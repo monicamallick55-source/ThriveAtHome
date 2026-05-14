@@ -1,999 +1,536 @@
-# Thrive@Home — Test Suite
+# Thrive@Home — Test Suite (v3.0)
 
-> **Every test here must pass before the corresponding phase is marked complete.**
-> Tests marked `[AUTO]` can be run with a script. Tests marked `[MANUAL]` require a human or real device. Tests marked `[LIVE]` call a real external service and may incur cost.
->
-> A test is only "passed" when the expected output is observed. "It compiled" is not a passing test. "It looks right" is not a passing test. Run it. Observe the result. Document it in progress.md.
-
----
-
-## Layer 1 — Core Product
+> **Every test must pass before the corresponding phase is marked complete.**
+> `[AUTO]` = run with a script. `[MANUAL]` = requires a human or real device. `[LIVE]` = calls a real external service (costs money/credits).
+> A test is "passed" only when the expected output is personally observed. "It probably works" is not a passing test.
 
 ---
+
+## M1 — Foundation
 
 ### Phase 1 — Project Scaffold
 
-**T1.1** `[MANUAL]` Open the Vercel deployment URL in a browser.
-- Expected: Page loads showing "Thrive@Home" in navy text
-- Expected: Tagline "Peace of mind for families. Independence for seniors." visible in teal
-- Expected: Browser DevTools → Console shows zero red errors
-- Fail: Blank page, error message, wrong colours, or any console error
+**T1.1** `[MANUAL]` Open Vercel deployment URL in browser. Expected: "Thrive@Home" in navy text, tagline in teal, zero console errors.
 
-**T1.2** `[MANUAL]` Make a trivial change (add a space to `app/page.tsx`), commit, push to `main`.
-- Expected: Vercel dashboard shows a new deployment triggered within 60 seconds
-- Expected: Deployment succeeds (green checkmark)
-- Fail: No deployment triggered, or deployment fails
+**T1.2** `[MANUAL]` Push trivial change to `main`. Expected: Vercel shows new deployment within 60 seconds. Deployment succeeds (green checkmark).
 
-**T1.3** `[AUTO]` Run in the Codespace terminal:
+**T1.3** `[AUTO]` `npx tsc --noEmit` → zero errors.
+
+**T1.4** `[MANUAL]` `echo "TEST=secret" > .env.local && git status` → `.env.local` under "Untracked files" ONLY, never under "Changes to be committed".
+
+**T1.5** `[MANUAL]` Open `.env.local.example` — confirm all 34 variable names present, all values blank.
+
+**T1.6** `[MANUAL]` `ls lib/interfaces/` → 8 interface files present: CallProvider, SmsProvider, EmailProvider, AiProvider, BillingProvider, TransportProvider, MealProvider, GoodsProvider.
+
+**T1.7** `[MANUAL]` `ls lib/stubs/` → 8 stub files present (one per interface).
+
+**T1.8** `[AUTO]` Verify all providers export stub instances when env vars absent:
 ```bash
-npx tsc --noEmit
+node -e "const p = require('./lib/providers'); console.log(Object.keys(p).map(k => p[k].constructor.name).join(', '))"
 ```
-- Expected: Zero output (zero errors)
-- Fail: Any error or warning output
-
-**T1.4** `[MANUAL]` Run:
-```bash
-echo "TEST=secret" > .env.local && git status
-```
-- Expected: `.env.local` appears under "Untracked files" — NOT under "Changes to be committed"
-- Fail: `.env.local` appears as staged or tracked
-- After test: the `.env.local` file should already exist from Phase 1 setup — this verifies `.gitignore` is working
-
-**T1.5** `[MANUAL]` Open `.env.local.example` and confirm ALL 23 variable names are present (values must be empty):
-`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_APP_URL`, `CARE_TEAM_EMAIL`, `CRON_SECRET`, `ANTHROPIC_API_KEY`, `RETELL_API_KEY`, `RETELL_AGENT_ID`, `RETELL_WEBHOOK_SECRET`, `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE_NUMBER`, `ONCALL_NAVIGATOR_PHONE`, `SENDGRID_API_KEY`, `SENDGRID_FROM_EMAIL`, `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ID_BASICS`, `STRIPE_PRICE_ID_CONNECT`, `STRIPE_PRICE_ID_COMPLETE`, `STRIPE_PRICE_ID_PREMIER`
-- Expected: All 23 names present, all values blank
-- Fail: Any name missing, or any actual value present
-
-**T1.6** `[MANUAL]` Check that all `/lib/interfaces/` files exist and TypeScript has no errors:
-```bash
-ls lib/interfaces/
-npx tsc --noEmit
-```
-- Expected: `CallProvider.ts`, `SmsProvider.ts`, `EmailProvider.ts`, `AiProvider.ts`, `BillingProvider.ts`, `RealtimeProvider.ts` all listed
-- Expected: Zero TypeScript errors
-- Fail: Any file missing or any type error
-
-**T1.7** `[MANUAL]` Check that all `/lib/stubs/` files exist:
-```bash
-ls lib/stubs/
-```
-- Expected: `StubCallProvider.ts`, `StubSmsProvider.ts`, `StubEmailProvider.ts`, `StubAiProvider.ts`, `StubBillingProvider.ts` all listed
-- Fail: Any file missing
-
-**T1.8** `[AUTO]` Verify providers.ts exports compile and default to stubs (no env vars set):
-```bash
-node -e "
-const { aiProvider, callProvider, smsProvider, emailProvider, billingProvider } = require('./lib/providers.ts')
-console.log('AI:', aiProvider.constructor.name)
-console.log('Call:', callProvider.constructor.name)
-console.log('SMS:', smsProvider.constructor.name)
-" 2>&1 | head -20
-```
-- Expected: All names contain "Stub"
-- Fail: Any name contains a real service name (Anthropic, Retell, Twilio, etc.)
+Expected: all names contain "Stub".
 
 ---
 
 ### Phase 2 — Supabase Connection
 
-**T2.1** `[MANUAL]` Navigate to `/test` in the running dev server.
-- Expected: The message from the `connection_test` table appears on screen
-- Expected: Message text matches exactly what was manually inserted in Supabase dashboard
-- Fail: Blank page, "undefined", "null", loading spinner that never resolves, or any error
+**T2.1** `[MANUAL]` Navigate to `/test`. Expected: database message appears, matches what was inserted.
 
-**T2.2** `[MANUAL]` Temporarily corrupt `NEXT_PUBLIC_SUPABASE_URL` in `.env.local` (add "XXXXX" to the value). Restart dev server. Navigate to any page.
-- Expected: An error message appears that mentions the missing or invalid environment variable
-- Expected: The error is human-readable — not a raw stack trace
-- After test: restore correct value
-- Fail: Blank page, generic network error, or silent failure
+**T2.2** `[MANUAL]` Corrupt `NEXT_PUBLIC_SUPABASE_URL`, restart dev server. Expected: human-readable error about missing/invalid env var — not a raw stack trace.
 
-**T2.3** `[AUTO]` After deleting the test page and table, run:
-```bash
-npx tsc --noEmit
-```
-- Expected: Zero errors (no broken imports from the deleted test file)
-- Fail: Any TypeScript error
+**T2.3** `[AUTO]` After deleting test page and table: `npx tsc --noEmit` → zero errors.
 
 ---
 
 ### Phase 3 — Database Schema
 
-**T3.1** `[MANUAL]` Open Supabase → Table Editor. Confirm all 12 tables exist:
-`members`, `family_members`, `check_in_calls`, `alerts`, `care_navigators`, `navigator_assignments`, `navigator_tasks`, `navigator_notes`, `subscriptions`, `realtime_notifications`, `notification_log`, `emergency_log`, `medication_schedules`, `audit_log`
-- Expected: All 14 tables visible (12 main + notification_log + audit_log)
-- Fail: Any table missing
+**T3.1** `[MANUAL]` Supabase → Table Editor: confirm all 43 tables visible.
 
-**T3.2** `[MANUAL]` Open Supabase → Database → Foreign Keys. Confirm these relationships exist:
-- `family_members.member_id` → `members.id`
-- `check_in_calls.member_id` → `members.id`
-- `alerts.member_id` → `members.id`
-- `navigator_assignments.member_id` → `members.id`
-- `navigator_assignments.navigator_id` → `care_navigators.id`
-- `realtime_notifications.member_id` → `members.id`
-- Fail: Any FK relationship missing
+**T3.2** `[MANUAL]` Supabase → Database → Foreign Keys: confirm all FK relationships present.
 
-**T3.3** `[MANUAL]` In Supabase SQL Editor, run a test insert and confirm cascade delete:
+**T3.3** `[MANUAL]` Test cascade delete:
 ```sql
-INSERT INTO members (full_name, preferred_name, phone_number, plan_tier, status)
-VALUES ('Test Person', 'Test', '+15550001234', 'basics', 'active')
-RETURNING id;
--- Copy the returned id, then:
-INSERT INTO family_members (member_id, full_name, email, role)
-VALUES ('[COPIED_ID]', 'Test Family', 'test@test.com', 'family');
--- Confirm both inserts succeed, then clean up:
-DELETE FROM members WHERE full_name = 'Test Person';
--- Confirm the family_members row was also deleted (cascade)
+INSERT INTO members (full_name, phone_number, plan_tier, status) VALUES ('Test', '+15550001234', 'basics', 'active') RETURNING id;
+-- Copy id, then:
+INSERT INTO family_members (member_id, full_name, email, role) VALUES ('[id]', 'Test Family', 'test@test.com', 'family');
+DELETE FROM members WHERE full_name = 'Test';
 SELECT * FROM family_members WHERE email = 'test@test.com';
--- Expected: empty result
 ```
-- Expected: Both inserts succeed without error
-- Expected: Cascade delete removes the `family_members` row
-- Fail: Any constraint violation, or cascade delete does not work
+Expected: family_members row deleted by cascade. Clean up.
 
-**T3.4** `[MANUAL]` Open Supabase → Database → Replication. Confirm `realtime_notifications` table has Realtime enabled for INSERT events.
-- Expected: `realtime_notifications` listed with INSERT enabled
-- Fail: Table not listed or INSERT not enabled
+**T3.4** `[MANUAL]` Supabase → Database → Replication: `realtime_notifications` enabled for INSERT.
 
-**T3.5** `[MANUAL]` Confirm the `audit_log` table has the three trigger functions attached:
+**T3.5** `[AUTO]` Confirm audit triggers:
 ```sql
-SELECT trigger_name, event_object_table FROM information_schema.triggers
-WHERE trigger_schema = 'public' ORDER BY event_object_table;
+SELECT trigger_name, event_object_table FROM information_schema.triggers WHERE trigger_schema = 'public' ORDER BY event_object_table;
 ```
-- Expected: `members_audit`, `calls_audit`, `alerts_audit` triggers visible
-- Fail: Any trigger missing
+Expected: `members_audit`, `calls_audit`, `alerts_audit` present.
 
 ---
 
 ### Phase 4 — Row Level Security
 
-**T4.1** `[MANUAL]` Open Supabase → Authentication → Policies. Confirm RLS is enabled on ALL 14 tables.
-- Expected: Every table shows "RLS enabled"
-- Fail: Any table showing "RLS disabled"
+**T4.1** `[MANUAL]` Supabase → Authentication → Policies: ALL tables show "RLS enabled".
 
-**T4.2** `[MANUAL]` Cross-user isolation test. In the Codespace terminal, create a test script at `/scripts/test-rls.ts`:
-```ts
-import { createClient } from '@supabase/supabase-js'
+**T4.2** `[AUTO]` Cross-user isolation test (see prompt.md Phase 4 for full script). Expected: User A cannot read User B's member data. Own data accessible. Admin service role reads all.
 
-// Sign in as User A, attempt to read Member B's data
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
-
-async function test() {
-  // Sign in as User A
-  await supabase.auth.signInWithPassword({ email: 'usera@test.com', password: 'testpass123' })
-
-  // Try to read Member B's data (Member B belongs to User B, not User A)
-  const { data, error } = await supabase.from('members').select('*').eq('id', 'MEMBER_B_UUID_HERE')
-  console.log('Cross-user members query:', data?.length === 0 ? 'BLOCKED ✓' : 'EXPOSED ✗', data)
-
-  // Try to read Member A's own data (should work)
-  const { data: ownData } = await supabase.from('members').select('*').eq('id', 'MEMBER_A_UUID_HERE')
-  console.log('Own member query:', ownData?.length === 1 ? 'ACCESSIBLE ✓' : 'BLOCKED ✗', ownData)
-}
-test()
-```
-- Expected: Cross-user query returns empty array (BLOCKED)
-- Expected: Own data query returns one row (ACCESSIBLE)
-- Fail: Cross-user query returns any rows, or own data query is blocked
-
-**T4.3** `[MANUAL]` Using the admin/service role client, confirm it reads all rows (bypasses RLS):
-```ts
-const { data } = await adminSupabase.from('members').select('*')
-console.log('Admin reads all members:', data?.length >= 2 ? 'WORKS ✓' : 'BLOCKED ✗')
-```
-- Expected: Returns all member rows regardless of user
-- Fail: Returns empty or restricted results
-
-**T4.4** `[MANUAL]` Confirm `realtime_notifications` RLS policies: User A cannot read User B's notifications.
-- Expected: Same cross-user blocking behaviour as T4.2 for `realtime_notifications`
-- Fail: User A can see User B's notifications
-
-After all tests pass: delete all test users and member rows.
+**T4.3** `[MANUAL]` Same cross-user test on `realtime_notifications` table. Expected: User A cannot see User B's notifications.
 
 ---
 
+## M2 — Member Data
+
 ### Phase 5 — Authentication
 
-**T5.1** `[MANUAL]` Navigate to `/signup`. Fill in all required fields and submit.
-- Expected: New Supabase Auth user appears in Supabase → Authentication → Users
-- Expected: New `family_members` row created with `role = 'family'` and correct `supabase_auth_id`
-- Expected: Browser redirects to `/dashboard`
-- Fail: No Auth user created, no `family_members` row, or no redirect
+**T5.1** `[MANUAL]` Sign up at `/signup`. Expected: Auth user + `family_members` row created. Redirected to `/dashboard`.
 
-**T5.2** `[MANUAL]` Log out. Navigate directly to `/dashboard` by typing the URL.
-- Expected: Immediately redirected to `/login`
-- Expected: Dashboard content is never visible
-- Fail: Dashboard loads for a logged-out user
+**T5.2** `[MANUAL]` Log out, navigate to `/dashboard`. Expected: immediately redirected to `/login`.
 
-**T5.3** `[MANUAL]` Log out. Try to access `/navigator` and `/admin` directly.
-- Expected: Both redirect to `/login`
-- Fail: Either page loads for a logged-out user
+**T5.3** `[MANUAL]` Log out, navigate to `/navigator` and `/admin`. Expected: both redirect to `/login`.
 
-**T5.4** `[MANUAL]` Manually update a `family_members.role` to `'navigator'` in Supabase. Log in as that user.
-- Expected: Redirected to `/navigator`
-- Expected: `/dashboard` access is redirected back to `/navigator`
-- Fail: Navigator role user lands on `/dashboard`
+**T5.4** `[MANUAL]` Set a user's role to `navigator` in Supabase. Log in. Expected: lands on `/navigator`, not `/dashboard`.
 
-**T5.5** `[MANUAL]` Log in as a `family` role user. Manually type `/navigator` in the URL bar.
-- Expected: Immediately redirected to `/dashboard`
-- Fail: Navigator console loads for a family role user
+**T5.5** `[MANUAL]` As `family` role, type `/navigator` in URL bar. Expected: immediately redirected to `/dashboard`.
 
-**T5.6** `[MANUAL]` Simulate a failed `family_members` insert during signup (temporarily break the insert query). Attempt signup.
-- Expected: The Supabase Auth user is also deleted (rollback)
-- Expected: User sees a clear error message — not a partially-created account
-- After test: restore the insert query
-- Fail: Orphaned Auth user exists with no `family_members` row
+**T5.6** `[MANUAL]` Simulate failed `family_members` insert. Expected: Supabase Auth user also deleted (rollback). User sees clear error. No orphaned auth user.
 
 ---
 
 ### Phase 6 — Member Onboarding Form
 
-**T6.1** `[MANUAL]` Navigate to `/onboarding`. Click "Next" on Step 1 with all fields empty.
-- Expected: Error messages appear on every required field
-- Expected: Page does NOT advance to Step 2
-- Fail: Form advances with empty required fields
+**T6.1** `[MANUAL]` Click "Next" on Step 1 with all fields empty. Expected: errors on every required field. Does NOT advance.
 
-**T6.2** `[MANUAL]` Enter `abc-def-ghij` as the phone number in Step 1. Click "Next".
-- Expected: Validation error on the phone field with a format example
-- Fail: Non-numeric phone accepted
+**T6.2** `[MANUAL]` Enter `abc-def-ghij` as phone. Expected: format validation error.
 
-**T6.3** `[MANUAL]` Enter today's date as the date of birth.
-- Expected: Validation error — person must be at least 60 years old
-- Fail: Any date of birth accepted
+**T6.3** `[MANUAL]` Enter today's date as DOB. Expected: error — must be at least 60 years old.
 
-**T6.4** `[MANUAL]` Complete all 3 steps with valid data (no plan selection step yet). Submit.
-- Expected: `members` row created in Supabase with all fields populated
-- Expected: `family_members.member_id` updated to link the logged-in user to the new member
-- Expected: Redirected to `/onboarding/confirmation`
-- Expected: Confirmation shows the senior's preferred name (not "undefined" or a placeholder)
-- Fail: Any field missing from DB, or "undefined" on confirmation page
+**T6.4** `[MANUAL]` Complete all 3 steps. Expected: member row in Supabase, `plan_tier = 'basics'`, confirmation shows correct preferred name.
 
-**T6.5** `[MANUAL]` Partially complete the form, then refresh the page.
-- Expected: Form data is preserved (localStorage)
-- Fail: All data lost on refresh
+**T6.5** `[MANUAL]` Partially fill form, refresh page. Expected: form data preserved (localStorage).
 
-**T6.6** `[MANUAL]` Complete the form on a real phone at 375px width.
-- Expected: All fields visible, all buttons tappable, no horizontal scroll
-- Fail: Any element cut off or requiring horizontal scroll
+**T6.6** `[MANUAL]` Complete form on real phone at 375px. Expected: no horizontal scroll, all buttons tappable.
 
-**T6.7** `[MANUAL]` Check the new member's `plan_tier` in Supabase.
-- Expected: `plan_tier = 'basics'` (default — no plan selection in onboarding until Layer 4)
-- Fail: `plan_tier` is null, empty, or any other value
+**T6.7** `[MANUAL]` Check new member's `plan_tier`. Expected: `basics` (not null, not empty).
 
 ---
 
-### Phase 7 — App Data Layer
+### Phase 7 — App Data Layer & Seed Data
 
-**T7.1** `[AUTO]` Create `/scripts/test-data-layer.ts` and run it:
-```ts
-import { getMember, createMember } from '../lib/data/members'
-import { getActiveAlerts }          from '../lib/data/alerts'
-import { getUnreadNotifications }   from '../lib/data/notifications'
+**T7.1** `[AUTO]` Run `/scripts/test-data-layer.ts`:
+- Create member → confirm row exists with correct fields
+- Fetch by valid ID → returns typed data
+- Fetch by invalid UUID → returns `{ data: null, error: 'not found' }` not a crash
+- Get active alerts (empty) → returns `[]` not error
+- Run twice (idempotency) → no duplicate rows created
 
-async function run() {
-  // Test create
-  const { data: created, error: createErr } = await createMember({
-    full_name: 'Data Layer Test', preferred_name: 'Test',
-    phone_number: '+15550001234', plan_tier: 'basics', status: 'active'
-  })
-  console.assert(!createErr, 'Create should not error:', createErr)
-  console.assert(created?.id, 'Created member should have an id')
+**T7.2** `[AUTO]` Run `/scripts/seed-test-data.ts`. Expected: "Seed complete. Login: test-family@thriveathome.dev / TestPassword123!" printed. Check Supabase: Margaret Chen member row, 14 call rows, 2 alert rows, 2 notification rows.
 
-  // Test fetch by id
-  const { data: fetched, error: fetchErr } = await getMember(created!.id)
-  console.assert(!fetchErr, 'Fetch should not error:', fetchErr)
-  console.assert(fetched?.full_name === 'Data Layer Test', 'Name should match')
+**T7.3** `[AUTO]` Run `/scripts/clear-test-data.ts`. Expected: all seeded rows deleted.
 
-  // Test invalid id — should return error, not crash
-  const { data: notFound, error: notFoundErr } = await getMember('not-a-real-uuid-000000')
-  console.assert(notFound === null, 'Invalid id should return null data')
-  console.assert(notFoundErr !== null, 'Invalid id should return an error string')
-
-  // Test empty alerts (no alerts yet)
-  const { data: alerts } = await getActiveAlerts(created!.id)
-  console.assert(Array.isArray(alerts), 'Alerts should return an array')
-  console.assert(alerts?.length === 0, 'No alerts yet for test member')
-
-  // Test notifications (should be empty)
-  const { data: notifs } = await getUnreadNotifications(created!.id)
-  console.assert(Array.isArray(notifs), 'Notifications should return an array')
-
-  // Clean up
-  await deleteTestMember(created!.id)
-
-  console.log('✓ All data layer tests passed')
-}
-run().catch(e => { console.error('Data layer test failed:', e); process.exit(1) })
-```
-- Expected: "✓ All data layer tests passed" printed
-- Expected: All assertions pass without throwing
-- Fail: Any assertion fails or script throws
-
-**T7.2** `[AUTO]`:
-```bash
-npx tsc --noEmit
-```
-- Expected: Zero errors
-- Fail: Any TypeScript error
+**T7.4** `[AUTO]` `npx tsc --noEmit` → zero errors.
 
 ---
+
+## M3 — UI System
 
 ### Phase 8 — Primitive UI Components
 
-**T8.1** `[MANUAL]` Create a temporary `/app/test-ui/page.tsx` that renders all component variants. Navigate to it.
-- Expected: All Button variants visible and correctly coloured (navy/teal/red/ghost)
-- Expected: All Card variants visible (default, highlight, warning, danger)
-- Expected: All Badge variants visible
-- Expected: MoodEmoji renders 😊 for score 9, 🙂 for 7, 😐 for 5, 😔 for 3, 😞 for 1, — for null
-- Expected: StatusDot renders green for no_alerts, amber for concern, red for urgent
-- Expected: NotificationBell renders with a count badge showing "0"
-- Fail: Any component missing, wrong colour, or rendering error
+**T8.1** `[MANUAL]` Navigate to `/test-ui`. Visually confirm all 13 components render in all variants.
 
-**T8.2** `[MANUAL]` Tab through all components on the test page using only the keyboard.
-- Expected: Every interactive element (buttons, bell) is reachable via Tab
-- Expected: Focus ring is visible on every focused element
-- Expected: All interactive elements can be activated with Enter or Space
-- Fail: Any element unreachable by keyboard, or invisible focus state
+**T8.2** `[MANUAL]` Tab through all components using only keyboard. Expected: every interactive element reachable, focus ring always visible, Enter/Space activates buttons.
 
-**T8.3** `[AUTO]`:
-```bash
-npx tsc --noEmit
-```
-- Expected: Zero errors
-- Fail: Any TypeScript error
+**T8.3** `[MANUAL]` `NotificationBell` shows "0" count. Click it: dropdown opens. Confirm no hardcoded data.
 
-After all tests pass: delete the test-ui page.
+**T8.4** `[AUTO]` `npx tsc --noEmit` → zero errors. Then delete test-ui page.
 
 ---
 
-### Phase 9 — Supabase Realtime Notifications
+## M4 — Realtime Notifications
 
-**T9.1** `[MANUAL]` Open the dev server. Open the family dashboard in one browser tab (as a logged-in family user linked to a test member). Open Supabase SQL Editor in another tab.
+### Phase 9 — Supabase Realtime
 
-In the SQL Editor, insert a test notification:
+**T9.1** `[MANUAL]` Open family dashboard for seeded member in one tab. In SQL Editor:
 ```sql
 INSERT INTO realtime_notifications (member_id, type, title, body, severity)
-VALUES ('[TEST_MEMBER_ID]', 'new_alert', 'Test Alert', 'This is a realtime test notification.', 'concern');
+VALUES ('[MARGARET_CHEN_ID]', 'new_alert', 'Test Alert', 'Realtime test notification.', 'concern');
 ```
-- Expected: Within 2 seconds, a toast notification appears in the dashboard tab WITHOUT refreshing
-- Expected: The `NotificationBell` unread count increments by 1
-- Fail: Notification does not appear, or requires a page refresh
+Expected: Toast notification appears in dashboard tab within 2 seconds — no page refresh. Bell count increments.
 
-**T9.2** `[MANUAL]` Click the `NotificationBell` in the dashboard.
-- Expected: A dropdown appears showing the test notification
-- Expected: "Mark read" button visible on the notification
-- Fail: Dropdown doesn't open, or notification not listed
+**T9.2** `[MANUAL]` Click bell. Expected: dropdown shows notification.
 
-**T9.3** `[MANUAL]` Click "Mark read" on the test notification.
-- Expected: Notification moves out of the unread list
-- Expected: Bell count decrements to 0
-- Expected: In Supabase, the `realtime_notifications` row has `read = true` and a `read_at` timestamp
-- Fail: Count doesn't update, or DB row not updated
+**T9.3** `[MANUAL]` Click "Mark read". Expected: bell count → 0. Supabase row: `read = true`, `read_at` timestamp.
 
-**T9.4** `[MANUAL]` Open the dashboard as User A (linked to Member A). Insert a notification for Member B in SQL Editor.
-- Expected: User A does NOT see the notification for Member B (RLS working)
-- Fail: User A sees another member's notification
+**T9.4** `[MANUAL]` As User A (linked to Member A), insert notification for Member B. Expected: User A does NOT see it.
 
-**T9.5** `[AUTO]` Verify `pushRealtimeNotification()` handles Supabase insert failure gracefully:
-Create a test that passes a bad `member_id` (non-existent UUID) to `pushRealtimeNotification`.
-- Expected: Function logs the error but does NOT throw
-- Expected: The calling code continues running after the failed notification
-- Fail: Function throws and crashes the pipeline
+**T9.5** `[AUTO]` Call `pushRealtimeNotification` with a non-existent `member_id`. Expected: function logs error but does NOT throw. Calling code continues.
 
 ---
 
-### Phase 10 — Alert Logic
+## M5 — Alert Engine
 
-**T10.1** `[AUTO]` Run the alert rules test:
+### Phase 10 — Alert Logic & Detection
+
+**T10.1** `[AUTO]` Alert rules test:
 ```ts
-// Test each alert rule fires correctly
-const crisisCall = { member_id: TEST_ID, alert_flags: ['crisis'], mood_score: 2, medication_taken: false }
-await createAlertsFromCall(crisisCall)
-
-const { data: alerts } = await adminSupabase.from('alerts').select('*').eq('member_id', TEST_ID)
-const crisisAlert = alerts?.find(a => a.alert_type === 'crisis')
-console.assert(crisisAlert?.severity === 'emergency', 'Crisis flag → emergency severity')
-
-const { data: emergLog } = await adminSupabase.from('emergency_log').select('*').eq('member_id', TEST_ID)
-console.assert(emergLog?.length === 1, 'Emergency log should have 1 entry')
+// Crisis → emergency alert + emergency_log entry
+// Fall → urgent alert
+// Medication miss (single) → informational
+// Mood ≤ 3 → concern mood_drop
+// Confirm each creates correct severity
 ```
-- Expected: All alert rules create the correct severity
-- Fail: Any rule fires wrong severity
+Expected: all rule-severity mappings correct.
 
-**T10.2** `[AUTO]` Deduplication test:
-```ts
-// Call createAlertsFromCall twice with same type for same member
-await createAlertsFromCall({ member_id: TEST_ID, alert_flags: ['fall'], ...validCallData })
-await createAlertsFromCall({ member_id: TEST_ID, alert_flags: ['fall'], ...validCallData })
+**T10.2** `[AUTO]` Deduplication test: call `createCallAlerts` twice with same type for same member within 24 hours. Expected: exactly 1 alert row, not 2.
 
-const { data } = await adminSupabase.from('alerts').select('*').eq('member_id', TEST_ID).eq('alert_type', 'fall')
-console.assert(data?.length === 1, `Should be 1 fall alert, got ${data?.length}`)
-```
-- Expected: Only 1 alert row, not 2
-- Fail: Duplicate alert created
+**T10.3** `[MANUAL]` After alert created, open family dashboard. Expected: Realtime notification appears within 2 seconds — no page refresh.
 
-**T10.3** `[MANUAL]` After an alert is created by T10.1, open the family dashboard.
-- Expected: Within 2 seconds, a Realtime notification appears (Phase 9 integration)
-- Expected: Alert is visible in the Alerts Panel on the dashboard
-- Fail: Alert visible in Supabase but not triggering Realtime notification
+**T10.4** `[AUTO]` Wellness drift: insert 14 calls with declining scores (8,8,7,8,7,6,7,6,5,6,5,5,4,5). Run `checkWellnessDrift`. Expected: `concern` alert created. Insert 14 flat calls at score 6. Run again. Expected: no new alert.
 
-**T10.4** `[AUTO]` Wellness drift test:
-```ts
-// Insert 14 calls: last 7 days avg ~3.4, prior 7 days avg ~7.7
-// Should trigger concern-level drift alert
-await checkWellnessDrift(TEST_MEMBER_ID)
-const { data } = await adminSupabase.from('alerts').select('*')
-  .eq('member_id', TEST_MEMBER_ID).eq('alert_type', 'wellness_drift')
-console.assert(data?.length === 1, 'Should have 1 drift alert')
-
-// Insert 14 flat calls at score 6 — should NOT trigger
-await checkWellnessDrift(TEST_MEMBER_ID_2)
-const { data: data2 } = await adminSupabase.from('alerts').select('*')
-  .eq('member_id', TEST_MEMBER_ID_2).eq('alert_type', 'wellness_drift')
-console.assert(data2?.length === 0, 'Flat scores should not trigger drift alert')
-```
-- Expected: Drift detected for declining scores, not for flat scores
-- Fail: False positive or false negative
+**T10.5** `[AUTO]` Insufficient data check: insert only 3 calls. Run `checkWellnessDrift`. Expected: no alert, no error.
 
 ---
 
-### Phase 11 — Family Dashboard
+### Phase 11 — Crisis Detection
 
-**T11.1** `[MANUAL]` Run the seed script first:
+**T11.1** `[AUTO]` Send transcript containing "I don't want to be here anymore". Confirm within 60 seconds: emergency_log row with triggered phrase, emergency alert in alerts, critical navigator task, emergency Realtime notification. Stubs log urgent SMS and email.
+
+**T11.2** `[AUTO]` Send normal transcript. Expected: no emergency alert, no false positive.
+
+**T11.3** `[AUTO]` Send "I don't want to be here — I'd rather be at the beach!" Expected: disambiguation runs → no crisis (non-crisis context). Confirm no false positive.
+
+**T11.4** `[AUTO]` Simulate Anthropic API failure during disambiguation (mock to throw). Expected: function returns `true` (defaults to crisis). All 4 escalation steps still fire.
+
+---
+
+## M6 — Family Dashboard
+
+### Phase 12 — Family Dashboard
+
+**T12.1** `[MANUAL]` Log in as seeded family member. Navigate to `/dashboard`. Expected: loads within 3 seconds. Senior's name visible. No "undefined". StatusDot visible. NotificationBell shows "1" (one unread from T9.1).
+
+**T12.2** `[MANUAL]` While dashboard open, insert new alert via SQL Editor. Expected: alert card appears within 2 seconds — no page refresh. StatusDot updates.
+
+**T12.3** `[MANUAL]` View health timeline. Toggle between 7-day, 30-day, 60-day, 90-day tabs. Expected: chart renders for each. AI trend summary text changes.
+
+**T12.4** `[MANUAL]` Break Supabase URL temporarily, reload dashboard. Expected: friendly error message — no raw error code visible.
+
+**T12.5** `[MANUAL]` View dashboard on real phone at 375px. Expected: no horizontal scroll, all text readable, all buttons tappable.
+
+---
+
+### Phase 13 — Call History
+
+**T13.1** `[MANUAL]` With 14+ seeded calls, navigate to `/dashboard/history`. Expected: calls listed newest-first, mood emoji, medication ✓/✗, alert badges.
+
+**T13.2** `[MANUAL]` Click "View summary". Expected: full AI summary + scores + plain-English flags.
+
+**T13.3** `[MANUAL]` With 25+ calls: load-more button appears. Clicking it appends more calls without page reload.
+
+---
+
+### Phase 14 — Family Coordination Tools
+
+**T14.1** `[MANUAL]` Create a task as one family member. Log in as another family member linked to the same senior. Expected: task visible without page reload (Realtime).
+
+**T14.2** `[MANUAL]` Send a message in family messaging. Expected: message appears for all linked family members in real time.
+
+**T14.3** `[MANUAL]` Upload a document to document vault. Expected: file retrievable. Supabase Storage row visible.
+
+**T14.4** `[MANUAL]` Set a family member's `last_login_at` to 8 days ago in Supabase. Ensure member has an unacknowledged concern alert. Trigger family nudge cron. Expected: `family_nudge` Realtime notification pushed for that family member.
+
+---
+
+## M7 — Navigator Console
+
+### Phase 15 — Navigator Console
+
+**T15.1** `[MANUAL]` Log in as navigator. Navigate to `/navigator`. Expected: only assigned members visible (not all members). Members with alerts sorted to top.
+
+**T15.2** `[MANUAL]` Acknowledge an urgent alert. Expected: card disappears without reload. DB: `acknowledged = true`, `acknowledged_by = navigatorUserId`, `acknowledged_at` timestamp.
+
+**T15.3** `[MANUAL]` Click a member row. Expected: panel slides in with preferred name, age, plan tier, AI brief (stub text in M7), last 5 summaries.
+
+**T15.4** `[MANUAL]` Save a navigator note. Expected: saving → saved ✓ → persists after close/reopen.
+
+**T15.5** `[MANUAL]` Press Escape with panel open. Expected: panel closes, focus returns to triggering row.
+
+**T15.6** `[MANUAL]` As `family` role, type `/navigator` in URL bar. Expected: redirected to `/dashboard`.
+
+---
+
+### Phase 16 — Digest Scheduling
+
+**T16.1** `[MANUAL]` Trigger weekly digest cron manually with CRON_SECRET. Expected: console shows `[StubEmail] Would send weekly digest to [email] for Margaret Chen`. One log per active member.
+
+**T16.2** `[MANUAL]` Trigger cron without CRON_SECRET. Expected: 401 response.
+
+---
+
+## M8 — AI Calls
+
+### Phase 17 — Anthropic AI Provider
+
+**T17.1** `[AUTO]` Happy transcript → `mood_score ≥ 7`, `medication_taken = true`, `energy_score ≥ 7`.
+
+**T17.2** `[AUTO]` Difficult transcript ("I've been really down, pain is an 8 out of 10, forgot my pills") → `mood_score ≤ 4`, `pain_score ≥ 8` (comfort = 2), `medication_taken = false`.
+
+**T17.3** `[AUTO]` "Fell asleep watching TV" → NO fall flag.
+
+**T17.4** `[AUTO]` "Pain is a 3 out of 10" → NO pain_high flag (threshold is > 7).
+
+**T17.5** `[AUTO]` Brief transcript (topic not discussed) → `medication_taken = null`, never `false`. `energy_score = null`, never `0`.
+
+**T17.6** `[LIVE]` Real Claude summary: no forbidden words (patient, vitals, symptoms, assessment, diagnosis). No numbers or scores. 3–5 sentences. Warm tone.
+
+**T17.7** `[AUTO]` Disambiguation API failure (mock to throw) → returns `true`.
+
+**T17.8** `[MANUAL]` Confirm `aiProvider.constructor.name === 'AnthropicAiProvider'` (not Stub).
+
+---
+
+### Phase 18 — Retell AI Agent
+
+**T18.1** `[LIVE]` Test call to own phone. Expected: rings within 15 seconds, warm female voice, "Aria from Thrive@Home" introduction, natural conversation.
+
+**T18.2** `[LIVE]` Test call with Margaret Chen prompt. Expected: Aria says "Margaret", mentions gardening OR books naturally, does not use checklist tone.
+
+**T18.3** `[LIVE]` Say "I've been feeling really hopeless." Expected: Aria responds warmly, says team will be in touch, does NOT end call abruptly.
+
+**T18.4** `[LIVE]` After test call, Retell AI → Call History: call logged with recording and transcript.
+
+---
+
+### Phase 19 — Call Infrastructure, Scheduler & Webhook
+
+**T19.1** `[LIVE]` Trigger cron with CRON_SECRET. Expected: `check_in_calls` row created with `status = scheduled`. Phone rings within 2 minutes. Console: "1 scheduled, 0 skipped, 0 failed".
+
+**T19.2** `[MANUAL]` Trigger cron second time immediately. Expected: no duplicate call. Console: "0 scheduled, 1 skipped".
+
+**T19.3** `[MANUAL]` Trigger cron without CRON_SECRET. Expected: 401 response.
+
+**T19.4** `[MANUAL]` Send test webhook payload with correct Authorization. Expected: `check_in_calls` row updated with transcript and timestamps. Response: `{"received": true}`.
+
+**T19.5** `[MANUAL]` Send webhook without Authorization header. Expected: 401.
+
+**T19.6** `[LIVE]` After real call completes and webhook fires: `mood_score` is 1–10 (not 0, not null if discussed). `ai_summary` warm, no forbidden words. Realtime: `call_summary_ready` notification appears on dashboard within 30 seconds.
+
+**T19.7** `[MANUAL]` Send crisis transcript via webhook. Expected within 60 seconds: emergency_log row, emergency alert, critical navigator task, emergency Realtime notification. Stubs log urgent SMS and email.
+
+---
+
+## M9 — Concierge Line
+
+### Phase 20 — Concierge Line
+
+**T20.1** `[LIVE]` Call the concierge number. Expected: rings, warm greeting ("How can I help you today?").
+
+**T20.2** `[LIVE]` Say "I need a ride to the doctor tomorrow." Expected: `service_bookings` row created with `service_category = transport`. Console (stub): "[StubTransport] Would book ride..."
+
+**T20.3** `[LIVE]` Say "I just want to talk to someone." Expected: volunteer match queue request created. Realtime notification to navigator.
+
+**T20.4** `[LIVE]` Say "I don't want to be here anymore." Expected: full crisis escalation fires (same as T11.1).
+
+**T20.5** `[LIVE]` Say "I need to speak with a real person." Expected: Twilio transfers call to `ONCALL_NAVIGATOR_PHONE` within 2 minutes.
+
+**T20.6** `[MANUAL]` Check that all concierge calls are transcribed and logged in `check_in_calls` with `call_type = 'concierge'`.
+
+---
+
+## M10 — Outbound Notifications
+
+### Phase 21 — Twilio SMS
+
+**T21.1** `[LIVE]` Complete test call. Family member (sms: true) receives SMS within 5 minutes. SMS starts with "Thrive@Home update for [Name] 💚". Ends with "Reply STOP to unsubscribe". `notification_log` shows `status = sent`.
+
+**T21.2** `[LIVE]` Set family member `notification_prefs.sms = false`. Complete call. Expected: no SMS. `notification_log` shows no SMS attempt.
+
+**T21.3** `[LIVE]` Create emergency alert. Trigger `sendUrgentAlertSMS`. Expected: SMS arrives within 60 seconds even for family member with `sms: false`.
+
+**T21.4** `[MANUAL]` Confirm `smsProvider.constructor.name === 'TwilioSmsProvider'`.
+
+---
+
+### Phase 22 — SendGrid Email
+
+**T22.1** `[LIVE]` Complete test call. Email arrives within 30 minutes. Subject has name + emoji. Body: score bars, AI summary, CTA button, unsubscribe link.
+
+**T22.2** `[MANUAL]` Open email on real phone. Expected: no cut-off, readable without zoom, button tappable.
+
+**T22.3** `[MANUAL]` Open email in Gmail specifically. Expected: score bars render correctly.
+
+---
+
+### Phase 23 — Medication Reminders & Full Pipeline
+
+**T23.1** `[LIVE]` Set medication reminder 2 minutes away, trigger cron. Expected: SMS arrives within 3 minutes with 💊 emoji.
+
+**T23.2** `[AUTO]` Insert 3 consecutive `medication_taken = false` calls. Expected: concern alert + navigator task + Realtime notification. No duplicate on 4th miss.
+
+**T23.3** `[LIVE]` Full pipeline after real call: Realtime appears within 30 seconds, SMS within 5 minutes, email within 30 minutes. All 3 logged as `sent` in `notification_log`.
+
+---
+
+## M11 — Billing
+
+### Phase 24 — Pricing Page & Stripe Setup
+
+**T24.1** `[MANUAL]` Navigate to `/pricing`. Four plan cards visible with correct prices and features.
+
+**T24.2** `[AUTO]` All 4 Stripe price IDs present and start with `price_`.
+
+**T24.3** `[MANUAL]` Stripe dashboard → Webhooks: endpoint registered, enabled, 5 events selected.
+
+---
+
+### Phase 25 — Plan Selection & Checkout
+
+**T25.1** `[LIVE]` Complete onboarding form: Step 4 (plan selection) now appears. Selecting plan redirects to Stripe Checkout.
+
+**T25.2** `[LIVE]` Complete payment with card `4242 4242 4242 4242`, expiry `12/34`, CVC `123`. Expected: redirected to `/dashboard?subscribed=true`. Welcome banner visible. `subscriptions` row in Supabase `status = active`. Stripe shows Customer + Subscription.
+
+**T25.3** `[LIVE]` Stripe CLI replay all 5 webhook events. Expected: each updates Supabase correctly. `payment_failed` → family receives payment failure email. `subscription.deleted` → `status = cancelled`.
+
+**T25.4** `[MANUAL]` POST to webhook without `stripe-signature`. Expected: 401.
+
+**T25.5** `[MANUAL]` Previously enrolled member (plan_tier = basics) logs in. Expected: plan upgrade prompt visible.
+
+---
+
+### Phase 26 — Billing Management
+
+**T26.1** `[MANUAL]` Navigate to `/dashboard/billing`. Expected: current plan, next billing date, 6 invoices, 3 buttons.
+
+**T26.2** `[MANUAL]` Click "Change plan". Expected: Stripe Customer Portal opens.
+
+---
+
+## M12 — Compliance
+
+### Phase 27 — HIPAA Baseline
+
+**T27.1** `[MANUAL]` Access app via `http://` (not https). Expected: automatically redirected to `https://`.
+
+**T27.2** `[MANUAL]` Read a member record while logged in as family user. Check `audit_log` table. Expected: entry created with `action = SELECT`, `resource_type = members`, correct `user_id`.
+
+**T27.3** `[MANUAL]` POST to `/api/admin/delete-member` without admin auth. Expected: 401 or 403.
+
+**T27.4** `[MANUAL]` POST with admin auth and valid member ID. Expected: all member rows deleted across all tables. Response confirms deletion.
+
+**T27.5** `[MANUAL]` Navigate to `/privacy`. Expected: page loads with readable privacy policy covering collection, retention, sharing, deletion rights.
+
+---
+
+### Phase 28 — Accessibility & 65+ Usability
+
+**T28.1** `[AUTO]` Run axe-cli on all main pages:
 ```bash
-npx tsx scripts/seed-test-data.ts
+npx axe-cli [URL] --tags wcag2aa
+npx axe-cli [URL]/login --tags wcag2aa
+npx axe-cli [URL]/onboarding --tags wcag2aa
+npx axe-cli [URL]/dashboard --tags wcag2aa
+npx axe-cli [URL]/pricing --tags wcag2aa
+npx axe-cli [URL]/dashboard/services --tags wcag2aa
 ```
-Log in as a seeded family member. Navigate to `/dashboard`.
-- Expected: Dashboard loads within 3 seconds
-- Expected: Senior's name appears in the header
-- Expected: `StatusDot` is green (seed data has no urgent alerts by default)
-- Expected: Today's Wellness Card shows mood emoji, scores, and AI summary text from seed data
-- Expected: 7-Day Mood Trend chart renders with coloured dots
-- Expected: `NotificationBell` visible in header
-- Fail: Any section blank, "undefined", or showing a raw error
+Expected: zero violations on all pages.
 
-**T11.2** `[MANUAL]` While the dashboard is open, insert a new alert for the test member in Supabase SQL Editor.
-- Expected: Alert card appears in the Alerts Panel within 2 seconds (Realtime)
-- Expected: `StatusDot` changes to amber or red within 2 seconds (without page refresh)
-- Fail: Requires page refresh to show alert
+**T28.2** `[MANUAL]` Navigate entire onboarding → dashboard flow using only keyboard. Expected: every element reachable, focus ring always visible.
 
-**T11.3** `[MANUAL]` Temporarily return a database error from `getMember()`. Reload the dashboard.
-- Expected: A friendly human-readable error message appears
-- Expected: The rest of the dashboard shows skeletons or a partial state — not a full page crash
-- Expected: No raw error code or stack trace visible to the user
-- After test: restore the correct function
-
-**T11.4** `[MANUAL]` View the dashboard on a real phone at 375px.
-- Expected: All sections visible, no horizontal scroll
-- Expected: All text readable without zooming (minimum 18px)
-- Expected: All buttons have enough height to tap comfortably
-- Fail: Any element cut off, overlapping, or requiring zoom
+**T28.3** `[MANUAL]` Real 65+ person completes onboarding without assistance in under 10 minutes. Understands dashboard without explanation. Document every confusion point and fix all.
 
 ---
 
-### Phase 12 — Navigator Console
+## M13 — Volunteer Network
 
-**T12.1** `[MANUAL]` Log in as a `navigator` role user. Navigate to `/navigator`.
-- Expected: Only members assigned to THIS navigator appear (not all members)
-- Expected: Members with urgent/emergency alerts appear at the TOP of the table
-- Expected: A real-time search box filters the member list as you type
-- Fail: All members visible (RLS not working), or sort order wrong
+**T29.1** Submit application → row created with `status = pending`. Admin receives email. Approval → `background_check`.
 
-**T12.2** `[MANUAL]` With an unacknowledged urgent alert for a member in the navigator's caseload, confirm the alert queue appears above the caseload table.
-- Click "Acknowledge" on the alert card.
-- Expected: Card disappears immediately (no page reload)
-- Expected: In Supabase → `alerts`: `acknowledged = true`, `acknowledged_by` = navigator's user ID, `acknowledged_at` = timestamp
-- Fail: Card persists, or DB row not updated
+**T30.1** Approval triggers Checkr API call (test mode). Webhook updates status. `clear` → `active`.
 
-**T12.3** `[MANUAL]` Click a member row in the caseload table.
-- Expected: Detail panel slides in from the right
-- Expected: Panel shows preferred name, age, plan tier, last 5 call summaries
-- Expected: AI pre-call brief appears (stub text in Layer 1)
-- Expected: Navigator notes text area is present
-- Fail: No panel, or missing required sections
+**T31.1** Member [gardening, cooking] in SF matched higher than member without shared interests. Introduction email: no phone numbers or email addresses.
 
-**T12.4** `[MANUAL]` Type a note in the navigator notes area and save.
-- Expected: "Saving..." state appears
-- Expected: "Saved ✓" appears for ~2 seconds
-- Expected: Note persists when panel is closed and reopened
-- Expected: Note visible in Supabase → `navigator_notes` table
-- Fail: Note not saved, no save feedback, or disappears on close
+**T32.1** Volunteer logs in → only matched members visible. Visit logged → `volunteer_visits` row. Impact stats update.
 
-**T12.5** `[MANUAL]` With panel open, press Escape.
-- Expected: Panel closes
-- Expected: Focus returns to the member row that was clicked
-- Fail: Panel does not close, or focus lost
+**T33.1** Student logs 2-hour visit. PDF service record shows correct data. Semester CSV accurate.
 
-**T12.6** `[MANUAL]` Log in as a `family` role user. Navigate to `/navigator` by typing it in the URL bar.
-- Expected: Immediately redirected to `/dashboard`
-- Fail: Navigator console loads for a family user
+**T34.1** School admin creates student group. Activity logged. No direct contact info visible to either party.
+
+**T35.1** Veteran volunteer matched to veteran member. VA benefits session logged. VSO coordinator sees volunteer hours.
+
+**T36.1** Training module completed → `volunteer_training_completions` row. Certificate issued. Training required before first assignment is enforced. Badge awarded at correct hour milestone (50, 100, 250, 500).
 
 ---
 
-### Layer 1 Gate — Confirm before presenting Layer 1 review to user
+## M14 — Community Layer
 
-**TL1.A** `[AUTO]` All TypeScript compiles:
-```bash
-npx tsc --noEmit
-```
-Expected: Zero errors
+**T37.1** RSVP to event → dial-in details visible. Post-event SMS "Reply YES" → `attended = true`. Recording uploaded to Supabase Storage.
 
-**TL1.B** `[MANUAL]` Realtime end-to-end: Open family dashboard, insert alert in SQL Editor → alert appears in dashboard within 2 seconds. Confirm.
+**T38.1** RSVP local event with transport → both `local_event_rsvp` and `transport_booking` rows created.
 
-**TL1.C** `[AUTO]` Run the pre-commit secret check:
-```bash
-git ls-files | grep -E "^\.env"
-git diff HEAD --name-only | xargs grep -l -E "(sk_|SG\.|AC[a-z0-9]{32}|retell-|sk-ant-)" 2>/dev/null
-```
-Expected: No output from either command.
+**T39.1** Interest group created. Members join. AI discussion prompts appear. 3+ members share interest → new group suggestion created.
 
----
+**T40.1** 2 members at credit balance 0. Exchange completes → teacher +1, learner -1. Atomicity: injected failure mid-transaction → neither balance changes.
 
-## Layer 2 — AI & Calls
+**T41.1** All 12 circle seeds confirmed. Join → membership + count increments. RSVP → dial-in shows to RSVP'd users only. Admin announcement broadcasts to all circle members.
+
+**T42.1** Spanish member: onboarding/dashboard/billing render entirely in Spanish. Zero raw translation keys. Native speaker review complete.
+
+**T43.1** Low-income California veteran → VA Aid & Attendance + 3+ benefits. Non-veteran >$50k → no VA benefit. Every result shows specific qualifying reason.
+
+**T44.1** Demo request → `employer_leads` row + sales email. Employee invitation accepted → linked to employer account. Utilisation report accurate.
 
 ---
 
-### Phase 13 — Anthropic AI Provider
+## M15 — Celebrations & Life Stories
 
-**T13.1** `[AUTO]` Test score extraction with known transcripts:
-```ts
-const happyTranscript = `
-Aria: Hi Dorothy, how are you feeling today?
-Dorothy: Oh I'm wonderful! Had a great sleep, already took my morning pills. Feeling full of energy.
-Aria: Any pain or discomfort?
-Dorothy: Not at all, feeling very comfortable today.`
+**T45.1** Set DOB 7 days away. Trigger cron. Expected: family notification email with personalised (not generic) gift suggestions. Set DOB to today. D-0: community post created + modified check-in prompt used. Milestone birthday (set DOB to 70th birthday year) → flagged for coordinator.
 
-const scores = await aiProvider.extractCallScores(happyTranscript)
-console.assert(scores.mood_score !== null && scores.mood_score >= 7, 'Happy call mood ≥ 7, got: ' + scores.mood_score)
-console.assert(scores.medication_taken === true, 'Medication taken should be true')
-console.assert(scores.energy_score !== null && scores.energy_score >= 7, 'Energy should be high')
-```
-- Expected: All assertions pass
-- Fail: Any assertion fails
+**T45.2** Set `celebration_opt_out = true` for a member. Expected: no community post, no nudges.
 
-**T13.2** `[AUTO]` Test false positive prevention:
-```ts
-// "fell asleep" must NOT trigger fall flag
-const nap = 'I fell asleep watching the game last night, very restful.'
-const scores1 = await aiProvider.extractCallScores(nap)
-console.assert(!scores1.alert_flags.includes('fall'), 'Fell asleep should NOT trigger fall flag')
-
-// pain 3/10 must NOT trigger pain_high flag (threshold is >7)
-const lowPain = 'My knee is a bit achy, maybe a 3 out of 10, manageable.'
-const scores2 = await aiProvider.extractCallScores(lowPain)
-console.assert(!scores2.alert_flags.includes('pain_high'), 'Pain 3/10 should NOT trigger pain_high')
-
-// Topic not discussed must return null, never 0
-const brief = 'Aria: How are you? Senior: Fine thanks, busy today, gotta go.'
-const scores3 = await aiProvider.extractCallScores(brief)
-console.assert(scores3.medication_taken === null, 'Undiscussed topic must be null, not false')
-console.assert(scores3.energy_score !== 0, 'Undiscussed topic score must be null, not 0')
-```
-- Expected: All assertions pass (no false positives)
-- Fail: Any false positive fires
-
-**T13.3** `[LIVE]` Test Claude summary generation with a real transcript:
-- Expected: Summary is 3–5 sentences
-- Expected: Summary contains NO numbers or scores
-- Expected: Summary contains NONE of: patient, vitals, symptoms, assessment, diagnosis
-- Expected: Tone is warm and conversational — reads like a friend's message
-- Fail: Any forbidden word present, or summary is clinical/robotic
-
-**T13.4** `[AUTO]` Test crisis disambiguation fail-safe:
-```ts
-// Simulate API failure — should default to true (crisis)
-// Mock the Anthropic client to throw, then call disambiguateCrisisContext
-const result = await aiProvider.disambiguateCrisisContext('I dont want to be here', 'context')
-// When API throws, result must be true (treat as crisis)
-console.assert(result === true, 'API failure must default to true (crisis)')
-```
-- Expected: Returns `true` when Claude API fails
-- Fail: Returns `false` or throws when API fails
+**T46.1** Written entry created. Appears in life story feed. Voice memo uploads to Supabase Storage. Entry marked public → appears in cultural circle feed. Navigator creates interview response entry. Tribute entry links to loss record.
 
 ---
 
-### Phase 14 — Retell AI Agent Setup
+## M16 — Grief & Life Transitions
 
-**T14.1** `[LIVE]` Use Retell AI's built-in test call feature. Call your own phone.
-- Expected: Phone rings within 15 seconds
-- Expected: Voice is warm and natural (not robotic or monotone)
-- Expected: Aria introduces herself as "Aria from Thrive@Home"
-- Expected: Back-and-forth conversation is possible (Aria listens and responds)
-- Fail: No ring, robotic voice, wrong introduction
+**T47.1** Milestone birthday D-0 → `goodsProvider` stub logs birthday card order for milestone birthday. Admin manual trigger from navigator console → stub logs.
 
-**T14.2** `[LIVE]` Update the agent with a generated prompt for a test member named "Margaret" who likes "Gardening" and "Books". Call your own phone.
-- Expected: Aria says "Margaret" by name
-- Expected: Aria mentions gardening OR books naturally (not as a list)
-- Expected: Aria asks about mood and wellbeing without it feeling like a medical checklist
-- Fail: Wrong name, no interest mentioned, checklist tone
+**T48.1** Submit grief support request. Expected: care team email arrives within 2 minutes. If email fails, retry once after 30 seconds, then create critical navigator task.
 
-**T14.3** `[LIVE]` During a test call, say: "I've been feeling really hopeless lately and I just don't see the point."
-- Expected: Aria responds warmly and empathetically
-- Expected: Aria says someone from the team will be in touch
-- Expected: Aria does NOT abruptly end the call
-- Fail: Aria ignores the statement, ends the call, or responds robotically
+**T48.2** Set loss date to 6 months ago. Set `November 15` as test date. Trigger celebratory nudge system. Expected: nudge suppressed for this member.
 
-**T14.4** `[MANUAL]` After any test call, go to Retell AI → Call History.
-- Expected: Call appears with a recording
-- Expected: Transcript is available and shows Aria's and the user's words separately
-- Fail: No call logged, or no transcript
+**T48.3** Insert isolation + appetite change + confusion signals for a member over 90 days. Run grief monitoring detection. Expected: care team alert fires.
+
+**T49.1** Create nursing home transition record for a member. Expected: navigator task created + community farewell event offered. Member's AI check-in tone switches to transition mode.
+
+**T49.2** Create cognitive diagnosis transition. Expected: advance directive prompt appears on family dashboard. Dementia-specific resources surfaced.
 
 ---
 
-### Phase 15 — Twilio & Retell Call Infrastructure
+## M17 — Services Marketplace
 
-**T15.1** `[LIVE]` Run a test script calling `triggerCall` (via `callProvider.scheduleCall`) with your own phone number:
-```ts
-const callId = await callProvider.scheduleCall(
-  'test-member-id',
-  process.env.TWILIO_PHONE_NUMBER!, // Call yourself for testing
-  { preferredName: 'Test', interests: ['Gardening'], priorCallSummaries: [], preferredLanguage: 'english' }
-)
-console.log('Call ID:', callId)
-```
-- Expected: Phone rings within 20 seconds
-- Expected: Function returns a non-empty call ID string
-- Expected: Call appears in both Twilio call logs and Retell AI call history
-- Fail: No ring, function throws, or call ID is empty/undefined
+**T50.1** Admin adds test provider to directory. Member navigates to `/dashboard/services` → 6 category cards visible. "Request help" creates `service_bookings` row with `status = requested`. Realtime notification fires to navigator.
 
-**T15.2** `[MANUAL]` Call `callProvider.scheduleCall` with an invalid phone number (`'not-a-phone'`).
-- Expected: Throws a typed Error with a human-readable message about invalid phone format
-- Expected: Error message includes E.164 format example
-- Fail: Silent failure, undefined returned, or generic error
+**T51.1** Transport booking creates `transport_bookings` row. For volunteer-driver trip: volunteer match request created. Recurring trip creates scheduled series. Family dashboard shows trip status ("stub_confirmed").
 
-**T15.3** `[MANUAL]` Confirm `callProvider.constructor.name` is `'RetellCallProvider'` (not `'StubCallProvider'`) now that RETELL_API_KEY and TWILIO_ACCOUNT_SID are set.
-- Expected: `RetellCallProvider`
-- Fail: `StubCallProvider` (env vars not being picked up)
+**T52.1** Browse home service providers filtered by zip code. Grocery order stub logs what would be ordered with correct dietary restrictions.
+
+**T53.1** Telehealth session creates `service_bookings` row with telehealth type. Warm handoff note visible in navigator console. Mental health referral tracked in `service_bookings`.
+
+**T54.1** Document uploads and retrieves. Advisor directory returns only `is_vetted = true` providers. Fraud alert Realtime notification pushes on weekly schedule. Benefits application progress tracked.
+
+**T55.1** Meal delivery order creates row with correct dietary preferences from member profile. Social dining event creates `local_events` row with transport option.
+
+**T56.1** Tech helpline call logs and summarises (same pipeline as concierge). Tech help booking creates `service_bookings` row. Scam education event appears in events calendar.
 
 ---
 
-### Phase 16 — Outbound Call Scheduler
+## M18 — Enterprise
 
-**T16.1** `[LIVE]` Set a test member's `preferred_call_time` to the current UTC hour. Manually trigger the cron:
-```bash
-curl -X GET http://localhost:3000/api/cron/daily-calls \
-  -H "Authorization: Bearer $CRON_SECRET"
-```
-- Expected: A `check_in_calls` row created for the member with `status = 'scheduled'`
-- Expected: `retell_call_id` column has a real Retell call ID
-- Expected: Your phone rings within 2 minutes
-- Expected: Console shows: "1 scheduled, 0 skipped, 0 failed"
-- Fail: No row created, no call triggered, wrong log counts
+**T57.1** Enterprise dashboard loads with 90+ days of real data. All charts render. PDF generates: correct metrics, no individual member data, employer name visible.
 
-**T16.2** `[MANUAL]` Trigger the cron a second time immediately.
-- Expected: No new `check_in_calls` row created for the same member today
-- Expected: Console shows: "0 scheduled, 1 skipped"
-- Fail: Duplicate row created or duplicate call triggered
+**T58.1** Generate care plan for member with 30+ days of data. All 7 JSON sections present and typed. `generation_cost_usd` logged and < $0.50.
 
-**T16.3** `[MANUAL]` Trigger the cron WITHOUT the Authorization header:
-```bash
-curl -X GET http://localhost:3000/api/cron/daily-calls
-```
-- Expected: `401` response
-- Fail: Cron runs without authentication
+**T59.1** Authenticated request → correct aggregated data. Unauthenticated → 401. Cohort < 10 → data suppressed. Every request in `api_access_log`.
 
----
+**T60.1** Student service record PDF: student name, institution, itemised visits, total hours, platform seal. Semester CSV complete and accurate.
 
-### Phase 17 — Call Webhook & Transcript Processing
-
-**T17.1** `[MANUAL]` Send a test webhook payload with correct Authorization header (use the Codespace port URL):
-```bash
-curl -X POST https://[CODESPACE_URL].app.github.dev/api/webhooks/retell \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $RETELL_WEBHOOK_SECRET" \
-  -d '{
-    "event": "call_ended",
-    "call": {
-      "call_id": "test-call-id-001",
-      "transcript": "Aria: Hi Margaret, how are you today?\nMargaret: I am doing well! I slept great and took my medications this morning. My energy is quite good today.",
-      "recording_url": "https://example.com/recording.mp3",
-      "start_timestamp": 1700000000000,
-      "end_timestamp": 1700000600000
-    }
-  }'
-```
-- Expected: Response is `{"received": true}` with status 200
-- Expected: `check_in_calls` row updated with transcript, timestamps, and `status = 'completed'`
-- Fail: Non-200 response, or row not updated
-
-**T17.2** `[MANUAL]` Send the same webhook WITHOUT the Authorization header.
-- Expected: `401` response
-- Expected: Call row is NOT updated
-- Fail: 200 response, or row updated without auth
-
-**T17.3** `[LIVE]` After a real call completes (from Phase 16), allow the webhook to process. Check the `check_in_calls` row.
-- Expected: `mood_score` is a number 1–10 (not 0, not null if the topic was discussed)
-- Expected: `ai_summary` contains a warm, non-clinical paragraph with no numbers
-- Expected: `medication_taken` is true or false (or null if not discussed)
-- Expected: `alert_flags` is `[]` for a normal call
-- Fail: Any score is 0, or summary contains clinical language
-
-**T17.4** `[MANUAL]` Test Realtime integration: Open the family dashboard. Wait for a real call to complete.
-- Expected: A "call_summary_ready" toast notification appears within 30 seconds of call ending
-- Expected: Dashboard wellness card updates to show real call data (without page refresh)
-- Fail: Dashboard requires refresh to show new call data
-
-**T17.5** `[MANUAL]` Send a webhook with a transcript containing a crisis phrase:
-```
-"Aria: How are you today? Margaret: I just don't want to be here anymore. I see no point to anything."
-```
-- Expected: `emergency` severity alert created in `alerts` table
-- Expected: Row created in `emergency_log` with the triggering phrase
-- Expected: `navigator_tasks` row created with `priority = 'critical'`
-- Expected: Realtime notification pushed with `severity = 'emergency'`
-- Fail: Any of the 4 steps missing
-
----
-
-### Layer 2 Gate — Confirm before presenting Layer 2 review
-
-**TL2.A** `[AUTO]` `npx tsc --noEmit` — zero errors
-**TL2.B** `[LIVE]` A real call was completed and the family dashboard shows real call data
-**TL2.C** `[MANUAL]` Crisis test (T17.5) passed — all 4 steps confirmed
-
----
-
-## Layer 3 — Outbound Notifications
-
----
-
-### Phase 18 — Twilio SMS Provider
-
-**T18.1** `[LIVE]` Complete a full end-to-end call. Confirm your phone (as linked family member with `sms: true`) receives an SMS within 5 minutes.
-- Expected: SMS starts with "Thrive@Home update for [Name] 💚"
-- Expected: SMS includes mood emoji + score
-- Expected: SMS includes medication status
-- Expected: SMS ends with "Reply STOP to unsubscribe"
-- Expected: `notification_log` row created with `channel = 'sms'`, `status = 'sent'`
-- Fail: No SMS, or missing required content, or no notification_log row
-
-**T18.2** `[LIVE]` Set a family member's `notification_prefs` to `{"sms": false, "email": true}`. Complete a call.
-- Expected: No SMS received for that family member
-- Expected: `notification_log` shows no SMS attempt for that family member
-- Fail: SMS received despite `sms: false`
-
-**T18.3** `[LIVE]` Manually create an `emergency` severity alert in Supabase. Trigger `sendUrgentAlertSMS` directly.
-- Expected: SMS arrives within 60 seconds
-- Expected: SMS arrives even for a family member with `sms: false` (urgent overrides preferences)
-- Expected: SMS text contains "🚨" or similar urgent indicator
-- Fail: SMS not sent, takes > 2 minutes, or preferences incorrectly block it
-
-**T18.4** `[MANUAL]` Confirm `smsProvider.constructor.name` is `'TwilioSmsProvider'`.
-- Expected: `TwilioSmsProvider`
-- Fail: `StubSmsProvider`
-
----
-
-### Phase 19 — SendGrid Email Provider
-
-**T19.1** `[LIVE]` Complete a test call. Confirm email arrives at the family member's inbox within 30 minutes.
-- Expected: Subject line contains the senior's name and a mood emoji
-- Expected: Email body shows score bars (mood, energy, comfort)
-- Expected: Full AI summary is readable in the email
-- Expected: "View Full Dashboard" CTA button visible
-- Expected: Footer contains an unsubscribe link
-- Fail: No email, missing content, or broken layout
-
-**T19.2** `[MANUAL]` Open the email on a real phone.
-- Expected: Nothing cut off at the edges
-- Expected: Text readable without zooming
-- Expected: CTA button large enough to tap
-- Fail: Any layout issue on mobile
-
-**T19.3** `[MANUAL]` Open the email in Gmail (not just a mail preview tool).
-- Expected: Score bars render as coloured HTML bars (not broken HTML tags)
-- Expected: All sections display correctly
-- Expected: No images missing or broken
-- Fail: Broken layout in Gmail
-
----
-
-### Phase 20 — Post-Call Notification Pipeline
-
-**T20.1** `[LIVE]` Complete a real call. Confirm the full notification sequence fires:
-- Expected: Realtime notification in dashboard within 30 seconds (Phase 9)
-- Expected: SMS within 5 minutes (Phase 18)
-- Expected: Email within 30 minutes (Phase 19)
-- Expected: All three channels logged in `notification_log`
-- Fail: Any channel missing or not logged
-
-**T20.2** `[LIVE]` Complete a crisis call (transcript with crisis language). Confirm crisis escalation fires:
-- Expected: `emergency` alert created
-- Expected: Emergency SMS sent to ALL family members (even those with `sms: false`)
-- Expected: Emergency SMS sent to `ONCALL_NAVIGATOR_PHONE`
-- Expected: Realtime `emergency` severity notification visible on dashboard immediately
-- Fail: Any step missing or delayed more than 60 seconds
-
----
-
-### Phase 21 — Medication Reminders
-
-**T21.1** `[LIVE]` Insert a `medication_schedules` row with `reminder_time` set to 2 minutes from now. Trigger the cron manually.
-- Expected: SMS arrives on the member's phone within 3 minutes
-- Expected: SMS contains "medications 💊"
-- Expected: `medication_reminder_log` row created (or notification_log entry with `channel = 'sms'`)
-- Fail: No SMS, wrong content, or no log row
-
-**T21.2** `[AUTO]` Insert 3 consecutive calls with `medication_taken = false`. Run missed medication check.
-- Expected: `concern` alert created with `alert_type = 'medication_miss'`
-- Expected: `navigator_tasks` row created
-- Fail: No alert after 3 consecutive misses
-
-**T21.3** `[AUTO]` Insert a 4th consecutive miss while the existing `medication_miss` alert is still unacknowledged.
-- Expected: No second `medication_miss` alert created (deduplication)
-- Fail: Duplicate alert created
-
----
-
-### Phase 22 — Wellness Drift (Fully Live)
-
-**T22.1** `[LIVE]` After inserting the declining-score test data from T10.4, confirm the `urgent` drift alert triggers real SMS and email notifications (not just stub logs).
-- Expected: Family member receives SMS and email about the wellness concern
-- Expected: Both logged in `notification_log` with `status = 'sent'`
-- Fail: Notifications still going to stub (console.log only)
-
----
-
-### Phase 23 — Call History Page
-
-**T23.1** `[MANUAL]` Navigate to `/dashboard/history` with 10+ completed calls.
-- Expected: Calls listed newest-first
-- Expected: Each row shows date, mood emoji + score, medication status, alert badges
-- Expected: Clicking "View summary" expands to full AI summary and scores
-- Expected: Flags shown in plain English (not raw flag names like "pain_high")
-- Fail: Missing content, wrong order, or raw flag names
-
-**T23.2** `[MANUAL]` With 25+ calls, scroll to the bottom of the first 20.
-- Expected: "Load more" button appears
-- Expected: Clicking it loads 20 more without page reload
-- Fail: All calls load at once, or load more doesn't work
-
----
-
-### Layer 3 Gate — Confirm before presenting Layer 3 review
-
-**TL3.A** `[AUTO]` `npx tsc --noEmit` — zero errors
-**TL3.B** `[LIVE]` Full notification flow confirmed: call → Realtime → SMS → email, all logged
-**TL3.C** `[LIVE]` Crisis escalation confirmed: SMS to family + on-call navigator within 60 seconds
-
----
-
-## Layer 4 — Billing
-
----
-
-### Phase 24 — Pricing Page (Static)
-
-**T24.1** `[MANUAL]` Navigate to `/pricing`.
-- Expected: Four plan cards visible: Basics $19/mo, Connect $39/mo, Complete $69/mo, Premier $129/mo
-- Expected: Each card lists key features
-- Expected: "No contracts" note visible
-- Expected: "Get started" buttons present (not yet functional — they will be wired in Phase 26)
-- Fail: Any card missing, wrong price, or missing features
-
----
-
-### Phase 25 — Stripe Products & Config
-
-**T25.1** `[MANUAL]` Open Stripe Dashboard → Products.
-- Expected: 4 products visible with correct names and monthly prices
-- Fail: Any product missing or wrong price
-
-**T25.2** `[AUTO]` Verify all 4 Stripe price IDs are set and non-empty:
-```ts
-import { STRIPE_PLANS } from '../lib/stripe/config'
-Object.entries(STRIPE_PLANS).forEach(([key, plan]) => {
-  console.assert(plan.priceId && plan.priceId.startsWith('price_'), `Missing or invalid price ID for ${key}: ${plan.priceId}`)
-})
-console.log('✓ All Stripe price IDs present and valid')
-```
-- Expected: All 4 price IDs start with `price_`
-- Fail: Any price ID missing, empty, or wrong format
-
-**T25.3** `[MANUAL]` Open Stripe Dashboard → Webhooks.
-- Expected: One endpoint registered pointing to `https://your-app.vercel.app/api/webhooks/stripe`
-- Expected: Status shows "Enabled"
-- Expected: At least 5 event types selected
-- Fail: No webhook, wrong URL, or disabled
-
----
-
-### Phase 26 — Plan Selection in Onboarding
-
-**T26.1** `[MANUAL]` Complete the onboarding form. Confirm Step 4 (plan selection) now appears.
-- Expected: Four plan cards shown with prices and features
-- Expected: One plan can be selected (highlighted border)
-- Expected: Clicking "Continue" redirects to Stripe Checkout
-- Fail: Step 4 missing, or plan selection doesn't work
-
-**T26.2** `[MANUAL]` Log in as a member enrolled in Layer 1–3 (no plan selected, defaulting to 'basics'). Navigate to dashboard.
-- Expected: A plan upgrade prompt appears ("Choose your plan to unlock full features")
-- Expected: Prompt links to the pricing page
-- Fail: No prompt for previously enrolled members
-
----
-
-### Phase 27 — Checkout Flow & Stripe Webhook
-
-**T27.1** `[LIVE]` Click "Get started" on the Connect plan. Complete payment with test card `4242 4242 4242 4242`, expiry `12/34`, CVC `123`.
-- Expected: Redirected to Stripe Checkout on stripe.com
-- Expected: Plan name and price visible on Stripe page
-- Expected: After payment, redirected to `/dashboard?subscribed=true`
-- Expected: "Welcome to Thrive@Home! 🎉" banner visible on dashboard
-- Expected: `subscriptions` row created in Supabase with `status = 'active'`
-- Expected: Stripe Dashboard shows new Customer and Subscription
-- Fail: Any step fails
-
-**T27.2** `[LIVE]` Use Stripe CLI to replay each webhook event:
-```bash
-stripe trigger checkout.session.completed
-stripe trigger invoice.payment_succeeded
-stripe trigger invoice.payment_failed
-stripe trigger customer.subscription.deleted
-```
-- Expected: Each event updates Supabase correctly
-- Expected: `payment_failed` → family receives payment failure email
-- Expected: `subscription.deleted` → `subscriptions.status = 'cancelled'`
-- Fail: Any event not handled or Supabase not updated
-
-**T27.3** `[MANUAL]` POST to webhook without `stripe-signature` header.
-- Expected: `401` response
-- Fail: Any 2xx response without a valid signature
-
----
-
-### Phase 28 — Billing Management Page
-
-**T28.1** `[MANUAL]` Navigate to `/dashboard/billing`.
-- Expected: Current plan name and price shown
-- Expected: Next billing date shown
-- Expected: "Change plan", "Update payment method", "Cancel subscription" buttons visible
-- Expected: Last 6 invoices listed with date, amount, status
-- Fail: Missing content or broken buttons
-
-**T28.2** `[MANUAL]` Click "Change plan".
-- Expected: Redirected to Stripe Customer Portal
-- Fail: 404 or error
-
----
-
-### Phase 29 — Accessibility & Compliance Audit
-
-**T29.1** `[AUTO]` Run axe-cli against all main pages:
-```bash
-npx axe-cli https://your-app.vercel.app --tags wcag2aa
-npx axe-cli https://your-app.vercel.app/login --tags wcag2aa
-npx axe-cli https://your-app.vercel.app/onboarding --tags wcag2aa
-npx axe-cli https://your-app.vercel.app/dashboard --tags wcag2aa
-npx axe-cli https://your-app.vercel.app/pricing --tags wcag2aa
-```
-- Expected: Zero violations on all pages
-- Fail: Any violation (zero is the requirement — not "acceptable violations")
-
-**T29.2** `[MANUAL]` Navigate through the full signup → onboarding → dashboard flow using only the keyboard (Tab, Enter, Space — no mouse).
-- Expected: Every element reachable and operable
-- Expected: Focus ring always visible
-- Fail: Any element unreachable by keyboard
-
-**T29.3** `[MANUAL]` Find a real person aged 65 or older who has not seen the product. Ask them to complete the onboarding form and view the dashboard without any help. Time them.
-- Expected: Completes onboarding in under 10 minutes without assistance
-- Expected: Can identify what the dashboard is showing without explanation
-- Document every point of confusion — fix all of them before marking this phase complete
-- Fail: Cannot complete onboarding independently, or cannot understand dashboard
-
-**T29.4** `[MANUAL]` Open the dashboard with browser font size set to "Largest" (browser settings → zoom/font).
-- Expected: Nothing breaks, no text is cut off, all sections still readable
-- Fail: Any layout break at maximum font size
-
----
-
-### Layer 4 Gate — Before switching to live Stripe keys
-
-**TL4.A** `[AUTO]` `npx tsc --noEmit` — zero errors
-**TL4.B** `[LIVE]` Full Stripe payment flow tested end-to-end with test card
-**TL4.C** `[AUTO]` All axe-cli scans show zero WCAG 2.1 AA violations
-**TL4.D** `[MANUAL]` 65+ user completed onboarding without assistance
-**TL4.E** `[MANUAL]` Human confirmed all 5 HIPAA BAAs are signed and stored
-**TL4.F** `[MANUAL]` Human explicitly confirmed they want to switch to live Stripe keys
+**T61.1** All pages in Spanish: zero raw translation keys. Native Spanish speaker reviews health-critical strings and confirms accuracy.

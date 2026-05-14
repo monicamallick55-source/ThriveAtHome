@@ -1,623 +1,721 @@
-# Thrive@Home — Human Review Checklist
+# Thrive@Home — Human Review Checklist (v3.0)
 
 > **This file is for you, the founder. The AI cannot do these checks.**
-> When the AI presents a phase review and asks for APPROVED or ISSUE, come to this file, find the phase, and work through every item yourself.
->
-> You do not need to understand the code. You only need to look at what is on screen and compare it to what this document says you should see. If anything looks wrong or missing, reply: `ISSUE: [describe exactly what you saw]`
+> When the AI presents a phase review, find the phase here and work through every item.
+> Mark ✅ (looks right) or ❌ (something wrong). Reply APPROVED only when everything is ✅.
+> If any item is ❌, reply: **ISSUE: [describe exactly what you saw]**
 
 ---
 
 ## How to use this file
 
-1. The AI will present a phase review in this format:
-   ```
-   ✅ PHASE [N] — [NAME] — COMPLETE, AWAITING YOUR APPROVAL
-   ```
+1. Wait for: `✅ PHASE [N] — [NAME] — COMPLETE, AWAITING YOUR APPROVAL`
 2. Find Phase N in this file
-3. Work through every checklist item — mark ✅ for looks right, ❌ for something wrong
-4. If all items are ✅, reply: **APPROVED**
-5. If any item is ❌, reply: **ISSUE: [describe exactly what you saw and what you expected]**
-
-Do not skip items. Do not mark ✅ for something you did not personally verify.
+3. Work through every checklist item yourself — do not skip
+4. All ✅ → reply **APPROVED**
+5. Any ❌ → reply **ISSUE: [what you saw and what you expected]**
 
 ---
 
-## Layer 1 — Core Product
-
----
+## M1 — Foundation
 
 ### Phase 1 — Project Scaffold
 
-Open your Vercel deployment URL in a browser:
-- [ ] The page loads — no error, no blank screen
+Open Vercel deployment URL in browser:
 - [ ] "Thrive@Home" appears in large dark navy text
-- [ ] "Peace of mind for families. Independence for seniors." appears below in teal
-- [ ] Right-click → Inspect → Console tab shows zero red errors
-- [ ] The background is warm off-white (not bright white or grey)
+- [ ] Tagline appears below in teal
+- [ ] DevTools → Console → zero red errors
+- [ ] Background is warm off-white
 
-Make a trivial change in the Codespace, commit, and push:
-- [ ] Vercel shows a new deployment triggered within 2 minutes
-- [ ] Deployment completes with a green checkmark
+Make a change, commit, push to main:
+- [ ] Vercel shows new deployment triggered within 2 minutes
+- [ ] Deployment succeeds (green checkmark)
 
-Open `.env.local.example` in the Codespace:
-- [ ] The file contains more than 20 lines
-- [ ] You can see section headings for Supabase, Retell AI, Twilio, Anthropic, Stripe, SendGrid
-- [ ] Every value is blank (no actual credentials in this file)
-
----
+Open `.env.local.example` in Codespace:
+- [ ] File contains more than 30 lines
+- [ ] Every value is blank — no actual credentials anywhere in this file
 
 ### Phase 2 — Supabase Connection
+Navigate to `/test`:
+- [ ] A message from the database appears — matches what you typed in Supabase
+- [ ] Not "undefined", "null", or a spinner
 
-Navigate to `/test` on your running app:
-- [ ] A message from the database appears on screen (it should match what you typed in Supabase)
-- [ ] The message is not "undefined", "null", or an error
-- [ ] Page does not spin forever
-
-After the AI removes the test page and table:
-- [ ] The homepage at `/` still loads correctly
-
----
+After AI removes test page: navigate to `/`:
+- [ ] Homepage still loads correctly
 
 ### Phase 3 — Database Schema
+Supabase → Table Editor:
+- [ ] You can see all the tables listed (more than 40 of them)
+- [ ] Clicking `members` shows columns including full_name, preferred_name, plan_tier, status
+- [ ] Clicking `realtime_notifications` shows columns: type, title, body, severity, read
 
-Open Supabase → Table Editor in your browser:
-- [ ] You can see these tables in the left sidebar: `members`, `family_members`, `check_in_calls`, `alerts`, `care_navigators`, `navigator_assignments`, `navigator_tasks`, `navigator_notes`, `subscriptions`, `realtime_notifications`, `notification_log`, `emergency_log`, `medication_schedules`, `audit_log`
-- [ ] Clicking `members` shows columns including: full_name, preferred_name, phone_number, plan_tier, status
-- [ ] Clicking `check_in_calls` shows columns including: mood_score, energy_score, ai_summary, transcript, alert_flags
-- [ ] Clicking `realtime_notifications` shows columns including: type, title, body, severity, read
-
-Open Supabase → Database → Replication:
-- [ ] `realtime_notifications` table is listed with INSERT events enabled
-
----
+Supabase → Database → Replication:
+- [ ] `realtime_notifications` is listed with INSERT enabled
 
 ### Phase 4 — Row Level Security
+Supabase → Authentication → Policies:
+- [ ] ALL tables show "RLS enabled"
+- [ ] Each table has at least one policy
 
-Open Supabase → Authentication → Policies:
-- [ ] ALL tables show "RLS enabled" — none show "disabled"
-- [ ] Each table has at least one policy listed under it
-
-When the AI runs the cross-account test, they will show you the terminal output. Look for:
-- [ ] Output says something like "Cross-user members query: BLOCKED ✓"
-- [ ] Output says something like "Own member query: ACCESSIBLE ✓"
-- [ ] Output does NOT show the word "EXPOSED" anywhere
+AI shows cross-user test output:
+- [ ] Output says "Cross-user query: BLOCKED ✓"
+- [ ] Output says "Own data query: ACCESSIBLE ✓"
+- [ ] Output does NOT say "EXPOSED"
 
 ---
+
+## M2 — Member Data
 
 ### Phase 5 — Authentication
+Navigate to `/signup`, fill in test details, submit:
+- [ ] Redirected to `/dashboard`
+- [ ] No error messages
 
-Navigate to `/signup` on your running app:
-- [ ] A sign-up form appears with fields for name, email, password, and relationship to senior
-- [ ] All text is large and readable (not tiny)
-- [ ] The form uses navy and teal colours
-
-Fill in the form with test details and submit:
-- [ ] You are redirected to `/dashboard`
-- [ ] No error messages appear during sign-up
-
-Open Supabase → Authentication → Users:
-- [ ] Your test email appears in the list
-
-Open Supabase → Table Editor → `family_members`:
-- [ ] A row exists with your test email linked and `role = 'family'`
-
-Log out (the AI will show you how). Type `/dashboard` directly in the URL bar:
-- [ ] You are immediately redirected to `/login`
-- [ ] You cannot see any dashboard content while logged out
-
----
+Log out, type `/dashboard` in URL bar:
+- [ ] Immediately redirected to `/login` — dashboard content never visible
 
 ### Phase 6 — Member Onboarding Form
-
 Navigate to `/onboarding`:
-- [ ] A form appears with a progress bar at the top showing "Step 1 of 3"
-- [ ] Step 1 has fields for: name, preferred name, date of birth, phone number, language preference, and address
-- [ ] All fields are large and clearly labelled
-- [ ] The "Next" button is large and easy to click
+- [ ] Progress bar at top showing "Step 1 of 3"
+- [ ] Step 1: name, preferred name, DOB, phone, language, address
+- [ ] "Next" button is large
 
-Click "Next" without filling anything in:
-- [ ] Error messages appear on each required field
-- [ ] You do NOT advance to Step 2
+Click "Next" with all fields empty:
+- [ ] Error messages appear on required fields
+- [ ] Does NOT advance to Step 2
 
-Fill in valid data and complete all 3 steps. On completion:
-- [ ] You are taken to a confirmation page
-- [ ] The confirmation says "Welcome to the Thrive@Home family, [the name you entered]!"
-- [ ] The correct preferred name appears — not "undefined"
+Complete all 3 steps. Confirmation page:
+- [ ] "Welcome to the Thrive@Home family, [name you entered]!"
+- [ ] The correct preferred name — not "undefined"
 
-Open Supabase → Table Editor → `members`:
-- [ ] A new row exists with the data you entered
-- [ ] The `plan_tier` column shows `basics` (not null — no plan selection step yet)
+Supabase → `members` table:
+- [ ] New row with `plan_tier = basics` (not null, not empty)
 
-Partially fill the form and refresh the page:
-- [ ] Your form data is still there after refresh
+### Phase 7 — App Data Layer & Seed Data
+AI runs seed script and shows terminal output:
+- [ ] "Seed complete. Login: test-family@thriveathome.dev / TestPassword123!"
+- [ ] No red error lines
 
-Open the form on your actual phone:
-- [ ] All fields fit on screen without horizontal scrolling
-- [ ] All buttons are easy to tap without zooming in
+Log in with seeded credentials:
+- [ ] Login works
 
 ---
 
-### Phase 7 — App Data Layer
-
-The AI will run a test script and show you the output:
-- [ ] Output ends with "✓ All data layer tests passed"
-- [ ] No red error lines in the output
-
-The AI will run `npx tsc --noEmit`:
-- [ ] Output shows zero errors
-
----
+## M3 — UI System
 
 ### Phase 8 — Primitive UI Components
+Navigate to `/test-ui`:
+- [ ] Buttons in different styles: navy, teal-outlined, red, ghost
+- [ ] Cards with different border colours: default, teal, amber, red
+- [ ] Mood emojis: 😊 for high scores, 😔 for low, — for null
+- [ ] Coloured dots: green/amber/red for status
+- [ ] Bell icon with "0" count badge
+- [ ] Progress bar visible
 
-The AI will create a test page. Navigate to `/test-ui`:
-- [ ] You can see buttons in different styles: navy-filled, teal-outlined, red, and ghost/subtle
-- [ ] You can see cards with different border colours
-- [ ] You can see small badge pills (for alert types, plan tiers)
-- [ ] You can see emoji faces for different mood scores — happy face for high scores, sad for low
-- [ ] You can see a coloured dot that is green for no alerts, amber for concern, red for urgent
-- [ ] You can see a bell icon with a count badge showing "0"
-
-Tab through the page using only the keyboard (Tab key):
+Tab through page using only keyboard:
 - [ ] You can reach every button by tabbing
-- [ ] You can always see which element is focused (visible outline or highlight)
-- [ ] You can press Enter or Space to activate buttons
+- [ ] You can always see which element is focused (visible outline)
 
 ---
 
-### Phase 9 — Supabase Realtime Notifications
+## M4 — Realtime Notifications
 
-This is the most important Layer 1 test. Open the family dashboard in one browser tab.
+### Phase 9 — Supabase Realtime
 
-**Test 1: Do notifications appear instantly?**
-The AI will insert a test alert in Supabase while you watch the dashboard tab.
-- [ ] Within 2 seconds, a notification toast appears in the corner of the dashboard — WITHOUT refreshing the page
-- [ ] The bell icon in the header shows a count of "1"
+**This is the most important Layer 1 test.**
 
-**Test 2: Does the notification bell work?**
-Click the bell icon:
-- [ ] A dropdown appears showing the notification
-- [ ] A "Mark read" button is visible
+Open the family dashboard in one browser tab. The AI inserts a test notification via SQL Editor.
+
+**Test 1: Does it appear instantly?**
+- [ ] Within 2 seconds, a toast notification appears in the corner — WITHOUT refreshing the page
+- [ ] Bell icon count increments to "1"
+
+**Test 2: Does the bell dropdown work?**
+Click the bell:
+- [ ] Dropdown opens showing the notification
+- [ ] "Mark read" button visible
 
 Click "Mark read":
-- [ ] The notification moves out of the unread list
-- [ ] The bell count goes back to 0
+- [ ] Bell count returns to "0"
 
-**Test 3: Are notifications private?**
-The AI will insert a notification for a DIFFERENT member while you watch.
+**Test 3: Is it private?**
+AI inserts a notification for a DIFFERENT member:
 - [ ] You do NOT see the other member's notification
 
 ---
 
+## M5 — Alert Engine
+
 ### Phase 10 — Alert Logic
 
-The AI will run alert logic tests and show you the results:
-- [ ] Output confirms: crisis flag → emergency severity alert created
-- [ ] Output confirms: only 1 alert created when the same type fires twice (deduplication working)
-- [ ] Output confirms: flat mood scores do NOT trigger a drift alert
+AI runs alert tests and shows output:
+- [ ] "Crisis flag → emergency severity: PASSED"
+- [ ] "Deduplication: PASSED — only 1 alert created"
+- [ ] "Flat scores → no drift alert: PASSED"
 
-Open the family dashboard while the AI creates a test alert:
-- [ ] The alert appears in the Alerts Panel within 2 seconds (Realtime working)
-- [ ] The alert card has the correct colour — red for emergency, amber for urgent, softer for concern
+While dashboard is open, AI creates a test alert:
+- [ ] Alert card appears in Alerts Panel within 2 seconds — no page refresh
+- [ ] StatusDot in header changes colour
+
+### Phase 11 — Crisis Detection
+AI sends crisis transcript and shows results:
+- [ ] Output shows all 4 escalation steps logged (emergency_log, alert, navigator task, Realtime notification)
+- [ ] Stub logs show what SMS and email would have been sent
+
+AI sends "I don't want to be here — I'd rather be at the beach!" and shows disambiguation result:
+- [ ] Output shows "Context determined NON-crisis — no escalation" (false positive prevented)
+
+**Think carefully: If a real senior said something concerning, would this system catch it and get humans involved? If anything seems uncertain, tell the AI.**
 
 ---
 
-### Phase 11 — Family Dashboard
+## M6 — Family Dashboard
 
-Log in as a seeded test family member. Navigate to `/dashboard`:
+### Phase 12 — Family Dashboard
+
+Log in as seeded family member. Navigate to `/dashboard`:
 - [ ] Dashboard loads within 3 seconds
-- [ ] Senior's name appears in the header (not "undefined" or a loading spinner)
-- [ ] A coloured dot appears — should be green if no active alerts
-- [ ] "Today's Wellness" card shows a mood emoji, scores, and a summary paragraph
-- [ ] A line chart shows mood scores over 7 days
-- [ ] An Alerts panel shows either alert cards or "No concerns this week 🌟"
-- [ ] The bell icon is visible in the header
+- [ ] Margaret Chen's name appears in header (not "undefined")
+- [ ] StatusDot visible (green — no urgent alerts by default)
+- [ ] Bell icon visible in header
+- [ ] Today's Wellness Card shows: emoji, scores, a summary paragraph
+- [ ] 7-Day Mood Trend: a line chart with coloured dots
+- [ ] Health Timeline: tabs for 7-day, 30-day, 60-day, 90-day — each renders
 
-While the dashboard is open, the AI will insert a test alert in Supabase:
-- [ ] An alert card appears in the Alerts Panel within 2 seconds — no page refresh
-- [ ] The coloured dot in the header changes colour to reflect the new alert
+While dashboard is open, AI inserts an alert:
+- [ ] Alert card appears within 2 seconds — no page refresh
+- [ ] StatusDot changes colour
 
-Temporarily break the connection (the AI will do this):
-- [ ] A friendly message appears like "Unable to load your dashboard right now"
-- [ ] No raw error code or technical message is visible to you
+Break Supabase connection, reload:
+- [ ] Friendly error message — no raw error code or stack trace
 
-Open the dashboard on your actual phone:
-- [ ] All sections fit on screen without horizontal scrolling
-- [ ] All text is readable without pinch-zooming
+On real phone at 375px:
+- [ ] All sections visible, no horizontal scroll
+- [ ] All text readable without zooming
+
+### Phase 13 — Call History
+Navigate to `/dashboard/history`:
+- [ ] Calls listed newest-first
+- [ ] Each row shows date, emoji, medication status
+- [ ] Flags show plain English (not "pain_high" — something like "Aria noticed some discomfort")
+
+Click "View summary":
+- [ ] Full AI summary appears
+- [ ] Scores visible
+
+### Phase 14 — Family Coordination Tools
+Create a task in the family task board:
+- [ ] Task appears for all family members linked to this senior in real time
+
+Send a message in family messaging:
+- [ ] Message appears for other linked family members instantly
+
+Upload a document to document vault:
+- [ ] File accessible when you navigate back to it
 
 ---
 
-### Phase 12 — Navigator Console
+## M7 — Navigator Console
 
-Log in as a navigator role user and navigate to `/navigator`:
-- [ ] A table of member names appears — ONLY members assigned to this navigator
-- [ ] Members with alerts appear at the TOP of the table (most urgent first)
-- [ ] Typing in the search box filters the list as you type
+### Phase 15 — Navigator Console
+Log in as navigator, navigate to `/navigator`:
+- [ ] Only assigned members visible (not ALL members in the system)
+- [ ] Members with alerts appear at TOP
+- [ ] Search box filters list as you type
 
-If there are any unacknowledged urgent or emergency alerts, alert cards appear above the table:
-- [ ] Each card shows the member name and a plain-English description of the alert
-- [ ] Clicking "Acknowledge" removes the card immediately (no page reload)
+Acknowledge an alert card:
+- [ ] Card disappears without page reload
 
 Click a member row:
-- [ ] A panel slides in from the right side of the screen
-- [ ] The panel shows the member's preferred name, age, plan tier
-- [ ] At least 5 past call summaries are listed
-- [ ] A "Navigator notes" text area is present
+- [ ] Panel slides in from right
+- [ ] Shows member name, age, plan tier, AI brief (stub text is fine), last 5 call summaries
 
-Type a note in the text area and click save:
-- [ ] "Saving..." appears briefly
-- [ ] "Saved ✓" appears and fades after 2 seconds
-- [ ] Close the panel and click the same member row — your note is still there
+Save a navigator note:
+- [ ] "Saving..." → "Saved ✓" → note persists after closing and reopening panel
 
-Press Escape with the panel open:
-- [ ] The panel closes
+Press Escape:
+- [ ] Panel closes, focus returns to the member row
 
-Log in as a family role user and type `/navigator` in the URL bar:
+As family role, type `/navigator` in URL bar:
 - [ ] Immediately redirected to `/dashboard`
 
----
-
-### Layer 1 Gate Review
-
-Before replying APPROVED to the Layer 1 gate, confirm all of the following:
-
-- [ ] Every Phase 1–12 human review above was completed and passed
-- [ ] The Realtime test (Phase 9) worked — notification appeared without page refresh
-- [ ] At least one test member is enrolled in Supabase
-- [ ] The navigator console only shows members assigned to that navigator (RLS working)
-- [ ] The app looks like a product — not a rough prototype
+### Phase 16 — Digest Scheduling
+AI triggers the weekly digest cron and shows terminal output:
+- [ ] Terminal shows stub email would be sent for each active member
+- [ ] No red errors
+- [ ] Cron rejected without CRON_SECRET (shows 401 in terminal)
 
 ---
 
-## Layer 2 — AI & Calls
+## M8 — AI Calls
 
----
+### Phase 17 — Anthropic AI Provider
+AI runs extraction tests and shows output:
+- [ ] "Fell asleep: NO fall flag — PASSED"
+- [ ] "Pain 3/10: NO pain_high flag — PASSED"
+- [ ] "Topic not discussed: null (not 0) — PASSED"
 
-### Phase 13 — Anthropic AI Provider
+AI generates a real Claude summary and shows it to you:
+- [ ] Sounds like a caring friend wrote it, not a medical form
+- [ ] No numbers or scores mentioned
+- [ ] No clinical words (patient, vitals, symptoms, assessment, diagnosis)
+- [ ] 3–5 sentences
 
-The AI will run score extraction tests and show you the output. Look for:
-- [ ] Output shows no false positives — "fell asleep" did NOT trigger a fall flag
-- [ ] Output shows pain score 3/10 did NOT trigger high pain flag
-- [ ] Output shows undiscussed topic returned `null` not `0`
-- [ ] All test assertions show ✓ or PASS
+### Phase 18 — Retell AI Agent Setup
+Open Retell AI dashboard:
+- [ ] Agent named "Aria — Thrive@Home Daily Check-In" exists
+- [ ] Female voice selected — press preview button, confirm warm tone (not robotic)
 
-The AI will generate a real Claude summary from a test transcript and show it to you. Read it:
-- [ ] The summary sounds like a caring friend wrote it, not a medical form
-- [ ] No numbers or scores mentioned in the summary
-- [ ] No words like "patient", "vitals", "symptoms", "assessment" appear
-
----
-
-### Phase 14 — Retell AI Agent Setup
-
-The AI will walk you through creating Aria in the Retell AI dashboard. After creation:
-
-Open Retell AI → your agent settings:
-- [ ] Agent name is "Aria — Thrive@Home Daily Check-In"
-- [ ] A female voice is selected — press the preview button to confirm it sounds warm, not robotic
-
-Use Retell AI's "Test Call" button. It will call your phone:
+AI calls your phone with the Margaret prompt:
 - [ ] Your phone rings within 15 seconds
-- [ ] The voice sounds warm and natural — not robotic, not a call-centre tone
-- [ ] Aria says "Aria from Thrive@Home" in her introduction
+- [ ] Aria says "Margaret" by name
+- [ ] Aria mentions gardening or books naturally
+- [ ] Conversation feels like talking to a person, not answering a survey
 
-The AI will update the agent with a test prompt for "Margaret who likes Gardening and Books" and call your phone:
-- [ ] Aria says "Margaret" at some point
-- [ ] Aria mentions gardening or books naturally (not robotically)
-- [ ] The conversation feels like talking to a person, not answering a survey
+Say "I've been feeling really hopeless lately":
+- [ ] Aria responds with warmth and empathy
+- [ ] Aria says someone will be in touch
+- [ ] Aria does NOT immediately end the call
 
-Say to Aria during the call: "I've been feeling really hopeless lately and don't see the point of anything."
-- [ ] Aria responds with warmth and empathy (not a robotic "I understand")
-- [ ] Aria says someone from the team will be in touch
-- [ ] Aria does NOT immediately end the call or change the subject abruptly
+### Phase 19 — Call Infrastructure
 
----
+AI triggers cron. Your phone rings:
+- [ ] Phone rings within 2 minutes of cron trigger
+- [ ] Aria answers and conducts check-in
 
-### Phase 15 — Twilio & Retell Call Infrastructure
+Supabase → `check_in_calls`:
+- [ ] Row exists with `status = scheduled`, then updates to `completed`
+- [ ] `ai_summary` column has warm, readable text
 
-The AI will run a test call to your phone number:
-- [ ] Your phone rings within 20 seconds of the AI running the script
-- [ ] Aria answers (not silence or a Twilio error message)
-- [ ] The AI shows you the call ID in the terminal output (a non-empty string)
-
-Open Twilio Console → Monitor → Calls:
-- [ ] The test call appears in the call log
-
-Open Retell AI → Call History:
-- [ ] The same call appears there too
-
----
-
-### Phase 16 — Outbound Call Scheduler
-
-The AI will trigger the cron endpoint manually:
-- [ ] Your phone rings within 2 minutes
-- [ ] The terminal shows "1 scheduled, 0 skipped, 0 failed"
-
-Open Supabase → `check_in_calls`:
-- [ ] A row exists with `status = 'scheduled'` and a Retell call ID in the `retell_call_id` column
-
-The AI triggers the cron a second time:
+AI triggers cron second time:
 - [ ] Your phone does NOT ring again
-- [ ] Terminal shows "0 scheduled, 1 skipped"
+- [ ] Terminal: "0 scheduled, 1 skipped"
+
+After real call completes, check dashboard:
+- [ ] "Call summary ready" notification appears without page refresh
+- [ ] Dashboard wellness card updates with real call data
+
+AI sends crisis test transcript. Check Supabase:
+- [ ] `emergency_log` row with triggering phrase
+- [ ] `emergency` severity alert in `alerts`
+- [ ] `critical` priority task in `navigator_tasks`
+- [ ] Realtime notification with emergency severity visible on dashboard
 
 ---
 
-### Phase 17 — Call Webhook & Transcript Processing
+## M9 — Concierge Line
 
-After a real call completes, check Supabase → `check_in_calls` for that call's row:
-- [ ] `transcript` column contains the conversation text
-- [ ] `status` shows `completed`
-- [ ] `mood_score` has a number (not 0, not null if the topic was discussed)
-- [ ] `ai_summary` contains a paragraph of warm, readable text
+### Phase 20 — 24/7 Concierge Line
+Call the concierge number (AI will tell you what it is):
+- [ ] Rings within 15 seconds
+- [ ] Warm greeting — "How can I help you today?" (not "Welcome to Thrive@Home check-in")
+- [ ] Back-and-forth conversation works
 
-Read the `ai_summary`:
-- [ ] Sounds like a caring friend wrote it
-- [ ] Contains no numbers, scores, or clinical language
+Say "I need a ride to the doctor tomorrow":
+- [ ] AI shows terminal: "[StubTransport] Would book ride..." logged
+- [ ] Supabase `service_bookings` row created
 
-Check your family dashboard while a call is being processed:
-- [ ] Within 30 seconds of the call ending, a "call summary ready" notification appears
-- [ ] The dashboard updates with the new call data without you refreshing
+Say "I just want to talk to someone":
+- [ ] AI shows volunteer match request was created
 
-After the AI sends a crisis test transcript, check Supabase:
-- [ ] An alert with `severity = 'emergency'` appears in `alerts`
-- [ ] A row appears in `emergency_log` with the triggering phrase
-- [ ] A critical priority task appears in `navigator_tasks`
+Say "I need to speak with a real person":
+- [ ] Call transfers to your own phone number (on-call navigator) within 2 minutes
 
 ---
 
-## Layer 3 — Outbound Notifications
+## M10 — Outbound Notifications
+
+### Phase 21 — Twilio SMS
+Complete a test call. Check your phone (as linked family member):
+- [ ] SMS arrives within 5 minutes
+- [ ] Starts with "Thrive@Home update for [Name] 💚"
+- [ ] Includes mood emoji, score, medication status
+- [ ] Ends with "Reply STOP to unsubscribe"
+- [ ] Message is complete — not cut off
+
+Emergency alert SMS:
+- [ ] Arrives within 60 seconds
+- [ ] Contains urgent indicator (🚨 or similar)
+- [ ] Arrived even though `sms: false` is set on that family member
+
+### Phase 22 — SendGrid Email
+Check your inbox after test call:
+- [ ] Email arrives within 30 minutes
+- [ ] Subject has senior's name and emoji
+- [ ] Navy header visible
+- [ ] Score bars visible (coloured HTML bars — not broken tags)
+- [ ] AI summary readable
+- [ ] "View Full Dashboard" button visible
+- [ ] Unsubscribe link in footer
+
+Open on real phone:
+- [ ] Nothing cut off, text readable, button tappable
+
+Open in Gmail specifically:
+- [ ] Score bars render as coloured bars
+
+### Phase 23 — Full Pipeline
+Check Supabase → `notification_log` after a complete call:
+- [ ] 3 rows: `channel = realtime` (sent), `channel = sms` (sent), `channel = email` (sent)
+- [ ] All 3 show `status = sent` (not `stub`)
 
 ---
 
-### Phase 18 — Twilio SMS Provider
+## M11 — Billing
 
-After a test call, check your phone (as the linked family member):
-- [ ] An SMS arrives within 5 minutes of the call ending
-- [ ] The SMS starts with "Thrive@Home update for [Senior Name] 💚"
-- [ ] The SMS includes a mood emoji, a score, and medication status
-- [ ] The SMS ends with "Reply STOP to unsubscribe"
-- [ ] The message is complete — not cut off mid-sentence
-
-After the AI manually triggers an emergency alert, check your phone:
-- [ ] An SMS arrives within 60 seconds
-- [ ] The SMS contains "🚨" or a clear urgent indicator
-- [ ] The tone is alarming — this should get your attention immediately
-
----
-
-### Phase 19 — SendGrid Email Provider
-
-After a test call, check your email inbox:
-- [ ] An email arrives within 30 minutes
-- [ ] The subject line contains the senior's name and a mood emoji
-- [ ] Open the email: a navy header shows the senior's name
-- [ ] Coloured score bars are visible for mood, energy, and comfort
-- [ ] The AI summary paragraph is readable
-- [ ] A "View Full Dashboard" button is visible in navy
-- [ ] The footer has an unsubscribe link
-
-Open the email on your actual phone:
-- [ ] Nothing is cut off at the edges
-- [ ] Text is readable without zooming
-- [ ] The CTA button is large enough to tap with your thumb
-
-Open the email in Gmail specifically (not another email client):
-- [ ] The score bars render as coloured bars — not broken HTML
-- [ ] All sections display correctly
-
----
-
-### Phase 20 — Post-Call Notification Pipeline
-
-After a full real call, check that the complete sequence fired:
-
-Dashboard:
-- [ ] Realtime notification appeared within 30 seconds of call ending
-
-Phone:
-- [ ] SMS arrived within 5 minutes
-
-Email:
-- [ ] Email arrived within 30 minutes
-
-Open Supabase → `notification_log`:
-- [ ] Three rows exist for this call — one each for `realtime`, `sms`, `email`
-- [ ] All three show `status = 'sent'`
-
-After the AI triggers the crisis test again:
-- [ ] SMS arrives from the on-call navigator number AND family number within 60 seconds
-- [ ] The Realtime notification on the dashboard shows `emergency` severity (red)
-
----
-
-### Phase 21 — Medication Reminders
-
-After the AI sets a test reminder 2 minutes from now and triggers the cron:
-- [ ] Your phone receives an SMS within 3 minutes
-- [ ] SMS says something about taking medications and includes 💊
-
-After the AI inserts 3 consecutive `medication_taken = false` calls:
-- [ ] Check Supabase → `alerts` — a `medication_miss` concern alert exists
-- [ ] Check Supabase → `navigator_tasks` — a task for the navigator exists
-
----
-
-### Phase 22 — Wellness Drift (Fully Live)
-
-After the AI inserts declining score data and runs the drift check:
-- [ ] An SMS arrives on your phone about a wellness concern
-- [ ] An email arrives about the wellness concern
-- [ ] Both are logged in Supabase → `notification_log` with `status = 'sent'` (not `'stub'`)
-
-This confirms SMS and email notifications are truly live — not just logging to the console anymore.
-
----
-
-### Phase 23 — Call History Page
-
-Navigate to `/dashboard/history`:
-- [ ] A list of past calls appears, newest first
-- [ ] Each row shows date, a mood emoji, and medication status
-- [ ] The alert flags shown use plain English (e.g. "Aria noticed some discomfort" — not "pain_high")
-
-Click "View summary" on any call:
-- [ ] It expands to show the full AI summary and all scores
-
-With 25+ calls, scroll to the bottom of the first 20:
-- [ ] A "Load more" button appears
-- [ ] Clicking it adds more calls without the page reloading
-
----
-
-### Layer 3 Gate Review
-
-Before replying APPROVED to the Layer 3 gate, confirm:
-- [ ] Every Phase 18–23 human review above was completed and passed
-- [ ] You personally received a real SMS on your phone from a real call
-- [ ] You personally received a real email in your inbox from a real call
-- [ ] The Realtime notification appeared within 30 seconds (no refresh required)
-- [ ] Crisis escalation SMS arrived within 60 seconds during the crisis test
-
-At this point, the product is fully functional. A senior can be enrolled and their family stays connected — completely automatically, with no manual effort.
-
----
-
-## Layer 4 — Billing
-
----
-
-### Phase 24 — Pricing Page (Static)
-
+### Phase 24 — Pricing Page & Stripe Setup
 Navigate to `/pricing`:
-- [ ] Four plan cards appear: Basics ($19/mo), Connect ($39/mo), Complete ($69/mo), Premier ($129/mo)
-- [ ] Each card has a list of key features
-- [ ] "Start with any plan. Upgrade anytime. No contracts." is visible
-- [ ] "Get started" buttons are visible (they will be wired up in Phase 26)
+- [ ] Four plan cards: Basics $19, Connect $39, Complete $69, Premier $129
+- [ ] Each card has feature list
+- [ ] "No contracts" note visible
 
----
+Stripe dashboard → Products:
+- [ ] Four products with correct prices
 
-### Phase 25 — Stripe Products & Config
+Stripe dashboard → Webhooks:
+- [ ] Endpoint registered, Enabled, 5 events
 
-Open Stripe Dashboard → Products:
-- [ ] Four products appear: Thrive Basics, Thrive Connect, Thrive Complete, Thrive Premier
-- [ ] Prices are exactly $19/mo, $39/mo, $69/mo, $129/mo
-
-Open Stripe Dashboard → Webhooks:
-- [ ] One webhook endpoint is registered pointing to your app URL
-- [ ] Status shows "Enabled"
-
----
-
-### Phase 26 — Plan Selection in Onboarding
-
-Navigate to `/onboarding` and complete the form:
+### Phase 25 — Plan Selection & Checkout
+Complete onboarding:
 - [ ] Step 4 (plan selection) now appears after Step 3
-- [ ] Four plan cards are shown
-- [ ] Clicking a card highlights it with a border
-- [ ] Clicking "Continue" eventually takes you to Stripe Checkout
+- [ ] Plan cards shown with prices
 
-Log in as a member enrolled before billing was added:
-- [ ] A plan upgrade prompt appears on the dashboard
-- [ ] The prompt links to the pricing page
+After payment with test card 4242 4242 4242 4242:
+- [ ] Redirected back to your app
+- [ ] "Welcome to Thrive@Home! 🎉" banner visible
+- [ ] Supabase `subscriptions` row: `status = active`
+- [ ] Stripe dashboard shows Customer and Subscription
 
----
-
-### Phase 27 — Checkout Flow & Stripe Webhook
-
-Click "Get started" on the Connect plan. Complete Stripe checkout using test card:
-- Card number: `4242 4242 4242 4242`
-- Expiry: `12/34`
-- CVC: `123`
-- Any name and zip code
-
-- [ ] You are taken to a Stripe-hosted checkout page (the URL starts with stripe.com)
-- [ ] "Thrive Connect" and "$39.00" are visible on the Stripe page
-- [ ] After completing payment, you are redirected back to your dashboard
-- [ ] A "Welcome to Thrive@Home! 🎉" banner appears on the dashboard
-
-Open Stripe Dashboard → Customers:
-- [ ] A customer with your test email appears
-
-Open Stripe Dashboard → Subscriptions:
-- [ ] A subscription at $39/mo appears with status "Active"
-
-Open Supabase → `subscriptions` table:
-- [ ] A row exists with `status = 'active'` and the correct plan tier
-
----
-
-### Phase 28 — Billing Management Page
-
+### Phase 26 — Billing Management
 Navigate to `/dashboard/billing`:
-- [ ] Your current plan name is shown ("Thrive Connect")
-- [ ] The next billing date is shown (a future date)
-- [ ] Three buttons are visible: "Change plan", "Update payment method", "Cancel subscription"
-- [ ] Past invoices are listed with dates and amounts
-
-Click "Change plan":
-- [ ] You are taken to the Stripe Customer Portal
-- [ ] The portal shows your current plan and options to change it
+- [ ] Current plan name shown
+- [ ] Next billing date shown
+- [ ] Three buttons visible (Change plan, Update payment, Cancel)
+- [ ] Click "Change plan" → Stripe Customer Portal opens
 
 ---
 
-### Phase 29 — Accessibility & Compliance Audit
+## M12 — Compliance
 
-The AI will run an automated accessibility scan and show you the results:
-- [ ] The output shows zero violations — the word "violations: 0" appears for every page scanned
-- [ ] If any violations are shown, reply ISSUE immediately — do not accept any violations
+### Phase 27 — HIPAA Baseline
+Access `http://` version of your app:
+- [ ] Automatically redirected to `https://`
 
-Tab through the entire onboarding flow using only the keyboard:
-- [ ] You can complete the whole form using Tab, Enter, and Space — no mouse needed
-- [ ] You can always see which field is focused (highlighted outline or visible indicator)
+Navigate to `/privacy`:
+- [ ] Page loads with readable privacy policy
+- [ ] Mentions data collection, retention, sharing, and deletion rights
 
-**The 65+ test — this is mandatory and cannot be skipped:**
-
-Find a real person aged 65 or older who has not seen the product before. Show them the signup URL and say: "I'd like you to add a family member to this service. I won't be able to help — just try your best."
-
-Sit quietly and watch. Note every moment of confusion.
-- [ ] They completed the signup form without help
-- [ ] They completed the onboarding form (3 steps) without help
-- [ ] They understood what the dashboard was showing them without explanation
-- [ ] They did not need to zoom in to read anything
-- [ ] Total time was under 10 minutes
-
-Write down every moment of confusion and tell the AI. Every confusion point must be fixed before this phase is marked complete.
-
-**HIPAA checklist** — confirm before the Layer 4 gate:
+AI confirms all 5 BAAs are signed:
 - [ ] Supabase BAA signed and stored
 - [ ] Twilio BAA signed and stored
 - [ ] Retell AI BAA signed and stored
 - [ ] Anthropic BAA signed and stored
 - [ ] SendGrid BAA signed and stored
 
+### Phase 28 — Accessibility & 65+ Usability
+AI runs axe-cli scans and shows output:
+- [ ] Output shows "violations: 0" for every page scanned
+- [ ] No exceptions — zero is the requirement
+
+Tab through entire onboarding flow (no mouse):
+- [ ] You can complete the whole form using only Tab, Enter, Space
+- [ ] Focus is always visible
+
+**The 65+ test — mandatory, cannot be skipped:**
+
+Find a real person aged 65 or older. Give them the URL and say "Please try to add a family member to this service — I won't help you." Watch silently.
+
+- [ ] They signed up without help
+- [ ] They completed onboarding without help
+- [ ] They understood what the dashboard was showing them
+- [ ] They did not need to zoom in to read anything
+- [ ] Total time under 10 minutes
+
+Document every moment of confusion. Fix all before marking complete.
+
 ---
 
-### Layer 4 Gate Review — Before switching to live Stripe keys
+## M13 — Volunteer Network
 
-This is the final gate. Read every item carefully before replying APPROVED.
+### Phase 29 — Volunteer Application
+Navigate to `/volunteer/apply`:
+- [ ] Form loads with warm, mission-driven tone
+- [ ] All fields clearly labelled
 
-- [ ] Every Phase 24–29 human review above was completed and passed
+Submit application. Check your email (as admin):
+- [ ] Notification email arrives
+- [ ] Admin `/admin/volunteers` page shows pending application
+
+### Phase 30 — Background Checks
+After admin approval:
+- [ ] AI shows Checkr API call was made (test mode output in terminal)
+- [ ] Volunteer status changes to `background_check`
+
+### Phase 31 — Volunteer Matching
+AI shows matching scores for test members and volunteers:
+- [ ] Volunteer with shared interests and same city scores highest
+- [ ] Introduction email shows first names + shared interest(s) — no phone numbers or emails
+
+### Phase 32 — Volunteer Portal
+Log in as a test volunteer:
+- [ ] Only matched members visible (not all seniors)
+- [ ] Log a visit → visit row appears in Supabase
+- [ ] Impact stats update (hours increment)
+
+### Phase 33 — Student Network
+Download generated service record PDF:
+- [ ] Student name, university name, visit dates, hours, total shown
+- [ ] Looks official (not a raw HTML dump)
+
+### Phase 34 — Youth in Schools
+Log in as school admin:
+- [ ] Student group visible
+- [ ] Activities logged
+- [ ] No direct contact info visible to either youth or senior
+
+### Phase 35 — Veteran Network
+Log in as VSO coordinator (read-only view):
+- [ ] Can see their volunteers' activity
+- [ ] Cannot see other organisations' volunteers
+
+### Phase 36 — All Volunteer Networks
+Log in as each volunteer type (retired professional, faith, corporate):
+- [ ] Each sees a role-appropriate view
+- [ ] Training library accessible
+- [ ] Badge appears at correct hour milestone
+
+---
+
+## M14 — Community Layer
+
+### Phase 37 — Virtual Events
+Navigate to `/dashboard/events`:
+- [ ] Calendar and list view both render
+- [ ] RSVP to an event → dial-in details appear for you
+- [ ] Dial-in details NOT visible to a non-RSVPed user
+
+After AI sends the post-event SMS and you reply YES:
+- [ ] Supabase `event_rsvps.attended = true` for your row
+
+### Phase 38 — Local Events & Transport
+Book a local event with transport:
+- [ ] Both a `local_event_rsvp` AND a `transport_booking` row created in Supabase
+
+### Phase 39 — Interest Groups
+Create an interest group:
+- [ ] Group appears in directory
+- [ ] Members can join
+- [ ] AI-generated weekly discussion prompt appears on group page
+
+### Phase 40 — Skill Exchange
+Complete an exchange between two test members:
+- [ ] Teacher balance: 0 → 1
+- [ ] Learner balance: 0 → -1
+- [ ] Transaction rows visible in Supabase
+
+AI injects a failure mid-transaction:
+- [ ] Neither balance changed (atomicity confirmed)
+
+### Phase 41 — Cultural Circles
+Navigate to `/dashboard/cultural-circles`:
+- [ ] 12 circle cards visible
+- [ ] Join a circle → membership count increments
+- [ ] Post a message → appears in feed
+- [ ] RSVP to a circle event → dial-in details appear
+- [ ] Leave circle → removed from list
+
+### Phase 42 — Language Access
+Set your member's language to Spanish. Navigate through onboarding, dashboard, billing:
+- [ ] All UI text in Spanish
+- [ ] No raw translation keys visible (no "t('dashboard.title')" visible on screen)
+
+If you have a Spanish-speaking contact: have them review the grief support page in Spanish:
+- [ ] They confirm it sounds natural and professional (not machine-translated)
+
+### Phase 43 — Benefits Finder
+Answer questionnaire as low-income California veteran:
+- [ ] VA Aid & Attendance and 3+ other benefits appear
+- [ ] Every result card says WHY you qualify (specific reason from your answers)
+
+Answer as non-veteran, high income:
+- [ ] VA Aid & Attendance does NOT appear
+
+### Phase 44 — Employer Portal
+Submit demo request:
+- [ ] `employer_leads` row in Supabase
+- [ ] Sales team email arrives
+
+Send employee invitation, accept as test employee:
+- [ ] Employee linked to employer account in Supabase
+
+---
+
+## M15 — Celebrations & Life Stories
+
+### Phase 45 — Celebrations Engine
+AI sets test member's birthday to 7 days away and triggers cron:
+- [ ] A family notification email arrives
+- [ ] The email contains gift suggestions specific to Margaret's interests — not generic ("flowers and chocolates")
+- [ ] Suggestions feel personalised (reference gardening, books, or other interests)
+
+Set DOB to today, trigger cron:
+- [ ] "call_summary_ready" check-in prompt is modified (Aria acknowledges birthday)
+- [ ] Community post created
+
+### Phase 46 — Life Story Archive
+Navigate to `/dashboard/life-story`:
+- [ ] You can add a written entry
+- [ ] You can upload a voice memo
+- [ ] Entry marked as public appears in the cultural circle feed
+
+---
+
+## M16 — Grief & Life Transitions
+
+### Phase 47 — Physical Goods
+AI triggers a milestone birthday D-0:
+- [ ] Terminal shows stub log of birthday card order (AI shows you the output)
+- [ ] Goods order logged — not actually sent until real provider is configured
+
+### Phase 48 — Grief Support
+Navigate to `/dashboard/grief-support`:
+- [ ] Page tone is warm and human — not clinical
+- [ ] "You don't have to face this alone" sentiment is prominent
+- [ ] 4 category cards visible
+
+Submit a grief support request. Check your email (care team):
+- [ ] Email arrives within 2 minutes
+- [ ] Subject clearly identifies the member and type of support
+- [ ] Tone is urgent but calm
+
+Check Supabase → `members`:
+- [ ] `check_in_frequency` updated to `daily` for that member
+
+**After the AI sets up the holiday sensitivity test:** Confirm that no celebratory nudges appear for a member with a recent loss near significant dates.
+
+### Phase 49 — Life Transition Pathways
+AI creates a nursing home transition record:
+- [ ] Navigator task appears in the navigator console
+- [ ] Community farewell event option appears on the member's dashboard
+
+---
+
+## M17 — Services Marketplace
+
+### Phase 50 — Marketplace Foundation
+Navigate to `/dashboard/services`:
+- [ ] 6 service category cards visible: Transport, Home Services, Health Services, Legal & Financial, Meals & Nutrition, Tech Help
+- [ ] Each card links to its own page
+- [ ] "Request help" creates a booking row (AI shows Supabase evidence)
+
+### Phase 51 — Transportation
+Request a transport booking:
+- [ ] Terminal shows "[StubTransport] Would book ride..." logged
+- [ ] `transport_bookings` row in Supabase
+
+Request a volunteer-driver trip:
+- [ ] Volunteer match request created in addition to booking row
+
+Set up a recurring trip ("every Tuesday"):
+- [ ] Multiple scheduled booking rows created (one per occurrence)
+
+### Phase 52 — Home Services
+Browse home service providers:
+- [ ] Providers filtered by your zip code
+- [ ] Only `is_vetted = true` providers shown
+
+Request grocery delivery:
+- [ ] Terminal shows stub log with correct dietary restrictions from member profile
+
+### Phase 53 — Health Services
+Initiate a telehealth session:
+- [ ] `service_bookings` row with telehealth type
+- [ ] Warm handoff note visible in navigator console (not just a link)
+
+### Phase 54 — Legal & Financial Hub
+Upload a document to document vault:
+- [ ] File retrieves correctly
+- [ ] Metadata visible in `document_vault_items`
+
+Open advisor directory:
+- [ ] Only vetted advisors listed
+
+Fraud alert (weekly):
+- [ ] Realtime notification arrives for active members on schedule
+
+### Phase 55 — Meals & Nutrition
+Order a meal:
+- [ ] `service_bookings` row created with correct dietary preferences from member profile
+
+Social dining event:
+- [ ] Appears as a `local_events` entry with transport option
+
+### Phase 56 — Tech Help Services
+Call the tech helpline (AI gives you the number):
+- [ ] Call is answered, transcribed, and logged in `check_in_calls`
+
+Book an in-home tech help session:
+- [ ] `service_bookings` row created
+
+Tech safety event:
+- [ ] Appears on events calendar with correct category
+
+---
+
+## M18 — Enterprise
+
+### Phase 57 — Outcomes Dashboard
+Navigate to `/admin/outcomes`:
+- [ ] All charts render (not blank)
+- [ ] Date range picker works
+
+Download PDF report:
+- [ ] PDF downloads
+- [ ] Open it — readable, professional layout, no individual member data
+
+### Phase 58 — AI Care Plan Generation
+Navigate to `/dashboard/care-plan` for a member with 30+ days of data:
+- [ ] Plan appears with multiple sections
+- [ ] All sections are warm, non-clinical
+- [ ] "Top Strengths" shows 3 positive items
+- [ ] "Family Talking Points" shows conversation starters
+
+Read the care plan as if it were about your parent:
+- [ ] Nothing would cause unnecessary alarm
+- [ ] Recommendations are specific, not generic
+
+### Phase 59 — MA Reporting API
+AI makes an authenticated API request and shows you the JSON response:
+- [ ] Response contains aggregated numbers (no individual names or IDs)
+- [ ] No individual member health data visible anywhere in the response
+
+AI makes a request for a cohort of fewer than 10:
+- [ ] Response shows a suppression message, not the data
+
+### Phase 60 — University Portal
+Download a student service record PDF:
+- [ ] Student name, university name, visit dates, hours, total all correct
+- [ ] Looks official — you would accept this as a service record
+
+### Phase 61 — Full Multilingual Platform
+Confirm with a native Spanish speaker (if you have one):
+- [ ] The grief support page in Spanish reads naturally
+- [ ] Health-related strings don't sound machine-translated
+- [ ] They would trust it to communicate health information accurately
+
+---
+
+## Final Gate — Before Going Live with Real Members & Live Stripe Keys
+
+Read every item below. Only mark APPROVED when ALL are confirmed:
+
+- [ ] Every Phase 1–61 human review completed
 - [ ] Test payment with card 4242 4242 4242 4242 succeeded
-- [ ] All Stripe webhook events handled correctly (Stripe CLI test passed)
-- [ ] Zero accessibility violations on all pages
-- [ ] Real person aged 65+ completed onboarding without assistance
-- [ ] All 5 HIPAA BAAs are signed and stored
-- [ ] You understand: after APPROVED, the AI will switch Stripe keys to LIVE mode and real charges will be possible
+- [ ] All HIPAA BAAs signed and stored (all 5 vendors)
+- [ ] axe-cli shows zero violations on all pages
+- [ ] Real 65+ adult completed onboarding without assistance
+- [ ] At least 10 test users through the complete call → Realtime → SMS → email flow
+- [ ] Services marketplace stubs logged correctly for at least 1 request per category
+- [ ] You personally understand what happens when a senior says something concerning on a call
 
-**Only reply APPROVED when you are ready to accept real payments.**
-
----
-
-## Ongoing — For any new feature or phase added after Layer 4
-
-When the AI builds additional features (volunteer portal, cultural circles, skill exchange, etc.), each will have a phase review. The general checklist for any new feature is:
-
-- [ ] The feature works end-to-end in your browser — not just "the code compiled"
-- [ ] Realtime notifications appear for relevant updates (new request, status change, etc.)
-- [ ] The feature is fully usable on mobile at 375px width
-- [ ] Text is readable and buttons are tappable without zooming
-- [ ] Any new external service starts in stub mode and activates with its environment variable
-- [ ] You can use the feature without the AI explaining how it works
-
-If a feature requires a new external service (like Checkr for volunteer background checks), you will need to create that account and add its credentials — the AI will ask you for this at the right time.
+**Only after all items above: switch Stripe keys from `sk_test_` to `sk_live_`. Real charges will be possible from that moment.**
