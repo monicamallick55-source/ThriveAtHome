@@ -1,28 +1,22 @@
 # Thrive@Home — Build Progress Log (v1.0)
 
 > **APPEND ONLY. Never edit or delete a previous entry.**
-> This file is the memory of the build. Every session starts by reading it completely.
+> This is the persistent memory of the build. Every session starts by reading it top to bottom.
+> Every session ends by appending an entry — even if mid-phase or blocked.
 
 ---
 
 ## Rules
 
 **Start of every session:**
-1. Read this file top-to-bottom
-2. Find the last entry — that tells you exactly where you are
+1. Read this file top to bottom
+2. Find the last entry's `NEXT SESSION MUST` — resume exactly from there
 3. Cross-reference `checklist.md` to confirm current phase status
-4. Read `prompt.md` for the current phase instructions before writing any code
+4. Read `prompt.md` Section 8 for the current phase instructions before writing any code
+5. If last session ended at `[A]` (awaiting approval) — do NOT begin the next phase. Ask: "I'm waiting for your APPROVED on Phase [N]. Shall I proceed?"
 
-**End of every session (before closing):**
-1. Append a new entry using the exact format below
-2. Be specific — list every file touched, every test run, every decision made
-3. If mid-phase: describe exactly where to resume in `NEXT SESSION MUST`
-4. Update `checklist.md` to reflect current phase status
-
-**Never:**
-- Edit a previous entry
-- Delete a previous entry
-- Close without appending an entry
+**End of every session:**
+Append an entry using the exact format below. Even for a 10-minute session. Even if blocked.
 
 ---
 
@@ -30,52 +24,55 @@
 
 ```
 ---
-SESSION: [number — increment by 1 each session]
+SESSION: [number — increment by 1]
 DATE: [YYYY-MM-DD UTC]
 MILESTONE: [M1–M6]
-PHASE: [number] — [name]
-STATUS: [STARTED | IN_PROGRESS | AWAITING_APPROVAL | APPROVED_COMPLETE | BLOCKED]
+PHASE: [N] — [name]
+STATUS: [IN_PROGRESS | AWAITING_APPROVAL | APPROVED_COMPLETE | BLOCKED | NOT_STARTED]
 HUMAN_APPROVAL: [PENDING | RECEIVED — "APPROVED" | RECEIVED — "ISSUE: [description]" | N/A]
 
-WHAT WAS DONE:
+INNER LOOP STATE AT END OF SESSION:
+- Phase checklist: [X of Y items [x]]
+- Current item: [which checklist item was being worked on]
+- Loop state: [WORKING | TESTING | DEBUGGING | BLOCKED]
+
+STUB STATUS:
+- aiProvider: [StubAiProvider / AnthropicAiProvider]
+- callProvider: [StubCallProvider / RetellCallProvider]
+- smsProvider: [StubSmsProvider / TwilioSmsProvider]
+- emailProvider: [StubEmailProvider / SendGridEmailProvider]
+- billingProvider: [StubBillingProvider / StripeBillingProvider]
+- transportProvider: [StubTransportProvider / real]
+- mealProvider: [StubMealProvider / real]
+- goodsProvider: [StubGoodsProvider / real]
+
+WHAT WAS DONE THIS SESSION:
 - [/full/path/file.ts — CREATED]
-- [/full/path/file.ts — MODIFIED: exact description of change]
-- [Supabase: table `xyz` created / column `abc` added / policy `xyz` added]
-- [Supabase: Realtime enabled for `xyz` INSERT]
-- [Edge Function `xyz` deployed]
-- [npm: installed package@version]
-- [Env var: VARIABLE_NAME added to .env.local / Vercel]
+- [/full/path/file.ts — MODIFIED: what changed]
+- [Supabase: table/policy/Edge Function created or modified]
+- [npm package installed: name@version]
+- [env var added to .env.local / Vercel: VARIABLE_NAME]
 
-TESTS RUN:
-- [Test ID from tests.md]: PASSED — [one sentence: what was verified]
-- [Test ID]: FAILED — [exact failure: observed vs expected]
-- [Test ID]: SKIPPED — [reason — always a blocker, never convenience]
-
-STUB STATUS (which providers are real vs stub):
-- aiProvider: StubAiProvider [stub]
-- callProvider: StubCallProvider [stub]
-- smsProvider: StubSmsProvider [stub]
-- emailProvider: StubEmailProvider [stub]
-- billingProvider: StubBillingProvider [stub]
-- transportProvider: StubTransportProvider [stub]
-- mealProvider: StubMealProvider [stub]
-- goodsProvider: StubGoodsProvider [stub]
+TESTS AND VERIFICATIONS RUN:
+- [checklist item]: PASSED — [what was observed]
+- [checklist item]: FAILED — [observed vs expected]
+- [checklist item]: BLOCKED — H1: [tried] → [result]; H2: [tried] → [result]; H3: [tried] → [result]
 
 ERRORS ENCOUNTERED:
-- [exact error message] — [root cause] — [resolution, or UNRESOLVED if still open]
+- [exact error message] — [root cause identified] — [resolution, or UNRESOLVED]
 
 DECISIONS MADE:
-- [any architectural or implementation decision future sessions must know]
-- [any deviation from prompt.md with justification]
+- [any architectural or implementation decision that affects future sessions]
+- [any deviation from prompt.md with explicit justification]
 
 HUMAN APPROVAL:
 - Review presented: YES / NO
-- User response: APPROVED / ISSUE: [description] / PENDING
+- User response: APPROVED / ISSUE: [description] / PENDING / N/A
 
 NEXT SESSION MUST:
-- [first specific action — exact file name, function name, step number]
-- [second action]
-- [any blocker requiring human input before code can proceed]
+- [first specific action — exact file name, function, step, or verification to run]
+- [second specific action]
+- [any env var, manual Supabase step, or human input needed before code can proceed]
 ---
 ```
 
@@ -83,19 +80,20 @@ NEXT SESSION MUST:
 
 ## Architecture decisions log
 
-Record permanent decisions here so they survive session boundaries.
+Permanent decisions recorded here. Updated when a new decision is made.
 
 | Decision | Session | Rationale |
 |----------|---------|-----------|
-| Supabase Edge Functions for all server-side business logic — not Next.js API routes | 1 | Cleaner architecture, edge performance, positions for future scalability |
+| Supabase Edge Functions for all server-side business logic | 1 | Edge performance, clean separation, positions for future scalability |
 | Supabase Realtime is the sole in-browser notification channel in M1–M6 | 1 | No external paid service needed. SMS and email are Add-Ons in M10. |
-| All 8 external service interfaces and stubs created in Phase 1 | 1 | Real services added in Add-On milestones — zero existing code changes required |
-| Billing (Stripe) is M11 — not infrastructure, a feature added last | 1 | Product fully functional without billing. Billing is the last Add-On. |
-| Plan selection not in onboarding until M11 | 1 | Members default to `plan_tier = 'basics'`. Plan selection added only when Stripe is connected. |
+| All 8 service interfaces and stubs created in Phase 1 | 1 | Real services add zero existing code changes — only providers.ts and new implementation file |
+| Billing is M11 — not infrastructure, a feature added last | 1 | Product fully functional without billing |
+| Plan selection not in onboarding until M11 | 1 | Members default to `plan_tier = 'basics'`. Plan selection added when Stripe is connected. |
 | `providers.ts` is the single file that selects stub vs real | 1 | Application code never changes when activating a real service |
-| Crisis disambiguation stub returns `false` in v1 | 1 | No real calls in M1–M6, so false is safe. Real disambiguation (Anthropic) added in M8. |
-| `.single()` banned throughout — use `.maybeSingle()` everywhere | 1 | `.single()` throws on zero rows which is a valid state in deduplication and existence checks |
-| Placeholder pages created for all M7–M18 routes in Phase 1 | 1 | App never 404s. Navigation works from day one. No business logic in placeholders. |
+| Crisis disambiguation stub returns `false` in v1 | 1 | No real calls in M1–M6. False positive safer than false negative — real disambiguation in M8. |
+| `.maybeSingle()` throughout — `.single()` banned | 1 | `.single()` throws on zero rows — valid state in deduplication and existence checks |
+| BLOCKED state halts after 3 hypotheses | 1 | Prevents spinning on unsolvable problems. Human input required. |
+| Placeholder pages for all M7–M18 routes created in Phase 1 | 1 | App never 404s. No business logic in placeholders. |
 
 ---
 
@@ -109,43 +107,44 @@ PHASE: 0 — Pre-build planning
 STATUS: NOT_STARTED
 HUMAN_APPROVAL: N/A
 
-WHAT WAS DONE:
-- prompt.md v1.0 created (Phases 1–14, M1–M6 only)
-- checklist.md v1.0 created
+INNER LOOP STATE AT END OF SESSION:
+- Phase checklist: N/A (no application phase yet)
+- Current item: N/A
+- Loop state: N/A
+
+STUB STATUS:
+- All 8 providers are stubs (no application exists yet)
+
+WHAT WAS DONE THIS SESSION:
+- prompt.md v1.0 created (agentic loop protocol, debugging protocol, all edge cases)
+- checklist.md v1.0 created (BLOCKED state, STATUS field, verification methods per item)
 - progress.md v1.0 created
 - tests.md v1.0 created
 - human_review.md v1.0 created
 - dev_setup.md v1.0 created
-- ThriveAtHome_Build_Phases.md v3.0 created (all 61 phases, all 5 spec layers)
 - No application code written
 - No Supabase tables created
 - No external services configured
 
-TESTS RUN:
+TESTS AND VERIFICATIONS RUN:
 - None
-
-STUB STATUS:
-- All 8 providers are stubs (no application exists yet)
 
 ERRORS ENCOUNTERED:
 - None
 
 DECISIONS MADE:
-- v1 scope is M1–M6 (Phases 1–14) only
-- M7–M12 are Add-Ons in a separate document appended later
-- M13–M18 are Advanced features in a separate document appended later
-- All service interfaces defined in Phase 1 so stubs work from day one and real services slot in later with zero existing code changes
-- Supabase Realtime is Phase 9 — built before any external notification service
-- No plan selection in onboarding until M11 (Stripe is connected)
+- Agentic loop protocol embedded in Section 1 of prompt.md: WORKING → TESTING → (PASS: mark [x]) / (FAIL: DEBUGGING sub-loop → 3 hypotheses → BLOCKED)
+- Inner loop matches SVG diagram: persistent state (PROMPT.md + PROGRESS.md) → Phase N begins → inner debug loop → exit gate → human checkpoint → Phase N+1
+- Checklist items each have a specific verification method — not just a description
+- Section 3 of prompt.md is a dedicated debugging protocol with symptom-by-symptom diagnosis steps
 
 HUMAN APPROVAL:
 - No review presented
 
 NEXT SESSION MUST:
-- Confirm all items in dev_setup.md are complete before starting any code
-- Specifically confirm: GitHub repo `thrive-at-home` (Private) exists, Vercel is connected to GitHub, Supabase project is created and 3 credentials are saved
-- Begin Phase 1: Project Scaffold
-- Read prompt.md Phase 1 section completely before writing any code
-- First action: create `.gitignore` before any other file
-- Second action: verify `.gitignore` is working with `echo "TEST=secret" > .env.local && git status`
+- Confirm all items in dev_setup.md are complete before starting Phase 1
+- Confirm: GitHub repo `thrive-at-home` (Private) exists, Vercel is connected to GitHub, Supabase project is created and 3 credentials are saved, CRON_SECRET is generated and saved as a Codespace Secret
+- Begin Phase 1 by reading prompt.md Section 8 Phase 1 instructions completely
+- First action: create `.gitignore` BEFORE creating any other file
+- Second action: verify `.gitignore` with `echo "TEST=secret" > .env.local && git status` — MUST appear under "Untracked files" only before continuing
 ---

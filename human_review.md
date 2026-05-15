@@ -1,23 +1,37 @@
 # Thrive@Home — Human Review Checklist (v1.0)
 
 > **This file is for you, the founder. The AI cannot do these checks.**
-> When the AI presents a phase review and asks for APPROVED or ISSUE, come to this file, find the phase, and go through every item yourself.
 >
-> Mark ✅ for "looks right" and ❌ for "something is wrong or missing."
-> If every item is ✅, reply: **APPROVED**
-> If any item is ❌, reply: **ISSUE: [describe exactly what you saw and what you expected]**
+> When the AI presents `✅ PHASE [N] — COMPLETE, AWAITING YOUR APPROVAL`, come to this file.
+> Work through every item for that phase. Mark ✅ or ❌.
+> If every item is ✅ → reply **APPROVED**
+> If any item is ❌ → reply **ISSUE: [describe exactly what you saw and what you expected]**
 >
-> Do not skip items. Do not mark ✅ for something you did not personally check.
+> **Important habit:** The agent can occasionally mark a checklist item complete when it isn't.
+> Your review is the catch for this. For items marked "agent reports PASSED," do a quick spot check yourself.
 
 ---
 
 ## How to use this file
 
-1. The AI presents: `✅ PHASE [N] — [NAME] — COMPLETE, AWAITING YOUR APPROVAL`
-2. Find Phase N in this file
-3. Work through every checklist item
-4. All ✅ → reply **APPROVED**
-5. Any ❌ → reply **ISSUE: [describe exactly what you saw]**
+1. Wait for: `✅ PHASE [N] — [NAME] — COMPLETE, AWAITING YOUR APPROVAL`
+2. Find Phase N below
+3. Work through every ✅/❌ item yourself — do not skip
+4. Check `checklist.md` — confirm no items are `[ ]` or `[~]` (agent claiming complete with pending items)
+5. All ✅ → reply **APPROVED**
+6. Any ❌ → reply **ISSUE: [what you saw]**
+
+---
+
+## What to do if the agent is BLOCKED
+
+If the agent presents a BLOCKED message instead of a phase review:
+
+1. Read the BLOCKED entry in `progress.md` — it lists what was tried (H1, H2, H3) and what the current error is
+2. Look at the specific URL or Supabase dashboard the agent names
+3. If you can see what's wrong: reply with a description of what you observe
+4. If you're not sure: reply with the exact error message you see on screen and ask the agent to try another approach
+5. Never tell the agent to "just skip it and move on" — the BLOCKED item exists for a reason
 
 ---
 
@@ -25,41 +39,40 @@
 
 ### Phase 1 — Project Scaffold
 
-Open the Vercel deployment URL in your browser:
-- [ ] The page loads — no blank screen, no error message
+Open the Vercel deployment URL:
 - [ ] "Thrive@Home" appears in large dark navy text
-- [ ] A tagline appears below in teal
-- [ ] Right-click → Inspect → Console tab shows **zero red errors**
-- [ ] The background is a warm off-white (not bright white or grey)
+- [ ] A tagline appears in teal below the heading
+- [ ] DevTools → Console tab → zero red errors
+- [ ] Background is warm off-white (not bright white or grey)
 
-Make a trivial change (add a space somewhere), commit, push to `main`:
+Push a trivial change to GitHub:
 - [ ] Vercel dashboard shows a new deployment triggered within 2 minutes
 - [ ] Deployment completes with a green checkmark
 
-Open `.env.local.example` in the Codespace:
-- [ ] The file has more than 25 lines
-- [ ] Every value is blank — no actual credentials in this file
-- [ ] You can see section headings for Add-On services (Anthropic, Twilio, Stripe, etc.)
-
-Run `git ls-files | grep .env` in the terminal:
+Terminal: `git ls-files | grep .env`
 - [ ] No output at all — no `.env` file is tracked by Git
 
-Navigate to a few placeholder routes (e.g. `/navigator`, `/dashboard/services`, `/volunteer`):
-- [ ] Each shows a "Coming soon" message — not a 404 error
+Navigate to these placeholder routes and confirm each shows "Coming soon":
+- [ ] `/navigator`
+- [ ] `/admin`
+- [ ] `/dashboard/services`
+- [ ] `/volunteer`
+- [ ] `/pricing`
+
+**Agent hallucination check:** Ask the agent to show you the output of `ls lib/interfaces/ | wc -l`. Confirm it says 8.
 
 ---
 
 ### Phase 2 — Supabase Connection
 
-Navigate to `/test` on your running app:
-- [ ] A message from the database appears on screen — matches what you typed in Supabase
-- [ ] The message is not "undefined", "null", or an error
-- [ ] The page does not spin forever
+Navigate to `/test`:
+- [ ] Text from the database appears — matches what you inserted in Supabase
+- [ ] Not "undefined", "null", or a spinning loader
 
-Temporarily break the Supabase URL (the AI will do this):
-- [ ] A readable error message appears — not a raw stack trace or error code
+After the agent breaks the Supabase URL:
+- [ ] A readable error message appears — not a stack trace or error code
 
-After the AI removes the test page and table:
+After the agent restores it and deletes the test page:
 - [ ] The homepage at `/` still loads correctly
 
 ---
@@ -68,29 +81,28 @@ After the AI removes the test page and table:
 
 Open Supabase → Table Editor:
 - [ ] You can see more than 15 tables in the left sidebar
-- [ ] Clicking `members` shows columns including: `full_name`, `preferred_name`, `plan_tier`, `status`
-- [ ] Clicking `check_in_calls` shows columns including: `mood_score`, `ai_summary`, `alert_flags`
-- [ ] Clicking `realtime_notifications` shows columns including: `type`, `title`, `body`, `severity`, `read`
+- [ ] Clicking `members` shows columns including `full_name`, `preferred_name`, `plan_tier`, `status`
+- [ ] Clicking `realtime_notifications` shows columns including `type`, `title`, `body`, `severity`, `read`
 
-Open Supabase → Database → Replication:
+Supabase → Authentication → Policies:
+- [ ] All tables show "RLS enabled" — none show "disabled"
+
+Supabase → Database → Replication:
 - [ ] `realtime_notifications` is listed with INSERT events enabled
-
-Open Supabase → Authentication → Policies:
-- [ ] All tables show "RLS enabled" — none say "disabled"
 
 ---
 
 ### Phase 4 — RLS Verification
 
-The AI runs the cross-user isolation test and shows you the terminal output:
-- [ ] Output says "Cross-user isolation: PASSED"
-- [ ] Output says "Own data access: PASSED"
-- [ ] Output says "Service role reads all: PASSED"
-- [ ] Output does NOT say "FAILED" anywhere
-- [ ] Output says test data was cleaned up
+Agent runs the cross-user test script and shows you the terminal output:
+- [ ] Output contains "Cross-user isolation: PASSED"
+- [ ] Output contains "Own data access: PASSED"
+- [ ] Output contains "Service role reads all: PASSED"
+- [ ] Output does NOT contain "FAILED" anywhere
+- [ ] Output says "All test data cleaned up"
 
-Open Supabase → Table Editor → `members`:
-- [ ] No test rows with names like "User A" or "User B" remain
+Supabase → `members` table — confirm no test rows remain:
+- [ ] No rows with test email addresses like `user-a@test.com`
 
 ---
 
@@ -98,81 +110,72 @@ Open Supabase → Table Editor → `members`:
 
 ### Phase 5 — Authentication
 
-Navigate to `/signup`. Fill in test details and submit:
-- [ ] Redirected to `/onboarding`
-- [ ] No error messages on the page
+Navigate to `/signup`, fill in test details, submit:
+- [ ] Redirected to `/onboarding` — no error message
 
-Open Supabase → Authentication → Users:
-- [ ] Your test email appears in the list
+Supabase → Authentication → Users:
+- [ ] Your test email appears
 
-Open Supabase → Table Editor → `family_members`:
-- [ ] A row exists with your test email and `role = 'family'`
+Supabase → `family_members` table:
+- [ ] A row exists with your email and `role = 'family'`
 
-Log out. Type `/dashboard` directly in the address bar:
-- [ ] Immediately redirected to `/login` — dashboard content is never visible
+Log out, type `/dashboard` in the address bar:
+- [ ] Immediately redirected to `/login` — dashboard content never visible
 
-Log out. Type `/navigator` in the address bar:
+Log out, type `/navigator` in the address bar:
 - [ ] Immediately redirected to `/login`
 
-Log back in as your test family user. Type `/navigator` in the address bar:
-- [ ] Immediately redirected to `/dashboard` (family users cannot access navigator console)
+**Stress test:** Sign up with an email that already exists.
+- [ ] Clear error message — not a crash
+
+**Agent hallucination check:** Ask the agent to show you the signup rollback test result. If it says "I skipped that test because it seemed straightforward," that is not acceptable — ask it to run the test explicitly and show you the output.
 
 ---
 
 ### Phase 6 — Member Onboarding Form
 
 Navigate to `/onboarding`:
-- [ ] A form appears with a progress bar at the top showing "Step 1 of 3"
-- [ ] Step 1 has fields for: full name, preferred name, date of birth, phone number, language, address
-- [ ] All field labels are visible (not just grey placeholder text inside the field)
-- [ ] The "Next" button is large and easy to click
+- [ ] Progress bar shows "Step 1 of 3"
+- [ ] All field labels visible above the fields (not as placeholder text inside)
+- [ ] "Next" button is large
 
 Click "Next" with all fields empty:
-- [ ] Error messages appear below each required field
-- [ ] The page does NOT advance to Step 2
+- [ ] Error messages appear below required fields — form does NOT advance
 
-Enter today's date as the date of birth, click "Next":
-- [ ] Error message appears — must be at least 60 years old
-- [ ] Does NOT advance
+Enter today's date as date of birth:
+- [ ] Error — must be at least 60 years old
 
-Enter `abc-xyz-123` as the phone number, click "Next":
-- [ ] Error message appears — invalid phone format
-- [ ] Does NOT advance
+Enter `abc-xyz-123` as phone:
+- [ ] Error — invalid format with example
 
-Complete all 3 steps with valid data and submit:
-- [ ] Redirected to a confirmation page
-- [ ] Confirmation shows "Welcome to the Thrive@Home family, [the preferred name you entered]!"
-- [ ] The preferred name is NOT "undefined" or blank
+Complete all 3 steps and submit:
+- [ ] Confirmation page shows correct preferred name — not "undefined"
 
-Open Supabase → `members` table:
-- [ ] New row visible with the data you entered
-- [ ] `plan_tier` column shows `basics` — not null, not empty, not anything else
+Supabase → `members`:
+- [ ] New row with `plan_tier = 'basics'`
 
-Partially fill Step 2, then refresh the browser:
-- [ ] Your Step 2 data is still there after refresh
+Partially fill Step 2, refresh browser:
+- [ ] Your data is still there
 
-Open the onboarding form on your actual phone:
-- [ ] All fields fit on screen without horizontal scrolling
-- [ ] All buttons are easy to tap — no zooming needed
+On your actual phone at 375px:
+- [ ] No horizontal scrolling, all buttons tappable
 
 ---
 
 ### Phase 7 — App Data Layer & Seed Data
 
-The AI runs the seed script and shows you the terminal output:
-- [ ] Output ends with: `Login: test-family@thriveathome.dev / TestPassword123! | Member: Margaret Chen`
-- [ ] No red error lines in the output
+Agent runs seed script and shows terminal output:
+- [ ] `Login: test-family@thriveathome.dev / TestPassword123!` is printed
+- [ ] No red error lines
 
-Log in using the seed credentials:
-- [ ] Login works — no error
+Log in with the seeded credentials:
+- [ ] Login works
 
-Open Supabase → `check_in_calls`:
-- [ ] 14 rows exist linked to Margaret Chen, spanning the last 14 days
-- [ ] Each row has a `mood_score` and a short `ai_summary` text
+Supabase → `check_in_calls`:
+- [ ] 14 rows linked to Margaret Chen
 
-The AI runs the seed script a second time (idempotency check):
-- [ ] The terminal shows no errors
-- [ ] The row count in Supabase stays the same — no duplicates created
+Agent runs seed script a second time:
+- [ ] No errors; same row count (no duplicates)
 
 ---
 
@@ -180,25 +183,22 @@ The AI runs the seed script a second time (idempotency check):
 
 ### Phase 8 — Primitive UI Components
 
-Navigate to `/test-ui`:
-- [ ] You see buttons in different styles: dark navy (primary), teal outlined (secondary), red (danger), subtle/ghost
-- [ ] You see cards with different border accents: default, teal, amber, red
-- [ ] You see small coloured badge pills
-- [ ] You see mood emojis: 😊 for high scores, 😐 for middle, 😔 for low, — for no score
-- [ ] You see coloured dots: green (no alerts), amber (concern), red (urgent/emergency)
-- [ ] You see a bell icon with a "0" count badge
-- [ ] You see a progress bar
-- [ ] A modal can be opened and closed with the Escape key
+Navigate to `/test-ui` (the agent will tell you when it's live):
+- [ ] Buttons in 4 styles: dark navy, teal outlined, red, ghost/subtle
+- [ ] Cards with different border accents: default, teal, amber, red
+- [ ] Mood emojis: 😊 for high, 😐 for middle, 😔 for low, — for no score
+- [ ] Coloured dots: green, amber, red
+- [ ] Bell icon with "0" count
+- [ ] A progress bar is visible
 
-Tab through the page using only the keyboard (Tab key, no mouse):
-- [ ] Every button is reachable by pressing Tab
-- [ ] You can always see which element is focused (a visible outline or highlight)
-- [ ] Pressing Enter or Space activates buttons
+Tab through page using only the keyboard:
+- [ ] Every button reachable
+- [ ] Focus ring always visible (a visible outline around the focused element)
 
 Open the Modal:
-- [ ] Tab key stays trapped inside the Modal — you cannot Tab outside it while it's open
-- [ ] Pressing Escape closes the Modal
-- [ ] After closing, focus returns to whatever opened the Modal
+- [ ] Tab key stays inside the Modal
+- [ ] Pressing Escape closes it
+- [ ] Focus returns to whatever opened the Modal
 
 ---
 
@@ -208,159 +208,137 @@ Open the Modal:
 
 **This is the most important test in M1–M6.**
 
-Run the seed script. Log in as `test-family@thriveathome.dev`. Navigate to `/dashboard`.
-The AI inserts a test notification via the Supabase SQL Editor while you watch.
+Log in as `test-family@thriveathome.dev`. Open `/dashboard`. Watch it carefully.
 
-**Does it appear instantly?**
+The agent inserts a test notification via Supabase SQL Editor:
 - [ ] Within 2 seconds, a toast notification appears in the corner — WITHOUT refreshing the page
-- [ ] The bell icon in the header shows a count of "1"
-- [ ] The notification title is "Test Realtime" (or similar — whatever the AI inserted)
+- [ ] The bell icon count shows "1"
 
-Click the bell icon:
-- [ ] A dropdown opens showing the notification
-- [ ] A "Mark read" button is visible next to the notification
+Click the bell:
+- [ ] Dropdown shows the notification
+- [ ] "Mark read" button visible
 
 Click "Mark read":
-- [ ] The bell count returns to "0"
-- [ ] The notification is no longer in the unread list
+- [ ] Bell count returns to "0"
 
-**Is it private?**
-The AI inserts a notification for a DIFFERENT member while you watch:
-- [ ] You do NOT see the other member's notification — only your own member's notifications appear
+The agent inserts a notification for a DIFFERENT member:
+- [ ] You do NOT see it — only your own member's notifications appear
+
+**Stress test:** Close your laptop lid for 30 seconds (simulates network disconnect), reopen, insert a new notification. Does it still appear?
+- [ ] Realtime reconnects and the notification appears (may take 5–10 seconds)
 
 ---
 
 ## M5 — Alert Engine
 
-### Phase 10 — Alert Logic & Detection
+### Phase 10 — Alert Logic
 
-The AI runs the alert rules test script and shows you the output:
-- [ ] Output says all 8 alert rules passed
-- [ ] Output confirms deduplication worked — only 1 alert created when same type triggered twice
+Agent runs test script and shows output:
+- [ ] "All alert rule tests passed" appears
+- [ ] Deduplication confirmed — only 1 alert row for same type in 24h
 
-While the dashboard is open, the AI creates a test alert:
-- [ ] An alert card appears in the Alerts Panel within 2 seconds — no page refresh
-- [ ] The StatusDot in the header changes colour
-
-The AI runs the wellness drift test:
-- [ ] Output confirms: declining scores triggered a drift alert
-- [ ] Output confirms: flat scores did NOT trigger a drift alert
+While the dashboard is open, the agent creates a test alert:
+- [ ] Alert card appears in Alerts Panel within 2 seconds — no page refresh
+- [ ] StatusDot colour changes
 
 ### Phase 11 — Crisis Detection
 
-The AI runs the crisis detection test and shows you the output:
-- [ ] Output confirms all 5 escalation steps fired:
-  - Emergency log row created
-  - Emergency alert created
-  - Critical navigator task created
-  - Realtime notification pushed
-  - Stub SMS log visible: `[STUB][SMS][URGENT] Would send to...`
-- [ ] Output confirms "fell asleep watching TV" did NOT trigger crisis detection
+Agent runs crisis detection tests and shows output:
+- [ ] All 5 escalation steps confirmed in the output
+- [ ] "fell asleep watching TV" → no crisis fires (no false positive)
 
-**Take a moment with this one:** If a real senior said something concerning on a call, this system would catch it and immediately notify humans via multiple channels. The stubs confirm the actions would happen — the real connections (SMS, email) are added in M8/M10.
+**Take a moment here.** This feature protects real seniors. If a real person said something concerning during a call, does the output show it would escalate? Ask the agent to walk you through what would actually happen in M8 when real calls are connected.
 
 ---
 
 ## M6 — Family Dashboard
 
-### Phase 12 — Dashboard Shell & Health Timeline
+### Phase 12 — Dashboard Shell
 
 Log in as `test-family@thriveathome.dev`. Navigate to `/dashboard`:
 - [ ] Loads within 3 seconds
-- [ ] "Checking in on Margaret" (or similar) appears in the header
-- [ ] A coloured StatusDot is visible next to the name
-- [ ] A bell icon with a count badge is visible
-- [ ] Today's Wellness Card shows a mood emoji, some scores, and a summary paragraph
-- [ ] The 7-Day Mood Trend shows a line chart with coloured dots
-- [ ] The Health Timeline has 4 tabs: 7-day, 30-day, 60-day, 90-day — each tab renders a chart when clicked
+- [ ] "Margaret Chen" or her preferred name visible in header
+- [ ] Today's Wellness Card shows a mood emoji, scores, and summary text
+- [ ] Health timeline has 4 tabs — each renders when clicked
+- [ ] Bell icon in header
 
-While the dashboard is open, the AI inserts a test alert:
-- [ ] An alert card appears in the Alerts Panel within 2 seconds — no page refresh
-- [ ] The StatusDot changes colour
+While dashboard is open, agent inserts a test alert:
+- [ ] Alert card appears in Alerts Panel within 2 seconds — no page refresh
+- [ ] StatusDot changes colour
 
-Temporarily break the Supabase connection (the AI will do this):
-- [ ] A friendly message appears — not a raw error code or stack trace
+Agent breaks Supabase URL, reload:
+- [ ] Friendly error message visible — no raw error code
 
-Open the dashboard on your actual phone:
-- [ ] All sections are visible without horizontal scrolling
-- [ ] All text is readable without zooming
-- [ ] All buttons are large enough to tap comfortably
+On your actual phone at 375px:
+- [ ] No horizontal scroll, text readable, buttons tappable
+
+**Stress test:** Open the dashboard with the timeline tab showing all 4 states (red/amber/green) by adjusting seed data mood scores. Confirm the chart colours match the scores.
 
 ---
 
-### Phase 13 — Call History Page
+### Phase 13 — Call History
 
 Navigate to `/dashboard/calls`:
-- [ ] A list of calls appears, newest first
-- [ ] Each row shows a date, a mood emoji, and medication status
-- [ ] The alert flag icons use plain English labels when expanded — not raw flag names like "pain_high" or "no_eating"
+- [ ] Calls listed newest-first
+- [ ] Each row shows date, emoji, medication status
+- [ ] Alert flags shown in plain English — not "pain_high" or "no_eating"
 
-Click a call row to expand it:
-- [ ] The full AI summary paragraph appears
-- [ ] Scores are shown with labels (Mood, Energy, Comfort)
-- [ ] Alert flags are written in plain English
+Click a call row:
+- [ ] Full AI summary text appears
+- [ ] Flags use human-readable descriptions
 
-With more than 20 calls, scroll to the bottom:
-- [ ] A "Load more" button appears
-- [ ] Clicking it adds more calls without the whole page reloading
+With 25+ calls, scroll to bottom and click "Load more":
+- [ ] More calls appear — page does NOT reload
 
 ---
 
 ### Phase 14 — Family Coordination Tools
 
-Navigate to `/dashboard/family/tasks`:
-- [ ] A task board loads
-- [ ] You can create a task by filling in a title and clicking create
-- [ ] The new task appears immediately in the list
+Two browser windows. User A creates a task:
+- [ ] Task appears for User B within 2 seconds — no page refresh
 
-Create a task as one family member and check if another family member sees it (use two browser windows):
-- [ ] The task appears for the second family member within 2 seconds — no page refresh needed
-
-Mark a task as complete:
-- [ ] The task immediately moves to the completed section — no page reload
-
-Navigate to `/dashboard/family/messages`:
-- [ ] A messaging interface loads
-- [ ] You can type and send a message
-- [ ] The message appears immediately at the bottom
-
-Send a message and check the second family member's window:
-- [ ] The message appears for them within 2 seconds — no page refresh
+User A sends a message:
+- [ ] Message appears for User B within 2 seconds
 
 Navigate to `/dashboard/documents`:
-- [ ] The page loads
-- [ ] You can upload a PDF — a file picker appears
-- [ ] After upload, the document appears in the list with a file name and upload date
-- [ ] Clicking "Download" downloads the file successfully
+- [ ] Upload a PDF — it appears in the list
 
-Try to upload a very large file (over 10MB):
-- [ ] A clear error message appears — file too large
-- [ ] The upload does not proceed
+Click "Download":
+- [ ] File downloads
+
+Try to upload a large file (> 10MB):
+- [ ] Clear error message — upload does not proceed
+
+Agent sets `last_login_at` to 8 days ago and triggers the nudge function:
+- [ ] Terminal shows a `family_nudge` notification was inserted
+
+Agent triggers nudge again immediately:
+- [ ] Terminal shows the nudge was skipped (one per 7 days)
 
 ---
 
-## V1 Final Gate — Before Calling V1 Complete
+## V1 Final Gate
 
-Read every item below carefully before replying APPROVED to the V1 final gate.
+Read every item below before replying APPROVED.
 
 **Technical:**
-- [ ] `npx tsc --noEmit` in the terminal shows zero errors
-- [ ] `git ls-files | grep .env` in the terminal shows no output (no secrets tracked)
-- [ ] axe-cli accessibility scan shows zero violations on the dashboard, onboarding, and login pages
-- [ ] All placeholder routes return "Coming soon" — none return 404
+- [ ] Agent shows `npx tsc --noEmit` → zero errors
+- [ ] Agent shows `git ls-files | grep .env` → no output
+- [ ] Agent shows axe-cli runs → zero violations on dashboard, onboarding, and login
+- [ ] All 19 placeholder routes still return "Coming soon" — none accidentally broken
 
-**Core features:**
-- [ ] Sign up → enrol Margaret Chen → dashboard loads with her data → all working
-- [ ] New alert appears on dashboard within 2 seconds without refreshing (Realtime confirmed)
+**Core features working:**
+- [ ] Sign up → enrol Margaret Chen → dashboard loads with her data
+- [ ] New alert appears on dashboard within 2 seconds without refreshing
 - [ ] Family task appears for all linked family members without refresh
-- [ ] Document upload and download work correctly
-- [ ] Crisis detection stub confirms it would escalate (visible in terminal logs)
+- [ ] Document upload and download work
+- [ ] Crisis detection: agent shows 5 escalation steps logged in stub mode
 
 **Mobile:**
-- [ ] Viewed dashboard on a real phone at 375px — no horizontal scroll, all text readable, all buttons tappable
+- [ ] Viewed dashboard on a real phone — no horizontal scroll, all text readable
 
-**What V1 is:** A working, real-data product that a family can use to stay connected to their senior. Every alert fires, every notification is instant, and the dashboard is fully functional — using stub implementations for any feature that requires a paid external service (AI calls, SMS, email, billing).
+**What V1 is:** A fully functional product for families to stay connected with their senior — using stub implementations for any paid external service. Every alert fires, every notification is instant, and the dashboard is complete.
 
-**What comes next:** M7–M12 are Add-Ons that layer real AI calls, SMS, email, and billing on top of this working foundation. Each Add-On requires only two file changes to activate — the real service implementation and `providers.ts`.
+**What comes next:** M7–M12 are Add-Ons that layer real AI calls, SMS, email, and billing on top. Each Add-On requires only two file changes to activate — the real implementation file and `providers.ts`.
 
-When every item above is ✅, reply **APPROVED** and the V1 build is complete.
+When every item above is ✅ → reply **APPROVED** and V1 is complete.
