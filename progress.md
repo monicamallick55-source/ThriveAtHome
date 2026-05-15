@@ -1,23 +1,25 @@
-# Thrive@Home — Build Progress Log (v3.0)
+# Thrive@Home — Build Progress Log (v1.0 — M1–M6)
 
-> **APPEND ONLY. Never edit or delete previous entries. Always add new entries at the bottom.**
+> **APPEND ONLY. Never edit or delete previous entries.**
+> This is the build's memory. Read the entire file at the start of every session.
 
 ---
 
 ## Rules
 
 **Start of every session:**
-1. Read this file completely — last entry tells you exactly where you are
-2. Cross-reference `checklist.md` for current phase status
-3. Read `prompt.md` for current phase instructions before any code
+1. Read this file from top to bottom
+2. Find the last entry — it tells you exactly where you are
+3. Cross-reference `checklist.md` for current phase status
+4. Read `prompt.md` for the current phase instructions before writing any code
 
-**End of every session (before closing):**
+**End of every session:**
 1. Append a new entry using the exact format below
-2. Be specific: every file touched, every test run, every decision made
+2. List every file touched, every test run, every decision made
 3. If mid-phase: describe exactly what remains in `NEXT SESSION MUST`
-4. Update `checklist.md` to reflect current phase status
+4. Update `checklist.md` to reflect current status
 
-**Never:** edit a previous entry, summarise or collapse entries, close without appending.
+**Never:** edit a previous entry, summarise entries, or close without appending.
 
 ---
 
@@ -25,68 +27,69 @@
 
 ```
 ---
-SESSION: [number]
+SESSION: [number — increment by 1]
 DATE: [YYYY-MM-DD UTC]
-MILESTONE: [M1–M18]
+MILESTONE: [M1–M6]
 PHASE: [number] — [name]
 STATUS: [STARTED | IN_PROGRESS | AWAITING_APPROVAL | APPROVED_COMPLETE | BLOCKED]
-HUMAN_APPROVAL: [PENDING | RECEIVED — "[APPROVED / ISSUE: description]" | N/A]
+HUMAN_APPROVAL: [PENDING | RECEIVED — "APPROVED" | RECEIVED — "ISSUE: description" | N/A]
 
 WHAT WAS DONE:
 - [/full/path/to/file.ts — CREATED]
 - [/full/path/to/file.ts — MODIFIED: what changed]
-- [Supabase table `xyz` — CREATED / COLUMN `abc` ADDED]
-- [External service: description of what was configured]
+- [Supabase: table/function/policy created or changed]
 - [npm package installed: name@version]
-- [Env var added: VARIABLE_NAME (to .env.local and/or Vercel)]
+- [Env var added to .env.local and/or Vercel: VARIABLE_NAME]
+- [Edge Function deployed: function-name]
 
 TESTS RUN:
-- [Test ID from tests.md]: PASSED — [one sentence: what was verified]
-- [Test ID]: FAILED — [exact failure: observed vs expected]
-- [Test ID]: SKIPPED — [reason — always a blocker, never convenience]
+- [Test ID from tests.md]: PASSED — [what was verified]
+- [Test ID]: FAILED — [observed vs expected]
+- [Test ID]: SKIPPED — [reason — must be a blocker, never convenience]
+
+STUB STATUS (at end of this session):
+- aiProvider: [StubAiProvider | AnthropicAiProvider]
+- callProvider: [StubCallProvider | RetellCallProvider]
+- smsProvider: [StubSmsProvider | TwilioSmsProvider]
+- emailProvider: [StubEmailProvider | SendGridEmailProvider]
+- billingProvider: [StubBillingProvider | StripeBillingProvider]
+- transportProvider: [StubTransportProvider | LyftTransportProvider]
+- mealProvider: [StubMealProvider | InstacartMealProvider]
+- goodsProvider: [StubGoodsProvider | RealGoodsProvider]
 
 ERRORS ENCOUNTERED:
-- [exact error message] — [root cause] — [resolution or UNRESOLVED]
-
-STUB STATUS:
-- [which providers are still stubs vs real at end of this session]
-- Example: "aiProvider: AnthropicAiProvider (real) | smsProvider: StubSmsProvider (stub)"
+- [error message] — [root cause] — [resolution or UNRESOLVED]
 
 DECISIONS MADE:
-- [any implementation or architectural decision future sessions must know]
-- [any deviation from prompt.md with justification]
+- [any implementation decision future sessions must know about]
+- [any deviation from prompt.md and the justification]
 
-HUMAN APPROVAL STATUS:
-- Phase review presented: YES / NO
-- User response: APPROVED / ISSUE: [description] / PENDING
-- If ISSUE: what was fixed and re-tested before re-presenting
+HUMAN APPROVAL:
+- Review presented: YES / NO
+- Response: APPROVED / ISSUE: [description] / PENDING
+- If ISSUE: what was fixed before re-presenting
 
 NEXT SESSION MUST:
-- [first specific action — exact file, function, or step]
+- [first specific action — name the file and function]
 - [second action]
-- [any blockers requiring human input before code can proceed]
+- [any blockers needing human input]
 ---
 ```
 
 ---
 
-## Architecture decisions log
+## Architecture decisions
 
 | Decision | Phase | Rationale |
 |----------|-------|-----------|
-| Supabase Realtime is primary notification channel — before SMS/email | Phase 9 | No external service dependency. Works immediately from Supabase. |
-| All 5 product layers in spec included in build phases | All | Layer 4 Services Marketplace was originally missing. Now Phases 50–56. |
-| Services Marketplace uses interface/stub/real pattern | Phase 50 | Booking flow works before any commercial API agreement (Lyft, Instacart, etc.) |
-| Billing (Stripe) is M11 — not infrastructure, a feature | Phase 24 | Product fully functional without billing. Billing is last paid service connected. |
-| Plan selection not in onboarding until Phase 25 | Phase 6 | Members default to `basics`. Plan selection added only when Stripe is wired. |
-| `providers.ts` is single file that selects stub vs real | Phase 1 | Application code never changes when switching. Only providers.ts changes. |
-| Crisis disambiguation defaults TRUE on API failure | Phase 11 | False positive (unnecessary escalation) safer than false negative (missed crisis). |
-| Grief/crisis notifications retry once then create navigator task | Phase 48 | Patient safety — never silently drop. Human always investigates if both fail. |
-| Webhook routes return 200 even on handler failure | Phase 19, 25 | Non-200 causes Retell/Stripe to retry indefinitely → duplicate actions. |
-| Deduplication queries use `.maybeSingle()` not `.single()` | Phase 10 | `.single()` throws when no rows found — the expected case in deduplication. |
-| Concierge line is a separate Retell agent and Twilio number | Phase 20 | Different personality than Aria. Same transcript processing pipeline. |
-| Life story archive cross-links to celebrations, students, grief | Phases 46, 48, 33 | Single archive serves multiple features. Avoid data duplication. |
-| Services Marketplace stubs log dispatch intent | Phase 50 | Full UI and data recording work before any commercial API agreement needed. |
+| All server-side business logic in Supabase Edge Functions, not Next.js API routes | Phase 1 | Cleaner architecture, no Vercel cold-start on business logic, separates concerns |
+| All 8 service interfaces and stubs created in Phase 1 | Phase 1 | Product works and is testable before any paid service is connected |
+| No plan selection in onboarding until M11 (Billing Add-On) | Phase 6 | Product is fully functional without billing. plan_tier defaults to 'basics'. |
+| Supabase Realtime is the only notification channel in M1–M6 | Phase 9 | No external service needed. Real SMS/email added in M10 Add-On. |
+| Placeholder pages for all M7–M18 routes created in Phase 1 | Phase 1 | App navigates cleanly from day one. No 404s. No implementation in placeholders. |
+| `.maybeSingle()` not `.single()` for all deduplication and existence queries | Phase 4 | `.single()` throws when no rows found — the expected state in deduplication |
+| Crisis detection runs FIRST in every call processing pipeline | Phase 11 | Patient safety — can never be skipped or deprioritised |
+| Supabase Storage for document vault with private bucket + signed URLs | Phase 14 | Health documents require access control — never public URLs |
 
 ---
 
@@ -94,45 +97,47 @@ NEXT SESSION MUST:
 
 ---
 SESSION: 1
-DATE: [not yet started]
+DATE: [not yet started — fill in when first session begins]
 MILESTONE: N/A
-PHASE: 0 — Pre-build setup
+PHASE: 0 — Pre-build planning
 STATUS: NOT_STARTED
 HUMAN_APPROVAL: N/A
 
 WHAT WAS DONE:
-- Agent instruction files created: prompt.md (v3.0), tests.md (v3.0), human_review.md (v3.0), checklist.md (v3.0), progress.md (v3.0)
-- ThriveAtHome_Build_Phases.md updated to v3.0 (61 phases, all 5 spec layers included)
-- No application code written
-- No Supabase tables created
-- No external services configured
+- prompt.md v1.0 created — covers M1–M6 (Phases 1–14)
+- checklist.md v1.0 created — 14 phases
+- tests.md v1.0 created — tests for all 14 phases
+- human_review.md v1.0 created — human checklist for all 14 phases
+- progress.md v1.0 created — this file
 
 TESTS RUN:
-- None
+- None — no application code exists yet
+
+STUB STATUS:
+- All 8 providers: Stub (no application exists yet)
 
 ERRORS ENCOUNTERED:
 - None
 
-STUB STATUS:
-- All providers are stubs (no application exists yet)
-
 DECISIONS MADE:
-- Build follows 18 milestones, 61 phases
-- Services Marketplace (Phases 50–56) now included — was missing from previous build phases
-- All 5 platform spec layers represented: AI Connection, Human Companion Network, Community & Events, Services Marketplace, Celebrations/Culture/Transitions
-- Supabase Realtime is Phase 9 (M4) — built before any external service
-- Billing is M11 — last paid service connected
-- 24/7 Concierge Line is Phase 20 (M9) — separate from check-in calls
+- Build scope: prompt.md v1 covers M1–M6 only (Phases 1–14)
+- M7–M12: Add-On milestones, appended as a separate document when M6 is complete
+- M13–M18: Advanced features, separate document appended after M12
+- No Stripe, Retell AI, Twilio, Anthropic, SendGrid credentials needed for M1–M6
+- Only credentials needed to start: GitHub, Vercel, Supabase (URL + anon key + service role key)
+- All server-side business logic uses Supabase Edge Functions
+- Placeholder pages for all future routes created in Phase 1
 
-HUMAN APPROVAL STATUS:
+HUMAN APPROVAL:
 - No review presented
 
 NEXT SESSION MUST:
-- Confirm all accounts in dev_setup.md are created before starting Phase 1
 - Confirm GitHub repo `thrive-at-home` (Private) exists
-- Confirm Vercel connected to GitHub
-- Confirm Supabase project created and 3 credentials (URL, anon key, service role key) saved
-- Begin Phase 1: Project Scaffold
+- Confirm Vercel is connected to GitHub
+- Confirm Supabase project is created and all 3 credentials are saved:
+  NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY
+- Confirm CARE_TEAM_EMAIL is decided (your email for now)
+- Generate CRON_SECRET: run `openssl rand -base64 32` in Codespace terminal and save it
 - Read prompt.md Phase 1 section completely before writing any code
-- Read tests.md Phase 1 section before running any test
+- Begin Phase 1: Project Scaffold
 ---
