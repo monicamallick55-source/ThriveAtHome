@@ -148,3 +148,148 @@ NEXT SESSION MUST:
 - First action: create `.gitignore` BEFORE creating any other file
 - Second action: verify `.gitignore` with `echo "TEST=secret" > .env.local && git status` — MUST appear under "Untracked files" only before continuing
 ---
+
+---
+SESSION: 2
+DATE: 2026-05-16 UTC
+MILESTONE: M1
+PHASE: 1 — Project Scaffold
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase checklist: 7 of 9 items [x]
+- Current item: Vercel deploy verification (requires human to check Vercel dashboard)
+- Loop state: AWAITING HUMAN (Vercel deploy and auto-deploy require human to confirm in Vercel dashboard)
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider
+- emailProvider: StubEmailProvider
+- billingProvider: StubBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+- /workspaces/ThriveAtHome/.gitignore — CREATED (protects all .env files)
+- /workspaces/ThriveAtHome/.env.local.example — CREATED (committed safe empty template)
+- /workspaces/ThriveAtHome/app/globals.css — MODIFIED: added Tailwind v4 brand tokens (navy, teal, warm-white)
+- /workspaces/ThriveAtHome/app/layout.tsx — MODIFIED: simplified, removed Geist font dependency
+- /workspaces/ThriveAtHome/app/page.tsx — MODIFIED: Thrive@Home landing page with navy heading, teal tagline
+- /workspaces/ThriveAtHome/lib/env.ts — CREATED: requireEnv and requireServerEnv
+- /workspaces/ThriveAtHome/lib/interfaces/ — CREATED: 8 interfaces (CallProvider, SmsProvider, EmailProvider, AiProvider, BillingProvider, TransportProvider, MealProvider, GoodsProvider)
+- /workspaces/ThriveAtHome/lib/stubs/ — CREATED: 8 stubs (all log [STUB], return typed placeholders, never throw)
+- /workspaces/ThriveAtHome/lib/providers.ts — CREATED: single resolver file
+- /workspaces/ThriveAtHome/app/navigator/page.tsx — CREATED (placeholder)
+- /workspaces/ThriveAtHome/app/admin/page.tsx — CREATED (placeholder)
+- /workspaces/ThriveAtHome/app/dashboard/calls/page.tsx — CREATED (placeholder)
+- /workspaces/ThriveAtHome/app/dashboard/concierge/page.tsx — CREATED (placeholder)
+- /workspaces/ThriveAtHome/app/dashboard/billing/page.tsx — CREATED (placeholder)
+- /workspaces/ThriveAtHome/app/privacy/page.tsx — CREATED (placeholder)
+- /workspaces/ThriveAtHome/app/volunteer/page.tsx — CREATED (placeholder)
+- /workspaces/ThriveAtHome/app/student/page.tsx — CREATED (placeholder)
+- /workspaces/ThriveAtHome/app/dashboard/events/page.tsx — CREATED (placeholder)
+- /workspaces/ThriveAtHome/app/dashboard/groups/page.tsx — CREATED (placeholder)
+- /workspaces/ThriveAtHome/app/dashboard/skill-exchange/page.tsx — CREATED (placeholder)
+- /workspaces/ThriveAtHome/app/dashboard/cultural-circles/page.tsx — CREATED (placeholder)
+- /workspaces/ThriveAtHome/app/dashboard/benefits/page.tsx — CREATED (placeholder)
+- /workspaces/ThriveAtHome/app/dashboard/celebrations/page.tsx — CREATED (placeholder)
+- /workspaces/ThriveAtHome/app/dashboard/life-story/page.tsx — CREATED (placeholder)
+- /workspaces/ThriveAtHome/app/dashboard/grief-support/page.tsx — CREATED (placeholder)
+- /workspaces/ThriveAtHome/app/dashboard/services/page.tsx — CREATED (placeholder)
+- /workspaces/ThriveAtHome/app/outcomes/page.tsx — CREATED (placeholder)
+- /workspaces/ThriveAtHome/app/employers/page.tsx — CREATED (placeholder)
+- /workspaces/ThriveAtHome/app/login/page.tsx — CREATED (placeholder, Phase 5)
+- /workspaces/ThriveAtHome/app/signup/page.tsx — CREATED (placeholder, Phase 5)
+- Full folder structure created: components/, lib/, supabase/, types/, scripts/
+- npm package: next@16.2.6, react, tailwindcss@4, typescript (via create-next-app)
+- git commit da146c8 pushed to GitHub (triggers Vercel deploy if connected)
+
+TESTS AND VERIFICATIONS RUN:
+- .gitignore: PASSED — .env.local appears in "Ignored files" (properly gitignored)
+- npm build: PASSED — all 21 routes built without errors
+- curl routes: PASSED — all tested routes return HTTP 200
+- ls lib/interfaces/ | wc -l: PASSED — 8
+- ls lib/stubs/ | wc -l: PASSED — 8
+- providers stub check (tsx): PASSED — all 8 providers are Stub classes
+- npx tsc --noEmit: PASSED — zero output
+- git ls-files | grep .env: PASSED — only .env.local.example (safe, empty values); .env.local gitignored
+
+ERRORS ENCOUNTERED:
+- create-next-app rejected "ThriveAtHome" as project name (capital letters). Resolution: created in /tmp/thrive-next then copied files — no issues.
+
+DECISIONS MADE:
+- Used Tailwind v4 CSS @theme inline syntax instead of tailwind.config.ts (v4 changed configuration model)
+- Next.js v16.2.6 created by create-next-app (latest at time of build)
+- Node.js v24.14.0 confirmed (well above v18 minimum)
+- Created 21 placeholder pages (19 required + login + signup as early stubs for Phase 5)
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- If APPROVED: Begin Phase 2 (Supabase Connection) — install @supabase/supabase-js @supabase/ssr, create lib/supabase/ files
+- Vercel checklist items ([ ] Vercel deploy, [ ] Auto-deploy) require human to verify in Vercel dashboard
+- If Vercel not connected: human must connect Vercel to GitHub repo and deploy before APPROVED
+---
+
+AWAITING HUMAN APPROVAL
+
+ISSUE RECEIVED AND FIXED (Session 3):
+1. FIXED — "Thrive@Home" → "ThriveAtHome" in heading, footer, and metadata of app/page.tsx
+2. CONFIRMED — All placeholder pages return "Coming soon" when visited directly
+3. FIXED — Created app/pricing/page.tsx; all 23 routes now return HTTP 200 (verified locally)
+
+---
+SESSION: 3
+DATE: 2026-05-16 UTC
+MILESTONE: M1
+PHASE: 1 — Project Scaffold (Issue fix session)
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase checklist: 7 of 9 items [x]
+- Current item: Vercel deploy and auto-deploy (require human to verify in Vercel dashboard)
+- Loop state: AWAITING HUMAN
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider
+- emailProvider: StubEmailProvider
+- billingProvider: StubBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+- /workspaces/ThriveAtHome/app/page.tsx — MODIFIED: replaced all "Thrive@Home" with "ThriveAtHome" (heading, footer, metadata title)
+- /workspaces/ThriveAtHome/app/pricing/page.tsx — CREATED: Coming soon placeholder for M11 billing route
+- git commit 04bf7fa pushed to GitHub (triggers Vercel deploy)
+
+TESTS AND VERIFICATIONS RUN:
+- Heading text: PASSED — "ThriveAtHome" (no @ symbol) in header span and footer
+- All 23 routes HTTP 200: PASSED — curl verified / /navigator /admin /dashboard/* /privacy /volunteer /student /outcomes /employers /login /signup /pricing all return 200
+- npx tsc --noEmit: PASSED — zero output
+- npm run build: PASSED — /pricing appears in build output
+
+ERRORS ENCOUNTERED:
+- None
+
+DECISIONS MADE:
+- /pricing added as 20th placeholder (required by Phase 1 spec but was missing)
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- If APPROVED: Begin Phase 2 (Supabase Connection) — install @supabase/supabase-js @supabase/ssr, create lib/supabase/ client/server/middleware files, create /test page, verify DB row appears, delete /test page
+- Vercel items ([ ] deploy, [ ] auto-deploy) must be confirmed by human in Vercel dashboard before APPROVED
+---
+
+AWAITING HUMAN APPROVAL

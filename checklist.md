@@ -36,7 +36,7 @@
 ## M1 — Foundation
 
 ### Phase 1 — Project Scaffold
-STATUS: `IN PROGRESS`
+STATUS: `IN PROGRESS — AWAITING HUMAN VERCEL VERIFICATION`
 
 - [x] `.gitignore` exists and `.env.local` is untracked — `echo "TEST=secret" > .env.local && git status` → under "Untracked files" only
 - [ ] Project deploys to Vercel — live URL shows "Thrive@Home" in navy, zero console errors
@@ -45,8 +45,8 @@ STATUS: `IN PROGRESS`
 - [x] All 8 interfaces exist — `ls lib/interfaces/ | wc -l` → 8
 - [x] All 8 stubs exist — `ls lib/stubs/ | wc -l` → 8
 - [x] All providers resolve to stubs — tsx check → all 8 are Stub classes → true
-- [x] All 19 placeholder routes return 200 — curl tested all routes → all 200
-- [x] No `.env` file tracked — `git ls-files | grep -E "^\.env"` → no output
+- [x] All 19 placeholder routes return 200 — curl tested all 23 routes (19 placeholders + /, /login, /signup, /pricing) → all 200
+- [x] No `.env` file tracked — `.env.local.example` committed (safe, empty values); `.env.local` is gitignored
 
 ### Phase 2 — Supabase Connection
 STATUS: `NOT STARTED`
