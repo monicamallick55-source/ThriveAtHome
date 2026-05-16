@@ -40,26 +40,33 @@ If the agent presents a BLOCKED message instead of a phase review:
 ### Phase 1 — Project Scaffold
 
 Open the Vercel deployment URL:
-- [ ] "Thrive@Home" appears in large dark navy text
-- [ ] A tagline appears in teal below the heading
-- [ ] DevTools → Console tab → zero red errors
-- [ ] Background is warm off-white (not bright white or grey)
+- [x] "Thrive@Home" appears in large dark navy text
+- [x] A tagline appears in teal below the heading
+- [x] DevTools → Console tab → zero red errors
+- [x] Background is warm off-white (not bright white or grey)
 
 Push a trivial change to GitHub:
-- [ ] Vercel dashboard shows a new deployment triggered within 2 minutes
-- [ ] Deployment completes with a green checkmark
+- [x] Vercel dashboard shows a new deployment triggered within 2 minutes
+- [x] Deployment completes with a green checkmark
 
 Terminal: `git ls-files | grep .env`
-- [ ] No output at all — no `.env` file is tracked by Git
+- [x] No output at all — no `.env` file is tracked by Git
 
 Navigate to these placeholder routes and confirm each shows "Coming soon":
-- [ ] `/navigator`
-- [ ] `/admin`
-- [ ] `/dashboard/services`
-- [ ] `/volunteer`
+- [x] `/navigator`
+- [x] `/admin`
+- [x] `/dashboard/services`
+- [x] `/volunteer`
 - [ ] `/pricing`
 
 **Agent hallucination check:** Ask the agent to show you the output of `ls lib/interfaces/ | wc -l`. Confirm it says 8.
+
+Personal Notes:
+- logo should not be Thrive@Home it should have the words ThriveAtHome. 
+- the pricing placeholder doesn't work
+
+Iteration 2 of Phase 1:
+- 
 
 ---
 
