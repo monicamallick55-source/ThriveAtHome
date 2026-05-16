@@ -78,13 +78,13 @@ STATUS: `COMPLETE`
 ## M2 — Member Data
 
 ### Phase 5 — Authentication
-STATUS: `NOT STARTED`
+STATUS: `IN PROGRESS`
 
-- [ ] Signup creates auth user + family_members row — check both in Supabase
-- [ ] Unauthenticated `/dashboard` → redirected to `/login`
-- [ ] Family user blocked from `/navigator` — redirected to `/dashboard`
-- [ ] Navigator user redirected to `/navigator` on login
-- [ ] Orphaned auth user prevented — break insert, attempt signup → auth user deleted, clear error shown
+- [~] Signup creates auth user + family_members row — code built; requires browser test to verify both rows in Supabase
+- [x] Unauthenticated `/dashboard` → redirected to `/login` — curl 307 confirmed
+- [~] Family user blocked from `/navigator` — coded in proxy.ts; requires authenticated browser session to verify
+- [~] Navigator user redirected to `/navigator` on login — coded in proxy.ts + LoginForm; requires setting role='navigator' in Supabase to verify
+- [~] Orphaned auth user prevented — rollback code in /api/auth/signup/route.ts; requires browser test to verify
 
 ### Phase 6 — Member Onboarding Form
 STATUS: `NOT STARTED`

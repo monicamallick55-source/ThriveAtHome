@@ -1,15 +1,9 @@
-// Signup page — built in Phase 5.
+// Signup page — Phase 5. Delegates to SignupForm client component.
 import type { Metadata } from 'next'
+import { SignupForm } from '@/components/auth/SignupForm'
 
-export const metadata: Metadata = { title: 'Create Account — Thrive@Home' }
+export const metadata: Metadata = { title: 'Create Account — ThriveAtHome' }
 
 export default function SignupPage() {
-  return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#FAFAF8' }}>
-      <div className="text-center p-8 max-w-md">
-        <h1 className="text-2xl font-semibold mb-2" style={{ color: '#1B3A6B' }}>Create Account</h1>
-        <p className="text-lg" style={{ color: '#6b7280' }}>This feature is coming soon.</p>
-      </div>
-    </div>
-  )
+  return <SignupForm />
 }

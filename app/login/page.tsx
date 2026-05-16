@@ -1,15 +1,9 @@
-// Login page — built in Phase 5.
+// Login page — Phase 5. Delegates to LoginForm client component.
 import type { Metadata } from 'next'
+import { LoginForm } from '@/components/auth/LoginForm'
 
-export const metadata: Metadata = { title: 'Sign In — Thrive@Home' }
+export const metadata: Metadata = { title: 'Sign In — ThriveAtHome' }
 
 export default function LoginPage() {
-  return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#FAFAF8' }}>
-      <div className="text-center p-8 max-w-md">
-        <h1 className="text-2xl font-semibold mb-2" style={{ color: '#1B3A6B' }}>Sign In</h1>
-        <p className="text-lg" style={{ color: '#6b7280' }}>This feature is coming soon.</p>
-      </div>
-    </div>
-  )
+  return <LoginForm />
 }
