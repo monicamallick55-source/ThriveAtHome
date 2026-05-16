@@ -36,17 +36,17 @@
 ## M1 — Foundation
 
 ### Phase 1 — Project Scaffold
-STATUS: `NOT STARTED`
+STATUS: `IN PROGRESS`
 
-- [ ] `.gitignore` exists and `.env.local` is untracked — `echo "TEST=secret" > .env.local && git status` → under "Untracked files" only
+- [x] `.gitignore` exists and `.env.local` is untracked — `echo "TEST=secret" > .env.local && git status` → under "Untracked files" only
 - [ ] Project deploys to Vercel — live URL shows "Thrive@Home" in navy, zero console errors
 - [ ] Auto-deploy works — push trivial change → Vercel deploys within 60 seconds
-- [ ] `npx tsc --noEmit` passes — zero output
-- [ ] All 8 interfaces exist — `ls lib/interfaces/ | wc -l` → 8
-- [ ] All 8 stubs exist — `ls lib/stubs/ | wc -l` → 8
-- [ ] All providers resolve to stubs — `node -e "..."` → true
-- [ ] All 19 placeholder routes return 200 — navigate to each in browser
-- [ ] No `.env` file tracked — `git ls-files | grep -E "^\.env"` → no output
+- [x] `npx tsc --noEmit` passes — zero output
+- [x] All 8 interfaces exist — `ls lib/interfaces/ | wc -l` → 8
+- [x] All 8 stubs exist — `ls lib/stubs/ | wc -l` → 8
+- [x] All providers resolve to stubs — tsx check → all 8 are Stub classes → true
+- [x] All 19 placeholder routes return 200 — curl tested all routes → all 200
+- [x] No `.env` file tracked — `git ls-files | grep -E "^\.env"` → no output
 
 ### Phase 2 — Supabase Connection
 STATUS: `NOT STARTED`

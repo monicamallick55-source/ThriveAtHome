@@ -1,0 +1,26 @@
+// Stub implementation — logs emails, no real sending. Replaced in M10 with SendGridEmailProvider.
+import type { EmailProvider, PostCallEmailData } from '../interfaces/EmailProvider'
+
+export class StubEmailProvider implements EmailProvider {
+  async sendPostCallSummary(to: string, data: PostCallEmailData): Promise<void> {
+    console.log(`[STUB][Email] Post-call summary for ${data.seniorName} → ${to}`)
+  }
+  async sendAlert(to: string, memberName: string, alertMessage: string): Promise<void> {
+    console.log(`[STUB][Email] Alert for ${memberName} → ${to}: ${alertMessage.substring(0, 80)}`)
+  }
+  async sendPaymentFailed(to: string, memberName: string, _updateUrl: string): Promise<void> {
+    console.log(`[STUB][Email] Payment failed for ${memberName} → ${to}`)
+  }
+  async sendWelcome(to: string, memberName: string): Promise<void> {
+    console.log(`[STUB][Email] Welcome for ${memberName} → ${to}`)
+  }
+  async sendGriefSupportNotification(to: string, memberName: string, details: string): Promise<void> {
+    console.log(`[STUB][Email] Grief support for ${memberName} → ${to}: ${details.substring(0, 80)}`)
+  }
+  async sendWeeklyDigest(to: string, memberName: string, _content: string): Promise<void> {
+    console.log(`[STUB][Email] Weekly digest for ${memberName} → ${to}`)
+  }
+  async sendMonthlySummary(to: string, memberName: string, _content: string): Promise<void> {
+    console.log(`[STUB][Email] Monthly summary for ${memberName} → ${to}`)
+  }
+}
