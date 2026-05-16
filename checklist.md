@@ -78,24 +78,24 @@ STATUS: `COMPLETE`
 ## M2 — Member Data
 
 ### Phase 5 — Authentication
-STATUS: `IN PROGRESS`
+STATUS: `COMPLETE`
 
-- [~] Signup creates auth user + family_members row — code built; requires browser test to verify both rows in Supabase
+- [x] Signup creates auth user + family_members row — APPROVED by human: both rows confirmed in Supabase
 - [x] Unauthenticated `/dashboard` → redirected to `/login` — curl 307 confirmed
-- [~] Family user blocked from `/navigator` — coded in proxy.ts; requires authenticated browser session to verify
-- [~] Navigator user redirected to `/navigator` on login — coded in proxy.ts + LoginForm; requires setting role='navigator' in Supabase to verify
-- [~] Orphaned auth user prevented — rollback code in /api/auth/signup/route.ts; requires browser test to verify
+- [x] Family user blocked from `/navigator` — APPROVED by human: redirects correctly
+- [x] Navigator user redirected to `/navigator` on login — APPROVED by human: confirmed working
+- [x] Orphaned auth user prevented — APPROVED by human: rollback verified
 
 ### Phase 6 — Member Onboarding Form
-STATUS: `NOT STARTED`
+STATUS: `IN PROGRESS`
 
-- [ ] Empty required fields block Next — all error messages appear
-- [ ] DOB < 60 years rejected — clear error on today's date
-- [ ] Invalid phone rejected — error with format example
-- [ ] Successful submission creates member row with `plan_tier='basics'`
-- [ ] Confirmation shows correct preferred name — not "undefined"
-- [ ] Form state survives page refresh — Step 2 data preserved
-- [ ] Mobile layout at 375px — no horizontal scroll
+- [~] Empty required fields block Next — client-side validation blocks Next; requires browser test
+- [~] DOB < 60 years rejected — differenceInYears validation written; requires browser test
+- [~] Invalid phone rejected — isValidPhone() written; requires browser test
+- [~] Successful submission creates member row with `plan_tier='basics'` — API route written; requires browser test + Supabase row check
+- [~] Confirmation shows correct preferred name — Confirmation component reads preferred_name from API response; requires browser test
+- [~] Form state survives page refresh — localStorage read on mount, write on every change; requires browser test
+- [~] Mobile layout at 375px — no horizontal scroll; requires DevTools test
 
 ### Phase 7 — App Data Layer & Seed Data
 STATUS: `NOT STARTED`
@@ -210,13 +210,13 @@ STATUS: `NOT STARTED`
 
 ```
 M1  Foundation        [x][x][x][x]         4/4  ✅ COMPLETE
-M2  Member Data       [ ][ ][ ]            0/3
+M2  Member Data       [x][ ][ ]            1/3  (Phase 5 approved)
 M3  UI System         [ ]                  0/1
 M4  Realtime          [ ]                  0/1
 M5  Alert Engine      [ ][ ]               0/2
 M6  Family Dashboard  [ ][ ][ ]            0/3
 ─────────────────────────────────────────
-TOTAL                                      4/14
+TOTAL                                      5/14
 ```
 
 ---
