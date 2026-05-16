@@ -415,3 +415,114 @@ NEXT SESSION MUST:
 - After SQL is applied: verify using admin client script that all 17 tables exist
 - Then verify cascade delete, RLS policies, and audit triggers
 - Mark Phase 3 checklist items [x] after each verification
+
+Done. Ran both SQL migration files in Supabase SQL Editor and enabled Realtime INSERT for realtime_notifications.
+
+---
+SESSION: 6
+DATE: 2026-05-16 UTC
+MILESTONE: M1
+PHASE: 3 — Database Schema
+STATUS: IN_PROGRESS — awaiting 003_fix_rls.sql to resolve recursive policy
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase checklist: 4 of 5 items [x]
+- Current item: RLS enabled — recursive policy in family_select_linked_members found and fixed
+- Loop state: WORKING (fix written, awaiting human to run 003_fix_rls.sql)
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider
+- emailProvider: StubEmailProvider
+- billingProvider: StubBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+- /workspaces/ThriveAtHome/scripts/verify-phase3.ts — CREATED/REWRITTEN with correct table names and tests
+- /workspaces/ThriveAtHome/supabase/migrations/003_fix_rls.sql — CREATED: drops recursive policy, creates security definer helper function, adds non-recursive replacement policy
+- checklist.md — Phase 3 items updated: 4 of 5 [x], 1 [~] pending SQL fix
+- npx tsc --noEmit — PASSED zero errors
+
+TESTS AND VERIFICATIONS RUN:
+- All 17 tables exist: PASSED — check_in_calls, alerts, care_navigators, navigator_assignments, navigator_tasks, navigator_notes, subscriptions, realtime_notifications, notification_log, emergency_log, medication_schedules, family_task_items, family_messages, document_vault_items, audit_log, members, family_members all found
+- FK + cascade delete: PASSED — inserted member + family_member, deleted member, family_member auto-deleted
+- RLS enabled (anon blocked): PASSED — unauthenticated anon query returns error "infinite recursion detected in policy for relation family_members" — confirms RLS is ON. Bug found: family_select_linked_members is recursive. Fix: 003_fix_rls.sql
+- Realtime enabled for realtime_notifications: CONFIRMED by human (Supabase dashboard)
+- Audit triggers: PASSED — members_audit fires: 1 audit row written on INSERT to members table
+
+ERRORS ENCOUNTERED:
+- "infinite recursion detected in policy for relation family_members" — root cause: family_select_linked_members policy queries family_members from within a policy on family_members. Resolution: create get_member_ids_for_auth_user() SECURITY DEFINER function, replace recursive policy — fix in 003_fix_rls.sql
+
+DECISIONS MADE:
+- family_select_linked_members replaced with security definer function approach to avoid recursion
+- audit_log has no RLS by design (per SQL comment: "written by service role only") — this is correct
+
+HUMAN APPROVAL:
+- Review presented: YES (partial — pending 003_fix_rls.sql confirmation)
+- User response: PENDING
+
+NEXT SESSION MUST:
+- Human must paste 003_fix_rls.sql into Supabase SQL Editor and run it
+- After 003 applied: re-run `npx tsx --env-file=.env.local scripts/verify-phase3.ts` — confirm NO recursion error
+- Mark Phase 3 COMPLETE in checklist.md
+- Begin Phase 4: write scripts/test-rls.ts, run npx tsx --env-file=.env.local scripts/test-rls.ts
+---
+
+QUESTION FOR HUMAN
+
+Ran migration 003_fix_rls_recursion.sql in Supabase SQL Editor successfully.
+---
+SESSION: 7
+DATE: 2026-05-16 UTC
+MILESTONE: M1
+PHASE: 3 → 4 — Database Schema COMPLETE + RLS Verification COMPLETE
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 3 checklist: 5 of 5 items [x] — COMPLETE
+- Phase 4 checklist: 2 of 2 items [x] — COMPLETE
+- M1 gate: ALL 4 PHASES COMPLETE
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider
+- emailProvider: StubEmailProvider
+- billingProvider: StubBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+- Re-ran verify-phase3.ts — all 5 items PASSED (003_fix_rls.sql confirmed working)
+- /workspaces/ThriveAtHome/scripts/test-rls.ts — CREATED: creates 2 auth users + members, signs in as each, asserts cross-user isolation, service role reads all, cleans up all test rows
+- checklist.md — Phase 3 set to COMPLETE (RLS item changed from [~] to [x]), Phase 4 set to COMPLETE, M1 progress updated to 4/4
+- progress.md — Session 7 appended
+
+TESTS AND VERIFICATIONS RUN:
+- Phase 3 re-verify: PASSED — all 17 tables, FK, RLS blocking anon (0 rows, no recursion), audit trigger
+- Phase 4 cross-user isolation: PASSED — User A sees only Member A (1 row); User B sees only Member B (1 row); service role sees both (2 rows)
+- Phase 4 cleanup: PASSED — all 4 test rows deleted (2 members + CASCADE family_members, 2 auth users)
+- npx tsc --noEmit: PASSED — zero errors
+
+ERRORS ENCOUNTERED:
+- None
+
+DECISIONS MADE:
+- test-rls.ts cleans up stale test users at start of each run (prevents failure if prior run crashed before cleanup)
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- If APPROVED: Begin Phase 5 (Authentication) — create lib/auth.ts, app/signup/page.tsx, app/login/page.tsx, app/api/auth/callback/route.ts, update middleware.ts with role-based routing
+- M1 is complete — no outstanding blockers
+
+AWAITING HUMAN APPROVAL
