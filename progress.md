@@ -526,3 +526,81 @@ NEXT SESSION MUST:
 - M1 is complete — no outstanding blockers
 
 AWAITING HUMAN APPROVAL
+
+Ready for Phase 4 RLS verification. Please run scripts/test-rls.ts and show me the full output.
+APPROVED
+
+---
+SESSION: 8
+DATE: 2026-05-16 UTC
+MILESTONE: M2
+PHASE: 5 — Authentication
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase checklist: 1 of 5 items [x] (unauthenticated redirect verified programmatically)
+- Current item: Remaining 4 items require browser + live Supabase session to verify
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider
+- emailProvider: StubEmailProvider
+- billingProvider: StubBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+- /workspaces/ThriveAtHome/lib/auth.ts — CREATED: getCurrentUser, getUserRole, requireAuth
+- /workspaces/ThriveAtHome/lib/supabase/admin.ts — MODIFIED: added Database generic type
+- /workspaces/ThriveAtHome/lib/supabase/server.ts — MODIFIED: added Database generic type
+- /workspaces/ThriveAtHome/lib/supabase/client.ts — MODIFIED: added Database generic type
+- /workspaces/ThriveAtHome/types/database.ts — CREATED: full typed schema for all 17 tables + 9 enums
+- /workspaces/ThriveAtHome/proxy.ts — CREATED: Next.js 16 renamed from middleware.ts; session refresh + auth guard + role-based routing
+- /workspaces/ThriveAtHome/middleware.ts — DELETED: renamed to proxy.ts (Next.js 16 convention)
+- /workspaces/ThriveAtHome/app/api/auth/signup/route.ts — CREATED: atomic POST handler (admin.createUser + family_members insert + rollback on failure)
+- /workspaces/ThriveAtHome/app/api/auth/callback/route.ts — CREATED: Supabase Auth code exchange
+- /workspaces/ThriveAtHome/app/signup/page.tsx — MODIFIED: replaced placeholder with SignupForm component
+- /workspaces/ThriveAtHome/app/login/page.tsx — MODIFIED: replaced placeholder with LoginForm component
+- /workspaces/ThriveAtHome/app/onboarding/page.tsx — CREATED: placeholder for Phase 6
+- /workspaces/ThriveAtHome/components/auth/SignupForm.tsx — CREATED: client component with full signup flow
+- /workspaces/ThriveAtHome/components/auth/LoginForm.tsx — CREATED: client component with login + role-based redirect
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — all 29 routes built (including /api/auth/signup, /api/auth/callback, /onboarding)
+- Unauthenticated /dashboard redirect: PASSED — curl returns 307 to /login
+- Unauthenticated /onboarding redirect: PASSED — curl returns 307 to /login
+- /login route: PASSED — HTTP 200
+- /signup route: PASSED — HTTP 200
+- git ls-files | grep .env: PASSED — only .env.local.example
+- Hardcoded secrets scan: PASSED — no secrets in code
+
+ERRORS ENCOUNTERED:
+- TypeScript errors TS2353 + TS2339: Supabase clients lacked Database generic → fixed by creating types/database.ts and threading Database type through all 3 clients
+- middleware.ts deprecated in Next.js 16 → renamed to proxy.ts, function renamed from `middleware` to `proxy`
+
+DECISIONS MADE:
+- Atomic signup via /api/auth/signup route: admin creates auth user, then inserts family_members — admin.deleteUser rollback on failure
+- Browser clients in components/auth/ are separate from server page files (Server Component pages export metadata + render Client Components)
+- types/database.ts written manually from migration file (no supabase CLI available to generate)
+- /onboarding placeholder created in Phase 5 because signup flow redirects there
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- Human must verify in browser:
+  1. Navigate to /signup, fill form, submit → check Supabase Auth > Users AND family_members table for two rows
+  2. Log out, navigate to /dashboard → confirm redirect to /login
+  3. Log in as family user, navigate to /navigator → confirm redirect to /dashboard
+  4. In Supabase: change family_members.role to 'navigator' for test user, log out, log in → confirm lands on /navigator
+  5. To test orphan prevention: temporarily add `throw new Error('test')` after auth.admin.createUser in /app/api/auth/signup/route.ts, attempt signup, confirm auth user does NOT appear in Supabase Auth > Users, restore file
+- After all 5 verified: mark all checklist items [x], begin Phase 6
+---
+
+AWAITING HUMAN APPROVAL

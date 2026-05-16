@@ -73,29 +73,29 @@ Iteration 2 of Phase 1:
 ### Phase 2 — Supabase Connection
 
 Navigate to `/test`:
-- [ ] Text from the database appears — matches what you inserted in Supabase
-- [ ] Not "undefined", "null", or a spinning loader
+- [x] Text from the database appears — matches what you inserted in Supabase
+- [x] Not "undefined", "null", or a spinning loader
 
 After the agent breaks the Supabase URL:
-- [ ] A readable error message appears — not a stack trace or error code
+- [x] A readable error message appears — not a stack trace or error code
 
 After the agent restores it and deletes the test page:
-- [ ] The homepage at `/` still loads correctly
+- [x] The homepage at `/` still loads correctly
 
 ---
 
 ### Phase 3 — Database Schema
 
 Open Supabase → Table Editor:
-- [ ] You can see more than 15 tables in the left sidebar
-- [ ] Clicking `members` shows columns including `full_name`, `preferred_name`, `plan_tier`, `status`
-- [ ] Clicking `realtime_notifications` shows columns including `type`, `title`, `body`, `severity`, `read`
+- [x] You can see more than 15 tables in the left sidebar
+- [x] Clicking `members` shows columns including `full_name`, `preferred_name`, `plan_tier`, `status`
+- [x] Clicking `realtime_notifications` shows columns including `type`, `title`, `body`, `severity`, `read`
 
 Supabase → Authentication → Policies:
-- [ ] All tables show "RLS enabled" — none show "disabled"
+- [x] All tables show "RLS enabled" — none show "disabled"
 
 Supabase → Database → Replication:
-- [ ] `realtime_notifications` is listed with INSERT events enabled
+- [x] `realtime_notifications` is listed with INSERT events enabled
 
 ---
 
