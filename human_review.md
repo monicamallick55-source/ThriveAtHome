@@ -57,7 +57,7 @@ Navigate to these placeholder routes and confirm each shows "Coming soon":
 - [x] `/admin`
 - [x] `/dashboard/services`
 - [x] `/volunteer`
-- [ ] `/pricing`
+- [x] `/pricing`
 
 **Agent hallucination check:** Ask the agent to show you the output of `ls lib/interfaces/ | wc -l`. Confirm it says 8.
 
@@ -66,7 +66,7 @@ Personal Notes:
 - the pricing placeholder doesn't work
 
 Iteration 2 of Phase 1:
-- 
+- everything is fixed. ready for phase 2 
 
 ---
 

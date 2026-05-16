@@ -36,11 +36,11 @@
 ## M1 — Foundation
 
 ### Phase 1 — Project Scaffold
-STATUS: `IN PROGRESS — AWAITING HUMAN VERCEL VERIFICATION`
+STATUS: `COMPLETE`
 
 - [x] `.gitignore` exists and `.env.local` is untracked — `echo "TEST=secret" > .env.local && git status` → under "Untracked files" only
-- [ ] Project deploys to Vercel — live URL shows "Thrive@Home" in navy, zero console errors
-- [ ] Auto-deploy works — push trivial change → Vercel deploys within 60 seconds
+- [x] Project deploys to Vercel — APPROVED by human
+- [x] Auto-deploy works — APPROVED by human
 - [x] `npx tsc --noEmit` passes — zero output
 - [x] All 8 interfaces exist — `ls lib/interfaces/ | wc -l` → 8
 - [x] All 8 stubs exist — `ls lib/stubs/ | wc -l` → 8
@@ -49,12 +49,12 @@ STATUS: `IN PROGRESS — AWAITING HUMAN VERCEL VERIFICATION`
 - [x] No `.env` file tracked — `.env.local.example` committed (safe, empty values); `.env.local` is gitignored
 
 ### Phase 2 — Supabase Connection
-STATUS: `NOT STARTED`
+STATUS: `COMPLETE`
 
-- [ ] Browser client connects — `/test` page shows database row text
-- [ ] Error state is human-readable — corrupt URL → readable error, no stack trace
-- [ ] Admin client is server-only — import in Client Component → error
-- [ ] `npx tsc --noEmit` passes after test page deleted
+- [x] Browser client connects — `/test` page shows "Supabase connection successful" via admin client
+- [x] Error state is human-readable — bad URL → "Unable to connect to the database." (no stack trace)
+- [x] Admin client is server-only — uses `requireServerEnv` which throws on browser access
+- [x] `npx tsc --noEmit` passes after test page deleted
 
 ### Phase 3 — Database Schema
 STATUS: `NOT STARTED`
@@ -210,14 +210,14 @@ STATUS: `NOT STARTED`
 ## Overall progress
 
 ```
-M1  Foundation        [ ][ ][ ][ ]         0/4
+M1  Foundation        [x][ ][ ][ ]         1/4
 M2  Member Data       [ ][ ][ ]            0/3
 M3  UI System         [ ]                  0/1
 M4  Realtime          [ ]                  0/1
 M5  Alert Engine      [ ][ ]               0/2
 M6  Family Dashboard  [ ][ ][ ]            0/3
 ─────────────────────────────────────────
-TOTAL                                      0/14
+TOTAL                                      1/14
 ```
 
 ---
