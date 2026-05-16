@@ -604,3 +604,78 @@ NEXT SESSION MUST:
 ---
 
 AWAITING HUMAN APPROVAL
+
+APPROVED — Phase 5 auth is working. Signup creates auth user and family_members row correctly. Unauthenticated /dashboard redirects to /login. Dashboard 404 is expected — page.tsx doesn't exist until Phase 12. Tested login redirect works, Supabase rows confirmed.
+
+---
+SESSION: 9
+DATE: 2026-05-16 UTC
+MILESTONE: M2
+PHASE: 6 — Member Onboarding Form
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase checklist: 0 of 7 items [x] (all 7 items require browser verification)
+- Current item: All items coded and built; awaiting human browser test for all 7 checklist verifications
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider
+- emailProvider: StubEmailProvider
+- billingProvider: StubBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+- checklist.md — Phase 5 marked COMPLETE (all 5 items [x] per human approval); Phase 6 set to IN PROGRESS
+- npm install date-fns — INSTALLED (for differenceInYears DOB validation)
+- /workspaces/ThriveAtHome/app/api/onboarding/route.ts — CREATED: POST handler; auth check → duplicate check → members insert (plan_tier='basics') → family_members.member_id link
+- /workspaces/ThriveAtHome/components/onboarding/types.ts — CREATED: OnboardingFormData interface, EMPTY_FORM, STORAGE_KEY
+- /workspaces/ThriveAtHome/components/onboarding/Step1BasicInfo.tsx — CREATED: full_name, preferred_name, date_of_birth, phone_number (all required)
+- /workspaces/ThriveAtHome/components/onboarding/Step2EmergencyHealth.tsx — CREATED: emergency contact 1, address, lives_alone toggle, health_conditions, medications (all optional)
+- /workspaces/ThriveAtHome/components/onboarding/Step3Preferences.tsx — CREATED: language, call frequency, call time, topics, doctor (all optional)
+- /workspaces/ThriveAtHome/components/onboarding/Confirmation.tsx — CREATED: shows preferred_name, "Go to dashboard" link
+- /workspaces/ThriveAtHome/components/onboarding/OnboardingForm.tsx — CREATED: orchestrator; localStorage persist on every change, read on mount, clear on success; step validation; submit to /api/onboarding
+- /workspaces/ThriveAtHome/app/onboarding/page.tsx — MODIFIED: replaced placeholder with OnboardingForm component
+- git commit 0c3cd9e pushed to GitHub
+
+TESTS AND VERIFICATIONS RUN:
+- npm install date-fns: PASSED — differenceInYears(new Date(), new Date('1960-01-01')) returns 66
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — /api/onboarding and /onboarding appear in build output
+- /onboarding unauthenticated: PASSED — curl returns 307 → /login (middleware protects route)
+- All 23 routes still return correct codes: PASSED — public routes 200, protected routes 307 to /login
+- .env secrets check: PASSED — only .env.local.example tracked
+- Hardcoded secrets scan: PASSED — no secrets in new files
+- .single() scan: PASSED — zero .single() calls in app/lib/components
+
+ERRORS ENCOUNTERED:
+- None
+
+DECISIONS MADE:
+- Phone validation accepts both E.164 format (+15550001234) and 10-digit US (5550001234) with common separators stripped
+- lives_alone sent as boolean (null/true/false) to API; stored as '' | 'yes' | 'no' in form state for radio button UX
+- Step 2 and 3 have no required fields — only Step 1 blocks Next
+- Hydration guard added: localStorage is read before first render to prevent hydration mismatch
+- topics_enjoy stored as comma-separated string in form; converted to string[] array in API route before DB insert
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- Human must verify all 7 checklist items in browser:
+  1. Visit /onboarding (must be signed in), click Next with empty Step 1 fields → errors appear on all 4 fields
+  2. Enter today's date as DOB → error: "must be at least 60 years old"
+  3. Enter "abc-xyz-123" as phone → error with format example
+  4. Complete all 3 steps, submit → check Supabase members table: row created with plan_tier='basics', family_members.member_id linked
+  5. Complete form, read confirmation → shows preferred name correctly (not "undefined")
+  6. Fill Step 2, refresh browser → Step 2 data preserved from localStorage
+  7. DevTools 375px width, scroll all steps → no horizontal scroll
+- After all 7 verified: mark Phase 6 COMPLETE, begin Phase 7 (Data Layer & Seed Data)
+
+AWAITING HUMAN APPROVAL
