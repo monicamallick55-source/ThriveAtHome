@@ -1,9 +1,9 @@
-// Thrive@Home landing page.
+// ThriveAtHome landing page.
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Thrive@Home — Caring for the people who matter most',
+  title: 'ThriveAtHome — Caring for the people who matter most',
   description: 'AI-powered senior care coordination that keeps families connected and loved ones safe.',
 }
 
@@ -12,7 +12,7 @@ export default function HomePage() {
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#FAFAF8' }}>
       <header className="px-8 py-6 flex items-center justify-between max-w-6xl mx-auto w-full">
         <div className="flex items-center gap-3">
-          <span className="text-2xl font-bold" style={{ color: '#1B3A6B' }}>Thrive@Home</span>
+          <span className="text-2xl font-bold" style={{ color: '#1B3A6B' }}>ThriveAtHome</span>
         </div>
         <nav className="flex gap-4">
           <Link
@@ -59,7 +59,7 @@ export default function HomePage() {
       </main>
 
       <footer className="px-8 py-6 text-center" style={{ color: '#9ca3af' }}>
-        <p>© 2025 Thrive@Home. All rights reserved.</p>
+        <p>© 2025 ThriveAtHome. All rights reserved.</p>
       </footer>
     </div>
   )
