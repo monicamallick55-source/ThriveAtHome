@@ -44,7 +44,7 @@ export default function TestUiPage() {
     <ToastProvider>
       <div className="min-h-screen bg-[#FAFAF8] p-6 max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-[#1B3A6B] mb-2">UI Component Gallery</h1>
-        <p className="text-lg text-gray-500 mb-2">All 13 components — delete this page after Phase 8 approval.</p>
+        <p className="text-lg text-gray-500 mb-2">All 14 components — delete this page after Phase 8 approval.</p>
 
         {/* 1. Button */}
         <Section title="1. Button">

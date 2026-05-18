@@ -116,8 +116,8 @@ STATUS: `COMPLETE`
 ### Phase 8 — Primitive UI Components
 STATUS: `IN PROGRESS`
 
-- [ ] All 13 components render in all variants — visually confirmed at `/test-ui`
-- [ ] All interactive elements keyboard-reachable — Tab navigation confirmed
+- [ ] All 14 components render in all variants — visually confirmed at `/test-ui`
+- [ ] All interactive elements keyboard-reachable — Tab navigation confirmed, Tabs uses roving tabindex + arrow keys
 - [ ] Modal focus trap works — Tab stays inside, Escape closes
 - [x] `npx tsc --noEmit` passes — zero errors confirmed
 - [ ] Test-ui page deleted — `ls app/test-ui` → not found
