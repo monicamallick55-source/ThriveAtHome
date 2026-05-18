@@ -114,12 +114,12 @@ STATUS: `COMPLETE`
 ## M3 — UI System
 
 ### Phase 8 — Primitive UI Components
-STATUS: `NOT STARTED`
+STATUS: `IN PROGRESS`
 
 - [ ] All 13 components render in all variants — visually confirmed at `/test-ui`
 - [ ] All interactive elements keyboard-reachable — Tab navigation confirmed
 - [ ] Modal focus trap works — Tab stays inside, Escape closes
-- [ ] `npx tsc --noEmit` passes
+- [x] `npx tsc --noEmit` passes — zero errors confirmed
 - [ ] Test-ui page deleted — `ls app/test-ui` → not found
 
 **M3 gate:** Phase 8 `[x]` before Phase 9.
