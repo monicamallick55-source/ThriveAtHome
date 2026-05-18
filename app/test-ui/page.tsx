@@ -132,16 +132,26 @@ export default function TestUiPage() {
 
         {/* 7. Skeleton */}
         <Section title="7. Skeleton">
+          <p className="text-base text-gray-500 mb-4">Loading-state placeholders — animated gray shapes that appear while data is fetching.</p>
           <div className="space-y-6 max-w-lg">
-            <div className="flex items-center gap-3">
-              <Skeleton height="h-12" width="w-12" rounded />
-              <div className="flex-1 space-y-2">
-                <Skeleton height="h-5" width="w-1/2" />
-                <Skeleton height="h-4" width="w-3/4" />
+            <div className="bg-white border border-gray-200 rounded-xl p-4">
+              <p className="text-sm font-medium text-gray-500 mb-3">Profile row skeleton</p>
+              <div className="flex items-center gap-3">
+                <Skeleton height="h-12" width="w-12" rounded />
+                <div className="flex-1 space-y-2">
+                  <Skeleton height="h-5" width="w-1/2" />
+                  <Skeleton height="h-4" width="w-3/4" />
+                </div>
               </div>
             </div>
-            <SkeletonCard />
-            <SkeletonText lines={4} />
+            <div className="bg-white border border-gray-200 rounded-xl p-4">
+              <p className="text-sm font-medium text-gray-500 mb-3">SkeletonCard</p>
+              <SkeletonCard />
+            </div>
+            <div className="bg-white border border-gray-200 rounded-xl p-4">
+              <p className="text-sm font-medium text-gray-500 mb-3">SkeletonText (4 lines)</p>
+              <SkeletonText lines={4} />
+            </div>
           </div>
         </Section>
 
