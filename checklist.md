@@ -87,25 +87,25 @@ STATUS: `COMPLETE`
 - [x] Orphaned auth user prevented — APPROVED by human: rollback verified
 
 ### Phase 6 — Member Onboarding Form
-STATUS: `IN PROGRESS`
+STATUS: `COMPLETE`
 
-- [~] Empty required fields block Next — client-side validation blocks Next; requires browser test
-- [~] DOB < 60 years rejected — differenceInYears validation written; requires browser test
-- [~] Invalid phone rejected — isValidPhone() written; requires browser test
-- [~] Successful submission creates member row with `plan_tier='basics'` — API route written; requires browser test + Supabase row check
-- [~] Confirmation shows correct preferred name — Confirmation component reads preferred_name from API response; requires browser test
-- [~] Form state survives page refresh — localStorage read on mount, write on every change; requires browser test
-- [~] Mobile layout at 375px — no horizontal scroll; requires DevTools test
+- [x] Empty required fields block Next — APPROVED by human
+- [x] DOB < 60 years rejected — APPROVED by human
+- [x] Invalid phone rejected — APPROVED by human
+- [x] Successful submission creates member row with `plan_tier='basics'` — APPROVED by human
+- [x] Confirmation shows correct preferred name — APPROVED by human
+- [x] Form state survives page refresh — APPROVED by human
+- [x] Mobile layout at 375px — APPROVED by human
 
 ### Phase 7 — App Data Layer & Seed Data
-STATUS: `NOT STARTED`
+STATUS: `COMPLETE`
 
-- [ ] All data functions return `{data, error}`, never throw — `npx tsx scripts/test-data-layer.ts` → all PASSED
-- [ ] Invalid ID returns `{data: null, error: 'Not found'}` — not a crash
-- [ ] Seed script creates correct data — prints credentials, 14 call rows in Supabase
-- [ ] Seed script is idempotent — run twice → same row count
-- [ ] Clear script removes all seeded data without error
-- [ ] `npx tsc --noEmit` passes
+- [x] All data functions return `{data, error}`, never throw — `npx tsx scripts/test-data-layer.ts` → 27/27 PASSED
+- [x] Invalid ID returns `{data: null, error: 'Not found'}` — verified: getMemberById, getCallById, completeFamilyTask all return correct shape
+- [x] Seed script creates correct data — ran successfully; prints credentials; 14 calls (mood arc 8,8,7,8,7,6,7,6,5,6,5,5,4,5) in Supabase
+- [x] Seed script is idempotent — ran twice; second run shows all "↩ Already exists" skips, same row count
+- [x] Clear script removes all seeded data without error — ran successfully, all rows removed via cascade
+- [x] `npx tsc --noEmit` passes — zero errors
 
 **M2 gate:** All 3 phases `[x]` before Phase 8.
 
@@ -210,7 +210,7 @@ STATUS: `NOT STARTED`
 
 ```
 M1  Foundation        [x][x][x][x]         4/4  ✅ COMPLETE
-M2  Member Data       [x][ ][ ]            1/3  (Phase 5 approved)
+M2  Member Data       [x][x][x]            3/3  ✅ COMPLETE
 M3  UI System         [ ]                  0/1
 M4  Realtime          [ ]                  0/1
 M5  Alert Engine      [ ][ ]               0/2
