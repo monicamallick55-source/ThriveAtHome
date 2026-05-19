@@ -129,13 +129,13 @@ STATUS: `COMPLETE`
 ## M4 — Realtime Notifications
 
 ### Phase 9 — Supabase Realtime
-STATUS: `IN PROGRESS`
+STATUS: `COMPLETE`
 
-- [ ] Notification appears in browser within 2 seconds — SQL insert → toast without refresh
-- [ ] Bell count increments and decrements — insert → 1 → mark read → 0
-- [ ] Cross-user isolation — User A cannot see Member B's notifications
+- [x] Notification appears in browser within 2 seconds — SQL insert → toast within 2 seconds, APPROVED by human
+- [x] Bell count increments and decrements — insert → 1 → mark all read → 0, APPROVED by human
+- [x] Cross-user isolation — APPROVED by human
 - [x] `pushRealtimeNotification` does not throw on failure — `npx tsx scripts/test-push-notif.ts` → FK violation logged, function returned normally (PASSED)
-- [ ] `push-notification` Edge Function deployed — appears in `supabase functions list`
+- [x] `push-notification` Edge Function deployed — confirmed in Supabase Edge Functions dashboard by human
 
 **M4 gate:** Phase 9 `[x]` before Phase 10.
 
@@ -144,7 +144,7 @@ STATUS: `IN PROGRESS`
 ## M5 — Alert Engine
 
 ### Phase 10 — Alert Logic & Detection
-STATUS: `NOT STARTED`
+STATUS: `IN PROGRESS`
 
 - [ ] All 8 alert rules correct — `npx tsx scripts/test-alert-rules.ts` → all PASSED
 - [ ] Deduplication works — same type in 24h creates exactly 1 row
@@ -212,11 +212,11 @@ STATUS: `NOT STARTED`
 M1  Foundation        [x][x][x][x]         4/4  ✅ COMPLETE
 M2  Member Data       [x][x][x]            3/3  ✅ COMPLETE
 M3  UI System         [x]                  1/1  ✅ COMPLETE
-M4  Realtime          [ ]                  0/1
+M4  Realtime          [x]                  1/1  ✅ COMPLETE
 M5  Alert Engine      [ ][ ]               0/2
 M6  Family Dashboard  [ ][ ][ ]            0/3
 ─────────────────────────────────────────
-TOTAL                                      6/14
+TOTAL                                      7/14
 ```
 
 ---
