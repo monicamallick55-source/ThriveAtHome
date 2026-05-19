@@ -169,7 +169,7 @@ STATUS: `COMPLETE`
 ## M6 — Family Dashboard
 
 ### Phase 12 — Dashboard Shell & Health Timeline
-STATUS: `NOT STARTED`
+STATUS: `IN PROGRESS`
 
 - [ ] Dashboard loads < 3 seconds with seed data
 - [ ] All 4 health timeline tabs render without error
