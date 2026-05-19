@@ -945,3 +945,71 @@ NEXT SESSION MUST:
 AWAITING HUMAN APPROVAL
 
 APPROVED
+
+---
+SESSION: 14
+DATE: 2026-05-19 UTC
+MILESTONE: M4
+PHASE: 9 — Supabase Realtime Notification System
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase checklist: 1 of 5 items [x] (pushRealtimeNotification no-throw verified)
+- Current item: 3 items require browser verification; 1 requires Edge Function deployment
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider
+- emailProvider: StubEmailProvider
+- billingProvider: StubBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+- Phase 8 cleanup confirmed: app/test-ui/page.tsx deleted (committed this session in a887b7d)
+- /workspaces/ThriveAtHome/lib/realtime/notifications.ts — COMMITTED: pushRealtimeNotification server helper
+- /workspaces/ThriveAtHome/lib/realtime/useNotifications.ts — COMMITTED: useNotifications hook (Realtime channel, toast on INSERT, markRead/markAllRead)
+- /workspaces/ThriveAtHome/app/test-realtime/page.tsx — COMMITTED: temporary test page (delete after approval)
+- /workspaces/ThriveAtHome/app/test-realtime/RealtimeTestClient.tsx — COMMITTED: shows member ID, bell count, notification list, SQL INSERT instructions
+- /workspaces/ThriveAtHome/supabase/functions/push-notification/index.ts — COMMITTED: Edge Function (auth check, field validation, Realtime insert)
+- /workspaces/ThriveAtHome/scripts/test-push-notif.ts — COMMITTED: verifies no-throw on FK violation
+- git commit a887b7d pushed to GitHub
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — /test-realtime in build output, all 25 routes clean
+- git ls-files | grep .env: PASSED — only .env.local.example
+- Secrets scan: PASSED — no secrets in new files
+- .single() scan: PASSED — zero usage
+- pushRealtimeNotification no-throw: [x] CONFIRMED from prior session (PASSED)
+- Supabase CLI v2.100.0 installed; SUPABASE_ACCESS_TOKEN not set — deploy requires human action
+- Project ref: qdniskppkfqjmtpkftdt
+
+ERRORS ENCOUNTERED:
+- None
+
+DECISIONS MADE:
+- Edge Function deploy requires SUPABASE_ACCESS_TOKEN; human must deploy via CLI or dashboard
+- test-realtime page shows inline SQL INSERT with correct member_id for self-contained testing
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- If APPROVED: delete app/test-realtime/ dir, run npx tsc --noEmit, npm run build, mark all 5 Phase 9 items [x], begin Phase 10
+- Human must verify in browser at http://localhost:3000/test-realtime:
+  1. Run SQL INSERT shown on page → toast appears within 2 seconds (Item 1 ✓)
+  2. Bell shows 1 → mark read → bell shows 0 (Item 2 ✓)
+  3. Log in as a DIFFERENT user → INSERT for Margaret Chen member_id → notification does NOT appear (Item 3 ✓)
+- Human must deploy Edge Function:
+  Option A: supabase login && supabase functions deploy push-notification --project-ref qdniskppkfqjmtpkftdt
+  Option B: Add SUPABASE_ACCESS_TOKEN to Codespace secrets (then agent can deploy next session)
+  Option C: Supabase Dashboard → Edge Functions → Deploy → paste supabase/functions/push-notification/index.ts
+---
+
+AWAITING HUMAN APPROVAL
