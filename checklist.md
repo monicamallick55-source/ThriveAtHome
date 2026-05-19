@@ -144,23 +144,23 @@ STATUS: `COMPLETE`
 ## M5 — Alert Engine
 
 ### Phase 10 — Alert Logic & Detection
-STATUS: `IN PROGRESS`
+STATUS: `COMPLETE`
 
-- [x] All 8 alert rules correct — `npx tsx scripts/test-alert-rules.ts` → 23/23 PASSED
-- [x] Deduplication works — same type in 24h creates exactly 1 row — confirmed: 2 calls = 1 row, deduplicated=true
-- [ ] New alert triggers Realtime notification — dashboard shows toast within 2 seconds (requires browser)
-- [x] Wellness drift: decline detected, flat scores not flagged — `npx tsx scripts/test-wellness-drift.ts` → 5/5 PASSED
-- [x] Emergency log written before alert on crisis — confirmed: emergency_log row exists + triggered_phrase stored correctly
-- [ ] `create-alert` Edge Function deployed — awaiting human deploy
-- [ ] `check-missed-calls` Edge Function deployed — awaiting human deploy
+- [x] All 8 alert rules correct — `npx tsx scripts/test-alert-rules.ts` → 23/23 PASSED (re-run Session 16: confirmed)
+- [x] Deduplication works — same type in 24h creates exactly 1 row — re-run Session 16: "deduplication: exactly 1 mood_drop row (not 2)", deduplicated=true, same alertId returned
+- [x] New alert triggers Realtime notification — DEFERRED to Phase 12 per human (dashboard page does not exist until Phase 12); approved explicitly by human
+- [x] Wellness drift: decline detected, flat scores not flagged — re-run Session 16: 5/5 PASSED (decline → alert; flat/improving/insufficient → no alert)
+- [x] Emergency log written before alert on crisis — re-run Session 16: "emergency_log row written for crisis createAlert call" + "triggered_phrase stored correctly"
+- [x] `create-alert` Edge Function deployed — confirmed by human in APPROVED message (Session 15)
+- [x] `check-missed-calls` Edge Function deployed — confirmed by human in APPROVED message (Session 15)
 
 ### Phase 11 — Crisis Detection
-STATUS: `NOT STARTED`
+STATUS: `COMPLETE`
 
-- [ ] Crisis transcript triggers all 5 escalation steps — `npx tsx scripts/test-crisis-detection.ts`
-- [ ] Normal transcript: no false positive
-- [ ] "fell asleep watching TV": no false positive
-- [ ] Crisis detection failure creates navigator task — call processing continues
+- [x] Crisis transcript triggers all 5 escalation steps — `npx tsx scripts/test-crisis-detection.ts` → 9/9 PASSED (emergency_log, alert, navigator task, Realtime notif, [STUB][SMS][URGENT] — all 5 confirmed)
+- [x] Normal transcript: no false positive — 0 alerts/tasks/notifs/logs created
+- [x] "fell asleep watching TV": no false positive — "fell asleep" not in 15-phrase list; 0 escalations
+- [x] Crisis detection failure creates navigator task — _scanner throwing → "Crisis detection failed — manual review required" task created; no exception propagated — call processing continues
 
 **M5 gate:** Both phases `[x]` before Phase 12.
 
@@ -213,7 +213,7 @@ M1  Foundation        [x][x][x][x]         4/4  ✅ COMPLETE
 M2  Member Data       [x][x][x]            3/3  ✅ COMPLETE
 M3  UI System         [x]                  1/1  ✅ COMPLETE
 M4  Realtime          [x]                  1/1  ✅ COMPLETE
-M5  Alert Engine      [ ][ ]               0/2
+M5  Alert Engine      [x][x]               2/2  ✅ COMPLETE
 M6  Family Dashboard  [ ][ ][ ]            0/3
 ─────────────────────────────────────────
 TOTAL                                      7/14
