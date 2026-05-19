@@ -114,13 +114,13 @@ STATUS: `COMPLETE`
 ## M3 — UI System
 
 ### Phase 8 — Primitive UI Components
-STATUS: `IN PROGRESS`
+STATUS: `COMPLETE`
 
-- [ ] All 14 components render in all variants — visually confirmed at `/test-ui`
-- [ ] All interactive elements keyboard-reachable — Tab navigation confirmed, Tabs uses roving tabindex + arrow keys
-- [ ] Modal focus trap works — Tab stays inside, Escape closes
+- [x] All 14 components render in all variants — visually confirmed at `/test-ui` — APPROVED by human
+- [x] All interactive elements keyboard-reachable — Tab navigation confirmed, Tabs uses roving tabindex + arrow keys — APPROVED by human
+- [x] Modal focus trap works — Tab stays inside, Escape closes — APPROVED by human
 - [x] `npx tsc --noEmit` passes — zero errors confirmed
-- [ ] Test-ui page deleted — `ls app/test-ui` → not found
+- [x] Test-ui page deleted — `rm -rf app/test-ui` → confirmed removed; build + tsc pass
 
 **M3 gate:** Phase 8 `[x]` before Phase 9.
 
@@ -129,12 +129,12 @@ STATUS: `IN PROGRESS`
 ## M4 — Realtime Notifications
 
 ### Phase 9 — Supabase Realtime
-STATUS: `NOT STARTED`
+STATUS: `IN PROGRESS`
 
 - [ ] Notification appears in browser within 2 seconds — SQL insert → toast without refresh
 - [ ] Bell count increments and decrements — insert → 1 → mark read → 0
 - [ ] Cross-user isolation — User A cannot see Member B's notifications
-- [ ] `pushRealtimeNotification` does not throw on failure — logs error, continues
+- [x] `pushRealtimeNotification` does not throw on failure — `npx tsx scripts/test-push-notif.ts` → FK violation logged, function returned normally (PASSED)
 - [ ] `push-notification` Edge Function deployed — appears in `supabase functions list`
 
 **M4 gate:** Phase 9 `[x]` before Phase 10.
@@ -211,12 +211,12 @@ STATUS: `NOT STARTED`
 ```
 M1  Foundation        [x][x][x][x]         4/4  ✅ COMPLETE
 M2  Member Data       [x][x][x]            3/3  ✅ COMPLETE
-M3  UI System         [ ]                  0/1
+M3  UI System         [x]                  1/1  ✅ COMPLETE
 M4  Realtime          [ ]                  0/1
 M5  Alert Engine      [ ][ ]               0/2
 M6  Family Dashboard  [ ][ ][ ]            0/3
 ─────────────────────────────────────────
-TOTAL                                      5/14
+TOTAL                                      6/14
 ```
 
 ---

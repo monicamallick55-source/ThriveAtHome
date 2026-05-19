@@ -102,14 +102,14 @@ Supabase → Database → Replication:
 ### Phase 4 — RLS Verification
 
 Agent runs the cross-user test script and shows you the terminal output:
-- [ ] Output contains "Cross-user isolation: PASSED"
-- [ ] Output contains "Own data access: PASSED"
-- [ ] Output contains "Service role reads all: PASSED"
-- [ ] Output does NOT contain "FAILED" anywhere
-- [ ] Output says "All test data cleaned up"
+- [x] Output contains "Cross-user isolation: PASSED"
+- [x] Output contains "Own data access: PASSED"
+- [x] Output contains "Service role reads all: PASSED"
+- [x] Output does NOT contain "FAILED" anywhere
+- [x] Output says "All test data cleaned up"
 
 Supabase → `members` table — confirm no test rows remain:
-- [ ] No rows with test email addresses like `user-a@test.com`
+- [x] No rows with test email addresses like `user-a@test.com`
 
 ---
 
@@ -118,22 +118,22 @@ Supabase → `members` table — confirm no test rows remain:
 ### Phase 5 — Authentication
 
 Navigate to `/signup`, fill in test details, submit:
-- [ ] Redirected to `/onboarding` — no error message
+- [x] Redirected to `/onboarding` — no error message
 
 Supabase → Authentication → Users:
-- [ ] Your test email appears
+- [x] Your test email appears
 
 Supabase → `family_members` table:
-- [ ] A row exists with your email and `role = 'family'`
+- [x] A row exists with your email and `role = 'family'`
 
 Log out, type `/dashboard` in the address bar:
-- [ ] Immediately redirected to `/login` — dashboard content never visible
+- [x] Immediately redirected to `/login` — dashboard content never visible
 
 Log out, type `/navigator` in the address bar:
-- [ ] Immediately redirected to `/login`
+- [x] Immediately redirected to `/login`
 
 **Stress test:** Sign up with an email that already exists.
-- [ ] Clear error message — not a crash
+- [x] Clear error message — not a crash
 
 **Agent hallucination check:** Ask the agent to show you the signup rollback test result. If it says "I skipped that test because it seemed straightforward," that is not acceptable — ask it to run the test explicitly and show you the output.
 
@@ -142,47 +142,47 @@ Log out, type `/navigator` in the address bar:
 ### Phase 6 — Member Onboarding Form
 
 Navigate to `/onboarding`:
-- [ ] Progress bar shows "Step 1 of 3"
-- [ ] All field labels visible above the fields (not as placeholder text inside)
-- [ ] "Next" button is large
+- [x] Progress bar shows "Step 1 of 3"
+- [x] All field labels visible above the fields (not as placeholder text inside)
+- [x] "Next" button is large
 
 Click "Next" with all fields empty:
-- [ ] Error messages appear below required fields — form does NOT advance
+- [x] Error messages appear below required fields — form does NOT advance
 
 Enter today's date as date of birth:
-- [ ] Error — must be at least 60 years old
+- [x] Error — must be at least 60 years old
 
 Enter `abc-xyz-123` as phone:
-- [ ] Error — invalid format with example
+- [x] Error — invalid format with example
 
 Complete all 3 steps and submit:
-- [ ] Confirmation page shows correct preferred name — not "undefined"
+- [x] Confirmation page shows correct preferred name — not "undefined"
 
 Supabase → `members`:
-- [ ] New row with `plan_tier = 'basics'`
+- [x] New row with `plan_tier = 'basics'`
 
 Partially fill Step 2, refresh browser:
-- [ ] Your data is still there
+- [x] Your data is still there
 
 On your actual phone at 375px:
-- [ ] No horizontal scrolling, all buttons tappable
+- [x] No horizontal scrolling, all buttons tappable
 
 ---
 
 ### Phase 7 — App Data Layer & Seed Data
 
 Agent runs seed script and shows terminal output:
-- [ ] `Login: test-family@thriveathome.dev / TestPassword123!` is printed
-- [ ] No red error lines
+- [x] `Login: test-family@thriveathome.dev / TestPassword123!` is printed
+- [x] No red error lines
 
 Log in with the seeded credentials:
-- [ ] Login works
+- [x] Login works
 
 Supabase → `check_in_calls`:
-- [ ] 14 rows linked to Margaret Chen
+- [x] 14 rows linked to Margaret Chen
 
 Agent runs seed script a second time:
-- [ ] No errors; same row count (no duplicates)
+- [x] No errors; same row count (no duplicates)
 
 ---
 
@@ -191,21 +191,21 @@ Agent runs seed script a second time:
 ### Phase 8 — Primitive UI Components
 
 Navigate to `/test-ui` (the agent will tell you when it's live):
-- [ ] Buttons in 4 styles: dark navy, teal outlined, red, ghost/subtle
-- [ ] Cards with different border accents: default, teal, amber, red
-- [ ] Mood emojis: 😊 for high, 😐 for middle, 😔 for low, — for no score
-- [ ] Coloured dots: green, amber, red
-- [ ] Bell icon with "0" count
-- [ ] A progress bar is visible
+- [x] Buttons in 4 styles: dark navy, teal outlined, red, ghost/subtle
+- [x] Cards with different border accents: default, teal, amber, red
+- [x] Mood emojis: 😊 for high, 😐 for middle, 😔 for low, — for no score
+- [x] Coloured dots: green, amber, red
+- [x] Bell icon with "0" count
+- [x] A progress bar is visible
 
 Tab through page using only the keyboard:
-- [ ] Every button reachable
-- [ ] Focus ring always visible (a visible outline around the focused element)
+- [x] Every button reachable
+- [x] Focus ring always visible (a visible outline around the focused element)
 
 Open the Modal:
-- [ ] Tab key stays inside the Modal
-- [ ] Pressing Escape closes it
-- [ ] Focus returns to whatever opened the Modal
+- [x] Tab key stays inside the Modal
+- [x] Pressing Escape closes it
+- [x] Focus returns to whatever opened the Modal
 
 ---
 

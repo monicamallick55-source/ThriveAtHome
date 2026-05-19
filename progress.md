@@ -748,3 +748,200 @@ NEXT SESSION MUST:
 ---
 
 AWAITING HUMAN APPROVAL
+
+
+APPROVED
+
+---
+SESSION: 11
+DATE: 2026-05-18 UTC
+MILESTONE: M3
+PHASE: 8 — Primitive UI Components
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase checklist: 1 of 5 items [x] (tsc confirmed); 3 require browser visual verification; 1 (delete test-ui) awaits approval
+- Current item: Awaiting human to open /test-ui in browser and confirm all variants visible and interactive
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider
+- emailProvider: StubEmailProvider
+- billingProvider: StubBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+- npm install focus-trap-react@12.0.2 — INSTALLED
+- /workspaces/ThriveAtHome/components/ui/Button.tsx — CREATED: 5 variants (primary/secondary/outline/ghost/danger), 3 sizes, loading spinner, fullWidth, ARIA busy/disabled
+- /workspaces/ThriveAtHome/components/ui/Card.tsx — CREATED: Card + CardHeader + CardTitle + CardBody, padding and shadow variants
+- /workspaces/ThriveAtHome/components/ui/Badge.tsx — CREATED: 6 severity variants, optional icon, role=status, aria-label
+- /workspaces/ThriveAtHome/components/ui/Input.tsx — CREATED: label above, hint, error below, aria-describedby, aria-invalid, min-h-52px
+- /workspaces/ThriveAtHome/components/ui/Select.tsx — CREATED: label above, options, placeholder, error, aria
+- /workspaces/ThriveAtHome/components/ui/Textarea.tsx — CREATED: label above, hint, error, resize-y, min-h
+- /workspaces/ThriveAtHome/components/ui/Skeleton.tsx — CREATED: Skeleton + SkeletonCard + SkeletonText, animate-pulse, role=status
+- /workspaces/ThriveAtHome/components/ui/StatusDot.tsx — CREATED: 5 levels, pulse animation for non-ok states, 3 sizes
+- /workspaces/ThriveAtHome/components/ui/MoodEmoji.tsx — CREATED: maps 1-10 scores to emoji, showScore, size variants, getMoodEmoji export
+- /workspaces/ThriveAtHome/components/ui/NotificationBell.tsx — CREATED: count badge, aria-label with unread count, min-h-52px
+- /workspaces/ThriveAtHome/components/ui/Toast.tsx — CREATED: ToastProvider + useToast hook, 5 severity variants, auto-dismiss, role=alert
+- /workspaces/ThriveAtHome/components/ui/Modal.tsx — CREATED: FocusTrap from focus-trap-react, Escape key close, role=dialog, aria-modal, aria-labelledby, body scroll lock
+- /workspaces/ThriveAtHome/components/ui/Tabs.tsx — CREATED: role=tablist/tab/tabpanel, aria-selected, aria-controls, keyboard accessible
+- /workspaces/ThriveAtHome/components/ui/ProgressBar.tsx — CREATED: role=progressbar, aria-valuenow/min/max, 5 colors, 3 sizes
+- /workspaces/ThriveAtHome/components/ui/index.ts — CREATED: barrel export for all 14 components and types
+- /workspaces/ThriveAtHome/app/test-ui/page.tsx — CREATED: visual gallery of every component in every variant
+- /workspaces/ThriveAtHome/checklist.md — MODIFIED: Phase 8 status IN PROGRESS, tsc item [x]
+- git commit 70aa112 pushed
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — /test-ui appears in build output, zero errors
+- curl /test-ui: PASSED — HTTP 200
+- git ls-files | grep .env: PASSED — only .env.local.example (safe)
+- Secrets scan (components/ui/): PASSED — no secrets
+- .single() scan: PASSED — zero usage in app/lib/components
+
+ERRORS ENCOUNTERED:
+- None
+
+DECISIONS MADE:
+- Built 14 components (prompt listed 13 but enumerated 14 names: Button, Card, Badge, Input, Select, Textarea, Skeleton, StatusDot, MoodEmoji, NotificationBell, Toast, Modal, Tabs, ProgressBar)
+- Toast uses React Context (ToastProvider + useToast) — allows any component tree to fire toasts
+- Modal uses FocusTrap from focus-trap-react with initialFocus:false to not steal focus from page on render
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- If APPROVED: delete app/test-ui/page.tsx, run npx tsc --noEmit, run npm run build, mark all 5 Phase 8 checklist items [x], begin Phase 9 (Realtime)
+- Human must verify in browser at http://localhost:3000/test-ui:
+  1. All 14 component sections visible, no rendering errors
+  2. Tab key navigates all buttons/inputs without using mouse
+  3. Open Modal → Tab stays inside → Escape closes modal
+---
+
+ISSUE: UI gallery says 13 components but prompts show 14 names: Button, Card, Badge, Input, Select, Textarea, Skeleton, StatusDot, MoodEmoji, NotificationBell, Toast, Modal, Tabs, ProgressBar. TAB key skips 2,3,7,8,9
+, 13 components. Fix the components so all interactive elements receive focus when tabbing through the page.
+
+---
+SESSION: 12
+DATE: 2026-05-18 UTC
+MILESTONE: M3
+PHASE: 8 — Primitive UI Components (Issue fix)
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase checklist: 1 of 5 items [x] (tsc); 3 require browser; 1 awaits delete after approval
+- Current item: Awaiting human browser verification of fixes
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider
+- emailProvider: StubEmailProvider
+- billingProvider: StubBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+- /workspaces/ThriveAtHome/components/ui/Tabs.tsx — MODIFIED: implemented WAI-ARIA Tabs Pattern: active tab tabIndex=0, inactive tabIndex=-1, onKeyDown handles ArrowLeft/ArrowRight/Home/End with programmatic focus via useRef array
+- /workspaces/ThriveAtHome/app/test-ui/page.tsx — MODIFIED: corrected header "All 13 components" → "All 14 components"
+- /workspaces/ThriveAtHome/checklist.md — MODIFIED: updated Phase 8 keyboard item text to reflect fix
+- git commit a07764f pushed to GitHub
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — /test-ui appears in build output, zero errors
+- Root cause of TAB-skipping Tabs: buttons defaulted to tabIndex=0 (all individually focusable) — this caused confusion because the correct ARIA pattern requires roving tabindex (active=0, inactive=-1) with arrow key navigation. Now fixed: Tab enters the tablist and lands on the active tab; Left/Right/Home/End navigate between tabs.
+- Items 2,3,7,8,9 (Card, Badge, Skeleton, StatusDot, MoodEmoji): correctly have no interactive elements — they are display-only and should not receive Tab focus. This is expected behavior.
+
+ERRORS ENCOUNTERED:
+- None
+
+DECISIONS MADE:
+- Tabs now uses WAI-ARIA Tabs Pattern (roving tabindex + arrow keys) — correct per ARIA APG. Tab enters the tablist once, arrow keys navigate between individual tabs.
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- If APPROVED: delete app/test-ui/page.tsx, run npx tsc --noEmit, run npm run build, mark all 5 Phase 8 checklist items [x], begin Phase 9 (Realtime)
+- Human must verify in browser at http://localhost:3000/test-ui:
+  1. Gallery header shows "All 14 components" (not 13)
+  2. Tab key reaches Tabs section (item 13) — lands on the "7 days" tab button (active tab)
+  3. Arrow keys navigate between "7 days", "30 days", "60 days", "90 days" tabs
+  4. Open Modal → Tab stays inside modal → Escape closes modal
+  5. All other interactive elements (Buttons, Input, Select, Textarea, NotificationBell, Toast buttons) reachable by Tab
+---
+
+AWAITING HUMAN APPROVAL
+
+ISSUE: there are no fields in component named skeleton
+
+ISSUE FIXED (Session 13):
+- Root cause: Skeleton renders bg-gray-200 shapes against the #FAFAF8 near-white page background — contrast too low to see the animated boxes
+- Fix: wrapped each skeleton demo variant in a white bg-white card with a descriptive label ("Profile row skeleton", "SkeletonCard", "SkeletonText (4 lines)") and an explanatory intro sentence
+- Added description: "Loading-state placeholders — animated gray shapes that appear while data is fetching."
+- git commit 4613e49 pushed
+- npx tsc --noEmit: PASSED; npm run build: PASSED
+
+---
+SESSION: 13
+DATE: 2026-05-18 UTC
+MILESTONE: M3
+PHASE: 8 — Primitive UI Components (Skeleton visibility fix)
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase checklist: 1 of 5 items [x] (tsc); 3 require browser; 1 awaits delete after approval
+- Current item: Awaiting human browser verification — Skeleton section now visible
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider
+- emailProvider: StubEmailProvider
+- billingProvider: StubBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+- /workspaces/ThriveAtHome/app/test-ui/page.tsx — MODIFIED: Section 7 Skeleton demo wrapped in bg-white border containers with descriptive labels; added intro description explaining what Skeleton is
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — /test-ui in build output, zero errors
+
+ERRORS ENCOUNTERED:
+- None
+
+DECISIONS MADE:
+- Skeleton shapes are gray (#E5E7EB) on near-white (#FAFAF8) — low contrast by design (it's a loading placeholder). Fix was to display them on a white card background so the gray is clearly visible.
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- If APPROVED: delete app/test-ui/page.tsx, run npx tsc --noEmit, run npm run build, mark all 5 Phase 8 checklist items [x], begin Phase 9 (Realtime)
+- Human must verify in browser at http://localhost:3000/test-ui:
+  1. Section 7 "Skeleton" — three white cards visible, each with a label and animated gray shapes inside
+  2. All 14 component sections visible, no blank/missing sections
+  3. Tab key reaches Tabs section → lands on active tab → arrow keys navigate between tabs
+  4. Open Modal → Tab stays inside → Escape closes modal
+---
+
+AWAITING HUMAN APPROVAL
+
+APPROVED
