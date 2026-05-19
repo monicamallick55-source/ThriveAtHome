@@ -1013,3 +1013,76 @@ NEXT SESSION MUST:
 ---
 
 AWAITING HUMAN APPROVAL
+
+APPROVED — Realtime test passed. Toast appeared within 2 seconds of INSERT, bell count showed 1, mark all read dropped to 0. Edge Function push-notification deployed and confirmed in Supabase Edge Functions dashboard.
+
+
+---
+SESSION: 15
+DATE: 2026-05-19 UTC
+MILESTONE: M5
+PHASE: 10 — Alert Logic & Detection
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase checklist: 4 of 6 items [x]
+- Current item: Realtime notification browser test (item 3) and Edge Function deploys (items 6-7)
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider
+- emailProvider: StubEmailProvider
+- billingProvider: StubBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+- Phase 9 APPROVED — checklist updated, test-realtime/ deleted, tsc + build pass
+- /workspaces/ThriveAtHome/lib/alerts/rules.ts — CREATED: 8 alert rule definitions
+- /workspaces/ThriveAtHome/lib/alerts/createAlert.ts — CREATED: dedup + emergency_log-first + Realtime push
+- /workspaces/ThriveAtHome/lib/alerts/detectAlerts.ts — CREATED: per-call rule detection + wellness drift
+- /workspaces/ThriveAtHome/lib/alerts/index.ts — CREATED: barrel export
+- /workspaces/ThriveAtHome/supabase/functions/create-alert/index.ts — CREATED: Edge Function
+- /workspaces/ThriveAtHome/supabase/functions/check-missed-calls/index.ts — CREATED: cron Edge Function
+- /workspaces/ThriveAtHome/scripts/test-alert-rules.ts — CREATED: 23-assertion test suite
+- /workspaces/ThriveAtHome/scripts/test-wellness-drift.ts — CREATED: 5-assertion drift test
+- git commit f9a111e pushed to GitHub
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsx scripts/test-alert-rules.ts: PASSED — 23/23 checks (all 8 rules, dedup, emergency_log priority)
+- npx tsx scripts/test-wellness-drift.ts: PASSED — 5/5 checks (decline detected, flat/improving/insufficient do not fire)
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — all routes clean
+- git ls-files | grep .env: PASSED — only .env.local.example
+- Secrets scan: PASSED — no secrets in new files
+- .single() scan: PASSED — zero usage in new files
+
+ERRORS ENCOUNTERED:
+- TS2322: alerts table has no call_id column (schema per prompt.md) — removed call_id from alerts insert; callId still flows to emergency_log and realtime_notifications which do have the column
+- TS2345: AlertRule.type vs CreateAlertParams.alertType name mismatch — renamed field to alertType throughout
+- TS2322 line 85 switch exhaustiveness — added default case to alertSeverityToNotifSeverity
+
+DECISIONS MADE:
+- alerts table has no call_id per the schema in prompt.md — callId is preserved in emergency_log and realtime_notifications only
+- Wellness drift threshold: 1.5 mood points difference between recent half and prior half of 14-call window
+- Fall/crisis/emergency: dedupWindowHours=0 (always create — each occurrence is safety-critical)
+- wellness_drift: dedupWindowHours=168 (7-day dedup as specified in prompt)
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- Human must verify in browser: open /dashboard → run SQL INSERT into alerts table for Margaret Chen's member_id → confirm toast notification appears within 2 seconds (checklist item 3)
+- Human must deploy Edge Functions:
+  Option A: supabase functions deploy create-alert --project-ref qdniskppkfqjmtpkftdt
+             supabase functions deploy check-missed-calls --project-ref qdniskppkfqjmtpkftdt
+  Option B: Supabase Dashboard → Edge Functions → Deploy → paste each index.ts
+- If APPROVED after browser + deploy: mark all 6 Phase 10 items [x], begin Phase 11 (Crisis Detection)
+---
+
+AWAITING HUMAN APPROVAL
