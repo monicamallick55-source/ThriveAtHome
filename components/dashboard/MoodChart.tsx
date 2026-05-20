@@ -15,7 +15,7 @@ import type { CheckInCall } from '@/lib/data/calls'
 type Days = 7 | 30 | 60 | 90
 
 function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
 }
 
 function filterCallsByDays(calls: CheckInCall[], days: Days) {

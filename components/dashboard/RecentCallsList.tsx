@@ -24,7 +24,7 @@ const statusLabel: Record<string, string> = {
 
 function formatCallDate(dateStr: string | null, fallback: string): string {
   const d = new Date(dateStr ?? fallback)
-  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' })
 }
 
 function formatDuration(secs: number | null): string {
