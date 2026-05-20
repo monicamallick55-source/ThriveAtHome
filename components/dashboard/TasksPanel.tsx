@@ -15,7 +15,7 @@ const taskTypeBadge: Record<string, BadgeVariant> = {
 function formatDue(dateStr: string | null): string {
   if (!dateStr) return ''
   const d = new Date(dateStr)
-  return `Due ${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+  return `Due ${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })}`
 }
 
 export interface TasksPanelProps {
