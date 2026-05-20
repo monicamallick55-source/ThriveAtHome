@@ -207,6 +207,120 @@ STATUS: `COMPLETE`
 
 ---
 
+## UI Polish — P1–P8
+
+### P1 — Design System
+STATUS: `IN PROGRESS`
+
+- [ ] Google Fonts installed and loading — verify in browser DevTools → Network tab → Fonts
+- [ ] CSS custom properties visible — open DevTools → Elements → :root → all --color-* vars present
+- [x] Tailwind config updated (Tailwind v4 CSS @theme) — verify: npx tsc --noEmit passes → zero output
+- [ ] Body font is DM Sans — verify visually in browser
+- [ ] A heading is Cormorant Garamond — verify visually
+- [ ] Background is warm cream (#FAFAF5) — not pure white
+- [x] npm run build passes — zero errors (all 37 routes compiled successfully)
+
+### P2 — Component Library Rebuild
+STATUS: `NOT STARTED`
+
+- [ ] All 14 components render at /test-ui — visually inspect every variant
+- [ ] Body text is DM Sans, headings are Cormorant Garamond — confirmed visually
+- [ ] Background is warm cream — not pure white
+- [ ] All buttons min 56px height — inspect in DevTools
+- [ ] All inputs min 56px height — inspect in DevTools
+- [ ] Focus rings visible on all interactive elements — tab through /test-ui
+- [ ] Contrast ratio ≥ 7:1 on all text — check with DevTools → Accessibility
+- [ ] MoodEmoji shows emoji + score + label — all 6 states visible
+- [ ] StatusDot shows dot + label — not dot alone
+- [ ] Toast auto-dismisses after 6 seconds
+- [ ] npx tsc --noEmit passes
+- [ ] Delete /test-ui page after approval
+
+### P3 — Landing Page
+STATUS: `NOT STARTED`
+
+- [ ] Hero loads and the headline is Cormorant Garamond — visually confirmed
+- [ ] Mock wellness card renders correctly in hero
+- [ ] Page is fully readable on mobile (375px) — no horizontal scroll
+- [ ] All text ≥ 18px — check in DevTools
+- [ ] Buttons are 56px height minimum
+- [ ] Gradient background is subtle — not overpowering
+- [ ] Three feature sections render correctly
+- [ ] Pricing cards render, Connect is highlighted
+- [ ] Final CTA section is navy with cream text
+- [ ] npx tsc --noEmit passes
+
+### P4 — Login and Signup Pages
+STATUS: `NOT STARTED`
+
+- [ ] Login page: two-column layout on desktop, single column on mobile
+- [ ] Left panel is navy with quote text
+- [ ] All inputs are 56px height
+- [ ] Labels are visible above every input — no placeholder-only fields
+- [ ] Password show/hide toggle works
+- [ ] Error messages appear below failing fields
+- [ ] Submit buttons are full-width on mobile
+- [ ] npx tsc --noEmit passes
+- [ ] Functional test: sign up → login → redirected correctly (auth still works)
+
+### P5 — Onboarding Form
+STATUS: `NOT STARTED`
+
+- [ ] Progress bar shows 3 labelled steps
+- [ ] Step 1: all fields labelled, no placeholder-only
+- [ ] Step 2: call time as radio cards (not dropdown)
+- [ ] Step 2: topic pills are tappable and toggle correctly
+- [ ] Step 3: emergency contact in a card
+- [ ] Step 3: "Add another contact" expands the second contact
+- [ ] Step 3: lives alone is a toggle switch
+- [ ] Validation errors appear below failing fields
+- [ ] Form data survives page refresh (localStorage)
+- [ ] Submit creates member row with plan_tier='basics' — check Supabase after submission
+- [ ] Confirmation page shows senior's preferred name
+- [ ] Mobile: no horizontal scroll, all elements accessible at 375px
+- [ ] npx tsc --noEmit passes
+
+### P6 — Family Dashboard
+STATUS: `NOT STARTED`
+
+- [ ] Navigation bar renders on desktop and mobile
+- [ ] Navy header overlapped by wellness card (negative margin creates depth)
+- [ ] Wellness card: all 4 scores visible, AI summary in italic display font
+- [ ] Health timeline: chart renders, all 4 tabs work
+- [ ] Alerts panel: empty state shows warm teal message
+- [ ] Alerts panel: test alert card renders with correct severity colour
+- [ ] Quick actions: 2×2 grid on mobile, 4-across on desktop
+- [ ] Realtime: insert test alert → card appears within 2 seconds, no refresh
+- [ ] Mobile at 375px: no horizontal scroll, all text readable
+- [ ] npx tsc --noEmit passes
+
+### P7 — Call History and Family Tools
+STATUS: `NOT STARTED`
+
+- [ ] Call history renders with seed data, dates and mood emojis visible
+- [ ] Expanded call row shows AI summary in italic display font
+- [ ] Family tasks: create task works, task appears immediately
+- [ ] Documents: upload zone renders with dashed border
+- [ ] Documents: upload PDF → appears in list with download button
+- [ ] Documents: file > 10MB → calm amber error message
+- [ ] Documents: delete button removes the document
+- [ ] npx tsc --noEmit passes
+- [ ] Mobile at 375px: all three pages accessible, no horizontal scroll
+
+### P8 — Final Accessibility Audit and Production Deploy
+STATUS: `NOT STARTED`
+
+- [ ] axe-cli: zero violations on all 6 pages
+- [ ] npx tsc --noEmit: zero errors
+- [ ] npm run build: zero errors
+- [ ] git push triggers Vercel deployment
+- [ ] Production URL loads landing page correctly
+- [ ] Production URL: sign in works
+- [ ] Production URL: dashboard loads with real data
+- [ ] Mobile on real phone: no horizontal scroll, all text readable without zooming
+
+---
+
 ## Overall progress
 
 ```
@@ -218,6 +332,10 @@ M5  Alert Engine      [x][x]               2/2  ✅ COMPLETE
 M6  Family Dashboard  [x][x][x]            3/3  ✅ COMPLETE
 ─────────────────────────────────────────
 TOTAL                                      14/14  🎉 V1 COMPLETE — ALL PHASES APPROVED
+
+UI Polish
+P1  Design System      [ ]                  IN PROGRESS
+P2–P8                  [ ]                  NOT STARTED
 ```
 
 ---
