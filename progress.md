@@ -1159,3 +1159,284 @@ NEXT SESSION MUST:
 ---
 
 AWAITING HUMAN APPROVAL
+APPROVED
+
+---
+SESSION: 17
+DATE: 2026-05-19 UTC
+MILESTONE: M6
+PHASE: 12 — Dashboard Shell & Health Timeline
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase checklist: 0 of 5 items [x] (all 5 require browser verification)
+- Current item: All coded and built; awaiting human browser test
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider
+- emailProvider: StubEmailProvider
+- billingProvider: StubBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+- Phase 11 marked COMPLETE (APPROVED by human)
+- npm install recharts@3.8.1 — INSTALLED
+- /workspaces/ThriveAtHome/app/dashboard/page.tsx — CREATED: Server Component; requireAuth → getMemberForAuthUser → Promise.all 5 sections with 8s timeout per section → DashboardClient
+- /workspaces/ThriveAtHome/app/dashboard/loading.tsx — CREATED: Next.js skeleton loading state (nav bar + 4 SkeletonCard sections)
+- /workspaces/ThriveAtHome/components/dashboard/SectionError.tsx — CREATED: per-section error card (role=alert, friendly message)
+- /workspaces/ThriveAtHome/components/dashboard/MemberCard.tsx — CREATED: preferred_name header, StatusDot for member.status, plan tier Badge
+- /workspaces/ThriveAtHome/components/dashboard/MoodChart.tsx — CREATED: Recharts LineChart with 7/30/60/90-day Tabs; filters calls client-side by time window
+- /workspaces/ThriveAtHome/components/dashboard/AlertsPanel.tsx — CREATED: realtime alerts subscription (INSERT on alerts table for member_id), acknowledge button (Supabase client update via RLS), StatusDot showing worst unacked severity
+- /workspaces/ThriveAtHome/components/dashboard/RecentCallsList.tsx — CREATED: 5 most recent calls; MoodEmoji, duration, medication status, status Badge
+- /workspaces/ThriveAtHome/components/dashboard/TasksPanel.tsx — CREATED: pending tasks first, completed collapsed, link to /dashboard/family
+- /workspaces/ThriveAtHome/components/dashboard/DashboardClient.tsx — CREATED: ToastProvider wrapper → DashboardInner; sticky nav with NotificationBell; useNotifications hook; Card-wrapped sections in responsive grid
+- git commit 6425bfe pushed to GitHub
+- checklist.md: Phase 12 set to IN PROGRESS
+
+TESTS AND VERIFICATIONS RUN:
+- npm run build: PASSED — /dashboard appears as ƒ (dynamic SSR), all routes build clean
+- npx tsc --noEmit: PASSED — zero errors
+- curl /dashboard (unauthenticated): PASSED — 307 → /login (middleware protecting route)
+- curl / /login /signup /pricing: PASSED — all 200 (public routes unaffected)
+- git ls-files | grep .env: PASSED — only .env.local.example
+- Secrets scan: PASSED — no real secrets in any new file
+- .single() scan: PASSED — zero usage in new files
+
+ERRORS ENCOUNTERED:
+- Recharts Tooltip formatter type: (value: number) rejects undefined — fixed by changing to (value: unknown)
+
+DECISIONS MADE:
+- AlertsPanel subscribes to alerts INSERT events (requires Realtime enabled for alerts table — see human action below)
+- DashboardClient wraps DashboardInner in ToastProvider (useNotifications hook calls useToast, which requires ToastProvider as ancestor)
+- notifError prop present in DashboardClient for future use — notifications panel not in Phase 12 scope
+- All 5 data sections use withTimeout(8000) — if any section times out, it shows SectionError, rest renders normally
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- If APPROVED: begin Phase 13 (Call History Page) — /app/dashboard/calls/page.tsx, Load-more pagination, expanded row with plain-English flag labels
+- Human must perform ONE manual Supabase step BEFORE testing:
+  Supabase → Database → Replication → toggle INSERT for the "alerts" table (same process used for realtime_notifications in Phase 9). Without this, new alerts will not appear via Realtime.
+- Human must verify in browser (run `npm run dev` first):
+  1. Log in as test-family@thriveathome.dev / TestPassword123! → navigate to /dashboard → all sections load < 3 seconds
+  2. Click all 4 mood chart tabs (7 days, 30 days, 60 days, 90 days) → each renders without error
+  3. Run SQL in Supabase Editor: INSERT INTO alerts (member_id, alert_type, severity, message) VALUES ('a2136072-eaf4-476c-ac1d-67fba4bef909','mood_drop','concern','Test realtime alert') → alert card appears within 2 seconds, no page refresh
+  4. Break NEXT_PUBLIC_SUPABASE_URL (set to bad value), restart dev, load /dashboard → friendly error message, no stack trace visible. Restore URL.
+  5. DevTools → 375px width → scroll entire dashboard → no horizontal scroll
+---
+
+AWAITING HUMAN APPROVAL
+ISSUE: Hydration error on /dashboard after restoring correct Supabase URL. Error in components/dashboard/TasksPanel.tsx line 56 — the formatDue(task.due_date) function produces different output on server vs client (server renders "Due May 18", client renders "Due May 19"). This is a date timezone mismatch. Fix by formatting the date as UTC consistently on both server and client, or suppress hydration for that specific element using suppressHydrationWarning on the <p> tag.
+
+---
+SESSION: 18
+DATE: 2026-05-20 UTC
+MILESTONE: M6
+PHASE: 12 — Dashboard Shell & Health Timeline (hydration fix)
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase checklist: 0 of 5 items [x] (all 5 require browser verification)
+- Current item: Awaiting human browser test after hydration fix
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider
+- emailProvider: StubEmailProvider
+- billingProvider: StubBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+- /workspaces/ThriveAtHome/components/dashboard/TasksPanel.tsx — MODIFIED: formatDue — added timeZone:'UTC' to toLocaleDateString (hydration fix: UTC server and local-timezone browser now produce identical output)
+- /workspaces/ThriveAtHome/components/dashboard/RecentCallsList.tsx — MODIFIED: formatCallDate — same UTC fix applied
+- /workspaces/ThriveAtHome/components/dashboard/MoodChart.tsx — MODIFIED: formatDate — same UTC fix applied
+- git commit 81fc1ce (TasksPanel) pushed
+- git commit bdfeadf (RecentCallsList + MoodChart) pushed
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — /dashboard appears as ƒ (dynamic SSR), all routes clean
+- curl /dashboard (unauthenticated): PASSED — 307 → /login
+- Root cause confirmed: toLocaleDateString without timeZone:'UTC' renders differently on UTC server and user local-timezone browser. Fixed in all 3 date helpers.
+
+ERRORS ENCOUNTERED:
+- Hydration error: TasksPanel.tsx formatDue + RecentCallsList.tsx formatCallDate + MoodChart.tsx formatDate all used toLocaleDateString without timeZone. Resolution: pinned timeZone:'UTC' in all three.
+
+DECISIONS MADE:
+- Fixed all 3 date formatters across the dashboard (not just the one reported) to prevent future hydration issues
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- If APPROVED: begin Phase 13 (Call History Page) — /app/dashboard/calls/page.tsx, load-more pagination, expanded row with plain-English flag labels
+- Human must verify in browser (run npm run dev first):
+  1. Log in as test-family@thriveathome.dev, navigate to /dashboard → all sections load < 3 seconds
+  2. Click all 4 mood chart tabs → each renders without error
+  3. Run SQL: INSERT INTO alerts (member_id,alert_type,severity,message) VALUES ('a2136072-eaf4-476c-ac1d-67fba4bef909','mood_drop','concern','Test realtime alert') → alert appears within 2 seconds
+  4. Break NEXT_PUBLIC_SUPABASE_URL, restart dev, load /dashboard → friendly error, no stack trace. Restore.
+  5. DevTools → 375px → no horizontal scroll
+- Human must enable Realtime INSERT for "alerts" table in Supabase → Database → Replication (required for item 3 above)
+---
+
+AWAITING HUMAN APPROVAL
+APPROVED
+
+---
+SESSION: 19
+DATE: 2026-05-20 UTC
+MILESTONE: M6
+PHASE: 13 — Call History Page
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase checklist: 0 of 3 items [x] (all 3 require browser verification)
+- Current item: All coded and built; awaiting human browser test
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider
+- emailProvider: StubEmailProvider
+- billingProvider: StubBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+- Phase 12 marked COMPLETE (APPROVED by human; all 5 items [x] in checklist.md)
+- /workspaces/ThriveAtHome/lib/data/calls.ts — MODIFIED: added getCallCountForMember (total count for load-more)
+- /workspaces/ThriveAtHome/app/api/calls/route.ts — CREATED: GET endpoint; auth → authz (member ownership) → paginated calls
+- /workspaces/ThriveAtHome/components/dashboard/CallHistoryClient.tsx — CREATED: expandable call rows, FLAG_LABELS map (8 flags → plain English), load-more with offset pagination
+- /workspaces/ThriveAtHome/app/dashboard/calls/page.tsx — MODIFIED: replaced placeholder; Server Component with requireAuth, parallel fetch (calls + count), renders CallHistoryClient
+- /workspaces/ThriveAtHome/scripts/seed-test-data.ts — MODIFIED: extended MOOD_ARC from 14 to 25 calls; threshold changed from 14 to 25; seed ran and inserted 25 new calls (DB now has 39 total for Margaret)
+- git commit 0759078 pushed
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — /dashboard/calls appears as ƒ (dynamic SSR), all routes clean
+- curl /dashboard/calls (unauthenticated): PASSED — 307 → /login (middleware protecting route)
+- seed-test-data.ts ran: PASSED — inserted 25 new calls; DB now has 39 total calls for Margaret Chen
+- git ls-files | grep .env: PASSED — only .env.local.example (safe)
+- Secrets scan: PASSED — no secrets in new files
+- .single() scan: PASSED — zero usage in new files
+
+ERRORS ENCOUNTERED:
+- None
+
+DECISIONS MADE:
+- FLAG_LABELS map covers 8 flag values: low_mood, mood_drop, medication_miss, fall, missed_call, wellness_drift, crisis, emergency — unknown flags fall back to the raw flag name
+- Rows with no ai_summary AND no flags are not expandable (click disabled)
+- PAGE_SIZE = 20 in both the Server Component and the API route
+- getCallCountForMember uses admin client (bypasses RLS) since the auth check is done at the page/API layer
+- Seed extended to 25 calls; existing 14 were kept, 25 more added → 39 total (sufficient for load-more test)
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- If APPROVED: begin Phase 14 (Family Coordination Tools)
+- Human must verify in browser (run npm run dev first, log in as test-family@thriveathome.dev):
+  1. Navigate to /dashboard/calls → 20 calls shown, newest first, mood emoji and medication status visible on each row
+  2. Click a call with flags (calls with low_mood flag: last ~11 calls have mood <= 5) → row expands showing "Aria noted a mood concern this call" (not "low_mood")
+  3. Scroll to bottom of page, click "Load more (19 remaining)" → additional calls append, NO page reload
+---
+
+AWAITING HUMAN APPROVAL
+
+APPROVED
+
+---
+SESSION: 20
+DATE: 2026-05-20 UTC
+MILESTONE: M6
+PHASE: 14 — Family Coordination Tools
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase checklist: 0 of 7 items [x] (all 7 require browser verification + Edge Function deploy)
+- Current item: All coded and built; awaiting human browser test
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider
+- emailProvider: StubEmailProvider
+- billingProvider: StubBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+- Phase 13 marked COMPLETE (checklist.md updated, all 3 items [x] per APPROVED)
+- /workspaces/ThriveAtHome/lib/data/documents.ts — MODIFIED: added addDocument() function
+- /workspaces/ThriveAtHome/app/api/tasks/route.ts — CREATED: POST create task (auth → authz → createFamilyTask)
+- /workspaces/ThriveAtHome/app/api/messages/route.ts — CREATED: POST send message (auth → authz → createFamilyMessage)
+- /workspaces/ThriveAtHome/app/api/documents/route.ts — CREATED: GET list + POST upload (10 MB limit enforced, uploads to member-documents Storage bucket, records metadata)
+- /workspaces/ThriveAtHome/app/api/documents/[id]/download/route.ts — CREATED: GET signed URL (60-second expiry, generated at click time)
+- /workspaces/ThriveAtHome/components/dashboard/FamilyTaskBoard.tsx — CREATED: task board with Realtime INSERT+UPDATE subscriptions, create task form, mark-done button
+- /workspaces/ThriveAtHome/components/dashboard/FamilyChat.tsx — CREATED: family messaging with Realtime INSERT subscription, chat bubble UI, send form
+- /workspaces/ThriveAtHome/components/dashboard/DocumentVault.tsx — CREATED: file upload (client-side + server-side 10 MB validation), document list, download via signed URL
+- /workspaces/ThriveAtHome/app/dashboard/family/page.tsx — CREATED: Server Component; task board + messaging, link to /dashboard/documents
+- /workspaces/ThriveAtHome/app/dashboard/documents/page.tsx — CREATED: Server Component; document vault
+- /workspaces/ThriveAtHome/supabase/functions/family-nudge-check/index.ts — CREATED: cron Edge Function; 7-day absence + active alert → family_nudge notification; 7-day dedup
+- /workspaces/ThriveAtHome/scripts/test-family-nudge.ts — CREATED: 4-test, 8-assertion test suite
+- git commit 72a860f pushed to GitHub
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — all 6 new routes appear in build output
+- curl /dashboard/family (unauthenticated): PASSED — 307 → /login
+- curl /dashboard/documents (unauthenticated): PASSED — 307 → /login
+- GET /api/tasks: PASSED — 405 Method Not Allowed (correct; only POST defined)
+- git ls-files | grep .env: PASSED — only .env.local.example (safe)
+- Secrets scan: PASSED — no secrets in new files
+- .single() scan: PASSED — zero usage in new files
+- npx tsx scripts/test-family-nudge.ts: PASSED — 8/8 assertions
+
+ERRORS ENCOUNTERED:
+- None
+
+DECISIONS MADE:
+- Document storage path: {memberId}/{timestamp}_{safeFileName} — prevents collisions and groups by member
+- Signed URL expiry: 60 seconds — generated at click time per prompt spec
+- 10 MB limit enforced both client-side (instant UX feedback) and server-side (security)
+- FamilyTaskBoard: Realtime dedup using Array.some() prevents duplicate on optimistic + Realtime fire
+- FamilyChat: Ctrl+Enter sends message; same dedup approach
+- family-nudge-check: dedup window = 7 days matching the absence window
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- Human must perform 3 manual Supabase steps BEFORE testing:
+  1. Supabase → Database → Replication → toggle INSERT for "family_task_items" table
+  2. Supabase → Database → Replication → toggle INSERT for "family_messages" table
+  3. Supabase → Storage → New bucket: name "member-documents", toggle Private (no public access)
+- Human must deploy Edge Function:
+  supabase functions deploy family-nudge-check --project-ref qdniskppkfqjmtpkftdt
+  OR Supabase Dashboard → Edge Functions → Deploy → paste supabase/functions/family-nudge-check/index.ts
+- If APPROVED after all browser + deploy verifications: mark all 7 Phase 14 items [x], run M6 gate checks
+---
+
+AWAITING HUMAN APPROVAL
