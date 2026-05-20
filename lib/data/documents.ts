@@ -36,6 +36,32 @@ interface AddDocumentInput {
   isAdvanceDirective?: boolean
 }
 
+/** Delete a document record and return its storage path for cleanup. */
+export async function deleteDocument(
+  documentId: string,
+  memberId: string
+): Promise<{ storagePath: string | null; error: string | null }> {
+  try {
+    const admin = createAdminClient()
+    const { data, error } = await admin
+      .from('document_vault_items')
+      .delete()
+      .eq('id', documentId)
+      .eq('member_id', memberId)
+      .select('storage_path')
+      .maybeSingle()
+    if (error) {
+      console.error('[data/documents/deleteDocument]', error)
+      return { storagePath: null, error: error.message }
+    }
+    if (!data) return { storagePath: null, error: 'Document not found' }
+    return { storagePath: data.storage_path, error: null }
+  } catch (e) {
+    console.error('[data/documents/deleteDocument] Unexpected error:', e)
+    return { storagePath: null, error: e instanceof Error ? e.message : String(e) }
+  }
+}
+
 /** Record document metadata in the vault after upload to storage. */
 export async function addDocument(
   input: AddDocumentInput

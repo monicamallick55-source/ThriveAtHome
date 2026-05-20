@@ -34,6 +34,7 @@ export function DocumentVault({ memberId, initialDocuments, error }: DocumentVau
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [downloading, setDownloading] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState<string | null>(null)
   const [description, setDescription] = useState('')
   const [isAdvanceDirective, setIsAdvanceDirective] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
@@ -70,6 +71,19 @@ export function DocumentVault({ memberId, initialDocuments, error }: DocumentVau
       if (fileRef.current) fileRef.current.value = ''
     }
     setUploading(false)
+  }
+
+  async function handleDelete(docId: string, fileName: string) {
+    if (!confirm(`Delete "${fileName}"? This cannot be undone.`)) return
+    setDeleting(docId)
+    const res = await fetch(`/api/documents/${docId}`, { method: 'DELETE' })
+    const json = await res.json()
+    if (!res.ok) {
+      alert(json.error ?? 'Delete failed. Please try again.')
+    } else {
+      setDocuments((prev) => prev.filter((d) => d.id !== docId))
+    }
+    setDeleting(null)
   }
 
   async function handleDownload(docId: string, fileName: string) {
@@ -184,16 +198,28 @@ export function DocumentVault({ memberId, initialDocuments, error }: DocumentVau
                     Uploaded {formatDate(doc.created_at)}
                   </p>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleDownload(doc.id, doc.file_name)}
-                  loading={downloading === doc.id}
-                  className="shrink-0 min-h-[52px]"
-                  aria-label={`Download ${doc.file_name}`}
-                >
-                  Download
-                </Button>
+                <div className="flex gap-2 shrink-0">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDownload(doc.id, doc.file_name)}
+                    loading={downloading === doc.id}
+                    className="min-h-[52px]"
+                    aria-label={`Download ${doc.file_name}`}
+                  >
+                    Download
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => handleDelete(doc.id, doc.file_name)}
+                    loading={deleting === doc.id}
+                    className="min-h-[52px]"
+                    aria-label={`Delete ${doc.file_name}`}
+                  >
+                    Delete
+                  </Button>
+                </div>
               </li>
             ))}
           </ul>
