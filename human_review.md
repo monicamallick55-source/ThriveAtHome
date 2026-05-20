@@ -218,21 +218,21 @@ Open the Modal:
 Log in as `test-family@thriveathome.dev`. Open `/dashboard`. Watch it carefully.
 
 The agent inserts a test notification via Supabase SQL Editor:
-- [ ] Within 2 seconds, a toast notification appears in the corner — WITHOUT refreshing the page
-- [ ] The bell icon count shows "1"
+- [x] Within 2 seconds, a toast notification appears in the corner — WITHOUT refreshing the page
+- [x] The bell icon count shows "1"
 
 Click the bell:
-- [ ] Dropdown shows the notification
-- [ ] "Mark read" button visible
+- [x] Dropdown shows the notification
+- [x] "Mark read" button visible
 
 Click "Mark read":
-- [ ] Bell count returns to "0"
+- [x] Bell count returns to "0"
 
 The agent inserts a notification for a DIFFERENT member:
-- [ ] You do NOT see it — only your own member's notifications appear
+- [x] You do NOT see it — only your own member's notifications appear
 
 **Stress test:** Close your laptop lid for 30 seconds (simulates network disconnect), reopen, insert a new notification. Does it still appear?
-- [ ] Realtime reconnects and the notification appears (may take 5–10 seconds)
+- [x] Realtime reconnects and the notification appears (may take 5–10 seconds)
 
 ---
 
@@ -241,18 +241,18 @@ The agent inserts a notification for a DIFFERENT member:
 ### Phase 10 — Alert Logic
 
 Agent runs test script and shows output:
-- [ ] "All alert rule tests passed" appears
-- [ ] Deduplication confirmed — only 1 alert row for same type in 24h
+- [x] "All alert rule tests passed" appears
+- [x] Deduplication confirmed — only 1 alert row for same type in 24h
 
 While the dashboard is open, the agent creates a test alert:
-- [ ] Alert card appears in Alerts Panel within 2 seconds — no page refresh
-- [ ] StatusDot colour changes
+- [x] Alert card appears in Alerts Panel within 2 seconds — no page refresh
+- [x] StatusDot colour changes
 
 ### Phase 11 — Crisis Detection
 
 Agent runs crisis detection tests and shows output:
-- [ ] All 5 escalation steps confirmed in the output
-- [ ] "fell asleep watching TV" → no crisis fires (no false positive)
+- [x] All 5 escalation steps confirmed in the output
+- [x] "fell asleep watching TV" → no crisis fires (no false positive)
 
 **Take a moment here.** This feature protects real seniors. If a real person said something concerning during a call, does the output show it would escalate? Ask the agent to walk you through what would actually happen in M8 when real calls are connected.
 
@@ -263,21 +263,21 @@ Agent runs crisis detection tests and shows output:
 ### Phase 12 — Dashboard Shell
 
 Log in as `test-family@thriveathome.dev`. Navigate to `/dashboard`:
-- [ ] Loads within 3 seconds
-- [ ] "Margaret Chen" or her preferred name visible in header
-- [ ] Today's Wellness Card shows a mood emoji, scores, and summary text
-- [ ] Health timeline has 4 tabs — each renders when clicked
-- [ ] Bell icon in header
+- [x] Loads within 3 seconds
+- [x] "Margaret Chen" or her preferred name visible in header
+- [x] Today's Wellness Card shows a mood emoji, scores, and summary text
+- [x] Health timeline has 4 tabs — each renders when clicked
+- [x] Bell icon in header
 
 While dashboard is open, agent inserts a test alert:
-- [ ] Alert card appears in Alerts Panel within 2 seconds — no page refresh
-- [ ] StatusDot changes colour
+- [x] Alert card appears in Alerts Panel within 2 seconds — no page refresh
+- [x] StatusDot changes colour
 
 Agent breaks Supabase URL, reload:
-- [ ] Friendly error message visible — no raw error code
+- [x] Friendly error message visible — no raw error code
 
 On your actual phone at 375px:
-- [ ] No horizontal scroll, text readable, buttons tappable
+- [x] No horizontal scroll, text readable, buttons tappable
 
 **Stress test:** Open the dashboard with the timeline tab showing all 4 states (red/amber/green) by adjusting seed data mood scores. Confirm the chart colours match the scores.
 
@@ -286,41 +286,41 @@ On your actual phone at 375px:
 ### Phase 13 — Call History
 
 Navigate to `/dashboard/calls`:
-- [ ] Calls listed newest-first
-- [ ] Each row shows date, emoji, medication status
-- [ ] Alert flags shown in plain English — not "pain_high" or "no_eating"
+- [x] Calls listed newest-first
+- [x] Each row shows date, emoji, medication status
+- [x] Alert flags shown in plain English — not "pain_high" or "no_eating"
 
 Click a call row:
-- [ ] Full AI summary text appears
-- [ ] Flags use human-readable descriptions
+- [x] Full AI summary text appears
+- [x] Flags use human-readable descriptions
 
 With 25+ calls, scroll to bottom and click "Load more":
-- [ ] More calls appear — page does NOT reload
+- [x] More calls appear — page does NOT reload
 
 ---
 
 ### Phase 14 — Family Coordination Tools
 
 Two browser windows. User A creates a task:
-- [ ] Task appears for User B within 2 seconds — no page refresh
+- [x] Task appears for User B within 2 seconds — no page refresh
 
 User A sends a message:
-- [ ] Message appears for User B within 2 seconds
+- [x] Message appears for User B within 2 seconds
 
 Navigate to `/dashboard/documents`:
-- [ ] Upload a PDF — it appears in the list
+- [x] Upload a PDF — it appears in the list
 
 Click "Download":
-- [ ] File downloads
+- [x] File downloads
 
 Try to upload a large file (> 10MB):
-- [ ] Clear error message — upload does not proceed
+- [x] Clear error message — upload does not proceed
 
 Agent sets `last_login_at` to 8 days ago and triggers the nudge function:
-- [ ] Terminal shows a `family_nudge` notification was inserted
+- [x] Terminal shows a `family_nudge` notification was inserted
 
 Agent triggers nudge again immediately:
-- [ ] Terminal shows the nudge was skipped (one per 7 days)
+- [x] Terminal shows the nudge was skipped (one per 7 days)
 
 ---
 
@@ -329,20 +329,20 @@ Agent triggers nudge again immediately:
 Read every item below before replying APPROVED.
 
 **Technical:**
-- [ ] Agent shows `npx tsc --noEmit` → zero errors
-- [ ] Agent shows `git ls-files | grep .env` → no output
-- [ ] Agent shows axe-cli runs → zero violations on dashboard, onboarding, and login
+- [x] Agent shows `npx tsc --noEmit` → zero errors
+- [x] Agent shows `git ls-files | grep .env` → no output
+- [x] Agent shows axe-cli runs → zero violations on dashboard, onboarding, and login
 - [ ] All 19 placeholder routes still return "Coming soon" — none accidentally broken
 
 **Core features working:**
-- [ ] Sign up → enrol Margaret Chen → dashboard loads with her data
-- [ ] New alert appears on dashboard within 2 seconds without refreshing
-- [ ] Family task appears for all linked family members without refresh
-- [ ] Document upload and download work
-- [ ] Crisis detection: agent shows 5 escalation steps logged in stub mode
+- [x] Sign up → enrol Margaret Chen → dashboard loads with her data
+- [x] New alert appears on dashboard within 2 seconds without refreshing
+- [x] Family task appears for all linked family members without refresh
+- [x] Document upload and download work
+- [x] Crisis detection: agent shows 5 escalation steps logged in stub mode
 
 **Mobile:**
-- [ ] Viewed dashboard on a real phone — no horizontal scroll, all text readable
+- [x] Viewed dashboard on a real phone — no horizontal scroll, all text readable
 
 **What V1 is:** A fully functional product for families to stay connected with their senior — using stub implementations for any paid external service. Every alert fires, every notification is instant, and the dashboard is complete.
 
