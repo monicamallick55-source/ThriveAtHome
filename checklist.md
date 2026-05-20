@@ -203,7 +203,7 @@ STATUS: `COMPLETE`
 - [x] `npx axe-cli [URL]/onboarding --tags wcag2aa` → zero violations — Playwright/axe-core 4.10.2, Session 21
 - [x] `npx axe-cli [URL]/login --tags wcag2aa` → zero violations — Playwright/axe-core 4.10.2, Session 21
 - [x] All 19 placeholder routes still return 200 — all 23 routes tested, all 200, Session 21
-- [ ] End-to-end: sign up → enrol → dashboard → Realtime notification — requires human browser test
+- [x] End-to-end: sign up → enrol → dashboard → Realtime notification — APPROVED by human (Session 21: tasks/messages/documents/Realtime all working; Session 22: document delete confirmed)
 
 ---
 
@@ -215,9 +215,9 @@ M2  Member Data       [x][x][x]            3/3  ✅ COMPLETE
 M3  UI System         [x]                  1/1  ✅ COMPLETE
 M4  Realtime          [x]                  1/1  ✅ COMPLETE
 M5  Alert Engine      [x][x]               2/2  ✅ COMPLETE
-M6  Family Dashboard  [x][x][x]            3/3  ✅ COMPLETE (M6 gate pending end-to-end human test)
+M6  Family Dashboard  [x][x][x]            3/3  ✅ COMPLETE
 ─────────────────────────────────────────
-TOTAL                                      14/14  🎉 V1 COMPLETE (pending final human end-to-end gate)
+TOTAL                                      14/14  🎉 V1 COMPLETE — ALL PHASES APPROVED
 ```
 
 ---
