@@ -1623,3 +1623,58 @@ NEXT SESSION MUST:
 ---
 
 V1 COMPLETE — ALL 14 PHASES APPROVED
+
+We are doing the UI polish pass before M7. Please read prompt-ui.md which is in this workspace directory. Follow the instructions in that file to complete phases P1-P8. Begin with P1 — Design System immediately.
+
+---
+SESSION: 24
+DATE: 2026-05-20 UTC
+MILESTONE: UI Polish
+PHASE: P1 — Design System
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- P1 checklist: 2 of 7 items [x] (tsc + build verified programmatically; 5 require browser)
+- Current item: Awaiting human browser verification of fonts, colours, and background
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- All 8 providers remain stubs (UI polish does not touch business logic)
+
+WHAT WAS DONE THIS SESSION:
+- Read prompt-ui.md (.claude/prompt-ui.md) — 8 phases P1–P8 UI polish
+- /workspaces/ThriveAtHome/app/layout.tsx — MODIFIED: installed Cormorant Garamond, DM Sans, DM Mono via next/font/google; CSS variables --font-cormorant, --font-dm-sans, --font-dm-mono applied to body
+- /workspaces/ThriveAtHome/app/globals.css — MODIFIED: full design system — @theme block with all colour tokens, typography scale (min 18px), shadows, radius, mood/alert severity colours; base body + heading styles
+- /workspaces/ThriveAtHome/checklist.md — MODIFIED: added UI Polish sections P1–P8 with all checklist items; P1 set to IN PROGRESS
+- /workspaces/ThriveAtHome/tsconfig.json — MODIFIED: removed .next/dev/types/**/*.ts from include (recurring Session 21 issue — dev build adds it back each time; correct state is excluded)
+- git commit d60a3d5 pushed to GitHub
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors (with .next/dev/types excluded)
+- npm run build: PASSED — all 37 routes compiled successfully (Turbopack, TypeScript checked)
+- .next/dev/types issue: RECURRING from Session 21 — npm run build restores the entry; dev server must regenerate the file correctly. Fixed by re-excluding after each build.
+
+ERRORS ENCOUNTERED:
+- .next/dev/types/validator.ts malformed (same as Session 21) — resolved by excluding from tsconfig
+
+DECISIONS MADE:
+- Tailwind v4 CSS-first config: no tailwind.config.ts created (Tailwind v4 uses @theme in CSS; prompt-ui.md reference to tailwind.config.ts is for v3 — equivalent done in globals.css)
+- Used @theme (not @theme inline) so CSS custom properties are emitted to :root for direct var() use in CSS base styles
+- Font families use CSS var() references from next/font (--font-cormorant, --font-dm-sans, --font-dm-mono) set on body element
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- If APPROVED: Begin P2 (Component Library Rebuild) — rebuild all 14 components, create /app/test-ui/page.tsx for visual review
+- Human must verify in browser (run npm run dev first):
+  1. DevTools → Network → Fonts tab → Cormorant Garamond and DM Sans requests visible
+  2. DevTools → Elements → select <html> → Computed → --color-navy, --color-teal, --color-cream all present in :root
+  3. Page background should be warm cream (#FAFAF5) — not pure white
+  4. Body text should be DM Sans (humanist sans-serif, not Arial/system)
+  5. Any <h1>-<h4> element should render in Cormorant Garamond (elegant serif)
+---
+
+AWAITING HUMAN APPROVAL
