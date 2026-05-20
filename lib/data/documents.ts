@@ -25,3 +25,44 @@ export async function getDocumentsForMember(
     return { data: null, error: e instanceof Error ? e.message : String(e) }
   }
 }
+
+interface AddDocumentInput {
+  memberId: string
+  uploadedBy: string
+  fileName: string
+  fileType: string
+  description?: string | null
+  storagePath: string
+  isAdvanceDirective?: boolean
+}
+
+/** Record document metadata in the vault after upload to storage. */
+export async function addDocument(
+  input: AddDocumentInput
+): Promise<{ data: DocumentVaultItem | null; error: string | null }> {
+  try {
+    const admin = createAdminClient()
+    const { data, error } = await admin
+      .from('document_vault_items')
+      .insert({
+        member_id: input.memberId,
+        uploaded_by: input.uploadedBy,
+        file_name: input.fileName,
+        file_type: input.fileType,
+        description: input.description ?? null,
+        storage_path: input.storagePath,
+        is_advance_directive: input.isAdvanceDirective ?? false,
+      })
+      .select('*')
+      .maybeSingle()
+    if (error) {
+      console.error('[data/documents/addDocument]', error)
+      return { data: null, error: error.message }
+    }
+    if (!data) return { data: null, error: 'Insert returned no data' }
+    return { data: data as DocumentVaultItem, error: null }
+  } catch (e) {
+    console.error('[data/documents/addDocument] Unexpected error:', e)
+    return { data: null, error: e instanceof Error ? e.message : String(e) }
+  }
+}

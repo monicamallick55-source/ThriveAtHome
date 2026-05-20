@@ -178,14 +178,14 @@ STATUS: `COMPLETE`
 - [x] Mobile at 375px: no horizontal scroll — APPROVED by human
 
 ### Phase 13 — Call History Page
-STATUS: `IN PROGRESS`
+STATUS: `COMPLETE`
 
-- [ ] Calls listed newest-first, correct mood emoji and medication per row
-- [ ] Expanded row shows plain-English flag labels — not raw flag names
-- [ ] Load-more appends without page reload
+- [x] Calls listed newest-first, correct mood emoji and medication per row — APPROVED by human
+- [x] Expanded row shows plain-English flag labels — not raw flag names — APPROVED by human
+- [x] Load-more appends without page reload — APPROVED by human
 
 ### Phase 14 — Family Coordination Tools
-STATUS: `NOT STARTED`
+STATUS: `IN PROGRESS`
 
 - [ ] Task by User A appears for User B within 2 seconds via Realtime
 - [ ] Message by User A appears for User B within 2 seconds
@@ -214,9 +214,9 @@ M2  Member Data       [x][x][x]            3/3  ✅ COMPLETE
 M3  UI System         [x]                  1/1  ✅ COMPLETE
 M4  Realtime          [x]                  1/1  ✅ COMPLETE
 M5  Alert Engine      [x][x]               2/2  ✅ COMPLETE
-M6  Family Dashboard  [x][ ][ ]            1/3
+M6  Family Dashboard  [x][x][ ]            2/3
 ─────────────────────────────────────────
-TOTAL                                      7/14
+TOTAL                                      8/14
 ```
 
 ---
