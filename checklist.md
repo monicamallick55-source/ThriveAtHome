@@ -169,16 +169,16 @@ STATUS: `COMPLETE`
 ## M6 — Family Dashboard
 
 ### Phase 12 — Dashboard Shell & Health Timeline
-STATUS: `IN PROGRESS`
+STATUS: `COMPLETE`
 
-- [ ] Dashboard loads < 3 seconds with seed data
-- [ ] All 4 health timeline tabs render without error
-- [ ] New alert appears via Realtime within 2 seconds, no refresh
-- [ ] Error state: friendly message, no raw error code
-- [ ] Mobile at 375px: no horizontal scroll
+- [x] Dashboard loads < 3 seconds with seed data — APPROVED by human
+- [x] All 4 health timeline tabs render without error — APPROVED by human
+- [x] New alert appears via Realtime within 2 seconds, no refresh — APPROVED by human
+- [x] Error state: friendly message, no raw error code — APPROVED by human
+- [x] Mobile at 375px: no horizontal scroll — APPROVED by human
 
 ### Phase 13 — Call History Page
-STATUS: `NOT STARTED`
+STATUS: `IN PROGRESS`
 
 - [ ] Calls listed newest-first, correct mood emoji and medication per row
 - [ ] Expanded row shows plain-English flag labels — not raw flag names
@@ -214,7 +214,7 @@ M2  Member Data       [x][x][x]            3/3  ✅ COMPLETE
 M3  UI System         [x]                  1/1  ✅ COMPLETE
 M4  Realtime          [x]                  1/1  ✅ COMPLETE
 M5  Alert Engine      [x][x]               2/2  ✅ COMPLETE
-M6  Family Dashboard  [ ][ ][ ]            0/3
+M6  Family Dashboard  [x][ ][ ]            1/3
 ─────────────────────────────────────────
 TOTAL                                      7/14
 ```

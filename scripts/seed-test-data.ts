@@ -16,8 +16,10 @@ const TEST_EMAIL = 'test-family@thriveathome.dev'
 const TEST_PASSWORD = 'TestPassword123!'
 const NAV_EMAIL = 'test-navigator@thriveathome.dev'
 
-// Mood arc: 8,8,7,8,7,6,7,6,5,6,5,5,4,5 (14 calls, oldest to newest)
-const MOOD_ARC = [8, 8, 7, 8, 7, 6, 7, 6, 5, 6, 5, 5, 4, 5]
+// Mood arc: 25 calls total (oldest to newest).
+// First 11: older historical calls for load-more testing.
+// Last 14: the canonical 14-call arc (8,8,7,8,7,6,7,6,5,6,5,5,4,5).
+const MOOD_ARC = [9, 8, 9, 8, 7, 9, 8, 8, 7, 9, 8, 8, 8, 7, 8, 7, 6, 7, 6, 5, 6, 5, 5, 4, 5]
 
 async function seed(): Promise<void> {
   console.log('── Seed: ThriveAtHome test data ────────────────────────')
@@ -127,7 +129,7 @@ async function seed(): Promise<void> {
     .select('*', { count: 'exact', head: true })
     .eq('member_id', memberId)
 
-  if ((existingCallCount ?? 0) >= 14) {
+  if ((existingCallCount ?? 0) >= 25) {
     console.log(`   ↩  Already have ${existingCallCount} calls, skipping`)
   } else {
     const now = new Date()
@@ -157,7 +159,7 @@ async function seed(): Promise<void> {
 
     const { error } = await admin.from('check_in_calls').insert(callsToInsert)
     if (error) throw new Error(`check_in_calls insert failed: ${error.message}`)
-    console.log(`   ✅ Inserted 14 calls (mood arc: ${MOOD_ARC.join(',')})`)
+    console.log(`   ✅ Inserted ${MOOD_ARC.length} calls (mood arc: ${MOOD_ARC.join(',')})`)
   }
 
   // ── 5. alerts ───────────────────────────────────────────────────
