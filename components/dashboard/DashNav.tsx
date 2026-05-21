@@ -6,7 +6,6 @@ import { createClient } from '@/lib/supabase/client'
 
 interface DashNavProps {
   seniorName: string
-  familyInitial: string
   unreadCount: number
   onMarkAllRead: () => void
 }
@@ -18,7 +17,7 @@ const NAV_LINKS = [
   { href: '/dashboard/documents', label: 'Documents' },
 ]
 
-export function DashNav({ seniorName, familyInitial, unreadCount, onMarkAllRead }: DashNavProps) {
+export function DashNav({ seniorName, unreadCount, onMarkAllRead }: DashNavProps) {
   const pathname = usePathname()
   const router = useRouter()
 
@@ -102,43 +101,24 @@ export function DashNav({ seniorName, familyInitial, unreadCount, onMarkAllRead 
           })}
         </div>
 
-        {/* Right: Bell + avatar + sign out */}
+        {/* Right: Bell + sign out */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
           <NotificationBell
             count={unreadCount}
             onClick={onMarkAllRead}
             label="Notifications"
           />
-          <div
-            style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '50%',
-              backgroundColor: 'var(--color-teal)',
-              color: 'white',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontFamily: 'var(--font-body)',
-              fontSize: '18px',
-              fontWeight: 600,
-              flexShrink: 0,
-            }}
-            aria-label={`${seniorName}'s family dashboard`}
-          >
-            {familyInitial}
-          </div>
           <button
             onClick={handleSignOut}
             style={{
               fontFamily: 'var(--font-body)',
               fontSize: '15px',
               fontWeight: 500,
-              color: 'var(--color-text-muted)',
+              color: 'var(--color-navy)',
               background: 'none',
-              border: '1px solid var(--color-warm-grey)',
+              border: '1.5px solid var(--color-navy)',
               borderRadius: 'var(--radius-md)',
-              padding: '6px 14px',
+              padding: '6px 16px',
               cursor: 'pointer',
               minHeight: '36px',
               transition: 'all 0.2s',

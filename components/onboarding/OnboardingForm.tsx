@@ -203,19 +203,36 @@ export function OnboardingForm() {
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-cream)', padding: '32px 16px' }}>
       <div style={{ maxWidth: '640px', margin: '0 auto' }}>
-        {/* Wordmark */}
-        <p
-          style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: '24px',
-            color: 'var(--color-navy)',
-            fontWeight: 500,
-            textAlign: 'center',
-            marginBottom: '32px',
-          }}
-        >
-          ThriveAtHome
-        </p>
+        {/* Top nav: back link + wordmark */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '32px' }}>
+          <a
+            href="/dashboard"
+            style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: '15px',
+              fontWeight: 500,
+              color: 'var(--color-text-secondary)',
+              textDecoration: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+            }}
+          >
+            ← Dashboard
+          </a>
+          <p
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: '24px',
+              color: 'var(--color-navy)',
+              fontWeight: 500,
+              margin: 0,
+            }}
+          >
+            ThriveAtHome
+          </p>
+          <div style={{ width: '100px' }} aria-hidden="true" />
+        </div>
 
         {/* Step progress */}
         <div style={{ marginBottom: '32px' }}>

@@ -120,7 +120,6 @@ function DashboardInner(props: DashboardClientProps) {
 
   const { unreadCount, markAllRead } = useNotifications(member.id)
   const latestCall = initialCalls.length > 0 ? initialCalls[0] : null
-  const familyInitial = 'F'
 
   return (
     <div
@@ -132,7 +131,6 @@ function DashboardInner(props: DashboardClientProps) {
     >
       <DashNav
         seniorName={member.preferred_name}
-        familyInitial={familyInitial}
         unreadCount={unreadCount}
         onMarkAllRead={markAllRead}
       />

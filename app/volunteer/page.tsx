@@ -7,42 +7,23 @@ export const metadata: Metadata = { title: 'Volunteer Portal — ThriveAtHome' }
 export default function VolunteerPage() {
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-cream)', display: 'flex', flexDirection: 'column' }}>
-      <nav style={{ backgroundColor: 'var(--color-navy)', padding: '0 32px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Link href="/" style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--color-cream)', textDecoration: 'none', fontWeight: 500 }}>
-          ThriveAtHome
-        </Link>
-        <Link href="/login" style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'rgba(250,250,245,0.7)', textDecoration: 'none' }}>
-          Sign in
-        </Link>
+      <nav style={{ position: 'sticky', top: 0, zIndex: 40, backgroundColor: 'white', borderBottom: '1px solid var(--color-warm-grey)', boxShadow: 'var(--shadow-sm)', height: '64px', display: 'flex', alignItems: 'center' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Link href="/dashboard" style={{ fontFamily: 'var(--font-body)', fontSize: '18px', fontWeight: 500, color: 'var(--color-text-secondary)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            ← Dashboard
+          </Link>
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--color-navy)', fontWeight: 500 }}>ThriveAtHome</span>
+          <div style={{ width: '120px' }} aria-hidden="true" />
+        </div>
       </nav>
       <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '64px 32px' }}>
         <div style={{ textAlign: 'center', maxWidth: '480px' }}>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '42px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '16px', letterSpacing: '-0.01em' }}>
             Volunteer Portal
           </h1>
-          <p style={{ fontFamily: 'var(--font-body)', fontSize: '20px', color: 'var(--color-text-secondary)', lineHeight: 1.65, marginBottom: '40px' }}>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '20px', color: 'var(--color-text-secondary)', lineHeight: 1.65 }}>
             The volunteer portal is coming soon. Volunteers will be able to see care requests and coordinate with families.
           </p>
-          <Link
-            href="/"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              fontFamily: 'var(--font-body)',
-              fontSize: '18px',
-              fontWeight: 500,
-              color: 'var(--color-navy)',
-              textDecoration: 'none',
-              border: '1.5px solid var(--color-navy)',
-              borderRadius: 'var(--radius-md)',
-              padding: '12px 24px',
-              minHeight: '48px',
-              transition: 'all 0.2s',
-            }}
-          >
-            ← Back to home
-          </Link>
         </div>
       </main>
     </div>

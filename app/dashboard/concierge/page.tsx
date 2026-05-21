@@ -21,28 +21,9 @@ export default function ConciergePage() {
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '42px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '16px', letterSpacing: '-0.01em' }}>
             Concierge Line
           </h1>
-          <p style={{ fontFamily: 'var(--font-body)', fontSize: '20px', color: 'var(--color-text-secondary)', lineHeight: 1.65, marginBottom: '32px' }}>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '20px', color: 'var(--color-text-secondary)', lineHeight: 1.65 }}>
             Our concierge team is here to help. This feature is coming soon — for urgent needs, contact us at support@thriveathome.com.
           </p>
-          <Link
-            href="/dashboard"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              fontFamily: 'var(--font-body)',
-              fontSize: '18px',
-              fontWeight: 500,
-              color: 'var(--color-cream)',
-              textDecoration: 'none',
-              backgroundColor: 'var(--color-navy)',
-              borderRadius: 'var(--radius-md)',
-              padding: '12px 24px',
-              minHeight: '48px',
-              transition: 'all 0.2s',
-            }}
-          >
-            Return to dashboard
-          </Link>
         </div>
       </main>
     </div>

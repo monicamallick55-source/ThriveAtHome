@@ -178,6 +178,25 @@ export function LoginForm() {
         }}
       >
         <div style={{ width: '100%', maxWidth: '420px' }}>
+          {/* Back to home link (mobile only — desktop has wordmark in left panel) */}
+          <div style={{ marginBottom: '24px' }} className="login-back-home">
+            <Link
+              href="/"
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: '15px',
+                fontWeight: 500,
+                color: 'var(--color-text-secondary)',
+                textDecoration: 'none',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+              }}
+            >
+              ← Back to home
+            </Link>
+          </div>
+
           {/* Mobile wordmark */}
           <p
             style={{

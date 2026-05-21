@@ -193,6 +193,25 @@ export function SignupForm() {
         }}
       >
         <div style={{ width: '100%', maxWidth: '420px' }}>
+          {/* Back to home link */}
+          <div style={{ marginBottom: '24px' }}>
+            <Link
+              href="/"
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: '15px',
+                fontWeight: 500,
+                color: 'var(--color-text-secondary)',
+                textDecoration: 'none',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+              }}
+            >
+              ← Back to home
+            </Link>
+          </div>
+
           {/* Mobile wordmark */}
           <p
             style={{
