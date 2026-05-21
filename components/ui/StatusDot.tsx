@@ -1,43 +1,64 @@
-export type StatusLevel = 'ok' | 'concern' | 'urgent' | 'emergency' | 'unknown'
+export type StatusLevel = 'no_alerts' | 'informational' | 'concern' | 'urgent' | 'emergency'
 
 export interface StatusDotProps {
   level: StatusLevel
-  pulse?: boolean
-  label?: string
   size?: 'sm' | 'md' | 'lg'
+  className?: string
 }
 
-const colorClasses: Record<StatusLevel, string> = {
-  ok:        'bg-green-500',
-  concern:   'bg-yellow-400',
-  urgent:    'bg-orange-500',
-  emergency: 'bg-red-600',
-  unknown:   'bg-gray-400',
+const dotColorClasses: Record<StatusLevel, string> = {
+  no_alerts:     'bg-[var(--color-mood-high)]',
+  informational: 'bg-[var(--color-navy-light)]',
+  concern:       'bg-[var(--color-concern-border)]',
+  urgent:        'bg-[var(--color-urgent-border)]',
+  emergency:     'bg-[var(--color-urgent-text)]',
 }
 
-const ariaLabels: Record<StatusLevel, string> = {
-  ok:        'Status: good',
-  concern:   'Status: concern',
-  urgent:    'Status: urgent',
-  emergency: 'Status: emergency',
-  unknown:   'Status: unknown',
+const labelText: Record<StatusLevel, string> = {
+  no_alerts:     'All good',
+  informational: 'Note',
+  concern:       'Attention',
+  urgent:        'Urgent',
+  emergency:     'Emergency',
 }
 
-const sizeClasses = { sm: 'w-2.5 h-2.5', md: 'w-3.5 h-3.5', lg: 'w-4 h-4' }
+const textColorClasses: Record<StatusLevel, string> = {
+  no_alerts:     'text-[var(--color-mood-high)]',
+  informational: 'text-[var(--color-navy-light)]',
+  concern:       'text-[var(--color-concern-text)]',
+  urgent:        'text-[var(--color-urgent-text)]',
+  emergency:     'text-[var(--color-urgent-text)]',
+}
 
-export function StatusDot({ level, pulse = false, label, size = 'md' }: StatusDotProps) {
+const pulseStates: StatusLevel[] = ['concern', 'urgent', 'emergency']
+
+const dotSizeClasses = {
+  sm: 'w-2 h-2',
+  md: 'w-2.5 h-2.5',
+  lg: 'w-3.5 h-3.5',
+}
+
+export function StatusDot({ level, size = 'md', className = '' }: StatusDotProps) {
+  const label = labelText[level]
+  const shouldPulse = pulseStates.includes(level)
+
   return (
     <span
       role="img"
-      aria-label={label ?? ariaLabels[level]}
-      className="inline-flex items-center gap-1.5"
+      aria-label={`Status: ${label}`}
+      className={`inline-flex items-center gap-2 ${className}`}
     >
-      <span className={`relative inline-flex rounded-full ${sizeClasses[size]} ${colorClasses[level]}`}>
-        {pulse && level !== 'ok' && level !== 'unknown' && (
-          <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${colorClasses[level]} opacity-60`} />
+      <span className={`relative inline-flex rounded-full flex-shrink-0 ${dotSizeClasses[size]} ${dotColorClasses[level]}`}>
+        {shouldPulse && (
+          <span
+            aria-hidden="true"
+            className={`animate-ping absolute inline-flex h-full w-full rounded-full ${dotColorClasses[level]} opacity-50`}
+          />
         )}
       </span>
-      {label && <span className="text-base text-gray-700">{label}</span>}
+      <span className={`text-sm font-medium ${textColorClasses[level]}`}>
+        {label}
+      </span>
     </span>
   )
 }

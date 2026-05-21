@@ -188,7 +188,7 @@ export function FamilyTaskBoard({
               )}
             </div>
             <Button
-              variant="outline"
+              variant="secondary"
               size="sm"
               onClick={() => handleComplete(task.id)}
               loading={completing === task.id}

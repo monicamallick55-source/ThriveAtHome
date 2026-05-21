@@ -48,9 +48,10 @@ LOG_FILE="claude-build.log"
 PROMPT="You are the autonomous build agent for Thrive@Home. You have full permission to read files, write files, create files, and run bash commands. Do not ask for permission. Do not pause to ask questions. Just build.
 
 Read these files immediately, in this exact order, before doing anything else:
-1. prompt.md        — your full build instructions and the agentic loop protocol
-2. progress.md      — where the build is right now and where to resume
-3. checklist.md     — current state of every checklist item
+1. prompt-ui.md     — UI polish instructions for this session
+2. prompt.md        — the agentic loop protocol (Section 1 still applies)
+3. progress.md      — where the build is right now and where to resume
+4. checklist.md     — current state of every checklist item
 
 Then act immediately based on what you find:
 - If progress.md shows no sessions started: check node --version, then begin Phase 1 right now

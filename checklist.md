@@ -210,18 +210,18 @@ STATUS: `COMPLETE`
 ## UI Polish — P1–P8
 
 ### P1 — Design System
-STATUS: `IN PROGRESS`
+STATUS: `COMPLETE`
 
-- [ ] Google Fonts installed and loading — verify in browser DevTools → Network tab → Fonts
-- [ ] CSS custom properties visible — open DevTools → Elements → :root → all --color-* vars present
+- [x] Google Fonts installed and loading — APPROVED by human
+- [x] CSS custom properties visible — APPROVED by human
 - [x] Tailwind config updated (Tailwind v4 CSS @theme) — verify: npx tsc --noEmit passes → zero output
-- [ ] Body font is DM Sans — verify visually in browser
-- [ ] A heading is Cormorant Garamond — verify visually
-- [ ] Background is warm cream (#FAFAF5) — not pure white
+- [x] Body font is DM Sans — APPROVED by human
+- [x] A heading is Cormorant Garamond — APPROVED by human
+- [x] Background is warm cream (#FAFAF5) — APPROVED by human
 - [x] npm run build passes — zero errors (all 37 routes compiled successfully)
 
 ### P2 — Component Library Rebuild
-STATUS: `NOT STARTED`
+STATUS: `IN PROGRESS`
 
 - [ ] All 14 components render at /test-ui — visually inspect every variant
 - [ ] Body text is DM Sans, headings are Cormorant Garamond — confirmed visually
@@ -233,7 +233,7 @@ STATUS: `NOT STARTED`
 - [ ] MoodEmoji shows emoji + score + label — all 6 states visible
 - [ ] StatusDot shows dot + label — not dot alone
 - [ ] Toast auto-dismisses after 6 seconds
-- [ ] npx tsc --noEmit passes
+- [x] npx tsc --noEmit passes — zero errors
 - [ ] Delete /test-ui page after approval
 
 ### P3 — Landing Page

@@ -26,42 +26,46 @@ export function useToast() {
   return ctx
 }
 
-const severityClasses: Record<ToastSeverity, string> = {
-  info:      'bg-blue-600 border-blue-700',
-  concern:   'bg-yellow-500 border-yellow-600',
-  urgent:    'bg-orange-500 border-orange-600',
-  emergency: 'bg-red-600 border-red-700',
-  success:   'bg-green-600 border-green-700',
-}
-
-const severityIcons: Record<ToastSeverity, string> = {
-  info: 'ℹ', concern: '⚠', urgent: '🔶', emergency: '🚨', success: '✓',
+const severityStyles: Record<ToastSeverity, { container: string; icon: string; border: string }> = {
+  info:      { container: 'bg-[var(--color-cream)] text-[var(--color-text-primary)]',   icon: 'ℹ', border: 'border-l-4 border-l-[var(--color-navy)] border border-[var(--color-warm-grey)]' },
+  success:   { container: 'bg-[var(--color-teal-muted)] text-[var(--color-text-primary)]', icon: '✓', border: 'border-l-4 border-l-[var(--color-teal)] border border-[var(--color-warm-grey)]' },
+  concern:   { container: 'bg-[var(--color-concern)] text-[var(--color-concern-text)]', icon: '⚠', border: 'border-l-4 border-l-[var(--color-concern-border)] border border-[var(--color-concern-border)]' },
+  urgent:    { container: 'bg-[var(--color-urgent)] text-[var(--color-urgent-text)]',   icon: '⚠', border: 'border-l-4 border-l-[var(--color-urgent-border)] border border-[var(--color-urgent-border)]' },
+  emergency: { container: 'bg-[var(--color-emergency)] text-white',                      icon: '🚨', border: 'border-2 border-[var(--color-urgent-border)]' },
 }
 
 function ToastItem({ toast, onDismiss }: { toast: ToastMessage; onDismiss: (id: string) => void }) {
   useEffect(() => {
-    const duration = toast.duration ?? 5000
+    const duration = toast.duration ?? 6000
     const timer = setTimeout(() => onDismiss(toast.id), duration)
     return () => clearTimeout(timer)
   }, [toast.id, toast.duration, onDismiss])
+
+  const style = severityStyles[toast.severity]
+  const isEmergency = toast.severity === 'emergency'
 
   return (
     <div
       role="alert"
       aria-live="assertive"
       aria-atomic="true"
-      className={`flex items-start gap-3 w-full max-w-sm rounded-xl border text-white p-4 shadow-lg ${severityClasses[toast.severity]}`}
+      className={[
+        'flex items-start gap-3 rounded-[var(--radius-md)] shadow-[var(--shadow-lg)] p-4',
+        isEmergency ? 'w-screen max-w-full text-center justify-center' : 'w-full max-w-[360px]',
+        style.container,
+        style.border,
+      ].join(' ')}
     >
-      <span className="text-xl mt-0.5 flex-shrink-0" aria-hidden="true">{severityIcons[toast.severity]}</span>
+      <span className="text-xl mt-0.5 flex-shrink-0" aria-hidden="true">{style.icon}</span>
       <div className="flex-1 min-w-0">
-        <p className="font-semibold text-lg leading-tight">{toast.title}</p>
-        {toast.body && <p className="text-base opacity-90 mt-0.5">{toast.body}</p>}
+        <p className="font-medium text-base leading-snug">{toast.title}</p>
+        {toast.body && <p className="text-sm opacity-80 mt-0.5">{toast.body}</p>}
       </div>
       <button
         type="button"
         onClick={() => onDismiss(toast.id)}
         aria-label="Dismiss notification"
-        className="flex-shrink-0 ml-2 text-white/80 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white rounded p-0.5 min-h-[44px] min-w-[44px] flex items-center justify-center"
+        className="flex-shrink-0 ml-1 opacity-60 hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-teal)] rounded-[var(--radius-sm)] p-1 min-h-[44px] min-w-[44px] flex items-center justify-center transition-opacity"
       >
         ✕
       </button>
@@ -86,7 +90,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       {children}
       <div
         aria-label="Notifications"
-        className="fixed bottom-4 right-4 z-50 flex flex-col gap-3 items-end"
+        className="fixed top-6 right-6 z-50 flex flex-col gap-2 items-end"
       >
         {toasts.map(t => (
           <ToastItem key={t.id} toast={t} onDismiss={dismiss} />

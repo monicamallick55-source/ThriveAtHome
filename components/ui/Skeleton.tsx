@@ -11,7 +11,7 @@ export function Skeleton({ height = 'h-6', width = 'w-full', rounded = false, cl
     <div
       role="status"
       aria-label="Loading…"
-      className={`animate-pulse bg-gray-200 ${height} ${width} ${rounded ? 'rounded-full' : 'rounded-lg'} ${className}`}
+      className={`animate-pulse bg-[var(--color-warm-grey)] ${height} ${width} ${rounded ? 'rounded-full' : 'rounded-[var(--radius-md)]'} ${className}`}
       {...rest}
     >
       <span className="sr-only">Loading…</span>
@@ -21,7 +21,7 @@ export function Skeleton({ height = 'h-6', width = 'w-full', rounded = false, cl
 
 export function SkeletonCard() {
   return (
-    <div role="status" aria-label="Loading card" className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm space-y-3">
+    <div role="status" aria-label="Loading card" className="bg-[var(--color-warm-white)] rounded-[var(--radius-lg)] border border-[var(--color-warm-grey)] p-6 shadow-[var(--shadow-card)] space-y-3">
       <Skeleton height="h-6" width="w-1/3" />
       <Skeleton height="h-4" />
       <Skeleton height="h-4" width="w-3/4" />

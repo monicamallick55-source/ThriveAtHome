@@ -13,9 +13,10 @@ export interface TabsProps {
   defaultTab?: string
   onChange?: (id: string) => void
   label: string
+  variant?: 'underline' | 'pill'
 }
 
-export function Tabs({ tabs, defaultTab, onChange, label }: TabsProps) {
+export function Tabs({ tabs, defaultTab, onChange, label, variant = 'underline' }: TabsProps) {
   const [active, setActive] = useState(defaultTab ?? tabs[0]?.id ?? '')
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([])
 
@@ -37,9 +38,24 @@ export function Tabs({ tabs, defaultTab, onChange, label }: TabsProps) {
     }
   }
 
+  const getTabClass = (isActive: boolean) => {
+    if (variant === 'pill') {
+      return isActive
+        ? 'bg-[var(--color-navy)] text-[var(--color-cream)] rounded-[var(--radius-full)] px-4 py-2'
+        : 'bg-transparent text-[var(--color-text-secondary)] hover:bg-[var(--color-warm-grey)] rounded-[var(--radius-full)] px-4 py-2'
+    }
+    return isActive
+      ? 'border-b-2 border-[var(--color-navy)] text-[var(--color-navy)]'
+      : 'border-b-2 border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-navy)] hover:border-[var(--color-warm-grey)]'
+  }
+
   return (
     <div>
-      <div role="tablist" aria-label={label} className="flex border-b border-gray-200 gap-1 overflow-x-auto">
+      <div
+        role="tablist"
+        aria-label={label}
+        className={`flex gap-1 overflow-x-auto ${variant === 'underline' ? 'border-b border-[var(--color-warm-grey)]' : 'p-1 bg-[var(--color-warm-grey)] rounded-[var(--radius-full)] w-fit'}`}
+      >
         {tabs.map((tab, i) => (
           <button
             key={tab.id}
@@ -52,11 +68,12 @@ export function Tabs({ tabs, defaultTab, onChange, label }: TabsProps) {
             tabIndex={active === tab.id ? 0 : -1}
             onClick={() => handleSelect(tab.id)}
             onKeyDown={e => handleKeyDown(e, i)}
-            className={`px-4 py-3 text-lg font-medium border-b-2 whitespace-nowrap transition-colors min-h-[52px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1B3A6B] focus-visible:ring-inset
-              ${active === tab.id
-                ? 'border-[#1B3A6B] text-[#1B3A6B]'
-                : 'border-transparent text-gray-500 hover:text-[#1B3A6B] hover:border-gray-300'
-              }`}
+            className={[
+              'text-base font-medium whitespace-nowrap transition-all duration-200 min-h-[44px]',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-teal)] focus-visible:ring-offset-1',
+              variant === 'underline' ? 'px-4 py-3' : '',
+              getTabClass(active === tab.id),
+            ].join(' ')}
           >
             {tab.label}
           </button>

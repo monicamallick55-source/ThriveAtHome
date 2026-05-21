@@ -1678,3 +1678,78 @@ NEXT SESSION MUST:
 ---
 
 AWAITING HUMAN APPROVAL
+APPROVED
+
+---
+SESSION: 25
+DATE: 2026-05-21 UTC
+MILESTONE: UI Polish
+PHASE: P2 — Component Library Rebuild
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- P1 checklist: 7 of 7 items [x] — marked COMPLETE (human APPROVED)
+- P2 checklist: 1 of 12 items [x] (tsc verified); 10 require browser visual verification; 1 (delete test-ui) awaits approval
+- Current item: Awaiting human browser verification of all 14 components at /test-ui
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- All 8 providers remain stubs (UI polish does not touch business logic)
+
+WHAT WAS DONE THIS SESSION:
+- checklist.md — P1 marked COMPLETE (7/7 [x]), P2 set to IN PROGRESS
+- components/ui/Button.tsx — REBUILT: variants now primary/secondary/teal/ghost/danger; min-h-[56px] min-w-[56px]; rounded-[--radius-md]; teal focus ring; transition-all duration-200
+- components/ui/Card.tsx — REBUILT: variants default/highlight/warning/danger/emergency; warm-white bg; rounded-[--radius-lg]; shadow-[--shadow-card]; warm-grey border; left-border accent for non-default variants
+- components/ui/Badge.tsx — REBUILT: colors mapped to design system vars (teal-muted/mood-high for success; info/concern/urgent/emergency vars for others); rounded-[--radius-sm]
+- components/ui/Input.tsx — REBUILT: h-14 (56px); warm-grey border-[1.5px]; teal focus ring; placeholder text-warm-mid; error uses urgent-text/urgent-border; gap-2 label spacing
+- components/ui/Select.tsx — REBUILT: matching Input styling; custom SVG chevron; appearance-none
+- components/ui/Textarea.tsx — REBUILT: matching Input styling; resize-y; min-h-[112px]
+- components/ui/Skeleton.tsx — REBUILT: colors updated to --color-warm-grey; rounded-[--radius-md]; SkeletonCard uses warm-white bg
+- components/ui/StatusDot.tsx — REBUILT: new StatusLevel type (no_alerts/informational/concern/urgent/emergency); always shows dot+label; pulse auto-applied for concern/urgent/emergency; text color per level
+- components/ui/MoodEmoji.tsx — REBUILT: pill display (emoji + score/10 + label); 6 states as specified; min-width per size; removed showScore prop (always shows score in pill)
+- components/ui/NotificationBell.tsx — REBUILT: teal badge (not red); min-w/h-[56px]; rounded-full hover; teal focus ring
+- components/ui/Toast.tsx — REBUILT: position top-right (was bottom); auto-dismiss 6s (was 5s); left-border variants for info/success/concern/urgent; emergency = dark bg full treatment
+- components/ui/Modal.tsx — REBUILT: warm-white bg; navy/40 backdrop; rounded-[--radius-xl]; teal focus ring; display font for title
+- components/ui/Tabs.tsx — REBUILT: added pill variant (navy bg on active, cream text); underline variant updated to design system colors; same WAI-ARIA keyboard pattern
+- components/ui/ProgressBar.tsx — REBUILT: design system color vars; warm-grey track; renamed 'yellow' → 'amber' color option
+- app/test-ui/page.tsx — CREATED: visual gallery of all 14 components in all variants
+- components/dashboard/AlertsPanel.tsx — MODIFIED: StatusLevel 'ok' → 'no_alerts'; removed pulse prop; Button variant 'outline' → 'secondary'
+- components/dashboard/MemberCard.tsx — MODIFIED: StatusLevel 'ok' → 'no_alerts', 'unknown' → 'informational'; removed pulse prop
+- components/dashboard/DocumentVault.tsx, FamilyTaskBoard.tsx, CallHistoryClient.tsx — MODIFIED: Button variant 'outline' → 'secondary'
+- components/dashboard/CallHistoryClient.tsx, RecentCallsList.tsx — MODIFIED: removed showScore prop from MoodEmoji (no longer exists in rebuilt component)
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — /test-ui in build output, all routes compile
+
+ERRORS ENCOUNTERED:
+- StatusLevel type mismatch in AlertsPanel + MemberCard (used old 'ok'/'unknown' values) — fixed by mapping to 'no_alerts'/'informational'
+- ButtonVariant mismatch: 'outline' removed from rebuilt Button; 3 dashboard files used it — replaced with 'secondary'
+- MoodEmoji.showScore removed in rebuild; 2 dashboard files used it — removed the prop from call sites
+
+DECISIONS MADE:
+- MoodEmoji now always renders as a pill (emoji + score + label) — showScore removed as separate prop; score is always shown
+- StatusDot: pulse prop removed; pulse is automatic based on level (concern/urgent/emergency pulse by default)
+- Toast moved to top-right per prompt-ui.md spec; 6s auto-dismiss per spec
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- If APPROVED: delete app/test-ui/page.tsx, run npx tsc --noEmit + npm run build, mark all P2 items [x], begin P3 (Landing Page)
+- Human must verify in browser (run npm run dev, open http://localhost:3000/test-ui):
+  1. All 14 sections visible — no blank or broken sections
+  2. Page background is warm cream (not pure white)
+  3. Headings (h1, h2) are in Cormorant Garamond (elegant serif)
+  4. Body text is DM Sans (humanist sans, not Arial)
+  5. Buttons: visually confirm min 56px height (DevTools → Inspect any button → computed height)
+  6. Inputs: visually confirm min 56px height (h-14 = 56px)
+  7. Tab through all interactive elements — focus rings visible (2px teal ring)
+  8. MoodEmoji: all 6 states show emoji + score/10 + label in a pill
+  9. StatusDot: all 5 states show dot + label text (never dot alone)
+  10. Click a Toast button → toast appears top-right → auto-dismisses after ~6 seconds
+---
+
+AWAITING HUMAN APPROVAL

@@ -3,29 +3,29 @@ export interface ProgressBarProps {
   max?: number
   label: string
   showValue?: boolean
-  color?: 'navy' | 'teal' | 'green' | 'yellow' | 'red'
+  color?: 'navy' | 'teal' | 'green' | 'amber' | 'red'
   size?: 'sm' | 'md' | 'lg'
 }
 
 const colorClasses = {
-  navy:   'bg-[#1B3A6B]',
-  teal:   'bg-[#2A9D8F]',
-  green:  'bg-green-500',
-  yellow: 'bg-yellow-400',
-  red:    'bg-red-600',
+  navy:  'bg-[var(--color-navy)]',
+  teal:  'bg-[var(--color-teal)]',
+  green: 'bg-[var(--color-mood-high)]',
+  amber: 'bg-[var(--color-concern-border)]',
+  red:   'bg-[var(--color-urgent-text)]',
 }
 
-const sizeClasses = { sm: 'h-2', md: 'h-3', lg: 'h-4' }
+const sizeClasses = { sm: 'h-1.5', md: 'h-2', lg: 'h-3' }
 
 export function ProgressBar({ value, max = 100, label, showValue = false, color = 'teal', size = 'md' }: ProgressBarProps) {
   const pct = Math.min(100, Math.max(0, (value / max) * 100))
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-1.5">
       <div className="flex justify-between items-center">
-        <span className="text-base font-medium text-gray-700">{label}</span>
+        <span className="text-base font-medium text-[var(--color-text-secondary)]">{label}</span>
         {showValue && (
-          <span className="text-base text-gray-500" aria-hidden="true">{Math.round(pct)}%</span>
+          <span className="text-sm font-mono text-[var(--color-text-muted)]" aria-hidden="true">{Math.round(pct)}%</span>
         )}
       </div>
       <div
@@ -34,7 +34,7 @@ export function ProgressBar({ value, max = 100, label, showValue = false, color 
         aria-valuemin={0}
         aria-valuemax={max}
         aria-label={`${label}: ${Math.round(pct)}%`}
-        className={`w-full bg-gray-200 rounded-full overflow-hidden ${sizeClasses[size]}`}
+        className={`w-full bg-[var(--color-warm-grey)] rounded-full overflow-hidden ${sizeClasses[size]}`}
       >
         <div
           className={`h-full rounded-full transition-all duration-500 ${colorClasses[color]}`}

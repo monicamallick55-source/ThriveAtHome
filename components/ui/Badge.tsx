@@ -8,12 +8,12 @@ export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 }
 
 const variantClasses: Record<BadgeVariant, string> = {
-  info:      'bg-blue-100 text-blue-800',
-  concern:   'bg-yellow-100 text-yellow-800',
-  urgent:    'bg-orange-100 text-orange-800',
-  emergency: 'bg-red-100 text-red-800',
-  success:   'bg-green-100 text-green-800',
-  neutral:   'bg-gray-100 text-gray-700',
+  info:      'bg-[var(--color-info)] text-[var(--color-info-text)]',
+  concern:   'bg-[var(--color-concern)] text-[var(--color-concern-text)]',
+  urgent:    'bg-[var(--color-urgent)] text-[var(--color-urgent-text)]',
+  emergency: 'bg-[var(--color-emergency)] text-[var(--color-emergency-text)]',
+  success:   'bg-[var(--color-teal-muted)] text-[var(--color-mood-high)]',
+  neutral:   'bg-[var(--color-warm-grey)] text-[var(--color-text-secondary)]',
 }
 
 const variantLabels: Record<BadgeVariant, string> = {
@@ -26,7 +26,7 @@ export function Badge({ variant = 'neutral', icon, children, className = '', ...
     <span
       role="status"
       aria-label={`${variantLabels[variant]}: ${typeof children === 'string' ? children : ''}`}
-      className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-base font-medium ${variantClasses[variant]} ${className}`}
+      className={`inline-flex items-center gap-1 px-3 py-1 rounded-[var(--radius-sm)] text-sm font-medium ${variantClasses[variant]} ${className}`}
       {...rest}
     >
       {icon && <span aria-hidden="true">{icon}</span>}

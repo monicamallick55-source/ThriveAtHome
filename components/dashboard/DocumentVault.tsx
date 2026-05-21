@@ -200,7 +200,7 @@ export function DocumentVault({ memberId, initialDocuments, error }: DocumentVau
                 </div>
                 <div className="flex gap-2 shrink-0">
                   <Button
-                    variant="outline"
+                    variant="secondary"
                     size="sm"
                     onClick={() => handleDownload(doc.id, doc.file_name)}
                     loading={downloading === doc.id}

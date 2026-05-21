@@ -33,7 +33,7 @@ function highestSeverity(alerts: Alert[]): StatusLevel {
   if (unacked.some((a) => a.severity === 'urgent')) return 'urgent'
   if (unacked.some((a) => a.severity === 'concern')) return 'concern'
   if (unacked.length > 0) return 'concern'
-  return 'ok'
+  return 'no_alerts'
 }
 
 function formatAge(dateStr: string): string {
@@ -113,7 +113,7 @@ export function AlertsPanel({ memberId, familyMemberId, initialAlerts, error }: 
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-3">
-        <StatusDot level={status} pulse={status !== 'ok'} size="md" />
+        <StatusDot level={status} size="md" />
         <span className="text-lg font-semibold text-brand-navy">
           {unacked.length === 0
             ? 'No active alerts'
@@ -145,7 +145,7 @@ export function AlertsPanel({ memberId, familyMemberId, initialAlerts, error }: 
           </div>
           {familyMemberId && (
             <Button
-              variant="outline"
+              variant="secondary"
               size="sm"
               onClick={() => handleAcknowledge(alert.id)}
               loading={acknowledging === alert.id}

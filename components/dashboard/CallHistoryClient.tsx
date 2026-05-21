@@ -75,7 +75,7 @@ function CallRow({ call }: CallRowProps) {
       >
         {/* Mood emoji */}
         <div className="flex-shrink-0 w-12 flex justify-center">
-          <MoodEmoji score={call.mood_score} size="lg" showScore={false} />
+          <MoodEmoji score={call.mood_score} size="lg" />
         </div>
 
         {/* Date and duration */}
@@ -216,7 +216,7 @@ export default function CallHistoryClient({ memberId, initialCalls, totalCount }
             </p>
           )}
           <Button
-            variant="outline"
+            variant="secondary"
             onClick={loadMore}
             loading={loading}
             aria-label="Load more calls"

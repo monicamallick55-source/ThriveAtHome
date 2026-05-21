@@ -59,7 +59,7 @@ export function RecentCallsList({ calls, error }: RecentCallsListProps) {
         >
           <div className="flex items-center gap-3 flex-1 min-w-0">
             {call.mood_score !== null ? (
-              <MoodEmoji score={call.mood_score} size="lg" showScore />
+              <MoodEmoji score={call.mood_score} size="lg" />
             ) : (
               <span className="text-2xl text-gray-300" aria-label="No mood score">—</span>
             )}

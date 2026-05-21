@@ -13,8 +13,8 @@ const planLabels: Record<string, string> = {
 }
 
 const statusLevelMap: Record<string, StatusLevel> = {
-  active: 'ok',
-  inactive: 'unknown',
+  active: 'no_alerts',
+  inactive: 'informational',
   paused: 'concern',
 }
 
@@ -30,12 +30,12 @@ export interface MemberCardProps {
 }
 
 export function MemberCard({ member }: MemberCardProps) {
-  const statusLevel = statusLevelMap[member.status] ?? 'unknown'
+  const statusLevel = statusLevelMap[member.status] ?? 'informational'
 
   return (
     <div className="flex items-center justify-between flex-wrap gap-4">
       <div className="flex items-center gap-3">
-        <StatusDot level={statusLevel} pulse={statusLevel !== 'ok'} size="lg" />
+        <StatusDot level={statusLevel} size="lg" />
         <div>
           <h1 className="text-3xl font-bold text-brand-navy leading-tight">
             {member.preferred_name}&apos;s Dashboard
