@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { requireAuth } from '@/lib/auth'
 import { getMemberForAuthUser } from '@/lib/data/members'
 import { getDocumentsForMember } from '@/lib/data/documents'
-import { Card, CardHeader, CardTitle, CardBody } from '@/components/ui/Card'
 import { DocumentVault } from '@/components/dashboard/DocumentVault'
 import { ToastProvider } from '@/components/ui/Toast'
 
@@ -25,45 +24,91 @@ export default async function DocumentsPage() {
 
   return (
     <ToastProvider>
-      <div className="min-h-screen bg-brand-warm-white">
+      <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-cream)' }}>
         {/* Navigation */}
-        <nav className="sticky top-0 z-10 bg-brand-navy shadow-md" aria-label="Dashboard navigation">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link
-                href="/dashboard/family"
-                className="text-white text-base hover:text-brand-teal-light transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal rounded"
-                aria-label="Back to family coordination"
-              >
-                ← Family
-              </Link>
-            </div>
-            <span className="text-white text-xl font-bold tracking-tight">ThriveAtHome</span>
-            <div className="w-20" aria-hidden="true" />
+        <nav
+          style={{
+            position: 'sticky',
+            top: 0,
+            zIndex: 40,
+            backgroundColor: 'white',
+            borderBottom: '1px solid var(--color-warm-grey)',
+            boxShadow: 'var(--shadow-sm)',
+            height: '64px',
+            display: 'flex',
+            alignItems: 'center',
+          }}
+          aria-label="Dashboard navigation"
+        >
+          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Link
+              href="/dashboard"
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: '18px',
+                fontWeight: 500,
+                color: 'var(--color-text-secondary)',
+                textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
+              ← Dashboard
+            </Link>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--color-navy)', fontWeight: 500 }}>
+              ThriveAtHome
+            </span>
+            <div style={{ width: '120px' }} aria-hidden="true" />
           </div>
         </nav>
 
-        <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8" id="main-content">
-          {/* Page header */}
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-brand-navy">Document Vault</h1>
-            <p className="text-lg text-gray-500 mt-1">
+        {/* Navy header */}
+        <div style={{ backgroundColor: 'var(--color-navy)', padding: '32px 24px 48px' }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+            <h1
+              style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: '34px',
+                fontWeight: 500,
+                color: 'var(--color-cream)',
+                marginBottom: '6px',
+                letterSpacing: '-0.01em',
+              }}
+            >
+              Document Vault
+            </h1>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '18px', color: 'rgba(250,250,245,0.7)', margin: 0 }}>
               Securely store important documents for {member.preferred_name}.
             </p>
           </div>
+        </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Documents</CardTitle>
-            </CardHeader>
-            <CardBody>
-              <DocumentVault
-                memberId={member.id}
-                initialDocuments={documents ?? []}
-                error={docsError}
-              />
-            </CardBody>
-          </Card>
+        <main
+          id="main-content"
+          style={{
+            maxWidth: '900px',
+            margin: '-24px auto 0',
+            padding: '0 24px 48px',
+            position: 'relative',
+            zIndex: 10,
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: 'white',
+              borderRadius: 'var(--radius-xl)',
+              border: '1px solid var(--color-warm-grey)',
+              boxShadow: 'var(--shadow-card)',
+              padding: '28px',
+            }}
+          >
+            <DocumentVault
+              memberId={member.id}
+              initialDocuments={documents ?? []}
+              error={docsError}
+            />
+          </div>
         </main>
       </div>
     </ToastProvider>

@@ -7,7 +7,6 @@ import { getMemberForAuthUser } from '@/lib/data/members'
 import { getFamilyMemberByAuthId } from '@/lib/data/family'
 import { getTasksForMember } from '@/lib/data/tasks'
 import { getMessagesForMember } from '@/lib/data/messages'
-import { Card, CardHeader, CardTitle, CardBody } from '@/components/ui/Card'
 import { FamilyTaskBoard } from '@/components/dashboard/FamilyTaskBoard'
 import { FamilyChat } from '@/components/dashboard/FamilyChat'
 import { ToastProvider } from '@/components/ui/Toast'
@@ -17,24 +16,18 @@ export const metadata: Metadata = { title: 'Family Coordination — ThriveAtHome
 export default async function FamilyPage() {
   const user = await requireAuth()
 
-  // Resolve member and family member rows in parallel
   const [memberResult, familyMemberResult] = await Promise.all([
     getMemberForAuthUser(user.id),
     getFamilyMemberByAuthId(user.id),
   ])
 
-  if (!memberResult.data) {
-    redirect('/onboarding')
-  }
+  if (!memberResult.data) redirect('/onboarding')
 
   const member = memberResult.data
   const familyMember = familyMemberResult.data
 
-  if (!familyMember) {
-    redirect('/onboarding')
-  }
+  if (!familyMember) redirect('/onboarding')
 
-  // Fetch tasks and messages in parallel
   const [tasksResult, messagesResult] = await Promise.all([
     getTasksForMember(member.id),
     getMessagesForMember(member.id, 50),
@@ -42,71 +35,153 @@ export default async function FamilyPage() {
 
   return (
     <ToastProvider>
-      <div className="min-h-screen bg-brand-warm-white">
+      <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-cream)' }}>
         {/* Navigation */}
-        <nav className="sticky top-0 z-10 bg-brand-navy shadow-md" aria-label="Dashboard navigation">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link
-                href="/dashboard"
-                className="text-white text-base hover:text-brand-teal-light transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal rounded"
-                aria-label="Back to dashboard"
-              >
-                ← Dashboard
-              </Link>
-            </div>
-            <span className="text-white text-xl font-bold tracking-tight">ThriveAtHome</span>
-            <div className="w-20" aria-hidden="true" />
+        <nav
+          style={{
+            position: 'sticky',
+            top: 0,
+            zIndex: 40,
+            backgroundColor: 'white',
+            borderBottom: '1px solid var(--color-warm-grey)',
+            boxShadow: 'var(--shadow-sm)',
+            height: '64px',
+            display: 'flex',
+            alignItems: 'center',
+          }}
+          aria-label="Dashboard navigation"
+        >
+          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Link
+              href="/dashboard"
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: '18px',
+                fontWeight: 500,
+                color: 'var(--color-text-secondary)',
+                textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
+              ← Dashboard
+            </Link>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--color-navy)', fontWeight: 500 }}>
+              ThriveAtHome
+            </span>
+            <div style={{ width: '120px' }} aria-hidden="true" />
           </div>
         </nav>
 
-        <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-8" id="main-content">
-          {/* Page header */}
-          <div className="mb-2">
-            <h1 className="text-3xl font-bold text-brand-navy">Family Coordination</h1>
-            <p className="text-lg text-gray-500 mt-1">
+        {/* Navy header */}
+        <div style={{ backgroundColor: 'var(--color-navy)', padding: '32px 24px 48px' }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+            <h1
+              style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: '34px',
+                fontWeight: 500,
+                color: 'var(--color-cream)',
+                marginBottom: '6px',
+                letterSpacing: '-0.01em',
+              }}
+            >
+              Family Coordination
+            </h1>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '18px', color: 'rgba(250,250,245,0.7)', margin: 0 }}>
               Coordinate care tasks and stay in touch for {member.preferred_name}.
             </p>
           </div>
+        </div>
 
-          {/* Task board */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Family Tasks</CardTitle>
-            </CardHeader>
-            <CardBody>
+        <main
+          id="main-content"
+          style={{
+            maxWidth: '1200px',
+            margin: '-24px auto 0',
+            padding: '0 24px 48px',
+            position: 'relative',
+            zIndex: 10,
+          }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            {/* Task board */}
+            <div
+              style={{
+                backgroundColor: 'white',
+                borderRadius: 'var(--radius-xl)',
+                border: '1px solid var(--color-warm-grey)',
+                boxShadow: 'var(--shadow-card)',
+                padding: '28px',
+              }}
+            >
+              <h2
+                style={{
+                  fontFamily: 'var(--font-display)',
+                  fontSize: '24px',
+                  fontWeight: 500,
+                  color: 'var(--color-navy)',
+                  marginBottom: '20px',
+                }}
+              >
+                Family Tasks
+              </h2>
               <FamilyTaskBoard
                 memberId={member.id}
                 familyMemberId={familyMember.id}
                 initialTasks={tasksResult.data ?? []}
                 error={tasksResult.error}
               />
-            </CardBody>
-          </Card>
+            </div>
 
-          {/* Family messaging */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Family Messages</CardTitle>
-            </CardHeader>
-            <CardBody>
+            {/* Family messaging */}
+            <div
+              style={{
+                backgroundColor: 'white',
+                borderRadius: 'var(--radius-xl)',
+                border: '1px solid var(--color-warm-grey)',
+                boxShadow: 'var(--shadow-card)',
+                padding: '28px',
+              }}
+            >
+              <h2
+                style={{
+                  fontFamily: 'var(--font-display)',
+                  fontSize: '24px',
+                  fontWeight: 500,
+                  color: 'var(--color-navy)',
+                  marginBottom: '20px',
+                }}
+              >
+                Family Messages
+              </h2>
               <FamilyChat
                 memberId={member.id}
                 familyMemberId={familyMember.id}
                 initialMessages={messagesResult.data ?? []}
                 error={messagesResult.error}
               />
-            </CardBody>
-          </Card>
+            </div>
 
-          {/* Link to document vault */}
-          <div className="text-center">
-            <Link
-              href="/dashboard/documents"
-              className="text-brand-teal text-lg hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal rounded"
-            >
-              View Document Vault →
-            </Link>
+            {/* Link to documents */}
+            <div style={{ textAlign: 'center', paddingTop: '8px' }}>
+              <Link
+                href="/dashboard/documents"
+                style={{
+                  fontFamily: 'var(--font-body)',
+                  fontSize: '18px',
+                  fontWeight: 500,
+                  color: 'var(--color-teal)',
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                }}
+              >
+                View Document Vault →
+              </Link>
+            </div>
           </div>
         </main>
       </div>

@@ -1,7 +1,8 @@
 'use client'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { NotificationBell } from '@/components/ui/NotificationBell'
+import { createClient } from '@/lib/supabase/client'
 
 interface DashNavProps {
   seniorName: string
@@ -19,6 +20,14 @@ const NAV_LINKS = [
 
 export function DashNav({ seniorName, familyInitial, unreadCount, onMarkAllRead }: DashNavProps) {
   const pathname = usePathname()
+  const router = useRouter()
+
+  async function handleSignOut() {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push('/login')
+    router.refresh()
+  }
 
   return (
     <nav
@@ -93,7 +102,7 @@ export function DashNav({ seniorName, familyInitial, unreadCount, onMarkAllRead 
           })}
         </div>
 
-        {/* Right: Bell + avatar */}
+        {/* Right: Bell + avatar + sign out */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
           <NotificationBell
             count={unreadCount}
@@ -119,6 +128,26 @@ export function DashNav({ seniorName, familyInitial, unreadCount, onMarkAllRead 
           >
             {familyInitial}
           </div>
+          <button
+            onClick={handleSignOut}
+            style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: '15px',
+              fontWeight: 500,
+              color: 'var(--color-text-muted)',
+              background: 'none',
+              border: '1px solid var(--color-warm-grey)',
+              borderRadius: 'var(--radius-md)',
+              padding: '6px 14px',
+              cursor: 'pointer',
+              minHeight: '36px',
+              transition: 'all 0.2s',
+              whiteSpace: 'nowrap',
+            }}
+            className="sign-out-btn"
+          >
+            Sign out
+          </button>
         </div>
       </div>
 
@@ -163,6 +192,7 @@ export function DashNav({ seniorName, familyInitial, unreadCount, onMarkAllRead 
         }
         @media (max-width: 767px) {
           .dash-mobile-nav { display: flex !important; }
+          .sign-out-btn { display: none !important; }
         }
       `}</style>
     </nav>

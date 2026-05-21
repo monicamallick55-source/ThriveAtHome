@@ -8,14 +8,12 @@ import { AlertsPanel } from './AlertsPanel'
 import { MoodChart } from './MoodChart'
 import { RecentCallsList } from './RecentCallsList'
 import { TasksPanel } from './TasksPanel'
-import { StatusDot } from '@/components/ui/StatusDot'
 import { useNotifications } from '@/lib/realtime/useNotifications'
 import type { Member } from '@/lib/data/members'
 import type { CheckInCall } from '@/lib/data/calls'
 import type { Alert } from '@/lib/data/alerts'
 import type { RealtimeNotification } from '@/lib/data/notifications'
 import type { FamilyTaskItem } from '@/lib/data/tasks'
-import type { StatusLevel } from '@/components/ui/StatusDot'
 
 export interface DashboardClientProps {
   member: Member
@@ -30,18 +28,12 @@ export interface DashboardClientProps {
   tasksError: string | null
 }
 
-const statusLevelMap: Record<string, StatusLevel> = {
-  active: 'no_alerts',
-  inactive: 'informational',
-  paused: 'concern',
-}
-
 function QuickActions() {
   const actions = [
-    { label: 'Talk to our team', icon: '📞', href: '#' },
-    { label: 'Request a volunteer', icon: '🤝', href: '#' },
-    { label: 'View call history', icon: '🕐', href: '/dashboard/calls' },
-    { label: 'Update preferences', icon: '⚙️', href: '/onboarding' },
+    { label: 'Concierge line', sub: 'Talk to our team', href: '/dashboard/concierge' },
+    { label: 'Request a volunteer', sub: 'Coordination support', href: '/volunteer' },
+    { label: 'Call history', sub: 'All past conversations', href: '/dashboard/calls' },
+    { label: 'Update preferences', sub: 'Call times & topics', href: '/onboarding' },
   ]
 
   return (
@@ -71,8 +63,8 @@ function QuickActions() {
             href={action.href}
             style={{
               display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
+              flexDirection: 'column',
+              gap: '4px',
               padding: '20px',
               backgroundColor: 'var(--color-warm-white)',
               border: '1px solid var(--color-warm-grey)',
@@ -83,16 +75,24 @@ function QuickActions() {
               boxShadow: 'var(--shadow-card)',
             }}
           >
-            <span style={{ fontSize: '24px', flexShrink: 0 }}>{action.icon}</span>
             <span
               style={{
                 fontFamily: 'var(--font-body)',
                 fontSize: '18px',
-                fontWeight: 500,
+                fontWeight: 600,
                 color: 'var(--color-navy)',
               }}
             >
               {action.label}
+            </span>
+            <span
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: '15px',
+                color: 'var(--color-text-muted)',
+              }}
+            >
+              {action.sub}
             </span>
           </Link>
         ))}
@@ -120,7 +120,6 @@ function DashboardInner(props: DashboardClientProps) {
 
   const { unreadCount, markAllRead } = useNotifications(member.id)
   const latestCall = initialCalls.length > 0 ? initialCalls[0] : null
-  const statusLevel = statusLevelMap[member.status] ?? 'informational'
   const familyInitial = 'F'
 
   return (
@@ -145,40 +144,32 @@ function DashboardInner(props: DashboardClientProps) {
           padding: '32px 24px 56px',
         }}
       >
-        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
-          <div>
-            <p
-              style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: '13px',
-                fontWeight: 500,
-                letterSpacing: '0.1em',
-                textTransform: 'uppercase',
-                color: 'rgba(250,250,245,0.6)',
-                margin: '0 0 8px',
-              }}
-            >
-              Good morning
-            </p>
-            <h1
-              style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: 'clamp(24px, 4vw, 34px)',
-                fontWeight: 500,
-                color: 'var(--color-cream)',
-                letterSpacing: '-0.01em',
-                margin: 0,
-              }}
-            >
-              Checking in on {member.preferred_name}
-            </h1>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <StatusDot level={statusLevel} size="md" />
-            <span style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'rgba(250,250,245,0.8)' }}>
-              {member.status === 'active' ? 'All good' : 'Check required'}
-            </span>
-          </div>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <p
+            style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: '13px',
+              fontWeight: 500,
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              color: 'rgba(250,250,245,0.6)',
+              margin: '0 0 8px',
+            }}
+          >
+            Good morning
+          </p>
+          <h1
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(24px, 4vw, 34px)',
+              fontWeight: 500,
+              color: 'var(--color-cream)',
+              letterSpacing: '-0.01em',
+              margin: 0,
+            }}
+          >
+            Checking in on {member.preferred_name}
+          </h1>
         </div>
       </div>
 
