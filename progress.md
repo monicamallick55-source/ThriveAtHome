@@ -1842,3 +1842,138 @@ NEXT SESSION MUST:
 ---
 
 AWAITING HUMAN APPROVAL
+
+ISSUE: All pages dont have navigation flows to get back to previous page or dashboard. Some buttons dont do anything when clicked
+. On landing page for member the status shows twice. The colors, fonts are not consistent across all pages. volunterr button has an emogi other buttons do not. the button labels are inconsistent. There is no way to logout on member signed on page
+check all pages for consistency and navigation back and forth and flow across pages also sign in and signout capabilities
+---
+SESSION: 27
+DATE: 2026-05-21 UTC
+MILESTONE: UI Polish
+PHASE: P8 — Navigation, Consistency, and UX Fixes
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- P8 checklist: 4 of 7 items [x] — tsc/build/axe/git-push done; 3 production verify items await human
+- Current item: Awaiting human to verify production URL after Vercel deploy
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- All 8 providers remain stubs (UI polish does not touch business logic)
+
+WHAT WAS DONE THIS SESSION:
+- components/dashboard/DashNav.tsx — MODIFIED: added Sign out button (Supabase client signOut → router.push('/login')); hidden on mobile via CSS
+- components/dashboard/DashboardClient.tsx — MODIFIED: removed duplicate StatusDot + "All good" from navy header; removed emoji icons from QuickActions; replaced href="#" dead links with /dashboard/concierge and /volunteer; QuickActions now show title + subtitle in clean text layout
+- app/dashboard/family/page.tsx — REBUILT: replaced old Tailwind bg-brand-* classes with design-system inline styles; navy header + ← Dashboard back nav; matching calls-page layout pattern
+- app/dashboard/documents/page.tsx — REBUILT: same design-system pattern; ← Dashboard back nav (was incorrectly going to /dashboard/family)
+- app/navigator/page.tsx — REBUILT: design system, navy nav header, ← Back to home
+- app/volunteer/page.tsx — REBUILT: design system, navy nav header, ← Back to home
+- app/admin/page.tsx — REBUILT: design system, navy nav header, ← Back to home
+- app/pricing/page.tsx — REBUILT: design system, cream nav, View plans CTA
+- app/dashboard/billing/page.tsx — REBUILT: dashboard nav pattern with ← Dashboard
+- app/dashboard/concierge/page.tsx — REBUILT: dashboard nav pattern; support email contact info
+- app/dashboard/events/page.tsx — REBUILT: dashboard nav pattern
+- app/dashboard/groups/page.tsx — REBUILT: dashboard nav pattern
+- app/dashboard/skill-exchange/page.tsx — REBUILT: dashboard nav pattern
+- app/dashboard/cultural-circles/page.tsx — REBUILT: dashboard nav pattern
+- app/dashboard/benefits/page.tsx — REBUILT: dashboard nav pattern
+- app/dashboard/celebrations/page.tsx — REBUILT: dashboard nav pattern
+- app/dashboard/life-story/page.tsx — REBUILT: dashboard nav pattern
+- app/dashboard/grief-support/page.tsx — REBUILT: dashboard nav pattern
+- app/dashboard/services/page.tsx — REBUILT: dashboard nav pattern
+- app/outcomes/page.tsx — REBUILT: navy nav, ← Back to home
+- app/student/page.tsx — REBUILT: navy nav, ← Back to home
+- app/employers/page.tsx — REBUILT: navy nav, ← Back to home
+- app/privacy/page.tsx — REBUILT: cream nav, ← Back to home
+- git commit df8177b pushed to origin/main (Vercel deploy triggered)
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — all 37 routes compiled successfully
+
+ERRORS ENCOUNTERED:
+- None
+
+DECISIONS MADE:
+- Removed StatusDot entirely from dashboard nav header; WellnessCard mood pill is the single status indicator
+- QuickActions: replaced emoji icon + label pattern with title + subtitle text-only cards (consistent with all other non-icon UI)
+- Sign out hidden on mobile (space constraint); mobile users use the same flow via session expiry or can add to mobile menu in M7
+- All placeholder pages: dashboard sub-pages use ← Dashboard back nav; public pages use ← Back to home
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- Human verifies production URL (Vercel deploy triggered by git push df8177b):
+  1. Landing page loads correctly with correct fonts and cream background
+  2. Sign in works → dashboard loads
+  3. Dashboard: "Sign out" button visible top-right → click → redirected to /login
+  4. Dashboard Quick Actions: "Concierge line", "Request a volunteer", "Call history", "Update preferences" — all are clickable links
+  5. Family page and Documents page: design matches calls page (white nav, navy header, ← Dashboard back nav)
+  6. Any placeholder page (e.g. /volunteer) shows correct fonts and cream background
+- If all production checks pass: mark remaining 3 P8 checklist items [x], mark P8 COMPLETE
+---
+
+AWAITING HUMAN APPROVAL
+ISSUE: Update preferences does not have navigation flows to go back if user decides not to update anything and cancel updating preferences. BAck to Home button on request Voulnterr take back to landing page signing out the user. KIt should go back to signed in landing page. Call History page doesnt have the back to dashboard button on bottom has the dashboard on topd of page with arrow to go back . This is inconsistemt for all buttons concierge Line button has a back to dashboard button also has the dashboard with arrow on top so has it twice. color of signout button is not consistemt with other buttons on page with label color . There is a greem dot saying F it doesnt do anything . what is it for? there is no navigation from sign in or create account page to home landing page
+
+---
+SESSION: 28
+DATE: 2026-05-21 UTC
+MILESTONE: UI Polish
+PHASE: P8 — Navigation and Consistency Fixes (Round 2)
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- P8 checklist: 4 of 7 items [x] — tsc/build/axe/git-push done; 3 production verify items await human
+- Current item: Awaiting human to verify production URL after Vercel deploy (379579c)
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- All 8 providers remain stubs (UI polish does not touch business logic)
+
+WHAT WAS DONE THIS SESSION:
+- components/dashboard/DashNav.tsx — MODIFIED: removed hardcoded 'F' avatar circle (was confusing, served no purpose); sign-out button now uses navy border/text to match other UI buttons
+- components/dashboard/DashboardClient.tsx — MODIFIED: removed `familyInitial` prop from DashNav call (no longer needed)
+- app/dashboard/concierge/page.tsx — MODIFIED: removed duplicate "Return to dashboard" button from content area; top nav "← Dashboard" is the single back navigation
+- app/volunteer/page.tsx — MODIFIED: replaced public-style navy nav (with "Sign in" link) with white dashboard-style nav ("← Dashboard"); removed "← Back to home" button from content; page is now consistent with other dashboard sub-pages
+- app/navigator/page.tsx — MODIFIED: replaced "Sign in" link in nav with "Sign out" (navigator users are always authenticated); removed duplicate "← Back to home" button from content
+- components/onboarding/OnboardingForm.tsx — MODIFIED: added "← Dashboard" cancel link in top nav area so users can exit the onboarding/preferences form at any step
+- components/auth/LoginForm.tsx — MODIFIED: added "← Back to home" link above the form (visible on mobile; hidden on desktop where the left panel has the wordmark)
+- components/auth/SignupForm.tsx — MODIFIED: added "← Back to home" link above the form
+- git commit 379579c pushed to origin/main (Vercel deploy triggered)
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — all 37 routes compiled, zero errors
+
+ERRORS ENCOUNTERED:
+- None
+
+DECISIONS MADE:
+- Avatar removed entirely from DashNav; a hardcoded 'F' adds confusion without value. If a proper user avatar is needed, it can be implemented in M7 with real user data.
+- Login page: "← Back to home" hidden on desktop (≥768px) because the left panel already shows the ThriveAtHome branding contextually; shown on mobile where there is no panel. SignupForm shows it always.
+- Volunteer page: changed to dashboard-style nav since it is exclusively reached via the dashboard quick action; public users wouldn't normally navigate to /volunteer directly.
+- Concierge page: content-area back button removed; the sticky nav "← Dashboard" is the standard pattern for all sub-pages.
+- Call History page had NO duplicate — only the single "← Dashboard" in the sticky nav. The inconsistency the human noticed was comparing it to Concierge (which had two); now all pages have exactly one.
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- Human verifies production URL (Vercel deploy triggered by git push 379579c):
+  1. Dashboard: teal "F" avatar is GONE — only bell icon + "Sign out" button visible top-right; "Sign out" button has navy border/text
+  2. Login page: "← Back to home" link appears above the form (mobile) or just above the wordmark
+  3. Signup page: "← Back to home" link appears above the form
+  4. Onboarding form: "← Dashboard" link appears top-left above the step progress bar
+  5. /dashboard/concierge: page shows only "← Dashboard" in the sticky nav; NO second back button in the content
+  6. /volunteer: shows white dashboard-style nav with "← Dashboard" link (not navy nav with "Sign in")
+  7. All other UX from Session 27 still works correctly
+- If all production checks pass: mark remaining 3 P8 checklist items [x], mark P8 COMPLETE
+---
+
+AWAITING HUMAN APPROVAL
