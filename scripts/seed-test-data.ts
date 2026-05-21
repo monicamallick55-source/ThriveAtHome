@@ -15,6 +15,7 @@ const admin = createClient(SUPABASE_URL, SERVICE_KEY, {
 const TEST_EMAIL = 'test-family@thriveathome.dev'
 const TEST_PASSWORD = 'TestPassword123!'
 const NAV_EMAIL = 'test-navigator@thriveathome.dev'
+const NAV_PASSWORD = 'TestPassword123!'
 
 // Mood arc: 25 calls total (oldest to newest).
 // First 11: older historical calls for load-more testing.
@@ -228,23 +229,70 @@ async function seed(): Promise<void> {
     console.log('   ✅ Inserted 2 notifications')
   }
 
-  // ── 7. care navigator + assignment ─────────────────────────────
-  console.log('\n7. care navigator + assignment')
+  // ── 7. navigator auth user, care_navigators row, assignment ────
+  console.log('\n7. navigator auth user + care_navigators + assignment')
 
+  // 7a. Navigator auth user
+  let navAuthUserId: string
+  const existingNavUser = existingUsers?.users.find((u) => u.email === NAV_EMAIL)
+  if (existingNavUser) {
+    navAuthUserId = existingNavUser.id
+    console.log(`   ↩  Navigator auth user already exists (${navAuthUserId})`)
+  } else {
+    const { data: newNavUser, error } = await admin.auth.admin.createUser({
+      email: NAV_EMAIL,
+      password: NAV_PASSWORD,
+      email_confirm: true,
+    })
+    if (error || !newNavUser.user) throw new Error(`Navigator auth user create failed: ${error?.message}`)
+    navAuthUserId = newNavUser.user.id
+    console.log(`   ✅ Created navigator auth user: ${NAV_EMAIL} (${navAuthUserId})`)
+  }
+
+  // 7b. family_members row with role='navigator'
+  const { data: existingNavFm } = await admin
+    .from('family_members')
+    .select('id')
+    .eq('supabase_auth_id', navAuthUserId)
+    .maybeSingle()
+  if (existingNavFm) {
+    console.log(`   ↩  Navigator family_members row exists (${existingNavFm.id})`)
+  } else {
+    const { error } = await admin.from('family_members').insert({
+      supabase_auth_id: navAuthUserId,
+      full_name: 'Sarah Williams',
+      email: NAV_EMAIL,
+      relationship: 'navigator',
+      role: 'navigator',
+    })
+    if (error) throw new Error(`Navigator family_members insert failed: ${error.message}`)
+    console.log(`   ✅ Created navigator family_members row`)
+  }
+
+  // 7c. care_navigators row linked to auth user
   let navigatorId: string
   const { data: existingNav } = await admin
     .from('care_navigators')
-    .select('id')
+    .select('id, supabase_auth_id')
     .eq('email', NAV_EMAIL)
     .maybeSingle()
 
   if (existingNav) {
     navigatorId = existingNav.id
-    console.log(`   ↩  Navigator already exists (${navigatorId})`)
+    if (!existingNav.supabase_auth_id) {
+      await admin
+        .from('care_navigators')
+        .update({ supabase_auth_id: navAuthUserId })
+        .eq('id', navigatorId)
+      console.log(`   ✅ Linked care_navigator to auth user (${navigatorId})`)
+    } else {
+      console.log(`   ↩  care_navigator already exists and linked (${navigatorId})`)
+    }
   } else {
     const { data: nav, error } = await admin
       .from('care_navigators')
       .insert({
+        supabase_auth_id: navAuthUserId,
         full_name: 'Sarah Williams',
         email: NAV_EMAIL,
         phone: '+15550007890',
@@ -259,6 +307,7 @@ async function seed(): Promise<void> {
     console.log(`   ✅ Created navigator Sarah Williams (${navigatorId})`)
   }
 
+  // 7d. navigator_assignment
   const { count: existingAssignCount } = await admin
     .from('navigator_assignments')
     .select('*', { count: 'exact', head: true })
@@ -275,6 +324,64 @@ async function seed(): Promise<void> {
     console.log('   ✅ Created navigator assignment')
   } else {
     console.log('   ↩  Assignment already exists')
+  }
+
+  // 7e. navigator_task (for Phase 15 tasks section testing)
+  const { count: existingNavTaskCount } = await admin
+    .from('navigator_tasks')
+    .select('*', { count: 'exact', head: true })
+    .eq('navigator_id', navigatorId)
+    .eq('completed', false)
+
+  if ((existingNavTaskCount ?? 0) === 0) {
+    const tomorrow = new Date()
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    const { error } = await admin.from('navigator_tasks').insert([
+      {
+        member_id: memberId!,
+        navigator_id: navigatorId,
+        task_type: 'follow_up',
+        description: 'Follow up with Margaret about her recent mood decline — schedule a care check-in call.',
+        priority: 'high',
+        due_by: tomorrow.toISOString(),
+        completed: false,
+      },
+      {
+        member_id: memberId!,
+        navigator_id: navigatorId,
+        task_type: 'medication_review',
+        description: 'Confirm Metformin refill was completed — Margaret mentioned supply was running low.',
+        priority: 'medium',
+        due_by: tomorrow.toISOString(),
+        completed: false,
+      },
+    ])
+    if (error) throw new Error(`navigator_tasks insert failed: ${error.message}`)
+    console.log('   ✅ Created 2 navigator tasks')
+  } else {
+    console.log('   ↩  Navigator tasks already exist')
+  }
+
+  // 7f. urgent alert for alert queue testing (Phase 15)
+  const { count: existingUrgentCount } = await admin
+    .from('alerts')
+    .select('*', { count: 'exact', head: true })
+    .eq('member_id', memberId)
+    .eq('severity', 'urgent')
+    .eq('acknowledged', false)
+
+  if ((existingUrgentCount ?? 0) === 0) {
+    const { error } = await admin.from('alerts').insert({
+      member_id: memberId!,
+      alert_type: 'wellness_drift',
+      severity: 'urgent',
+      message: 'Margaret\'s mood scores have fallen below 5 for 3 consecutive calls — immediate follow-up recommended.',
+      acknowledged: false,
+    })
+    if (error) throw new Error(`urgent alert insert failed: ${error.message}`)
+    console.log('   ✅ Created urgent alert for alert queue')
+  } else {
+    console.log('   ↩  Urgent alert already exists')
   }
 
   // ── 8. family_task_items (3 tasks) ──────────────────────────────
@@ -327,8 +434,8 @@ async function seed(): Promise<void> {
   // ── Done ────────────────────────────────────────────────────────
   console.log('\n── Seed complete ────────────────────────────────────────')
   console.log(`   Member:  Margaret Chen (${memberId})`)
-  console.log(`   Login:   ${TEST_EMAIL}`)
-  console.log(`   Password: ${TEST_PASSWORD}`)
+  console.log(`   Family login:    ${TEST_EMAIL} / ${TEST_PASSWORD}`)
+  console.log(`   Navigator login: ${NAV_EMAIL} / ${NAV_PASSWORD}`)
 }
 
 seed().catch((e) => {

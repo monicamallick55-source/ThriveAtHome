@@ -308,16 +308,57 @@ STATUS: `COMPLETE`
 - [x] Mobile at 375px: all three pages accessible, no horizontal scroll — flex-wrap, max-width patterns
 
 ### P8 — Final Accessibility Audit and Production Deploy
-STATUS: `IN PROGRESS`
+STATUS: `COMPLETE`
 
 - [x] axe-cli: zero violations on all 6 pages — Playwright + axe-core: landing/login/signup/onboarding/dashboard/calls all 0 violations (Session 26)
-- [x] npx tsc --noEmit: zero errors — zero errors (Session 26)
-- [x] npm run build: zero errors — all routes compiled (Session 26)
-- [ ] git push triggers Vercel deployment
-- [ ] Production URL loads landing page correctly
-- [ ] Production URL: sign in works
-- [ ] Production URL: dashboard loads with real data
-- [ ] Mobile on real phone: no horizontal scroll, all text readable without zooming
+- [x] npx tsc --noEmit: zero errors — zero errors (Session 27)
+- [x] npm run build: zero errors — all 37 routes compiled (Session 27)
+- [x] git push triggers Vercel deployment — df8177b pushed to origin/main (Session 27)
+- [x] Production URL loads landing page correctly — APPROVED by human (Session 29)
+- [x] Production URL: sign in works — APPROVED by human (Session 29)
+- [x] Production URL: dashboard loads with real data — APPROVED by human (Session 29)
+- [x] Mobile on real phone: no horizontal scroll, all text readable without zooming — APPROVED by human (Session 29)
+
+---
+
+## M7 — Navigator Console
+
+### Phase 15 — Navigator Console Shell
+STATUS: `IN PROGRESS`
+
+- [ ] /app/navigator/page.tsx — real page replaces placeholder
+    VERIFY: Log in as navigator role user (test-navigator@thriveathome.dev), navigate to /navigator
+    PASS: Caseload table loads with assigned members
+
+- [ ] Caseload table renders correctly
+    VERIFY: Table shows member name, plan tier, last check-in, alert status dot, mood
+    PASS: All columns visible, sorted by alert severity
+
+- [ ] Search/filter works
+    VERIFY: Type a name in search box
+    PASS: Table filters to matching members in real time
+
+- [ ] Alert queue shows unacknowledged urgent/emergency alerts
+    VERIFY: Reload navigator page (urgent alert created in seed)
+    PASS: Alert card appears at top with Acknowledge button
+
+- [ ] Acknowledge button works
+    VERIFY: Click Acknowledge on the urgent alert card
+    PASS: Alert disappears from queue, DB row has acknowledged=true
+
+- [ ] Today's tasks section renders
+    VERIFY: Tasks section visible with seed navigator tasks
+    PASS: Both tasks appear with priority badges
+
+- [ ] Mark complete works on tasks
+    VERIFY: Click "Mark complete" on a task
+    PASS: Task disappears from list, DB row has completed=true
+
+- [ ] Route protection works
+    VERIFY: Log in as family role user (test-family@thriveathome.dev), navigate to /navigator
+    PASS: Redirected to /dashboard; unauthenticated /navigator → 307 → /login confirmed ✓
+
+- [x] npx tsc --noEmit passes — zero errors (Session 30)
 
 ---
 
@@ -341,7 +382,9 @@ P4  Login/Signup       [x]                  COMPLETE
 P5  Onboarding         [x]                  COMPLETE
 P6  Dashboard          [x]                  COMPLETE
 P7  Call History+Tools [x]                  COMPLETE
-P8  Accessibility      [~]                  IN PROGRESS — axe/tsc/build all pass; awaiting deploy verify
+P8  Accessibility      [x]                  COMPLETE — APPROVED
+
+M7  Navigator Console  [ ][ ][ ][ ][ ][ ][ ][ ][x]   1/9 — IN PROGRESS (Session 30)
 ```
 
 ---

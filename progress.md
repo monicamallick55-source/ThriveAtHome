@@ -1977,3 +1977,109 @@ NEXT SESSION MUST:
 ---
 
 AWAITING HUMAN APPROVAL
+APPROVED
+
+---
+SESSION: 29
+DATE: 2026-05-21 UTC
+MILESTONE: UI Polish
+PHASE: P8 — Final Accessibility Audit and Production Deploy (COMPLETE)
+STATUS: APPROVED_COMPLETE
+HUMAN_APPROVAL: RECEIVED — "APPROVED" (Session 28 navigation/consistency fixes confirmed)
+
+INNER LOOP STATE AT END OF SESSION:
+- P8 checklist: 8 of 8 items [x] — COMPLETE
+- UI Polish P1–P8: ALL COMPLETE
+- Loop state: UI POLISH COMPLETE
+
+STUB STATUS:
+- All 8 providers remain stubs (UI polish does not touch business logic)
+
+WHAT WAS DONE THIS SESSION:
+- checklist.md — P8 remaining 4 items marked [x] (APPROVED by human, Session 28 approval)
+- checklist.md — P8 STATUS set to COMPLETE
+- checklist.md — Overall progress P8 updated to COMPLETE — APPROVED
+
+TESTS AND VERIFICATIONS RUN:
+- Production URL verification: APPROVED by human (confirmed through iterative review in Sessions 26–28)
+- Navigation/consistency/UX: APPROVED by human (Session 28)
+
+ERRORS ENCOUNTERED:
+- None
+
+DECISIONS MADE:
+- UI Polish P1–P8 is complete. All 8 phases verified and approved.
+- Ready for M7–M12 Add-Ons (prompt-addons.md) when human is ready.
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: APPROVED (Session 28)
+
+
+UI POLISH COMPLETE — ALL P1–P8 PHASES APPROVED
+
+NOTE: Restructuring Add-On build order. Build in this sequence: M7 (Navigator Console) → M11 (Stripe Billing) → M10 (SMS/Email with SendGrid free tier) → M8 (AI Calls — defer until revenue) → M9 (Concierge — defer) → M12 (Compliance — defer). Skip directly to M11 after M7 completes. Do not build M8 or M9 until explicitly instructed.
+
+---
+SESSION: 30
+DATE: 2026-05-21 UTC
+MILESTONE: M7
+PHASE: 15 — Navigator Console Shell
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 15 checklist: 1 of 9 items [x] (tsc confirmed); 7 require browser verification; 1 (route protection to /dashboard) verified by code logic + unauthenticated redirect curl-confirmed
+- Current item: Awaiting human browser test as navigator user at /navigator
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- All 8 providers remain stubs (navigator console uses no business logic providers)
+
+WHAT WAS DONE THIS SESSION:
+- Read prompt-addons.md, progress.md, checklist.md — confirmed UI Polish COMPLETE, restructured order M7 → M11 → M10 → M8 → M9 → M12
+- /workspaces/ThriveAtHome/lib/data/navigator.ts — CREATED: getNavigatorByAuthId(), getNavigatorCaseload(), getNavigatorTasks(); CaseloadEntry and NavigatorTask types; batch queries with severity sorting
+- /workspaces/ThriveAtHome/app/api/navigator/alerts/[id]/acknowledge/route.ts — CREATED: POST handler; navigator/admin only; updates acknowledged=true with acknowledger ID
+- /workspaces/ThriveAtHome/app/api/navigator/tasks/[id]/complete/route.ts — CREATED: POST handler; navigator/admin only; updates completed=true with timestamp
+- /workspaces/ThriveAtHome/components/navigator/NavConsole.tsx — CREATED: Client Component; alert queue (urgent/emergency only); caseload table with real-time search filter; today's tasks with priority sort; optimistic UI on acknowledge/complete; sign-out
+- /workspaces/ThriveAtHome/app/navigator/page.tsx — REBUILT: Server Component; requireAuth() → getUserRole() → redirect family to /dashboard; getNavigatorByAuthId() → getNavigatorCaseload() + getNavigatorTasks() in parallel; membersById lookup passed to NavConsole
+- /workspaces/ThriveAtHome/scripts/seed-test-data.ts — MODIFIED: added navigator auth user (test-navigator@thriveathome.dev / TestPassword123!), family_members row with role='navigator', care_navigators linked via supabase_auth_id, 2 navigator tasks, 1 urgent unacknowledged alert for alert queue testing
+- /workspaces/ThriveAtHome/checklist.md — MODIFIED: added Phase 15 checklist items; tsc item [x]
+- git commit: pending (will push after human approval)
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — /navigator (ƒ dynamic), /api/navigator/alerts/[id]/acknowledge (ƒ), /api/navigator/tasks/[id]/complete (ƒ) all in build output
+- npx tsx scripts/seed-test-data.ts: PASSED — navigator auth user created (89fd1f1f), care_navigator linked, 2 navigator tasks, 1 urgent alert
+- curl http://localhost:3000/navigator (unauthenticated): PASSED — 307 → /login
+
+ERRORS ENCOUNTERED:
+- None
+
+DECISIONS MADE:
+- NavConsole is a single Client Component (not split into 3) — simpler, fewer files, all interactivity in one place
+- Alert queue shows only urgent/emergency (not concern/informational) per spec
+- Caseload sorted server-side by severity; client-side search is additive filter only
+- Seed: navigator family_members row uses relationship='navigator' (non-standard but descriptive)
+- Route protection: family users redirected to /dashboard (not /login — they are authenticated)
+- Unauthenticated users: requireAuth() redirects to /login (standard pattern)
+- date-fns formatDistanceToNow used for "X minutes ago" in alert queue
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- Human must log in as test-navigator@thriveathome.dev and navigate to /navigator
+- Verify (in browser):
+  1. Page loads with "Your caseload" heading and navigator name "Sarah Williams" in nav
+  2. Caseload table shows Margaret Chen with plan=basics, last check-in date, mood score
+  3. Alert queue at top shows "Urgent" alert card for Margaret with Acknowledge button
+  4. Click Acknowledge → card disappears immediately (optimistic); check Supabase alerts table: acknowledged=true
+  5. Type "Margaret" in search box → table filters correctly; clear → all members show
+  6. Tasks section shows 2 tasks with "High" and "Medium" priority badges
+  7. Click "Mark complete" on a task → task disappears; check Supabase navigator_tasks: completed=true
+  8. Log out, log in as test-family@thriveathome.dev, navigate to /navigator → redirected to /dashboard
+- After all 8 browser checks pass: mark all 9 items [x], mark Phase 15 COMPLETE, begin Phase 16
+
+AWAITING HUMAN APPROVAL
