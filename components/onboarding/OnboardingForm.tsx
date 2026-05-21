@@ -1,19 +1,17 @@
 'use client'
-// Multi-step onboarding form. Saves progress to localStorage on every change.
-// Validates step before advancing. Submits to /api/onboarding on final step.
 import { useState, useEffect, useCallback } from 'react'
 import { differenceInYears } from 'date-fns'
 import { Step1BasicInfo } from './Step1BasicInfo'
-import { Step2EmergencyHealth } from './Step2EmergencyHealth'
-import { Step3Preferences } from './Step3Preferences'
+import { Step2Preferences } from './Step2Preferences'
+import { Step3Safety } from './Step3Safety'
 import { Confirmation } from './Confirmation'
 import { type OnboardingFormData, EMPTY_FORM, STORAGE_KEY } from './types'
 
 const TOTAL_STEPS = 3
+const STEP_LABELS = ['About the senior', 'Call preferences', 'Safety']
 
 type ValidationErrors = Partial<Record<keyof OnboardingFormData, string>>
 
-/** Normalises a phone number to digits only, then validates E.164 or 10-digit US. */
 function isValidPhone(raw: string): boolean {
   const cleaned = raw.replace(/[\s\-().+]/g, '')
   if (/^\d{10}$/.test(cleaned)) return true
@@ -50,16 +48,22 @@ function validateStep1(data: OnboardingFormData): ValidationErrors {
 }
 
 function validateStep2(_data: OnboardingFormData): ValidationErrors {
-  // Step 2 fields are all optional — no blocking validation
   return {}
 }
 
 function validateStep3(_data: OnboardingFormData): ValidationErrors {
-  // Step 3 fields are all optional — no blocking validation
   return {}
 }
 
 const validators = [validateStep1, validateStep2, validateStep3]
+
+function CheckIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path d="M3 8l3.5 3.5L13 5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
 
 export function OnboardingForm() {
   const [step, setStep] = useState(1)
@@ -70,7 +74,6 @@ export function OnboardingForm() {
   const [confirmedName, setConfirmedName] = useState<string | null>(null)
   const [hydrated, setHydrated] = useState(false)
 
-  // Load saved form state from localStorage on first render (before rendering fields)
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY)
@@ -79,23 +82,21 @@ export function OnboardingForm() {
         setFormData((prev) => ({ ...prev, ...parsed }))
       }
     } catch {
-      // Ignore parse errors — start fresh
+      // Ignore parse errors
     }
     setHydrated(true)
   }, [])
 
-  // Persist form state to localStorage on every change
   const handleChange = useCallback((field: keyof OnboardingFormData, value: string) => {
     setFormData((prev) => {
       const next = { ...prev, [field]: value }
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
       } catch {
-        // Storage may be full — continue silently
+        // ignore
       }
       return next
     })
-    // Clear error for the field being edited
     setErrors((prev) => {
       if (!prev[field]) return prev
       const next = { ...prev }
@@ -108,7 +109,6 @@ export function OnboardingForm() {
     const errs = validators[step - 1](formData)
     if (Object.keys(errs).length > 0) {
       setErrors(errs)
-      // Scroll to first error
       const firstKey = Object.keys(errs)[0]
       document.getElementById(firstKey)?.focus()
       return
@@ -151,9 +151,7 @@ export function OnboardingForm() {
         return
       }
 
-      // Clear saved form state on success
       try { localStorage.removeItem(STORAGE_KEY) } catch { /* ignore */ }
-
       setConfirmedName(data.preferred_name ?? formData.preferred_name)
     } catch (err) {
       console.error('[OnboardingForm] Unexpected error:', err)
@@ -163,20 +161,39 @@ export function OnboardingForm() {
     }
   }
 
-  // Prevent hydration flash by not rendering form fields until localStorage is read
   if (!hydrated) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#FAFAF8' }}>
-        <div className="w-8 h-8 rounded-full border-2 border-gray-300 border-t-blue-500 animate-spin" aria-label="Loading" />
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--color-cream)' }}>
+        <div
+          style={{
+            width: '40px',
+            height: '40px',
+            borderRadius: '50%',
+            border: '3px solid var(--color-warm-grey)',
+            borderTopColor: 'var(--color-teal)',
+            animation: 'spin 0.8s linear infinite',
+          }}
+          aria-label="Loading"
+          role="status"
+        />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     )
   }
 
-  // Confirmation screen
   if (confirmedName) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4 py-8" style={{ backgroundColor: '#FAFAF8' }}>
-        <div className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px 16px', backgroundColor: 'var(--color-cream)' }}>
+        <div
+          style={{
+            width: '100%',
+            maxWidth: '640px',
+            backgroundColor: 'var(--color-warm-white)',
+            borderRadius: 'var(--radius-xl)',
+            boxShadow: 'var(--shadow-md)',
+            padding: '48px',
+          }}
+        >
           <Confirmation preferredName={confirmedName} />
         </div>
       </div>
@@ -184,84 +201,200 @@ export function OnboardingForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-8" style={{ backgroundColor: '#FAFAF8' }}>
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-cream)', padding: '32px 16px' }}>
+      <div style={{ maxWidth: '640px', margin: '0 auto' }}>
+        {/* Wordmark */}
+        <p
+          style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: '24px',
+            color: 'var(--color-navy)',
+            fontWeight: 500,
+            textAlign: 'center',
+            marginBottom: '32px',
+          }}
+        >
+          ThriveAtHome
+        </p>
 
-        {/* Progress indicator */}
-        <div className="mb-6">
-          <div className="flex justify-between mb-2">
-            <span className="text-xs font-medium text-gray-400">Step {step} of {TOTAL_STEPS}</span>
-            <span className="text-xs font-medium" style={{ color: '#0D7C8F' }}>
-              {step === 1 ? 'About the senior' : step === 2 ? 'Safety & health' : 'Preferences'}
-            </span>
-          </div>
-          <div className="w-full bg-gray-100 rounded-full h-1.5">
-            <div
-              className="h-1.5 rounded-full transition-all duration-300"
-              style={{ width: `${(step / TOTAL_STEPS) * 100}%`, backgroundColor: '#0D7C8F' }}
-              role="progressbar"
-              aria-valuenow={step}
-              aria-valuemin={1}
-              aria-valuemax={TOTAL_STEPS}
-              aria-label={`Step ${step} of ${TOTAL_STEPS}`}
-            />
+        {/* Step progress */}
+        <div style={{ marginBottom: '32px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0' }}>
+            {STEP_LABELS.map((label, index) => {
+              const stepNum = index + 1
+              const isComplete = step > stepNum
+              const isActive = step === stepNum
+              return (
+                <div key={label} style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: '0 0 auto' }}>
+                    <div
+                      style={{
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: isComplete ? 'var(--color-teal)' : isActive ? 'var(--color-navy)' : 'var(--color-warm-grey)',
+                        color: isComplete || isActive ? 'white' : 'var(--color-text-muted)',
+                        fontSize: '15px',
+                        fontWeight: 600,
+                        fontFamily: 'var(--font-body)',
+                        transition: 'all 0.3s',
+                      }}
+                      aria-current={isActive ? 'step' : undefined}
+                    >
+                      {isComplete ? <CheckIcon /> : stepNum}
+                    </div>
+                    <span
+                      style={{
+                        fontSize: '13px',
+                        marginTop: '6px',
+                        color: isActive ? 'var(--color-navy)' : isComplete ? 'var(--color-teal)' : 'var(--color-text-muted)',
+                        fontFamily: 'var(--font-body)',
+                        fontWeight: isActive ? 600 : 400,
+                        whiteSpace: 'nowrap',
+                        textAlign: 'center',
+                      }}
+                    >
+                      {label}
+                    </span>
+                  </div>
+                  {index < STEP_LABELS.length - 1 && (
+                    <div
+                      style={{
+                        flex: 1,
+                        height: '2px',
+                        backgroundColor: step > stepNum ? 'var(--color-teal)' : 'var(--color-warm-grey)',
+                        marginBottom: '24px',
+                        transition: 'background-color 0.3s',
+                      }}
+                    />
+                  )}
+                </div>
+              )
+            })}
           </div>
         </div>
 
-        {/* Step content */}
-        {step === 1 && (
-          <Step1BasicInfo data={formData} onChange={handleChange} errors={errors} />
-        )}
-        {step === 2 && (
-          <Step2EmergencyHealth data={formData} onChange={handleChange} errors={errors} />
-        )}
-        {step === 3 && (
-          <Step3Preferences data={formData} onChange={handleChange} errors={errors} />
-        )}
-
-        {/* Submit error */}
-        {submitError && (
-          <p className="mt-4 text-red-600 text-sm bg-red-50 rounded-lg p-3" role="alert">
-            {submitError}
-          </p>
-        )}
-
-        {/* Navigation */}
-        <div className="mt-6 flex gap-3">
-          {step > 1 && (
-            <button
-              type="button"
-              onClick={handleBack}
-              disabled={submitting}
-              className="flex-1 rounded-lg border border-gray-300 px-4 py-4 text-base font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-60"
-              style={{ minHeight: '52px' }}
-            >
-              Back
-            </button>
+        {/* Form card */}
+        <div
+          style={{
+            backgroundColor: 'var(--color-warm-white)',
+            borderRadius: 'var(--radius-xl)',
+            boxShadow: 'var(--shadow-md)',
+            padding: '48px',
+          }}
+          className="onboarding-card"
+        >
+          {step === 1 && (
+            <Step1BasicInfo data={formData} onChange={handleChange} errors={errors} />
+          )}
+          {step === 2 && (
+            <Step2Preferences data={formData} onChange={handleChange} errors={errors} />
+          )}
+          {step === 3 && (
+            <Step3Safety data={formData} onChange={handleChange} errors={errors} />
           )}
 
-          {step < TOTAL_STEPS ? (
-            <button
-              type="button"
-              onClick={handleNext}
-              className="flex-1 text-white font-semibold rounded-lg px-4 py-4 text-base transition-opacity hover:opacity-90"
-              style={{ backgroundColor: '#1B3A6B', minHeight: '52px' }}
+          {submitError && (
+            <p
+              role="alert"
+              style={{
+                marginTop: '24px',
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '8px',
+                backgroundColor: 'var(--color-urgent)',
+                color: 'var(--color-urgent-text)',
+                borderRadius: 'var(--radius-md)',
+                padding: '14px 16px',
+                fontSize: '18px',
+                fontFamily: 'var(--font-body)',
+                border: '1px solid var(--color-urgent-border)',
+              }}
             >
-              Next
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={submitting}
-              className="flex-1 text-white font-semibold rounded-lg px-4 py-4 text-base transition-opacity hover:opacity-90 disabled:opacity-60"
-              style={{ backgroundColor: '#1B3A6B', minHeight: '52px' }}
-            >
-              {submitting ? 'Saving profile…' : 'Save profile'}
-            </button>
+              <span aria-hidden="true">⚠</span> {submitError}
+            </p>
           )}
+
+          <div style={{ marginTop: '40px', display: 'flex', gap: '12px' }}>
+            {step > 1 && (
+              <button
+                type="button"
+                onClick={handleBack}
+                disabled={submitting}
+                style={{
+                  flex: 1,
+                  height: '56px',
+                  backgroundColor: 'transparent',
+                  border: '1.5px solid var(--color-warm-grey)',
+                  borderRadius: 'var(--radius-md)',
+                  color: 'var(--color-text-secondary)',
+                  fontSize: '18px',
+                  fontWeight: 500,
+                  fontFamily: 'var(--font-body)',
+                  cursor: submitting ? 'not-allowed' : 'pointer',
+                  opacity: submitting ? 0.6 : 1,
+                  transition: 'all 0.2s',
+                }}
+              >
+                Back
+              </button>
+            )}
+
+            {step < TOTAL_STEPS ? (
+              <button
+                type="button"
+                onClick={handleNext}
+                style={{
+                  flex: 1,
+                  height: '56px',
+                  backgroundColor: 'var(--color-teal)',
+                  border: 'none',
+                  borderRadius: 'var(--radius-md)',
+                  color: 'white',
+                  fontSize: '18px',
+                  fontWeight: 500,
+                  fontFamily: 'var(--font-body)',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}
+              >
+                Next
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={submitting}
+                style={{
+                  flex: 1,
+                  height: '56px',
+                  backgroundColor: 'var(--color-navy)',
+                  border: 'none',
+                  borderRadius: 'var(--radius-md)',
+                  color: 'var(--color-cream)',
+                  fontSize: '18px',
+                  fontWeight: 500,
+                  fontFamily: 'var(--font-body)',
+                  cursor: submitting ? 'not-allowed' : 'pointer',
+                  opacity: submitting ? 0.6 : 1,
+                  transition: 'all 0.2s',
+                }}
+              >
+                {submitting ? 'Saving profile…' : 'Save profile'}
+              </button>
+            )}
+          </div>
         </div>
       </div>
+
+      <style>{`
+        @media (max-width: 600px) {
+          .onboarding-card { padding: 24px !important; }
+        }
+      `}</style>
     </div>
   )
 }

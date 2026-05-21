@@ -1,18 +1,7 @@
-// RecentCallsList — shows the 5 most recent check-in calls with mood emoji and status.
 import { MoodEmoji } from '@/components/ui/MoodEmoji'
-import { Badge } from '@/components/ui/Badge'
 import { SectionError } from './SectionError'
 import type { CheckInCall } from '@/lib/data/calls'
-import type { BadgeVariant } from '@/components/ui/Badge'
 import Link from 'next/link'
-
-const statusBadge: Record<string, BadgeVariant> = {
-  completed: 'success',
-  missed: 'urgent',
-  failed: 'emergency',
-  scheduled: 'neutral',
-  in_progress: 'info',
-}
 
 const statusLabel: Record<string, string> = {
   completed: 'Completed',
@@ -22,13 +11,21 @@ const statusLabel: Record<string, string> = {
   in_progress: 'In progress',
 }
 
+const statusColor: Record<string, string> = {
+  completed: 'var(--color-teal)',
+  missed: 'var(--color-concern-text)',
+  failed: 'var(--color-urgent-text)',
+  scheduled: 'var(--color-text-muted)',
+  in_progress: 'var(--color-navy-light)',
+}
+
 function formatCallDate(dateStr: string | null, fallback: string): string {
   const d = new Date(dateStr ?? fallback)
   return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' })
 }
 
 function formatDuration(secs: number | null): string {
-  if (!secs) return '—'
+  if (!secs) return ''
   const m = Math.floor(secs / 60)
   const s = secs % 60
   return m > 0 ? `${m}m ${s}s` : `${s}s`
@@ -46,47 +43,94 @@ export function RecentCallsList({ calls, error }: RecentCallsListProps) {
 
   if (recent.length === 0) {
     return (
-      <p className="text-gray-500 text-lg">No calls have been completed yet.</p>
+      <p style={{ color: 'var(--color-text-muted)', fontSize: '18px', fontFamily: 'var(--font-body)', margin: 0 }}>
+        No calls completed yet.
+      </p>
     )
   }
 
   return (
-    <div className="space-y-2">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
       {recent.map((call) => (
         <div
           key={call.id}
-          className="rounded-xl border border-gray-200 bg-white px-5 py-4 flex flex-wrap items-center gap-4"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            padding: '14px 16px',
+            backgroundColor: 'var(--color-cream)',
+            border: '1px solid var(--color-warm-grey)',
+            borderRadius: 'var(--radius-md)',
+            flexWrap: 'wrap',
+          }}
         >
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            {call.mood_score !== null ? (
-              <MoodEmoji score={call.mood_score} size="lg" />
-            ) : (
-              <span className="text-2xl text-gray-300" aria-label="No mood score">—</span>
-            )}
-            <div className="min-w-0">
-              <p className="text-lg font-medium text-brand-navy truncate">
-                {formatCallDate(call.scheduled_at, call.created_at)}
-              </p>
-              <p className="text-base text-gray-400">
-                {formatDuration(call.duration_seconds)}
-                {call.medication_taken !== null && (
-                  <span className="ml-3">
-                    {call.medication_taken ? '💊 Meds taken' : '⚠ Meds not taken'}
-                  </span>
-                )}
-              </p>
-            </div>
+          {call.mood_score !== null ? (
+            <MoodEmoji score={call.mood_score} size="sm" />
+          ) : (
+            <span
+              style={{
+                color: 'var(--color-text-muted)',
+                fontSize: '22px',
+                fontFamily: 'var(--font-mono)',
+                lineHeight: 1,
+              }}
+              aria-label="No mood score"
+            >
+              —
+            </span>
+          )}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: '18px',
+                fontWeight: 500,
+                color: 'var(--color-text-primary)',
+                margin: 0,
+              }}
+            >
+              {formatCallDate(call.scheduled_at, call.created_at)}
+            </p>
+            <p
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '13px',
+                color: 'var(--color-text-muted)',
+                margin: '2px 0 0',
+              }}
+            >
+              {formatDuration(call.duration_seconds)}
+              {call.medication_taken !== null && (
+                <span style={{ marginLeft: '12px' }}>
+                  {call.medication_taken ? '💊 Taken' : '⚠ Not taken'}
+                </span>
+              )}
+            </p>
           </div>
-          <Badge variant={statusBadge[call.status] ?? 'neutral'}>
+          <span
+            style={{
+              fontSize: '13px',
+              fontFamily: 'var(--font-body)',
+              fontWeight: 500,
+              color: statusColor[call.status] ?? 'var(--color-text-muted)',
+            }}
+          >
             {statusLabel[call.status] ?? call.status}
-          </Badge>
+          </span>
         </div>
       ))}
       {calls.length > 5 && (
-        <div className="pt-1">
+        <div style={{ paddingTop: '8px' }}>
           <Link
             href="/dashboard/calls"
-            className="text-lg text-brand-teal hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal rounded"
+            style={{
+              fontSize: '18px',
+              color: 'var(--color-teal)',
+              fontFamily: 'var(--font-body)',
+              fontWeight: 500,
+              textDecoration: 'none',
+            }}
           >
             View all {calls.length} calls →
           </Link>

@@ -1,13 +1,9 @@
 'use client'
-// CallHistoryClient — expandable call rows with plain-English flag labels and load-more pagination.
 import { useState, useCallback } from 'react'
 import { MoodEmoji } from '@/components/ui/MoodEmoji'
-import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import type { CheckInCall } from '@/lib/data/calls'
-import type { BadgeVariant } from '@/components/ui/Badge'
 
-// Plain-English labels for every flag value stored in check_in_calls.alert_flags.
 const FLAG_LABELS: Record<string, string> = {
   low_mood:        'Aria noted a mood concern this call',
   mood_drop:       'A significant mood decline was noted',
@@ -19,20 +15,20 @@ const FLAG_LABELS: Record<string, string> = {
   emergency:       'An emergency was flagged — care team alerted',
 }
 
-const statusBadge: Record<string, BadgeVariant> = {
-  completed: 'success',
-  missed: 'urgent',
-  failed: 'emergency',
-  scheduled: 'neutral',
-  in_progress: 'info',
-}
-
 const statusLabel: Record<string, string> = {
   completed: 'Completed',
   missed: 'Missed',
   failed: 'Failed',
   scheduled: 'Scheduled',
   in_progress: 'In progress',
+}
+
+const statusColor: Record<string, string> = {
+  completed: 'var(--color-teal)',
+  missed: 'var(--color-concern-text)',
+  failed: 'var(--color-urgent-text)',
+  scheduled: 'var(--color-text-muted)',
+  in_progress: 'var(--color-navy-light)',
 }
 
 function formatCallDate(dateStr: string | null, fallback: string): string {
@@ -54,60 +50,108 @@ function parseFlags(flags: unknown): string[] {
   return flags.filter((f): f is string => typeof f === 'string')
 }
 
-interface CallRowProps {
-  call: CheckInCall
-}
-
-function CallRow({ call }: CallRowProps) {
+function CallRow({ call }: { call: CheckInCall }) {
   const [expanded, setExpanded] = useState(false)
   const flags = parseFlags(call.alert_flags)
   const hasDetails = !!call.ai_summary || flags.length > 0
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
-      {/* Summary row — always visible */}
+    <div
+      style={{
+        backgroundColor: 'var(--color-warm-white)',
+        border: '1px solid var(--color-warm-grey)',
+        borderRadius: 'var(--radius-lg)',
+        overflow: 'hidden',
+        boxShadow: 'var(--shadow-card)',
+      }}
+    >
       <button
-        className="w-full text-left px-5 py-4 flex flex-wrap items-center gap-4 hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-teal"
+        style={{
+          width: '100%',
+          textAlign: 'left',
+          padding: '20px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '16px',
+          backgroundColor: 'transparent',
+          border: 'none',
+          cursor: hasDetails ? 'pointer' : 'default',
+          flexWrap: 'wrap',
+          transition: 'background-color 0.2s',
+        }}
         onClick={() => hasDetails && setExpanded((prev) => !prev)}
         aria-expanded={hasDetails ? expanded : undefined}
         aria-label={`${formatCallDate(call.scheduled_at, call.created_at)} call — ${statusLabel[call.status] ?? call.status}${hasDetails ? '. Click to expand.' : ''}`}
         disabled={!hasDetails}
       >
-        {/* Mood emoji */}
-        <div className="flex-shrink-0 w-12 flex justify-center">
-          <MoodEmoji score={call.mood_score} size="lg" />
+        {/* Date in mono */}
+        <div style={{ flexShrink: 0 }}>
+          <span
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: '13px',
+              color: 'var(--color-text-muted)',
+              display: 'block',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {formatCallDate(call.scheduled_at, call.created_at)}
+          </span>
         </div>
 
-        {/* Date and duration */}
-        <div className="flex-1 min-w-0">
-          <p className="text-lg font-medium text-brand-navy">
-            {formatCallDate(call.scheduled_at, call.created_at)}
-          </p>
-          <p className="text-base text-gray-500 flex flex-wrap gap-3 mt-0.5">
+        {/* Mood */}
+        <div style={{ flexShrink: 0 }}>
+          <MoodEmoji score={call.mood_score} size="sm" />
+        </div>
+
+        {/* Details */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div
+            style={{
+              display: 'flex',
+              gap: '16px',
+              flexWrap: 'wrap',
+              fontSize: '15px',
+              fontFamily: 'var(--font-body)',
+              color: 'var(--color-text-muted)',
+            }}
+          >
             <span>{formatDuration(call.duration_seconds)}</span>
-            {call.mood_score !== null && (
-              <span>Mood: {call.mood_score}/10</span>
-            )}
             {call.medication_taken !== null && (
-              <span>{call.medication_taken ? '💊 Meds taken' : '⚠️ Meds not taken'}</span>
+              <span style={{ color: call.medication_taken ? 'var(--color-teal)' : 'var(--color-concern-text)' }}>
+                {call.medication_taken ? '💊 Taken' : '⚠ Not taken'}
+              </span>
             )}
             {flags.length > 0 && (
-              <span className="text-amber-600 font-medium">
+              <span style={{ color: 'var(--color-concern-text)', fontWeight: 500 }}>
                 {flags.length} flag{flags.length > 1 ? 's' : ''}
               </span>
             )}
-          </p>
+          </div>
         </div>
 
-        {/* Status badge + chevron */}
-        <div className="flex items-center gap-3 flex-shrink-0">
-          <Badge variant={statusBadge[call.status] ?? 'neutral'}>
+        {/* Status + chevron */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+          <span
+            style={{
+              fontSize: '13px',
+              fontFamily: 'var(--font-body)',
+              fontWeight: 500,
+              color: statusColor[call.status] ?? 'var(--color-text-muted)',
+            }}
+          >
             {statusLabel[call.status] ?? call.status}
-          </Badge>
+          </span>
           {hasDetails && (
             <span
               aria-hidden="true"
-              className={`text-gray-400 text-xl transition-transform ${expanded ? 'rotate-180' : ''}`}
+              style={{
+                color: 'var(--color-text-muted)',
+                fontSize: '18px',
+                display: 'inline-block',
+                transition: 'transform 0.2s',
+                transform: expanded ? 'rotate(180deg)' : 'none',
+              }}
             >
               ▾
             </span>
@@ -115,40 +159,86 @@ function CallRow({ call }: CallRowProps) {
         </div>
       </button>
 
-      {/* Expanded detail panel */}
+      {/* Expanded panel */}
       {expanded && hasDetails && (
-        <div className="border-t border-gray-100 px-5 py-4 space-y-4 bg-gray-50">
-          {/* Extra scores */}
-          {(call.energy_score !== null || call.pain_score !== null) && (
-            <div className="flex gap-6 text-base text-gray-600">
-              {call.energy_score !== null && (
-                <span>Energy: <strong>{call.energy_score}/10</strong></span>
-              )}
-              {call.pain_score !== null && (
-                <span>Pain: <strong>{call.pain_score}/10</strong></span>
-              )}
-            </div>
-          )}
-
-          {/* AI summary */}
+        <div
+          style={{
+            borderTop: '1px solid var(--color-warm-grey)',
+            padding: '20px',
+            backgroundColor: 'var(--color-cream)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '20px',
+          }}
+        >
+          {/* AI summary in display font */}
           {call.ai_summary && (
             <div>
-              <p className="text-base font-semibold text-gray-700 mb-1">Call Summary</p>
-              <p className="text-base text-gray-600 leading-relaxed">{call.ai_summary}</p>
+              <p
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '11px',
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                  color: 'var(--color-text-muted)',
+                  marginBottom: '8px',
+                }}
+              >
+                Call summary
+              </p>
+              <p
+                style={{
+                  fontFamily: 'var(--font-display)',
+                  fontSize: '20px',
+                  fontStyle: 'italic',
+                  color: 'var(--color-text-primary)',
+                  lineHeight: 1.65,
+                  margin: 0,
+                }}
+              >
+                {call.ai_summary}
+              </p>
             </div>
           )}
 
-          {/* Alert flags — plain-English labels */}
+          {/* Extra scores */}
+          {(call.energy_score !== null || call.pain_score !== null) && (
+            <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
+              {call.energy_score !== null && (
+                <div>
+                  <span style={{ fontSize: '13px', color: 'var(--color-text-muted)', fontFamily: 'var(--font-body)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '2px' }}>Energy</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '20px', fontWeight: 600, color: 'var(--color-navy)' }}>{call.energy_score}/10</span>
+                </div>
+              )}
+              {call.pain_score !== null && (
+                <div>
+                  <span style={{ fontSize: '13px', color: 'var(--color-text-muted)', fontFamily: 'var(--font-body)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '2px' }}>Comfort</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '20px', fontWeight: 600, color: 'var(--color-navy)' }}>{10 - call.pain_score}/10</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Flags */}
           {flags.length > 0 && (
             <div>
-              <p className="text-base font-semibold text-gray-700 mb-2">Flags</p>
-              <ul className="space-y-1" aria-label="Call flags">
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--color-text-muted)', marginBottom: '10px' }}>
+                Flags
+              </p>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }} aria-label="Call flags">
                 {flags.map((flag) => (
                   <li
                     key={flag}
-                    className="flex items-start gap-2 text-base text-amber-700"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '10px',
+                      fontSize: '18px',
+                      color: 'var(--color-concern-text)',
+                      fontFamily: 'var(--font-body)',
+                    }}
                   >
-                    <span aria-hidden="true" className="mt-0.5">⚠</span>
+                    <span aria-hidden="true" style={{ marginTop: '2px' }}>⚠</span>
                     <span>{FLAG_LABELS[flag] ?? flag}</span>
                   </li>
                 ))}
@@ -197,26 +287,39 @@ export default function CallHistoryClient({ memberId, initialCalls, totalCount }
 
   if (calls.length === 0) {
     return (
-      <p className="text-gray-500 text-lg py-4">No calls have been recorded yet.</p>
+      <div
+        style={{
+          textAlign: 'center',
+          padding: '48px 24px',
+          backgroundColor: 'var(--color-teal-muted)',
+          borderRadius: 'var(--radius-xl)',
+        }}
+      >
+        <p style={{ fontFamily: 'var(--font-display)', fontSize: '24px', color: 'var(--color-navy)', margin: '0 0 8px' }}>
+          No calls yet
+        </p>
+        <p style={{ fontFamily: 'var(--font-body)', fontSize: '18px', color: 'var(--color-text-muted)', margin: 0 }}>
+          Aria will call for the first time at the scheduled time.
+        </p>
+      </div>
     )
   }
 
   return (
-    <div className="space-y-3">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
       {calls.map((call) => (
         <CallRow key={call.id} call={call} />
       ))}
 
-      {/* Load more */}
       {hasMore && (
-        <div className="pt-2 flex flex-col items-center gap-2">
+        <div style={{ paddingTop: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
           {error && (
-            <p role="alert" className="text-base text-red-600">
+            <p role="alert" style={{ color: 'var(--color-urgent-text)', fontSize: '18px', fontFamily: 'var(--font-body)', margin: 0 }}>
               {error}
             </p>
           )}
           <Button
-            variant="secondary"
+            variant="ghost"
             onClick={loadMore}
             loading={loading}
             aria-label="Load more calls"

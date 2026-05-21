@@ -7,8 +7,8 @@
   --color-navy-light:        #2A5298;
 
   /* ─── Accent colours ──────────────────────────────────── */
-  --color-teal:              #2A9D8F;
-  --color-teal-light:        #3DBFB0;
+  --color-teal:              #1A7A6A;
+  --color-teal-light:        #2A9D8F;
   --color-teal-muted:        #E8F5F4;
 
   /* ─── Warm neutrals ───────────────────────────────────── */
@@ -20,7 +20,7 @@
   /* ─── Text ────────────────────────────────────────────── */
   --color-text-primary:      #1A1814;
   --color-text-secondary:    #4A4640;
-  --color-text-muted:        #7A746C;
+  --color-text-muted:        #5E5852;
 
   /* ─── Alert severity ──────────────────────────────────── */
   --color-info:              #E8F0FB;

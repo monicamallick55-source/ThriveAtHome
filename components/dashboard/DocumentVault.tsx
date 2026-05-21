@@ -1,19 +1,14 @@
 'use client'
-// DocumentVault — upload, list, and download documents from the member-documents Storage bucket.
 import { useState, useRef } from 'react'
 import { Button } from '@/components/ui/Button'
-import { Badge } from '@/components/ui/Badge'
 import { SectionError } from './SectionError'
 import type { DocumentVaultItem } from '@/lib/data/documents'
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10 MB — enforced client-side before API call
+const MAX_FILE_SIZE = 10 * 1024 * 1024
 
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    timeZone: 'UTC',
+    year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC',
   })
 }
 
@@ -21,6 +16,14 @@ function humanSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+function fileIcon(fileName: string): string {
+  const ext = fileName.split('.').pop()?.toLowerCase() ?? ''
+  if (['pdf'].includes(ext)) return '📄'
+  if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) return '🖼️'
+  if (['doc', 'docx'].includes(ext)) return '📝'
+  return '📎'
 }
 
 export interface DocumentVaultProps {
@@ -37,17 +40,14 @@ export function DocumentVault({ memberId, initialDocuments, error }: DocumentVau
   const [deleting, setDeleting] = useState<string | null>(null)
   const [description, setDescription] = useState('')
   const [isAdvanceDirective, setIsAdvanceDirective] = useState(false)
+  const [isDragOver, setIsDragOver] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
-  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-
+  async function uploadFile(file: File) {
     setUploadError(null)
 
-    // Client-side size check — provides instant feedback before sending to API
     if (file.size > MAX_FILE_SIZE) {
-      setUploadError('This file is too large. Maximum size is 10 MB.')
+      setUploadError('That file is a bit too large. Please upload files under 10MB.')
       if (fileRef.current) fileRef.current.value = ''
       return
     }
@@ -73,6 +73,19 @@ export function DocumentVault({ memberId, initialDocuments, error }: DocumentVau
     setUploading(false)
   }
 
+  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    await uploadFile(file)
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault()
+    setIsDragOver(false)
+    const file = e.dataTransfer.files?.[0]
+    if (file) uploadFile(file)
+  }
+
   async function handleDelete(docId: string, fileName: string) {
     if (!confirm(`Delete "${fileName}"? This cannot be undone.`)) return
     setDeleting(docId)
@@ -93,7 +106,6 @@ export function DocumentVault({ memberId, initialDocuments, error }: DocumentVau
     if (!res.ok || !json.url) {
       alert(json.error ?? 'Unable to download file.')
     } else {
-      // Open signed URL in a new tab — triggers the browser's native download
       const a = document.createElement('a')
       a.href = json.url
       a.download = fileName
@@ -107,104 +119,188 @@ export function DocumentVault({ memberId, initialDocuments, error }: DocumentVau
   if (error) return <SectionError message={error} />
 
   return (
-    <div className="space-y-6">
-      {/* Upload section */}
-      <div className="rounded-xl border border-dashed border-gray-300 bg-gray-50 p-5 space-y-3">
-        <h3 className="text-lg font-semibold text-brand-navy">Upload a document</h3>
-
-        <div className="space-y-3">
-          {/* Optional description */}
-          <div>
-            <label htmlFor="doc-description" className="block text-base font-medium text-gray-700 mb-1">
-              Description (optional)
-            </label>
-            <input
-              id="doc-description"
-              type="text"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="e.g. Living will, insurance card…"
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-brand-teal"
-            />
-          </div>
-
-          {/* Advance directive checkbox */}
-          <label className="flex items-center gap-2 cursor-pointer text-base text-gray-700">
-            <input
-              type="checkbox"
-              checked={isAdvanceDirective}
-              onChange={(e) => setIsAdvanceDirective(e.target.checked)}
-              className="w-4 h-4 accent-brand-teal"
-            />
-            This is an advance directive or healthcare proxy document
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+      {/* Upload zone */}
+      <div>
+        {/* Optional description field */}
+        <div style={{ marginBottom: '16px' }}>
+          <label
+            htmlFor="doc-description"
+            style={{ display: 'block', fontSize: '18px', fontWeight: 500, color: 'var(--color-text-secondary)', marginBottom: '8px', fontFamily: 'var(--font-body)' }}
+          >
+            Description (optional)
           </label>
-
-          {/* File picker */}
-          <div>
-            <label htmlFor="doc-file" className="block text-base font-medium text-gray-700 mb-1">
-              Select file (PDF, images, or documents — max 10 MB)
-            </label>
-            <input
-              id="doc-file"
-              ref={fileRef}
-              type="file"
-              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.txt"
-              onChange={handleUpload}
-              disabled={uploading}
-              className="block w-full text-base text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-base file:font-medium file:bg-brand-navy file:text-white hover:file:bg-opacity-90 cursor-pointer"
-              aria-describedby={uploadError ? 'upload-error' : undefined}
-            />
-          </div>
-
-          {uploading && (
-            <p className="text-base text-gray-500" role="status">
-              Uploading…
-            </p>
-          )}
-          {uploadError && (
-            <p id="upload-error" role="alert" className="text-base text-red-600">
-              {uploadError}
-            </p>
-          )}
+          <input
+            id="doc-description"
+            type="text"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="e.g. Living will, insurance card…"
+            style={{
+              width: '100%',
+              height: '56px',
+              backgroundColor: 'white',
+              border: '1.5px solid var(--color-warm-grey)',
+              borderRadius: 'var(--radius-md)',
+              padding: '0 16px',
+              fontSize: '18px',
+              fontFamily: 'var(--font-body)',
+              color: 'var(--color-text-primary)',
+              outline: 'none',
+              boxSizing: 'border-box',
+            }}
+          />
         </div>
+
+        {/* Drop zone */}
+        <div
+          onDragOver={(e) => { e.preventDefault(); setIsDragOver(true) }}
+          onDragLeave={() => setIsDragOver(false)}
+          onDrop={handleDrop}
+          onClick={() => fileRef.current?.click()}
+          style={{
+            height: '160px',
+            border: `2px dashed ${isDragOver ? 'var(--color-teal)' : 'var(--color-warm-grey)'}`,
+            borderRadius: 'var(--radius-xl)',
+            backgroundColor: isDragOver ? 'var(--color-teal-muted)' : 'var(--color-cream)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+          role="button"
+          aria-label="Upload document"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && fileRef.current?.click()}
+        >
+          <span style={{ fontSize: '32px' }}>📁</span>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '18px', color: 'var(--color-text-secondary)', margin: 0, fontWeight: 500 }}>
+            Drop a file here, or click to upload
+          </p>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-muted)', margin: 0 }}>
+            PDF, JPG, PNG — max 10MB
+          </p>
+          <input
+            ref={fileRef}
+            id="doc-file"
+            type="file"
+            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.txt"
+            onChange={handleUpload}
+            disabled={uploading}
+            style={{ display: 'none' }}
+            aria-describedby={uploadError ? 'upload-error' : undefined}
+          />
+        </div>
+
+        <label
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            marginTop: '12px',
+            cursor: 'pointer',
+            fontSize: '18px',
+            color: 'var(--color-text-secondary)',
+            fontFamily: 'var(--font-body)',
+          }}
+        >
+          <input
+            type="checkbox"
+            checked={isAdvanceDirective}
+            onChange={(e) => setIsAdvanceDirective(e.target.checked)}
+            style={{ width: '20px', height: '20px', accentColor: 'var(--color-teal)', cursor: 'pointer' }}
+          />
+          This is an advance directive or healthcare proxy
+        </label>
+
+        {uploading && (
+          <p style={{ marginTop: '12px', fontSize: '18px', color: 'var(--color-text-muted)', fontFamily: 'var(--font-body)' }} role="status">
+            Uploading…
+          </p>
+        )}
+
+        {uploadError && (
+          <p
+            id="upload-error"
+            role="alert"
+            style={{
+              marginTop: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              backgroundColor: 'var(--color-concern)',
+              color: 'var(--color-concern-text)',
+              border: '1px solid var(--color-concern-border)',
+              borderRadius: 'var(--radius-md)',
+              padding: '14px 16px',
+              fontSize: '18px',
+              fontFamily: 'var(--font-body)',
+            }}
+          >
+            <span aria-hidden="true">⚠</span> {uploadError}
+          </p>
+        )}
       </div>
 
       {/* Document list */}
       <div>
-        <h3 className="text-lg font-semibold text-brand-navy mb-3">
-          {documents.length === 0 ? 'No documents uploaded yet' : `${documents.length} document${documents.length === 1 ? '' : 's'}`}
+        <h3
+          style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: '22px',
+            fontWeight: 500,
+            color: 'var(--color-navy)',
+            marginBottom: '16px',
+          }}
+        >
+          {documents.length === 0
+            ? 'No documents uploaded yet'
+            : `${documents.length} document${documents.length === 1 ? '' : 's'}`}
         </h3>
 
         {documents.length > 0 && (
-          <ul className="space-y-2" aria-label="Document list">
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '10px' }} aria-label="Document list">
             {documents.map((doc) => (
               <li
                 key={doc.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white px-5 py-4"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '16px',
+                  backgroundColor: 'var(--color-warm-white)',
+                  border: '1px solid var(--color-warm-grey)',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: '16px 20px',
+                  flexWrap: 'wrap',
+                  boxShadow: 'var(--shadow-card)',
+                }}
               >
-                <div className="space-y-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-lg font-medium text-brand-navy truncate">
-                      {doc.file_name}
-                    </span>
+                <span style={{ fontSize: '28px', flexShrink: 0 }}>{fileIcon(doc.file_name)}</span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontFamily: 'var(--font-body)', fontSize: '18px', fontWeight: 500, color: 'var(--color-navy)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {doc.file_name}
                     {doc.is_advance_directive && (
-                      <Badge variant="info">Advance directive</Badge>
+                      <span style={{ marginLeft: '8px', fontSize: '13px', backgroundColor: 'var(--color-info)', color: 'var(--color-info-text)', padding: '2px 8px', borderRadius: 'var(--radius-full)', fontWeight: 600 }}>
+                        Advance directive
+                      </span>
                     )}
-                  </div>
+                  </p>
                   {doc.description && (
-                    <p className="text-base text-gray-500">{doc.description}</p>
+                    <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)', margin: '2px 0 0' }}>{doc.description}</p>
                   )}
-                  <p className="text-sm text-gray-400">
-                    Uploaded {formatDate(doc.created_at)}
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'var(--color-text-muted)', margin: '2px 0 0' }}>
+                    {formatDate(doc.created_at)}
                   </p>
                 </div>
-                <div className="flex gap-2 shrink-0">
+                <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
                   <Button
                     variant="secondary"
                     size="sm"
                     onClick={() => handleDownload(doc.id, doc.file_name)}
                     loading={downloading === doc.id}
-                    className="min-h-[52px]"
                     aria-label={`Download ${doc.file_name}`}
                   >
                     Download
@@ -214,7 +310,6 @@ export function DocumentVault({ memberId, initialDocuments, error }: DocumentVau
                     size="sm"
                     onClick={() => handleDelete(doc.id, doc.file_name)}
                     loading={deleting === doc.id}
-                    className="min-h-[52px]"
                     aria-label={`Delete ${doc.file_name}`}
                   >
                     Delete

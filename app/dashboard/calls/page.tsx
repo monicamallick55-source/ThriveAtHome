@@ -1,4 +1,3 @@
-// Call History page — server component that fetches the first page of calls and total count.
 import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -6,6 +5,7 @@ import { requireAuth } from '@/lib/auth'
 import { getMemberForAuthUser } from '@/lib/data/members'
 import { getCallsForMember, getCallCountForMember } from '@/lib/data/calls'
 import CallHistoryClient from '@/components/dashboard/CallHistoryClient'
+import { ToastProvider } from '@/components/ui/Toast'
 
 export const metadata: Metadata = { title: 'Call History — ThriveAtHome' }
 
@@ -29,46 +29,102 @@ export default async function CallsPage() {
   const totalCount = countResult.data ?? 0
 
   return (
-    <div className="min-h-screen bg-brand-warm-white">
-      {/* Navigation bar */}
-      <nav className="sticky top-0 z-10 bg-brand-navy shadow-md" aria-label="Dashboard navigation">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+    <ToastProvider>
+      <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-cream)' }}>
+        {/* Navigation */}
+        <nav
+          style={{
+            position: 'sticky',
+            top: 0,
+            zIndex: 40,
+            backgroundColor: 'white',
+            borderBottom: '1px solid var(--color-warm-grey)',
+            boxShadow: 'var(--shadow-sm)',
+            height: '64px',
+            display: 'flex',
+            alignItems: 'center',
+          }}
+          aria-label="Dashboard navigation"
+        >
+          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Link
               href="/dashboard"
-              className="text-white text-base hover:text-brand-teal-light transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal rounded"
-              aria-label="Back to dashboard"
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: '18px',
+                fontWeight: 500,
+                color: 'var(--color-text-secondary)',
+                textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
             >
               ← Dashboard
             </Link>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--color-navy)', fontWeight: 500 }}>
+              ThriveAtHome
+            </span>
+            <div style={{ width: '120px' }} aria-hidden="true" />
           </div>
-          <span className="text-white text-xl font-bold tracking-tight">ThriveAtHome</span>
-          <div className="w-20" aria-hidden="true" />
-        </div>
-      </nav>
+        </nav>
 
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8" id="main-content">
-        {/* Page header */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-brand-navy">Call History</h1>
-          <p className="text-lg text-gray-500 mt-1">
-            {member.preferred_name}&apos;s check-in calls — {totalCount} total
-          </p>
-        </div>
-
-        {/* Error loading calls */}
-        {callsResult.error && !callsResult.data && (
-          <div role="alert" className="rounded-xl bg-red-50 border border-red-200 px-5 py-4 text-lg text-red-700">
-            Unable to load call history. Please refresh the page.
+        {/* Navy header */}
+        <div style={{ backgroundColor: 'var(--color-navy)', padding: '32px 24px 48px' }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+            <h1
+              style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: '34px',
+                fontWeight: 500,
+                color: 'var(--color-cream)',
+                marginBottom: '6px',
+                letterSpacing: '-0.01em',
+              }}
+            >
+              {member.preferred_name}&apos;s Call History
+            </h1>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '18px', color: 'rgba(250,250,245,0.7)', margin: 0 }}>
+              Every conversation, summarised for you. {totalCount} total calls.
+            </p>
           </div>
-        )}
+        </div>
 
-        <CallHistoryClient
-          memberId={member.id}
-          initialCalls={callsResult.data ?? []}
-          totalCount={totalCount}
-        />
-      </main>
-    </div>
+        <main
+          id="main-content"
+          style={{
+            maxWidth: '1200px',
+            margin: '-24px auto 0',
+            padding: '0 24px 48px',
+            position: 'relative',
+            zIndex: 10,
+          }}
+        >
+          {callsResult.error && !callsResult.data && (
+            <div
+              role="alert"
+              style={{
+                backgroundColor: 'var(--color-urgent)',
+                border: '1px solid var(--color-urgent-border)',
+                borderRadius: 'var(--radius-lg)',
+                padding: '16px 20px',
+                fontSize: '18px',
+                color: 'var(--color-urgent-text)',
+                fontFamily: 'var(--font-body)',
+                marginBottom: '24px',
+              }}
+            >
+              Unable to load call history. Please refresh the page.
+            </div>
+          )}
+
+          <CallHistoryClient
+            memberId={member.id}
+            initialCalls={callsResult.data ?? []}
+            totalCount={totalCount}
+          />
+        </main>
+      </div>
+    </ToastProvider>
   )
 }

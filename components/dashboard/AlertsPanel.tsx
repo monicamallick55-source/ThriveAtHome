@@ -1,30 +1,50 @@
 'use client'
-// AlertsPanel — shows active alerts with realtime new-alert subscriptions.
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
-import { StatusDot } from '@/components/ui/StatusDot'
 import { SectionError } from './SectionError'
 import type { Alert } from '@/lib/data/alerts'
-import type { BadgeVariant } from '@/components/ui/Badge'
 import type { StatusLevel } from '@/components/ui/StatusDot'
 
-const severityBadge: Record<string, BadgeVariant> = {
-  informational: 'info',
-  concern: 'concern',
-  urgent: 'urgent',
-  emergency: 'emergency',
+const alertTypeLabel: Record<string, string> = {
+  missed_call: 'Aria noticed a missed call',
+  mood_drop: 'Aria noticed a mood concern',
+  medication_miss: 'Medication may have been missed',
+  wellness_drift: 'Wellness has been gradually declining',
+  fall: 'A possible fall was detected',
+  crisis: 'Crisis keywords detected — please check in',
+  emergency: 'Emergency — immediate attention needed',
 }
 
-const alertTypeLabel: Record<string, string> = {
-  missed_call: 'Missed call',
-  mood_drop: 'Mood drop',
-  medication_miss: 'Medication missed',
-  wellness_drift: 'Wellness decline',
-  fall: 'Fall detected',
-  crisis: 'Crisis',
-  emergency: 'Emergency',
+const severityStyle: Record<string, { border: string; bg: string; badge: string; badgeText: string; label: string }> = {
+  informational: {
+    border: 'var(--color-navy-light)',
+    bg: 'var(--color-info)',
+    badge: 'var(--color-info)',
+    badgeText: 'var(--color-info-text)',
+    label: 'Note',
+  },
+  concern: {
+    border: 'var(--color-concern-border)',
+    bg: 'var(--color-concern)',
+    badge: 'var(--color-concern)',
+    badgeText: 'var(--color-concern-text)',
+    label: 'Attention',
+  },
+  urgent: {
+    border: 'var(--color-urgent-border)',
+    bg: 'var(--color-urgent)',
+    badge: 'var(--color-urgent)',
+    badgeText: 'var(--color-urgent-text)',
+    label: 'Urgent',
+  },
+  emergency: {
+    border: 'var(--color-urgent-border)',
+    bg: 'var(--color-emergency)',
+    badge: 'var(--color-emergency)',
+    badgeText: 'white',
+    label: 'Emergency',
+  },
 }
 
 function highestSeverity(alerts: Alert[]): StatusLevel {
@@ -56,7 +76,6 @@ export function AlertsPanel({ memberId, familyMemberId, initialAlerts, error }: 
   const [alerts, setAlerts] = useState<Alert[]>(initialAlerts)
   const [acknowledging, setAcknowledging] = useState<string | null>(null)
 
-  // Realtime subscription: new alerts inserted for this member
   useEffect(() => {
     const supabase = createClient()
     const channel = supabase
@@ -108,76 +127,174 @@ export function AlertsPanel({ memberId, familyMemberId, initialAlerts, error }: 
 
   const unacked = alerts.filter((a) => !a.acknowledged)
   const acked = alerts.filter((a) => a.acknowledged)
-  const status = highestSeverity(alerts)
+
+  if (unacked.length === 0 && acked.length === 0) {
+    return (
+      <div
+        style={{
+          backgroundColor: 'var(--color-teal-muted)',
+          borderRadius: 'var(--radius-lg)',
+          padding: '24px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '16px',
+          minHeight: '80px',
+        }}
+      >
+        <span style={{ fontSize: '28px' }}>✓</span>
+        <p
+          style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: '22px',
+            color: 'var(--color-teal)',
+            margin: 0,
+          }}
+        >
+          No concerns this week. Everything looks good.
+        </p>
+      </div>
+    )
+  }
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-3">
-        <StatusDot level={status} size="md" />
-        <span className="text-lg font-semibold text-brand-navy">
-          {unacked.length === 0
-            ? 'No active alerts'
-            : `${unacked.length} active alert${unacked.length === 1 ? '' : 's'}`}
-        </span>
-      </div>
-
-      {unacked.length === 0 && acked.length === 0 && (
-        <p className="text-gray-500 text-lg">All clear — no alerts at this time.</p>
-      )}
-
-      {/* Unacknowledged alerts first */}
-      {unacked.map((alert) => (
-        <div
-          key={alert.id}
-          className="rounded-xl border border-orange-200 bg-orange-50 px-5 py-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"
-        >
-          <div className="space-y-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant={severityBadge[alert.severity] ?? 'neutral'}>
-                {alert.severity}
-              </Badge>
-              <span className="font-semibold text-lg text-brand-navy">
-                {alertTypeLabel[alert.alert_type] ?? alert.alert_type}
-              </span>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      {unacked.map((alert) => {
+        const style = severityStyle[alert.severity] ?? severityStyle.concern
+        const isEmergency = alert.severity === 'emergency'
+        return (
+          <div
+            key={alert.id}
+            style={{
+              backgroundColor: style.bg,
+              borderLeft: `4px solid ${style.border}`,
+              border: `1px solid ${style.border}`,
+              borderRadius: 'var(--radius-lg)',
+              padding: '20px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px', flexWrap: 'wrap' }}>
+                  <span
+                    style={{
+                      backgroundColor: style.badge,
+                      color: style.badgeText,
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      fontFamily: 'var(--font-body)',
+                      padding: '3px 10px',
+                      borderRadius: 'var(--radius-full)',
+                      letterSpacing: '0.04em',
+                    }}
+                  >
+                    {style.label}
+                  </span>
+                  <span
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: '13px',
+                      color: isEmergency ? 'rgba(255,255,255,0.6)' : 'var(--color-text-muted)',
+                    }}
+                  >
+                    {formatAge(alert.created_at)}
+                  </span>
+                </div>
+                <p
+                  style={{
+                    fontFamily: 'var(--font-body)',
+                    fontSize: '18px',
+                    color: isEmergency ? 'white' : 'var(--color-text-primary)',
+                    margin: 0,
+                    lineHeight: 1.65,
+                  }}
+                >
+                  {alertTypeLabel[alert.alert_type] ?? alert.message}
+                </p>
+                {alert.message && alert.message !== alertTypeLabel[alert.alert_type] && (
+                  <p
+                    style={{
+                      fontFamily: 'var(--font-body)',
+                      fontSize: '15px',
+                      color: isEmergency ? 'rgba(255,255,255,0.8)' : 'var(--color-text-secondary)',
+                      margin: '8px 0 0',
+                    }}
+                  >
+                    {alert.message}
+                  </p>
+                )}
+              </div>
+              {familyMemberId && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleAcknowledge(alert.id)}
+                  loading={acknowledging === alert.id}
+                  style={{ flexShrink: 0 }}
+                >
+                  Mark acknowledged
+                </Button>
+              )}
             </div>
-            <p className="text-lg text-gray-700">{alert.message}</p>
-            <p className="text-base text-gray-400">{formatAge(alert.created_at)}</p>
           </div>
-          {familyMemberId && (
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => handleAcknowledge(alert.id)}
-              loading={acknowledging === alert.id}
-              className="shrink-0"
-            >
-              Mark acknowledged
-            </Button>
-          )}
-        </div>
-      ))}
+        )
+      })}
 
-      {/* Acknowledged alerts (collapsed) */}
       {acked.length > 0 && (
-        <details className="mt-2">
-          <summary className="cursor-pointer text-base text-gray-400 hover:text-gray-600">
+        <details style={{ marginTop: '8px' }}>
+          <summary
+            style={{
+              cursor: 'pointer',
+              fontSize: '15px',
+              color: 'var(--color-text-muted)',
+              fontFamily: 'var(--font-body)',
+              padding: '8px 0',
+            }}
+          >
             {acked.length} acknowledged alert{acked.length === 1 ? '' : 's'}
           </summary>
-          <div className="mt-2 space-y-2">
-            {acked.map((alert) => (
-              <div
-                key={alert.id}
-                className="rounded-xl border border-gray-200 bg-white px-5 py-3 flex flex-wrap items-center gap-3 opacity-60"
-              >
-                <Badge variant={severityBadge[alert.severity] ?? 'neutral'}>
-                  {alert.severity}
-                </Badge>
-                <span className="text-lg text-gray-600">
-                  {alertTypeLabel[alert.alert_type] ?? alert.alert_type}
-                </span>
-                <span className="text-base text-gray-400 ml-auto">{formatAge(alert.created_at)}</span>
-              </div>
-            ))}
+          <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {acked.map((alert) => {
+              const style = severityStyle[alert.severity] ?? severityStyle.concern
+              return (
+                <div
+                  key={alert.id}
+                  style={{
+                    backgroundColor: 'var(--color-warm-white)',
+                    border: '1px solid var(--color-warm-grey)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '14px 16px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    opacity: 0.7,
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <span
+                    style={{
+                      backgroundColor: style.badge,
+                      color: style.badgeText,
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      fontFamily: 'var(--font-body)',
+                      padding: '2px 8px',
+                      borderRadius: 'var(--radius-full)',
+                    }}
+                  >
+                    {style.label}
+                  </span>
+                  <span style={{ fontSize: '18px', color: 'var(--color-text-secondary)', fontFamily: 'var(--font-body)', flex: 1 }}>
+                    {alertTypeLabel[alert.alert_type] ?? alert.alert_type}
+                  </span>
+                  <span style={{ fontSize: '13px', color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}>
+                    {formatAge(alert.created_at)}
+                  </span>
+                </div>
+              )
+            })}
           </div>
         </details>
       )}
