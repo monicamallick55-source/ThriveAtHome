@@ -324,41 +324,55 @@ STATUS: `COMPLETE`
 ## M7 — Navigator Console
 
 ### Phase 15 — Navigator Console Shell
+STATUS: `COMPLETE`
+
+- [x] /app/navigator/page.tsx — real page replaces placeholder — APPROVED by human (Session 30)
+- [x] Caseload table renders correctly — APPROVED by human (Session 30)
+- [x] Search/filter works — skipped by human; approved overall (Session 30); verify with real navigator user
+- [x] Alert queue shows unacknowledged urgent/emergency alerts — APPROVED by human (Session 30)
+- [x] Acknowledge button works — APPROVED by human (Session 30)
+- [x] Today's tasks section renders — APPROVED by human (Session 30)
+- [x] Mark complete works on tasks — APPROVED by human (Session 30)
+- [x] Route protection works — unauthenticated 307→/login curl-confirmed; family→/dashboard APPROVED (Session 30)
+- [x] npx tsc --noEmit passes — zero errors (Session 30)
+
+### Phase 16 — Member Detail Panel + Navigator Notes
+STATUS: `COMPLETE`
+
+- [x] Clicking a member row opens a slide-out panel — APPROVED by human (Session 31)
+- [x] Panel shows correct member data — APPROVED by human (Session 31)
+- [x] Last 5 call summaries visible — APPROVED by human (Session 31)
+- [x] Navigator brief generates — APPROVED by human (Session 31)
+- [x] Navigator notes: save a note — APPROVED by human (Session 31)
+- [x] Navigator notes: previous notes visible — APPROVED by human (Session 31)
+- [x] Panel closes correctly — APPROVED by human (Session 31)
+- [x] Family contacts visible — APPROVED by human (Session 31)
+- [x] npx tsc --noEmit passes — zero errors (Session 31)
+
+---
+
+## M11 — Billing
+
+### Phase 24 — Stripe Product Setup + Config
 STATUS: `IN PROGRESS`
 
-- [ ] /app/navigator/page.tsx — real page replaces placeholder
-    VERIFY: Log in as navigator role user (test-navigator@thriveathome.dev), navigate to /navigator
-    PASS: Caseload table loads with assigned members
+- [ ] All 4 Stripe Price IDs set in .env.local
+    VERIFY: grep STRIPE_PRICE_ID .env.local
+    PASS: Shows 4 non-empty values
 
-- [ ] Caseload table renders correctly
-    VERIFY: Table shows member name, plan tier, last check-in, alert status dot, mood
-    PASS: All columns visible, sorted by alert severity
+- [x] StripeBillingProvider implements BillingProvider interface — npx tsc --noEmit → zero errors (Session 32)
 
-- [ ] Search/filter works
-    VERIFY: Type a name in search box
-    PASS: Table filters to matching members in real time
+- [ ] providers.ts resolves to StripeBillingProvider when STRIPE_SECRET_KEY present
+    VERIFY: npx tsx -e "const p = require('./lib/providers'); console.log(p.billingProvider.constructor.name)"
+    PASS: Prints "StripeBillingProvider" (not "StubBillingProvider")
 
-- [ ] Alert queue shows unacknowledged urgent/emergency alerts
-    VERIFY: Reload navigator page (urgent alert created in seed)
-    PASS: Alert card appears at top with Acknowledge button
+- [ ] /pricing page updated with real plan cards
+    VERIFY: Navigate to /pricing
+    PASS: Four plan cards visible with correct prices and features
 
-- [ ] Acknowledge button works
-    VERIFY: Click Acknowledge on the urgent alert card
-    PASS: Alert disappears from queue, DB row has acknowledged=true
-
-- [ ] Today's tasks section renders
-    VERIFY: Tasks section visible with seed navigator tasks
-    PASS: Both tasks appear with priority badges
-
-- [ ] Mark complete works on tasks
-    VERIFY: Click "Mark complete" on a task
-    PASS: Task disappears from list, DB row has completed=true
-
-- [ ] Route protection works
-    VERIFY: Log in as family role user (test-family@thriveathome.dev), navigate to /navigator
-    PASS: Redirected to /dashboard; unauthenticated /navigator → 307 → /login confirmed ✓
-
-- [x] npx tsc --noEmit passes — zero errors (Session 30)
+- [ ] /dashboard/billing page updated
+    VERIFY: Navigate to /dashboard/billing (logged in)
+    PASS: Shows current plan, not "Coming soon"
 
 ---
 
@@ -384,7 +398,8 @@ P6  Dashboard          [x]                  COMPLETE
 P7  Call History+Tools [x]                  COMPLETE
 P8  Accessibility      [x]                  COMPLETE — APPROVED
 
-M7  Navigator Console  [ ][ ][ ][ ][ ][ ][ ][ ][x]   1/9 — IN PROGRESS (Session 30)
+M7  Navigator Console  [x][x][x][x][x][x][x][x][x]   9/9 Phase 15 ✅ APPROVED
+                      [x][x][x][x][x][x][x][x][x]   9/9 Phase 16 ✅ APPROVED (Session 31)
 ```
 
 ---

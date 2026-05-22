@@ -1,10 +1,24 @@
-// Placeholder for Billing — built in M11.
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { requireAuth } from '@/lib/auth'
+import { getMemberForAuthUser } from '@/lib/data/members'
+import { getMemberSubscription } from '@/lib/data/billing'
+import { BillingClient } from '@/components/billing/BillingClient'
+import type { PlanTier } from '@/lib/interfaces/BillingProvider'
 
 export const metadata: Metadata = { title: 'Billing — ThriveAtHome' }
 
-export default function BillingPage() {
+export default async function BillingPage() {
+  const user = await requireAuth()
+
+  const { data: member } = await getMemberForAuthUser(user.id)
+  const subscription = member
+    ? (await getMemberSubscription(member.id)).data
+    : null
+
+  const currentTier = (member?.plan_tier ?? 'basics') as PlanTier
+  const memberName = member?.preferred_name ?? member?.full_name?.split(' ')[0] ?? 'your loved one'
+
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-cream)', display: 'flex', flexDirection: 'column' }}>
       <nav style={{ position: 'sticky', top: 0, zIndex: 40, backgroundColor: 'white', borderBottom: '1px solid var(--color-warm-grey)', boxShadow: 'var(--shadow-sm)', height: '64px', display: 'flex', alignItems: 'center' }}>
@@ -16,14 +30,36 @@ export default function BillingPage() {
           <div style={{ width: '120px' }} aria-hidden="true" />
         </div>
       </nav>
-      <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '64px 32px' }}>
-        <div style={{ textAlign: 'center', maxWidth: '480px' }}>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '42px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '16px', letterSpacing: '-0.01em' }}>
-            Billing
+
+      <div style={{ backgroundColor: 'var(--color-navy)', padding: '40px 24px 48px' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '40px', fontWeight: 500, color: 'white', marginBottom: '8px', letterSpacing: '-0.01em' }}>
+            Billing &amp; Subscription
           </h1>
-          <p style={{ fontFamily: 'var(--font-body)', fontSize: '20px', color: 'var(--color-text-secondary)', lineHeight: 1.65 }}>
-            Billing management is coming soon.
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '18px', color: 'rgba(255,255,255,0.75)' }}>
+            Manage your ThriveAtHome plan
           </p>
+        </div>
+      </div>
+
+      <main style={{ flex: 1, padding: '40px 24px' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          {!member ? (
+            <div style={{ backgroundColor: 'white', borderRadius: 'var(--radius-lg)', border: '1.5px solid var(--color-warm-grey)', padding: '32px', maxWidth: '480px' }}>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: '18px', color: 'var(--color-text-secondary)', marginBottom: '20px' }}>
+                Complete your loved one's profile before managing billing.
+              </p>
+              <Link href="/onboarding" style={{ fontFamily: 'var(--font-body)', fontSize: '17px', fontWeight: 600, color: 'white', backgroundColor: 'var(--color-navy)', textDecoration: 'none', padding: '12px 24px', borderRadius: 'var(--radius-md)', display: 'inline-flex', alignItems: 'center', minHeight: '48px' }}>
+                Start onboarding
+              </Link>
+            </div>
+          ) : (
+            <BillingClient
+              currentTier={currentTier}
+              subscription={subscription}
+              memberName={memberName}
+            />
+          )}
         </div>
       </main>
     </div>
