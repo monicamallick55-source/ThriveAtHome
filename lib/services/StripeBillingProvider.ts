@@ -12,7 +12,8 @@ export class StripeBillingProvider implements BillingProvider {
   async createCheckoutSession(
     planTier: PlanTier,
     memberId: string,
-    familyMemberId: string
+    familyMemberId: string,
+    existingStripeCustomerId?: string | null
   ): Promise<string> {
     const stripe = getStripeClient()
     const priceId = getStripePriceId(planTier)
@@ -23,6 +24,8 @@ export class StripeBillingProvider implements BillingProvider {
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${appUrl}/dashboard?subscribed=true`,
       cancel_url: `${appUrl}/pricing`,
+      // Reuse existing customer so Stripe doesn't create a duplicate on upgrade
+      ...(existingStripeCustomerId ? { customer: existingStripeCustomerId } : {}),
       metadata: { member_id: memberId, family_member_id: familyMemberId },
       subscription_data: {
         metadata: { member_id: memberId, family_member_id: familyMemberId },

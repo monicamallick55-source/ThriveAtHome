@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
 import { getMemberForAuthUser } from '@/lib/data/members'
+import { getMemberSubscription } from '@/lib/data/billing'
 import { billingProvider } from '@/lib/providers'
 import type { PlanTier } from '@/lib/interfaces/BillingProvider'
 
@@ -27,8 +28,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Member not found — complete onboarding first' }, { status: 404 })
   }
 
+  // Reuse existing Stripe customer if one exists (prevents duplicate customers on upgrade).
+  const { data: existingSub } = await getMemberSubscription(member.id)
+  const existingCustomerId = existingSub?.stripe_customer_id ?? null
+
   try {
-    const checkoutUrl = await billingProvider.createCheckoutSession(planTier, member.id, user.id)
+    const checkoutUrl = await billingProvider.createCheckoutSession(
+      planTier,
+      member.id,
+      user.id,
+      existingCustomerId
+    )
     return NextResponse.json({ checkoutUrl })
   } catch (e) {
     console.error('[billing/checkout]', e)

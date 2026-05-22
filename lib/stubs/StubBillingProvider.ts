@@ -2,7 +2,7 @@
 import type { BillingProvider, PlanTier } from '../interfaces/BillingProvider'
 
 export class StubBillingProvider implements BillingProvider {
-  async createCheckoutSession(planTier: PlanTier, memberId: string, _familyMemberId: string): Promise<string> {
+  async createCheckoutSession(planTier: PlanTier, memberId: string, _familyMemberId: string, _existingCustomerId?: string | null): Promise<string> {
     console.log(`[STUB][Billing] Would create checkout session for plan: ${planTier}, member: ${memberId}`)
     return 'https://stub-checkout.example.com/session'
   }
