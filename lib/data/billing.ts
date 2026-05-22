@@ -71,28 +71,53 @@ export async function upsertSubscription(
   try {
     const admin = createAdminClient()
 
-    // Upsert the subscriptions row keyed on stripe_subscription_id
-    const { data: sub, error: subErr } = await admin
+    // Check if a row already exists for this stripe_subscription_id
+    const { data: existing, error: fetchErr } = await admin
       .from('subscriptions')
-      .upsert(
-        {
-          member_id: params.memberId,
-          stripe_customer_id: params.stripeCustomerId,
-          stripe_subscription_id: params.stripeSubscriptionId,
-          plan_tier: params.planTier,
-          status: params.status,
-          current_period_start: params.currentPeriodStart ?? null,
-          current_period_end: params.currentPeriodEnd ?? null,
-          monthly_amount_cents: params.monthlyAmountCents ?? null,
-        },
-        { onConflict: 'stripe_subscription_id' }
-      )
-      .select()
+      .select('id')
+      .eq('stripe_subscription_id', params.stripeSubscriptionId)
       .maybeSingle()
 
-    if (subErr) {
-      console.error('[data/billing/upsertSubscription]', subErr)
-      return { data: null, error: subErr.message }
+    if (fetchErr) {
+      console.error('[data/billing/upsertSubscription] fetch error:', fetchErr)
+      return { data: null, error: fetchErr.message }
+    }
+
+    const payload = {
+      member_id: params.memberId,
+      stripe_customer_id: params.stripeCustomerId,
+      stripe_subscription_id: params.stripeSubscriptionId,
+      plan_tier: params.planTier,
+      status: params.status,
+      current_period_start: params.currentPeriodStart ?? null,
+      current_period_end: params.currentPeriodEnd ?? null,
+      monthly_amount_cents: params.monthlyAmountCents ?? null,
+    }
+
+    let sub: Subscription | null = null
+    if (existing) {
+      const { data: updated, error: updateErr } = await admin
+        .from('subscriptions')
+        .update(payload)
+        .eq('id', existing.id)
+        .select()
+        .maybeSingle()
+      if (updateErr) {
+        console.error('[data/billing/upsertSubscription] update error:', updateErr)
+        return { data: null, error: updateErr.message }
+      }
+      sub = updated as Subscription | null
+    } else {
+      const { data: inserted, error: insertErr } = await admin
+        .from('subscriptions')
+        .insert(payload)
+        .select()
+        .maybeSingle()
+      if (insertErr) {
+        console.error('[data/billing/upsertSubscription] insert error:', insertErr)
+        return { data: null, error: insertErr.message }
+      }
+      sub = inserted as Subscription | null
     }
 
     // Sync member.plan_tier
@@ -106,7 +131,7 @@ export async function upsertSubscription(
       // Non-fatal — subscription row is already correct
     }
 
-    return { data: sub as Subscription | null, error: null }
+    return { data: sub, error: null }
   } catch (e) {
     console.error('[data/billing/upsertSubscription] Unexpected error:', e)
     return { data: null, error: e instanceof Error ? e.message : String(e) }

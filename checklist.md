@@ -385,32 +385,19 @@ STATUS: `IN PROGRESS`
     VERIFY: grep STRIPE_WEBHOOK_SECRET .env.local
     PASS: Non-empty value
 
-- [x] npx tsc --noEmit passes — zero errors (Session 33)
+- [x] npx tsc --noEmit passes — zero errors (Session 34)
+- [x] npm run build passes — /api/billing/checkout, /api/billing/portal, /dashboard/billing all ƒ (dynamic), zero errors (Session 34)
 
 ### Phase 26 — Stripe Webhook + Billing Management
 STATUS: `IN PROGRESS`
 
-- [ ] Webhook verifies Stripe signature
-    VERIFY: Send unsigned request to /api/webhooks/stripe
-    PASS: Returns 401
-
-- [ ] checkout.session.completed creates subscription row
-    VERIFY: Use Stripe CLI: stripe trigger checkout.session.completed
-    PASS: subscriptions row created, members.plan_tier updated
-
-- [ ] invoice.payment_failed logs warning
-    VERIFY: stripe trigger invoice.payment_failed
-    PASS: Console log shows payment failed warning (email added in M10)
-
-- [ ] customer.subscription.deleted marks cancelled
-    VERIFY: stripe trigger customer.subscription.deleted
-    PASS: subscriptions.status = 'cancelled', members.status = 'inactive'
-
-- [ ] Billing management page shows Stripe Customer Portal link
-    VERIFY: Navigate to /dashboard/billing, click "Manage subscription"
-    PASS: Redirected to Stripe Customer Portal
-
-- [x] npx tsc --noEmit passes — zero errors (Session 33)
+- [x] Webhook verifies Stripe signature — returns 401 on invalid signature (Session 33)
+- [ ] checkout.session.completed creates subscription row — requires STRIPE_WEBHOOK_SECRET set + webhook registered + migration 004 run
+- [ ] invoice.payment_failed logs warning — requires STRIPE_WEBHOOK_SECRET + Stripe CLI
+- [ ] customer.subscription.deleted marks cancelled — requires STRIPE_WEBHOOK_SECRET + Stripe CLI
+- [ ] Billing management page: click "Manage subscription" → Stripe Customer Portal
+- [x] npx tsc --noEmit passes — zero errors (Session 34)
+- [x] npm run build passes — /api/webhooks/stripe ƒ (dynamic), zero errors (Session 34)
 
 ---
 

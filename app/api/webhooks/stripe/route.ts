@@ -98,7 +98,7 @@ async function handleStripeEvent(event: Stripe.Event) {
       const planTier = getPlanTierFromSubscription(subscription)
       const { start, end } = getSubscriptionPeriod(subscription)
 
-      await upsertSubscription({
+      const { error: upsertErr } = await upsertSubscription({
         memberId,
         stripeCustomerId,
         stripeSubscriptionId,
@@ -109,7 +109,11 @@ async function handleStripeEvent(event: Stripe.Event) {
         monthlyAmountCents: subscription.items.data[0]?.price?.unit_amount ?? null,
       })
 
-      console.log(`[webhook/stripe] Subscription created for member ${memberId}: ${planTier}`)
+      if (upsertErr) {
+        console.error(`[webhook/stripe] checkout.session.completed: upsertSubscription failed for member ${memberId}:`, upsertErr)
+      } else {
+        console.log(`[webhook/stripe] Subscription created for member ${memberId}: ${planTier}`)
+      }
       break
     }
 
@@ -131,7 +135,7 @@ async function handleStripeEvent(event: Stripe.Event) {
         : (subscription.customer as Stripe.Customer | null)?.id ?? ''
       const { start, end } = getSubscriptionPeriod(subscription)
 
-      await upsertSubscription({
+      const { error: upsertErr2 } = await upsertSubscription({
         memberId,
         stripeCustomerId,
         stripeSubscriptionId,
@@ -142,6 +146,9 @@ async function handleStripeEvent(event: Stripe.Event) {
         monthlyAmountCents: subscription.items.data[0]?.price?.unit_amount ?? null,
       })
 
+      if (upsertErr2) {
+        console.error(`[webhook/stripe] invoice.payment_succeeded: upsertSubscription failed:`, upsertErr2)
+      }
       console.log(`[webhook/stripe] Payment succeeded for subscription ${stripeSubscriptionId}`)
       break
     }
@@ -168,7 +175,7 @@ async function handleStripeEvent(event: Stripe.Event) {
         : (subscription.customer as Stripe.Customer | null)?.id ?? ''
       const { start, end } = getSubscriptionPeriod(subscription)
 
-      await upsertSubscription({
+      const { error: upsertErr3 } = await upsertSubscription({
         memberId,
         stripeCustomerId,
         stripeSubscriptionId: subscription.id,
@@ -179,6 +186,9 @@ async function handleStripeEvent(event: Stripe.Event) {
         monthlyAmountCents: subscription.items.data[0]?.price?.unit_amount ?? null,
       })
 
+      if (upsertErr3) {
+        console.error(`[webhook/stripe] customer.subscription.updated: upsertSubscription failed:`, upsertErr3)
+      }
       console.log(`[webhook/stripe] Subscription updated: ${subscription.id} → ${planTier} (${subscription.status})`)
       break
     }
