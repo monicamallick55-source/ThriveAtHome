@@ -374,7 +374,7 @@ STATUS: `IN PROGRESS`
     PASS: Redirected to /dashboard?subscribed=true, green success banner visible
 
 - [ ] subscriptions row created in Supabase
-    VERIFY: Check subscriptions table after test payment (requires webhook to fire)
+    VERIFY: Check subscriptions table after test payment (sync fallback: no webhook required)
     PASS: Row exists with correct plan_tier and stripe_subscription_id
 
 - [ ] members.plan_tier updated
@@ -385,8 +385,8 @@ STATUS: `IN PROGRESS`
     VERIFY: grep STRIPE_WEBHOOK_SECRET .env.local
     PASS: Non-empty value
 
-- [x] npx tsc --noEmit passes — zero errors (Session 34)
-- [x] npm run build passes — /api/billing/checkout, /api/billing/portal, /dashboard/billing all ƒ (dynamic), zero errors (Session 34)
+- [x] npx tsc --noEmit passes — zero errors (Sessions 34, 35)
+- [x] npm run build passes — /api/billing/checkout, /api/billing/portal, /dashboard/billing all ƒ (dynamic), zero errors (Sessions 34, 35)
 
 ### Phase 26 — Stripe Webhook + Billing Management
 STATUS: `IN PROGRESS`
