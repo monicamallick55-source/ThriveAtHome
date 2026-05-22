@@ -354,25 +354,63 @@ STATUS: `COMPLETE`
 ## M11 — Billing
 
 ### Phase 24 — Stripe Product Setup + Config
+STATUS: `COMPLETE`
+
+- [x] All 4 Stripe Price IDs set in .env.local — grep STRIPE_PRICE_ID .env.local → 4 non-empty values (Session 33)
+- [x] StripeBillingProvider implements BillingProvider interface — npx tsc --noEmit → zero errors (Session 32)
+- [x] providers.ts resolves to StripeBillingProvider when STRIPE_SECRET_KEY present — verified with env var set: resolves to StripeBillingProvider (Session 33)
+- [x] /pricing page updated with real plan cards — APPROVED by human (Session 32)
+- [x] /dashboard/billing page updated — APPROVED by human (Session 32)
+
+### Phase 25 — Stripe Checkout Flow
 STATUS: `IN PROGRESS`
 
-- [ ] All 4 Stripe Price IDs set in .env.local
-    VERIFY: grep STRIPE_PRICE_ID .env.local
-    PASS: Shows 4 non-empty values
+- [ ] Checkout session creates correctly
+    VERIFY: Click "Upgrade" on a plan in /dashboard/billing, confirm Stripe checkout page loads
+    PASS: Redirected to Stripe hosted checkout with correct price
 
-- [x] StripeBillingProvider implements BillingProvider interface — npx tsc --noEmit → zero errors (Session 32)
+- [ ] Test payment completes
+    VERIFY: Complete checkout with test card 4242 4242 4242 4242
+    PASS: Redirected to /dashboard?subscribed=true, green success banner visible
 
-- [ ] providers.ts resolves to StripeBillingProvider when STRIPE_SECRET_KEY present
-    VERIFY: npx tsx -e "const p = require('./lib/providers'); console.log(p.billingProvider.constructor.name)"
-    PASS: Prints "StripeBillingProvider" (not "StubBillingProvider")
+- [ ] subscriptions row created in Supabase
+    VERIFY: Check subscriptions table after test payment (requires webhook to fire)
+    PASS: Row exists with correct plan_tier and stripe_subscription_id
 
-- [ ] /pricing page updated with real plan cards
-    VERIFY: Navigate to /pricing
-    PASS: Four plan cards visible with correct prices and features
+- [ ] members.plan_tier updated
+    VERIFY: Check members table after test payment
+    PASS: plan_tier matches the purchased plan
 
-- [ ] /dashboard/billing page updated
-    VERIFY: Navigate to /dashboard/billing (logged in)
-    PASS: Shows current plan, not "Coming soon"
+- [ ] Stripe webhook secret set
+    VERIFY: grep STRIPE_WEBHOOK_SECRET .env.local
+    PASS: Non-empty value
+
+- [x] npx tsc --noEmit passes — zero errors (Session 33)
+
+### Phase 26 — Stripe Webhook + Billing Management
+STATUS: `IN PROGRESS`
+
+- [ ] Webhook verifies Stripe signature
+    VERIFY: Send unsigned request to /api/webhooks/stripe
+    PASS: Returns 401
+
+- [ ] checkout.session.completed creates subscription row
+    VERIFY: Use Stripe CLI: stripe trigger checkout.session.completed
+    PASS: subscriptions row created, members.plan_tier updated
+
+- [ ] invoice.payment_failed logs warning
+    VERIFY: stripe trigger invoice.payment_failed
+    PASS: Console log shows payment failed warning (email added in M10)
+
+- [ ] customer.subscription.deleted marks cancelled
+    VERIFY: stripe trigger customer.subscription.deleted
+    PASS: subscriptions.status = 'cancelled', members.status = 'inactive'
+
+- [ ] Billing management page shows Stripe Customer Portal link
+    VERIFY: Navigate to /dashboard/billing, click "Manage subscription"
+    PASS: Redirected to Stripe Customer Portal
+
+- [x] npx tsc --noEmit passes — zero errors (Session 33)
 
 ---
 

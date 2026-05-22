@@ -29,8 +29,13 @@ async function withTimeout<T>(
   return Promise.race([promise, timeout])
 }
 
-export default async function DashboardPage() {
-  const user = await requireAuth()
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ subscribed?: string }>
+}) {
+  const [user, params] = await Promise.all([requireAuth(), searchParams])
+  const showSubscribedBanner = params.subscribed === 'true'
 
   const { data: member, error: memberError } = await withTimeout(
     getMemberForAuthUser(user.id)
@@ -70,6 +75,7 @@ export default async function DashboardPage() {
       notifError={notifResult.error}
       initialTasks={tasksResult.data ?? []}
       tasksError={tasksResult.error}
+      showSubscribedBanner={showSubscribedBanner}
     />
   )
 }

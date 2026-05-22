@@ -1,5 +1,6 @@
 'use client'
 import Link from 'next/link'
+import { useState } from 'react'
 import { ToastProvider } from '@/components/ui/Toast'
 import { SectionError } from './SectionError'
 import { DashNav } from './DashNav'
@@ -26,6 +27,7 @@ export interface DashboardClientProps {
   notifError: string | null
   initialTasks: FamilyTaskItem[]
   tasksError: string | null
+  showSubscribedBanner?: boolean
 }
 
 function QuickActions() {
@@ -116,8 +118,10 @@ function DashboardInner(props: DashboardClientProps) {
     alertsError,
     initialTasks,
     tasksError,
+    showSubscribedBanner = false,
   } = props
 
+  const [bannerVisible, setBannerVisible] = useState(showSubscribedBanner)
   const { unreadCount, markAllRead } = useNotifications(member.id)
   const latestCall = initialCalls.length > 0 ? initialCalls[0] : null
 
@@ -134,6 +138,33 @@ function DashboardInner(props: DashboardClientProps) {
         unreadCount={unreadCount}
         onMarkAllRead={markAllRead}
       />
+
+      {/* Subscription success banner */}
+      {bannerVisible && (
+        <div
+          role="status"
+          style={{
+            backgroundColor: 'var(--color-teal-muted)',
+            borderBottom: '1.5px solid var(--color-teal)',
+            padding: '14px 24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '16px',
+          }}
+        >
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '17px', fontWeight: 500, color: 'var(--color-navy)', margin: 0 }}>
+            🎉 Welcome to ThriveAtHome! Your subscription is now active.
+          </p>
+          <button
+            onClick={() => setBannerVisible(false)}
+            aria-label="Dismiss"
+            style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '20px', color: 'var(--color-navy)', padding: '4px', lineHeight: 1 }}
+          >
+            ×
+          </button>
+        </div>
+      )}
 
       {/* Navy page header */}
       <div
