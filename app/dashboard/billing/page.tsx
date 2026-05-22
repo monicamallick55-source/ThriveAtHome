@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { requireAuth } from '@/lib/auth'
 import { getMemberForAuthUser } from '@/lib/data/members'
 import { getMemberSubscription } from '@/lib/data/billing'
+import { syncMemberSubscription } from '@/lib/stripe/sync'
 import { BillingClient } from '@/components/billing/BillingClient'
 import type { PlanTier } from '@/lib/interfaces/BillingProvider'
 
@@ -12,6 +13,15 @@ export default async function BillingPage() {
   const user = await requireAuth()
 
   const { data: member } = await getMemberForAuthUser(user.id)
+
+  // Sync from Stripe if no subscription row exists yet (webhook may not have fired).
+  if (member && user.email) {
+    const { data: existingSub } = await getMemberSubscription(member.id)
+    if (!existingSub) {
+      await syncMemberSubscription(member.id, user.email)
+    }
+  }
+
   const subscription = member
     ? (await getMemberSubscription(member.id)).data
     : null

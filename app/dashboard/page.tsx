@@ -8,6 +8,7 @@ import { getAlertsForMember } from '@/lib/data/alerts'
 import { getNotificationsForMember } from '@/lib/data/notifications'
 import { getTasksForMember } from '@/lib/data/tasks'
 import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { syncMemberSubscription } from '@/lib/stripe/sync'
 import DashboardClient from '@/components/dashboard/DashboardClient'
 import type { CheckInCall } from '@/lib/data/calls'
 import type { Alert } from '@/lib/data/alerts'
@@ -47,6 +48,13 @@ export default async function DashboardPage({
       redirect('/onboarding')
     }
     redirect('/onboarding')
+  }
+
+  // If redirected here after checkout, sync subscription from Stripe directly.
+  // This is a reliable fallback in case the Stripe webhook hasn't fired yet
+  // (e.g. STRIPE_WEBHOOK_SECRET not yet set in Vercel env vars).
+  if (showSubscribedBanner && user.email) {
+    await syncMemberSubscription(member.id, user.email)
   }
 
   const [
