@@ -1,9 +1,10 @@
 'use client'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { formatDistanceToNow } from 'date-fns'
 import type { CaseloadEntry, NavigatorTask } from '@/lib/data/navigator'
+import { MemberDetailPanel } from './MemberDetailPanel'
 
 const SEVERITY_STYLE: Record<string, { bg: string; text: string; border: string; label: string }> = {
   emergency: { bg: 'var(--color-emergency-bg)', text: 'var(--color-emergency-text)', border: 'var(--color-emergency-border)', label: 'Emergency' },
@@ -68,6 +69,9 @@ export function NavConsole({
   const [acknowledgedIds, setAcknowledgedIds] = useState<Set<string>>(new Set())
   const [completedTaskIds, setCompletedTaskIds] = useState<Set<string>>(new Set())
   const [actionErrors, setActionErrors] = useState<Record<string, string>>({})
+  const [panelMemberId, setPanelMemberId] = useState<string | null>(null)
+  const [panelMemberName, setPanelMemberName] = useState('')
+  const panelTriggerRef = useRef<HTMLElement | null>(null)
 
   const handleSignOut = async () => {
     const supabase = createClient()
@@ -441,7 +445,7 @@ export function NavConsole({
                       textAlign: 'left',
                     }}
                   >
-                    {['Name', 'Plan', 'Last check-in', 'Status', 'Mood'].map(col => (
+                    {['Name', 'Plan', 'Last check-in', 'Status', 'Mood', ''].map(col => (
                       <th
                         key={col}
                         scope="col"
@@ -520,6 +524,31 @@ export function NavConsole({
                         </td>
                         <td style={{ padding: '14px 16px', color: 'var(--color-text-secondary)' }}>
                           {moodLabel(entry.latestCall?.mood_score ?? null)}
+                        </td>
+                        <td style={{ padding: '14px 16px' }}>
+                          <button
+                            onClick={(e) => {
+                              panelTriggerRef.current = e.currentTarget
+                              setPanelMemberName(entry.member.preferred_name || entry.member.full_name)
+                              setPanelMemberId(entry.member.id)
+                            }}
+                            aria-label={`View details for ${entry.member.preferred_name || entry.member.full_name}`}
+                            style={{
+                              fontFamily: 'var(--font-body)',
+                              fontSize: '13px',
+                              fontWeight: 500,
+                              color: 'var(--color-teal)',
+                              background: 'transparent',
+                              border: '1.5px solid var(--color-teal)',
+                              borderRadius: 'var(--radius-sm)',
+                              padding: '6px 14px',
+                              cursor: 'pointer',
+                              whiteSpace: 'nowrap',
+                              minHeight: '34px',
+                            }}
+                          >
+                            View
+                          </button>
                         </td>
                       </tr>
                     )
@@ -681,6 +710,15 @@ export function NavConsole({
           )}
         </section>
       </main>
+
+      {panelMemberId && (
+        <MemberDetailPanel
+          memberId={panelMemberId}
+          memberName={panelMemberName}
+          triggerRef={panelTriggerRef}
+          onClose={() => setPanelMemberId(null)}
+        />
+      )}
     </div>
   )
 }

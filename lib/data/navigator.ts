@@ -143,6 +143,96 @@ export async function getNavigatorCaseload(
   }
 }
 
+export type NavigatorNote = Database['public']['Tables']['navigator_notes']['Row']
+export type FamilyMember = Database['public']['Tables']['family_members']['Row']
+
+/** Get last N check-in calls for a member (newest first). */
+export async function getMemberRecentCalls(
+  memberId: string,
+  limit = 5
+): Promise<{ data: CheckInCall[] | null; error: string | null }> {
+  try {
+    const admin = createAdminClient()
+    const { data, error } = await admin
+      .from('check_in_calls')
+      .select('*')
+      .eq('member_id', memberId)
+      .order('created_at', { ascending: false })
+      .limit(limit)
+    if (error) {
+      console.error('[data/navigator/getMemberRecentCalls]', error)
+      return { data: null, error: error.message }
+    }
+    return { data: (data ?? []) as CheckInCall[], error: null }
+  } catch (e) {
+    console.error('[data/navigator/getMemberRecentCalls] Unexpected error:', e)
+    return { data: null, error: e instanceof Error ? e.message : String(e) }
+  }
+}
+
+/** Get family members linked to a member (i.e. their family contacts). */
+export async function getMemberFamilyContacts(
+  memberId: string
+): Promise<{ data: FamilyMember[] | null; error: string | null }> {
+  try {
+    const admin = createAdminClient()
+    const { data, error } = await admin
+      .from('family_members')
+      .select('*')
+      .eq('member_id', memberId)
+      .order('created_at', { ascending: true })
+    if (error) {
+      console.error('[data/navigator/getMemberFamilyContacts]', error)
+      return { data: null, error: error.message }
+    }
+    return { data: (data ?? []) as FamilyMember[], error: null }
+  } catch (e) {
+    console.error('[data/navigator/getMemberFamilyContacts] Unexpected error:', e)
+    return { data: null, error: e instanceof Error ? e.message : String(e) }
+  }
+}
+
+/** Get navigator notes for a specific member, newest first. */
+export async function getMemberNavigatorNotes(
+  memberId: string
+): Promise<{ data: NavigatorNote[] | null; error: string | null }> {
+  try {
+    const admin = createAdminClient()
+    const { data, error } = await admin
+      .from('navigator_notes')
+      .select('*')
+      .eq('member_id', memberId)
+      .order('created_at', { ascending: false })
+    if (error) {
+      console.error('[data/navigator/getMemberNavigatorNotes]', error)
+      return { data: null, error: error.message }
+    }
+    return { data: (data ?? []) as NavigatorNote[], error: null }
+  } catch (e) {
+    console.error('[data/navigator/getMemberNavigatorNotes] Unexpected error:', e)
+    return { data: null, error: e instanceof Error ? e.message : String(e) }
+  }
+}
+
+/** Check that a member is assigned to a given navigator (for API route authorization). */
+export async function isMemberAssignedToNavigator(
+  memberId: string,
+  navigatorId: string
+): Promise<boolean> {
+  try {
+    const admin = createAdminClient()
+    const { data } = await admin
+      .from('navigator_assignments')
+      .select('member_id')
+      .eq('member_id', memberId)
+      .eq('navigator_id', navigatorId)
+      .maybeSingle()
+    return data !== null
+  } catch {
+    return false
+  }
+}
+
 /** Get incomplete tasks assigned to a navigator. */
 export async function getNavigatorTasks(
   navigatorId: string

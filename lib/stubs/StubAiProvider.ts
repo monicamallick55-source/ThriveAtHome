@@ -17,7 +17,8 @@ export class StubAiProvider implements AiProvider {
   }
   async generateNavigatorBrief(_memberId: string, _summaries: string[]): Promise<string> {
     console.log('[STUB][AI] generateNavigatorBrief called')
-    return 'Navigator brief not yet available — AI calls enabled in M8.'
+    const n = _summaries.length
+    return `[STUB] Before calling this member: review their last ${n} call summar${n === 1 ? 'y' : 'ies'}.`
   }
   async generateCarePlan(_member: Member, _calls: CheckInCall[]): Promise<CarePlan> {
     console.log('[STUB][AI] generateCarePlan called')
