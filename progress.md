@@ -2442,3 +2442,4 @@ NEXT SESSION MUST:
   but the sync fallback now works even without it.
 
 AWAITING HUMAN APPROVAL
+APPROVED — Stripe checkout, webhook, subscription row, plan_tier update, and Customer Portal all verified and working. STRIPE_WEBHOOK_SECRET added to Vercel. One issue to fix: the family dashboard does not show the current plan anywhere. Please add the plan name visibly on the dashboard so family members can see which plan they are on. Then begin M10 SMS/Email.

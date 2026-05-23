@@ -3,6 +3,7 @@
 
 import { createAdminClient } from '../supabase/admin'
 import { pushRealtimeNotification } from '../realtime/notifications'
+import { smsProvider } from '../providers'
 import type { Database } from '../../types/database'
 
 type AlertType = Database['public']['Enums']['alert_type']
@@ -104,6 +105,26 @@ export async function createAlert(params: CreateAlertParams): Promise<CreateAler
     alertId: alert.id,
     callId,
   })
+
+  // Step 5 — emergency SMS to all linked family members
+  if (severity === 'emergency') {
+    try {
+      const { data: familyMembers } = await admin
+        .from('family_members')
+        .select('phone')
+        .eq('member_id', memberId)
+        .not('phone', 'is', null)
+      if (familyMembers && familyMembers.length > 0) {
+        await Promise.allSettled(
+          familyMembers
+            .filter((fm) => fm.phone)
+            .map((fm) => smsProvider.sendUrgent(fm.phone!, message))
+        )
+      }
+    } catch (e) {
+      console.error('[alerts/createAlert] Emergency SMS failed:', e)
+    }
+  }
 
   return { alertId: alert.id, deduplicated: false, error: null }
 }

@@ -174,19 +174,39 @@ function DashboardInner(props: DashboardClientProps) {
         }}
       >
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <p
-            style={{
-              fontFamily: 'var(--font-body)',
-              fontSize: '13px',
-              fontWeight: 500,
-              letterSpacing: '0.1em',
-              textTransform: 'uppercase',
-              color: 'rgba(250,250,245,0.6)',
-              margin: '0 0 8px',
-            }}
-          >
-            Good morning
-          </p>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <p
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: '13px',
+                fontWeight: 500,
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                color: 'rgba(250,250,245,0.6)',
+                margin: 0,
+              }}
+            >
+              Good morning
+            </p>
+            {member.plan_tier && (
+              <span
+                style={{
+                  fontFamily: 'var(--font-body)',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                  color: 'rgba(250,250,245,0.85)',
+                  backgroundColor: 'rgba(255,255,255,0.12)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '20px',
+                  padding: '4px 12px',
+                }}
+              >
+                Thrive {member.plan_tier.charAt(0).toUpperCase() + member.plan_tier.slice(1)}
+              </span>
+            )}
+          </div>
           <h1
             style={{
               fontFamily: 'var(--font-display)',
