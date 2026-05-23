@@ -2443,3 +2443,143 @@ NEXT SESSION MUST:
 
 AWAITING HUMAN APPROVAL
 APPROVED — Stripe checkout, webhook, subscription row, plan_tier update, and Customer Portal all verified and working. STRIPE_WEBHOOK_SECRET added to Vercel. One issue to fix: the family dashboard does not show the current plan anywhere. Please add the plan name visibly on the dashboard so family members can see which plan they are on. Then begin M10 SMS/Email.
+---
+SESSION: 36
+DATE: 2026-05-23 UTC
+MILESTONE: M11 → M10
+PHASE: 25+26 COMPLETE → Phase 21 (Twilio SMS) + Phase 22 (SendGrid Email) — providers built
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 25 checklist: 7 of 7 items [x] — COMPLETE (APPROVED Session 35; checklist updated)
+- Phase 26 checklist: 7 of 7 items [x] — COMPLETE (APPROVED Session 35; checklist updated)
+- Phase 21 checklist: 1 of 6 items [x] (tsc verified); 5 require Twilio credentials + browser
+- Phase 22 checklist: 1 of 6 items [x] (tsc verified); 5 require SendGrid credentials + browser
+- Current item: Awaiting human to set Twilio + SendGrid credentials and run test scripts
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider (→ TwilioSmsProvider when TWILIO_ACCOUNT_SID is set)
+- emailProvider: StubEmailProvider (→ SendGridEmailProvider when SENDGRID_API_KEY is set)
+- billingProvider: StripeBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+- checklist.md — Phase 25 + 26 all items [x], STATUS set to COMPLETE (human APPROVED Session 35)
+- checklist.md — M10 Phase 21, 22, 23 sections added
+- components/dashboard/DashboardClient.tsx — MODIFIED: plan tier pill badge in navy header ("Thrive Basics", "Thrive Connect" etc.) — visible to family members immediately on dashboard load
+- lib/services/TwilioSmsProvider.ts — REBUILT (was placeholder): real implementation using Twilio SDK; lazy client init on each call (avoids module-level env var access); send() and sendUrgent() with 🚨 prefix
+- lib/services/SendGridEmailProvider.ts — REBUILT (was placeholder): full HTML email templates using inline CSS only; all 7 EmailProvider methods implemented; senior-readable 18px min font; navy/cream/teal design system
+- lib/alerts/createAlert.ts — MODIFIED: Step 5 added — emergency severity alerts trigger sendUrgent() to all linked family members (queries family_members.phone, Promise.allSettled so one failure doesn't block others)
+- scripts/test-sms.ts — CREATED: sends standard + urgent SMS to ONCALL_NAVIGATOR_PHONE
+- scripts/test-email.ts — CREATED: sends post-call summary, alert, and welcome emails to SENDGRID_FROM_EMAIL
+- npm install twilio @sendgrid/mail
+- git commit f06bd3a pushed to origin/main
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — ✓ Compiled successfully in 25.6s, all routes clean
+- smsProvider resolution without TWILIO_ACCOUNT_SID: StubSmsProvider (correct)
+- git ls-files | grep .env: PASSED — only .env.local.example (safe)
+- Secrets scan: PASSED — no secrets in any new files
+
+ERRORS ENCOUNTERED:
+- TS2339: phone_number column does not exist on family_members (field is 'phone') — fixed immediately
+
+DECISIONS MADE:
+- Plan badge in navy header: shows "Thrive [Tier]" capitalised; only renders when plan_tier is set; uses frosted glass pill style to match navy background
+- TwilioSmsProvider: lazy client init avoids requireServerEnv at module load (same pattern as StripeBillingProvider)
+- SendGridEmailProvider: init() called at start of each method (sets API key from env); same lazy pattern
+- Emergency SMS fires for ALL linked family members (Promise.allSettled — partial failure is logged, never throws)
+- Post-call SMS hook: deferred to M8 (Retell webhook) as no call pipeline exists yet; the provider is ready to call when M8 wires in the webhook
+- Phase 22 implementation complete alongside Phase 21; both providers are production-ready
+
+CREDENTIALS NEEDED TO VERIFY PHASES 21 + 22:
+- TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER — from Twilio console
+- ONCALL_NAVIGATOR_PHONE — your mobile number for testing
+- SENDGRID_API_KEY — from SendGrid dashboard
+- SENDGRID_FROM_EMAIL — verified sender email in SendGrid
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- Human must set up Twilio credentials and SendGrid credentials in .env.local and Vercel
+- After credentials set, verify Phase 21 (SMS):
+  1. npx tsx scripts/test-sms.ts → SMS received on ONCALL_NAVIGATOR_PHONE
+  2. Dashboard loads with plan badge visible ("Thrive Basics" etc.) in navy header
+  3. (Optional) Trigger emergency alert → urgent SMS fires to family members
+- After credentials set, verify Phase 22 (email):
+  1. npx tsx scripts/test-email.ts → 3 emails received in inbox; renders correctly on mobile
+  2. Alert email sends for urgent alerts (manual test via createAlert)
+- If APPROVED: mark Phase 21 + 22 all items [x]; begin Phase 23 (Weekly + Monthly Digests)
+- NOTE: Post-call SMS + email will be wired into M8 (Retell webhook); today's providers are ready
+
+AWAITING HUMAN APPROVAL
+Deferring Phase 21 (Twilio SMS) and Phase 22 (SendGrid Email) until platform has paying users. Skipping to Phase 23 (Weekly/Monthly Digests) which uses stub providers and requires no paid services. After Phase 23, move to M12 Compliance. M8 AI Calls and M9 Concierge also deferred until revenue.
+
+---
+SESSION: 37
+DATE: 2026-05-23 UTC
+MILESTONE: M10
+PHASE: 21+22 DEFERRED → 23 — Weekly and Monthly Digests — COMPLETE
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 21 checklist: 2 of 6 items [x] — DEFERRED (provider built; live credentials deferred per human)
+- Phase 22 checklist: 2 of 6 items [x] — DEFERRED (provider built; live credentials deferred per human)
+- Phase 23 checklist: 4 of 4 items [x] — COMPLETE
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider (TwilioSmsProvider built; activates when TWILIO_ACCOUNT_SID set)
+- emailProvider: StubEmailProvider (SendGridEmailProvider built; activates when SENDGRID_API_KEY set)
+- billingProvider: StripeBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+- /workspaces/ThriveAtHome/vercel.json — CREATED: 3 cron entries (weekly-digest Sun 9am, monthly-summary 1st 9am, family-nudge daily 10am)
+- /workspaces/ThriveAtHome/app/api/cron/weekly-digest/route.ts — CREATED: GET; CRON_SECRET auth; queries active members; generates digest via aiProvider; sends via emailProvider to all family members with email notifications enabled
+- /workspaces/ThriveAtHome/app/api/cron/monthly-summary/route.ts — CREATED: identical pattern for monthly (30-day window)
+- /workspaces/ThriveAtHome/app/api/cron/family-nudge/route.ts — CREATED: GET; finds family members with last_login_at > 7 days ago; checks for unacknowledged alerts; 7-day email dedup via realtime_notifications; sends nudge email; records in realtime_notifications for dedup
+- /workspaces/ThriveAtHome/scripts/test-weekly-digest.ts — CREATED: 3 tests (weekly digest, monthly summary, family nudge) using Margaret Chen; all stub logs confirm flow works
+- /workspaces/ThriveAtHome/checklist.md — MODIFIED: Phase 21/22 marked DEFERRED; Phase 23 all 4 items [x] COMPLETE; Overall progress updated
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors (one TS2353 error fixed: message→body in realtime_notifications insert)
+- npm run build: PASSED — /api/cron/family-nudge, /api/cron/monthly-summary, /api/cron/weekly-digest all appear as ƒ (dynamic); ✓ Compiled successfully in 20.9s
+- cat vercel.json: PASSED — weekly-digest "0 9 * * 0" (Sunday), monthly-summary "0 9 1 * *" (1st of month), family-nudge "0 10 * * *" (daily)
+- npx tsx scripts/test-weekly-digest.ts: PASSED — all 3 tests ran; stub logs confirm digest → email flow; "=== All 3 tests passed ==="
+- git ls-files | grep .env: PASSED — only .env.local.example (safe)
+
+ERRORS ENCOUNTERED:
+- TS2353: realtime_notifications insert used 'message' field (correct column name is 'body') — fixed by correcting to 'body'
+
+DECISIONS MADE:
+- Phase 21 + 22 live verification deferred per human instruction — providers are production-ready (TwilioSmsProvider, SendGridEmailProvider fully implemented in Session 36); they activate automatically when env vars are set
+- Phase 23 uses stub providers throughout — all functionality testable without paid services
+- family-nudge cron supplements the existing Supabase Edge Function (family-nudge-check sends Realtime; this cron sends email nudge)
+- vercel.json created with only Phase 23 crons; Phase 18 crons (daily-calls, missed-calls) will be added when M8 AI Calls is un-deferred
+- Family nudge dedup uses realtime_notifications table (same dedup pattern as family-nudge-check Edge Function)
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- If APPROVED: mark Phase 23 COMPLETE in checklist (already marked); begin M12 Compliance (Phase 27 — HIPAA Baseline) per restructured build order
+- Phase 27 starts with: create /app/privacy/page.tsx (real privacy policy replacing placeholder), create /app/api/admin/delete-member/route.ts, add audit log queries to health data access
+- NOTE: Phase 27 BAA verification items require human confirmation (cannot be automated)
+
+AWAITING HUMAN APPROVAL

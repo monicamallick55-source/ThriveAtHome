@@ -413,37 +413,40 @@ M7  Navigator Console  [x][x][x][x][x][x][x][x][x]   9/9 Phase 15 ✅ APPROVED
 M11 Billing           [x][x][x][x][x]               5/5 Phase 24 ✅ APPROVED
                       [x][x][x][x][x][x][x]         7/7 Phase 25 ✅ APPROVED (Session 35)
                       [x][x][x][x][x][x][x]         7/7 Phase 26 ✅ APPROVED (Session 35)
+M10 SMS/Email         Phase 21 DEFERRED (provider built, live creds deferred)
+                      Phase 22 DEFERRED (provider built, live creds deferred)
+                      Phase 23 [x][x][x][x]          4/4 ✅ COMPLETE (Session 37)
 ```
 
 ## M10 — SMS + Email Notifications
 
 ### Phase 21 — Twilio SMS Provider
-STATUS: `IN PROGRESS`
+STATUS: `DEFERRED — provider built, live verification deferred until paying users`
 
-- [ ] TwilioSmsProvider implements SmsProvider interface — npx tsc --noEmit → zero errors
-- [ ] providers.ts resolves to TwilioSmsProvider when TWILIO_ACCOUNT_SID present
-- [ ] send() delivers real SMS — npx tsx scripts/test-sms.ts (sends to ONCALL_NAVIGATOR_PHONE)
-- [ ] sendUrgent() delivers real SMS — urgent path, SMS received with 🚨 prefix
-- [ ] Post-call SMS sends after a completed call
-- [ ] Emergency SMS sends immediately on emergency alert
+- [x] TwilioSmsProvider implements SmsProvider interface — npx tsc --noEmit → zero errors (Session 36)
+- [x] providers.ts resolves to TwilioSmsProvider when TWILIO_ACCOUNT_SID present — code verified (Session 36)
+- [ ] send() delivers real SMS — DEFERRED: requires Twilio credentials
+- [ ] sendUrgent() delivers real SMS — DEFERRED: requires Twilio credentials
+- [ ] Post-call SMS sends after a completed call — DEFERRED: wired in M8 Retell webhook
+- [ ] Emergency SMS sends immediately on emergency alert — DEFERRED: wired in M8
 
 ### Phase 22 — SendGrid Email Provider
-STATUS: `PENDING`
+STATUS: `DEFERRED — provider built, live verification deferred until paying users`
 
-- [ ] SendGridEmailProvider implements EmailProvider interface
-- [ ] providers.ts resolves to SendGridEmailProvider when SENDGRID_API_KEY present
-- [ ] Post-call email sends correctly — npx tsx scripts/test-email.ts
-- [ ] Email renders correctly on mobile
-- [ ] Alert email sends for urgent alerts
-- [ ] Welcome email sends on new subscription
+- [x] SendGridEmailProvider implements EmailProvider interface — npx tsc --noEmit → zero errors (Session 36)
+- [x] providers.ts resolves to SendGridEmailProvider when SENDGRID_API_KEY present — code verified (Session 36)
+- [ ] Post-call email sends correctly — DEFERRED: requires SendGrid credentials
+- [ ] Email renders correctly on mobile — DEFERRED
+- [ ] Alert email sends for urgent alerts — DEFERRED
+- [ ] Welcome email sends on new subscription — DEFERRED
 
 ### Phase 23 — Weekly and Monthly Digests
-STATUS: `PENDING`
+STATUS: `COMPLETE`
 
-- [ ] Weekly digest cron entry in vercel.json
-- [ ] Weekly digest email generates correctly
-- [ ] Monthly summary cron entry in vercel.json
-- [ ] Family nudge sends after 7-day absence
+- [x] Weekly digest cron entry in vercel.json — cat vercel.json shows schedule "0 9 * * 0" (Session 37)
+- [x] Weekly digest email generates correctly — npx tsx scripts/test-weekly-digest.ts → all 3 stubs log correctly (Session 37)
+- [x] Monthly summary cron entry in vercel.json — cat vercel.json shows schedule "0 9 1 * *" (Session 37)
+- [x] Family nudge sends after 7-day absence — test-weekly-digest.ts Test 3 passes; /api/cron/family-nudge route built and in build output (Session 37)
 
 ---
 
