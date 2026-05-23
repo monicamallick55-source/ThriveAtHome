@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { writeAuditLog } from '@/lib/data/audit'
 
 const BUCKET = 'member-documents'
 const SIGNED_URL_EXPIRY_SECONDS = 60 // 60-second window — generated at click time
@@ -64,6 +65,8 @@ export async function GET(
     console.error('[api/documents/download] createSignedUrl:', signedError)
     return NextResponse.json({ error: 'Unable to generate download link' }, { status: 500 })
   }
+
+  void writeAuditLog('document_downloaded', 'document_vault_items', documentId, user.id)
 
   return NextResponse.json({ url: signedData.signedUrl, fileName: doc.file_name })
 }

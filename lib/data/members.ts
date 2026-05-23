@@ -1,12 +1,17 @@
 // Member data access functions — server-side only, uses admin client.
 import { createAdminClient } from '../supabase/admin'
+import { writeAuditLog } from './audit'
 import type { Database } from '../../types/database'
 
 export type Member = Database['public']['Tables']['members']['Row']
 
-/** Fetch a member by their UUID. Returns {data: null, error: 'Not found'} if not present. */
+/**
+ * Fetch a member by their UUID. Returns {data: null, error: 'Not found'} if not present.
+ * Pass callerUserId to emit an audit log entry for HIPAA access tracking.
+ */
 export async function getMemberById(
-  memberId: string
+  memberId: string,
+  callerUserId?: string
 ): Promise<{ data: Member | null; error: string | null }> {
   try {
     const admin = createAdminClient()
@@ -20,6 +25,9 @@ export async function getMemberById(
       return { data: null, error: error.message }
     }
     if (!data) return { data: null, error: 'Not found' }
+    if (callerUserId) {
+      void writeAuditLog('member_viewed', 'member', memberId, callerUserId)
+    }
     return { data: data as Member, error: null }
   } catch (e) {
     console.error('[data/members/getMemberById] Unexpected error:', e)

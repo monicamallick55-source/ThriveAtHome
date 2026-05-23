@@ -64,7 +64,7 @@ export default async function DashboardPage({
     tasksResult,
     fmResult,
   ] = await Promise.all([
-    withTimeout<CheckInCall[]>(getCallsForMember(member.id, 90)),
+    withTimeout<CheckInCall[]>(getCallsForMember(member.id, 90, 0, user.id)),
     withTimeout<Alert[]>(getAlertsForMember(member.id)),
     withTimeout<RealtimeNotification[]>(getNotificationsForMember(member.id)),
     withTimeout<FamilyTaskItem[]>(getTasksForMember(member.id)),

@@ -416,6 +416,7 @@ M11 Billing           [x][x][x][x][x]               5/5 Phase 24 ✅ APPROVED
 M10 SMS/Email         Phase 21 DEFERRED (provider built, live creds deferred)
                       Phase 22 DEFERRED (provider built, live creds deferred)
                       Phase 23 [x][x][x][x]          4/4 ✅ COMPLETE (Session 37)
+M12 Compliance        Phase 27 IN PROGRESS (Session 38)
 ```
 
 ## M10 — SMS + Email Notifications
@@ -447,6 +448,20 @@ STATUS: `COMPLETE`
 - [x] Weekly digest email generates correctly — npx tsx scripts/test-weekly-digest.ts → all 3 stubs log correctly (Session 37)
 - [x] Monthly summary cron entry in vercel.json — cat vercel.json shows schedule "0 9 1 * *" (Session 37)
 - [x] Family nudge sends after 7-day absence — test-weekly-digest.ts Test 3 passes; /api/cron/family-nudge route built and in build output (Session 37)
+
+---
+
+## M12 — Compliance
+
+### Phase 27 — HIPAA Baseline
+STATUS: `IN PROGRESS`
+
+- [ ] All 5 BAAs signed and stored — PENDING HUMAN ACTION: must be completed before any real senior health data enters the system; cannot be automated. BAAs needed: Supabase, Twilio, Retell AI, Anthropic, SendGrid.
+- [x] Audit log entries created for all health data access — writeAuditLog() called in getMemberById (callerUserId), getCallsForMember (callerUserId), document download endpoint; npx tsc --noEmit → zero errors (Session 38)
+- [x] Privacy policy page exists at /privacy — real privacy policy built; npm run build shows /privacy as ○ (static); zero placeholder text (Session 38)
+- [x] Data deletion endpoint works — /api/admin/delete-member DELETE; admin-only; confirmationCode matches full_name; deletes all 15 tables + auth users; npx tsc --noEmit → zero errors; npm run build shows /api/admin/delete-member as ƒ (dynamic) (Session 38)
+- [ ] HTTPS enforced — PENDING: Vercel enforces HTTPS automatically on deploy; verify on production URL
+- [x] No credentials in git history — git log --all --full-history -- .env* shows only .env.local.example (scaffold commit da146c8); no .env.local or secrets in git history (Session 38)
 
 ---
 

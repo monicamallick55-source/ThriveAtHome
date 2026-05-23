@@ -1,14 +1,16 @@
 // Check-in call data access functions — server-side only, uses admin client.
 import { createAdminClient } from '../supabase/admin'
+import { writeAuditLog } from './audit'
 import type { Database } from '../../types/database'
 
 export type CheckInCall = Database['public']['Tables']['check_in_calls']['Row']
 
-/** Fetch paginated calls for a member, newest first. */
+/** Fetch paginated calls for a member, newest first. Pass callerUserId to emit an audit log entry. */
 export async function getCallsForMember(
   memberId: string,
   limit = 20,
-  offset = 0
+  offset = 0,
+  callerUserId?: string
 ): Promise<{ data: CheckInCall[] | null; error: string | null }> {
   try {
     const admin = createAdminClient()
@@ -22,6 +24,9 @@ export async function getCallsForMember(
     if (error) {
       console.error('[data/calls/getCallsForMember]', error)
       return { data: null, error: error.message }
+    }
+    if (callerUserId) {
+      void writeAuditLog('calls_viewed', 'check_in_calls', memberId, callerUserId)
     }
     return { data: (data ?? []) as CheckInCall[], error: null }
   } catch (e) {

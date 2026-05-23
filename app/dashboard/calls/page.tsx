@@ -22,7 +22,7 @@ export default async function CallsPage() {
   }
 
   const [callsResult, countResult] = await Promise.all([
-    getCallsForMember(member.id, PAGE_SIZE, 0),
+    getCallsForMember(member.id, PAGE_SIZE, 0, user.id),
     getCallCountForMember(member.id),
   ])
 
