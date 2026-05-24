@@ -7,6 +7,7 @@ import { getMemberForAuthUser } from '@/lib/data/members'
 import { getDocumentsForMember } from '@/lib/data/documents'
 import { DocumentVault } from '@/components/dashboard/DocumentVault'
 import { ToastProvider } from '@/components/ui/Toast'
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 
 export const metadata: Metadata = { title: 'Document Vault — ThriveAtHome' }
 
@@ -103,11 +104,13 @@ export default async function DocumentsPage() {
               padding: '28px',
             }}
           >
-            <DocumentVault
-              memberId={member.id}
-              initialDocuments={documents ?? []}
-              error={docsError}
-            />
+            <ErrorBoundary section="document vault">
+              <DocumentVault
+                memberId={member.id}
+                initialDocuments={documents ?? []}
+                error={docsError}
+              />
+            </ErrorBoundary>
           </div>
         </main>
       </div>

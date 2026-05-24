@@ -4,6 +4,7 @@ import { requireAuth, getUserRole } from '@/lib/auth'
 import { getNavigatorByAuthId, getNavigatorCaseload, getNavigatorTasks } from '@/lib/data/navigator'
 import { NavConsole } from '@/components/navigator/NavConsole'
 import { ToastProvider } from '@/components/ui/Toast'
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 
 export const metadata: Metadata = { title: 'Navigator Console — ThriveAtHome' }
 
@@ -41,14 +42,16 @@ export default async function NavigatorPage() {
 
   return (
     <ToastProvider>
-      <NavConsole
-        navigatorName={navigatorName}
-        caseload={caseload ?? []}
-        tasks={tasks ?? []}
-        membersById={membersById}
-        caseloadError={navigator ? caseloadError : null}
-        tasksError={navigator ? tasksError : null}
-      />
+      <ErrorBoundary section="navigator console">
+        <NavConsole
+          navigatorName={navigatorName}
+          caseload={caseload ?? []}
+          tasks={tasks ?? []}
+          membersById={membersById}
+          caseloadError={navigator ? caseloadError : null}
+          tasksError={navigator ? tasksError : null}
+        />
+      </ErrorBoundary>
     </ToastProvider>
   )
 }

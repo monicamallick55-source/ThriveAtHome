@@ -6,6 +6,7 @@ import { getMemberForAuthUser } from '@/lib/data/members'
 import { getCallsForMember, getCallCountForMember } from '@/lib/data/calls'
 import CallHistoryClient from '@/components/dashboard/CallHistoryClient'
 import { ToastProvider } from '@/components/ui/Toast'
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 
 export const metadata: Metadata = { title: 'Call History — ThriveAtHome' }
 
@@ -118,11 +119,13 @@ export default async function CallsPage() {
             </div>
           )}
 
-          <CallHistoryClient
-            memberId={member.id}
-            initialCalls={callsResult.data ?? []}
-            totalCount={totalCount}
-          />
+          <ErrorBoundary section="call history">
+            <CallHistoryClient
+              memberId={member.id}
+              initialCalls={callsResult.data ?? []}
+              totalCount={totalCount}
+            />
+          </ErrorBoundary>
         </main>
       </div>
     </ToastProvider>

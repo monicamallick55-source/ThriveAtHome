@@ -10,6 +10,7 @@ import { getMessagesForMember } from '@/lib/data/messages'
 import { FamilyTaskBoard } from '@/components/dashboard/FamilyTaskBoard'
 import { FamilyChat } from '@/components/dashboard/FamilyChat'
 import { ToastProvider } from '@/components/ui/Toast'
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 
 export const metadata: Metadata = { title: 'Family Coordination — ThriveAtHome' }
 
@@ -127,12 +128,14 @@ export default async function FamilyPage() {
               >
                 Family Tasks
               </h2>
-              <FamilyTaskBoard
-                memberId={member.id}
-                familyMemberId={familyMember.id}
-                initialTasks={tasksResult.data ?? []}
-                error={tasksResult.error}
-              />
+              <ErrorBoundary section="family tasks">
+                <FamilyTaskBoard
+                  memberId={member.id}
+                  familyMemberId={familyMember.id}
+                  initialTasks={tasksResult.data ?? []}
+                  error={tasksResult.error}
+                />
+              </ErrorBoundary>
             </div>
 
             {/* Family messaging */}
@@ -156,12 +159,14 @@ export default async function FamilyPage() {
               >
                 Family Messages
               </h2>
-              <FamilyChat
-                memberId={member.id}
-                familyMemberId={familyMember.id}
-                initialMessages={messagesResult.data ?? []}
-                error={messagesResult.error}
-              />
+              <ErrorBoundary section="family messages">
+                <FamilyChat
+                  memberId={member.id}
+                  familyMemberId={familyMember.id}
+                  initialMessages={messagesResult.data ?? []}
+                  error={messagesResult.error}
+                />
+              </ErrorBoundary>
             </div>
 
             {/* Link to documents */}

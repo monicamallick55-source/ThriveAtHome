@@ -2,6 +2,7 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { ToastProvider } from '@/components/ui/Toast'
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { SectionError } from './SectionError'
 import { DashNav } from './DashNav'
 import { WellnessCard } from './WellnessCard'
@@ -226,7 +227,9 @@ function DashboardInner(props: DashboardClientProps) {
       <main id="main-content" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
 
         {/* Wellness card overlaps navy header with negative margin */}
-        <WellnessCard member={member} latestCall={latestCall} />
+        <ErrorBoundary section="wellness summary">
+          <WellnessCard member={member} latestCall={latestCall} />
+        </ErrorBoundary>
 
         <div style={{ marginTop: '32px', display: 'flex', flexDirection: 'column', gap: '32px' }}>
 
@@ -244,12 +247,14 @@ function DashboardInner(props: DashboardClientProps) {
             >
               Alerts
             </h2>
-            <AlertsPanel
-              memberId={member.id}
-              familyMemberId={familyMemberId}
-              initialAlerts={initialAlerts}
-              error={alertsError}
-            />
+            <ErrorBoundary section="alerts">
+              <AlertsPanel
+                memberId={member.id}
+                familyMemberId={familyMemberId}
+                initialAlerts={initialAlerts}
+                error={alertsError}
+              />
+            </ErrorBoundary>
           </section>
 
           {/* Health timeline */}
@@ -276,11 +281,13 @@ function DashboardInner(props: DashboardClientProps) {
                 overflow: 'hidden',
               }}
             >
-              {callsError ? (
-                <SectionError message="Unable to load mood data. Please refresh the page." />
-              ) : (
-                <MoodChart calls={initialCalls} />
-              )}
+              <ErrorBoundary section="health timeline">
+                {callsError ? (
+                  <SectionError message="Unable to load mood data. Please refresh the page." />
+                ) : (
+                  <MoodChart calls={initialCalls} />
+                )}
+              </ErrorBoundary>
             </div>
           </section>
 
@@ -311,7 +318,9 @@ function DashboardInner(props: DashboardClientProps) {
                   padding: '24px',
                 }}
               >
-                <RecentCallsList calls={initialCalls} error={callsError} />
+                <ErrorBoundary section="recent calls">
+                  <RecentCallsList calls={initialCalls} error={callsError} />
+                </ErrorBoundary>
               </div>
             </section>
 
@@ -337,7 +346,9 @@ function DashboardInner(props: DashboardClientProps) {
                   padding: '24px',
                 }}
               >
-                <TasksPanel tasks={initialTasks} error={tasksError} />
+                <ErrorBoundary section="family tasks">
+                  <TasksPanel tasks={initialTasks} error={tasksError} />
+                </ErrorBoundary>
               </div>
             </section>
           </div>
