@@ -2651,3 +2651,78 @@ NEXT SESSION MUST:
 - Human should note BAA status: Supabase BAA, Twilio BAA, Retell AI BAA, Anthropic BAA, SendGrid BAA — these must be signed before real seniors are onboarded; no blocking code change needed
 
 AWAITING HUMAN APPROVAL
+APPROVED — Phase 27 verified. /privacy page renders correctly with full policy content. HTTPS redirect confirmed. BAA items noted as pending — will pursue before onboarding real seniors. Admin delete endpoint deferred. Begin Phase 28 Final Accessibility Audit.
+
+---
+SESSION: 39
+DATE: 2026-05-24 UTC
+MILESTONE: M12
+PHASE: 28 — Final Accessibility Audit + Production Hardening
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 27 checklist: 6 of 6 items [x] — COMPLETE (APPROVED Session 38; HTTPS [x] updated)
+- Phase 28 checklist: 4 of 8 items [x] — axe/tsc/build/git-push verified; 4 require human
+- Current item: Awaiting human browser check + production verify
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider (TwilioSmsProvider built; activates when TWILIO_ACCOUNT_SID set)
+- emailProvider: StubEmailProvider (SendGridEmailProvider built; activates when SENDGRID_API_KEY set)
+- billingProvider: StripeBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+- checklist.md — Phase 27 HTTPS item marked [x], STATUS set to COMPLETE
+- checklist.md — Phase 28 section added, IN PROGRESS
+- /workspaces/ThriveAtHome/components/ui/ErrorBoundary.tsx — CREATED: React class ErrorBoundary with friendly fallback UI, section labelling, console.error logging
+- /workspaces/ThriveAtHome/app/error.tsx — CREATED: Next.js global error page for unhandled server errors; Try again button; warm design system styling
+- /workspaces/ThriveAtHome/components/dashboard/DashboardClient.tsx — MODIFIED: ErrorBoundary wraps WellnessCard, AlertsPanel, health timeline (MoodChart), RecentCallsList, TasksPanel
+- /workspaces/ThriveAtHome/app/dashboard/calls/page.tsx — MODIFIED: ErrorBoundary wraps CallHistoryClient
+- /workspaces/ThriveAtHome/app/dashboard/family/page.tsx — MODIFIED: ErrorBoundary wraps FamilyTaskBoard, FamilyChat
+- /workspaces/ThriveAtHome/app/dashboard/documents/page.tsx — MODIFIED: ErrorBoundary wraps DocumentVault
+- /workspaces/ThriveAtHome/app/navigator/page.tsx — MODIFIED: ErrorBoundary wraps NavConsole
+- git commit 16871d2 pushed to origin/main (Vercel deploy triggered)
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — ✓ Compiled successfully in 60s, all 45 routes
+- Playwright + axe-core wcag2aa — /: 0 violations
+- Playwright + axe-core wcag2aa — /login: 0 violations
+- Playwright + axe-core wcag2aa — /signup: 0 violations
+- Playwright + axe-core wcag2aa — /onboarding: 0 violations
+- Playwright + axe-core wcag2aa — /pricing: 0 violations
+- Playwright + axe-core wcag2aa — /dashboard (test-family@thriveathome.dev): 0 violations
+- Playwright + axe-core wcag2aa — /dashboard/calls (test-family@thriveathome.dev): 0 violations
+- Playwright + axe-core wcag2aa — /navigator (test-navigator@thriveathome.dev): 0 violations
+- git ls-files | grep .env: PASSED — only .env.local.example (safe)
+
+ERRORS ENCOUNTERED:
+- None — clean pass throughout
+
+DECISIONS MADE:
+- ErrorBoundary is a React class component (required for error boundaries in React)
+- Each section has a descriptive `section` prop so error messages name the failing section
+- Global app/error.tsx catches unhandled Next.js App Router errors at the root level
+- Error boundary placement: each independently-loaded section gets its own boundary so one crash doesn't blank the entire page
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- Human verifies production URL (Vercel deploy triggered by git push 16871d2):
+  1. Open each page in browser DevTools Console — zero red errors on: /, /login, /signup, /dashboard, /dashboard/calls, /navigator, /pricing
+  2. On /dashboard: Chrome DevTools → Network → reload → DOMContentLoaded under 3 seconds
+  3. Confirm Vercel deploy succeeded (no build errors in Vercel dashboard)
+  4. (Optional, important for launch) Arrange for 65+ adult to complete: sign up → onboarding → /dashboard without assistance
+  5. (Optional, after 24 hours) Check Vercel → Logs → Functions for any unexpected error patterns
+- If all production checks pass: mark remaining 4 Phase 28 items [x]; mark Phase 28 COMPLETE; declare M12 COMPLETE
+- After M12 COMPLETE: M7+M8+M9+M10 remaining items (AI Calls, Concierge, live SMS/email) when business is ready
+
+AWAITING HUMAN APPROVAL
