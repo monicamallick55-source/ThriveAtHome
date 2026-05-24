@@ -2583,3 +2583,71 @@ NEXT SESSION MUST:
 - NOTE: Phase 27 BAA verification items require human confirmation (cannot be automated)
 
 AWAITING HUMAN APPROVAL
+APPROVED — Phase 23 complete. For Phase 27 HIPAA Baseline: No BAAs signed yet — platform is in development with test data only, no real seniors or real health data in the system. Please build the privacy policy page and data deletion endpoint. Mark all BAA checklist items as PENDING HUMAN ACTION with a note that they must be completed before any real member health data enters the system. Do not block the build on BAAs — they take weeks and should be pursued in parallel.
+
+
+---
+SESSION: 38
+DATE: 2026-05-23 UTC
+MILESTONE: M12
+PHASE: 27 — HIPAA Baseline
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 27 checklist: 4 of 6 items [x] — 1 BAA item (PENDING HUMAN ACTION), 1 HTTPS item (awaits production verify)
+- Current item: All automatable items built and verified; awaiting human to check production URL + confirm BAA plan
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider (TwilioSmsProvider built; activates when TWILIO_ACCOUNT_SID set)
+- emailProvider: StubEmailProvider (SendGridEmailProvider built; activates when SENDGRID_API_KEY set)
+- billingProvider: StripeBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+- checklist.md — Phase 23 confirmed COMPLETE; Phase 27 section added; M12 section added to summary table
+- /workspaces/ThriveAtHome/app/privacy/page.tsx — REBUILT: replaced "coming soon" placeholder with real 11-section privacy policy: Overview, What We Collect, How We Use, Call Recordings/Access, Data Sharing, Security, HIPAA Rights, Data Deletion, Cookies, Children's Privacy, Changes, Contact Us
+- /workspaces/ThriveAtHome/lib/data/audit.ts — CREATED: writeAuditLog() helper; writes to audit_log table; never throws (audit failures are logged but do not crash callers)
+- /workspaces/ThriveAtHome/app/api/admin/delete-member/route.ts — CREATED: DELETE endpoint; admin role required; confirmationCode must match member.full_name (case-insensitive); writes audit entry before deletion; deletes all 15 tables in dependency order + Supabase Auth users; returns confirmation JSON
+- /workspaces/ThriveAtHome/lib/data/members.ts — MODIFIED: getMemberById now accepts optional callerUserId; emits audit log entry when present
+- /workspaces/ThriveAtHome/lib/data/calls.ts — MODIFIED: getCallsForMember now accepts optional callerUserId; emits audit log entry when present
+- /workspaces/ThriveAtHome/app/dashboard/page.tsx — MODIFIED: passes user.id to getCallsForMember for audit logging
+- /workspaces/ThriveAtHome/app/dashboard/calls/page.tsx — MODIFIED: passes user.id to getCallsForMember for audit logging
+- /workspaces/ThriveAtHome/app/api/documents/[id]/download/route.ts — MODIFIED: emits audit log entry on document download
+- git commit 5a37d90 pushed to origin/main
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — ✓ Compiled successfully in 24.2s; /privacy (○ static), /api/admin/delete-member (ƒ dynamic) both in build output
+- git log --all --full-history -- .env*: PASSED — only .env.local.example in git history (da146c8 scaffold commit); no secrets in git history
+- git ls-files | grep .env: PASSED — only .env.local.example (safe)
+- Secrets scan in new files: PASSED — no hardcoded secrets
+
+ERRORS ENCOUNTERED:
+- None — clean first pass
+
+DECISIONS MADE:
+- writeAuditLog is best-effort (never throws) — audit failures must not crash health data reads
+- Data deletion uses 15-table ordered deletion (child tables first, members last) to avoid FK constraint violations
+- confirmationCode check is case-insensitive so "margaret chen" matches "Margaret Chen"
+- Audit logging added to the most sensitive access points: member profile view, call records view, document download
+- BAA items: marked PENDING HUMAN ACTION per human instruction; platform must not accept real senior data until all 5 BAAs are signed
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- If APPROVED: mark Phase 27 HTTPS item [x] (Vercel enforces it automatically), present Phase 28 checklist (Final Accessibility Audit + Production Hardening)
+- Human must verify in browser (Vercel production URL):
+  1. Navigate to /privacy → full policy renders (not "coming soon"); 11 sections visible; correct fonts and cream background
+  2. Navigate to http:// version of production URL → redirects to https:// automatically (Vercel handles this)
+  3. (Optional admin test) Send DELETE to /api/admin/delete-member with a TEST member ID and correct name → all data deleted, Supabase rows gone
+- Human should note BAA status: Supabase BAA, Twilio BAA, Retell AI BAA, Anthropic BAA, SendGrid BAA — these must be signed before real seniors are onboarded; no blocking code change needed
+
+AWAITING HUMAN APPROVAL
