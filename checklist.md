@@ -478,6 +478,26 @@ STATUS: `COMPLETE`
 
 ---
 
+## M13 — Volunteer Network
+
+### Phase 29 — Volunteer Database + Application
+STATUS: `IN PROGRESS`
+
+- [ ] Migration 005 runs without errors — VERIFY: All 3 tables visible in Supabase Table Editor
+      PASS: volunteers, volunteer_visits, volunteer_matches all present
+- [x] /app/volunteer/apply/page.tsx — real form replaces placeholder — created: multi-section form at /volunteer/apply (tsc PASSED, build shows ○ /volunteer/apply)
+- [x] Form collects all required fields — personal info (name/email/phone/city/state), languages (pills), availability (days + hours), service types (pills), interests (pills), motivation (textarea, required), prior experience (textarea, optional), veteran path
+- [ ] Submission saves to volunteers table — VERIFY: Submit test application, check Supabase volunteers table
+      PASS: Row created with status='pending', all fields populated
+- [ ] Admin receives email notification on new application — VERIFY: Submit application, check CARE_TEAM_EMAIL inbox
+      PASS: Email received OR stub log: "[STUB][EMAIL] Would send volunteer application notification to [email]..."
+- [x] Admin volunteer queue at /app/admin/volunteers/page.tsx — created: Server Component, admin-role-gated; build shows ƒ /admin/volunteers
+- [ ] Approve action updates status — VERIFY: Click Approve on test application
+      PASS: status changes to 'background_check' in Supabase
+- [x] npx tsc --noEmit passes — zero errors (Session 41)
+
+---
+
 ## Blocked items log
 
 When a phase reaches BLOCKED state, record it here.

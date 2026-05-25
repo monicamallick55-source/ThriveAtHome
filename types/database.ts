@@ -17,6 +17,8 @@ export type NotifSeverity = 'info' | 'concern' | 'urgent' | 'emergency'
 export type NotifChannel = 'realtime' | 'sms' | 'email'
 export type NotifStatus = 'sent' | 'failed' | 'stub'
 export type CheckInFrequency = 'daily' | 'every_other_day' | 'weekly'
+export type VolunteerStatus = 'pending' | 'background_check' | 'active' | 'inactive' | 'suspended'
+export type VisitType = 'phone_call' | 'in_person_visit' | 'virtual_event' | 'grocery_help' | 'walking_companion' | 'reading_aloud' | 'tech_help'
 
 export interface Database {
   public: {
@@ -499,6 +501,114 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['audit_log']['Insert']>
         Relationships: []
       }
+      volunteers: {
+        Row: {
+          id: string
+          created_at: string
+          supabase_auth_id: string | null
+          full_name: string
+          email: string
+          phone: string | null
+          city: string | null
+          state: string | null
+          languages: string[]
+          availability_days: string[]
+          hours_per_week: string | null
+          service_types: VisitType[]
+          interests: string[]
+          why_volunteer: string | null
+          prior_experience: string | null
+          status: VolunteerStatus
+          background_check_id: string | null
+          background_check_status: string | null
+          total_hours_logged: number
+          total_seniors_helped: number
+          rating_average: number | null
+          notes: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          supabase_auth_id?: string | null
+          full_name: string
+          email: string
+          phone?: string | null
+          city?: string | null
+          state?: string | null
+          languages?: string[]
+          availability_days?: string[]
+          hours_per_week?: string | null
+          service_types?: VisitType[]
+          interests?: string[]
+          why_volunteer?: string | null
+          prior_experience?: string | null
+          status?: VolunteerStatus
+          background_check_id?: string | null
+          background_check_status?: string | null
+          total_hours_logged?: number
+          total_seniors_helped?: number
+          rating_average?: number | null
+          notes?: string | null
+        }
+        Update: Partial<Database['public']['Tables']['volunteers']['Insert']>
+        Relationships: []
+      }
+      volunteer_visits: {
+        Row: {
+          id: string
+          created_at: string
+          volunteer_id: string
+          member_id: string
+          visit_date: string
+          duration_minutes: number
+          visit_type: VisitType
+          volunteer_notes: string | null
+          volunteer_rating: number | null
+          member_rating: number | null
+          verified: boolean
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          volunteer_id: string
+          member_id: string
+          visit_date: string
+          duration_minutes: number
+          visit_type: VisitType
+          volunteer_notes?: string | null
+          volunteer_rating?: number | null
+          member_rating?: number | null
+          verified?: boolean
+        }
+        Update: Partial<Database['public']['Tables']['volunteer_visits']['Insert']>
+        Relationships: []
+      }
+      volunteer_matches: {
+        Row: {
+          id: string
+          created_at: string
+          member_id: string
+          volunteer_id: string
+          match_score: number
+          match_reasons: unknown[]
+          status: string
+          matched_at: string | null
+          intro_sent_at: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          member_id: string
+          volunteer_id: string
+          match_score?: number
+          match_reasons?: unknown[]
+          status?: string
+          matched_at?: string | null
+          intro_sent_at?: string | null
+        }
+        Update: Partial<Database['public']['Tables']['volunteer_matches']['Insert']>
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>
@@ -516,6 +626,8 @@ export interface Database {
       notif_channel: NotifChannel
       notif_status: NotifStatus
       check_in_frequency: CheckInFrequency
+      volunteer_status: VolunteerStatus
+      visit_type: VisitType
     }
     CompositeTypes: Record<string, never>
   }

@@ -23,4 +23,7 @@ export class StubEmailProvider implements EmailProvider {
   async sendMonthlySummary(to: string, memberName: string, _content: string): Promise<void> {
     console.log(`[STUB][Email] Monthly summary for ${memberName} → ${to}`)
   }
+  async sendVolunteerApplicationNotification(to: string, applicantName: string, applicantEmail: string, city: string, serviceTypes: string[]): Promise<void> {
+    console.log(`[STUB][EMAIL] Would send volunteer application notification to ${to}: ${applicantName} (${applicantEmail}) from ${city} — services: ${serviceTypes.join(', ')}`)
+  }
 }

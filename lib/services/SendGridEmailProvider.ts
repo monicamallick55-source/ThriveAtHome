@@ -223,4 +223,23 @@ ${ctaButton('View Full Dashboard', dashboardUrl())}`
     })
     console.log(`[SendGrid] Monthly summary sent to ${to.substring(0, 6)}xxx`)
   }
+
+  async sendVolunteerApplicationNotification(to: string, applicantName: string, applicantEmail: string, city: string, serviceTypes: string[]): Promise<void> {
+    initClient()
+    const body = `<p style="margin:0 0 16px;font-family:Georgia,serif;font-size:22px;line-height:1.4;">New volunteer application received</p>
+<table style="width:100%;border-collapse:collapse;font-size:18px;line-height:1.6;">
+  <tr><td style="padding:8px 0;color:#5E5852;width:160px;">Name</td><td style="padding:8px 0;color:#2D2A25;font-weight:500;">${applicantName}</td></tr>
+  <tr><td style="padding:8px 0;color:#5E5852;">Email</td><td style="padding:8px 0;color:#2D2A25;">${applicantEmail}</td></tr>
+  <tr><td style="padding:8px 0;color:#5E5852;">Location</td><td style="padding:8px 0;color:#2D2A25;">${city || '—'}</td></tr>
+  <tr><td style="padding:8px 0;color:#5E5852;">Services</td><td style="padding:8px 0;color:#2D2A25;">${serviceTypes.join(', ') || '—'}</td></tr>
+</table>
+${ctaButton('Review Application', dashboardUrl() + '/admin/volunteers')}`
+    await sgMail.send({
+      to,
+      from: getFrom(),
+      subject: `ThriveAtHome: New volunteer application from ${applicantName}`,
+      html: baseTemplate('New Volunteer Application', body),
+    })
+    console.log(`[SendGrid] Volunteer application notification sent to ${to.substring(0, 6)}xxx`)
+  }
 }
