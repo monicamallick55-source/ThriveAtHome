@@ -155,8 +155,14 @@ export function AdminVolunteerMatching({ pendingMembers }: Props) {
         )}
 
         {matches && matches.length === 0 && (
-          <div style={{ padding: '32px', textAlign: 'center', color: 'var(--color-text-secondary)', fontFamily: 'var(--font-body)' }}>
-            No active volunteers yet. Approve volunteers from the Applications page first.
+          <div style={{ padding: '40px 32px', textAlign: 'center', backgroundColor: 'white', border: '1px solid var(--color-warm-grey)', borderRadius: 'var(--radius-lg)' }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--color-navy)', marginBottom: '8px' }}>No active volunteers yet</p>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '16px', color: 'var(--color-text-secondary)', marginBottom: '20px' }}>
+              To match volunteers, you need at least one active volunteer. Go to the Applications page, approve an application, then click <strong>Activate Volunteer</strong> once the background check passes.
+            </p>
+            <a href="/admin/volunteers" style={{ display: 'inline-block', height: '44px', lineHeight: '44px', padding: '0 24px', backgroundColor: 'var(--color-teal)', color: 'white', borderRadius: 'var(--radius-md)', fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 500, textDecoration: 'none' }}>
+              Go to Volunteer Applications
+            </a>
           </div>
         )}
 

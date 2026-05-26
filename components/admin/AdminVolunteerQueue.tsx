@@ -16,12 +16,14 @@ function formatDate(ts: string) {
   return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-export function AdminVolunteerQueue({ applications: initial }: { applications: Volunteer[] }) {
+type QueueMode = 'pending' | 'background_check'
+
+export function AdminVolunteerQueue({ applications: initial, mode = 'pending' }: { applications: Volunteer[]; mode?: QueueMode }) {
   const [applications, setApplications] = useState<Volunteer[]>(initial)
   const [processing, setProcessing] = useState<Set<string>>(new Set())
   const [toastMsg, setToastMsg] = useState<string | null>(null)
 
-  async function updateStatus(id: string, status: 'background_check' | 'inactive') {
+  async function updateStatus(id: string, status: 'background_check' | 'inactive' | 'active') {
     setProcessing(prev => new Set(prev).add(id))
     try {
       const res = await fetch(`/api/admin/volunteers/${id}/status`, {
@@ -31,7 +33,12 @@ export function AdminVolunteerQueue({ applications: initial }: { applications: V
       })
       if (res.ok) {
         setApplications(prev => prev.filter(a => a.id !== id))
-        setToastMsg(status === 'background_check' ? 'Application approved — moving to background check.' : 'Application rejected.')
+        const msg = status === 'background_check'
+          ? 'Application approved — moving to background check.'
+          : status === 'active'
+          ? 'Volunteer activated — they can now be matched with members.'
+          : 'Application rejected.'
+        setToastMsg(msg)
         setTimeout(() => setToastMsg(null), 4000)
       } else {
         const json = await res.json()
@@ -56,9 +63,15 @@ export function AdminVolunteerQueue({ applications: initial }: { applications: V
 
   if (applications.length === 0) {
     return (
-      <div style={{ textAlign: 'center', padding: '64px 32px' }}>
-        <p style={{ fontFamily: 'var(--font-display)', fontSize: '28px', color: 'var(--color-navy)', marginBottom: '8px' }}>No pending applications</p>
-        <p style={{ fontFamily: 'var(--font-body)', fontSize: '18px', color: 'var(--color-text-secondary)' }}>New applications will appear here automatically.</p>
+      <div style={{ textAlign: 'center', padding: '48px 32px', backgroundColor: 'white', border: '1px dashed var(--color-warm-grey)', borderRadius: 'var(--radius-lg)' }}>
+        <p style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--color-navy)', marginBottom: '8px' }}>
+          {mode === 'background_check' ? 'No volunteers awaiting activation' : 'No pending applications'}
+        </p>
+        <p style={{ fontFamily: 'var(--font-body)', fontSize: '16px', color: 'var(--color-text-secondary)' }}>
+          {mode === 'background_check'
+            ? 'Approved volunteers will appear here once background checks are submitted.'
+            : 'New applications will appear here automatically.'}
+        </p>
       </div>
     )
   }
@@ -72,7 +85,7 @@ export function AdminVolunteerQueue({ applications: initial }: { applications: V
       )}
 
       <p style={{ fontFamily: 'var(--font-body)', fontSize: '16px', color: 'var(--color-text-secondary)', marginBottom: '24px' }}>
-        {applications.length} pending application{applications.length !== 1 ? 's' : ''}
+        {applications.length} {mode === 'background_check' ? `volunteer${applications.length !== 1 ? 's' : ''} awaiting activation` : `pending application${applications.length !== 1 ? 's' : ''}`}
       </p>
 
       {applications.map(app => (
@@ -114,18 +127,37 @@ export function AdminVolunteerQueue({ applications: initial }: { applications: V
           )}
 
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-            <button
-              onClick={() => updateStatus(app.id, 'background_check')}
-              disabled={processing.has(app.id)}
-              style={{ height: '44px', padding: '0 24px', backgroundColor: processing.has(app.id) ? 'var(--color-warm-grey)' : 'var(--color-teal)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 500, cursor: processing.has(app.id) ? 'not-allowed' : 'pointer' }}>
-              Approve
-            </button>
-            <button
-              onClick={() => updateStatus(app.id, 'inactive')}
-              disabled={processing.has(app.id)}
-              style={{ height: '44px', padding: '0 24px', backgroundColor: 'white', color: 'var(--color-urgent-text)', border: '1.5px solid var(--color-urgent-border)', borderRadius: 'var(--radius-md)', fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 500, cursor: processing.has(app.id) ? 'not-allowed' : 'pointer' }}>
-              Reject
-            </button>
+            {mode === 'background_check' ? (
+              <>
+                <button
+                  onClick={() => updateStatus(app.id, 'active')}
+                  disabled={processing.has(app.id)}
+                  style={{ height: '44px', padding: '0 24px', backgroundColor: processing.has(app.id) ? 'var(--color-warm-grey)' : 'var(--color-teal)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 500, cursor: processing.has(app.id) ? 'not-allowed' : 'pointer' }}>
+                  Activate Volunteer
+                </button>
+                <button
+                  onClick={() => updateStatus(app.id, 'inactive')}
+                  disabled={processing.has(app.id)}
+                  style={{ height: '44px', padding: '0 24px', backgroundColor: 'white', color: 'var(--color-urgent-text)', border: '1.5px solid var(--color-urgent-border)', borderRadius: 'var(--radius-md)', fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 500, cursor: processing.has(app.id) ? 'not-allowed' : 'pointer' }}>
+                  Reject
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => updateStatus(app.id, 'background_check')}
+                  disabled={processing.has(app.id)}
+                  style={{ height: '44px', padding: '0 24px', backgroundColor: processing.has(app.id) ? 'var(--color-warm-grey)' : 'var(--color-teal)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 500, cursor: processing.has(app.id) ? 'not-allowed' : 'pointer' }}>
+                  Approve
+                </button>
+                <button
+                  onClick={() => updateStatus(app.id, 'inactive')}
+                  disabled={processing.has(app.id)}
+                  style={{ height: '44px', padding: '0 24px', backgroundColor: 'white', color: 'var(--color-urgent-text)', border: '1.5px solid var(--color-urgent-border)', borderRadius: 'var(--radius-md)', fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 500, cursor: processing.has(app.id) ? 'not-allowed' : 'pointer' }}>
+                  Reject
+                </button>
+              </>
+            )}
           </div>
         </div>
       ))}
