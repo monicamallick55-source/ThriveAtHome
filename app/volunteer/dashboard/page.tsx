@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import { getCurrentUser } from '@/lib/auth'
-import { getVolunteerByAuthId, getVolunteerMatchedMembers, getVolunteerVisits } from '@/lib/data/volunteers'
+import { getVolunteerByAuthId, getVolunteerMatchedMembers, getVolunteerVisits, getVolunteerMembersHelpedCount } from '@/lib/data/volunteers'
 import { VolunteerDashboard } from '@/components/volunteer/VolunteerDashboard'
 
 export const metadata: Metadata = { title: 'Volunteer Dashboard — ThriveAtHome' }
@@ -28,9 +28,10 @@ export default async function VolunteerDashboardPage() {
     )
   }
 
-  const [{ data: matchedMembers }, { data: recentVisits }] = await Promise.all([
+  const [{ data: matchedMembers }, { data: recentVisits }, membersHelpedCount] = await Promise.all([
     getVolunteerMatchedMembers(volunteer.id),
     getVolunteerVisits(volunteer.id, 20),
+    getVolunteerMembersHelpedCount(volunteer.id),
   ])
 
   return (
@@ -38,6 +39,7 @@ export default async function VolunteerDashboardPage() {
       volunteer={volunteer}
       matchedMembers={matchedMembers ?? []}
       recentVisits={recentVisits ?? []}
+      membersHelpedCount={membersHelpedCount}
     />
   )
 }

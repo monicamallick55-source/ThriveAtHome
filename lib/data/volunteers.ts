@@ -225,16 +225,24 @@ export async function getVolunteerByAuthId(
     const email = authUser?.user?.email
     if (!email) return { data: null, error: null }
 
+    // Search by email regardless of status (background_check, pending, active are all valid)
     const { data: byEmail, error: emailErr } = await admin
       .from('volunteers')
       .select('*')
       .ilike('email', email)
-      .eq('status', 'active')
       .maybeSingle()
     if (emailErr || !byEmail) return { data: null, error: emailErr?.message ?? null }
 
-    // Link this auth user to their volunteer record so future lookups use the fast path
-    await admin.from('volunteers').update({ supabase_auth_id: authId }).eq('id', byEmail.id)
+    // Only link if row is unclaimed (supabase_auth_id is null) to avoid hijacking another user's row
+    if (!byEmail.supabase_auth_id) {
+      const { error: linkErr } = await admin
+        .from('volunteers')
+        .update({ supabase_auth_id: authId })
+        .eq('id', byEmail.id)
+      if (linkErr) {
+        console.error('[data/volunteers/getVolunteerByAuthId] Failed to link supabase_auth_id:', linkErr)
+      }
+    }
     return { data: { ...(byEmail as Volunteer), supabase_auth_id: authId }, error: null }
   } catch (e) {
     console.error('[data/volunteers/getVolunteerByAuthId] Unexpected error:', e)
@@ -340,6 +348,22 @@ export async function logVolunteerVisit(
 }
 
 export type VolunteerVisit = Database['public']['Tables']['volunteer_visits']['Row']
+
+export async function getVolunteerMembersHelpedCount(
+  volunteerId: string
+): Promise<number> {
+  try {
+    const admin = createAdminClient()
+    const { data } = await admin
+      .from('volunteer_visits')
+      .select('member_id')
+      .eq('volunteer_id', volunteerId)
+    if (!data) return 0
+    return new Set(data.map(v => v.member_id)).size
+  } catch {
+    return 0
+  }
+}
 
 export async function getVolunteerVisits(
   volunteerId: string,

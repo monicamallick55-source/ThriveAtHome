@@ -36,12 +36,13 @@ interface Props {
   volunteer: Volunteer
   matchedMembers: PrivateMemberView[]
   recentVisits: VolunteerVisit[]
+  membersHelpedCount: number
 }
 
-export function VolunteerDashboard({ volunteer, matchedMembers, recentVisits: initialVisits }: Props) {
+export function VolunteerDashboard({ volunteer, matchedMembers, recentVisits: initialVisits, membersHelpedCount }: Props) {
   const [visits, setVisits] = useState<VolunteerVisit[]>(initialVisits)
   const [totalHours, setTotalHours] = useState(Number(volunteer.total_hours_logged ?? 0))
-  const [membersHelped, setMembersHelped] = useState(Number(volunteer.total_seniors_helped ?? 0))
+  const [membersHelped, setMembersHelped] = useState(membersHelpedCount)
   const [showLogForm, setShowLogForm] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
