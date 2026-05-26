@@ -26,7 +26,7 @@ export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname
 
   // Unauthenticated users: guard all protected areas
-  const isProtected = ['/dashboard', '/navigator', '/admin', '/onboarding'].some((p) =>
+  const isProtected = ['/dashboard', '/navigator', '/admin', '/onboarding', '/volunteer/dashboard'].some((p) =>
     path.startsWith(p)
   )
   if (isProtected && !user) {
@@ -43,10 +43,20 @@ export async function proxy(request: NextRequest) {
       .eq('supabase_auth_id', user.id)
       .maybeSingle()
 
-    const role = (fm?.role ?? 'family') as 'family' | 'navigator' | 'admin'
+    let role = (fm?.role ?? 'family') as 'family' | 'navigator' | 'admin' | 'volunteer'
 
-    // Family users cannot access /navigator or /admin — redirect to dashboard
-    if (role === 'family' && (path.startsWith('/navigator') || path.startsWith('/admin'))) {
+    // If no family_members row found, check if this user is a volunteer
+    if (!fm) {
+      const { data: vol } = await supabase
+        .from('volunteers')
+        .select('id')
+        .eq('supabase_auth_id', user.id)
+        .maybeSingle()
+      if (vol) role = 'volunteer'
+    }
+
+    // Family users cannot access /navigator, /admin, or /volunteer/dashboard
+    if (role === 'family' && (path.startsWith('/navigator') || path.startsWith('/admin') || path.startsWith('/volunteer/dashboard'))) {
       const url = request.nextUrl.clone()
       url.pathname = '/dashboard'
       return NextResponse.redirect(url)
@@ -57,6 +67,15 @@ export async function proxy(request: NextRequest) {
       const url = request.nextUrl.clone()
       url.pathname = '/navigator'
       return NextResponse.redirect(url)
+    }
+
+    // Volunteer users: redirect away from family/navigator/admin areas to their own portal
+    if (role === 'volunteer') {
+      if (path.startsWith('/dashboard') || path.startsWith('/navigator') || path.startsWith('/admin')) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/volunteer/dashboard'
+        return NextResponse.redirect(url)
+      }
     }
   }
 

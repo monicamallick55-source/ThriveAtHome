@@ -431,11 +431,112 @@ async function seed(): Promise<void> {
     console.log('   ✅ Inserted 3 tasks')
   }
 
+  // ── 9. Test volunteer (Phase 31) ────────────────────────────────
+  console.log('\n9. Test volunteer')
+  const VOL_EMAIL = 'test-volunteer@thriveathome.dev'
+  const VOL_PASSWORD = 'TestPassword123!'
+
+  let volAuthUserId: string
+  const existingVolUser = existingUsers?.users.find((u) => u.email === VOL_EMAIL)
+  if (existingVolUser) {
+    volAuthUserId = existingVolUser.id
+    console.log(`   ↩  Auth user exists: ${VOL_EMAIL} (${volAuthUserId})`)
+  } else {
+    const { data: newVolUser, error } = await admin.auth.admin.createUser({
+      email: VOL_EMAIL, password: VOL_PASSWORD, email_confirm: true,
+    })
+    if (error || !newVolUser.user) throw new Error(`Volunteer auth user create failed: ${error?.message}`)
+    volAuthUserId = newVolUser.user.id
+    console.log(`   ✅ Created volunteer auth user: ${VOL_EMAIL} (${volAuthUserId})`)
+  }
+
+  // family_members row with role='volunteer' (middleware looks here for role)
+  const { data: existingVolFm } = await admin
+    .from('family_members')
+    .select('id')
+    .eq('supabase_auth_id', volAuthUserId)
+    .maybeSingle()
+  if (!existingVolFm) {
+    const { error } = await admin.from('family_members').insert({
+      supabase_auth_id: volAuthUserId,
+      full_name: 'James Rivera',
+      email: VOL_EMAIL,
+      relationship: 'volunteer',
+      role: 'volunteer',
+    })
+    if (error) {
+      // Likely needs migration 006_volunteer_role.sql (ALTER TYPE user_role ADD VALUE 'volunteer')
+      console.log(`   ⚠️  Skipped family_members row — run migration 006_volunteer_role.sql first: ${error.message}`)
+      console.log('   ℹ️  Middleware will route volunteer via volunteers.supabase_auth_id (fallback active)')
+    } else {
+      console.log('   ✅ Created volunteer family_members row (role=volunteer)')
+    }
+  } else {
+    console.log('   ↩  Volunteer family_members already exists')
+  }
+
+  // volunteers table row (active status so they can be matched)
+  const { data: existingVol } = await admin
+    .from('volunteers')
+    .select('id')
+    .eq('email', VOL_EMAIL)
+    .maybeSingle()
+  let volunteerRowId: string
+  if (existingVol) {
+    volunteerRowId = existingVol.id
+    // Ensure supabase_auth_id is linked
+    await admin.from('volunteers').update({ supabase_auth_id: volAuthUserId }).eq('id', volunteerRowId)
+    console.log(`   ↩  volunteers row already exists (${volunteerRowId})`)
+  } else {
+    const { data: vol, error } = await admin.from('volunteers').insert({
+      supabase_auth_id: volAuthUserId,
+      full_name: 'James Rivera',
+      email: VOL_EMAIL,
+      phone: '+15550003456',
+      city: 'Springfield',
+      state: 'MA',
+      languages: ['english', 'spanish'],
+      availability_days: ['saturday', 'sunday'],
+      hours_per_week: '3-5',
+      service_types: ['phone_call', 'in_person_visit', 'grocery_help'],
+      interests: ['gardening', 'cooking', 'music'],
+      why_volunteer: 'I want to give back to my community and support seniors living independently.',
+      status: 'active',
+      total_hours_logged: 0,
+      total_seniors_helped: 0,
+    }).select('id').maybeSingle()
+    if (error || !vol) throw new Error(`volunteers insert failed: ${error?.message}`)
+    volunteerRowId = vol.id
+    console.log(`   ✅ Created active volunteer James Rivera (${volunteerRowId})`)
+  }
+
+  // volunteer_match: connect James to Margaret
+  const { count: existingMatchCount } = await admin
+    .from('volunteer_matches')
+    .select('*', { count: 'exact', head: true })
+    .eq('volunteer_id', volunteerRowId)
+    .eq('member_id', memberId!)
+  if ((existingMatchCount ?? 0) === 0) {
+    const { error } = await admin.from('volunteer_matches').insert({
+      member_id: memberId!,
+      volunteer_id: volunteerRowId,
+      match_score: 65,
+      match_reasons: ['Same city', 'Shared interests: gardening, cooking, music'],
+      status: 'matched',
+      matched_at: new Date().toISOString(),
+    })
+    if (error) throw new Error(`volunteer_matches insert failed: ${error.message}`)
+    console.log('   ✅ Created volunteer_match: James ↔ Margaret')
+  } else {
+    console.log('   ↩  volunteer_match already exists')
+  }
+
   // ── Done ────────────────────────────────────────────────────────
   console.log('\n── Seed complete ────────────────────────────────────────')
   console.log(`   Member:  Margaret Chen (${memberId})`)
   console.log(`   Family login:    ${TEST_EMAIL} / ${TEST_PASSWORD}`)
   console.log(`   Navigator login: ${NAV_EMAIL} / ${NAV_PASSWORD}`)
+  console.log(`   Volunteer login: ${VOL_EMAIL} / ${VOL_PASSWORD}`)
 }
 
 seed().catch((e) => {

@@ -3,7 +3,7 @@
 
 export type PlanTier = 'basics' | 'connect' | 'complete' | 'premier'
 export type MemberStatus = 'active' | 'inactive' | 'paused'
-export type UserRole = 'family' | 'navigator' | 'admin'
+export type UserRole = 'family' | 'navigator' | 'admin' | 'volunteer'
 export type CallStatus = 'scheduled' | 'in_progress' | 'completed' | 'missed' | 'failed'
 export type CallType = 'check_in' | 'concierge' | 'navigator'
 export type AlertType = 'missed_call' | 'mood_drop' | 'medication_miss' | 'wellness_drift' | 'fall' | 'crisis' | 'emergency'

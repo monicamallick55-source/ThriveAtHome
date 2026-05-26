@@ -184,6 +184,149 @@ export async function getPendingMatchRequests(): Promise<{ data: Array<{ member:
   }
 }
 
+export interface VolunteerVisitInsert {
+  volunteer_id: string
+  member_id: string
+  visit_date: string
+  duration_minutes: number
+  visit_type: VisitType
+  volunteer_notes?: string
+  volunteer_rating?: number
+}
+
+export async function getVolunteerByAuthId(
+  authId: string
+): Promise<{ data: Volunteer | null; error: string | null }> {
+  try {
+    const admin = createAdminClient()
+    const { data, error } = await admin
+      .from('volunteers')
+      .select('*')
+      .eq('supabase_auth_id', authId)
+      .maybeSingle()
+    if (error) {
+      console.error('[data/volunteers/getVolunteerByAuthId]', error)
+      return { data: null, error: error.message }
+    }
+    return { data: data as Volunteer | null, error: null }
+  } catch (e) {
+    console.error('[data/volunteers/getVolunteerByAuthId] Unexpected error:', e)
+    return { data: null, error: e instanceof Error ? e.message : String(e) }
+  }
+}
+
+export interface PrivateMemberView {
+  id: string
+  displayName: string // "First L." format
+  preferred_language: string
+  topics_enjoy: string[]
+  matchedAt: string | null
+  matchId: string
+}
+
+export async function getVolunteerMatchedMembers(
+  volunteerId: string
+): Promise<{ data: PrivateMemberView[] | null; error: string | null }> {
+  try {
+    const admin = createAdminClient()
+    const { data: matches, error: matchErr } = await admin
+      .from('volunteer_matches')
+      .select('id, matched_at, member_id')
+      .eq('volunteer_id', volunteerId)
+      .eq('status', 'matched')
+    if (matchErr) return { data: null, error: matchErr.message }
+    if (!matches || matches.length === 0) return { data: [], error: null }
+
+    const memberIds = matches.map(m => m.member_id)
+    const { data: members, error: memErr } = await admin
+      .from('members')
+      .select('id, full_name, preferred_language, topics_enjoy')
+      .in('id', memberIds)
+    if (memErr) return { data: null, error: memErr.message }
+
+    const result: PrivateMemberView[] = (members ?? []).map(m => {
+      const match = matches.find(mx => mx.member_id === m.id)!
+      const nameParts = m.full_name.trim().split(/\s+/)
+      const firstName = nameParts[0] ?? ''
+      const lastInitial = nameParts.length > 1 ? `${nameParts[nameParts.length - 1][0]}.` : ''
+      return {
+        id: m.id,
+        displayName: lastInitial ? `${firstName} ${lastInitial}` : firstName,
+        preferred_language: m.preferred_language,
+        topics_enjoy: m.topics_enjoy ?? [],
+        matchedAt: match.matched_at,
+        matchId: match.id,
+      }
+    })
+    return { data: result, error: null }
+  } catch (e) {
+    console.error('[data/volunteers/getVolunteerMatchedMembers] Unexpected error:', e)
+    return { data: null, error: e instanceof Error ? e.message : String(e) }
+  }
+}
+
+export async function logVolunteerVisit(
+  visitData: VolunteerVisitInsert
+): Promise<{ error: string | null }> {
+  try {
+    const admin = createAdminClient()
+    const { error: insertErr } = await admin
+      .from('volunteer_visits')
+      .insert({
+        volunteer_id: visitData.volunteer_id,
+        member_id: visitData.member_id,
+        visit_date: visitData.visit_date,
+        duration_minutes: visitData.duration_minutes,
+        visit_type: visitData.visit_type,
+        volunteer_notes: visitData.volunteer_notes ?? null,
+        volunteer_rating: visitData.volunteer_rating ?? null,
+        verified: false,
+      })
+    if (insertErr) return { error: insertErr.message }
+
+    // Update cumulative hours on volunteer row
+    const durationHours = visitData.duration_minutes / 60
+    const { data: vol } = await admin
+      .from('volunteers')
+      .select('total_hours_logged')
+      .eq('id', visitData.volunteer_id)
+      .maybeSingle()
+    await admin
+      .from('volunteers')
+      .update({ total_hours_logged: Number(vol?.total_hours_logged ?? 0) + durationHours })
+      .eq('id', visitData.volunteer_id)
+    return { error: null }
+  } catch (e) {
+    console.error('[data/volunteers/logVolunteerVisit] Unexpected error:', e)
+    return { error: e instanceof Error ? e.message : String(e) }
+  }
+}
+
+export type VolunteerVisit = Database['public']['Tables']['volunteer_visits']['Row']
+
+export async function getVolunteerVisits(
+  volunteerId: string,
+  limit = 10
+): Promise<{ data: VolunteerVisit[] | null; error: string | null }> {
+  try {
+    const admin = createAdminClient()
+    const { data, error } = await admin
+      .from('volunteer_visits')
+      .select('*')
+      .eq('volunteer_id', volunteerId)
+      .order('visit_date', { ascending: false })
+      .limit(limit)
+    if (error) {
+      console.error('[data/volunteers/getVolunteerVisits]', error)
+      return { data: null, error: error.message }
+    }
+    return { data: data as VolunteerVisit[], error: null }
+  } catch (e) {
+    console.error('[data/volunteers/getVolunteerVisits] Unexpected error:', e)
+    return { data: null, error: e instanceof Error ? e.message : String(e) }
+  }
+}
+
 export async function updateVolunteerStatus(
   volunteerId: string,
   status: VolunteerStatus
