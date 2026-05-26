@@ -207,16 +207,35 @@ export async function getVolunteerByAuthId(
 ): Promise<{ data: Volunteer | null; error: string | null }> {
   try {
     const admin = createAdminClient()
-    const { data, error } = await admin
+
+    // Fast path: match by supabase_auth_id
+    const { data: byId, error: idErr } = await admin
       .from('volunteers')
       .select('*')
       .eq('supabase_auth_id', authId)
       .maybeSingle()
-    if (error) {
-      console.error('[data/volunteers/getVolunteerByAuthId]', error)
-      return { data: null, error: error.message }
+    if (idErr) {
+      console.error('[data/volunteers/getVolunteerByAuthId]', idErr)
+      return { data: null, error: idErr.message }
     }
-    return { data: data as Volunteer | null, error: null }
+    if (byId) return { data: byId as Volunteer, error: null }
+
+    // Fallback: find volunteer by email (for volunteers who applied before creating an account)
+    const { data: authUser } = await admin.auth.admin.getUserById(authId)
+    const email = authUser?.user?.email
+    if (!email) return { data: null, error: null }
+
+    const { data: byEmail, error: emailErr } = await admin
+      .from('volunteers')
+      .select('*')
+      .ilike('email', email)
+      .eq('status', 'active')
+      .maybeSingle()
+    if (emailErr || !byEmail) return { data: null, error: emailErr?.message ?? null }
+
+    // Link this auth user to their volunteer record so future lookups use the fast path
+    await admin.from('volunteers').update({ supabase_auth_id: authId }).eq('id', byEmail.id)
+    return { data: { ...(byEmail as Volunteer), supabase_auth_id: authId }, error: null }
   } catch (e) {
     console.error('[data/volunteers/getVolunteerByAuthId] Unexpected error:', e)
     return { data: null, error: e instanceof Error ? e.message : String(e) }
@@ -292,16 +311,26 @@ export async function logVolunteerVisit(
       })
     if (insertErr) return { error: insertErr.message }
 
-    // Update cumulative hours on volunteer row
+    // Update cumulative hours and distinct members helped
     const durationHours = visitData.duration_minutes / 60
     const { data: vol } = await admin
       .from('volunteers')
       .select('total_hours_logged')
       .eq('id', visitData.volunteer_id)
       .maybeSingle()
+
+    const { data: allVisits } = await admin
+      .from('volunteer_visits')
+      .select('member_id')
+      .eq('volunteer_id', visitData.volunteer_id)
+    const distinctMembersCount = new Set((allVisits ?? []).map(v => v.member_id)).size
+
     await admin
       .from('volunteers')
-      .update({ total_hours_logged: Number(vol?.total_hours_logged ?? 0) + durationHours })
+      .update({
+        total_hours_logged: Number(vol?.total_hours_logged ?? 0) + durationHours,
+        total_seniors_helped: distinctMembersCount,
+      })
       .eq('id', visitData.volunteer_id)
     return { error: null }
   } catch (e) {
