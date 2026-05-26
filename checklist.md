@@ -418,6 +418,8 @@ M10 SMS/Email         Phase 21 DEFERRED (provider built, live creds deferred)
                       Phase 23 [x][x][x][x]          4/4 ✅ COMPLETE (Session 37)
 M12 Compliance        Phase 27 [x][x][x][x][x][x]    6/6 ✅ COMPLETE (Session 38 APPROVED)
                       Phase 28 [x][x][x][x][x][x]    8/8 ✅ COMPLETE (Session 40 APPROVED)
+M13 Volunteer Network Phase 29 [x][x][x][x][x][x][x][x]  8/8 ✅ COMPLETE (Session 41 APPROVED)
+                      Phase 30 [x][x][ ][ ][ ][x]   4/6 IN PROGRESS (Session 42)
 ```
 
 ## M10 — SMS + Email Notifications
@@ -481,20 +483,29 @@ STATUS: `COMPLETE`
 ## M13 — Volunteer Network
 
 ### Phase 29 — Volunteer Database + Application
+STATUS: `COMPLETE`
+
+- [x] Migration 005 runs without errors — APPROVED by human (Session 41): volunteers, volunteer_visits, volunteer_matches tables present in Supabase
+- [x] /app/volunteer/apply/page.tsx — real form replaces placeholder — APPROVED by human (Session 41): multi-section form loads correctly
+- [x] Form collects all required fields — APPROVED by human (Session 41): all sections verified + improvements: preferred contact method, background check consent, driver's license/insurance for transport volunteers
+- [x] Submission saves to volunteers table — APPROVED by human (Session 41): row created with status='pending'
+- [x] Admin receives email notification on new application — APPROVED by human (Session 41): stub log confirmed
+- [x] Admin volunteer queue at /app/admin/volunteers/page.tsx — APPROVED by human (Session 41): pending applications list loads
+- [x] Approve action updates status — APPROVED by human (Session 41): status changes to 'background_check'
+- [x] npx tsc --noEmit passes — zero errors (Session 42)
+
+### Phase 30 — Volunteer Matching Algorithm
 STATUS: `IN PROGRESS`
 
-- [ ] Migration 005 runs without errors — VERIFY: All 3 tables visible in Supabase Table Editor
-      PASS: volunteers, volunteer_visits, volunteer_matches all present
-- [x] /app/volunteer/apply/page.tsx — real form replaces placeholder — created: multi-section form at /volunteer/apply (tsc PASSED, build shows ○ /volunteer/apply)
-- [x] Form collects all required fields — personal info (name/email/phone/city/state), languages (pills), availability (days + hours), service types (pills), interests (pills), motivation (textarea, required), prior experience (textarea, optional), veteran path
-- [ ] Submission saves to volunteers table — VERIFY: Submit test application, check Supabase volunteers table
-      PASS: Row created with status='pending', all fields populated
-- [ ] Admin receives email notification on new application — VERIFY: Submit application, check CARE_TEAM_EMAIL inbox
-      PASS: Email received OR stub log: "[STUB][EMAIL] Would send volunteer application notification to [email]..."
-- [x] Admin volunteer queue at /app/admin/volunteers/page.tsx — created: Server Component, admin-role-gated; build shows ƒ /admin/volunteers
-- [ ] Approve action updates status — VERIFY: Click Approve on test application
-      PASS: status changes to 'background_check' in Supabase
-- [x] npx tsc --noEmit passes — zero errors (Session 41)
+- [x] Match scoring function produces correct results — npx tsx scripts/test-volunteer-matching.ts → all 4 tests PASS: city+3-interest volunteer scores 80 vs 10; veteran bonus +20; language bonus +20; inactive excluded (Session 42)
+- [x] getTopVolunteerMatches returns ranked results — test confirms top 3 matches returned sorted by score descending (Session 42)
+- [ ] Admin matching UI at /admin/volunteer-matching/page.tsx — VERIFY: Navigate to /admin/volunteer-matching
+      PASS: Page shows pending match requests on left, top 3 suggested volunteers on right
+- [ ] Confirm match creates volunteer_matches row — VERIFY: Click Confirm Match in admin UI
+      PASS: Row created in volunteer_matches with status='matched'
+- [ ] Intro notification pushed via Realtime — VERIFY: Family member dashboard open while admin confirms match
+      PASS: 'volunteer_matched' notification appears within 2 seconds
+- [x] npx tsc --noEmit passes — zero errors (Session 42)
 
 ---
 

@@ -8,12 +8,23 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
 
-    const { full_name, email, phone, city, state, languages, availability_days,
-            hours_per_week, service_types, interests, why_volunteer, prior_experience } = body
+    const { full_name, email, phone, city, state, preferred_contact, languages, availability_days,
+            hours_per_week, service_types, interests, why_volunteer, prior_experience,
+            has_drivers_license, has_auto_insurance, background_check_consent } = body
 
     if (!full_name?.trim() || !email?.trim() || !why_volunteer?.trim()) {
       return NextResponse.json({ error: 'Name, email, and motivation are required.' }, { status: 400 })
     }
+    if (!background_check_consent) {
+      return NextResponse.json({ error: 'Background check consent is required.' }, { status: 400 })
+    }
+
+    const notes = [
+      preferred_contact ? `Preferred contact: ${preferred_contact}` : null,
+      has_drivers_license ? 'Has valid driver\'s license' : null,
+      has_auto_insurance ? 'Has auto insurance' : null,
+      background_check_consent ? 'Background check consented' : null,
+    ].filter(Boolean).join(' | ')
 
     const { data, error } = await submitVolunteerApplication({
       full_name: full_name.trim(),
@@ -28,6 +39,7 @@ export async function POST(req: NextRequest) {
       interests: Array.isArray(interests) ? interests : [],
       why_volunteer: why_volunteer.trim(),
       prior_experience: prior_experience?.trim() || undefined,
+      notes: notes || undefined,
     })
 
     if (error) {

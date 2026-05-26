@@ -15,6 +15,12 @@ const SERVICE_TYPES = [
   { value: 'reading_aloud', label: 'Reading aloud' },
   { value: 'tech_help', label: 'Tech help' },
 ]
+const DRIVING_SERVICE_TYPES = ['in_person_visit', 'grocery_help', 'walking_companion']
+const CONTACT_METHODS = [
+  { value: 'email', label: 'Email' },
+  { value: 'phone', label: 'Phone call' },
+  { value: 'text', label: 'Text message' },
+]
 const INTERESTS = [
   'Cooking & recipes', 'Music & singing', 'Sports & fitness', 'Arts & crafts',
   'Travel & history', 'Books & reading', 'Gardening & nature', 'Movies & TV',
@@ -28,6 +34,7 @@ type FormState = {
   phone: string
   city: string
   state: string
+  preferred_contact: string
   languages: string[]
   availability_days: string[]
   hours_per_week: string
@@ -35,6 +42,9 @@ type FormState = {
   interests: string[]
   why_volunteer: string
   prior_experience: string
+  has_drivers_license: boolean
+  has_auto_insurance: boolean
+  background_check_consent: boolean
   is_veteran: boolean
   veteran_branch: string
   veteran_years: string
@@ -43,8 +53,11 @@ type FormState = {
 
 const initial: FormState = {
   full_name: '', email: '', phone: '', city: '', state: '',
+  preferred_contact: 'email',
   languages: [], availability_days: [], hours_per_week: '',
   service_types: [], interests: [], why_volunteer: '', prior_experience: '',
+  has_drivers_license: false, has_auto_insurance: false,
+  background_check_consent: false,
   is_veteran: false, veteran_branch: '', veteran_years: '', vso_affiliation: '',
 }
 
@@ -62,11 +75,17 @@ export default function VolunteerApplyPage() {
     setForm(f => ({ ...f, [key]: val }))
   }
 
+  const needsDrivingInfo = form.service_types.some(s => DRIVING_SERVICE_TYPES.includes(s))
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
     if (!form.full_name.trim() || !form.email.trim() || !form.why_volunteer.trim()) {
       setError('Please complete all required fields (name, email, motivation).')
+      return
+    }
+    if (!form.background_check_consent) {
+      setError('You must consent to a background check to volunteer with ThriveAtHome.')
       return
     }
     setSubmitting(true)
@@ -233,6 +252,21 @@ export default function VolunteerApplyPage() {
               </div>
             </div>
 
+            {/* Preferred contact */}
+            <div style={{ marginTop: '20px' }}>
+              <p style={labelStyle}>Preferred contact method</p>
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '8px' }}>
+                {CONTACT_METHODS.map(m => (
+                  <button key={m.value} type="button"
+                    onClick={() => setField('preferred_contact', m.value)}
+                    style={pillStyle(form.preferred_contact === m.value)}
+                    aria-pressed={form.preferred_contact === m.value}>
+                    {m.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Veteran toggle */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '8px' }}>
               <button type="button"
@@ -318,6 +352,34 @@ export default function VolunteerApplyPage() {
             </div>
           </div>
 
+          {/* Driving info — shown only when in-person/grocery/walking selected */}
+          {needsDrivingInfo && (
+            <div style={sectionStyle}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '26px', color: 'var(--color-navy)', fontWeight: 500, marginBottom: '8px' }}>Driving requirements</h2>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: '16px', color: 'var(--color-text-secondary)', marginBottom: '20px' }}>
+                The services you selected may require driving. Please confirm your status.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={form.has_drivers_license}
+                    onChange={e => setField('has_drivers_license', e.target.checked)}
+                    style={{ width: '20px', height: '20px', cursor: 'pointer', accentColor: 'var(--color-teal)' }} />
+                  <span style={{ fontFamily: 'var(--font-body)', fontSize: '17px', color: 'var(--color-text)' }}>
+                    I have a valid driver&apos;s license
+                  </span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={form.has_auto_insurance}
+                    onChange={e => setField('has_auto_insurance', e.target.checked)}
+                    style={{ width: '20px', height: '20px', cursor: 'pointer', accentColor: 'var(--color-teal)' }} />
+                  <span style={{ fontFamily: 'var(--font-body)', fontSize: '17px', color: 'var(--color-text)' }}>
+                    I have current auto insurance
+                  </span>
+                </label>
+              </div>
+            </div>
+          )}
+
           {/* Interests */}
           <div style={sectionStyle}>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '26px', color: 'var(--color-navy)', fontWeight: 500, marginBottom: '8px' }}>Your interests</h2>
@@ -346,6 +408,22 @@ export default function VolunteerApplyPage() {
                 value={form.prior_experience} onChange={e => setField('prior_experience', e.target.value)}
                 placeholder="Any previous caregiving, volunteering, or professional experience with older adults..." />
             </div>
+          </div>
+
+          {/* Background check consent */}
+          <div style={{ ...sectionStyle, borderColor: 'var(--color-teal)', backgroundColor: '#F0FAF9' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--color-navy)', fontWeight: 500, marginBottom: '12px' }}>Background check</h2>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '16px', color: 'var(--color-text-secondary)', marginBottom: '16px', lineHeight: 1.6 }}>
+              All ThriveAtHome volunteers undergo a background check before their first visit. This helps ensure the safety and wellbeing of the seniors you&apos;ll be connecting with.
+            </p>
+            <label style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', cursor: 'pointer' }}>
+              <input type="checkbox" checked={form.background_check_consent}
+                onChange={e => setField('background_check_consent', e.target.checked)}
+                style={{ width: '20px', height: '20px', marginTop: '2px', cursor: 'pointer', accentColor: 'var(--color-teal)', flexShrink: 0 }} />
+              <span style={{ fontFamily: 'var(--font-body)', fontSize: '17px', color: 'var(--color-text)', lineHeight: 1.5 }}>
+                I understand and consent to a background check as part of the volunteer approval process. <span style={{ color: 'var(--color-urgent-text)' }}>*</span>
+              </span>
+            </label>
           </div>
 
           {error && (

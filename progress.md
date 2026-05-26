@@ -2779,3 +2779,82 @@ PLATFORM STATUS AT M12 COMPLETE:
 
 M7-M12 COMPLETE — ALL ADD-ON PHASES APPROVED
 Ready for M13-M18 Advanced Features when prompt-advanced.md is provided.
+
+NOTE: Adjusted build order for M13-M18. Build in this sequence: M13 (Volunteer Network) → M14 (Community Features) → M17 (Services Marketplace) → M15 (Celebrations) → M16 (Grief Support) → M18 (Enterprise). Begin M13 Phase 29 immediately.
+
+---
+SESSION: 41
+DATE: 2026-05-25 UTC
+MILESTONE: M13
+PHASE: 29 — Volunteer Database + Application
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 29 checklist: 4 of 8 items [x] (tsc + build + code structure verified); 4 require Supabase migration run + browser verification
+- Current item: Migration written; awaiting human to run migration in Supabase SQL Editor and verify tables
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider (TwilioSmsProvider built; activates when TWILIO_ACCOUNT_SID set)
+- emailProvider: StubEmailProvider (SendGridEmailProvider built; activates when SENDGRID_API_KEY set)
+- billingProvider: StripeBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+- Read prompt-advanced.md, prompt.md (Section 1), progress.md, checklist.md — confirmed M12 COMPLETE, Phase 29 NOT STARTED
+- /workspaces/ThriveAtHome/supabase/migrations/005_volunteers.sql — CREATED: volunteer_status + visit_type enums; volunteers, volunteer_visits, volunteer_matches tables with RLS enabled
+- /workspaces/ThriveAtHome/types/database.ts — MODIFIED: added VolunteerStatus + VisitType types; volunteers, volunteer_visits, volunteer_matches table Row/Insert/Update types; enum entries
+- /workspaces/ThriveAtHome/lib/interfaces/EmailProvider.ts — MODIFIED: added sendVolunteerApplicationNotification method
+- /workspaces/ThriveAtHome/lib/stubs/StubEmailProvider.ts — MODIFIED: stub implementation with log format "[STUB][EMAIL] Would send volunteer application notification..."
+- /workspaces/ThriveAtHome/lib/services/SendGridEmailProvider.ts — MODIFIED: real HTML email template for volunteer application notification
+- /workspaces/ThriveAtHome/lib/data/volunteers.ts — CREATED: submitVolunteerApplication, getVolunteerApplications, updateVolunteerStatus
+- /workspaces/ThriveAtHome/app/api/volunteer/apply/route.ts — CREATED: POST; validates required fields; inserts to volunteers; fires stub/real admin email notification (best-effort)
+- /workspaces/ThriveAtHome/app/api/admin/volunteers/[id]/status/route.ts — CREATED: PATCH; admin role required; updates volunteer status
+- /workspaces/ThriveAtHome/app/volunteer/apply/page.tsx — CREATED: public Client Component; 6 sections: personal info (with veteran path), languages, availability, service types, interests, motivation; success state; submit → /api/volunteer/apply
+- /workspaces/ThriveAtHome/app/admin/volunteers/page.tsx — CREATED: Server Component; admin-role-gated; lists pending applications; renders AdminVolunteerQueue
+- /workspaces/ThriveAtHome/components/admin/AdminVolunteerQueue.tsx — CREATED: Client Component; displays application cards with name/email/city/service types/motivation excerpt; Approve (→ background_check) + Reject (→ inactive) buttons; optimistic removal + toast feedback
+- git commit 9f3a969 pushed to origin/main
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — ✓ Compiled successfully in 24.2s; /volunteer/apply (○ static), /admin/volunteers (ƒ dynamic), /api/volunteer/apply (ƒ), /api/admin/volunteers/[id]/status (ƒ) all in build output
+- git ls-files | grep .env: PASSED — only .env.local.example (safe)
+- .single() scan in new files: PASSED — zero usage
+
+ERRORS ENCOUNTERED:
+- None — clean first pass
+
+DECISIONS MADE:
+- Volunteer apply page is /volunteer/apply (new subdirectory) — the existing /volunteer/page.tsx stays as the portal placeholder for the post-approval dashboard (Phase 31)
+- Admin notification is best-effort (void + catch) — form submission never fails due to email failure
+- Veteran fields stored in interests array (interests.push('veteran')) for matching algorithm compatibility in Phase 33
+- Admin PATCH endpoint covers both approve and reject with a single status param (cleaner than two separate routes)
+- AdminVolunteerQueue removes approved/rejected cards optimistically — prevents double-processing
+- /admin/volunteers protected at server level via requireAuth + getUserRole + redirect (family users → /dashboard)
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- Human must run migration in Supabase SQL Editor:
+  Go to Supabase → SQL Editor → paste and run: /supabase/migrations/005_volunteers.sql
+  VERIFY: Supabase Table Editor shows volunteers, volunteer_visits, volunteer_matches tables
+- Human must verify in browser (run npm run dev, or check Vercel production):
+  1. Navigate to /volunteer/apply → multi-section form loads (not "Coming soon")
+  2. Confirm form sections visible: Personal info, Languages, Availability, Service types, Interests, Motivation
+  3. Submit a test application with all required fields filled
+  4. Check Supabase volunteers table → row created with status='pending'
+  5. Check terminal logs → "[STUB][EMAIL] Would send volunteer application notification to [CARE_TEAM_EMAIL]..."
+  6. Log in as admin, navigate to /admin/volunteers → application appears in queue
+  7. Click "Approve" → card disappears from queue; check Supabase volunteers table: status='background_check'
+- If all pass: mark remaining 4 Phase 29 items [x], present AWAITING HUMAN APPROVAL for Phase 29
+
+AWAITING HUMAN APPROVAL
+
+APPROVED with notes - Should say preferred contact method and something about they are willing to go through background check. confirm background check featire was added. if they choose to drive do they have valid drivers license and insurance. Tested all 1 through 7 everything works
