@@ -222,7 +222,7 @@ export default function StudentPortal({ student, initialVisits }: Props) {
           <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', opacity: 0.7, marginBottom: '6px' }}>
             Student Volunteer Portal
           </p>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 500, margin: '0 0 16px' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 500, margin: '0 0 16px', color: 'var(--color-cream)' }}>
             Welcome, {student.full_name.split(' ')[0]}
           </h1>
           {student.university_name && (
@@ -275,25 +275,6 @@ export default function StudentPortal({ student, initialVisits }: Props) {
           >
             {showForm ? 'Cancel' : '+ Log a visit'}
           </button>
-          {visits.length > 0 && (
-            <button
-              onClick={handleDownloadPDF}
-              style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: '16px',
-                fontWeight: 500,
-                backgroundColor: 'transparent',
-                color: 'var(--color-navy)',
-                border: '1.5px solid var(--color-navy)',
-                borderRadius: 'var(--radius-md)',
-                padding: '12px 24px',
-                cursor: 'pointer',
-                minHeight: '48px',
-              }}
-            >
-              Download service record
-            </button>
-          )}
         </div>
 
         {/* Toast */}
