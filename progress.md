@@ -3090,3 +3090,144 @@ NEXT SESSION MUST:
 ---
 
 AWAITING HUMAN APPROVAL
+APPROVED
+
+---
+SESSION: 45
+DATE: 2026-05-26 UTC
+MILESTONE: M13
+PHASE: 31 COMPLETE → 32 — Student Volunteer Portal
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 31 checklist: 6 of 6 items [x] — COMPLETE (APPROVED end of Session 44)
+- Phase 32 checklist: 2 of 5 items [x] (tsc + build verified); 3 require browser verification
+- Current item: Awaiting human to run migration 008, re-run seed, then verify student portal
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider (TwilioSmsProvider built; activates when TWILIO_ACCOUNT_SID set)
+- emailProvider: StubEmailProvider (SendGridEmailProvider built; activates when SENDGRID_API_KEY set)
+- billingProvider: StripeBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+- checklist.md — Phase 31 all 6 items [x], STATUS set to COMPLETE (APPROVED Session 44)
+- supabase/migrations/008_students.sql — CREATED: ALTER TYPE user_role ADD VALUE 'student'; CREATE TABLE student_volunteers (id, supabase_auth_id, full_name, email, university_name, major, graduation_year, interests, languages, total_hours_logged, status); CREATE TABLE student_visits (id, student_id, visit_date, duration_minutes, visit_type, reflection, notes, verified); RLS policies on both tables
+- types/database.ts — MODIFIED: added 'student' to UserRole type; added student_volunteers Row/Insert types; added student_visits Row/Insert types
+- lib/auth.ts — MODIFIED: added 'student' to UserRole type
+- proxy.ts — MODIFIED: /student added to protected routes; student role fallback check via student_volunteers.supabase_auth_id; student role redirected to /student from other protected areas
+- lib/data/students.ts — CREATED: getStudentByAuthId, getStudentVisits, logStudentVisit
+- app/api/student/visits/route.ts — CREATED: POST; auth check; student profile check; validates fields; calls logStudentVisit; updates total_hours_logged
+- app/api/student/register/route.ts — CREATED: POST; auth check; duplicate check; inserts student_volunteers row (status=active)
+- components/student/StudentPortal.tsx — CREATED: Client Component; impact stats in navy header; log-a-visit form (date/duration/type/reflection required/notes); visit history list; PDF download via jspdf (student name, university, hours, visit log)
+- components/student/StudentRegisterForm.tsx — CREATED: Client Component; self-registration form for first-time student visitors; shows pending message on submit
+- app/student/page.tsx — REBUILT: Server Component; requireAuth → getStudentByAuthId → if no record: StudentRegisterForm; if active: StudentPortal
+- scripts/seed-test-data.ts — MODIFIED: Section 10 added — test-student@thriveathome.dev (Priya Patel, State University, Social Work, 2027)
+- tsconfig.json — MODIFIED: excluded .next/dev/types/validator.ts (pre-existing Next.js type generator bug — corrupted file already existed in committed state before this session)
+- npm install jspdf@4.2.1
+- git commit b3e846d pushed to origin/main (Vercel deploy triggered)
+
+TESTS AND VERIFICATIONS RUN:
+- git stash → npx tsc --noEmit on committed state: CONFIRMED validator.ts error was pre-existing (not introduced by this session) → git stash pop
+- npx tsc --noEmit (after excluding validator.ts): PASSED — zero errors
+- npm run build: PASSED — ✓ Compiled successfully in 25.6s; /student (ƒ dynamic), /api/student/register (ƒ), /api/student/visits (ƒ) all in build output
+- git ls-files | grep .env: PASSED — only .env.local.example (safe)
+
+ERRORS ENCOUNTERED:
+- validator.ts pre-existing corruption in .next/dev/types/ — fixed by adding to tsconfig.json exclude list
+
+DECISIONS MADE:
+- Created separate student_visits table instead of adding student_volunteer_id to volunteer_visits (which has NOT NULL FK constraints to volunteers.id and members.id that students can't satisfy)
+- StudentRegisterForm: students auto-activate on self-registration (status='active') — coordinator can deactivate if needed; avoids blocking legitimate students
+- jsPDF chosen for PDF generation (client-side) — no server-side dependency, downloads immediately
+- Volunteer_visits.student_volunteer_id column NOT added (would require relaxing NOT NULL FKs) — student_visits is the clean solution
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- Human must run migration 008 in Supabase SQL Editor:
+  Contents of supabase/migrations/008_students.sql (creates student_volunteers, student_visits, adds 'student' to user_role)
+- Human must re-run seed: npx tsx --env-file=.env.local scripts/seed-test-data.ts
+  (creates test-student@thriveathome.dev / TestPassword123! — Priya Patel, State University)
+- Human must verify in browser (npm run dev or Vercel production):
+  1. Log in as test-student@thriveathome.dev / TestPassword123!
+  2. Lands on /student (not /dashboard or /login)
+  3. Student portal shows: "Welcome, Priya" header; "State University · Social Work"; impact stat "0h"
+  4. Click "+ Log a visit" → form appears with date/duration/type/reflection fields
+  5. Fill in: date=today, duration=2 hours (120 min), type=phone_call, reflection="Had a great conversation with a senior community member about their gardening hobby. Learned about seasonal planting." → Submit
+  6. Toast "Visit logged successfully" appears; visit appears in history list; stat shows "2h"
+  7. Log another visit (2h) → total updates to "4 hours of verified community service" in summary banner
+  8. Click "Download service record" → PDF downloads with: name, university, Social Work major, 4.0h total, both visits listed with reflection text
+  9. Log in as test-family@thriveathome.dev → navigate to /student → redirected to /dashboard
+- If all pass: mark Phase 32 remaining 3 items [x], mark Phase 32 COMPLETE, begin Phase 33 (VSO Veteran Volunteer Network)
+
+AWAITING HUMAN APPROVAL
+
+APPROVED
+ISSUE: The "Download service record" button appears twice on the /student page — once in the action buttons row at the top and once at the bottom of the service visit history section. Remove the duplicate. Keep only the one at the bottom of the visit history section inside the teal summary card, as it provides better context showing the total hours alongside the download button.Student portal appears but does not show : "Welcome, Priya" header. the banner shows- "State University · Social Work"; impact stat "0h"
+
+---
+SESSION: 46
+DATE: 2026-05-26 UTC
+MILESTONE: M13
+PHASE: 32 ISSUE FIX — Student Volunteer Portal
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 32 checklist: 5 of 5 items [x] — COMPLETE (APPROVED Session 45 + issue fixes applied)
+- Current item: Two ISSUE fixes deployed; awaiting human to verify in browser
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider (TwilioSmsProvider built; activates when TWILIO_ACCOUNT_SID set)
+- emailProvider: StubEmailProvider (SendGridEmailProvider built; activates when SENDGRID_API_KEY set)
+- billingProvider: StripeBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+ISSUE FIX #1 — "Welcome, Priya" header invisible on navy background:
+- ROOT CAUSE: app/globals.css sets `h1, h2, h3, h4 { color: var(--color-navy) }` globally. The StudentPortal hero section has `color: var(--color-cream)` on the parent div, but the CSS rule for h1 is more specific than color inheritance, so h1 rendered in navy-on-navy (invisible).
+- components/student/StudentPortal.tsx — MODIFIED: added `color: 'var(--color-cream)'` explicitly to the h1 inline style in the hero header. Inline styles override stylesheet rules regardless of specificity.
+
+ISSUE FIX #2 — Duplicate "Download service record" button:
+- components/student/StudentPortal.tsx — MODIFIED: removed the "Download service record" button from the actions bar at the top. Kept only the download button inside the teal summary card at the bottom of the visit history section (where it has context: shows total hours alongside the button).
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — ✓ Compiled successfully in 25.7s; /student (ƒ dynamic) in build output
+- git commit 2ea5ac3 pushed to origin/main
+
+ERRORS ENCOUNTERED:
+- None — clean fix
+
+DECISIONS MADE:
+- Explicit inline color override is the correct approach (vs. modifying globals.css which would affect all h1 elements site-wide)
+- Download button kept only in the teal summary card (better UX: user sees total before downloading)
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- Human must verify in browser (Vercel production or npm run dev):
+  1. Log in as test-student@thriveathome.dev / TestPassword123!
+  2. /student portal loads — "Welcome, Priya" heading is VISIBLE (cream text on navy background)
+  3. "State University · Social Work" and impact stat visible below the welcome heading
+  4. Actions bar shows only "+ Log a visit" button (NO second download button in top row)
+  5. After logging a visit, the teal summary card at the bottom shows hours total + single "Download service record" button
+- If all pass: Phase 32 is COMPLETE, begin Phase 33 (VSO Veteran Volunteer Network)
+
+AWAITING HUMAN APPROVAL
