@@ -32,6 +32,10 @@ function makeVolunteer(overrides: Partial<Volunteer>): Volunteer {
     total_seniors_helped: 0,
     rating_average: null,
     notes: null,
+    has_drivers_license: false,
+    license_state: null,
+    insurance_provider: null,
+    insurance_expiry: null,
     ...overrides,
   }
 }

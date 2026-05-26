@@ -10,7 +10,8 @@ export async function POST(req: NextRequest) {
 
     const { full_name, email, phone, city, state, preferred_contact, languages, availability_days,
             hours_per_week, service_types, interests, why_volunteer, prior_experience,
-            has_drivers_license, has_auto_insurance, background_check_consent } = body
+            has_drivers_license, license_state, insurance_provider, insurance_expiry,
+            background_check_consent } = body
 
     if (!full_name?.trim() || !email?.trim() || !why_volunteer?.trim()) {
       return NextResponse.json({ error: 'Name, email, and motivation are required.' }, { status: 400 })
@@ -21,8 +22,6 @@ export async function POST(req: NextRequest) {
 
     const notes = [
       preferred_contact ? `Preferred contact: ${preferred_contact}` : null,
-      has_drivers_license ? 'Has valid driver\'s license' : null,
-      has_auto_insurance ? 'Has auto insurance' : null,
       background_check_consent ? 'Background check consented' : null,
     ].filter(Boolean).join(' | ')
 
@@ -40,6 +39,10 @@ export async function POST(req: NextRequest) {
       why_volunteer: why_volunteer.trim(),
       prior_experience: prior_experience?.trim() || undefined,
       notes: notes || undefined,
+      has_drivers_license: !!has_drivers_license,
+      license_state: license_state?.trim() || undefined,
+      insurance_provider: insurance_provider?.trim() || undefined,
+      insurance_expiry: insurance_expiry || undefined,
     })
 
     if (error) {

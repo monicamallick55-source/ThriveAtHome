@@ -419,7 +419,8 @@ M10 SMS/Email         Phase 21 DEFERRED (provider built, live creds deferred)
 M12 Compliance        Phase 27 [x][x][x][x][x][x]    6/6 ✅ COMPLETE (Session 38 APPROVED)
                       Phase 28 [x][x][x][x][x][x]    8/8 ✅ COMPLETE (Session 40 APPROVED)
 M13 Volunteer Network Phase 29 [x][x][x][x][x][x][x][x]  8/8 ✅ COMPLETE (Session 41 APPROVED)
-                      Phase 30 [x][x][ ][ ][ ][x]   4/6 IN PROGRESS (Session 42)
+                      Phase 30 [x][x][x][x][x][x]   6/6 ✅ COMPLETE (Session 42 APPROVED)
+                      Phase 31 [x][ ][ ][ ][ ][x]   2/6 IN PROGRESS (Session 43) ISSUE: driver fields
 ```
 
 ## M10 — SMS + Email Notifications
@@ -495,17 +496,44 @@ STATUS: `COMPLETE`
 - [x] npx tsc --noEmit passes — zero errors (Session 42)
 
 ### Phase 30 — Volunteer Matching Algorithm
-STATUS: `IN PROGRESS`
+STATUS: `COMPLETE`
 
 - [x] Match scoring function produces correct results — npx tsx scripts/test-volunteer-matching.ts → all 4 tests PASS: city+3-interest volunteer scores 80 vs 10; veteran bonus +20; language bonus +20; inactive excluded (Session 42)
 - [x] getTopVolunteerMatches returns ranked results — test confirms top 3 matches returned sorted by score descending (Session 42)
-- [ ] Admin matching UI at /admin/volunteer-matching/page.tsx — VERIFY: Navigate to /admin/volunteer-matching
-      PASS: Page shows pending match requests on left, top 3 suggested volunteers on right
-- [ ] Confirm match creates volunteer_matches row — VERIFY: Click Confirm Match in admin UI
-      PASS: Row created in volunteer_matches with status='matched'
-- [ ] Intro notification pushed via Realtime — VERIFY: Family member dashboard open while admin confirms match
-      PASS: 'volunteer_matched' notification appears within 2 seconds
-- [x] npx tsc --noEmit passes — zero errors (Session 42)
+- [x] Admin matching UI at /admin/volunteer-matching/page.tsx — APPROVED by human (Session 42 approval): page loads, members on left, Find top matches shows scored volunteer cards on right
+- [x] Confirm match creates volunteer_matches row — APPROVED by human (Session 42 approval): volunteer_matched row created
+- [x] Intro notification pushed via Realtime — APPROVED by human (Session 42 approval)
+- [x] npx tsc --noEmit passes — zero errors (Session 43)
+
+### Phase 31 — Volunteer Dashboard
+STATUS: `IN PROGRESS`
+
+- [x] Volunteer can log in and reach /volunteer/dashboard — /volunteer/dashboard built and in build output as ƒ (dynamic); middleware routes volunteer role to /volunteer/dashboard; fallback via volunteers.supabase_auth_id if no family_members row (Session 43)
+- [ ] Dashboard shows upcoming matched members — VERIFY: Log in as test-volunteer@thriveathome.dev, navigate to /volunteer/dashboard
+      PASS: Member appears in "Your connections" section as "Margaret C." (not full name)
+- [ ] Log a visit form works — VERIFY: Fill in visit form (date, duration, type, notes, rating) and submit
+      PASS: Row created in volunteer_visits, total_hours_logged updated on volunteer row
+- [ ] Impact stats update correctly — VERIFY: Log 2 visits, check dashboard stats
+      PASS: Total hours and seniors helped counts are correct
+- [ ] Privacy: only member first name + last initial shown — VERIFY: Check all volunteer-facing UI for member names
+      PASS: Never shows full name — always "Margaret C." format
+- [x] npx tsc --noEmit passes — zero errors (Session 43)
+
+DRIVER VERIFICATION ISSUE (Session 44):
+- Migration 007: ALTER TABLE volunteers ADD COLUMN has_drivers_license boolean, license_state text, insurance_provider text, insurance_expiry date
+- Apply form: conditional driver section now collects license state, insurance provider, policy expiry
+- Apply API: new fields persisted to DB (no longer shoved into notes text field)
+- Matching UI: "Driver verified" badge shown when has_drivers_license=true AND insurance_provider filled
+- types/database.ts: 4 new columns added to volunteers Row/Insert
+- tsc: PASSED | build: PASSED (Session 44)
+
+HUMAN ACTIONS REQUIRED BEFORE BROWSER TEST:
+1. Run migration 006 in Supabase SQL Editor: ALTER TYPE user_role ADD VALUE IF NOT EXISTS 'volunteer';
+   (file: supabase/migrations/006_volunteer_role.sql)
+2. Run migration 007 in Supabase SQL Editor: contents of supabase/migrations/007_volunteer_driver_fields.sql
+   (adds has_drivers_license, license_state, insurance_provider, insurance_expiry columns)
+3. Run seed: npx tsx --env-file=.env.local scripts/seed-test-data.ts
+   (creates test-volunteer@thriveathome.dev / TestPassword123! — James Rivera, active, matched to Margaret)
 
 ---
 

@@ -178,11 +178,16 @@ export function AdminVolunteerMatching({ pendingMembers }: Props) {
             }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px' }}>
                 <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
                     <p style={{ fontFamily: 'var(--font-body)', fontSize: '18px', fontWeight: 600, color: 'var(--color-navy)' }}>{m.volunteer.full_name}</p>
                     <span style={{ display: 'inline-flex', alignItems: 'center', padding: '3px 10px', backgroundColor: 'var(--color-teal)', color: 'white', borderRadius: '999px', fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600 }}>
                       Score: {m.score}
                     </span>
+                    {m.volunteer.has_drivers_license && m.volunteer.insurance_provider && (
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 10px', backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', color: '#1D4ED8', borderRadius: '999px', fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 500 }}>
+                        ✓ Driver verified
+                      </span>
+                    )}
                   </div>
                   <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>
                     {[m.volunteer.city, m.volunteer.state].filter(Boolean).join(', ')} · {m.volunteer.hours_per_week ?? 'Hours not set'}/week

@@ -525,6 +525,10 @@ export interface Database {
           total_seniors_helped: number
           rating_average: number | null
           notes: string | null
+          has_drivers_license: boolean
+          license_state: string | null
+          insurance_provider: string | null
+          insurance_expiry: string | null
         }
         Insert: {
           id?: string
@@ -549,6 +553,10 @@ export interface Database {
           total_seniors_helped?: number
           rating_average?: number | null
           notes?: string | null
+          has_drivers_license?: boolean
+          license_state?: string | null
+          insurance_provider?: string | null
+          insurance_expiry?: string | null
         }
         Update: Partial<Database['public']['Tables']['volunteers']['Insert']>
         Relationships: []

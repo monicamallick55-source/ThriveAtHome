@@ -23,6 +23,10 @@ export interface VolunteerApplicationData {
   why_volunteer: string
   prior_experience?: string
   notes?: string
+  has_drivers_license?: boolean
+  license_state?: string
+  insurance_provider?: string
+  insurance_expiry?: string
 }
 
 export async function submitVolunteerApplication(
@@ -46,6 +50,10 @@ export async function submitVolunteerApplication(
         why_volunteer: data.why_volunteer,
         prior_experience: data.prior_experience ?? null,
         notes: data.notes ?? null,
+        has_drivers_license: data.has_drivers_license ?? false,
+        license_state: data.license_state ?? null,
+        insurance_provider: data.insurance_provider ?? null,
+        insurance_expiry: data.insurance_expiry ?? null,
         status: 'pending',
       })
       .select()

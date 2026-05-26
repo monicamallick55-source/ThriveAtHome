@@ -2858,3 +2858,235 @@ NEXT SESSION MUST:
 AWAITING HUMAN APPROVAL
 
 APPROVED with notes - Should say preferred contact method and something about they are willing to go through background check. confirm background check featire was added. if they choose to drive do they have valid drivers license and insurance. Tested all 1 through 7 everything works
+
+---
+SESSION: 42
+DATE: 2026-05-26 UTC
+MILESTONE: M13
+PHASE: 29 IMPROVEMENTS + 30 — Volunteer Matching Algorithm
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 29 checklist: 8 of 8 items [x] — COMPLETE (APPROVED Session 41 + improvements applied)
+- Phase 30 checklist: 4 of 6 items [x] (tsc + test script + build verified); 3 require browser (admin matching UI, confirm match, Realtime notification)
+- Current item: Awaiting human browser test as admin at /admin/volunteer-matching
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider (TwilioSmsProvider built; activates when TWILIO_ACCOUNT_SID set)
+- emailProvider: StubEmailProvider (SendGridEmailProvider built; activates when SENDGRID_API_KEY set)
+- billingProvider: StripeBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+- Phase 29 improvements (human-requested in approval notes):
+  - app/volunteer/apply/page.tsx — MODIFIED: added preferred contact method selector (Email/Phone/Text); added background check consent checkbox (required, blocks submission); added driver's license + auto insurance checkboxes (shown when in-person/grocery/walking services selected); validation blocks submit if no consent
+  - app/api/volunteer/apply/route.ts — MODIFIED: accepts new fields; enforces background_check_consent server-side (400 if missing); stores preferred_contact + has_drivers_license + has_auto_insurance in notes field
+  - lib/data/volunteers.ts — MODIFIED: VolunteerApplicationData interface now includes notes?: string; insert passes notes to DB
+- Phase 30 — Volunteer Matching Algorithm:
+  - lib/volunteers/match.ts — CREATED: scoreVolunteerForMember() (city 25pts, interests 15pts each max 45, language 20pts, veteran bonus 20pts, hours 10pts); getTopVolunteerMatchesFromList() returns top N active volunteers sorted by score
+  - lib/data/volunteers.ts — MODIFIED: added getActiveVolunteers, getTopVolunteerMatches, confirmVolunteerMatch, getPendingMatchRequests
+  - scripts/test-volunteer-matching.ts — CREATED: 4 tests all PASS (score ordering, ranking, language bonus, veteran bonus)
+  - app/api/admin/volunteer-matching/matches/route.ts — CREATED: GET ?memberId=; returns top 3 scored matches
+  - app/api/admin/volunteer-matching/confirm/route.ts — CREATED: POST; admin/navigator only; creates volunteer_matches row; fires volunteer_matched Realtime notification
+  - components/admin/AdminVolunteerMatching.tsx — CREATED: split layout; left=pending members list; right=Find top matches button + scored volunteer cards with Confirm match action; optimistic confirmed state
+  - app/admin/volunteer-matching/page.tsx — CREATED: Server Component; admin/navigator gated; getPendingMatchRequests; renders AdminVolunteerMatching
+- git commit 976cde6 pushed to origin/main
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — ✓ Compiled successfully in 23.3s; /admin/volunteer-matching (ƒ dynamic), /api/admin/volunteer-matching/confirm (ƒ), /api/admin/volunteer-matching/matches (ƒ) all in build output
+- npx tsx scripts/test-volunteer-matching.ts: PASSED — all 4 tests pass
+- git ls-files | grep .env: PASSED — only .env.local.example (safe)
+
+ERRORS ENCOUNTERED:
+- TS2307: 2 API routes imported from '@/lib/auth/requireAuth' and '@/lib/data/family' — fixed by importing from '@/lib/auth' (single auth module exports both)
+
+DECISIONS MADE:
+- Preferred contact stored in notes field (not a dedicated column) — avoids schema change; still visible to admin team
+- Driver's license + insurance shown conditionally only when transport-related services are selected (in_person_visit, grocery_help, walking_companion)
+- Background check consent is a hard gate at both client and server (400 response if missing)
+- getPendingMatchRequests: returns members with active status and NO existing 'matched' volunteer_match row
+- Match scoring: veteran-to-veteran uses interests array contains 'veteran' (set when volunteer is_veteran toggle enabled)
+- AdminVolunteerMatching fetches matches lazily on "Find top matches" click to avoid loading all volunteer data upfront
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- Human must navigate to /admin/volunteer-matching (logged in as admin):
+  1. Page loads with "Members needing a match" list on left (shows active members with no existing match)
+  2. Click on a member card → member highlighted on left
+  3. Click "Find top matches" → scored volunteer cards appear on right
+  4. Each volunteer card shows: name, score badge, city/hours, match reason pills
+  5. Click "Confirm match" → card border turns teal, label changes to "Matched"
+  6. Check Supabase volunteer_matches table → row created with status='matched', correct member_id, volunteer_id, score, reasons
+  7. (Optional) Open family dashboard before confirming → volunteer_matched Realtime notification appears within 2 seconds after clicking Confirm
+- NOTE: /admin/volunteer-matching needs at least 1 active volunteer in Supabase to show matches. If no active volunteers exist: approve a test volunteer application first (go to /admin/volunteers → Approve → run migration 005_volunteers.sql to set status manually to 'active')
+- If all pass: mark Phase 30 remaining 3 items [x], mark Phase 30 COMPLETE, begin Phase 31 (Volunteer Dashboard)
+
+AWAITING HUMAN APPROVAL
+
+ISSUE: On /admin/volunteer-matching, the "Find top matches" or available hours button does nothing when clicked. No volunteer cards appear on the right side. Please check: (1) the click handler is wired to the correct function, (2) the matching API call is being made and returning results, (3) check browser DevTools Console for any JavaScript errors when clicking the button. Fix so clicking the button triggers the matching algorithm and displays scored volunteer cards.
+APPROVED — Phase 30 volunteer matching verified. /admin/volunteer-matching loads correctly. Members listed on left, clicking Find top matches shows scored volunteer cards on right. Score, location, hours visible. Matched button present. "Available hours" is a display tag not a button — correct behaviour.
+
+---
+SESSION: 43
+DATE: 2026-05-26 UTC
+MILESTONE: M13
+PHASE: 30 COMPLETE → 31 — Volunteer Dashboard
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 30 checklist: 6 of 6 items [x] — COMPLETE (human APPROVED Session 42 approval message)
+- Phase 31 checklist: 2 of 6 items [x] (tsc + build verified); 4 require browser verification
+- Current item: Awaiting human to run migration 006, re-run seed, then verify volunteer dashboard
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider (TwilioSmsProvider built; activates when TWILIO_ACCOUNT_SID set)
+- emailProvider: StubEmailProvider (SendGridEmailProvider built; activates when SENDGRID_API_KEY set)
+- billingProvider: StripeBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+- ROOT CAUSE of Phase 30 ISSUE: No 'Activate Volunteer' button existed — Approve moved volunteers to background_check but there was no UI to move them to active. Matching algorithm only finds active volunteers → "No active volunteers" state appeared when clicking Find top matches.
+- components/admin/AdminVolunteerQueue.tsx — MODIFIED: added mode prop ('pending'|'background_check'); background_check mode shows "Activate Volunteer" button; pending mode shows Approve/Reject; improved empty state messaging
+- app/admin/volunteers/page.tsx — MODIFIED: now fetches both pending AND background_check volunteers; shows background_check section first with "Background Check Complete" heading and count badge; links both sections to AdminVolunteerQueue with correct mode
+- components/admin/AdminVolunteerMatching.tsx — MODIFIED: improved empty state when no active volunteers — now shows a card with explanation and "Go to Volunteer Applications" button link
+- Phase 31 — Volunteer Dashboard:
+  - types/database.ts — MODIFIED: added 'volunteer' to UserRole type
+  - lib/auth.ts — MODIFIED: added 'volunteer' to UserRole type
+  - proxy.ts — MODIFIED: /volunteer/dashboard added to protected routes; volunteer role redirected to /volunteer/dashboard from /dashboard /navigator /admin; fallback: if no family_members row, check volunteers.supabase_auth_id
+  - lib/data/volunteers.ts — MODIFIED: added getVolunteerByAuthId, PrivateMemberView type, getVolunteerMatchedMembers (name as "First L." format), logVolunteerVisit (inserts to volunteer_visits + updates total_hours_logged), getVolunteerVisits
+  - app/api/volunteer/visits/route.ts — CREATED: POST endpoint; auth check; volunteer profile check; validates fields; calls logVolunteerVisit
+  - components/volunteer/VolunteerDashboard.tsx — CREATED: Client Component; impact stats grid; "Your connections" section (privacy-protected names); log a visit form with member select/date/duration/type/notes/rating; visit history list
+  - app/volunteer/dashboard/page.tsx — CREATED: Server Component; requireAuth → getVolunteerByAuthId → shows pending message if not active; loads matches + visits in parallel; renders VolunteerDashboard
+  - supabase/migrations/006_volunteer_role.sql — CREATED: ALTER TYPE user_role ADD VALUE IF NOT EXISTS 'volunteer'
+  - scripts/seed-test-data.ts — MODIFIED: Section 9 added — test-volunteer@thriveathome.dev (James Rivera), active status, matched to Margaret C., volunteer_match row created
+- git commit de12333 pushed to origin/main (Vercel deploy triggered)
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — /volunteer/dashboard appears as ƒ (dynamic), /api/volunteer/visits as ƒ, all 50 routes compile cleanly
+- npx tsx scripts/seed-test-data.ts: PASSED — test-volunteer@thriveathome.dev created; James Rivera active volunteer created (0f41a40f); matched to Margaret; family_members skipped (requires migration 006 first)
+- git ls-files | grep .env: PASSED — only .env.local.example (safe)
+
+ERRORS ENCOUNTERED:
+- Seed failed: 'volunteer' not a valid user_role enum value — root cause: enum in DB only has family/navigator/admin. Fix: created migration 006_volunteer_role.sql. Seed made the family_members insert non-fatal; middleware falls back to volunteers.supabase_auth_id check.
+
+DECISIONS MADE:
+- Volunteer privacy: getVolunteerMatchedMembers always returns displayName as "First L." format — full name never exposed to volunteer UI
+- Middleware dual lookup: first check family_members.role (standard path after migration), then volunteers.supabase_auth_id (fallback path before migration or for volunteersonly in volunteers table)
+- logVolunteerVisit reads current total_hours_logged then increments — no Postgres RPC needed
+- VolunteerDashboard is a single client component (simpler than multiple sub-components)
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- Human must run migration 006_volunteer_role.sql in Supabase SQL Editor:
+  ALTER TYPE user_role ADD VALUE IF NOT EXISTS 'volunteer';
+- Human must re-run seed: npx tsx --env-file=.env.local scripts/seed-test-data.ts
+  (section 9 will then create the family_members row for the volunteer — currently skipped)
+- Human must verify in browser (run npm run dev, or use Vercel production):
+  1. Log in as test-volunteer@thriveathome.dev / TestPassword123!
+  2. Lands on /volunteer/dashboard (not redirected to /dashboard or /login)
+  3. Dashboard shows: "Welcome, James" header, impact stats (0h, 0 members, 1 connection, 0 visits)
+  4. "Your connections" section shows "Margaret C." (not "Margaret Chen")
+  5. Click "+ Log visit" → form appears with Margaret C. in member dropdown
+  6. Fill form: date=today, duration=60min, type=phone_call, notes="Great call", rating=5 → submit
+  7. Toast "Visit logged successfully" appears; visit appears in history list; Total hours stat updates
+  8. Log in as test-family@thriveathome.dev, navigate to /volunteer/dashboard → redirected to /dashboard (not a volunteer user)
+- If all pass: mark Phase 31 remaining 4 items [x], begin Phase 32 (Student Volunteer Portal)
+---
+
+AWAITING HUMAN APPROVAL
+
+ISSUE: Volunteer application is missing driver's license and car insurance verification fields for volunteers who select "walking_companion" or any transport-related service type. Please add: (1) a conditional section in the volunteer application form that appears when "driving" or transport services are selected — collecting: has valid driver's license (yes/no), license state, car insurance provider, policy expiration date; (2) store these fields in the volunteers table as new columns: has_drivers_license boolean, license_state text, insurance_provider text, insurance_expiry date; (3) show a "Driver verified" badge on volunteer cards in the matching UI when these fields are filled in. Add the new columns via a migration first.
+
+---
+SESSION: 44
+DATE: 2026-05-26 UTC
+MILESTONE: M13
+PHASE: 31 — Volunteer Dashboard (ISSUE fix: driver verification fields)
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 31 checklist: 2 of 6 items [x] — 4 require browser verification
+- Current item: ISSUE resolved — driver/insurance fields added; awaiting human to run migrations 006+007, re-run seed, then verify browser
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider
+- emailProvider: StubEmailProvider
+- billingProvider: StripeBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+ISSUE FIX — Driver license and insurance verification fields:
+- supabase/migrations/007_volunteer_driver_fields.sql — CREATED: ALTER TABLE volunteers ADD COLUMN has_drivers_license boolean NOT NULL DEFAULT false, license_state text, insurance_provider text, insurance_expiry date
+- types/database.ts — MODIFIED: added has_drivers_license, license_state, insurance_provider, insurance_expiry to volunteers Row and Insert types
+- lib/data/volunteers.ts — MODIFIED: VolunteerApplicationData extended with 4 new fields; submitVolunteerApplication now persists them to DB columns (instead of shoehorning into notes text field)
+- app/api/volunteer/apply/route.ts — MODIFIED: destructure license_state, insurance_provider, insurance_expiry from request body; pass to submitVolunteerApplication; removed obsolete has_auto_insurance checkbox handling
+- app/volunteer/apply/page.tsx — MODIFIED: FormState: replaced has_auto_insurance with license_state, insurance_provider, insurance_expiry; driving section now shows license_state dropdown (conditional on has_drivers_license checkbox), insurance provider text input, policy expiry date input; fetch body passes new fields
+- components/admin/AdminVolunteerMatching.tsx — MODIFIED: volunteer match cards now show "Driver verified" badge (blue pill) when volunteer.has_drivers_license=true AND volunteer.insurance_provider is set
+- scripts/test-volunteer-matching.ts — MODIFIED: makeVolunteer() default object includes 4 new fields (has_drivers_license: false, license_state: null, insurance_provider: null, insurance_expiry: null)
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — /volunteer/apply and /volunteer/dashboard in build output; all 50 routes compile
+- git ls-files | grep .env: PASSED — only .env.local.example (safe)
+
+ERRORS ENCOUNTERED:
+- scripts/test-volunteer-matching.ts makeVolunteer() object missing new fields → tsc error → fixed by adding 4 null defaults
+
+DECISIONS MADE:
+- Removed has_auto_insurance boolean field entirely: the combination of insurance_provider (text) + insurance_expiry (date) is more informative and actionable for the admin
+- "Driver verified" badge requires BOTH has_drivers_license=true AND insurance_provider set — neither alone is sufficient for admin confidence
+- license_state shown as conditional sub-field (only when has_drivers_license checked) to keep form clean for non-drivers
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- Human must run migration 006 in Supabase SQL Editor (if not already done):
+  ALTER TYPE user_role ADD VALUE IF NOT EXISTS 'volunteer';
+- Human must run migration 007 in Supabase SQL Editor:
+  -- contents of supabase/migrations/007_volunteer_driver_fields.sql:
+  ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS has_drivers_license boolean NOT NULL DEFAULT false,
+    ADD COLUMN IF NOT EXISTS license_state text,
+    ADD COLUMN IF NOT EXISTS insurance_provider text,
+    ADD COLUMN IF NOT EXISTS insurance_expiry date;
+- Human must re-run seed: npx tsx --env-file=.env.local scripts/seed-test-data.ts
+- Human must verify in browser (run npm run dev or use Vercel production):
+  1. Log in as test-volunteer@thriveathome.dev / TestPassword123!
+  2. Lands on /volunteer/dashboard (not /login or /dashboard)
+  3. "Your connections" shows "Margaret C." (not "Margaret Chen")
+  4. Log a visit form submits; toast appears; visit in history; stats update
+  5. Go to /volunteer/apply (logged out) → select "In-person visit" or "Grocery help" → Driving section appears
+  6. Check "I have a valid driver's license" → License state dropdown appears
+  7. Fill insurance provider + expiry → submit → admin volunteer queue shows "Driver verified" badge on that volunteer's match card
+  8. Log in as family user → navigate to /volunteer/dashboard → redirected to /dashboard
+- If all pass: mark Phase 31 all 6 items [x], begin Phase 32 (Student Volunteer Portal)
+---
+
+AWAITING HUMAN APPROVAL

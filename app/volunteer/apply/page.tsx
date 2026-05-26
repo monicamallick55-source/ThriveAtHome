@@ -43,7 +43,9 @@ type FormState = {
   why_volunteer: string
   prior_experience: string
   has_drivers_license: boolean
-  has_auto_insurance: boolean
+  license_state: string
+  insurance_provider: string
+  insurance_expiry: string
   background_check_consent: boolean
   is_veteran: boolean
   veteran_branch: string
@@ -56,7 +58,7 @@ const initial: FormState = {
   preferred_contact: 'email',
   languages: [], availability_days: [], hours_per_week: '',
   service_types: [], interests: [], why_volunteer: '', prior_experience: '',
-  has_drivers_license: false, has_auto_insurance: false,
+  has_drivers_license: false, license_state: '', insurance_provider: '', insurance_expiry: '',
   background_check_consent: false,
   is_veteran: false, veteran_branch: '', veteran_years: '', vso_affiliation: '',
 }
@@ -101,6 +103,9 @@ export default function VolunteerApplyPage() {
           veteran_branch: form.is_veteran ? form.veteran_branch : undefined,
           veteran_years: form.is_veteran ? form.veteran_years : undefined,
           vso_affiliation: form.is_veteran ? form.vso_affiliation : undefined,
+          license_state: form.has_drivers_license ? form.license_state : undefined,
+          insurance_provider: form.insurance_provider || undefined,
+          insurance_expiry: form.insurance_expiry || undefined,
         }),
       })
       const json = await res.json()
@@ -357,25 +362,42 @@ export default function VolunteerApplyPage() {
             <div style={sectionStyle}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '26px', color: 'var(--color-navy)', fontWeight: 500, marginBottom: '8px' }}>Driving requirements</h2>
               <p style={{ fontFamily: 'var(--font-body)', fontSize: '16px', color: 'var(--color-text-secondary)', marginBottom: '20px' }}>
-                The services you selected may require driving. Please confirm your status.
+                The services you selected may require driving. Please confirm your driving status.
               </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
-                  <input type="checkbox" checked={form.has_drivers_license}
-                    onChange={e => setField('has_drivers_license', e.target.checked)}
-                    style={{ width: '20px', height: '20px', cursor: 'pointer', accentColor: 'var(--color-teal)' }} />
-                  <span style={{ fontFamily: 'var(--font-body)', fontSize: '17px', color: 'var(--color-text)' }}>
-                    I have a valid driver&apos;s license
-                  </span>
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
-                  <input type="checkbox" checked={form.has_auto_insurance}
-                    onChange={e => setField('has_auto_insurance', e.target.checked)}
-                    style={{ width: '20px', height: '20px', cursor: 'pointer', accentColor: 'var(--color-teal)' }} />
-                  <span style={{ fontFamily: 'var(--font-body)', fontSize: '17px', color: 'var(--color-text)' }}>
-                    I have current auto insurance
-                  </span>
-                </label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <div>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
+                    <input type="checkbox" checked={form.has_drivers_license}
+                      onChange={e => setField('has_drivers_license', e.target.checked)}
+                      style={{ width: '20px', height: '20px', cursor: 'pointer', accentColor: 'var(--color-teal)' }} />
+                    <span style={{ fontFamily: 'var(--font-body)', fontSize: '17px', color: 'var(--color-text)' }}>
+                      I have a valid driver&apos;s license
+                    </span>
+                  </label>
+                  {form.has_drivers_license && (
+                    <div style={{ marginTop: '16px', marginLeft: '32px' }}>
+                      <label style={labelStyle} htmlFor="vol-lic-state">License state</label>
+                      <select id="vol-lic-state" style={{ ...inputStyle, width: '200px', cursor: 'pointer' }}
+                        value={form.license_state} onChange={e => setField('license_state', e.target.value)}>
+                        <option value="">Select state</option>
+                        {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                    </div>
+                  )}
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                  <div>
+                    <label style={labelStyle} htmlFor="vol-ins-provider">Car insurance provider <span style={{ fontWeight: 400, color: 'var(--color-text-secondary)' }}>(optional)</span></label>
+                    <input id="vol-ins-provider" type="text" style={inputStyle} value={form.insurance_provider}
+                      onChange={e => setField('insurance_provider', e.target.value)}
+                      placeholder="e.g. State Farm, Geico" />
+                  </div>
+                  <div>
+                    <label style={labelStyle} htmlFor="vol-ins-expiry">Policy expiration date <span style={{ fontWeight: 400, color: 'var(--color-text-secondary)' }}>(optional)</span></label>
+                    <input id="vol-ins-expiry" type="date" style={inputStyle} value={form.insurance_expiry}
+                      onChange={e => setField('insurance_expiry', e.target.value)} />
+                  </div>
+                </div>
               </div>
             </div>
           )}
