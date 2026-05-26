@@ -255,14 +255,22 @@ export function VolunteerDashboard({ volunteer, matchedMembers, recentVisits: in
         {/* Impact stats */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '40px' }}>
           {[
-            { label: 'Total hours', value: formatHours(totalHours) },
-            { label: 'Members helped', value: String(membersHelped) },
-            { label: 'Your connections', value: String(matchedMembers.length) },
-            { label: 'Visits logged', value: String(visits.length) },
+            { label: 'Total hours', value: formatHours(totalHours), anchor: null },
+            { label: 'Members helped', value: String(membersHelped), anchor: null },
+            { label: 'Your connections', value: String(matchedMembers.length), anchor: 'connections-section' },
+            { label: 'Visits logged', value: String(visits.length), anchor: null },
           ].map(stat => (
-            <div key={stat.label} style={{ ...cardStyle, textAlign: 'center', padding: '28px 16px', marginBottom: 0 }}>
+            <div
+              key={stat.label}
+              onClick={stat.anchor ? () => document.getElementById(stat.anchor!)?.scrollIntoView({ behavior: 'smooth' }) : undefined}
+              role={stat.anchor ? 'link' : undefined}
+              tabIndex={stat.anchor ? 0 : undefined}
+              onKeyDown={stat.anchor ? (e) => { if (e.key === 'Enter' || e.key === ' ') document.getElementById(stat.anchor!)?.scrollIntoView({ behavior: 'smooth' }) } : undefined}
+              style={{ ...cardStyle, textAlign: 'center', padding: '28px 16px', marginBottom: 0, cursor: stat.anchor ? 'pointer' : 'default', transition: 'box-shadow 0.15s', ...(stat.anchor ? { outline: 'none' } : {}) }}>
               <p style={{ fontFamily: 'var(--font-display)', fontSize: '36px', color: 'var(--color-teal)', fontWeight: 500, marginBottom: '4px' }}>{stat.value}</p>
-              <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)' }}>{stat.label}</p>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)' }}>
+                {stat.label}{stat.anchor ? ' ↓' : ''}
+              </p>
             </div>
           ))}
         </div>
@@ -271,7 +279,7 @@ export function VolunteerDashboard({ volunteer, matchedMembers, recentVisits: in
           {/* Left: connections + log visit */}
           <div>
             {/* Your connections */}
-            <div style={{ marginBottom: '32px' }}>
+            <div id="connections-section" style={{ marginBottom: '32px' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', color: 'var(--color-navy)', fontWeight: 500, marginBottom: '16px' }}>
                 Your connections
               </h2>
