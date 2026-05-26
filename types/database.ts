@@ -3,7 +3,7 @@
 
 export type PlanTier = 'basics' | 'connect' | 'complete' | 'premier'
 export type MemberStatus = 'active' | 'inactive' | 'paused'
-export type UserRole = 'family' | 'navigator' | 'admin' | 'volunteer'
+export type UserRole = 'family' | 'navigator' | 'admin' | 'volunteer' | 'student'
 export type CallStatus = 'scheduled' | 'in_progress' | 'completed' | 'missed' | 'failed'
 export type CallType = 'check_in' | 'concierge' | 'navigator'
 export type AlertType = 'missed_call' | 'mood_drop' | 'medication_miss' | 'wellness_drift' | 'fall' | 'crisis' | 'emergency'
@@ -589,6 +589,64 @@ export interface Database {
           verified?: boolean
         }
         Update: Partial<Database['public']['Tables']['volunteer_visits']['Insert']>
+        Relationships: []
+      }
+      student_visits: {
+        Row: {
+          id: string
+          created_at: string
+          student_id: string
+          visit_date: string
+          duration_minutes: number
+          visit_type: string
+          reflection: string
+          notes: string | null
+          verified: boolean
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          student_id: string
+          visit_date: string
+          duration_minutes: number
+          visit_type?: string
+          reflection: string
+          notes?: string | null
+          verified?: boolean
+        }
+        Update: Partial<Database['public']['Tables']['student_visits']['Insert']>
+        Relationships: []
+      }
+      student_volunteers: {
+        Row: {
+          id: string
+          created_at: string
+          supabase_auth_id: string | null
+          full_name: string
+          email: string
+          university_name: string | null
+          major: string | null
+          graduation_year: number | null
+          interests: string[]
+          languages: string[]
+          total_hours_logged: number
+          status: string
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          supabase_auth_id?: string | null
+          full_name: string
+          email: string
+          university_name?: string | null
+          major?: string | null
+          graduation_year?: number | null
+          interests?: string[]
+          languages?: string[]
+          total_hours_logged?: number
+          status?: string
+        }
+        Update: Partial<Database['public']['Tables']['student_volunteers']['Insert']>
         Relationships: []
       }
       volunteer_matches: {

@@ -531,12 +531,64 @@ async function seed(): Promise<void> {
     console.log('   ↩  volunteer_match already exists')
   }
 
+  // ── 10. Test student volunteer (Phase 32) ───────────────────────
+  console.log('\n10. Test student volunteer')
+  const STUDENT_EMAIL = 'test-student@thriveathome.dev'
+  const STUDENT_PASSWORD = 'TestPassword123!'
+
+  let studentAuthUserId: string | undefined
+  const existingStudentUser = existingUsers?.users.find((u) => u.email === STUDENT_EMAIL)
+  if (existingStudentUser) {
+    studentAuthUserId = existingStudentUser.id
+    console.log(`   ↩  Auth user exists: ${STUDENT_EMAIL} (${studentAuthUserId})`)
+  } else {
+    const { data: newStudentUser, error } = await admin.auth.admin.createUser({
+      email: STUDENT_EMAIL, password: STUDENT_PASSWORD, email_confirm: true,
+    })
+    if (error || !newStudentUser.user) {
+      console.log(`   ⚠️  Student auth user create failed: ${error?.message}`)
+    } else {
+      studentAuthUserId = newStudentUser.user.id
+      console.log(`   ✅ Created student auth user: ${STUDENT_EMAIL} (${studentAuthUserId})`)
+    }
+  }
+
+  if (studentAuthUserId) {
+    const { data: existingSv } = await admin
+      .from('student_volunteers')
+      .select('id')
+      .eq('supabase_auth_id', studentAuthUserId)
+      .maybeSingle()
+    if (!existingSv) {
+      const { error } = await admin.from('student_volunteers').insert({
+        supabase_auth_id: studentAuthUserId,
+        full_name: 'Priya Patel',
+        email: STUDENT_EMAIL,
+        university_name: 'State University',
+        major: 'Social Work',
+        graduation_year: 2027,
+        interests: ['gardening', 'cooking'],
+        languages: ['english', 'hindi'],
+        total_hours_logged: 0,
+        status: 'active',
+      })
+      if (error) {
+        console.log(`   ⚠️  student_volunteers insert failed (run migration 008_students.sql first): ${error.message}`)
+      } else {
+        console.log('   ✅ Created student volunteer: Priya Patel (State University)')
+      }
+    } else {
+      console.log('   ↩  student_volunteers row already exists')
+    }
+  }
+
   // ── Done ────────────────────────────────────────────────────────
   console.log('\n── Seed complete ────────────────────────────────────────')
   console.log(`   Member:  Margaret Chen (${memberId})`)
   console.log(`   Family login:    ${TEST_EMAIL} / ${TEST_PASSWORD}`)
   console.log(`   Navigator login: ${NAV_EMAIL} / ${NAV_PASSWORD}`)
   console.log(`   Volunteer login: ${VOL_EMAIL} / ${VOL_PASSWORD}`)
+  console.log(`   Student login:   ${STUDENT_EMAIL} / ${STUDENT_PASSWORD}`)
 }
 
 seed().catch((e) => {

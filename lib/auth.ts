@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from './supabase/server'
 import { createAdminClient } from './supabase/admin'
 
-export type UserRole = 'family' | 'navigator' | 'admin' | 'volunteer'
+export type UserRole = 'family' | 'navigator' | 'admin' | 'volunteer' | 'student'
 
 /** Returns the current authenticated Supabase user, or null if not signed in. */
 export async function getCurrentUser() {

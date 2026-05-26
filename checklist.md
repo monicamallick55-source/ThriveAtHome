@@ -420,7 +420,8 @@ M12 Compliance        Phase 27 [x][x][x][x][x][x]    6/6 ✅ COMPLETE (Session 3
                       Phase 28 [x][x][x][x][x][x]    8/8 ✅ COMPLETE (Session 40 APPROVED)
 M13 Volunteer Network Phase 29 [x][x][x][x][x][x][x][x]  8/8 ✅ COMPLETE (Session 41 APPROVED)
                       Phase 30 [x][x][x][x][x][x]   6/6 ✅ COMPLETE (Session 42 APPROVED)
-                      Phase 31 [x][ ][ ][ ][ ][x]   2/6 IN PROGRESS (Session 43) ISSUE: driver fields
+                      Phase 31 [x][x][x][x][x][x]   6/6 ✅ COMPLETE (Session 44 APPROVED)
+                      Phase 32 [x][ ][ ][ ][x]      2/5 IN PROGRESS (Session 45)
 ```
 
 ## M10 — SMS + Email Notifications
@@ -506,18 +507,32 @@ STATUS: `COMPLETE`
 - [x] npx tsc --noEmit passes — zero errors (Session 43)
 
 ### Phase 31 — Volunteer Dashboard
+STATUS: `COMPLETE`
+
+- [x] Volunteer can log in and reach /volunteer/dashboard — APPROVED by human (Session 44)
+- [x] Dashboard shows upcoming matched members — APPROVED by human (Session 44): "Margaret C." shown
+- [x] Log a visit form works — APPROVED by human (Session 44): visit form submits, row created
+- [x] Impact stats update correctly — APPROVED by human (Session 44)
+- [x] Privacy: only member first name + last initial shown — APPROVED by human (Session 44)
+- [x] npx tsc --noEmit passes — zero errors (Session 43/44)
+
+### Phase 32 — Student Volunteer Portal
 STATUS: `IN PROGRESS`
 
-- [x] Volunteer can log in and reach /volunteer/dashboard — /volunteer/dashboard built and in build output as ƒ (dynamic); middleware routes volunteer role to /volunteer/dashboard; fallback via volunteers.supabase_auth_id if no family_members row (Session 43)
-- [ ] Dashboard shows upcoming matched members — VERIFY: Log in as test-volunteer@thriveathome.dev, navigate to /volunteer/dashboard
-      PASS: Member appears in "Your connections" section as "Margaret C." (not full name)
-- [ ] Log a visit form works — VERIFY: Fill in visit form (date, duration, type, notes, rating) and submit
-      PASS: Row created in volunteer_visits, total_hours_logged updated on volunteer row
-- [ ] Impact stats update correctly — VERIFY: Log 2 visits, check dashboard stats
-      PASS: Total hours and seniors helped counts are correct
-- [ ] Privacy: only member first name + last initial shown — VERIFY: Check all volunteer-facing UI for member names
-      PASS: Never shows full name — always "Margaret C." format
-- [x] npx tsc --noEmit passes — zero errors (Session 43)
+- [x] /app/student/page.tsx — real page replaces placeholder — built in Session 45; /student appears as ƒ (dynamic) in build output
+- [ ] Student can log a visit — VERIFY: Logged-in student submits visit form (date, duration, type, reflection) at /student
+      PASS: Row created in student_visits, total_hours_logged updated on student_volunteers row
+- [ ] Service hour total displays correctly — VERIFY: Log 2 visits of 2 hours each, check dashboard
+      PASS: "4 hours of verified community service" shown with correct total
+- [ ] Download service record generates PDF — VERIFY: Click "Download service record" button
+      PASS: PDF downloads with student name, hours, dates, university name
+- [x] npx tsc --noEmit passes — zero errors (Session 45); note: excluded .next/dev/types/validator.ts (pre-existing Next.js type gen bug)
+
+HUMAN ACTIONS REQUIRED BEFORE BROWSER TEST:
+1. Run migration 008_students.sql in Supabase SQL Editor (file: supabase/migrations/008_students.sql)
+   Creates: student_volunteers table, student_visits table, adds 'student' to user_role enum
+2. Run seed: npx tsx --env-file=.env.local scripts/seed-test-data.ts
+   Creates: test-student@thriveathome.dev / TestPassword123! (Priya Patel, State University)
 
 DRIVER VERIFICATION ISSUE (Session 44):
 - Migration 007: ALTER TABLE volunteers ADD COLUMN has_drivers_license boolean, license_state text, insurance_provider text, insurance_expiry date

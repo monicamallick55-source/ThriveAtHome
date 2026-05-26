@@ -26,7 +26,7 @@ export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname
 
   // Unauthenticated users: guard all protected areas
-  const isProtected = ['/dashboard', '/navigator', '/admin', '/onboarding', '/volunteer/dashboard'].some((p) =>
+  const isProtected = ['/dashboard', '/navigator', '/admin', '/onboarding', '/volunteer/dashboard', '/student'].some((p) =>
     path.startsWith(p)
   )
   if (isProtected && !user) {
@@ -43,20 +43,29 @@ export async function proxy(request: NextRequest) {
       .eq('supabase_auth_id', user.id)
       .maybeSingle()
 
-    let role = (fm?.role ?? 'family') as 'family' | 'navigator' | 'admin' | 'volunteer'
+    let role = (fm?.role ?? 'family') as 'family' | 'navigator' | 'admin' | 'volunteer' | 'student'
 
-    // If no family_members row found, check if this user is a volunteer
+    // If no family_members row found, check volunteers or student_volunteers table
     if (!fm) {
       const { data: vol } = await supabase
         .from('volunteers')
         .select('id')
         .eq('supabase_auth_id', user.id)
         .maybeSingle()
-      if (vol) role = 'volunteer'
+      if (vol) {
+        role = 'volunteer'
+      } else {
+        const { data: sv } = await supabase
+          .from('student_volunteers')
+          .select('id')
+          .eq('supabase_auth_id', user.id)
+          .maybeSingle()
+        if (sv) role = 'student'
+      }
     }
 
-    // Family users cannot access /navigator, /admin, or /volunteer/dashboard
-    if (role === 'family' && (path.startsWith('/navigator') || path.startsWith('/admin') || path.startsWith('/volunteer/dashboard'))) {
+    // Family users cannot access /navigator, /admin, /volunteer/dashboard, or /student
+    if (role === 'family' && (path.startsWith('/navigator') || path.startsWith('/admin') || path.startsWith('/volunteer/dashboard') || path.startsWith('/student'))) {
       const url = request.nextUrl.clone()
       url.pathname = '/dashboard'
       return NextResponse.redirect(url)
@@ -74,6 +83,15 @@ export async function proxy(request: NextRequest) {
       if (path.startsWith('/dashboard') || path.startsWith('/navigator') || path.startsWith('/admin')) {
         const url = request.nextUrl.clone()
         url.pathname = '/volunteer/dashboard'
+        return NextResponse.redirect(url)
+      }
+    }
+
+    // Student users: redirect away from other protected areas to /student
+    if (role === 'student') {
+      if (path.startsWith('/dashboard') || path.startsWith('/navigator') || path.startsWith('/admin') || path.startsWith('/volunteer/dashboard')) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/student'
         return NextResponse.redirect(url)
       }
     }
