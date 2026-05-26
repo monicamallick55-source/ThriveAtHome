@@ -422,6 +422,7 @@ M13 Volunteer Network Phase 29 [x][x][x][x][x][x][x][x]  8/8 ✅ COMPLETE (Sessi
                       Phase 30 [x][x][x][x][x][x]   6/6 ✅ COMPLETE (Session 42 APPROVED)
                       Phase 31 [x][x][x][x][x][x]   6/6 ✅ COMPLETE (Session 44 APPROVED)
                       Phase 32 [x][x][x][x][x]      5/5 ✅ COMPLETE (Session 46 APPROVED)
+                      Phase 33 [x][x][x][x]         4/4 ✅ COMPLETE (Session 49 — awaiting human APPROVED)
 ```
 
 ## M10 — SMS + Email Notifications
@@ -546,6 +547,16 @@ HUMAN ACTIONS REQUIRED BEFORE BROWSER TEST:
    (adds has_drivers_license, license_state, insurance_provider, insurance_expiry columns)
 3. Run seed: npx tsx --env-file=.env.local scripts/seed-test-data.ts
    (creates test-volunteer@thriveathome.dev / TestPassword123! — James Rivera, active, matched to Margaret)
+
+### Phase 33 — VSO Veteran Volunteer Network
+STATUS: `COMPLETE`
+
+- [x] Volunteer application has veteran-specific path — /volunteer/apply line 276-308: "I am a U.S. military veteran" toggle reveals branch, years served, VSO affiliation; code inspection confirmed (Session 49)
+- [x] Veteran volunteers tagged in database — apply/page.tsx handleSubmit: if(is_veteran) interests.push('veteran') at line 96; API stores in interests array (Session 49)
+- [x] Veteran-to-veteran matching prioritised — match.ts lines 47-50: volunteer.interests.includes('veteran') && memberTopics includes 'veteran' → +20 score (Session 49)
+- [x] npx tsc --noEmit passes — zero errors (Session 49)
+
+VERIFICATION: npx tsx scripts/test-volunteer-matching.ts → "✓ PASS: Veteran volunteer scores higher for veteran member" (Session 49)
 
 ---
 

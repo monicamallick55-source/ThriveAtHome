@@ -3231,3 +3231,226 @@ NEXT SESSION MUST:
 - If all pass: Phase 32 is COMPLETE, begin Phase 33 (VSO Veteran Volunteer Network)
 
 AWAITING HUMAN APPROVAL
+
+ISSUE: Three problems on /volunteer/dashboard:
+1. Download service record button is completely gone after the last fix — it was removed entirely instead of just removing the duplicate. Add it back at the bottom of the visit history section inside a teal summary card showing total hours + download button.
+2. "Members helped" stat shows 0 but Margaret C. appears in "Your connections" with 1 connection. The members_helped count is not being calculated correctly — it should count distinct members from volunteer_visits, not from volunteer_matches. Fix the stat calculation.
+3. The greeting says "Welcome, James" but the logged-in volunteer is Priya. The full_name is being pulled from the wrong record — likely from the volunteers table test data instead of the authenticated user's volunteers row. Fix to show the correct logged-in volunteer's name.
+
+---
+SESSION: 47
+DATE: 2026-05-26 UTC
+MILESTONE: M13
+PHASE: 32 ISSUE FIX — Volunteer Dashboard (3 bugs from human review)
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 32 checklist: 5 of 5 items [x] — COMPLETE (Session 46 APPROVED)
+- Phase 32 issue fixes applied — awaiting human to verify in browser
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider (TwilioSmsProvider built; activates when TWILIO_ACCOUNT_SID set)
+- emailProvider: StubEmailProvider (SendGridEmailProvider built; activates when SENDGRID_API_KEY set)
+- billingProvider: StripeBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+ISSUE FIX #1 — Download service record button on /volunteer/dashboard:
+- components/volunteer/VolunteerDashboard.tsx — MODIFIED: added handleDownloadPDF() async function using jsPDF; generates PDF with volunteer name, email, city, total hours, and visit log
+- components/volunteer/VolunteerDashboard.tsx — MODIFIED: added teal summary card at bottom of visit history section with total hours text + "Download service record" button (disabled when 0 visits)
+
+ISSUE FIX #2 — Members helped = 0:
+- lib/data/volunteers.ts — MODIFIED: logVolunteerVisit now queries all volunteer_visits for this volunteer, counts distinct member_ids, and writes that count to total_seniors_helped atomically with the hours update
+- components/volunteer/VolunteerDashboard.tsx — MODIFIED: membersHelped is now tracked as a React state variable (initialized from volunteer.total_seniors_helped); when a visit is logged, checks if the member was in previous visits and increments membersHelped by 1 if it's a new member (optimistic update)
+
+ISSUE FIX #3 — Welcome, James shown to different-named volunteer:
+- lib/data/volunteers.ts — MODIFIED: getVolunteerByAuthId now has a two-step lookup:
+  1. Fast path: eq('supabase_auth_id', authId) — same as before
+  2. Fallback: if no match, gets the auth user's email via admin.auth.admin.getUserById(), then searches volunteers by email; if found, links supabase_auth_id for future fast lookups
+  This allows volunteers who applied before creating their auth account to see their correct name
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — ✓ Compiled successfully in 26.6s; /volunteer/dashboard (ƒ dynamic) in build output
+- git commit 62a1a16 pushed to origin/main
+
+ERRORS ENCOUNTERED:
+- None — clean fixes
+
+DECISIONS MADE:
+- Email fallback in getVolunteerByAuthId is restricted to status='active' volunteers only (prevents accidentally linking a pending application)
+- membersHelped optimistic update only increments if member not already in existing visits (deduplication by member_id)
+- Download button disabled (greyed out) when no visits logged (same pattern as student portal)
+- jsPDF already installed from Phase 32; no new dependency needed
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- Human must verify in browser (Vercel production or npm run dev):
+  1. Log in as test-volunteer@thriveathome.dev / TestPassword123!
+  2. /volunteer/dashboard loads — impact stats visible
+  3. "Members helped" stat: log a visit to Margaret C. → stat updates from 0 to 1
+  4. Visit history section: teal summary card appears at bottom after logging a visit, showing hours + "Download service record" button
+  5. Click "Download service record" → PDF downloads with volunteer name, email, city, total hours, visit log
+  6. Name issue: if logged in as a volunteer whose email matches their volunteers row email (but supabase_auth_id was null), should now see correct name
+- If all pass: begin Phase 33 (VSO Veteran Volunteer Network)
+
+AWAITING HUMAN APPROVAL
+
+ISSUE: Two remaining problems on /volunteer/dashboard:
+1. Greeting still shows "Welcome, James" instead of the logged-in volunteer's name. The name is being pulled from hardcoded test data or the wrong volunteers row. Fix to show the authenticated volunteer's actual name from their volunteers table row matched by supabase_auth_id.
+2. "Members helped" still shows 0 despite Margaret C. appearing in connections and visit history. The count should be the number of distinct member_ids in volunteer_visits for this volunteer. Fix the query to count distinct members from volunteer_visits where volunteer_id matches the current volunteer.
+---
+SESSION: 48
+DATE: 2026-05-26 UTC
+MILESTONE: M13
+PHASE: 32 ISSUE FIX — Volunteer Dashboard (2 remaining bugs)
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 32 checklist: 5 of 5 items [x] — COMPLETE (Session 46 APPROVED)
+- Two additional issue fixes applied to /volunteer/dashboard — awaiting human to verify
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider (TwilioSmsProvider built; activates when TWILIO_ACCOUNT_SID set)
+- emailProvider: StubEmailProvider (SendGridEmailProvider built; activates when SENDGRID_API_KEY set)
+- billingProvider: StripeBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+ISSUE FIX #1 — "Welcome, James" showing wrong volunteer's name:
+- lib/data/volunteers.ts — MODIFIED: getVolunteerByAuthId email fallback no longer filters by
+  status='active' — volunteers in background_check or pending state couldn't be found before
+- lib/data/volunteers.ts — MODIFIED: email fallback now only links supabase_auth_id when the
+  row has NULL supabase_auth_id (unclaimed), preventing overwriting a link to a different user's row
+- Result: volunteer lookup is now more precise — only the volunteer whose row is unclaimed (or
+  already linked to this auth_id) is returned; a row claimed by a different auth_id is not returned
+
+ISSUE FIX #2 — "Members helped" showing 0:
+- lib/data/volunteers.ts — ADDED: getVolunteerMembersHelpedCount() — queries volunteer_visits
+  directly for all visits by this volunteer, counts distinct member_ids (bypasses stale DB column)
+- app/volunteer/dashboard/page.tsx — MODIFIED: fetches membersHelpedCount server-side in
+  parallel with other data; passes as explicit prop to VolunteerDashboard
+- components/volunteer/VolunteerDashboard.tsx — MODIFIED: Props now include membersHelpedCount;
+  useState initializes membersHelped from this server-fetched count instead of volunteer.total_seniors_helped
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — ✓ Compiled successfully; /volunteer/dashboard (ƒ dynamic) in build output
+- git commit b014446 pushed to origin/main
+
+ERRORS ENCOUNTERED:
+- None — clean fixes
+
+DECISIONS MADE:
+- Removed status filter from email fallback: a volunteer in background_check who has an account should be able to log in and see their dashboard (even if limited)
+- supabase_auth_id link only happens for NULL rows: prevents accidentally hijacking a different volunteer's auth link
+- membersHelpedCount from server query is authoritative: bypasses the total_seniors_helped DB column which may be stale from visits logged before Session 47's fix
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- Human must verify in browser (Vercel production or npm run dev):
+  1. Log in as test-volunteer@thriveathome.dev / TestPassword123!
+  2. /volunteer/dashboard loads — check the greeting header shows the CORRECT volunteer name
+  3. If you previously logged visits for Margaret C., "Members helped" stat should show 1 (not 0)
+  4. Log a new visit → "Members helped" stays at 1 (same member), "Visits logged" increments by 1
+  5. Total hours stat increments correctly after logging
+  6. Download service record → PDF downloads with correct volunteer info
+- If all pass: begin Phase 33 (VSO Veteran Volunteer Network)
+
+AWAITING HUMAN APPROVAL
+ISSUE: The "Your connections" stat card shows the count (1) but is not clickable and does not expand to show the names of connected members. Either: (1) make the stat card clickable and scroll down to the "Your connections" section below, OR (2) add the connection count as a link that anchors to the connections list. The connections list already shows "Margaret C." correctly below — the stat card just needs to link to it. Use a simple anchor link: clicking the "1 / Your connections" stat card should smooth-scroll to the Your connections section on the same page.
+
+---
+SESSION: 49
+DATE: 2026-05-26 UTC
+MILESTONE: M13
+PHASE: 32 ISSUE FIX (connections anchor) + 33 — VSO Veteran Volunteer Network COMPLETE
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 32 checklist: 5 of 5 items [x] — COMPLETE (connections anchor fix applied)
+- Phase 33 checklist: 4 of 4 items [x] — COMPLETE (all already implemented; verified)
+- Current item: Awaiting human browser verification of connections anchor + Phase 33 review
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider (TwilioSmsProvider built; activates when TWILIO_ACCOUNT_SID set)
+- emailProvider: StubEmailProvider (SendGridEmailProvider built; activates when SENDGRID_API_KEY set)
+- billingProvider: StripeBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+SESSION OPENER: Applied connections anchor fix (issue from Session 48):
+- components/volunteer/VolunteerDashboard.tsx — MODIFIED:
+  (1) Added id="connections-section" to the "Your connections" section container
+  (2) "Your connections" stat card now has onClick smooth-scrolls to #connections-section
+  (3) Label shows "Your connections ↓" visual hint that it's clickable
+  (4) Keyboard accessible: role="link", tabIndex=0, onKeyDown Enter/Space
+- git commit 662c6f4 pushed to origin/main
+
+PHASE 33 — VSO Veteran Volunteer Network:
+- DISCOVERED: Phase 33 was fully built in prior sessions (Session 42 and earlier)
+  - Veteran toggle: /volunteer/apply has "I am a U.S. military veteran" toggle (lines 276-308) that reveals branch, years served, VSO affiliation
+  - Veteran tagging: on submit, is_veteran=true pushes 'veteran' to interests array (line 96-97 of apply/page.tsx)
+  - Veteran matching: lib/volunteers/match.ts (lines 47-50) gives veteran volunteers +20 score when member is also a veteran
+  - All 4 Phase 33 checklist items verified
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — /volunteer/dashboard (ƒ dynamic) in build output
+- npx tsx scripts/test-volunteer-matching.ts: PASSED — all 5 tests pass including:
+  "✓ PASS: Veteran volunteer scores higher for veteran member"
+- Code inspection: /volunteer/apply veteran toggle visible at line 276; reveals branch/years/VSO fields
+- Code inspection: apply/page.tsx handleSubmit: interests.push('veteran') when is_veteran=true (line 96)
+- git commit 662c6f4 pushed to origin/main
+
+ERRORS ENCOUNTERED:
+- None
+
+DECISIONS MADE:
+- Phase 33 was already fully implemented across Phase 29 (application form) and Phase 30 (matching algorithm); no new code needed
+- Connections anchor: used smooth scroll to existing section rather than modal/expand — cleaner UX
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- Human must verify in browser (Vercel production or npm run dev):
+  PHASE 32 ISSUE FIX:
+  1. Log in as test-volunteer@thriveathome.dev / TestPassword123!
+  2. On /volunteer/dashboard: "Your connections" stat card now shows "Your connections ↓" label
+  3. Click the stat card → page smooth-scrolls down to the "Your connections" section
+  PHASE 33 VERIFICATION:
+  4. Navigate to /volunteer/apply (logged out)
+  5. In "Personal information" section: "I am a U.S. military veteran" toggle is visible
+  6. Click the toggle → reveals 3 fields: Branch of service, Years served, VSO affiliation (optional)
+  7. Submit a test application with veteran=true → check Supabase volunteers table → interests array includes 'veteran'
+  8. (Optional) For veteran members: matching gives veteran volunteers +20 bonus score (verified via test script)
+- If all pass: mark Phase 33 all 4 items [x], present AWAITING HUMAN APPROVAL for Phase 33
+- Begin Phase 34 (Cultural Community Circles) after APPROVED
+
+AWAITING HUMAN APPROVAL
