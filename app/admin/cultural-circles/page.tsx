@@ -1,20 +1,18 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { requireAuth } from '@/lib/auth'
-import { getFamilyMemberByAuthId } from '@/lib/data/family'
-import { getAllCircles, getMemberCircleIds } from '@/lib/data/circles'
-import CulturalCirclesClient from '@/components/circles/CulturalCirclesClient'
+import { redirect } from 'next/navigation'
+import { requireAuth, getUserRole } from '@/lib/auth'
+import { getAllCircles } from '@/lib/data/circles'
+import AdminCirclesClient from '@/components/admin/AdminCirclesClient'
 
-export const metadata: Metadata = { title: 'Cultural Circles — ThriveAtHome' }
+export const metadata: Metadata = { title: 'Cultural Circles Admin — ThriveAtHome' }
 
-export default async function CulturalCirclesPage() {
+export default async function AdminCulturalCirclesPage() {
   const user = await requireAuth()
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
+  const role = await getUserRole(user.id)
+  if (role !== 'admin' && role !== 'navigator') redirect('/dashboard')
 
-  const [circles, joinedIds] = await Promise.all([
-    getAllCircles(),
-    fm?.member_id ? getMemberCircleIds(fm.member_id) : Promise.resolve([]),
-  ])
+  const circles = await getAllCircles()
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-cream)', display: 'flex', flexDirection: 'column' }}>
@@ -27,22 +25,21 @@ export default async function CulturalCirclesPage() {
           maxWidth: '1200px', margin: '0 auto', padding: '0 24px', width: '100%',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
-          <Link href="/dashboard" style={{
+          <Link href="/navigator" style={{
             fontFamily: 'var(--font-body)', fontSize: '18px', fontWeight: 500,
             color: 'var(--color-text-secondary)', textDecoration: 'none',
-            display: 'flex', alignItems: 'center', gap: '8px',
           }}>
-            ← Dashboard
+            ← Navigator Console
           </Link>
           <span style={{
             fontFamily: 'var(--font-display)', fontSize: '22px',
             color: 'var(--color-navy)', fontWeight: 500,
           }}>ThriveAtHome</span>
-          <div style={{ width: '120px' }} aria-hidden="true" />
+          <div style={{ width: '160px' }} aria-hidden="true" />
         </div>
       </nav>
 
-      <CulturalCirclesClient circles={circles} joinedCircleIds={joinedIds} />
+      <AdminCirclesClient circles={circles} />
     </div>
   )
 }

@@ -675,6 +675,120 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['volunteer_matches']['Insert']>
         Relationships: []
       }
+      cultural_circles: {
+        Row: {
+          id: string
+          created_at: string
+          circle_name: string
+          primary_language: string
+          description: string
+          member_count: number
+          is_active: boolean
+          image_placeholder: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          circle_name: string
+          primary_language?: string
+          description: string
+          member_count?: number
+          is_active?: boolean
+          image_placeholder?: string | null
+        }
+        Update: Partial<Database['public']['Tables']['cultural_circles']['Insert']>
+        Relationships: []
+      }
+      circle_memberships: {
+        Row: {
+          id: string
+          created_at: string
+          member_id: string
+          circle_id: string
+          joined_at: string
+          is_ambassador: boolean
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          member_id: string
+          circle_id: string
+          joined_at?: string
+          is_ambassador?: boolean
+        }
+        Update: Partial<Database['public']['Tables']['circle_memberships']['Insert']>
+        Relationships: []
+      }
+      circle_posts: {
+        Row: {
+          id: string
+          created_at: string
+          circle_id: string
+          member_id: string
+          content: string
+          post_type: string
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          circle_id: string
+          member_id: string
+          content: string
+          post_type?: string
+        }
+        Update: Partial<Database['public']['Tables']['circle_posts']['Insert']>
+        Relationships: []
+      }
+      circle_events: {
+        Row: {
+          id: string
+          created_at: string
+          circle_id: string
+          title: string
+          description: string | null
+          event_date: string
+          event_time: string | null
+          format: string
+          dial_in_number: string | null
+          dial_in_code: string | null
+          video_link: string | null
+          rsvp_count: number
+          is_recurring: boolean
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          circle_id: string
+          title: string
+          description?: string | null
+          event_date: string
+          event_time?: string | null
+          format?: string
+          dial_in_number?: string | null
+          dial_in_code?: string | null
+          video_link?: string | null
+          rsvp_count?: number
+          is_recurring?: boolean
+        }
+        Update: Partial<Database['public']['Tables']['circle_events']['Insert']>
+        Relationships: []
+      }
+      circle_event_rsvps: {
+        Row: {
+          id: string
+          created_at: string
+          event_id: string
+          member_id: string
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          event_id: string
+          member_id: string
+        }
+        Update: Partial<Database['public']['Tables']['circle_event_rsvps']['Insert']>
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>
