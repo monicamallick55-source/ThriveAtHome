@@ -488,41 +488,43 @@ export default function StudentPortal({ student, initialVisits }: Props) {
           )}
         </div>
 
-        {/* Service hours summary banner when 0 */}
-        {visits.length > 0 && (
-          <div style={{
-            marginTop: '32px',
-            background: 'rgba(26,122,106,0.08)',
-            borderRadius: 'var(--radius-lg)',
-            padding: '20px 24px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '12px',
-          }}>
-            <p style={{ fontFamily: 'var(--font-body)', fontSize: '16px', color: '#1a7a6a', margin: 0, fontWeight: 500 }}>
-              {hoursDisplay} hours of verified community service
-            </p>
-            <button
-              onClick={handleDownloadPDF}
-              style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: '15px',
-                fontWeight: 500,
-                backgroundColor: '#1a7a6a',
-                color: 'white',
-                border: 'none',
-                borderRadius: 'var(--radius-md)',
-                padding: '10px 20px',
-                cursor: 'pointer',
-                minHeight: '44px',
-              }}
-            >
-              Download service record
-            </button>
-          </div>
-        )}
+        {/* Service hours summary banner — always visible */}
+        <div style={{
+          marginTop: '32px',
+          background: 'rgba(26,122,106,0.08)',
+          borderRadius: 'var(--radius-lg)',
+          padding: '20px 24px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '12px',
+        }}>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '16px', color: '#1a7a6a', margin: 0, fontWeight: 500 }}>
+            {visits.length === 0
+              ? 'Log your first visit to start tracking service hours'
+              : `${hoursDisplay} hours of verified community service`}
+          </p>
+          <button
+            onClick={handleDownloadPDF}
+            disabled={visits.length === 0}
+            style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: '15px',
+              fontWeight: 500,
+              backgroundColor: visits.length === 0 ? '#999' : '#1a7a6a',
+              color: 'white',
+              border: 'none',
+              borderRadius: 'var(--radius-md)',
+              padding: '10px 20px',
+              cursor: visits.length === 0 ? 'not-allowed' : 'pointer',
+              minHeight: '44px',
+              opacity: visits.length === 0 ? 0.6 : 1,
+            }}
+          >
+            Download service record
+          </button>
+        </div>
       </main>
     </div>
   )

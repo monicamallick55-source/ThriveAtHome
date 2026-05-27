@@ -40,6 +40,7 @@
   "exclude": [
     "node_modules",
     "supabase/functions",
-    ".next/dev/types/validator.ts"
+    ".next/dev/types/validator.ts",
+    ".next/dev/types/routes.d.ts"
   ]
 }

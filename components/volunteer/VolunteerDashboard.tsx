@@ -46,6 +46,7 @@ export function VolunteerDashboard({ volunteer, matchedMembers, recentVisits: in
   const [showLogForm, setShowLogForm] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
+  const [connectionsHighlight, setConnectionsHighlight] = useState(false)
   const [form, setForm] = useState({
     member_id: matchedMembers[0]?.id ?? '',
     visit_date: new Date().toISOString().slice(0, 10),
@@ -262,10 +263,26 @@ export function VolunteerDashboard({ volunteer, matchedMembers, recentVisits: in
           ].map(stat => (
             <div
               key={stat.label}
-              onClick={stat.anchor ? () => document.getElementById(stat.anchor!)?.scrollIntoView({ behavior: 'smooth' }) : undefined}
+              onClick={stat.anchor ? () => {
+                const el = document.getElementById(stat.anchor!)
+                if (el) {
+                  el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  setConnectionsHighlight(true)
+                  setTimeout(() => setConnectionsHighlight(false), 1400)
+                }
+              } : undefined}
               role={stat.anchor ? 'link' : undefined}
               tabIndex={stat.anchor ? 0 : undefined}
-              onKeyDown={stat.anchor ? (e) => { if (e.key === 'Enter' || e.key === ' ') document.getElementById(stat.anchor!)?.scrollIntoView({ behavior: 'smooth' }) } : undefined}
+              onKeyDown={stat.anchor ? (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  const el = document.getElementById(stat.anchor!)
+                  if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                    setConnectionsHighlight(true)
+                    setTimeout(() => setConnectionsHighlight(false), 1400)
+                  }
+                }
+              } : undefined}
               style={{ ...cardStyle, textAlign: 'center', padding: '28px 16px', marginBottom: 0, cursor: stat.anchor ? 'pointer' : 'default', transition: 'box-shadow 0.15s', ...(stat.anchor ? { outline: 'none' } : {}) }}>
               <p style={{ fontFamily: 'var(--font-display)', fontSize: '36px', color: 'var(--color-teal)', fontWeight: 500, marginBottom: '4px' }}>{stat.value}</p>
               <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)' }}>
@@ -279,7 +296,15 @@ export function VolunteerDashboard({ volunteer, matchedMembers, recentVisits: in
           {/* Left: connections + log visit */}
           <div>
             {/* Your connections */}
-            <div id="connections-section" style={{ marginBottom: '32px' }}>
+            <div
+              id="connections-section"
+              style={{
+                marginBottom: '32px',
+                transition: 'outline 0.15s',
+                outline: connectionsHighlight ? '3px solid var(--color-teal)' : '3px solid transparent',
+                borderRadius: 'var(--radius-lg)',
+              }}
+            >
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', color: 'var(--color-navy)', fontWeight: 500, marginBottom: '16px' }}>
                 Your connections
               </h2>

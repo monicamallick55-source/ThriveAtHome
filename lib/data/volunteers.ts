@@ -242,6 +242,28 @@ export async function getVolunteerByAuthId(
       if (linkErr) {
         console.error('[data/volunteers/getVolunteerByAuthId] Failed to link supabase_auth_id:', linkErr)
       }
+
+      // Also ensure a family_members row with role='volunteer' exists for middleware routing.
+      // Best-effort: failure here is non-fatal (user can still be looked up via email next time).
+      const { data: existingFm } = await admin
+        .from('family_members')
+        .select('id, role')
+        .eq('supabase_auth_id', authId)
+        .maybeSingle()
+      if (!existingFm) {
+        await admin.from('family_members').insert({
+          supabase_auth_id: authId,
+          full_name: byEmail.full_name,
+          email: byEmail.email,
+          relationship: 'volunteer',
+          role: 'volunteer',
+        }).select()
+      } else if (existingFm.role !== 'volunteer') {
+        await admin
+          .from('family_members')
+          .update({ role: 'volunteer' })
+          .eq('supabase_auth_id', authId)
+      }
     }
     return { data: { ...(byEmail as Volunteer), supabase_auth_id: authId }, error: null }
   } catch (e) {
