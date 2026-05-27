@@ -31,8 +31,10 @@ export interface CircleEvent {
   dial_in_number: string | null
   dial_in_code: string | null
   video_link: string | null
+  location_address: string | null
   rsvp_count: number
   is_recurring: boolean
+  is_platform_wide: boolean
   user_has_rsvped?: boolean
 }
 
@@ -244,6 +246,38 @@ export async function cancelRsvpToCircleEvent(memberId: string, eventId: string)
   return true
 }
 
+export async function getPlatformWideEvents(memberId?: string): Promise<CircleEvent[]> {
+  const supabase = await createClient()
+  const { data: events, error } = await supabase
+    .from('circle_events')
+    .select('*')
+    .eq('is_platform_wide', true)
+    .gte('event_date', new Date().toISOString().slice(0, 10))
+    .order('event_date')
+  if (error) {
+    console.error('[circles] getPlatformWideEvents error:', error.message)
+    return []
+  }
+
+  let rsvpedIds = new Set<string>()
+  if (memberId && events && events.length > 0) {
+    const eventIds = events.map(e => e.id)
+    const { data: rsvps } = await supabase
+      .from('circle_event_rsvps')
+      .select('event_id')
+      .eq('member_id', memberId)
+      .in('event_id', eventIds)
+    rsvpedIds = new Set((rsvps ?? []).map(r => r.event_id))
+  }
+
+  return (events ?? []).map(e => ({
+    ...e,
+    location_address: e.location_address ?? null,
+    is_platform_wide: e.is_platform_wide ?? true,
+    user_has_rsvped: rsvpedIds.has(e.id),
+  }))
+}
+
 export async function createCircleEvent(event: {
   circle_id: string
   title: string
@@ -254,6 +288,8 @@ export async function createCircleEvent(event: {
   dial_in_number?: string
   dial_in_code?: string
   video_link?: string
+  location_address?: string
+  is_platform_wide?: boolean
   is_recurring?: boolean
 }): Promise<CircleEvent | null> {
   const supabase = await createClient()

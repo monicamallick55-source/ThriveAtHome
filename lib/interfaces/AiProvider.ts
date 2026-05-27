@@ -1,6 +1,15 @@
 // Interface for all AI-generated content — summaries, care plans, triage, etc.
 import type { CallScores } from './EmailProvider'
 
+export interface LocalEventSuggestion {
+  title: string
+  source: string
+  date: string
+  location: string
+  description: string
+  url: string
+}
+
 export interface ConciergeTriage {
   intent: 'service_request' | 'companionship_call' | 'emergency' | 'information' | 'care_team_transfer'
   serviceType?: 'transport' | 'meal' | 'companion' | 'tech_help' | 'home_service'
@@ -53,4 +62,5 @@ export interface AiProvider {
   generateCelebrationPersonalisation(member: Member, type: string): Promise<string>
   generateConciergeTriage(transcript: string): Promise<ConciergeTriage>
   generateFamilyNudgeTopic(member: Member, recentCalls: CheckInCall[]): Promise<string>
+  suggestLocalEvents(city: string, state: string, interests: string[]): Promise<LocalEventSuggestion[]>
 }

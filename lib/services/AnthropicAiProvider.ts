@@ -1,7 +1,7 @@
 // Placeholder — real implementation added in M8 (Phase 19)
 // This file must exist for Turbopack build to succeed.
 // It is only instantiated when ANTHROPIC_API_KEY is set in the environment.
-import type { AiProvider, ConciergeTriage, CarePlan, Member, CheckInCall } from '../interfaces/AiProvider'
+import type { AiProvider, ConciergeTriage, CarePlan, Member, CheckInCall, LocalEventSuggestion } from '../interfaces/AiProvider'
 import type { CallScores } from '../interfaces/EmailProvider'
 
 export class AnthropicAiProvider implements AiProvider {
@@ -34,5 +34,8 @@ export class AnthropicAiProvider implements AiProvider {
   }
   async generateFamilyNudgeTopic(_member: Member, _recentCalls: CheckInCall[]): Promise<string> {
     throw new Error('[AnthropicAiProvider] Not yet implemented — add in M8')
+  }
+  async suggestLocalEvents(_city: string, _state: string, _interests: string[]): Promise<LocalEventSuggestion[]> {
+    throw new Error('[AnthropicAiProvider] suggestLocalEvents — implement in M8 with web search tool')
   }
 }

@@ -1,5 +1,5 @@
 // Stub implementation — returns typed placeholders, no real AI calls. Replaced in M8 with AnthropicAiProvider.
-import type { AiProvider, ConciergeTriage, CarePlan, Member, CheckInCall } from '../interfaces/AiProvider'
+import type { AiProvider, ConciergeTriage, CarePlan, Member, CheckInCall, LocalEventSuggestion } from '../interfaces/AiProvider'
 import type { CallScores } from '../interfaces/EmailProvider'
 
 export class StubAiProvider implements AiProvider {
@@ -47,5 +47,34 @@ export class StubAiProvider implements AiProvider {
   async generateFamilyNudgeTopic(_member: Member, _recentCalls: CheckInCall[]): Promise<string> {
     console.log('[STUB][AI] generateFamilyNudgeTopic called')
     return 'Ask about their week.'
+  }
+  async suggestLocalEvents(_city: string, _state: string, _interests: string[]): Promise<LocalEventSuggestion[]> {
+    console.log('[STUB][AI] suggestLocalEvents called — returning placeholder events')
+    return [
+      {
+        title: 'Senior Social Hour',
+        source: 'Meetup',
+        date: 'Every Tuesday at 2:00 PM',
+        location: 'Community Center, Main Street',
+        description: 'A weekly gathering for seniors to meet new friends, play cards, and enjoy light refreshments in a warm, welcoming setting.',
+        url: '#',
+      },
+      {
+        title: 'Gentle Yoga for Active Seniors',
+        source: 'Eventbrite',
+        date: 'Wednesdays & Fridays at 10:00 AM',
+        location: 'Senior Wellness Studio',
+        description: 'Chair-assisted yoga designed for seniors of all fitness levels. Improves flexibility, balance, and mood — no experience needed.',
+        url: '#',
+      },
+      {
+        title: 'Community Garden Volunteer Day',
+        source: 'Local',
+        date: 'First Saturday of each month',
+        location: 'Riverside Community Garden',
+        description: 'Help tend the neighborhood garden, meet your neighbors, and take home fresh produce. Light outdoor activity — all welcome.',
+        url: '#',
+      },
+    ]
   }
 }

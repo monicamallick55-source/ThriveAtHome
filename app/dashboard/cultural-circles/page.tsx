@@ -2,7 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { requireAuth } from '@/lib/auth'
 import { getFamilyMemberByAuthId } from '@/lib/data/family'
-import { getAllCircles, getMemberCircleIds } from '@/lib/data/circles'
+import { getAllCircles, getMemberCircleIds, getPlatformWideEvents } from '@/lib/data/circles'
+import { aiProvider } from '@/lib/providers'
 import CulturalCirclesClient from '@/components/circles/CulturalCirclesClient'
 
 export const metadata: Metadata = { title: 'Cultural Circles — ThriveAtHome' }
@@ -10,10 +11,13 @@ export const metadata: Metadata = { title: 'Cultural Circles — ThriveAtHome' }
 export default async function CulturalCirclesPage() {
   const user = await requireAuth()
   const { data: fm } = await getFamilyMemberByAuthId(user.id)
+  const memberId = fm?.member_id ?? undefined
 
-  const [circles, joinedIds] = await Promise.all([
+  const [circles, joinedIds, platformEvents, localEvents] = await Promise.all([
     getAllCircles(),
-    fm?.member_id ? getMemberCircleIds(fm.member_id) : Promise.resolve([]),
+    memberId ? getMemberCircleIds(memberId) : Promise.resolve([]),
+    getPlatformWideEvents(memberId),
+    aiProvider.suggestLocalEvents('', '', []).catch(() => []),
   ])
 
   return (
@@ -42,7 +46,13 @@ export default async function CulturalCirclesPage() {
         </div>
       </nav>
 
-      <CulturalCirclesClient circles={circles} joinedCircleIds={joinedIds} />
+      <CulturalCirclesClient
+        circles={circles}
+        joinedCircleIds={joinedIds}
+        platformEvents={platformEvents}
+        localEventSuggestions={localEvents}
+        hasMember={!!memberId}
+      />
     </div>
   )
 }

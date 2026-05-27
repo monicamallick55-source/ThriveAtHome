@@ -22,6 +22,8 @@ interface EventForm {
   format: string
   dial_in_number: string
   dial_in_code: string
+  location_address: string
+  is_platform_wide: boolean
 }
 
 const defaultForm: EventForm = {
@@ -33,6 +35,8 @@ const defaultForm: EventForm = {
   format: 'phone',
   dial_in_number: '',
   dial_in_code: '',
+  location_address: '',
+  is_platform_wide: false,
 }
 
 export default function AdminCirclesClient({ circles }: Props) {
@@ -51,27 +55,33 @@ export default function AdminCirclesClient({ circles }: Props) {
     if (!form.circleId || !form.title || !form.event_date) return
     setSubmitting(true)
     try {
+      const body: Record<string, unknown> = {
+        circle_id: form.circleId,
+        title: form.title,
+        event_date: form.event_date,
+        format: form.format,
+        is_platform_wide: form.is_platform_wide,
+      }
+      if (form.description) body.description = form.description
+      if (form.event_time) body.event_time = form.event_time
+      if (form.format !== 'in_person') {
+        if (form.dial_in_number) body.dial_in_number = form.dial_in_number
+        if (form.dial_in_code) body.dial_in_code = form.dial_in_code
+      } else {
+        if (form.location_address) body.location_address = form.location_address
+      }
       const res = await fetch('/api/admin/circles/events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          circle_id: form.circleId,
-          title: form.title,
-          description: form.description || undefined,
-          event_date: form.event_date,
-          event_time: form.event_time || undefined,
-          format: form.format,
-          dial_in_number: form.dial_in_number || undefined,
-          dial_in_code: form.dial_in_code || undefined,
-        }),
+        body: JSON.stringify(body),
       })
       if (res.ok) {
         setForm(defaultForm)
         setShowEventForm(false)
         showToast('Event created successfully')
       } else {
-        const { error } = await res.json()
-        showToast(`Error: ${error}`)
+        const data = await res.json().catch(() => ({}))
+        showToast(`Error: ${(data as { error?: string }).error ?? 'Failed to create event'}`)
       }
     } finally {
       setSubmitting(false)
@@ -158,9 +168,9 @@ export default function AdminCirclesClient({ circles }: Props) {
                     onChange={e => setForm(f => ({ ...f, format: e.target.value }))}
                     style={{ ...inputStyle, height: '44px' }}
                   >
-                    <option value="phone">Phone call</option>
-                    <option value="video">Video call</option>
-                    <option value="in_person">In person</option>
+                    <option value="phone">Phone only</option>
+                    <option value="video">Video or phone</option>
+                    <option value="in_person">In-person</option>
                   </select>
                 </div>
               </div>
@@ -213,7 +223,7 @@ export default function AdminCirclesClient({ circles }: Props) {
                 </div>
               </div>
 
-              {(form.format === 'phone' || form.format === 'video') && (
+              {form.format !== 'in_person' && (
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
                   <div>
                     <label style={labelStyle}>Dial-in number</label>
@@ -237,6 +247,35 @@ export default function AdminCirclesClient({ circles }: Props) {
                   </div>
                 </div>
               )}
+
+              {form.format === 'in_person' && (
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={labelStyle}>Location address</label>
+                  <input
+                    type="text"
+                    value={form.location_address}
+                    onChange={e => setForm(f => ({ ...f, location_address: e.target.value }))}
+                    placeholder="e.g. 123 Main St, Community Hall, Room 2"
+                    style={inputStyle}
+                  />
+                </div>
+              )}
+
+              <div style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <input
+                  type="checkbox"
+                  id="is_platform_wide"
+                  checked={form.is_platform_wide}
+                  onChange={e => setForm(f => ({ ...f, is_platform_wide: e.target.checked }))}
+                  style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--color-teal)' }}
+                />
+                <label htmlFor="is_platform_wide" style={{ ...labelStyle, margin: 0, cursor: 'pointer' }}>
+                  Show to all members (platform-wide event)
+                </label>
+                <span style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)' }}>
+                  — visible on the main Circles page even to non-members
+                </span>
+              </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '8px' }}>
                 <button

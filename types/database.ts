@@ -752,8 +752,10 @@ export interface Database {
           dial_in_number: string | null
           dial_in_code: string | null
           video_link: string | null
+          location_address: string | null
           rsvp_count: number
           is_recurring: boolean
+          is_platform_wide: boolean
         }
         Insert: {
           id?: string
@@ -767,8 +769,10 @@ export interface Database {
           dial_in_number?: string | null
           dial_in_code?: string | null
           video_link?: string | null
+          location_address?: string | null
           rsvp_count?: number
           is_recurring?: boolean
+          is_platform_wide?: boolean
         }
         Update: Partial<Database['public']['Tables']['circle_events']['Insert']>
         Relationships: []

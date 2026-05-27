@@ -215,7 +215,7 @@ export default function CircleDetailClient({
                         color: 'var(--color-text-secondary)', margin: '0 0 6px',
                       }}>
                         {formatEventDate(event.event_date, event.event_time)}
-                        {' · '}{event.format === 'phone' ? 'Phone call' : event.format === 'video' ? 'Video call' : 'In person'}
+                        {' · '}{event.format === 'phone' ? 'Phone only' : event.format === 'video' ? 'Video or phone' : 'In-person'}
                         {' · '}{event.rsvp_count} going
                       </p>
                       {event.description && (
@@ -225,8 +225,25 @@ export default function CircleDetailClient({
                         }}>{event.description}</p>
                       )}
 
-                      {/* Dial-in details when RSVPed */}
-                      {rsvped && event.dial_in_number && (
+                      {/* Join details when RSVPed */}
+                      {rsvped && event.format === 'in_person' && event.location_address && (
+                        <div style={{
+                          backgroundColor: accentColor + '10', border: `1px solid ${accentColor}30`,
+                          borderRadius: '10px', padding: '12px 16px', marginTop: '8px',
+                        }}>
+                          <p style={{
+                            fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 600,
+                            color: 'var(--color-navy)', margin: '0 0 4px',
+                          }}>You&apos;re going! Location:</p>
+                          <p style={{
+                            fontFamily: 'var(--font-body)', fontSize: '15px',
+                            color: 'var(--color-text-primary)', margin: 0, lineHeight: 1.6,
+                          }}>
+                            {event.location_address}
+                          </p>
+                        </div>
+                      )}
+                      {rsvped && event.format !== 'in_person' && event.dial_in_number && (
                         <div style={{
                           backgroundColor: accentColor + '10', border: `1px solid ${accentColor}30`,
                           borderRadius: '10px', padding: '12px 16px', marginTop: '8px',
