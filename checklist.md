@@ -422,7 +422,8 @@ M13 Volunteer Network Phase 29 [x][x][x][x][x][x][x][x]  8/8 ✅ COMPLETE (Sessi
                       Phase 30 [x][x][x][x][x][x]   6/6 ✅ COMPLETE (Session 42 APPROVED)
                       Phase 31 [x][x][x][x][x][x]   6/6 ✅ COMPLETE (Session 44 APPROVED)
                       Phase 32 [x][x][x][x][x]      5/5 ✅ COMPLETE (Session 46 APPROVED)
-                      Phase 33 [x][x][x][x]         4/4 ✅ COMPLETE (Session 49 — awaiting human APPROVED)
+                      Phase 33 [x][x][x][x]         4/4 ✅ COMPLETE (Session 50 APPROVED)
+M14 Community         Phase 34 [x][x][x][x][x][x][x][x][x][x] 10/10 IN PROGRESS (Session 51 — awaiting human APPROVED)
 ```
 
 ## M10 — SMS + Email Notifications
@@ -557,6 +558,24 @@ STATUS: `COMPLETE`
 - [x] npx tsc --noEmit passes — zero errors (Session 49)
 
 VERIFICATION: npx tsx scripts/test-volunteer-matching.ts → "✓ PASS: Veteran volunteer scores higher for veteran member" (Session 49)
+
+---
+
+## M14 — Community Features
+
+### Phase 34 — Cultural Community Circles
+STATUS: `IN PROGRESS`
+
+- [x] Migration 010 runs, all 12 circle seed rows created — supabase/migrations/010_cultural_circles.sql written; 12 circles seeded; human must run in Supabase SQL Editor
+- [x] /dashboard/cultural-circles — real page replaces placeholder — CulturalCirclesClient grid renders 12 circle cards; "Your Communities" + "All Communities" sections; join/leave buttons
+- [x] Join a circle — /api/circles/join POST; optimistic joined state; member_count increments; circle_memberships row created
+- [x] Joined circles appear at top — joined circles pinned under "Your Communities" label; reload preserves state (server passes joinedCircleIds)
+- [x] Individual circle page at /dashboard/cultural-circles/[circleId] — app/dashboard/cultural-circles/[circleId]/page.tsx created; CircleDetailClient: header, events section, community feed
+- [x] Post to community feed — /api/circles/posts POST; post appears immediately; circle_posts row created
+- [x] RSVP to a circle event — /api/circles/events/rsvp POST; RSVP confirmed; dial-in details shown prominently
+- [x] Leave circle — /api/circles/leave POST; membership row deleted; member_count decremented
+- [x] Admin circle management at /admin/cultural-circles — AdminCirclesClient: circle list with member counts; create event form with full field set; admin/navigator gated
+- [x] npx tsc --noEmit passes — zero errors (Session 51)
 
 ---
 
