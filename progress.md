@@ -3681,3 +3681,194 @@ NEXT SESSION MUST:
 - If volunteer redirect still reported: user must log out of volunteer account first, then log in as family account
 
 AWAITING HUMAN APPROVAL
+ISSUE: problems with cultural circles:
+1. Runtime SyntaxError "Unexpected end of JSON input" in handleCreateEvent on /admin/cultural-circles — the event creation form is submitting malformed JSON. Fix the handleCreateEvent function to ensure all required fields are validated before submission and the JSON body is correctly formed before the API call.
+2. Event creation form only supports online/virtual events. Add in-person event support: add a "Format" field with three options (Phone only, Video or phone, In-person). When "In-person" is selected, show an address field instead of dial-in number and video link fields. Store the address in the existing video_link column or add a new location_address text column to circle_events table via migration if needed.
+3. Platform-wide events: events should have a visibility setting — "Circle only" (current behavior, only visible to circle members) vs "All members" (visible to everyone regardless of circle membership). Add an is_platform_wide boolean column to circle_events table. On /dashboard/cultural-circles, show a "Community Events" section at the top displaying all is_platform_wide=true events that any member can RSVP to, even if they have not joined any circle.
+4. External community events discovery: add an "Events Near You" section on /dashboard/cultural-circles that uses the aiProvider (stub for now, real in M8) to suggest external events from platforms like Meetup, Luma, Eventbrite, and local community sources. The AI stub should return 3 placeholder event cards showing: event name, source platform badge, date, location, brief description, and a "Learn more" external link. Filter suggestions by member location (city/state from their profile), interests (topics_enjoy), and age-appropriateness. When real AI is activated in M8, this section will call a web search tool to find real local events. For now the stub returns realistic placeholder cards so the UI is built and ready.
+
+
+
+
+---
+SESSION: 53
+DATE: 2026-05-27 UTC
+MILESTONE: M14
+PHASE: 34 — Cultural Community Circles (issue fixes)
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 34 checklist: 10 of 10 items [x] — COMPLETE (all 4 reported issues now fixed)
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider (suggestLocalEvents added)
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider
+- emailProvider: StubEmailProvider
+- billingProvider: StripeBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+All 4 human-reported issues fixed:
+
+ISSUE 1 — SyntaxError "Unexpected end of JSON input" in handleCreateEvent:
+- Root cause: res.json() called on an error response with empty body caused "Unexpected end of JSON input"
+- Fix: AdminCirclesClient.tsx handleCreateEvent now uses `res.json().catch(() => ({}))` — safe parse
+- JSON body construction refactored to build body object first, then JSON.stringify() once — eliminates subtle serialization bugs
+
+ISSUE 2 — In-person event support:
+- supabase/migrations/011_circle_events_location.sql — CREATED: adds `location_address text` and `is_platform_wide boolean NOT NULL DEFAULT false` to circle_events; adds RLS policy for platform-wide events
+- types/database.ts — MODIFIED: circle_events Row/Insert now includes location_address and is_platform_wide
+- lib/data/circles.ts — MODIFIED: CircleEvent interface now has location_address + is_platform_wide; createCircleEvent accepts both
+- AdminCirclesClient.tsx — MODIFIED: EventForm has location_address + is_platform_wide; format select uses "Phone only" / "Video or phone" / "In-person"; shows address field when in_person selected, dial-in fields for other formats
+- app/api/admin/circles/events/route.ts — MODIFIED: safely parses request body (try/catch), passes location_address + is_platform_wide through to createCircleEvent
+- CircleDetailClient.tsx — MODIFIED: shows location address when RSVPed to in-person event; shows dial-in details for phone/video; format labels updated to "Phone only" / "Video or phone" / "In-person"
+
+ISSUE 3 — Platform-wide events:
+- lib/data/circles.ts — ADDED: getPlatformWideEvents(memberId?) function — queries is_platform_wide=true events, checks RSVP status per member
+- app/dashboard/cultural-circles/page.tsx — MODIFIED: fetches platformEvents + localEvents server-side, passes to CulturalCirclesClient
+- CulturalCirclesClient.tsx — MODIFIED: "Community Events" section above circles grid; platform-wide events show to ALL members; any member can RSVP; dial-in or location details shown on RSVP
+
+ISSUE 4 — Events Near You (AI stub):
+- lib/interfaces/AiProvider.ts — MODIFIED: LocalEventSuggestion interface added; suggestLocalEvents() method added to AiProvider interface
+- lib/stubs/StubAiProvider.ts — MODIFIED: suggestLocalEvents() returns 3 realistic placeholder event cards (Senior Social Hour/Meetup, Gentle Yoga/Eventbrite, Community Garden/Local)
+- lib/services/AnthropicAiProvider.ts — MODIFIED: suggestLocalEvents() placeholder added (real web search implementation deferred to M8)
+- CulturalCirclesClient.tsx — MODIFIED: "Events Near You" section with color-coded source platform badges (Meetup red, Eventbrite orange, Local green); "Learn more →" link or "Contact your navigator" fallback when URL is placeholder
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — ✓ Compiled successfully 39.1s; all routes in build output; /dashboard/cultural-circles ƒ dynamic
+- git ls-files | grep .env: PASSED — only .env.local.example (safe)
+- git commit ebc5a15 pushed to origin/main
+
+ERRORS ENCOUNTERED:
+- lib/data/circles.ts: TS2322 + TS2339 + TS2345 (missing location_address/is_platform_wide in types) — fixed by updating types/database.ts circle_events Row/Insert
+
+DECISIONS MADE:
+- location_address stored in its own column (cleaner than reusing video_link)
+- is_platform_wide events use existing circle_event_rsvps table — same RSVP infrastructure, no new table needed
+- Events Near You: stub returns 3 hardcoded realistic cards; real AI web-search implementation deferred to M8 (as specified)
+- "Events Near You" section uses server-side fetch (aiProvider.suggestLocalEvents called in page.tsx) — avoids client-side API call for stub data
+- Platform-wide events policy: separate RLS policy "authenticated_can_read_platform_events" allows any authenticated user to read platform-wide events
+- Format labels: "Phone only" / "Video or phone" / "In-person" (matches prompt-advanced.md spec)
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- Human must run migration 011 in Supabase SQL Editor (REQUIRED before testing):
+  Copy-paste supabase/migrations/011_circle_events_location.sql
+  VERIFY: Supabase Table Editor → circle_events → location_address + is_platform_wide columns present
+- Human must verify in browser (logged in as FAMILY account):
+  1. /dashboard/cultural-circles → 12 circle cards + any platform-wide events in "Community Events" section at top
+  2. RSVP to a platform-wide event → RSVP confirmed, teal highlight; cancel → restored
+  3. "Events Near You" section shows 3 placeholder cards (Senior Social Hour/Meetup, Gentle Yoga/Eventbrite, Community Garden/Local)
+  4. /admin/cultural-circles → Create event → format "In-person" → shows address field (not dial-in); "Video or phone" → shows dial-in fields
+  5. "Show to all members" checkbox visible in event creation form
+  6. Create an in-person event with address → appears in /dashboard/cultural-circles circle detail; RSVP shows address
+  7. Create a platform-wide event (check "Show to all members") → appears in "Community Events" section on main circles page
+- If all pass: mark Phase 34 APPROVED_COMPLETE, begin Phase 35 (Virtual Events Platform)
+- Begin Phase 35 only after APPROVED
+
+AWAITING HUMAN APPROVAL
+ISSUE: platform-wide event does not do anything when clicked. Not able to test step2. verified events near you shows 3 placeholder cards. Crate event has community circle drop down as required field. It has checbov to mark the event to appear to all members but requires one comunity circle to be chosen first. Modify this to allow the events to be created for all members without requiring the event to be associated with a community circle. Also one event should allowed to be associated with mutiple community circles. these are different requirements and features.
+
+---
+SESSION: 54
+DATE: 2026-05-27 UTC
+MILESTONE: M14
+PHASE: 34 — Cultural Community Circles (issue fixes round 2)
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 34 checklist: 10 of 10 items [x] — all 3 reported issues fixed
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider
+- emailProvider: StubEmailProvider
+- billingProvider: StripeBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+All 3 human-reported issues fixed:
+
+ISSUE 1 — Platform-wide event does not do anything when clicked:
+- Root cause: RSVP button was gated behind {hasMember && ...}; admin/navigator users without a linked member_id never saw the button — clicking the card area did nothing
+- Fix 1: Removed hasMember guard — RSVP button now visible to ALL authenticated users
+- Fix 2: Added error toast feedback when RSVP API fails:
+  - "No member linked" → "Set up your family member profile to RSVP to events."
+  - Other errors → "Could not complete RSVP. Please try again."
+- CulturalCirclesClient.tsx — MODIFIED
+
+ISSUE 2 — Create event form requires community circle even for platform-wide:
+- Root cause: select had required attribute; API validated !circle_id would block submission
+- Fix: Circle selection is now optional when is_platform_wide=true
+  - AdminCirclesClient.tsx: client-side validation checks circleIds.length > 0 || is_platform_wide; shows inline error message
+  - app/api/admin/circles/events/route.ts: validates title + event_date only as required; circle_ids optional; returns 400 only if !is_platform_wide && circle_ids.length === 0
+  - circle_id in createCircleEvent set to circleIds[0] ?? null
+
+ISSUE 3 — One event should be associated with multiple community circles:
+- supabase/migrations/012_circle_events_multi_circle.sql — CREATED:
+  ALTER TABLE circle_events ALTER COLUMN circle_id DROP NOT NULL;
+  ALTER TABLE circle_events ADD COLUMN circle_ids uuid[] DEFAULT '{}';
+- types/database.ts — MODIFIED: circle_events Row.circle_id = string | null; Row/Insert both have circle_ids: string[]
+- lib/data/circles.ts — MODIFIED:
+  - CircleEvent interface: circle_id: string | null, circle_ids: string[]
+  - getCircleEvents(circleId): now queries .or(`circle_id.eq.${circleId},circle_ids.cs.{${circleId}}`) — returns events from both the primary circle and multi-circle array
+  - createCircleEvent: circle_id is optional/nullable, circle_ids accepted; sets circle_id = circleIds[0] ?? null
+  - getPlatformWideEvents: maps circle_ids ?? [] for backward compatibility
+- AdminCirclesClient.tsx — MODIFIED:
+  - Single circle dropdown → multi-select checkboxes (scrollable grid of 12 circles)
+  - Each checkbox highlighted in the circle's accent color when selected
+  - Shows "{N} circles selected" count below
+  - "Create event" button on circle row pre-selects that circle in the form
+  - Inline validation error shown in form (not toast) for better UX
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — ✓ Compiled successfully 32.7s; /dashboard/cultural-circles ƒ dynamic
+- git commit 4198d2c pushed to main
+
+ERRORS ENCOUNTERED:
+- None
+
+DECISIONS MADE:
+- circle_id kept as a nullable "primary" circle for backward compat with existing events in the DB (those have circle_id set from before migration 012)
+- circle_ids array used for multi-circle association going forward
+- getCircleEvents uses OR query: matches either circle_id = X or X in circle_ids array — covers both old and new events
+- RSVP button visible to all authenticated users; descriptive toast explains if they don't have a member profile
+- Inline validation error in form (not toast) for the circle/platform-wide requirement — easier to see and fix
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- Human must run migration 012 in Supabase SQL Editor (REQUIRED before testing):
+  Copy-paste supabase/migrations/012_circle_events_multi_circle.sql
+  VERIFY: Supabase Table Editor → circle_events → circle_id now nullable, circle_ids column present (uuid[])
+- Human must also confirm migration 011 was run (from Session 53):
+  circle_events should have location_address and is_platform_wide columns
+  If not run: run supabase/migrations/011_circle_events_location.sql first, then 012
+- Human must verify in browser (logged in as FAMILY account):
+  1. /admin/cultural-circles → Create event → sees multi-select checkbox grid of all 12 circles
+  2. Check "Show to all members" → circle checkboxes become optional; can create event with no circles selected
+  3. Select 2+ circles → event appears in both circle detail pages
+  4. Create a platform-wide event → appears in "Community Events" section on /dashboard/cultural-circles
+  5. RSVP to platform-wide event → button click → "RSVP confirmed!" toast OR descriptive error if no member linked
+  6. Cancel RSVP → button returns to "RSVP"
+- If all pass: mark Phase 34 APPROVED_COMPLETE, begin Phase 35 (Virtual Events Platform)
+- Begin Phase 35 only after APPROVED
+
+AWAITING HUMAN APPROVAL
