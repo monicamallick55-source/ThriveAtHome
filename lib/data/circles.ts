@@ -22,7 +22,8 @@ export interface CirclePost {
 
 export interface CircleEvent {
   id: string
-  circle_id: string
+  circle_id: string | null
+  circle_ids: string[]
   title: string
   description: string | null
   event_date: string
@@ -170,10 +171,11 @@ export async function postToCircle(memberId: string, circleId: string, content: 
 
 export async function getCircleEvents(circleId: string, memberId?: string): Promise<CircleEvent[]> {
   const supabase = await createClient()
+  // Fetch events where this circle is the primary circle OR in the multi-circle array
   const { data: events, error } = await supabase
     .from('circle_events')
     .select('*')
-    .eq('circle_id', circleId)
+    .or(`circle_id.eq.${circleId},circle_ids.cs.{${circleId}}`)
     .gte('event_date', new Date().toISOString().slice(0, 10))
     .order('event_date')
   if (error) {
@@ -194,6 +196,7 @@ export async function getCircleEvents(circleId: string, memberId?: string): Prom
 
   return (events ?? []).map(e => ({
     ...e,
+    circle_ids: e.circle_ids ?? [],
     user_has_rsvped: rsvpedIds.has(e.id),
   }))
 }
@@ -272,6 +275,7 @@ export async function getPlatformWideEvents(memberId?: string): Promise<CircleEv
 
   return (events ?? []).map(e => ({
     ...e,
+    circle_ids: e.circle_ids ?? [],
     location_address: e.location_address ?? null,
     is_platform_wide: e.is_platform_wide ?? true,
     user_has_rsvped: rsvpedIds.has(e.id),
@@ -279,7 +283,8 @@ export async function getPlatformWideEvents(memberId?: string): Promise<CircleEv
 }
 
 export async function createCircleEvent(event: {
-  circle_id: string
+  circle_id?: string | null
+  circle_ids?: string[]
   title: string
   description?: string
   event_date: string
@@ -295,12 +300,15 @@ export async function createCircleEvent(event: {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('circle_events')
-    .insert(event)
+    .insert({
+      ...event,
+      circle_ids: event.circle_ids ?? [],
+    })
     .select()
     .maybeSingle()
   if (error) {
     console.error('[circles] createCircleEvent error:', error.message)
     return null
   }
-  return data
+  return data ? { ...data, circle_ids: data.circle_ids ?? [] } : null
 }

@@ -14,7 +14,7 @@ interface Props {
 }
 
 interface EventForm {
-  circleId: string
+  circleIds: string[]
   title: string
   description: string
   event_date: string
@@ -27,7 +27,7 @@ interface EventForm {
 }
 
 const defaultForm: EventForm = {
-  circleId: '',
+  circleIds: [],
   title: '',
   description: '',
   event_date: '',
@@ -44,32 +44,54 @@ export default function AdminCirclesClient({ circles }: Props) {
   const [form, setForm] = useState<EventForm>(defaultForm)
   const [submitting, setSubmitting] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
+  const [validationError, setValidationError] = useState<string | null>(null)
 
   const showToast = (msg: string) => {
     setToast(msg)
-    setTimeout(() => setToast(null), 3000)
+    setTimeout(() => setToast(null), 3500)
+  }
+
+  const toggleCircle = (circleId: string) => {
+    setForm(f => ({
+      ...f,
+      circleIds: f.circleIds.includes(circleId)
+        ? f.circleIds.filter(id => id !== circleId)
+        : [...f.circleIds, circleId],
+    }))
+    setValidationError(null)
   }
 
   const handleCreateEvent = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!form.circleId || !form.title || !form.event_date) return
+    setValidationError(null)
+
+    if (!form.title.trim() || !form.event_date) {
+      setValidationError('Title and date are required.')
+      return
+    }
+    if (!form.is_platform_wide && form.circleIds.length === 0) {
+      setValidationError('Select at least one circle, or check "Show to all members".')
+      return
+    }
+
     setSubmitting(true)
     try {
       const body: Record<string, unknown> = {
-        circle_id: form.circleId,
-        title: form.title,
+        circle_ids: form.circleIds,
+        title: form.title.trim(),
         event_date: form.event_date,
         format: form.format,
         is_platform_wide: form.is_platform_wide,
       }
-      if (form.description) body.description = form.description
+      if (form.description.trim()) body.description = form.description.trim()
       if (form.event_time) body.event_time = form.event_time
       if (form.format !== 'in_person') {
-        if (form.dial_in_number) body.dial_in_number = form.dial_in_number
-        if (form.dial_in_code) body.dial_in_code = form.dial_in_code
+        if (form.dial_in_number.trim()) body.dial_in_number = form.dial_in_number.trim()
+        if (form.dial_in_code.trim()) body.dial_in_code = form.dial_in_code.trim()
       } else {
-        if (form.location_address) body.location_address = form.location_address
+        if (form.location_address.trim()) body.location_address = form.location_address.trim()
       }
+
       const res = await fetch('/api/admin/circles/events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -123,7 +145,7 @@ export default function AdminCirclesClient({ circles }: Props) {
             </p>
           </div>
           <button
-            onClick={() => setShowEventForm(!showEventForm)}
+            onClick={() => { setShowEventForm(!showEventForm); setValidationError(null) }}
             style={{
               padding: '10px 20px', borderRadius: '10px',
               fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 500,
@@ -144,22 +166,20 @@ export default function AdminCirclesClient({ circles }: Props) {
             <h2 style={{
               fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 500,
               color: 'var(--color-navy)', margin: '0 0 20px',
-            }}>Create Circle Event</h2>
+            }}>Create Event</h2>
             <form onSubmit={handleCreateEvent}>
+
+              {/* Title + Format */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
                 <div>
-                  <label style={labelStyle}>Circle *</label>
-                  <select
-                    value={form.circleId}
-                    onChange={e => setForm(f => ({ ...f, circleId: e.target.value }))}
-                    required
-                    style={{ ...inputStyle, height: '44px' }}
-                  >
-                    <option value="">Select a circle</option>
-                    {circles.map(c => (
-                      <option key={c.id} value={c.id}>{c.circle_name}</option>
-                    ))}
-                  </select>
+                  <label style={labelStyle}>Event title *</label>
+                  <input
+                    type="text"
+                    value={form.title}
+                    onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+                    placeholder="e.g. Monthly Gathering"
+                    style={inputStyle}
+                  />
                 </div>
                 <div>
                   <label style={labelStyle}>Format *</label>
@@ -175,18 +195,7 @@ export default function AdminCirclesClient({ circles }: Props) {
                 </div>
               </div>
 
-              <div style={{ marginBottom: '16px' }}>
-                <label style={labelStyle}>Event title *</label>
-                <input
-                  type="text"
-                  value={form.title}
-                  onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                  placeholder="e.g. Monthly Gathering"
-                  required
-                  style={inputStyle}
-                />
-              </div>
-
+              {/* Description */}
               <div style={{ marginBottom: '16px' }}>
                 <label style={labelStyle}>Description</label>
                 <textarea
@@ -201,6 +210,7 @@ export default function AdminCirclesClient({ circles }: Props) {
                 />
               </div>
 
+              {/* Date + Time */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
                 <div>
                   <label style={labelStyle}>Date *</label>
@@ -208,7 +218,6 @@ export default function AdminCirclesClient({ circles }: Props) {
                     type="date"
                     value={form.event_date}
                     onChange={e => setForm(f => ({ ...f, event_date: e.target.value }))}
-                    required
                     style={inputStyle}
                   />
                 </div>
@@ -223,6 +232,7 @@ export default function AdminCirclesClient({ circles }: Props) {
                 </div>
               </div>
 
+              {/* Location / dial-in details */}
               {form.format !== 'in_person' && (
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
                   <div>
@@ -261,26 +271,90 @@ export default function AdminCirclesClient({ circles }: Props) {
                 </div>
               )}
 
-              <div style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              {/* Platform-wide toggle */}
+              <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <input
                   type="checkbox"
                   id="is_platform_wide"
                   checked={form.is_platform_wide}
-                  onChange={e => setForm(f => ({ ...f, is_platform_wide: e.target.checked }))}
+                  onChange={e => { setForm(f => ({ ...f, is_platform_wide: e.target.checked })); setValidationError(null) }}
                   style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--color-teal)' }}
                 />
                 <label htmlFor="is_platform_wide" style={{ ...labelStyle, margin: 0, cursor: 'pointer' }}>
                   Show to all members (platform-wide event)
                 </label>
-                <span style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)' }}>
-                  — visible on the main Circles page even to non-members
-                </span>
               </div>
+
+              {/* Circle selection — optional when platform-wide */}
+              <div style={{ marginBottom: '20px' }}>
+                <label style={labelStyle}>
+                  Community circles
+                  {!form.is_platform_wide && (
+                    <span style={{ color: '#c0392b', marginLeft: '4px' }}>*</span>
+                  )}
+                  <span style={{ fontWeight: 400, color: 'var(--color-text-secondary)', marginLeft: '8px', fontSize: '13px' }}>
+                    {form.is_platform_wide
+                      ? '— optional, select to also show inside specific circles'
+                      : '— required if not platform-wide, select one or more'}
+                  </span>
+                </label>
+                <div style={{
+                  display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+                  gap: '8px', maxHeight: '280px', overflowY: 'auto',
+                  border: '1px solid var(--color-warm-grey)', borderRadius: '10px', padding: '12px',
+                }}>
+                  {circles.map((circle, i) => {
+                    const isSelected = form.circleIds.includes(circle.id)
+                    const color = CIRCLE_COLORS[i % CIRCLE_COLORS.length]
+                    return (
+                      <label
+                        key={circle.id}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: '8px',
+                          padding: '8px 10px', borderRadius: '8px', cursor: 'pointer',
+                          backgroundColor: isSelected ? color + '12' : 'transparent',
+                          border: isSelected ? `1px solid ${color}` : '1px solid transparent',
+                          transition: 'all 0.15s',
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleCircle(circle.id)}
+                          style={{ accentColor: color, width: '16px', height: '16px' }}
+                        />
+                        <span style={{
+                          fontFamily: 'var(--font-body)', fontSize: '13px',
+                          color: isSelected ? color : 'var(--color-text-primary)', fontWeight: isSelected ? 600 : 400,
+                        }}>
+                          {circle.circle_name}
+                        </span>
+                      </label>
+                    )
+                  })}
+                </div>
+                {form.circleIds.length > 0 && (
+                  <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: '6px 0 0' }}>
+                    {form.circleIds.length} circle{form.circleIds.length > 1 ? 's' : ''} selected
+                  </p>
+                )}
+              </div>
+
+              {/* Validation error */}
+              {validationError && (
+                <div style={{
+                  backgroundColor: '#fff0f0', border: '1px solid #ffcccc',
+                  borderRadius: '10px', padding: '10px 14px', marginBottom: '16px',
+                  fontFamily: 'var(--font-body)', fontSize: '14px', color: '#c0392b',
+                }}>
+                  {validationError}
+                </div>
+              )}
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '8px' }}>
                 <button
                   type="button"
-                  onClick={() => { setForm(defaultForm); setShowEventForm(false) }}
+                  onClick={() => { setForm(defaultForm); setShowEventForm(false); setValidationError(null) }}
                   style={{
                     padding: '10px 20px', borderRadius: '10px',
                     fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 500,
@@ -331,7 +405,7 @@ export default function AdminCirclesClient({ circles }: Props) {
               </div>
               <button
                 onClick={() => {
-                  setForm(f => ({ ...f, circleId: circle.id }))
+                  setForm(f => ({ ...f, circleIds: [circle.id] }))
                   setShowEventForm(true)
                   setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 50)
                 }}

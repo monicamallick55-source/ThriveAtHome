@@ -17,13 +17,20 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
-  const { circle_id, title, event_date } = body
-  if (!circle_id || !title || !event_date) {
-    return NextResponse.json({ error: 'circle_id, title, event_date required' }, { status: 400 })
+
+  const { title, event_date, is_platform_wide } = body
+  const circleIds = Array.isArray(body.circle_ids) ? (body.circle_ids as string[]) : []
+
+  if (!title || !event_date) {
+    return NextResponse.json({ error: 'title and event_date are required' }, { status: 400 })
+  }
+  if (!is_platform_wide && circleIds.length === 0) {
+    return NextResponse.json({ error: 'Select at least one circle or mark as platform-wide' }, { status: 400 })
   }
 
   const event = await createCircleEvent({
-    circle_id: body.circle_id as string,
+    circle_id: circleIds[0] ?? null,
+    circle_ids: circleIds,
     title: body.title as string,
     event_date: body.event_date as string,
     description: body.description as string | undefined,

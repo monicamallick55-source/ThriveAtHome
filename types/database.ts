@@ -743,7 +743,8 @@ export interface Database {
         Row: {
           id: string
           created_at: string
-          circle_id: string
+          circle_id: string | null
+          circle_ids: string[]
           title: string
           description: string | null
           event_date: string
@@ -760,7 +761,8 @@ export interface Database {
         Insert: {
           id?: string
           created_at?: string
-          circle_id: string
+          circle_id?: string | null
+          circle_ids?: string[]
           title: string
           description?: string | null
           event_date: string

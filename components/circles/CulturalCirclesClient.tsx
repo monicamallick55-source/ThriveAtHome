@@ -102,6 +102,14 @@ export default function CulturalCirclesClient({ circles, joinedCircleIds, platfo
           return next
         })
         showToast(cancel ? 'RSVP cancelled' : 'RSVP confirmed!')
+      } else {
+        const data = await res.json().catch(() => ({}))
+        const msg = (data as { error?: string }).error
+        if (msg === 'No member linked') {
+          showToast('Set up your family member profile to RSVP to events.')
+        } else {
+          showToast(`Could not complete RSVP. Please try again.`)
+        }
       }
     } finally {
       setPlatformRsvpLoading(null)
@@ -360,23 +368,21 @@ export default function CulturalCirclesClient({ circles, joinedCircleIds, platfo
                         </div>
                       )}
                     </div>
-                    {hasMember && (
-                      <button
-                        onClick={() => handlePlatformRsvp(event.id, rsvped)}
-                        disabled={isLoading}
-                        style={{
-                          padding: '9px 18px', borderRadius: '10px',
-                          fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 500,
-                          cursor: isLoading ? 'wait' : 'pointer',
-                          border: '1px solid var(--color-teal)',
-                          backgroundColor: rsvped ? 'white' : 'var(--color-teal)',
-                          color: rsvped ? 'var(--color-teal)' : 'white',
-                          opacity: isLoading ? 0.7 : 1, whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {isLoading ? '...' : rsvped ? 'Cancel RSVP' : 'RSVP'}
-                      </button>
-                    )}
+                    <button
+                      onClick={() => handlePlatformRsvp(event.id, rsvped)}
+                      disabled={isLoading}
+                      style={{
+                        padding: '9px 18px', borderRadius: '10px',
+                        fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 500,
+                        cursor: isLoading ? 'wait' : 'pointer',
+                        border: '1px solid var(--color-teal)',
+                        backgroundColor: rsvped ? 'white' : 'var(--color-teal)',
+                        color: rsvped ? 'var(--color-teal)' : 'white',
+                        opacity: isLoading ? 0.7 : 1, whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {isLoading ? '...' : rsvped ? 'Cancel RSVP' : 'RSVP'}
+                    </button>
                   </div>
                 )
               })}
