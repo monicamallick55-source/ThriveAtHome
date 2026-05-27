@@ -1,4 +1,5 @@
-// Next.js proxy (previously middleware) — refreshes session cookies and enforces role-based routing.
+// Next.js proxy — refreshes session cookies and enforces role-based routing.
+// In Next.js 16+, proxy.ts replaces middleware.ts. The exported function must be named "proxy".
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
