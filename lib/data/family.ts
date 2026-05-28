@@ -14,6 +14,7 @@ export async function getFamilyMemberByAuthId(
       .from('family_members')
       .select('*')
       .eq('supabase_auth_id', authUserId)
+      .limit(1)
       .maybeSingle()
     if (error) {
       console.error('[data/family/getFamilyMemberByAuthId]', error)

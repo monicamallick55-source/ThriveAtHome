@@ -45,6 +45,7 @@ export async function getMemberForAuthUser(
       .from('family_members')
       .select('member_id')
       .eq('supabase_auth_id', authUserId)
+      .limit(1)
       .maybeSingle()
     if (fmError) {
       console.error('[data/members/getMemberForAuthUser] family_members lookup:', fmError)

@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { requireAuth } from '@/lib/auth'
-import { getMemberForAuthUser } from '@/lib/data/members'
+import { getFamilyMemberByAuthId } from '@/lib/data/family'
 import { getUpcomingEvents } from '@/lib/data/events'
 import EventsClient from '@/components/events/EventsClient'
 
@@ -10,9 +10,9 @@ export const metadata: Metadata = { title: 'Events — ThriveAtHome' }
 
 export default async function EventsPage() {
   const user = await requireAuth()
-  const { data: member } = await getMemberForAuthUser(user.id)
+  const { data: fm } = await getFamilyMemberByAuthId(user.id)
 
-  const { data: events } = await getUpcomingEvents(member?.id)
+  const { data: events } = await getUpcomingEvents(fm?.member_id ?? undefined)
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-cream)', display: 'flex', flexDirection: 'column' }}>
