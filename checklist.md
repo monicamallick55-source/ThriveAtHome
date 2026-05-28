@@ -423,8 +423,8 @@ M13 Volunteer Network Phase 29 [x][x][x][x][x][x][x][x]  8/8 ✅ COMPLETE (Sessi
                       Phase 31 [x][x][x][x][x][x]   6/6 ✅ COMPLETE (Session 44 APPROVED)
                       Phase 32 [x][x][x][x][x]      5/5 ✅ COMPLETE (Session 46 APPROVED)
                       Phase 33 [x][x][x][x]         4/4 ✅ COMPLETE (Session 50 APPROVED)
-M14 Community         Phase 34 [x][x][x][x][x][x][x][x][x][x] 10/10 ✅ COMPLETE (Session 54 APPROVED) + enhancements (Session 57)
-                      Phase 35 [x][x][x][~][~][~][x][x]    5/8 IN PROGRESS (Session 57 — RSVP fixes applied; awaiting browser verify)
+M14 Community         Phase 34 [x][x][x][x][x][x][x][x][x][x] 10/10 ✅ COMPLETE (Session 54 APPROVED) + enhancements (Session 57–58)
+                      Phase 35 [x][x][x][x][x][x][x][x]    8/8 ✅ COMPLETE (Session 57 CONFIRMED by human)
 ```
 
 ## M10 — SMS + Email Notifications
@@ -581,16 +581,16 @@ STATUS: `COMPLETE`
 ---
 
 ### Phase 35 — Virtual Events Platform
-STATUS: `IN PROGRESS`
+STATUS: `COMPLETE`
 
 - [x] Migration 013 runs without errors — CONFIRMED by human (Session 55): events and event_rsvps tables present in Supabase
 - [x] /dashboard/events — real page replaces placeholder — CONFIRMED by human (Session 55): events calendar loads, not "Coming soon"
 - [x] Events display correctly — CONFIRMED by human (Session 55): events shown in chronological order with date, time, host, format badge
-- [~] RSVP works — hydration fix + RSVP fix applied (Sessions 56–57); awaiting human verification with family account
-- [~] RSVP for today's event shows "Join Now" — awaiting human verification with family account
-- [~] Cancel RSVP works — awaiting human verification with family account
+- [x] RSVP works — CONFIRMED by human (Session 57): "all others steps were verified to be working correctly"
+- [x] RSVP for today's event shows "Join Now" — CONFIRMED by human (Session 57)
+- [x] Cancel RSVP works — CONFIRMED by human (Session 57)
 - [x] Admin event creation at /admin/events/create — CONFIRMED by human (Session 55): form loads; in-person → address field; submit → event appears in /dashboard/events
-- [x] npx tsc --noEmit passes — PASSED (Sessions 55–57)
+- [x] npx tsc --noEmit passes — PASSED (Sessions 55–58)
 
 ---
 
