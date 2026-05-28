@@ -4024,3 +4024,118 @@ NEXT SESSION MUST:
 - If all pass: mark Phase 35 all 8 items [x], present AWAITING HUMAN APPROVAL for Phase 35, begin Phase 36
 
 AWAITING HUMAN APPROVAL
+
+ISSUE: Two problems on /dashboard/events:
+1. Hydration error in components/events/EventsClient.tsx line 175 — date/time is being formatted differently on server vs client. The error shows "Thursday, June 4 at 4:00 PM" (server) vs "Thursday, June 4 at 9:00 AM" (client) — this is a timezone mismatch. Fix by formatting the event time using UTC consistently on both server and client, or add suppressHydrationWarning to the date/time element. Use date-fns formatInTimeZone or always display times in UTC to avoid the server/client mismatch.
+2. Event times are displaying incorrectly — likely showing UTC time instead of the member's local timezone or the event's specified timezone. Fix the time display to show the event time in the event's stored timezone field, not the server's timezone.
+ISSUE: Four enhancements needed for the Communities section: (1) Rename "Cultural Circles" to "Communities" across the entire platform — update navigation labels, page headings, section labels, admin page headings, and any "Cultural Circle" text throughout the app to say "Community" or "Communities" instead. The URL /dashboard/cultural-circles can stay as-is to avoid breaking bookmarks. (2) Seed 8 interest-based community circles into the cultural_circles table alongside the existing 12 cultural circles, based on member interests from topics_enjoy: Gardening & Nature Club, Books & Storytelling Circle, Music Lovers Circle, Cooking & Recipes Circle, Faith & Spirituality Circle, Sports & Games Circle, Travel Memories Circle, Crafts & Creative Arts Circle — each with primary_language='english', a warm 1-2 sentence description, and is_active=true. (3) Add a "Recommended for you" section on /dashboard/cultural-circles above the full grid showing 2-3 communities the member has NOT yet joined, selected by matching the member's topics_enjoy interests to circle interest tags — fall back to most popular by member_count if no interest match found. (4) Ensure /admin/cultural-circles has a fully working "Create new community" form that allows admins to add new communities at any time with fields for: community name, description, primary language, and interest tags — so the platform community list can grow beyond the initial 20 seeded circles without any code changes.
+
+---
+SESSION: 57
+DATE: 2026-05-28 UTC
+MILESTONE: M14
+PHASE: 35 — Virtual Events Platform (fixes complete) + Phase 34 Communities enhancements
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 35: all issues resolved — awaiting human verification of RSVP (steps 4–6)
+- Phase 34 enhancements: all 4 items implemented and deployed
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider
+- emailProvider: StubEmailProvider
+- billingProvider: StripeBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+
+FIX 1 — Phase 35 hydration error (EventsClient.tsx):
+- Root cause: formatEventDate used `new Date(`${dateStr}T${timeStr}`)` which
+  parses as LOCAL time on client but UTC on Node.js server → timezone mismatch
+- Fix: replaced with manual string parsing using Date.UTC(year, month, day)
+  + manual time-string parsing (h%12, AM/PM) — identical to CulturalCirclesClient
+  and CircleDetailClient pattern. Now server and client always produce the same string.
+- Result: "Thursday, June 4 at 4:00 PM" renders identically on server and client
+
+ENHANCEMENT 1 — Rename "Cultural Circles" → "Communities":
+- components/circles/CulturalCirclesClient.tsx: h1 "Cultural Community Circles" → "Communities"
+- components/admin/AdminCirclesClient.tsx: h1 "Cultural Community Circles" → "Communities", "active circles" → "active communities"
+- app/dashboard/cultural-circles/page.tsx: metadata "Cultural Circles" → "Communities"
+- app/admin/cultural-circles/page.tsx: metadata "Cultural Circles Admin" → "Communities Admin"
+- URLs /dashboard/cultural-circles and /admin/cultural-circles unchanged
+
+ENHANCEMENT 2 — Seed 8 interest-based community circles:
+- supabase/migrations/014_interest_circles.sql CREATED
+  - ALTER TABLE cultural_circles ADD COLUMN IF NOT EXISTS interest_tag text
+  - INSERT 8 circles: Gardening & Nature Club, Books & Storytelling Circle,
+    Music Lovers Circle, Cooking & Recipes Circle, Faith & Spirituality Circle,
+    Sports & Games Circle, Travel Memories Circle, Crafts & Creative Arts Circle
+  - Each with matching interest_tag from TOPICS enum: 'Gardening', 'Books',
+    'Music', 'Cooking', 'Faith & spirituality', 'Sports', 'Travel memories', 'Family'
+- types/database.ts: interest_tag column added to cultural_circles Row/Insert
+- lib/data/circles.ts: CulturalCircle interface updated with interest_tag: string | null
+
+ENHANCEMENT 3 — "Recommended for you" section:
+- app/dashboard/cultural-circles/page.tsx: added getMemberById() call to get
+  member's topics_enjoy; passes memberTopics to CulturalCirclesClient
+- CulturalCirclesClient.tsx Props: added memberTopics?: string[]
+- Logic: case-insensitive match of circle.interest_tag against memberTopics;
+  falls back to most popular by member_count if <2 interest matches;
+  shows 2-3 recommended circles above Community Events section;
+  only shown when hasMember=true and not all circles already joined
+
+ENHANCEMENT 4 — Admin "Create new community" form:
+- app/api/admin/circles/create/route.ts CREATED: POST; admin/navigator only;
+  validates name + description; calls createCommunityCircle()
+- lib/data/circles.ts: createCommunityCircle() function added
+- AdminCirclesClient.tsx: "+ New Community" button opens create form with
+  name, description, primary_language (select), interest_tag (select from TOPICS);
+  on success appends new circle to live list without page reload; toast confirmation
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — ✓ Compiled successfully; all 65 routes including
+  /api/admin/circles/create (ƒ), /dashboard/cultural-circles (ƒ), /dashboard/events (ƒ)
+- git commit 72187a1 pushed to origin/main
+
+ERRORS ENCOUNTERED:
+- None — clean implementation
+
+DECISIONS MADE:
+- Date.UTC() + getUTCDay()/getUTCMonth() approach for event date formatting:
+  timezone-invariant, same as circles pattern, no extra library needed
+- interest_tag stored as single text value matching exact TOPICS strings from onboarding;
+  case-insensitive comparison in frontend handles legacy lowercase seeds
+- Recommended section limited to 3 circles; only shows when hasMember=true
+- "Create new community" form updates live circles list in AdminCirclesClient state
+  so new community is immediately visible in the circle list below
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- Human must run migration 014 in Supabase SQL Editor:
+  Copy-paste supabase/migrations/014_interest_circles.sql
+  VERIFY: cultural_circles table now has interest_tag column; 8 new rows present
+- Human must verify in browser:
+  Phase 35 RSVP verification (logged in as family account):
+  4. /dashboard/events → click RSVP on an upcoming event → button changes to "Going!";
+     teal panel shows dial-in: "Call [number] and enter [code]"
+  5. If a today's event exists: "Join Now" navy button
+  6. Cancel RSVP → button reverts to "RSVP"; panel disappears; count decrements
+  Phase 34 Communities enhancements:
+  7. /dashboard/cultural-circles → heading now reads "Communities"
+  8. "Recommended for you" section shows 2–3 circles based on member interests
+  9. /admin/cultural-circles → "+ New Community" button shows create form;
+     fill in name/description/language/tag → submit → new community appears in list
+- If all pass: mark Phase 35 all 8 items [x], mark Phase 34 enhancement items [x],
+  present AWAITING HUMAN APPROVAL for Phase 35, begin Phase 36
+
+AWAITING HUMAN APPROVAL
