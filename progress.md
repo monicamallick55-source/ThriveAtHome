@@ -3875,3 +3875,84 @@ AWAITING HUMAN APPROVAL
 APPROVED — Phase 34 Cultural Community Circles verified. All 6 browser checks pass. External events (Meetup, Eventbrite etc.) correctly link out to external platforms — full RSVP integration deferred to M17 when AI provider is activated. Begin Phase 35 Virtual Events Platform.
 ISSUE: External event cards (Meetup, Eventbrite, Luma) on /dashboard/cultural-circles do nothing when clicked — the "Learn more" link is not working. Fix by ensuring each external event card has a working anchor tag with href pointing to the external platform URL (e.g. meetup.com, eventbrite.com, lu.ma) and target="_blank" rel="noopener noreferrer" so it opens in a new tab. The stub event cards should have real placeholder URLs for each platform so clicking actually opens the external site.
 
+
+---
+SESSION: 55
+DATE: 2026-05-28 UTC
+MILESTONE: M14
+PHASE: 34 ISSUE FIX → 35 — Virtual Events Platform
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 34 issue fix: "Learn more" links on external event cards now use real placeholder URLs (meetup.com, eventbrite.com, volunteermatch.org); tsc + build pass; git commit f6af786
+- Phase 35 checklist: 1 of 8 items [x] (tsc + build verified); 7 require migration + browser verification
+- Current item: Migration written; awaiting human to run migration 013 in Supabase SQL Editor, then verify in browser
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider (suggestLocalEvents now returns real platform URLs)
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider (TwilioSmsProvider built; activates when TWILIO_ACCOUNT_SID set)
+- emailProvider: StubEmailProvider (SendGridEmailProvider built; activates when SENDGRID_API_KEY set)
+- billingProvider: StripeBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+PHASE 34 ISSUE FIX — "Learn more" links not working:
+- lib/stubs/StubAiProvider.ts — MODIFIED: replaced url: '#' with real platform URLs: meetup.com/find/?keywords=senior+social, eventbrite.com/d/online/senior-yoga/, volunteermatch.org/search/?k=community+garden+senior
+- Root cause: UI already had correct anchor tag with target="_blank" rel="noopener noreferrer" — rendered only when url !== '#'. Stub was returning '#' for all 3 events, so the "Contact your navigator" fallback appeared instead. Fix: real URLs → "Learn more →" link renders and opens in new tab.
+- git commit f6af786 pushed to origin/main
+
+PHASE 35 — Virtual Events Platform:
+- supabase/migrations/013_events.sql — CREATED: event_format + event_status enums; events table with location_address (in-person support); event_rsvps table; RLS policies (authenticated read; admin/navigator manage; family read own RSVPs)
+- types/database.ts — MODIFIED: EventFormat + EventStatus types; events Row/Insert/Update types; event_rsvps Row/Insert/Update types; enums added
+- lib/data/events.ts — CREATED: getUpcomingEvents (fetches upcoming+live events, checks user RSVP status); rsvpToEvent (insert + rsvp_count increment); cancelEventRsvp (delete + decrement); createEvent
+- app/api/events/rsvp/route.ts — CREATED: POST; auth + member check; action='rsvp'|'cancel'; calls rsvpToEvent/cancelEventRsvp
+- app/api/admin/events/route.ts — CREATED: POST; admin/navigator role required; calls createEvent
+- components/events/EventsClient.tsx — CREATED: "Happening Today" section with "Join Now" button; "Upcoming Events" section; EventCard with format badge, RSVP/cancel, dial-in details shown prominently on RSVP; phone number displayed large; video link; in-person address; rsvp_count
+- components/events/AdminCreateEventClient.tsx — CREATED: full event creation form; format radio (Phone only/Video or phone/In person); conditional dial-in/video link/address fields; recurring toggle; timezone selector
+- app/dashboard/events/page.tsx — REBUILT: real Server Component; passes member.id to getUpcomingEvents for RSVP status; renders EventsClient
+- app/admin/events/create/page.tsx — CREATED: admin/navigator gated Server Component; renders AdminCreateEventClient
+- checklist.md — MODIFIED: Phase 34 marked COMPLETE (Session 54 APPROVED); Phase 35 added IN PROGRESS with all 8 items [~]
+- git commit 3bb62cc pushed to origin/main
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — ✓ Compiled successfully; /dashboard/events (ƒ), /admin/events/create (ƒ), /api/events/rsvp (ƒ), /api/admin/events (ƒ) all in build output
+- git ls-files | grep .env: PASSED — only .env.local.example (safe)
+- .single() scan in new files: PASSED — zero usage
+
+ERRORS ENCOUNTERED:
+- getMemberForAuthUser returns {data, error} not {member} — fixed at 2 call sites (app/api/events/rsvp/route.ts, app/dashboard/events/page.tsx)
+
+DECISIONS MADE:
+- Phase 34 "Learn more" fix: real platform search/discover URLs used as placeholders (not deep links to non-existent events) so clicking opens a real, useful page
+- events table includes location_address for in-person support (same as circle_events pattern from Session 53)
+- EventCard: today's events use navy background "Join Now" button vs teal "RSVP" for upcoming; isToday checks event_date against local UTC date string
+- Admin create event form: conditional fields based on format (same UX pattern as circle events admin)
+- getUpcomingEvents fetches events with status IN ('upcoming', 'live') and event_date >= today
+- RSVP count uses select-then-update pattern (avoids Supabase rpc constraints)
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- Human must run migration 013 in Supabase SQL Editor (REQUIRED before testing):
+  Copy-paste supabase/migrations/013_events.sql
+  VERIFY: Supabase Table Editor → events and event_rsvps tables present
+- Human must verify in browser (logged in as family account):
+  1. /dashboard/events → page loads (not "Coming soon"); shows empty state with warm message
+  2. Admin creates 3 test events via /admin/events/create (one with today's date)
+  3. Reload /dashboard/events → events shown in chronological order with date, time, host, format badge
+  4. Click RSVP on an upcoming event → button changes to "Going!"; dial-in details shown prominently; "Call [number] and enter [code] when prompted. That's it."
+  5. Today's event shows "Join Now" button (not "RSVP") with phone number large
+  6. Cancel RSVP → button returns to "RSVP", rsvp_count decrements
+  7. /admin/events/create (admin login) → form loads; select In-person → address field appears; submit → event appears in /dashboard/events
+- Also verify Phase 34 ISSUE fix: /dashboard/cultural-circles → "Events Near You" section → click "Learn more →" on any card → opens meetup.com/eventbrite.com/volunteermatch.org in new tab
+- If all pass: mark Phase 35 all items [x], present AWAITING HUMAN APPROVAL, begin Phase 36
+
+AWAITING HUMAN APPROVAL

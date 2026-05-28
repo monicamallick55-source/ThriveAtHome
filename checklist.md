@@ -423,7 +423,8 @@ M13 Volunteer Network Phase 29 [x][x][x][x][x][x][x][x]  8/8 ✅ COMPLETE (Sessi
                       Phase 31 [x][x][x][x][x][x]   6/6 ✅ COMPLETE (Session 44 APPROVED)
                       Phase 32 [x][x][x][x][x]      5/5 ✅ COMPLETE (Session 46 APPROVED)
                       Phase 33 [x][x][x][x]         4/4 ✅ COMPLETE (Session 50 APPROVED)
-M14 Community         Phase 34 [x][x][x][x][x][x][x][x][x][x] 10/10 COMPLETE (Session 52 — issue fixed; awaiting human APPROVED)
+M14 Community         Phase 34 [x][x][x][x][x][x][x][x][x][x] 10/10 ✅ COMPLETE (Session 54 APPROVED)
+                      Phase 35 [~][~][~][~][~][~][~][~]    8/8 IN PROGRESS (Session 55 — awaiting migration + browser verify)
 ```
 
 ## M10 — SMS + Email Notifications
@@ -576,6 +577,20 @@ STATUS: `COMPLETE`
 - [x] Leave circle — /api/circles/leave POST; membership row deleted; member_count decremented
 - [x] Admin circle management at /admin/cultural-circles — AdminCirclesClient: circle list with member counts; create event form with full field set; admin/navigator gated
 - [x] npx tsc --noEmit passes — zero errors (Session 51)
+
+---
+
+### Phase 35 — Virtual Events Platform
+STATUS: `IN PROGRESS`
+
+- [~] Migration 013 runs without errors — supabase/migrations/013_events.sql written; human must run in Supabase SQL Editor; VERIFY: events and event_rsvps tables visible in Supabase
+- [~] /dashboard/events — real page replaces placeholder — EventsClient built; ƒ dynamic in build output; human must verify shows events (not "Coming soon")
+- [~] Events display correctly — EventsClient renders in chronological order with date, time, host, format badge
+- [~] RSVP works — /api/events/rsvp POST; button changes to "Going!"; dial-in details shown prominently
+- [~] RSVP for today's event shows "Join Now" — EventCard isToday check; navy background button labeled "Join Now"
+- [~] Cancel RSVP works — action='cancel' decrements rsvp_count; button returns to "RSVP"
+- [~] Admin event creation at /admin/events/create — AdminCreateEventClient built; ƒ dynamic in build output
+- [~] npx tsc --noEmit passes — PASSED (Session 55)
 
 ---
 
