@@ -25,6 +25,7 @@ interface CommunityForm {
   description: string
   primary_language: string
   interest_tag: string
+  community_type: string
 }
 
 const defaultCommunityForm: CommunityForm = {
@@ -32,6 +33,7 @@ const defaultCommunityForm: CommunityForm = {
   description: '',
   primary_language: 'english',
   interest_tag: '',
+  community_type: 'cultural',
 }
 
 const CIRCLE_COLORS = [
@@ -108,6 +110,7 @@ export default function AdminCirclesClient({ circles: initialCircles }: Props) {
           description: communityForm.description.trim(),
           primary_language: communityForm.primary_language,
           interest_tag: communityForm.interest_tag || null,
+          community_type: communityForm.community_type,
         }),
       })
       if (res.ok) {
@@ -275,6 +278,47 @@ export default function AdminCirclesClient({ circles: initialCircles }: Props) {
                   rows={3}
                   style={{ ...inputStyle, height: 'auto', padding: '10px 12px', resize: 'vertical', lineHeight: 1.5 }}
                 />
+              </div>
+
+              <div style={{ marginBottom: '16px' }}>
+                <label style={labelStyle}>Community type *</label>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  {[
+                    { value: 'cultural', label: 'Cultural & Heritage', desc: 'Cultural, ethnic, and heritage communities' },
+                    { value: 'interest', label: 'Interest & Hobby', desc: 'Hobby, interest, and activity groups' },
+                  ].map(opt => (
+                    <label
+                      key={opt.value}
+                      style={{
+                        flex: 1, display: 'flex', alignItems: 'flex-start', gap: '10px',
+                        padding: '12px 14px', borderRadius: '10px', cursor: 'pointer',
+                        border: communityForm.community_type === opt.value
+                          ? '2px solid var(--color-teal)'
+                          : '2px solid var(--color-warm-grey)',
+                        backgroundColor: communityForm.community_type === opt.value
+                          ? 'rgba(0,128,120,0.06)' : 'white',
+                        transition: 'all 0.15s',
+                      }}
+                    >
+                      <input
+                        type="radio"
+                        name="community_type"
+                        value={opt.value}
+                        checked={communityForm.community_type === opt.value}
+                        onChange={() => setCommunityForm(f => ({ ...f, community_type: opt.value }))}
+                        style={{ marginTop: '2px', accentColor: 'var(--color-teal)' }}
+                      />
+                      <div>
+                        <span style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, color: 'var(--color-navy)', display: 'block' }}>
+                          {opt.label}
+                        </span>
+                        <span style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)' }}>
+                          {opt.desc}
+                        </span>
+                      </div>
+                    </label>
+                  ))}
+                </div>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
@@ -567,47 +611,73 @@ export default function AdminCirclesClient({ circles: initialCircles }: Props) {
           </div>
         )}
 
-        {/* Circles list */}
-        <div style={{ display: 'grid', gap: '12px' }}>
-          {circles.map((circle, i) => (
-            <div key={circle.id} style={{
-              backgroundColor: 'white', borderRadius: '14px',
-              boxShadow: '0 2px 6px rgba(0,0,0,0.05)',
-              borderLeft: `4px solid ${CIRCLE_COLORS[i % CIRCLE_COLORS.length]}`,
-              padding: '16px 20px',
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              flexWrap: 'wrap', gap: '12px',
-            }}>
-              <div>
-                <p style={{
-                  fontFamily: 'var(--font-display)', fontSize: '17px', fontWeight: 500,
-                  color: 'var(--color-navy)', margin: '0 0 2px',
-                }}>{circle.circle_name}</p>
-                <p style={{
-                  fontFamily: 'var(--font-body)', fontSize: '14px',
-                  color: 'var(--color-text-secondary)', margin: 0,
+        {/* Circles list — split by community_type */}
+        {(['cultural', 'interest'] as const).map(type => {
+          const sectionCircles = circles.filter(c => (c.community_type ?? 'cultural') === type)
+          if (sectionCircles.length === 0) return null
+          const sectionLabel = type === 'cultural' ? 'Cultural & Heritage Communities' : 'Interest & Hobby Communities'
+          return (
+            <div key={type} style={{ marginBottom: '32px' }}>
+              <h2 style={{
+                fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600,
+                color: 'var(--color-text-secondary)', textTransform: 'uppercase',
+                letterSpacing: '0.06em', margin: '0 0 12px',
+              }}>
+                {sectionLabel}
+                <span style={{
+                  marginLeft: '8px', fontSize: '12px', fontWeight: 400,
+                  backgroundColor: 'var(--color-cream)', color: 'var(--color-text-secondary)',
+                  padding: '1px 8px', borderRadius: '10px',
                 }}>
-                  {circle.member_count} {circle.member_count === 1 ? 'member' : 'members'} · {circle.primary_language}
-                </p>
+                  {sectionCircles.length}
+                </span>
+              </h2>
+              <div style={{ display: 'grid', gap: '12px' }}>
+                {sectionCircles.map((circle) => {
+                  const i = circles.findIndex(c => c.id === circle.id)
+                  return (
+                    <div key={circle.id} style={{
+                      backgroundColor: 'white', borderRadius: '14px',
+                      boxShadow: '0 2px 6px rgba(0,0,0,0.05)',
+                      borderLeft: `4px solid ${CIRCLE_COLORS[i % CIRCLE_COLORS.length]}`,
+                      padding: '16px 20px',
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      flexWrap: 'wrap', gap: '12px',
+                    }}>
+                      <div>
+                        <p style={{
+                          fontFamily: 'var(--font-display)', fontSize: '17px', fontWeight: 500,
+                          color: 'var(--color-navy)', margin: '0 0 2px',
+                        }}>{circle.circle_name}</p>
+                        <p style={{
+                          fontFamily: 'var(--font-body)', fontSize: '14px',
+                          color: 'var(--color-text-secondary)', margin: 0,
+                        }}>
+                          {circle.member_count} {circle.member_count === 1 ? 'member' : 'members'} · {circle.primary_language}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setForm(f => ({ ...f, circleIds: [circle.id] }))
+                          setShowEventForm(true)
+                          setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 50)
+                        }}
+                        style={{
+                          padding: '7px 14px', borderRadius: '8px',
+                          fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 500,
+                          cursor: 'pointer', border: `1px solid ${CIRCLE_COLORS[i % CIRCLE_COLORS.length]}`,
+                          backgroundColor: 'white', color: CIRCLE_COLORS[i % CIRCLE_COLORS.length],
+                        }}
+                      >
+                        + Create event
+                      </button>
+                    </div>
+                  )
+                })}
               </div>
-              <button
-                onClick={() => {
-                  setForm(f => ({ ...f, circleIds: [circle.id] }))
-                  setShowEventForm(true)
-                  setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 50)
-                }}
-                style={{
-                  padding: '7px 14px', borderRadius: '8px',
-                  fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 500,
-                  cursor: 'pointer', border: `1px solid ${CIRCLE_COLORS[i % CIRCLE_COLORS.length]}`,
-                  backgroundColor: 'white', color: CIRCLE_COLORS[i % CIRCLE_COLORS.length],
-                }}
-              >
-                + Create event
-              </button>
             </div>
-          ))}
-        </div>
+          )
+        })}
       </div>
     </div>
   )

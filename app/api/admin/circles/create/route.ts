@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
 
-  const { circle_name, description, primary_language, interest_tag } = body
+  const { circle_name, description, primary_language, interest_tag, community_type } = body
 
   if (!circle_name || typeof circle_name !== 'string' || !circle_name.trim()) {
     return NextResponse.json({ error: 'circle_name is required' }, { status: 400 })
@@ -36,6 +36,9 @@ export async function POST(request: Request) {
     interest_tag: typeof interest_tag === 'string' && interest_tag.trim()
       ? interest_tag.trim()
       : null,
+    community_type: typeof community_type === 'string' && community_type.trim()
+      ? community_type.trim()
+      : 'cultural',
   })
 
   if (!circle) return NextResponse.json({ error: 'Failed to create community' }, { status: 500 })

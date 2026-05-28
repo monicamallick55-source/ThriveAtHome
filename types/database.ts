@@ -688,6 +688,7 @@ export interface Database {
           is_active: boolean
           image_placeholder: string | null
           interest_tag: string | null
+          community_type: string
         }
         Insert: {
           id?: string
@@ -699,6 +700,7 @@ export interface Database {
           is_active?: boolean
           image_placeholder?: string | null
           interest_tag?: string | null
+          community_type?: string
         }
         Update: Partial<Database['public']['Tables']['cultural_circles']['Insert']>
         Relationships: []

@@ -272,7 +272,14 @@ export default function CulturalCirclesClient({ circles, joinedCircleIds, platfo
 
   const allCirclesWithIndex = circles.map((c, i) => ({ circle: c, index: i }))
   const joinedWithIndex = allCirclesWithIndex.filter(({ circle }) => joined.has(circle.id))
-  const otherWithIndex = allCirclesWithIndex.filter(({ circle }) => !joined.has(circle.id))
+
+  // Split unjoined circles by community_type for separate sections
+  const unjoinedCultural = allCirclesWithIndex.filter(
+    ({ circle }) => !joined.has(circle.id) && circle.community_type !== 'interest'
+  )
+  const unjoinedInterest = allCirclesWithIndex.filter(
+    ({ circle }) => !joined.has(circle.id) && circle.community_type === 'interest'
+  )
 
   return (
     <div style={{ flex: 1, padding: '32px 24px' }}>
@@ -502,7 +509,7 @@ export default function CulturalCirclesClient({ circles, joinedCircleIds, platfo
           </div>
         )}
 
-        {/* Joined circles */}
+        {/* Your Communities — pinned joined circles */}
         {joinedWithIndex.length > 0 && (
           <div style={{ marginBottom: '40px' }}>
             <h2 style={{
@@ -528,28 +535,64 @@ export default function CulturalCirclesClient({ circles, joinedCircleIds, platfo
           </div>
         )}
 
-        {/* Other circles */}
-        {otherWithIndex.length > 0 && (
-          <div>
-            {joinedWithIndex.length > 0 && (
-              <h2 style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: '14px',
-                fontWeight: 600,
-                color: 'var(--color-text-secondary)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.06em',
-                margin: '0 0 16px',
-              }}>
-                All Communities
-              </h2>
-            )}
+        {/* Cultural & Heritage Communities */}
+        {unjoinedCultural.length > 0 && (
+          <div style={{ marginBottom: '40px' }}>
+            <h2 style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: '14px',
+              fontWeight: 600,
+              color: 'var(--color-text-secondary)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+              margin: '0 0 6px',
+            }}>
+              Cultural &amp; Heritage Communities
+            </h2>
+            <p style={{
+              fontFamily: 'var(--font-body)', fontSize: '14px',
+              color: 'var(--color-text-secondary)', margin: '0 0 16px',
+            }}>
+              Connect with others who share your cultural heritage, language, and traditions.
+            </p>
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
               gap: '20px',
             }}>
-              {otherWithIndex.map(({ circle, index }) => (
+              {unjoinedCultural.map(({ circle, index }) => (
+                <CircleCard key={circle.id} circle={circle} colorIndex={index} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Interest & Hobby Communities */}
+        {unjoinedInterest.length > 0 && (
+          <div style={{ marginBottom: '40px' }}>
+            <h2 style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: '14px',
+              fontWeight: 600,
+              color: 'var(--color-text-secondary)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+              margin: '0 0 6px',
+            }}>
+              Interest &amp; Hobby Communities
+            </h2>
+            <p style={{
+              fontFamily: 'var(--font-body)', fontSize: '14px',
+              color: 'var(--color-text-secondary)', margin: '0 0 16px',
+            }}>
+              Find others who share your passions and hobbies.
+            </p>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+              gap: '20px',
+            }}>
+              {unjoinedInterest.map(({ circle, index }) => (
                 <CircleCard key={circle.id} circle={circle} colorIndex={index} />
               ))}
             </div>

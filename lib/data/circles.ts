@@ -9,6 +9,7 @@ export interface CulturalCircle {
   is_active: boolean
   image_placeholder: string | null
   interest_tag: string | null
+  community_type: string
 }
 
 export interface CirclePost {
@@ -319,6 +320,7 @@ export async function createCommunityCircle(circle: {
   description: string
   primary_language: string
   interest_tag?: string | null
+  community_type?: string
 }): Promise<CulturalCircle | null> {
   const supabase = await createClient()
   const { data, error } = await supabase
@@ -328,6 +330,7 @@ export async function createCommunityCircle(circle: {
       description: circle.description,
       primary_language: circle.primary_language,
       interest_tag: circle.interest_tag ?? null,
+      community_type: circle.community_type ?? 'cultural',
       is_active: true,
       member_count: 0,
     })
