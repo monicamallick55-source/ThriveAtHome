@@ -3956,3 +3956,71 @@ NEXT SESSION MUST:
 - If all pass: mark Phase 35 all items [x], present AWAITING HUMAN APPROVAL, begin Phase 36
 
 AWAITING HUMAN APPROVAL
+Migrations 013_events.sql and event_rsvps table confirmed in Supabase — table and policies already exist from previous session. No action needed. events and Events_rsvps tables exist.successfully verified step 1,2,3,7 works.
+Also verified Events near you section, learn more links work 
+could not verify step 4, 5, 6 ISSUE: click on RSVP for in person event  and video/ phone event says 'no  member linked to this account' 
+
+---
+SESSION: 56
+DATE: 2026-05-28 UTC
+MILESTONE: M14
+PHASE: 35 — Virtual Events Platform (ISSUE fix)
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 35 checklist: 8 of 8 items [~] — RSVP issue fixed; awaiting human browser verification of steps 4–6
+- Current item: RSVP fix deployed — human must verify RSVP works as family account
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider
+- emailProvider: StubEmailProvider
+- billingProvider: StripeBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+ISSUE FIX — "No member linked to this account" on event RSVP:
+
+ROOT CAUSE ANALYSIS:
+- app/api/events/rsvp/route.ts used getMemberForAuthUser (2-step lookup: family_members → members row)
+- getMemberForAuthUser used .maybeSingle() which returns PGRST116 error if multiple family_members rows exist for the same supabase_auth_id
+- The circles RSVP (/api/circles/events/rsvp) uses the simpler getFamilyMemberByAuthId pattern which returns the family_members row directly and uses fm.member_id
+- Both getMemberForAuthUser and getFamilyMemberByAuthId lacked .limit(1) making them vulnerable to PGRST116 on duplicate rows
+
+THREE FIXES:
+- lib/data/family.ts — MODIFIED: getFamilyMemberByAuthId now uses .limit(1).maybeSingle() (prevents PGRST116 on duplicate rows)
+- lib/data/members.ts — MODIFIED: getMemberForAuthUser now uses .limit(1).maybeSingle() (same fix)
+- app/api/events/rsvp/route.ts — MODIFIED: switched from getMemberForAuthUser to getFamilyMemberByAuthId (consistent with circles RSVP pattern); better error message when no member linked: "To RSVP to events, please sign in with a family account that has a linked senior profile."
+- app/dashboard/events/page.tsx — MODIFIED: switched from getMemberForAuthUser to getFamilyMemberByAuthId for RSVP status check; uses fm?.member_id ?? undefined
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — /dashboard/events (ƒ), /api/events/rsvp (ƒ) in build output
+- git commit c626014 pushed to origin/main
+
+ERRORS ENCOUNTERED:
+- None — clean fix
+
+DECISIONS MADE:
+- getFamilyMemberByAuthId is the correct function for RSVP routes (returns the family_members row with member_id directly; avoids extra DB call)
+- .limit(1) added to both getFamilyMemberByAuthId and getMemberForAuthUser as defensive fix against PGRST116
+- Error message updated to be actionable: tells the user to sign in with a family account
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- Human must verify in browser (Vercel production or npm run dev), logged in as FAMILY account (test-family@thriveathome.dev / TestPassword123!):
+  4. Click RSVP on an upcoming (non-today) event → button changes to "Going!"; teal confirmation panel appears below with dial-in details: "Call [number] and enter [code] when prompted. That's it."
+  5. Today's event (if one exists): shows "Join Now" button in navy color
+  6. Cancel RSVP → button returns to "RSVP"; teal panel disappears; rsvp_count decrements
+  NOTE: Must be logged in as family account (not admin/navigator/volunteer) — RSVP requires a linked senior member profile
+- If all pass: mark Phase 35 all 8 items [x], present AWAITING HUMAN APPROVAL for Phase 35, begin Phase 36
+
+AWAITING HUMAN APPROVAL

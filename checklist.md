@@ -583,14 +583,14 @@ STATUS: `COMPLETE`
 ### Phase 35 — Virtual Events Platform
 STATUS: `IN PROGRESS`
 
-- [~] Migration 013 runs without errors — supabase/migrations/013_events.sql written; human must run in Supabase SQL Editor; VERIFY: events and event_rsvps tables visible in Supabase
-- [~] /dashboard/events — real page replaces placeholder — EventsClient built; ƒ dynamic in build output; human must verify shows events (not "Coming soon")
-- [~] Events display correctly — EventsClient renders in chronological order with date, time, host, format badge
-- [~] RSVP works — /api/events/rsvp POST; button changes to "Going!"; dial-in details shown prominently
-- [~] RSVP for today's event shows "Join Now" — EventCard isToday check; navy background button labeled "Join Now"
-- [~] Cancel RSVP works — action='cancel' decrements rsvp_count; button returns to "RSVP"
-- [~] Admin event creation at /admin/events/create — AdminCreateEventClient built; ƒ dynamic in build output
-- [~] npx tsc --noEmit passes — PASSED (Session 55)
+- [x] Migration 013 runs without errors — CONFIRMED by human (Session 55): events and event_rsvps tables present in Supabase
+- [x] /dashboard/events — real page replaces placeholder — CONFIRMED by human (Session 55): events calendar loads, not "Coming soon"
+- [x] Events display correctly — CONFIRMED by human (Session 55): events shown in chronological order with date, time, host, format badge
+- [~] RSVP works — ISSUE FIX applied (Session 56): switched to getFamilyMemberByAuthId pattern; awaiting human verification with family account
+- [~] RSVP for today's event shows "Join Now" — awaiting human verification with family account
+- [~] Cancel RSVP works — awaiting human verification with family account
+- [x] Admin event creation at /admin/events/create — CONFIRMED by human (Session 55): form loads; in-person → address field; submit → event appears in /dashboard/events
+- [x] npx tsc --noEmit passes — PASSED (Session 55 + Session 56 post-fix)
 
 ---
 
