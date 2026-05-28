@@ -11,6 +11,10 @@
     {
       "path": "/api/cron/family-nudge",
       "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/cron/celebrations",
+      "schedule": "0 8 * * *"
     }
   ]
 }

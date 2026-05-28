@@ -625,6 +625,18 @@ ARCHITECTURE NOTE: interest_groups table from prompt-advanced.md was not created
 ### Phase 38 — Employer Portal MVP
 STATUS: `COMPLETE`
 
+### Phase 39 — Personalized Celebrations Engine
+STATUS: `COMPLETE`
+
+- [x] Migration 018_celebrations.sql created — celebration_events table with RLS policies; human must run in Supabase SQL Editor (Session 64)
+- [x] /api/cron/celebrations route created — finds members with DOB within 7 days, creates celebration_events row, pushes celebration_upcoming realtime notification to family (Session 64)
+- [x] D-7 family notification sends — cron inserts realtime_notifications with type='celebration_upcoming' and body "[preferred_name]'s birthday is in N days" (Session 64)
+- [x] D-0 dashboard shows birthday banner — isTodayBirthday() runs server-side in dashboard/page.tsx; gold banner renders when true (Session 64)
+- [x] /dashboard/celebrations real page — upcoming celebrations + next birthday card + past milestones; no "Coming soon" (Session 64)
+- [x] AI personalisation calls stub — cron calls aiProvider.generateCelebrationPersonalisation(member, 'birthday'); logs [STUB][AI] and stores result in ai_message column (Session 64)
+- [x] npx tsc --noEmit passes — zero errors (Session 64)
+- [x] vercel.json updated — celebrations cron added at schedule "0 8 * * *" (Session 64)
+
 - [x] supabase/migrations/017_employer.sql — employer_accounts and employer_leads tables with RLS; human must run in Supabase SQL Editor (Session 63)
 - [x] /employers — real landing page replaces placeholder — hero with value prop, stats bar, 4 value prop cards, 3-tier pricing, demo request form (Session 63)
 - [x] Demo request form submits — /api/employers/leads POST; employer_leads row created with status='new'; stub email log to sales team (Session 63)

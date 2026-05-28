@@ -55,6 +55,21 @@ export async function getAllCircles(): Promise<CulturalCircle[]> {
   return data ?? []
 }
 
+export async function getInterestGroups(): Promise<CulturalCircle[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('cultural_circles')
+    .select('*')
+    .eq('is_active', true)
+    .eq('community_type', 'interest')
+    .order('circle_name')
+  if (error) {
+    console.error('[circles] getInterestGroups error:', error.message)
+    return []
+  }
+  return data ?? []
+}
+
 export async function getCircleById(circleId: string): Promise<CulturalCircle | null> {
   const supabase = await createClient()
   const { data, error } = await supabase

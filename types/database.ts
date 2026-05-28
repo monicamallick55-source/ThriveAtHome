@@ -1019,6 +1019,32 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['employer_leads']['Insert']>
         Relationships: []
       }
+      celebration_events: {
+        Row: {
+          id: string
+          created_at: string
+          member_id: string
+          celebration_type: string
+          event_date: string
+          status: string
+          ai_message: string | null
+          family_notified_at: string | null
+          community_posted_at: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          member_id: string
+          celebration_type: string
+          event_date: string
+          status?: string
+          ai_message?: string | null
+          family_notified_at?: string | null
+          community_posted_at?: string | null
+        }
+        Update: Partial<Database['public']['Tables']['celebration_events']['Insert']>
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>

@@ -9,6 +9,7 @@ import { getNotificationsForMember } from '@/lib/data/notifications'
 import { getTasksForMember } from '@/lib/data/tasks'
 import { getFamilyMemberByAuthId } from '@/lib/data/family'
 import { syncMemberSubscription } from '@/lib/stripe/sync'
+import { isTodayBirthday } from '@/lib/data/celebrations'
 import DashboardClient from '@/components/dashboard/DashboardClient'
 import type { CheckInCall } from '@/lib/data/calls'
 import type { Alert } from '@/lib/data/alerts'
@@ -71,6 +72,8 @@ export default async function DashboardPage({
     withTimeout<FamilyMember>(getFamilyMemberByAuthId(user.id)),
   ])
 
+  const memberIsBirthday = member.date_of_birth ? isTodayBirthday(member.date_of_birth) : false
+
   return (
     <DashboardClient
       member={member}
@@ -84,6 +87,7 @@ export default async function DashboardPage({
       initialTasks={tasksResult.data ?? []}
       tasksError={tasksResult.error}
       showSubscribedBanner={showSubscribedBanner}
+      isBirthday={memberIsBirthday}
     />
   )
 }

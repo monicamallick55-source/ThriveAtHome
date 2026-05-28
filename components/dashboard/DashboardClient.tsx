@@ -29,6 +29,7 @@ export interface DashboardClientProps {
   initialTasks: FamilyTaskItem[]
   tasksError: string | null
   showSubscribedBanner?: boolean
+  isBirthday?: boolean
 }
 
 function QuickActions() {
@@ -120,6 +121,7 @@ function DashboardInner(props: DashboardClientProps) {
     initialTasks,
     tasksError,
     showSubscribedBanner = false,
+    isBirthday = false,
   } = props
 
   const [bannerVisible, setBannerVisible] = useState(showSubscribedBanner)
@@ -139,6 +141,27 @@ function DashboardInner(props: DashboardClientProps) {
         unreadCount={unreadCount}
         onMarkAllRead={markAllRead}
       />
+
+      {/* Birthday banner */}
+      {isBirthday && (
+        <div
+          role="status"
+          style={{
+            background: 'linear-gradient(135deg, #f9c74f 0%, #f8961e 100%)',
+            padding: '16px 24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '12px',
+          }}
+        >
+          <span style={{ fontSize: '28px' }} aria-hidden="true">🎂</span>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '18px', fontWeight: 600, color: '#1a1a2e', margin: 0, textAlign: 'center' }}>
+            Happy Birthday, {member.preferred_name}! Wishing you a wonderful day filled with joy.
+          </p>
+          <span style={{ fontSize: '28px' }} aria-hidden="true">🎉</span>
+        </div>
+      )}
 
       {/* Subscription success banner */}
       {bannerVisible && (
