@@ -4296,3 +4296,132 @@ NEXT SESSION MUST:
 - If all pass: mark Phase 34 + Phase 35 APPROVED_COMPLETE, begin Phase 36
 
 AWAITING HUMAN APPROVAL
+ISSUE: The member-facing /dashboard/cultural-circles has been correctly renamed to /dashboard/communities but the admin page and any other references still use the old name. Please rename: (1) /admin/cultural-circles → /admin/communities — move app/admin/cultural-circles/page.tsx to app/admin/communities/page.tsx and add a redirect in next.config.ts; (2) Search the entire codebase for any remaining references to "cultural-circles" or "cultural_circles" in navigation links, breadcrumbs, button labels, and page titles — update all of them to use "communities" or "community" instead; (3) The navigation link in the dashboard nav bar that points to /dashboard/cultural-circles should now point to /dashboard/communities; (4) Any admin sidebar links pointing to /admin/cultural-circles should point to /admin/communities. The database table name cultural_circles can stay as-is — only the UI routes and labels need updating.
+
+---
+SESSION: 60
+DATE: 2026-05-28 UTC
+MILESTONE: M14
+PHASE: 34/35 — Admin communities URL rename + final URL cleanup
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 34 + Phase 35: all ISSUE fixes complete, including this URL rename
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider
+- emailProvider: StubEmailProvider
+- billingProvider: StripeBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+ISSUE FIX — Rename /admin/cultural-circles → /admin/communities:
+- app/admin/communities/page.tsx — CREATED: canonical admin communities page (identical content to old admin/cultural-circles page, cleaned up)
+- next.config.ts — MODIFIED: added redirect { source: '/admin/cultural-circles', destination: '/admin/communities', permanent: true }
+- app/dashboard/cultural-circles/[circleId]/page.tsx — MODIFIED: back link updated from /dashboard/cultural-circles to /dashboard/communities; label changed from "← Community Circles" to "← Communities"
+- DATABASE TABLE cultural_circles — UNCHANGED (as instructed; only UI routes updated)
+- lib/data/circles.ts — UNCHANGED (table name in queries stays cultural_circles)
+- DashNav.tsx — no Communities nav link was present; DashNav has: Dashboard, History, Family, Documents only (Communities is accessed via dashboard quick actions)
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — ✓ Compiled successfully in 33.6s; /admin/communities (ƒ dynamic) in build output; /admin/cultural-circles (ƒ redirect source) in build output
+- git commit 7c17c41 pushed to origin/main
+
+ERRORS ENCOUNTERED:
+- None — clean rename
+
+DECISIONS MADE:
+- Old /admin/cultural-circles kept as redirect source (permanent=true) — any bookmarks still work
+- DashNav does not need updating — it has no Communities link (Communities accessed via dashboard quick actions or URL)
+- The [circleId] page in the old /dashboard/cultural-circles/ path also updated (back link now → /dashboard/communities) since users may land there via the redirect
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- Human must verify in browser:
+  1. Visit /admin/cultural-circles → redirects to /admin/communities (URL changes in browser bar)
+  2. /admin/communities → Communities Admin page loads with two-section 3-column grid (Cultural & Heritage / Interest & Hobby)
+  3. /dashboard/cultural-circles → redirects to /dashboard/communities ✓ (already verified last session)
+  4. /dashboard/communities/[any circleId] → back link shows "← Communities" linking to /dashboard/communities
+- If all pass: mark Phase 34 + Phase 35 APPROVED_COMPLETE, begin Phase 36 (Skill Exchange / Time Banking)
+
+AWAITING HUMAN APPROVAL
+APPROVED
+---
+SESSION: 61
+DATE: 2026-05-28 UTC
+MILESTONE: M14
+PHASE: 36 — Skill Exchange / Time Banking
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 36: all 7 checklist items [x], awaiting human approval
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider
+- emailProvider: StubEmailProvider
+- billingProvider: StripeBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+Phase 36 — Skill Exchange / Time Banking built from scratch:
+
+FILES CREATED:
+- supabase/migrations/016_skill_exchange.sql — 4 tables: skills_offered, time_credits, skill_exchanges, time_credit_transactions; RLS on all; policies for authenticated read on skills, family-scoped manage
+- lib/data/skill-exchange.ts — data layer: getActiveSkills (with teacher names), getMemberSkills, registerSkill, requestExchange, getMemberExchanges, getMemberCredits, getMemberTransactions, completeExchange (transfers credits + logs transactions for both parties)
+- app/api/skill-exchange/register/route.ts — POST register skill for member
+- app/api/skill-exchange/request/route.ts — POST request exchange (looks up teacher from skill, validates not own skill)
+- app/api/skill-exchange/complete/route.ts — POST complete exchange (validates membership, transfers credits)
+- components/skill-exchange/SkillExchangeClient.tsx — 3-tab client component: Learn (skill grid cards with color-coded categories, Request button with requested state), Share (form: name/category/description/delivery/group-size + own skills list), My Credits (balance card navy, lifetime earned/spent, transaction history with +/- color amounts)
+
+FILES MODIFIED:
+- types/database.ts — added skills_offered, time_credits, skill_exchanges, time_credit_transactions table types
+- app/dashboard/skill-exchange/page.tsx — replaced "Coming soon" placeholder with real page; fetches all data server-side, passes to SkillExchangeClient
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — ✓ Compiled successfully in 33.9s; /dashboard/skill-exchange shows as ƒ Dynamic in build output
+
+ERRORS ENCOUNTERED:
+- One TSC error: new table types were placed outside the Tables closing brace — fixed immediately
+
+DECISIONS MADE:
+- Credits are 1 per hour of teaching duration (duration_hours on the exchange row)
+- Time credits are 1:1 exchange only; no expiry; no cash value
+- completeExchange upserts both teacher and learner credit rows so no pre-existing row required
+- Learn tab shows all active skills from all members; own skills show "You" as teacher_name
+- Requesting own skill returns 400 "Cannot request your own skill"
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+1. Human runs migration 016_skill_exchange.sql in Supabase SQL Editor
+2. Verify all 4 new tables visible in Supabase Table Editor: skills_offered, time_credits, skill_exchanges, time_credit_transactions
+3. Log in as a family account, navigate to /dashboard/skill-exchange
+4. Verify: 3-tab interface loads (Learn, Share, My Credits) — not "Coming soon"
+5. Go to Share tab → fill in a skill → submit → verify skills_offered row created, skill appears in Learn tab
+6. Go to Learn tab → click "Request this exchange" on the just-created skill from a DIFFERENT session/member
+   (or if testing solo: use Supabase to create a skill for a different member, then request it)
+7. Verify: skill_exchanges row created with status='scheduled'
+8. POST /api/skill-exchange/complete with the exchange_id to complete it
+9. Verify: My Credits tab shows earned credit, transaction history populated
+- If all pass: mark Phase 36 APPROVED_COMPLETE, begin Phase 37 (Interest Groups + Benefits Finder)
+
+AWAITING HUMAN APPROVAL

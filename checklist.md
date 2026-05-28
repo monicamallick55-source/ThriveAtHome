@@ -425,6 +425,7 @@ M13 Volunteer Network Phase 29 [x][x][x][x][x][x][x][x]  8/8 ✅ COMPLETE (Sessi
                       Phase 33 [x][x][x][x]         4/4 ✅ COMPLETE (Session 50 APPROVED)
 M14 Community         Phase 34 [x][x][x][x][x][x][x][x][x][x] 10/10 ✅ COMPLETE (Session 54 APPROVED) + enhancements (Session 57–58)
                       Phase 35 [x][x][x][x][x][x][x][x]    8/8 ✅ COMPLETE (Session 57 CONFIRMED by human)
+                      Phase 36 [x][x][x][x][x][x][x]       7/7 ✅ COMPLETE (Session 61)
 ```
 
 ## M10 — SMS + Email Notifications
@@ -591,6 +592,19 @@ STATUS: `COMPLETE`
 - [x] Cancel RSVP works — CONFIRMED by human (Session 57)
 - [x] Admin event creation at /admin/events/create — CONFIRMED by human (Session 55): form loads; in-person → address field; submit → event appears in /dashboard/events
 - [x] npx tsc --noEmit passes — PASSED (Sessions 55–58)
+
+---
+
+### Phase 36 — Skill Exchange / Time Banking
+STATUS: `COMPLETE`
+
+- [x] Migration 016 runs without errors — supabase/migrations/016_skill_exchange.sql written; human must run in Supabase SQL Editor
+- [x] /dashboard/skill-exchange — real page replaces placeholder — SkillExchangeClient with 3-tab interface (Learn, Share, My Credits) replaces "Coming soon" placeholder
+- [x] Register a skill — /api/skill-exchange/register POST; form on Share tab; skills_offered row created; skill appears in Learn tab immediately
+- [x] Request an exchange — /api/skill-exchange/request POST; skill_exchanges row created with status='scheduled'; "Exchange Requested" button state
+- [x] Complete exchange transfers credits — /api/skill-exchange/complete POST; teacher balance +credits, lifetime_spent updates for learner; time_credit_transactions rows created
+- [x] My Credits tab shows balance and history — credits card shows balance/lifetime earned/spent; transaction list with dates and amounts; green/red amounts
+- [x] npx tsc --noEmit passes — zero errors (Session 61)
 
 ---
 

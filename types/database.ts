@@ -869,6 +869,102 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['circle_event_rsvps']['Insert']>
         Relationships: []
       }
+      skills_offered: {
+        Row: {
+          id: string
+          created_at: string
+          member_id: string
+          skill_name: string
+          skill_category: string
+          description: string
+          delivery_method: string
+          max_group_size: number
+          is_active: boolean
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          member_id: string
+          skill_name: string
+          skill_category?: string
+          description: string
+          delivery_method?: string
+          max_group_size?: number
+          is_active?: boolean
+        }
+        Update: Partial<Database['public']['Tables']['skills_offered']['Insert']>
+        Relationships: []
+      }
+      time_credits: {
+        Row: {
+          id: string
+          member_id: string
+          balance: number
+          lifetime_earned: number
+          lifetime_spent: number
+        }
+        Insert: {
+          id?: string
+          member_id: string
+          balance?: number
+          lifetime_earned?: number
+          lifetime_spent?: number
+        }
+        Update: Partial<Database['public']['Tables']['time_credits']['Insert']>
+        Relationships: []
+      }
+      skill_exchanges: {
+        Row: {
+          id: string
+          created_at: string
+          teacher_member_id: string
+          learner_member_id: string
+          skill_id: string
+          scheduled_date: string | null
+          duration_hours: number
+          status: string
+          teacher_rating: number | null
+          learner_rating: number | null
+          credits_transferred: number | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          teacher_member_id: string
+          learner_member_id: string
+          skill_id: string
+          scheduled_date?: string | null
+          duration_hours?: number
+          status?: string
+          teacher_rating?: number | null
+          learner_rating?: number | null
+          credits_transferred?: number | null
+        }
+        Update: Partial<Database['public']['Tables']['skill_exchanges']['Insert']>
+        Relationships: []
+      }
+      time_credit_transactions: {
+        Row: {
+          id: string
+          created_at: string
+          member_id: string
+          amount: number
+          type: string
+          exchange_id: string | null
+          description: string
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          member_id: string
+          amount: number
+          type: string
+          exchange_id?: string | null
+          description: string
+        }
+        Update: Partial<Database['public']['Tables']['time_credit_transactions']['Insert']>
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>
