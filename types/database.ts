@@ -19,6 +19,8 @@ export type NotifStatus = 'sent' | 'failed' | 'stub'
 export type CheckInFrequency = 'daily' | 'every_other_day' | 'weekly'
 export type VolunteerStatus = 'pending' | 'background_check' | 'active' | 'inactive' | 'suspended'
 export type VisitType = 'phone_call' | 'in_person_visit' | 'virtual_event' | 'grocery_help' | 'walking_companion' | 'reading_aloud' | 'tech_help'
+export type EventFormat = 'phone_only' | 'video_or_phone' | 'in_person'
+export type EventStatus = 'upcoming' | 'live' | 'completed' | 'cancelled'
 
 export interface Database {
   public: {
@@ -779,6 +781,74 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['circle_events']['Insert']>
         Relationships: []
       }
+      events: {
+        Row: {
+          id: string
+          created_at: string
+          title: string
+          description: string | null
+          event_type: string
+          host_name: string | null
+          event_date: string
+          event_time: string
+          timezone: string
+          duration_minutes: number
+          format: EventFormat
+          dial_in_number: string | null
+          dial_in_code: string | null
+          video_link: string | null
+          location_address: string | null
+          max_capacity: number | null
+          is_recurring: boolean
+          recurrence_pattern: string | null
+          status: EventStatus
+          rsvp_count: number
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          title: string
+          description?: string | null
+          event_type?: string
+          host_name?: string | null
+          event_date: string
+          event_time: string
+          timezone?: string
+          duration_minutes?: number
+          format?: EventFormat
+          dial_in_number?: string | null
+          dial_in_code?: string | null
+          video_link?: string | null
+          location_address?: string | null
+          max_capacity?: number | null
+          is_recurring?: boolean
+          recurrence_pattern?: string | null
+          status?: EventStatus
+          rsvp_count?: number
+        }
+        Update: Partial<Database['public']['Tables']['events']['Insert']>
+        Relationships: []
+      }
+      event_rsvps: {
+        Row: {
+          id: string
+          created_at: string
+          event_id: string
+          member_id: string
+          rsvp_date: string
+          attended: boolean
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          event_id: string
+          member_id: string
+          rsvp_date?: string
+          attended?: boolean
+        }
+        Update: Partial<Database['public']['Tables']['event_rsvps']['Insert']>
+        Relationships: []
+      }
       circle_event_rsvps: {
         Row: {
           id: string
@@ -814,6 +884,8 @@ export interface Database {
       check_in_frequency: CheckInFrequency
       volunteer_status: VolunteerStatus
       visit_type: VisitType
+      event_format: EventFormat
+      event_status: EventStatus
     }
     CompositeTypes: Record<string, never>
   }

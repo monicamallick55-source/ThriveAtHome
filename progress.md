@@ -3872,3 +3872,6 @@ NEXT SESSION MUST:
 - Begin Phase 35 only after APPROVED
 
 AWAITING HUMAN APPROVAL
+APPROVED — Phase 34 Cultural Community Circles verified. All 6 browser checks pass. External events (Meetup, Eventbrite etc.) correctly link out to external platforms — full RSVP integration deferred to M17 when AI provider is activated. Begin Phase 35 Virtual Events Platform.
+ISSUE: External event cards (Meetup, Eventbrite, Luma) on /dashboard/cultural-circles do nothing when clicked — the "Learn more" link is not working. Fix by ensuring each external event card has a working anchor tag with href pointing to the external platform URL (e.g. meetup.com, eventbrite.com, lu.ma) and target="_blank" rel="noopener noreferrer" so it opens in a new tab. The stub event cards should have real placeholder URLs for each platform so clicking actually opens the external site.
+
