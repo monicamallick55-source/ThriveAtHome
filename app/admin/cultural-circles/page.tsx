@@ -5,7 +5,7 @@ import { requireAuth, getUserRole } from '@/lib/auth'
 import { getAllCircles } from '@/lib/data/circles'
 import AdminCirclesClient from '@/components/admin/AdminCirclesClient'
 
-export const metadata: Metadata = { title: 'Cultural Circles Admin — ThriveAtHome' }
+export const metadata: Metadata = { title: 'Communities Admin — ThriveAtHome' }
 
 export default async function AdminCulturalCirclesPage() {
   const user = await requireAuth()

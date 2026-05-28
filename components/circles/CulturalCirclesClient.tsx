@@ -29,6 +29,7 @@ interface Props {
   platformEvents: CircleEvent[]
   localEventSuggestions: LocalEventSuggestion[]
   hasMember: boolean
+  memberTopics?: string[]
 }
 
 function formatEventDate(dateStr: string, timeStr: string | null): string {
@@ -52,7 +53,7 @@ const SOURCE_COLORS: Record<string, string> = {
   Local: '#2A8A5E',
 }
 
-export default function CulturalCirclesClient({ circles, joinedCircleIds, platformEvents, localEventSuggestions, hasMember }: Props) {
+export default function CulturalCirclesClient({ circles, joinedCircleIds, platformEvents, localEventSuggestions, hasMember, memberTopics = [] }: Props) {
   const [joined, setJoined] = useState<Set<string>>(new Set(joinedCircleIds))
   const [loadingId, setLoadingId] = useState<string | null>(null)
   const [toast, setToast] = useState<string | null>(null)
@@ -141,6 +142,17 @@ export default function CulturalCirclesClient({ circles, joinedCircleIds, platfo
 
   const joinedCircles = circles.filter(c => joined.has(c.id))
   const otherCircles = circles.filter(c => !joined.has(c.id))
+
+  // Recommended: match interest_tag against member's topics_enjoy (case-insensitive)
+  const memberTopicsLower = memberTopics.map(t => t.toLowerCase())
+  const interestMatches = otherCircles.filter(c =>
+    c.interest_tag && memberTopicsLower.includes(c.interest_tag.toLowerCase())
+  )
+  // Fallback to most popular by member_count if fewer than 2 interest matches
+  const popularFallback = otherCircles
+    .filter(c => !interestMatches.find(m => m.id === c.id))
+    .sort((a, b) => b.member_count - a.member_count)
+  const recommended = [...interestMatches, ...popularFallback].slice(0, 3)
 
   const CircleCard = ({ circle, colorIndex }: { circle: CulturalCircle; colorIndex: number }) => {
     const isJoined = joined.has(circle.id)
@@ -293,7 +305,7 @@ export default function CulturalCirclesClient({ circles, joinedCircleIds, platfo
             margin: '0 0 8px',
             letterSpacing: '-0.01em',
           }}>
-            Cultural Community Circles
+            Communities
           </h1>
           <p style={{
             fontFamily: 'var(--font-body)',
@@ -302,9 +314,36 @@ export default function CulturalCirclesClient({ circles, joinedCircleIds, platfo
             margin: 0,
             lineHeight: 1.5,
           }}>
-            Connect with others who share your heritage, language, and traditions.
+            Connect with others who share your heritage, language, traditions, and interests.
           </p>
         </div>
+
+        {/* Recommended for you — shown when member hasn't joined everything */}
+        {hasMember && recommended.length > 0 && joinedCircles.length < circles.length && (
+          <div style={{ marginBottom: '40px' }}>
+            <h2 style={{
+              fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600,
+              color: 'var(--color-text-secondary)', textTransform: 'uppercase',
+              letterSpacing: '0.06em', margin: '0 0 4px',
+            }}>Recommended for You</h2>
+            <p style={{
+              fontFamily: 'var(--font-body)', fontSize: '14px',
+              color: 'var(--color-text-secondary)', margin: '0 0 16px',
+            }}>
+              Communities that match your interests.
+            </p>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+              gap: '20px',
+            }}>
+              {recommended.map(circle => {
+                const index = circles.findIndex(c => c.id === circle.id)
+                return <CircleCard key={circle.id} circle={circle} colorIndex={index >= 0 ? index : 0} />
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Community Events — platform-wide, visible to all members */}
         {platformEvents.length > 0 && (

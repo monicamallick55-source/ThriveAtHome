@@ -2,23 +2,27 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { requireAuth } from '@/lib/auth'
 import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { getMemberById } from '@/lib/data/members'
 import { getAllCircles, getMemberCircleIds, getPlatformWideEvents } from '@/lib/data/circles'
 import { aiProvider } from '@/lib/providers'
 import CulturalCirclesClient from '@/components/circles/CulturalCirclesClient'
 
-export const metadata: Metadata = { title: 'Cultural Circles — ThriveAtHome' }
+export const metadata: Metadata = { title: 'Communities — ThriveAtHome' }
 
 export default async function CulturalCirclesPage() {
   const user = await requireAuth()
   const { data: fm } = await getFamilyMemberByAuthId(user.id)
   const memberId = fm?.member_id ?? undefined
 
-  const [circles, joinedIds, platformEvents, localEvents] = await Promise.all([
+  const [circles, joinedIds, platformEvents, localEvents, memberResult] = await Promise.all([
     getAllCircles(),
     memberId ? getMemberCircleIds(memberId) : Promise.resolve([]),
     getPlatformWideEvents(memberId),
     aiProvider.suggestLocalEvents('', '', []).catch(() => []),
+    memberId ? getMemberById(memberId) : Promise.resolve({ data: null, error: null }),
   ])
+
+  const memberTopics = (memberResult?.data?.topics_enjoy ?? []) as string[]
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-cream)', display: 'flex', flexDirection: 'column' }}>
@@ -52,6 +56,7 @@ export default async function CulturalCirclesPage() {
         platformEvents={platformEvents}
         localEventSuggestions={localEvents}
         hasMember={!!memberId}
+        memberTopics={memberTopics}
       />
     </div>
   )

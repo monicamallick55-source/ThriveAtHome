@@ -8,6 +8,7 @@ export interface CulturalCircle {
   member_count: number
   is_active: boolean
   image_placeholder: string | null
+  interest_tag: string | null
 }
 
 export interface CirclePost {
@@ -311,4 +312,30 @@ export async function createCircleEvent(event: {
     return null
   }
   return data ? { ...data, circle_ids: data.circle_ids ?? [] } : null
+}
+
+export async function createCommunityCircle(circle: {
+  circle_name: string
+  description: string
+  primary_language: string
+  interest_tag?: string | null
+}): Promise<CulturalCircle | null> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('cultural_circles')
+    .insert({
+      circle_name: circle.circle_name,
+      description: circle.description,
+      primary_language: circle.primary_language,
+      interest_tag: circle.interest_tag ?? null,
+      is_active: true,
+      member_count: 0,
+    })
+    .select()
+    .maybeSingle()
+  if (error) {
+    console.error('[circles] createCommunityCircle error:', error.message)
+    return null
+  }
+  return data
 }

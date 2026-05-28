@@ -20,13 +20,21 @@ function isToday(dateStr: string) {
   return dateStr === today
 }
 
-function formatEventDate(dateStr: string, timeStr: string, timezone: string) {
-  const dt = new Date(`${dateStr}T${timeStr}`)
-  return dt.toLocaleDateString('en-US', {
-    weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC',
-  }) + ' at ' + dt.toLocaleTimeString('en-US', {
-    hour: 'numeric', minute: '2-digit', timeZone: 'UTC',
-  })
+function formatEventDate(dateStr: string, timeStr: string, _timezone: string) {
+  const [year, monthNum, dayNum] = dateStr.split('-').map(Number)
+  // Use UTC constructor so day-of-week is timezone-independent (no server/client mismatch)
+  const d = new Date(Date.UTC(year, monthNum - 1, dayNum))
+  const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December']
+  let out = `${dayNames[d.getUTCDay()]}, ${monthNames[d.getUTCMonth()]} ${d.getUTCDate()}`
+  if (timeStr) {
+    const [h, m] = timeStr.split(':').map(Number)
+    const ampm = h >= 12 ? 'PM' : 'AM'
+    const hour12 = h % 12 === 0 ? 12 : h % 12
+    out += ` at ${hour12}:${String(m).padStart(2, '0')} ${ampm}`
+  }
+  return out
 }
 
 interface Props {

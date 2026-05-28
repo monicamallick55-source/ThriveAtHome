@@ -3,6 +3,37 @@
 import { useState } from 'react'
 import type { CulturalCircle } from '@/lib/data/circles'
 
+const LANGUAGE_OPTIONS = [
+  { value: 'english', label: 'English' },
+  { value: 'spanish', label: 'Español' },
+  { value: 'mandarin', label: '中文 (Mandarin)' },
+  { value: 'vietnamese', label: 'Tiếng Việt' },
+  { value: 'korean', label: '한국어' },
+  { value: 'hindi', label: 'हिन्दी' },
+  { value: 'tagalog', label: 'Tagalog' },
+  { value: 'arabic', label: 'العربية' },
+  { value: 'polish', label: 'Polski' },
+]
+
+const INTEREST_TAG_OPTIONS = [
+  '', 'Family', 'Gardening', 'Cooking', 'Music', 'Travel memories',
+  'Sports', 'Books', 'Movies & TV', 'Faith & spirituality', 'History', 'Nature', 'Current events',
+]
+
+interface CommunityForm {
+  circle_name: string
+  description: string
+  primary_language: string
+  interest_tag: string
+}
+
+const defaultCommunityForm: CommunityForm = {
+  circle_name: '',
+  description: '',
+  primary_language: 'english',
+  interest_tag: '',
+}
+
 const CIRCLE_COLORS = [
   '#E8401C', '#1E6B9E', '#2A8A5E', '#8A4A2E',
   '#6A3D9A', '#D4880E', '#C74B8A', '#1A7A6A',
@@ -39,16 +70,59 @@ const defaultForm: EventForm = {
   is_platform_wide: false,
 }
 
-export default function AdminCirclesClient({ circles }: Props) {
+export default function AdminCirclesClient({ circles: initialCircles }: Props) {
+  const [circles, setCircles] = useState<CulturalCircle[]>(initialCircles)
   const [showEventForm, setShowEventForm] = useState(false)
+  const [showCreateCircleForm, setShowCreateCircleForm] = useState(false)
   const [form, setForm] = useState<EventForm>(defaultForm)
+  const [communityForm, setCommunityForm] = useState<CommunityForm>(defaultCommunityForm)
   const [submitting, setSubmitting] = useState(false)
+  const [creatingCircle, setCreatingCircle] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const [validationError, setValidationError] = useState<string | null>(null)
+  const [circleFormError, setCircleFormError] = useState<string | null>(null)
 
   const showToast = (msg: string) => {
     setToast(msg)
     setTimeout(() => setToast(null), 3500)
+  }
+
+  const handleCreateCircle = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setCircleFormError(null)
+    if (!communityForm.circle_name.trim()) {
+      setCircleFormError('Community name is required.')
+      return
+    }
+    if (!communityForm.description.trim()) {
+      setCircleFormError('Description is required.')
+      return
+    }
+    setCreatingCircle(true)
+    try {
+      const res = await fetch('/api/admin/circles/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          circle_name: communityForm.circle_name.trim(),
+          description: communityForm.description.trim(),
+          primary_language: communityForm.primary_language,
+          interest_tag: communityForm.interest_tag || null,
+        }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setCircles(prev => [...prev, data.circle])
+        setCommunityForm(defaultCommunityForm)
+        setShowCreateCircleForm(false)
+        showToast(`Community "${data.circle.circle_name}" created successfully`)
+      } else {
+        const data = await res.json().catch(() => ({}))
+        setCircleFormError((data as { error?: string }).error ?? 'Failed to create community')
+      }
+    } finally {
+      setCreatingCircle(false)
+    }
   }
 
   const toggleCircle = (circleId: string) => {
@@ -139,23 +213,136 @@ export default function AdminCirclesClient({ circles }: Props) {
             <h1 style={{
               fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 500,
               color: 'var(--color-navy)', margin: '0 0 4px',
-            }}>Cultural Community Circles</h1>
+            }}>Communities</h1>
             <p style={{ fontFamily: 'var(--font-body)', fontSize: '16px', color: 'var(--color-text-secondary)', margin: 0 }}>
-              {circles.length} active circles
+              {circles.length} active communities
             </p>
           </div>
-          <button
-            onClick={() => { setShowEventForm(!showEventForm); setValidationError(null) }}
-            style={{
-              padding: '10px 20px', borderRadius: '10px',
-              fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 500,
-              cursor: 'pointer', border: 'none',
-              backgroundColor: 'var(--color-navy)', color: 'white',
-            }}
-          >
-            {showEventForm ? 'Cancel' : '+ Create Event'}
-          </button>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => { setShowCreateCircleForm(!showCreateCircleForm); setCircleFormError(null); setShowEventForm(false) }}
+              style={{
+                padding: '10px 20px', borderRadius: '10px',
+                fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 500,
+                cursor: 'pointer', border: '1px solid var(--color-teal)',
+                backgroundColor: showCreateCircleForm ? 'white' : 'var(--color-teal)', color: showCreateCircleForm ? 'var(--color-teal)' : 'white',
+              }}
+            >
+              {showCreateCircleForm ? 'Cancel' : '+ New Community'}
+            </button>
+            <button
+              onClick={() => { setShowEventForm(!showEventForm); setValidationError(null); setShowCreateCircleForm(false) }}
+              style={{
+                padding: '10px 20px', borderRadius: '10px',
+                fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 500,
+                cursor: 'pointer', border: 'none',
+                backgroundColor: 'var(--color-navy)', color: 'white',
+              }}
+            >
+              {showEventForm ? 'Cancel' : '+ Create Event'}
+            </button>
+          </div>
         </div>
+
+        {/* Create New Community Form */}
+        {showCreateCircleForm && (
+          <div style={{
+            backgroundColor: 'white', borderRadius: '16px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.06)', padding: '24px', marginBottom: '32px',
+          }}>
+            <h2 style={{
+              fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 500,
+              color: 'var(--color-navy)', margin: '0 0 20px',
+            }}>Create New Community</h2>
+            <form onSubmit={handleCreateCircle}>
+              <div style={{ marginBottom: '16px' }}>
+                <label style={labelStyle}>Community name *</label>
+                <input
+                  type="text"
+                  value={communityForm.circle_name}
+                  onChange={e => setCommunityForm(f => ({ ...f, circle_name: e.target.value }))}
+                  placeholder="e.g. Nature Walkers Circle"
+                  style={inputStyle}
+                />
+              </div>
+
+              <div style={{ marginBottom: '16px' }}>
+                <label style={labelStyle}>Description *</label>
+                <textarea
+                  value={communityForm.description}
+                  onChange={e => setCommunityForm(f => ({ ...f, description: e.target.value }))}
+                  placeholder="A warm 1–2 sentence description of this community..."
+                  rows={3}
+                  style={{ ...inputStyle, height: 'auto', padding: '10px 12px', resize: 'vertical', lineHeight: 1.5 }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                <div>
+                  <label style={labelStyle}>Primary language</label>
+                  <select
+                    value={communityForm.primary_language}
+                    onChange={e => setCommunityForm(f => ({ ...f, primary_language: e.target.value }))}
+                    style={{ ...inputStyle }}
+                  >
+                    {LANGUAGE_OPTIONS.map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label style={labelStyle}>Interest tag</label>
+                  <select
+                    value={communityForm.interest_tag}
+                    onChange={e => setCommunityForm(f => ({ ...f, interest_tag: e.target.value }))}
+                    style={{ ...inputStyle }}
+                  >
+                    {INTEREST_TAG_OPTIONS.map(opt => (
+                      <option key={opt} value={opt}>{opt || '— None —'}</option>
+                    ))}
+                  </select>
+                  <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)', margin: '4px 0 0' }}>
+                    Used to show this community in the &ldquo;Recommended for you&rdquo; section.
+                  </p>
+                </div>
+              </div>
+
+              {circleFormError && (
+                <div style={{
+                  backgroundColor: '#fff0f0', border: '1px solid #ffcccc',
+                  borderRadius: '10px', padding: '10px 14px', marginBottom: '16px',
+                  fontFamily: 'var(--font-body)', fontSize: '14px', color: '#c0392b',
+                }}>{circleFormError}</div>
+              )}
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                <button
+                  type="button"
+                  onClick={() => { setCommunityForm(defaultCommunityForm); setShowCreateCircleForm(false); setCircleFormError(null) }}
+                  style={{
+                    padding: '10px 20px', borderRadius: '10px',
+                    fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 500,
+                    cursor: 'pointer', border: '1px solid var(--color-warm-grey)',
+                    backgroundColor: 'white', color: 'var(--color-text-secondary)',
+                  }}
+                >Cancel</button>
+                <button
+                  type="submit"
+                  disabled={creatingCircle}
+                  style={{
+                    padding: '10px 24px', borderRadius: '10px',
+                    fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 500,
+                    cursor: creatingCircle ? 'wait' : 'pointer', border: 'none',
+                    backgroundColor: 'var(--color-teal)', color: 'white',
+                    opacity: creatingCircle ? 0.7 : 1,
+                  }}
+                >
+                  {creatingCircle ? 'Creating...' : 'Create community'}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
 
         {/* Create Event Form */}
         {showEventForm && (
