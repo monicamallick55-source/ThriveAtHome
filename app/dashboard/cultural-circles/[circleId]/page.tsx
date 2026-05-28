@@ -47,12 +47,12 @@ export default async function CircleDetailPage({ params }: Props) {
           maxWidth: '1200px', margin: '0 auto', padding: '0 24px', width: '100%',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
-          <Link href="/dashboard/cultural-circles" style={{
+          <Link href="/dashboard/communities" style={{
             fontFamily: 'var(--font-body)', fontSize: '18px', fontWeight: 500,
             color: 'var(--color-text-secondary)', textDecoration: 'none',
             display: 'flex', alignItems: 'center', gap: '8px',
           }}>
-            ← Community Circles
+            ← Communities
           </Link>
           <span style={{
             fontFamily: 'var(--font-display)', fontSize: '22px',

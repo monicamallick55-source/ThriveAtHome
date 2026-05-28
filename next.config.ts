@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
         destination: '/dashboard/communities/:id',
         permanent: true,
       },
+      {
+        source: '/admin/cultural-circles',
+        destination: '/admin/communities',
+        permanent: true,
+      },
     ]
   },
 };
