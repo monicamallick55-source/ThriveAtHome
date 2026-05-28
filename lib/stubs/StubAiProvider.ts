@@ -57,7 +57,7 @@ export class StubAiProvider implements AiProvider {
         date: 'Every Tuesday at 2:00 PM',
         location: 'Community Center, Main Street',
         description: 'A weekly gathering for seniors to meet new friends, play cards, and enjoy light refreshments in a warm, welcoming setting.',
-        url: '#',
+        url: 'https://www.meetup.com/find/?keywords=senior+social',
       },
       {
         title: 'Gentle Yoga for Active Seniors',
@@ -65,7 +65,7 @@ export class StubAiProvider implements AiProvider {
         date: 'Wednesdays & Fridays at 10:00 AM',
         location: 'Senior Wellness Studio',
         description: 'Chair-assisted yoga designed for seniors of all fitness levels. Improves flexibility, balance, and mood — no experience needed.',
-        url: '#',
+        url: 'https://www.eventbrite.com/d/online/senior-yoga/',
       },
       {
         title: 'Community Garden Volunteer Day',
@@ -73,7 +73,7 @@ export class StubAiProvider implements AiProvider {
         date: 'First Saturday of each month',
         location: 'Riverside Community Garden',
         description: 'Help tend the neighborhood garden, meet your neighbors, and take home fresh produce. Light outdoor activity — all welcome.',
-        url: '#',
+        url: 'https://www.volunteermatch.org/search/?k=community+garden+senior',
       },
     ]
   }
