@@ -611,17 +611,20 @@ export default function AdminCirclesClient({ circles: initialCircles }: Props) {
           </div>
         )}
 
-        {/* Circles list — split by community_type */}
+        {/* Circles list — split by community_type, 3-column card grid */}
         {(['cultural', 'interest'] as const).map(type => {
           const sectionCircles = circles.filter(c => (c.community_type ?? 'cultural') === type)
           if (sectionCircles.length === 0) return null
           const sectionLabel = type === 'cultural' ? 'Cultural & Heritage Communities' : 'Interest & Hobby Communities'
+          const sectionSubtitle = type === 'cultural'
+            ? 'Connect with others who share cultural heritage, language, and traditions.'
+            : 'Find others who share passions and hobbies.'
           return (
-            <div key={type} style={{ marginBottom: '32px' }}>
+            <div key={type} style={{ marginBottom: '40px' }}>
               <h2 style={{
                 fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600,
                 color: 'var(--color-text-secondary)', textTransform: 'uppercase',
-                letterSpacing: '0.06em', margin: '0 0 12px',
+                letterSpacing: '0.06em', margin: '0 0 4px',
               }}>
                 {sectionLabel}
                 <span style={{
@@ -632,45 +635,63 @@ export default function AdminCirclesClient({ circles: initialCircles }: Props) {
                   {sectionCircles.length}
                 </span>
               </h2>
-              <div style={{ display: 'grid', gap: '12px' }}>
+              <p style={{
+                fontFamily: 'var(--font-body)', fontSize: '14px',
+                color: 'var(--color-text-secondary)', margin: '0 0 16px',
+              }}>{sectionSubtitle}</p>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+                gap: '20px',
+              }}>
                 {sectionCircles.map((circle) => {
                   const i = circles.findIndex(c => c.id === circle.id)
+                  const accentColor = CIRCLE_COLORS[i % CIRCLE_COLORS.length]
                   return (
                     <div key={circle.id} style={{
-                      backgroundColor: 'white', borderRadius: '14px',
-                      boxShadow: '0 2px 6px rgba(0,0,0,0.05)',
-                      borderLeft: `4px solid ${CIRCLE_COLORS[i % CIRCLE_COLORS.length]}`,
-                      padding: '16px 20px',
-                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      flexWrap: 'wrap', gap: '12px',
+                      backgroundColor: 'white',
+                      borderRadius: '16px',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                      overflow: 'hidden',
+                      border: '2px solid transparent',
+                      display: 'flex',
+                      flexDirection: 'column',
                     }}>
-                      <div>
-                        <p style={{
+                      {/* Color header bar */}
+                      <div style={{ height: '6px', backgroundColor: accentColor }} />
+                      <div style={{ padding: '18px 20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                        <h3 style={{
                           fontFamily: 'var(--font-display)', fontSize: '17px', fontWeight: 500,
-                          color: 'var(--color-navy)', margin: '0 0 2px',
-                        }}>{circle.circle_name}</p>
+                          color: 'var(--color-navy)', margin: '0 0 4px', lineHeight: 1.3,
+                        }}>{circle.circle_name}</h3>
+                        <span style={{
+                          fontFamily: 'var(--font-body)', fontSize: '13px',
+                          color: 'var(--color-text-secondary)', marginBottom: '10px', display: 'block',
+                        }}>
+                          {circle.primary_language} · {circle.member_count} {circle.member_count === 1 ? 'member' : 'members'}
+                        </span>
                         <p style={{
                           fontFamily: 'var(--font-body)', fontSize: '14px',
-                          color: 'var(--color-text-secondary)', margin: 0,
-                        }}>
-                          {circle.member_count} {circle.member_count === 1 ? 'member' : 'members'} · {circle.primary_language}
-                        </p>
+                          color: 'var(--color-text-primary)', lineHeight: 1.5,
+                          margin: '0 0 16px', flex: 1,
+                        }}>{circle.description}</p>
+                        <button
+                          onClick={() => {
+                            setForm(f => ({ ...f, circleIds: [circle.id] }))
+                            setShowEventForm(true)
+                            setShowCreateCircleForm(false)
+                            setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 50)
+                          }}
+                          style={{
+                            padding: '8px 14px', borderRadius: '10px',
+                            fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 500,
+                            cursor: 'pointer', border: `1px solid ${accentColor}`,
+                            backgroundColor: 'white', color: accentColor,
+                          }}
+                        >
+                          + Create event
+                        </button>
                       </div>
-                      <button
-                        onClick={() => {
-                          setForm(f => ({ ...f, circleIds: [circle.id] }))
-                          setShowEventForm(true)
-                          setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 50)
-                        }}
-                        style={{
-                          padding: '7px 14px', borderRadius: '8px',
-                          fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 500,
-                          cursor: 'pointer', border: `1px solid ${CIRCLE_COLORS[i % CIRCLE_COLORS.length]}`,
-                          backgroundColor: 'white', color: CIRCLE_COLORS[i % CIRCLE_COLORS.length],
-                        }}
-                      >
-                        + Create event
-                      </button>
                     </div>
                   )
                 })}

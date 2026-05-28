@@ -226,7 +226,7 @@ export default function CulturalCirclesClient({ circles, joinedCircleIds, platfo
 
           <div style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
             <Link
-              href={`/dashboard/cultural-circles/${circle.id}`}
+              href={`/dashboard/communities/${circle.id}`}
               style={{
                 flex: 1,
                 textAlign: 'center',
