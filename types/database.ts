@@ -965,6 +965,60 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['time_credit_transactions']['Insert']>
         Relationships: []
       }
+      employer_accounts: {
+        Row: {
+          id: string
+          created_at: string
+          company_name: string
+          contact_name: string
+          contact_email: string
+          plan_tier: string
+          seats_purchased: number
+          seats_used: number
+          status: string
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          company_name: string
+          contact_name: string
+          contact_email: string
+          plan_tier?: string
+          seats_purchased?: number
+          seats_used?: number
+          status?: string
+        }
+        Update: Partial<Database['public']['Tables']['employer_accounts']['Insert']>
+        Relationships: []
+      }
+      employer_leads: {
+        Row: {
+          id: string
+          created_at: string
+          company_name: string
+          contact_name: string
+          email: string
+          phone: string | null
+          company_size: string | null
+          notes: string | null
+          status: string
+          next_follow_up_date: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          company_name: string
+          contact_name: string
+          email: string
+          phone?: string | null
+          company_size?: string | null
+          notes?: string | null
+          status?: string
+          next_follow_up_date?: string | null
+        }
+        Update: Partial<Database['public']['Tables']['employer_leads']['Insert']>
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>

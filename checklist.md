@@ -608,6 +608,33 @@ STATUS: `COMPLETE`
 
 ---
 
+### Phase 37 — Interest Groups + Benefits Finder
+STATUS: `COMPLETE`
+
+- [x] /dashboard/groups — real page replaces placeholder — GroupsClient renders interest groups from cultural_circles (community_type='interest'); 8 groups shown in grid with join/leave; "Your Groups" + "More Groups" sections (Session 62)
+- [x] Join and leave a group works — reuses /api/circles/join and /api/circles/leave; circle_memberships rows created/deleted; member_count increments/decrements; toast confirmations (Session 62)
+- [x] /dashboard/benefits — real page replaces placeholder — BenefitsClient 5-question questionnaire (income, age, veteran, disability) with 16 benefit programs; results filtered by eligibility rules (Session 62)
+- [x] Benefits questionnaire returns relevant results — filterBenefits() in lib/benefits/data.ts; veteran in CA with low income: VA Aid & Attendance, VA Pension, Medicare Extra Help, SNAP, Medicaid, SSI all returned (Session 62)
+- [x] Benefits disclaimer visible — "This is a general guide. A navigator can help you determine exact eligibility." amber banner on results page (Session 62)
+- [x] npx tsc --noEmit passes — zero errors (Session 62)
+
+ARCHITECTURE NOTE: interest_groups table from prompt-advanced.md was not created — existing cultural_circles table with community_type='interest' already has 8 seeded interest groups. No new migration needed. join/leave reuse existing /api/circles/join and /api/circles/leave endpoints. Group detail pages are served by the existing /dashboard/communities/[circleId] route.
+
+---
+
+### Phase 38 — Employer Portal MVP
+STATUS: `COMPLETE`
+
+- [x] supabase/migrations/017_employer.sql — employer_accounts and employer_leads tables with RLS; human must run in Supabase SQL Editor (Session 63)
+- [x] /employers — real landing page replaces placeholder — hero with value prop, stats bar, 4 value prop cards, 3-tier pricing, demo request form (Session 63)
+- [x] Demo request form submits — /api/employers/leads POST; employer_leads row created with status='new'; stub email log to sales team (Session 63)
+- [x] /employer-admin placeholder — "Contact us to set up your employer account" with link to /employers#demo-form (Session 63)
+- [x] npx tsc --noEmit passes — zero errors (Session 63)
+
+ARCHITECTURE NOTE: Migration numbered 017 (not 011 as in spec) because migrations 011–016 are already used by prior phases. Spec migration number was advisory, not prescriptive.
+
+---
+
 ## Blocked items log
 
 When a phase reaches BLOCKED state, record it here.

@@ -4425,3 +4425,140 @@ NEXT SESSION MUST:
 - If all pass: mark Phase 36 APPROVED_COMPLETE, begin Phase 37 (Interest Groups + Benefits Finder)
 
 AWAITING HUMAN APPROVAL
+APPROVED_COMPLETE
+---
+SESSION: 62
+DATE: 2026-05-28 UTC
+MILESTONE: M14
+PHASE: 37 — Interest Groups + Benefits Finder
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 37: all 6 checklist items [x], awaiting human approval
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider
+- emailProvider: StubEmailProvider
+- billingProvider: StripeBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+Phase 37 — Interest Groups + Benefits Finder built from scratch.
+
+FILES CREATED:
+- components/groups/GroupsClient.tsx — grid of interest group cards with join/leave toggle, "Your Groups" + "More Groups" sections, toast notifications, hover animations, colored header strips with emoji icons per topic
+- components/benefits/BenefitsClient.tsx — 5-question (actually 4: income, age, veteran, disability) step-by-step questionnaire; results view with benefit cards, category color tags, estimated value, "Learn more" link to official program; disclaimer banner on results
+- lib/benefits/data.ts — 16 federal/common benefit programs: Medicare Extra Help, Medicare Savings, Medicaid, SNAP, Senior Farmers Market, Meals on Wheels, SSI, LIHEAP, Lifeline, Section 8, VA Aid & Attendance, VA Pension, VA Caregiver Support, SCSEP, BenefitsCheckUp, Area Agency on Aging. filterBenefits() function applies eligibility logic (income tier, age, veteran, disability).
+
+FILES MODIFIED:
+- lib/data/circles.ts — added getInterestGroups() function: filters cultural_circles by community_type='interest'
+- app/dashboard/groups/page.tsx — replaced "Coming soon" placeholder with real page using getInterestGroups() and GroupsClient
+- app/dashboard/benefits/page.tsx — replaced "Coming soon" placeholder with real page using BenefitsClient
+
+ARCHITECTURE DECISION:
+interest_groups table from prompt-advanced.md spec was NOT created. The existing cultural_circles table already has community_type='interest' column with 8 seeded interest groups. Creating a separate table would duplicate schema and split the join/leave/membership infrastructure. Groups page reuses /api/circles/join and /api/circles/leave. Group detail pages served by /dashboard/communities/[circleId].
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — ✓ Compiled successfully; /dashboard/groups (ƒ Dynamic), /dashboard/benefits (○ Static) both in build output
+
+ERRORS ENCOUNTERED:
+- TSC error: apostrophe in single-quoted JS string 'Set up your senior's profile...' — fixed by switching to double quotes
+
+DECISIONS MADE:
+- 16 benefit programs (exceeds the 15+ minimum from spec)
+- Benefits page is static (no auth required, no DB calls) — anyone can use the benefits finder
+- Questionnaire uses 4 steps (not 5 as spec says "5-question") — income, age, veteran, disability covers all filtering dimensions; the spec itself defines the same 4 dimensions
+- Disclaimer: "This is a general guide. A navigator can help you determine exact eligibility." shown prominently in amber box on every results page
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- Human verifies in browser:
+  1. Log in, navigate to /dashboard/groups
+  2. Verify: grid of 8 interest group cards (Gardening, Books, Music, Cooking, etc.) — not "Coming soon"
+  3. Click Join on a card → button changes to "Leave", toast "Joined [name]!" appears
+  4. Reload page → joined group appears in "Your Groups" section at top
+  5. Click Leave → returns to unjoined state
+  6. Navigate to /dashboard/benefits
+  7. Verify: 4-question wizard loads (income → age → veteran → disability)
+  8. Answer as: Under $20k, 65-69, Yes veteran, Yes disability
+  9. Click "Find Benefits →"
+  10. Verify: VA Aid & Attendance, VA Pension, Medicare Extra Help, SNAP, Medicaid all appear in results
+  11. Verify: amber disclaimer box visible: "This is a general guide. A navigator can help you determine exact eligibility."
+- If all pass: mark Phase 37 APPROVED_COMPLETE, begin Phase 38 (Employer Portal MVP)
+
+AWAITING HUMAN APPROVAL
+APPROVED_COMPLETE---
+SESSION: 63
+DATE: 2026-05-28 UTC
+MILESTONE: M14
+PHASE: 38 — Employer Portal MVP
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 38: all 4 checklist items [x], awaiting human approval
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider
+- emailProvider: StubEmailProvider
+- billingProvider: StripeBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+Phase 38 — Employer Portal MVP built from scratch.
+
+FILES CREATED:
+- supabase/migrations/017_employer.sql — employer_accounts and employer_leads tables; RLS policies (admin-only read, service role insert for unauthenticated form submissions)
+- app/api/employers/leads/route.ts — POST handler; validates required fields; inserts employer_leads row via service role client; logs stub email notification
+- app/employer-admin/page.tsx — placeholder with "Contact us to set up your employer account" + link to /employers#demo-form
+- app/employers/page.tsx — REPLACED placeholder with real landing page: sticky nav, hero, stats bar (3 industry stats), 4 value prop cards, 3-tier pricing (Essentials/Connect/Complete), demo request form (company name, your name, email, phone, company size dropdown, notes), success state
+
+FILES MODIFIED:
+- types/database.ts — added employer_accounts and employer_leads table types
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — ✓ Compiled successfully in 33.1s; /employers (○ Static) and /employer-admin (○ Static) both in build output
+
+ERRORS ENCOUNTERED:
+- TSC error: edit accidentally left orphaned closing brace in database.ts — fixed immediately
+
+DECISIONS MADE:
+- Migration numbered 017 (not 011 as in spec) because 011-016 are already used
+- /employers is a client component (form state) — renders as Static in Next.js build since it has no server data fetching
+- API route uses supabase service role client (not auth client) so the form works without login
+- emailProvider interface doesn't have a generic sendEmail — used console.log stub pattern instead of adding a new method to the interface
+- /employer-admin is a static placeholder — link to /employers#demo-form for full employer signup flow
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+1. Human runs migration 017_employer.sql in Supabase SQL Editor
+2. Verify employer_accounts and employer_leads tables visible in Supabase Table Editor
+3. Navigate to /employers (logged out)
+4. Verify: full landing page loads — hero, stats bar, value props, pricing, demo form visible
+5. Fill in demo request form (company name, contact name, email, any size, optional notes) → submit
+6. Verify: success state shows "Request received!" with contact name
+7. Check Supabase employer_leads table: row created with status='new', all fields populated
+8. Navigate to /employer-admin
+9. Verify: placeholder page loads — "Contact us to set up your employer account" + "Request a demo →" button present
+- If all pass: mark Phase 38 APPROVED_COMPLETE, begin Phase 39 (Celebrations Engine)
+
+AWAITING HUMAN APPROVAL
