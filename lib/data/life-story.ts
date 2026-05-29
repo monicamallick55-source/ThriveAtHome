@@ -17,6 +17,19 @@ export async function getLifeStoryEntries(memberId: string): Promise<{ data: Lif
   return { data, error: null }
 }
 
+export async function getLifeStoryEntry(id: string, memberId: string): Promise<{ data: LifeStoryEntry | null; error: string | null }> {
+  const supabase = createAdminClient()
+  const { data, error } = await supabase
+    .from('life_story_entries')
+    .select('*')
+    .eq('id', id)
+    .eq('member_id', memberId)
+    .maybeSingle()
+
+  if (error) return { data: null, error: error.message }
+  return { data, error: null }
+}
+
 export async function createLifeStoryEntry(params: {
   memberId: string
   title: string
@@ -24,6 +37,7 @@ export async function createLifeStoryEntry(params: {
   era: string | null
   entryType?: string
   createdBy?: string | null
+  attachments?: string[]
 }): Promise<{ data: LifeStoryEntry | null; error: string | null }> {
   const supabase = createAdminClient()
   const { data, error } = await supabase
@@ -35,6 +49,7 @@ export async function createLifeStoryEntry(params: {
       era: params.era || null,
       entry_type: params.entryType || 'memory',
       created_by: params.createdBy || null,
+      attachments: params.attachments ?? [],
     })
     .select()
     .limit(1)
@@ -50,6 +65,8 @@ export async function updateLifeStoryEntry(params: {
   title: string
   content: string
   era: string | null
+  entryType?: string
+  attachments?: string[]
 }): Promise<{ data: LifeStoryEntry | null; error: string | null }> {
   const supabase = createAdminClient()
   const { data, error } = await supabase
@@ -58,6 +75,8 @@ export async function updateLifeStoryEntry(params: {
       title: params.title,
       content: params.content,
       era: params.era || null,
+      ...(params.entryType !== undefined ? { entry_type: params.entryType } : {}),
+      ...(params.attachments !== undefined ? { attachments: params.attachments } : {}),
     })
     .eq('id', params.id)
     .eq('member_id', params.memberId)

@@ -23,14 +23,14 @@ export async function POST(request: Request) {
   const { data: fm } = await getFamilyMemberByAuthId(user.id)
   if (!fm?.member_id) return NextResponse.json({ error: 'No member linked' }, { status: 403 })
 
-  let body: { title?: string; content?: string; era?: string; entry_type?: string }
+  let body: { title?: string; content?: string; era?: string; entry_type?: string; attachments?: string[] }
   try {
     body = await request.json()
   } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  const { title, content, era, entry_type } = body
+  const { title, content, era, entry_type, attachments } = body
   if (!title?.trim() || !content?.trim()) {
     return NextResponse.json({ error: 'title and content are required' }, { status: 400 })
   }
@@ -42,6 +42,7 @@ export async function POST(request: Request) {
     era: era?.trim() || null,
     entryType: entry_type || 'memory',
     createdBy: fm.id,
+    attachments: attachments ?? [],
   })
 
   if (error || !data) return NextResponse.json({ error: error || 'Failed to create entry' }, { status: 500 })

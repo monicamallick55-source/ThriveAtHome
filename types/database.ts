@@ -1056,6 +1056,7 @@ export interface Database {
           entry_type: string
           created_by: string | null
           is_private: boolean
+          attachments: string[]
         }
         Insert: {
           id?: string
@@ -1067,6 +1068,7 @@ export interface Database {
           entry_type?: string
           created_by?: string | null
           is_private?: boolean
+          attachments?: string[]
         }
         Update: Partial<Database['public']['Tables']['life_story_entries']['Insert']>
         Relationships: [
