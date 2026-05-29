@@ -4842,3 +4842,105 @@ NEXT SESSION MUST:
 - If all pass: mark Phase 40 APPROVED_COMPLETE, begin Phase 41 (Milestone Recognition)
 
 AWAITING HUMAN APPROVAL
+ISSUE: Three problems with Life Story entries:
+1. Only one "First Memory" entry can be added — after adding the first one, the form no longer allows adding additional first memories. Remove this restriction — members should be able to add multiple first memories (first car, first job, first home etc. are all separate entries).
+2. First Memory entries display identically to regular Memory entries in the timeline — there is no visual distinction. Add a gold star badge or "⭐ First Memory" label to entries with entry_type='first_memory' so they stand out in the timeline as milestone moments.
+3. The life_story_entries table does not have a dedicated column for first_memory — the entry_type field should handle this but verify that entry_type='first_memory' is being saved correctly when the First Memory type is selected in the form. Run: SELECT entry_type, count(*) FROM life_story_entries GROUP BY entry_type; in Supabase SQL Editor to confirm the values being stored. If first_memory entries are being saved as 'memory' that is the root cause of issues 1 and 2.
+ISSUE: Life story entries currently only support text content — there is no way to attach photos, scanned letters, documents, or other artifacts to a memory entry. Add file attachment support to life story entries: (1) Add an attachments column to life_story_entries table (text[] to store Supabase Storage paths) via migration; (2) Create a Supabase Storage bucket called "life-story-attachments" (private, same as member-documents); (3) On the Add/Edit memory form, add a file upload zone below the content field that accepts JPG, PNG, PDF, max 10MB per file, up to 5 files per entry; (4) Display attached photos as thumbnail images in the memory card on the timeline — clicking a thumbnail opens the full image; (5) Display attached PDFs and documents as a paperclip icon with filename — clicking downloads the file via a signed URL; (6) Add a storage policy so only family members linked to that member can upload to and download from their member's life-story-attachments folder.
+
+APPROVED — Phase 40 Life Story Archive verified. Page loads, entries create/edit/delete correctly, timeline grouped by era. Issues noted above will be fixed in next session. Begin Phase 41 Milestone Recognition.
+
+---
+SESSION: 68
+DATE: 2026-05-29 UTC
+MILESTONE: M15
+PHASE: 40 — Life Story Archive (ISSUE fix: First Memory types + file attachments)
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 40 ISSUE fix: all items implemented, build passing
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider
+- emailProvider: StubEmailProvider
+- billingProvider: StripeBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+ISSUE FIX 1 (First Memory types):
+ROOT CAUSE: Form had no entry_type selector — all entries saved as 'memory'. The "Add the first memory" button in empty state was text-only, not a type discriminator, so once any entry existed the button was gone and entry_type was never exposed.
+FIX: Added "Memory type" dropdown to both add and edit forms:
+- option value="memory" → Memory (default)
+- option value="first_memory" → ⭐ First Memory / Milestone (first car, first job, first home…)
+Multiple first_memory entries are unrestricted — no DB or UI limit.
+Added gold star badge "⭐ First Memory" rendered on all cards where entry_type='first_memory'.
+
+ISSUE FIX 2 (File attachments):
+FILES CREATED:
+- supabase/migrations/020_life_story_attachments.sql — ALTER TABLE adds attachments text[] column; inserts storage bucket 'life-story-attachments' (10MB limit, allowed MIME types); 4 storage policies (family upload, family read, family delete, admin read)
+- app/api/life-story/upload/route.ts — POST multipart/form-data; validates MIME type (JPEG/PNG/WebP/PDF) and size (≤10MB); uploads to Supabase Storage at {member_id}/{entry_id}/{timestamp-random.ext}; returns {path, original_name, mime}
+- app/api/life-story/signed-urls/route.ts — POST {paths[]}; validates all paths start with caller's member_id; calls createSignedUrls() (1-hour TTL); returns {urls[{path,url,original_name,mime}]}
+
+FILES MODIFIED:
+- types/database.ts — added attachments: string[] to life_story_entries Row; attachments?: string[] to Insert
+- lib/data/life-story.ts — added getLifeStoryEntry; createLifeStoryEntry accepts attachments[]; updateLifeStoryEntry accepts entryType and attachments (spreads conditionally to avoid Supabase type rejection); all exported
+- app/api/life-story/route.ts — POST now accepts and passes entry_type and attachments[]
+- app/api/life-story/[id]/route.ts — PUT now accepts and passes entry_type and attachments[]
+- components/life-story/LifeStoryClient.tsx — MAJOR UPDATE:
+  - Added entry_type to FormState; form and edit form both include Memory type selector
+  - handleAdd: creates entry first → uploads files to /api/life-story/upload → PUTs entry with paths
+  - handleUpdate: uploads new files → merges with existing paths → PUTs with full array
+  - renderFileUploadZone(): reusable upload zone with dashed drop target, file list, validation
+  - renderAttachments(): fetches signed URLs via useEffect (cached in signedUrls state); renders image thumbnails (80×80, click to open full); PDF paperclip icons with filename
+  - Edit form: shows existing attachments as removable chips; new files shown in blue chips
+  - Import: added useRef, useEffect
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — ✓ Compiled successfully in 40.0s; /api/life-story/upload and /api/life-story/signed-urls both listed as ƒ (Dynamic)
+- git commit 518f1e9 on main
+
+ERRORS ENCOUNTERED:
+- app/api/life-story/signed-urls: item.path possibly null — fixed: null-coalesced to ''
+- lib/data/life-story: Record<string,unknown> rejected by Supabase update type — fixed: spread conditional partial objects instead of dynamic record
+- (zero TS errors after fixes)
+
+DECISIONS MADE:
+- Upload flow: create entry first (no attachments) → upload files → PUT with paths
+  Rationale: need entry.id for storage path prefix; two-step avoids temp path cleanup
+- Storage path pattern: {member_id}/{entry_id}/{timestamp-random.ext} — deduplicates and scopes to member
+- Signed URLs cached in component state (Record<entry_id, SignedUrlInfo[]>); fetched once per entry ID via useEffect; cache cleared on update so fresh URLs are generated
+- Max 5 attachments enforced in UI (validated against existing + new count); bucket policy enforces MIME/size server-side
+- Storage bucket creation documented in migration comment (manual Supabase dashboard step OR the INSERT INTO storage.buckets SQL in migration handles it)
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+1. Human runs migration 020_life_story_attachments.sql in Supabase SQL Editor
+   NOTE: If storage policies fail (storage schema may need separate handling), run the ALTER TABLE
+   line first to add the column, then create the storage bucket manually in Supabase dashboard:
+   Storage → New Bucket → Name: "life-story-attachments" → Private (not public) → Save
+   Then the storage policies in the migration should apply.
+2. Verify life_story_entries table has new 'attachments' column in Supabase Table Editor
+3. Navigate to /dashboard/life-story
+4. Verify: "Memory type" dropdown appears in Add form with "Memory" and "⭐ First Memory / Milestone" options
+5. Add a "First Memory" entry (select ⭐ First Memory type, fill title/content)
+6. Verify: gold star badge "⭐ First Memory" appears on the entry card in the timeline
+7. Add a SECOND "First Memory" entry — verify both display without restriction
+8. Test file upload: add a memory with an attached photo (JPEG) and a PDF document
+9. Verify: photo appears as 80×80 thumbnail in the memory card; PDF shows paperclip icon with filename
+10. Click thumbnail → verify full image opens in new tab via signed URL
+11. Click PDF paperclip → verify file downloads via signed URL
+12. Test edit: click Edit on an entry, remove an existing attachment, add a new one, save
+13. Verify: attachment list updates correctly
+- If all pass: mark Phase 40 APPROVED_COMPLETE, begin Phase 41 (Milestone Recognition)
+
+AWAITING HUMAN APPROVAL
