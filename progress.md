@@ -4768,3 +4768,77 @@ PHASE 39 CHECKLIST STATUS:
 - [x] Item 6-10: Require human browser verification (Supabase + browser access required)
 
 APPROVED — Phase 39 Celebrations Engine fully verified. Cron returns {"created":1,"notified":1}. celebration_events row created in Supabase. realtime_notifications row with type='celebration_upcoming' confirmed. Gold birthday banner appears on /dashboard and /dashboard/celebrations when DOB is set to today. Margaret's DOB restored to 1945-06-15. Begin Phase 40 Life Story Archive.
+
+---
+SESSION: 67
+DATE: 2026-05-29 UTC
+MILESTONE: M15
+PHASE: 40 — Life Story Archive
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 40: all 6 checklist items [x], awaiting human approval
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider
+- emailProvider: StubEmailProvider
+- billingProvider: StripeBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+Phase 40 — Life Story Archive built and committed.
+
+FILES CREATED (all new — untracked files from git status committed this session):
+- supabase/migrations/019_life_story.sql — life_story_entries table with family-scoped RLS + admin read policy
+- lib/data/life-story.ts — data layer: getLifeStoryEntries, createLifeStoryEntry, updateLifeStoryEntry, deleteLifeStoryEntry; fixed TS isolatedModules error (export type)
+- app/api/life-story/route.ts — GET (list entries for auth user's member) + POST (create entry)
+- app/api/life-story/[id]/route.ts — PUT (update entry) + DELETE (remove entry)
+- components/life-story/LifeStoryClient.tsx — full client component: era-grouped timeline using ERAS constant (Childhood → Recent memories), add-memory form with title/era/content, inline edit, delete with confirmation, empty state
+
+FILES MODIFIED:
+- app/dashboard/life-story/page.tsx — replaced "Coming soon" placeholder with real server page: requireAuth, getMemberForAuthUser, getLifeStoryEntries, renders LifeStoryClient with member name + entries
+- types/database.ts — added life_story_entries table types (Row, Insert, Update, Relationships)
+- checklist.md — Phase 40 COMPLETE section added
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — ✓ Compiled successfully; /dashboard/life-story listed as ƒ (Dynamic)
+- git commit 06cf734 pushed to origin/main (awaiting push)
+
+ERRORS ENCOUNTERED:
+- lib/data/life-story.ts line 6: TS1205 — re-exporting a type with isolatedModules requires 'export type' — fixed immediately
+
+DECISIONS MADE:
+- Migration numbered 019 (spec says 013 — advisory only; 013-018 already used)
+- LifeStoryClient groups entries by ERAS constant in chronological life order; entries with no era go in "Other memories" at the end
+- Era color coding: each era gets a distinct soft background + border color for visual differentiation
+- Edit is inline (expands the card to a form) — no separate modal needed
+- Delete uses window.confirm — simple, reliable for this use case
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+1. Human runs migration 019_life_story.sql in Supabase SQL Editor
+2. Verify life_story_entries table visible in Supabase Table Editor with correct columns
+3. Log in as a family account, navigate to /dashboard/life-story
+4. Verify: page loads (not "Coming soon"); shows "Every life has a story" empty state with "Add the first memory" button
+5. Click "Add the first memory" (or "+ Add a memory" in header)
+6. Fill in: Title = "The summer we moved to California", Era = "Young adult", Memory = "It was 1962 and we packed everything into a Ford station wagon..."
+7. Click "Save memory"
+8. Verify: entry appears in timeline under "Young adult" era section
+9. Verify: life_story_entries row created in Supabase with correct member_id, title, content, era
+10. Click "Edit" on the entry, change the title, save
+11. Verify: title updates in the UI without page reload
+12. Click "Delete", confirm, verify entry disappears
+13. Add entries with different eras to confirm era grouping works
+- If all pass: mark Phase 40 APPROVED_COMPLETE, begin Phase 41 (Milestone Recognition)
+
+AWAITING HUMAN APPROVAL
