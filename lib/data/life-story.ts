@@ -102,3 +102,69 @@ export async function deleteLifeStoryEntry(params: {
   if (error) return { error: error.message }
   return { error: null }
 }
+
+// ── Memory Books ────────────────────────────────────────────
+
+type MemoryBook = Database['public']['Tables']['memory_books']['Row']
+export type { MemoryBook }
+
+export async function createMemoryBook(params: {
+  memberId: string
+  title: string
+  dedication?: string | null
+  layoutStyle?: string
+  entryIds?: string[]
+  coverPhotoPath?: string | null
+}): Promise<{ data: MemoryBook | null; error: string | null }> {
+  const supabase = createAdminClient()
+  const { data, error } = await supabase
+    .from('memory_books')
+    .insert({
+      member_id: params.memberId,
+      title: params.title,
+      dedication: params.dedication ?? null,
+      layout_style: params.layoutStyle ?? 'classic',
+      entry_ids: params.entryIds ?? [],
+      cover_photo_path: params.coverPhotoPath ?? null,
+      status: 'pending',
+    })
+    .select()
+    .limit(1)
+    .maybeSingle()
+
+  if (error) return { data: null, error: error.message }
+  return { data, error: null }
+}
+
+export async function updateMemoryBookStoragePath(params: {
+  id: string
+  memberId: string
+  storagePath: string
+  pageCount?: number
+}): Promise<{ error: string | null }> {
+  const supabase = createAdminClient()
+  const { error } = await supabase
+    .from('memory_books')
+    .update({
+      storage_path: params.storagePath,
+      page_count: params.pageCount ?? null,
+      status: 'generated',
+    })
+    .eq('id', params.id)
+    .eq('member_id', params.memberId)
+
+  if (error) return { error: error.message }
+  return { error: null }
+}
+
+export async function getMemoryBooks(memberId: string): Promise<{ data: MemoryBook[] | null; error: string | null }> {
+  const supabase = createAdminClient()
+  const { data, error } = await supabase
+    .from('memory_books')
+    .select('*')
+    .eq('member_id', memberId)
+    .order('created_at', { ascending: false })
+
+  if (error) return { data: null, error: error.message }
+  return { data, error: null }
+}

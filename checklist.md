@@ -653,9 +653,13 @@ STATUS: `COMPLETE`
 - [x] Add a memory entry — POST /api/life-story; life_story_entries row created with title, content, era, entry_type; client renders new entry immediately (Session 67)
 - [x] Edit and delete entries work — PUT /api/life-story/[id] updates row; DELETE removes row; client updates state without reload (Session 67)
 - [x] Timeline view organised by era — LifeStoryClient groups entries by ERAS constant (Childhood → Recent memories); ungrouped entries appear as "Other memories" (Session 67)
-- [x] npx tsc --noEmit passes — zero errors (Session 67)
+- [x] ISSUE FIX (Session 68): Memory type selector added — entry_type saved as 'memory' or 'first_memory'; gold ⭐ badge on first_memory cards; multiple first_memory entries allowed
+- [x] ISSUE FIX (Session 68): File attachments — migration 020 adds attachments column; life-story-attachments Storage bucket; upload/signed-URL API routes; photo thumbnails + PDF icons in timeline
+- [x] ISSUE FIX (Session 69): Memory Book Builder — supabase/migrations/021_memory_books.sql; CREATE Memory Book UI (title, dedication, layout, cover photo, entry selection); jsPDF native PDF generation (cover, era chapters, entry pages, back cover); paid plans ($9.99 Stripe, free for complete/premier); Storage bucket memory-books; re-download from "Your Memory Books" section
+- [x] npx tsc --noEmit passes — zero errors (Session 69)
 
 ARCHITECTURE NOTE: Migration numbered 019 (not 013 as in spec) because migrations 013–018 are already used by prior phases.
+ARCHITECTURE NOTE: Memory Book PDF uses jsPDF native drawing API — not an HTML-to-PDF converter. Letter size (8.5×11 in). Color palettes per layout: Classic (navy/teal/cream), Modern (teal/navy/grey), Scrapbook (amber/teal/warm).
 
 ---
 

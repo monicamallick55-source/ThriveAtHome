@@ -1075,6 +1075,38 @@ export interface Database {
           { foreignKeyName: 'life_story_entries_member_id_fkey'; columns: ['member_id']; referencedRelation: 'members'; referencedColumns: ['id'] }
         ]
       }
+      memory_books: {
+        Row: {
+          id: string
+          created_at: string
+          member_id: string
+          title: string
+          dedication: string | null
+          layout_style: string
+          entry_ids: string[]
+          cover_photo_path: string | null
+          storage_path: string | null
+          page_count: number | null
+          status: string
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          member_id: string
+          title?: string
+          dedication?: string | null
+          layout_style?: string
+          entry_ids?: string[]
+          cover_photo_path?: string | null
+          storage_path?: string | null
+          page_count?: number | null
+          status?: string
+        }
+        Update: Partial<Database['public']['Tables']['memory_books']['Insert']>
+        Relationships: [
+          { foreignKeyName: 'memory_books_member_id_fkey'; columns: ['member_id']; referencedRelation: 'members'; referencedColumns: ['id'] }
+        ]
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>

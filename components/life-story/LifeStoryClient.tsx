@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import type { LifeStoryEntry } from '@/lib/data/life-story'
+import type { LifeStoryEntry, MemoryBook } from '@/lib/data/life-story'
+import MemoryBookBuilder from './MemoryBookBuilder'
 
 const ERAS = [
   'Childhood',
@@ -59,9 +60,12 @@ const EMPTY_FORM: FormState = { title: '', content: '', era: '', entry_type: 'me
 interface Props {
   initialEntries: LifeStoryEntry[]
   memberName: string
+  planTier: string
+  memberId: string
+  initialMemoryBooks: MemoryBook[]
 }
 
-export default function LifeStoryClient({ initialEntries, memberName }: Props) {
+export default function LifeStoryClient({ initialEntries, memberName, planTier, memberId, initialMemoryBooks }: Props) {
   const [entries, setEntries] = useState<LifeStoryEntry[]>(initialEntries)
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState<FormState>(EMPTY_FORM)
@@ -703,6 +707,15 @@ export default function LifeStoryClient({ initialEntries, memberName }: Props) {
           )}
         </>
       )}
+
+      {/* Memory Book Builder + Your Memory Books */}
+      <MemoryBookBuilder
+        entries={entries}
+        memberName={memberName}
+        planTier={planTier}
+        initialMemoryBooks={initialMemoryBooks}
+        parentSignedUrls={signedUrls}
+      />
     </div>
   )
 }

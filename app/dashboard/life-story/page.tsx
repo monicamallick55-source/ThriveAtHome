@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { requireAuth } from '@/lib/auth'
 import { getMemberForAuthUser } from '@/lib/data/members'
-import { getLifeStoryEntries } from '@/lib/data/life-story'
+import { getLifeStoryEntries, getMemoryBooks } from '@/lib/data/life-story'
 import LifeStoryClient from '@/components/life-story/LifeStoryClient'
 
 export const metadata: Metadata = { title: 'Life Story — ThriveAtHome' }
@@ -13,7 +13,10 @@ export default async function LifeStoryPage() {
   const { data: member } = await getMemberForAuthUser(user.id)
   if (!member) redirect('/onboarding')
 
-  const { data: entries } = await getLifeStoryEntries(member.id)
+  const [{ data: entries }, { data: memoryBooks }] = await Promise.all([
+    getLifeStoryEntries(member.id),
+    getMemoryBooks(member.id),
+  ])
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-cream)' }}>
@@ -71,6 +74,9 @@ export default async function LifeStoryPage() {
         <LifeStoryClient
           initialEntries={entries ?? []}
           memberName={member.preferred_name}
+          planTier={member.plan_tier}
+          memberId={member.id}
+          initialMemoryBooks={memoryBooks ?? []}
         />
       </main>
     </div>
