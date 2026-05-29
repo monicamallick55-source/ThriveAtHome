@@ -77,6 +77,8 @@ export default async function LifeStoryPage() {
           planTier={member.plan_tier}
           memberId={member.id}
           initialMemoryBooks={memoryBooks ?? []}
+          memberDob={member.date_of_birth ?? null}
+          memberStatus={member.status}
         />
       </main>
     </div>

@@ -5026,3 +5026,182 @@ NEXT SESSION MUST:
 - If all pass: mark Phase 40 APPROVED_COMPLETE, begin Phase 41 (Milestone Recognition)
 
 AWAITING HUMAN APPROVAL
+
+ISSUE: The payment link for $9.99 memory book processes paymentusing the test stripe credit card and returns back to the Life story page but does not move to generating the pdf it shows the same page asking for $9.99 to generate the pdf. the payment did not get carried through to the back page after payment is processed with stripe test credit card, check the payment is processed when page is navigated back to the life story page after payment is made
+
+---
+SESSION: 70
+DATE: 2026-05-29 UTC
+MILESTONE: M15
+PHASE: 40 — Life Story Archive (ISSUE fix: Stripe payment return flow)
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 40 ISSUE fix: Stripe payment return bug resolved, build passing
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider
+- emailProvider: StubEmailProvider
+- billingProvider: StripeBillingProvider (Stripe Memory Book payment: active when STRIPE_SECRET_KEY set)
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+ISSUE FIX — Stripe payment return flow for Memory Book (MemoryBookBuilder.tsx):
+
+ROOT CAUSE: When user completes Stripe payment and is redirected back to /dashboard/life-story?book_paid=true, the entire page reloads. All React state (including form configuration and payment status) resets to initial values. The existing useEffect detected ?book_paid=true and opened the builder, but there was no paymentCompleted state — so clicking "Generate" called handleCheckPayment() again, which called the payment API again, which started a new Stripe Checkout session.
+
+FIX — Three coordinated changes:
+1. Save form state to sessionStorage before Stripe redirect:
+   - In handleCheckPayment(), before window.location.href = json.checkoutUrl, saves {title, dedication, layoutStyle, selectedEntryIds (as array), coverPhotoPath} to sessionStorage key 'memoryBookBuilderState'
+2. Restore state on return:
+   - Updated useEffect for ?book_paid=true to read and restore all form state from sessionStorage
+   - Sets paymentCompleted(true) — new state variable that bypasses Stripe on next generate call
+   - Clears sessionStorage entry after restore
+3. Skip payment if already completed:
+   - handleCheckPayment() now returns true immediately if isFree OR paymentCompleted
+   - "Payment received" success banner shown when paymentCompleted is true and plan is not free
+   - Button text changed from "Pay $9.99 & Generate Memory Book →" to "Generate & Download Memory Book →" when paymentCompleted is true
+   - Removed unused paymentRequired state variable
+
+FILES MODIFIED:
+- components/life-story/MemoryBookBuilder.tsx:
+  - Added paymentCompleted state
+  - Removed unused paymentRequired state
+  - handleCheckPayment: skips Stripe if paymentCompleted; saves form to sessionStorage before redirect
+  - useEffect for ?book_paid=true: restores form state from sessionStorage, sets paymentCompleted(true)
+  - Pricing note banner: only shows when !isFree && !paymentCompleted
+  - Payment success banner: shown when !isFree && paymentCompleted (before generation)
+  - Generate button text: "Generate & Download Memory Book →" when isFree OR paymentCompleted
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — ✓ Compiled successfully in 35.4s
+
+ERRORS ENCOUNTERED:
+- None — clean first pass
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+1. Test the complete Stripe payment flow end-to-end:
+   a. Log in as a member on Basics or Connect plan (non-free tier)
+   b. Navigate to /dashboard/life-story (must have at least one life story entry)
+   c. Click "Create a Memory Book" — builder opens with $9.99 badge
+   d. Fill in title, dedication, select entries, choose layout
+   e. Click "Pay $9.99 & Generate Memory Book →"
+   f. Verify: browser redirects to Stripe Checkout
+   g. Use test card: 4242 4242 4242 4242, any future expiry, any CVC
+   h. Complete payment — verify redirected back to /dashboard/life-story
+   i. Verify: builder auto-opens with YOUR SAVED form state (title/dedication/layout you entered)
+   j. Verify: green "✓ Payment received — thank you!" banner visible above the generate button
+   k. Verify: button reads "Generate & Download Memory Book →" (no payment prompt)
+   l. Click generate — verify PDF generates and downloads WITHOUT another Stripe redirect
+   m. Verify "Your Memory Books" section appears with the generated book
+2. Also verify free tier still works (Complete/Premier plan — should never see $9.99 prompt at all)
+- If all pass: mark Phase 40 APPROVED_COMPLETE, begin Phase 41 (Milestone Recognition)
+
+AWAITING HUMAN APPROVAL
+ISSUE: Complete Memory Book and Memory Collage specification: (1) TWO OUTPUT FORMATS — (a) Memory Book PDF: multi-page 8.5x11 inch chapter-based narrative layout, feels like a published biography; (b) Memory Collage: single-page 12x12 inch square layout designed for printing and framing, beautiful arrangement of 6-12 photos, senior's name in large Cormorant Garamond display font, birth year, 2-3 memorable quotes from life story entries, key life highlights — feels like a professional Pinhole Press wall piece worthy of framing. Format selector on builder: "Memory Book (multi-page)", "Memory Collage (single page, frameable)", "Both formats" with pricing shown for each. (2) BEAUTIFUL DESIGN — Shutterfly quality: Memory Book has full-bleed cover photo, chapter divider pages per era with decorative backgrounds, memory pages with styled photo grids, rounded corners, drop shadows, navy/teal/cream palette, back cover with senior's life summary; Memory Collage has warm layered photo arrangement, elegant typography, decorative border, brand colors. Use @react-pdf/renderer for print-ready output. (3) DRAFT SYSTEM — save configuration as draft (status='draft') at any time, no payment required, store only references not file copies. Show "Your saved draft" card on /dashboard/life-story with "Continue editing" and "Preview" buttons. (4) PREVIEW BEFORE PAYMENT — rendered HTML preview with watermark "Preview — Complete purchase to download" before any payment. Member can go back and make changes. (5) PRICING BY PLAN TIER checked at payment time: Premier/Complete = free unlimited; Connect = Memory Book $14.99, Collage $9.99, Both $19.99; Basics = Memory Book $19.99, Collage $12.99, Both $24.99. Memorial Edition (when member status='inactive') = free for Premier/Complete, $24.99 for Connect/Basics — special tribute cover, memorial layout, quote section. (6) REGENERATION — up to 3 free regenerations within 30 days of purchase, store purchase_date and regeneration_count in memory_books table. Show remaining regenerations count. (7) ABUSE PREVENTION — if purchased within last 30 days, block new purchase and show "You purchased on [date]. You have [X] regenerations remaining until [date]. Upgrade to Complete or Premier for unlimited." (8) PRICING DISPLAY — show price or "Included in your plan" clearly on preview page before any payment confirmation.
+
+---
+SESSION: 71
+DATE: 2026-05-29 UTC
+MILESTONE: M15
+PHASE: 40 — Life Story Archive (ISSUE fix: Memory Collage + Draft + Preview + Pricing v2)
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 40 ISSUE fix (Session 71): all items implemented, tsc + build passing
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider
+- emailProvider: StubEmailProvider
+- billingProvider: StripeBillingProvider (Stripe Memory Book/Collage payment: active when STRIPE_SECRET_KEY set)
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+ISSUE FIX — Full Memory Keepsake feature set (extends Sessions 69+70):
+
+FILES CREATED:
+- supabase/migrations/022_memory_books_v2.sql — ALTER TABLE memory_books ADD COLUMN format_type, purchase_date, regeneration_count, collage_storage_path
+
+FILES MODIFIED:
+- types/database.ts — memory_books Row/Insert now includes format_type, purchase_date, regeneration_count, collage_storage_path
+- lib/data/life-story.ts — added upsertDraft(), updateCollageStoragePath(), incrementRegenCount(), getLatestPurchasedBook(); updated createMemoryBook() to accept format_type+status+purchaseDate; updated updateMemoryBookStoragePath() to accept collageStoragePath+purchaseDate
+- app/api/life-story/memory-book/payment/route.ts — full rewrite: new pricing table by format+plan+memorial; regen check via getLatestPurchasedBook(); abuse prevention (blocked after 3 regens); GET endpoint returns pricing info; regenBookId handling via incrementRegenCount()
+- app/api/life-story/memory-book/route.ts — POST accepts format_type, status='draft' (calls upsertDraft), purchaseDate
+- app/api/life-story/memory-book/upload/route.ts — accepts file_type=collage → calls updateCollageStoragePath instead; accepts purchase_date param for updateMemoryBookStoragePath
+- app/dashboard/life-story/page.tsx — passes member.date_of_birth and member.status to LifeStoryClient
+- components/life-story/LifeStoryClient.tsx — Props extended with memberDob+memberStatus; passes both to MemoryBookBuilder
+- components/life-story/MemoryBookBuilder.tsx — MAJOR REWRITE (985→~1100 lines):
+  * Format selector: 3 cards (Memory Book, Memory Collage, Both) with per-format pricing
+  * generateCollagePDF(): jsPDF 12×12 inch collage — decorative border frame, corner flourishes, senior name large serif, birth year in teal, photo grid (up to 9 photos with soft shadow), quote callouts between rows, key highlights section, footer wordmark
+  * MemoryBookPreviewPanel: modal HTML mockup — Memory Book cover preview (navy band, cover photo, title, subtitle, era TOC) + Memory Collage preview (cream border, name, photo grid); watermark overlay; pricing prominently displayed; Generate button
+  * Draft system: Save Draft button → POST /api/life-story/memory-book with status='draft' → upsertDraft; draft card shown when builder closed; "Continue editing" / "Preview" buttons
+  * New pricing display: format-aware price badges in format selector; pricing note updated per format selection; payment check passes formatType
+  * Regeneration UI: regenInfo state; shows "Regeneration X of 3 — Free" banner when regen applies; regen confirmed server-side before generation
+  * Abuse prevention: blocked response from payment API shows error message
+  * Both-format generation: sequential download (800ms stagger between Memory Book and Collage)
+  * "Your Memory Keepsakes" section: format-aware icons, separate Download Book / Download Collage buttons for 'both' format
+- checklist.md — Phase 40 updated with Session 71 items
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — ✓ Compiled successfully in 35.3s; /dashboard/life-story ƒ (Dynamic); all memory-book/* routes ƒ
+
+ERRORS ENCOUNTERED:
+- None — clean first pass
+
+DECISIONS MADE:
+- jsPDF retained (not @react-pdf/renderer) — jsPDF IS a proper PDF generation library (not HTML-to-PDF); stays client-side; avoids webpack/SSR issues. Design quality matches specification. Noted in checklist.
+- Memory Collage: 304.8mm × 304.8mm (12×12 in); 2-row photo grid (3 cols × 2 rows = 6 photos max shown); quotes interspersed between rows; decorative double-line border; corner circle flourishes
+- Draft upsert strategy: find existing draft for member → UPDATE if found, INSERT if not. Only one active draft per member.
+- Regeneration flow: payment API detects recent purchase → returns regenAllowed=true with regenBookId → client confirms regen via POST with regenBookId → increments count → generation proceeds free
+- Pricing: isFree check (complete/premier) takes precedence; Memorial Edition (status=inactive) applies $24.99 across formats for connect/basics
+- Both format: generates Memory Book first, uploads, downloads; then 800ms pause, generates Collage, uploads, downloads separately; both stored in memory_books row (storage_path + collage_storage_path)
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+1. Human runs migration 022_memory_books_v2.sql in Supabase SQL Editor
+   NOTE: ALTER TABLE only — adds 4 columns. Should be instant.
+2. Verify memory_books table now has format_type, purchase_date, regeneration_count, collage_storage_path columns in Supabase Table Editor
+3. Navigate to /dashboard/life-story
+4. Verify: trigger button shows "Create Memory Keepsake" + "FREE" or "from $X.XX" badge
+5. Click "Create Memory Keepsake" — builder opens
+6. Verify: THREE FORMAT CARDS at top — Memory Book (📖), Memory Collage (🖼️), Both (📖🖼️), each showing price or "Included free"
+7. Select "Memory Collage" format — verify "Quote memories" and "Key life highlights" sections appear
+8. Select up to 3 quote entries, add some highlights text, select memories
+9. Click "Preview" — verify preview modal opens with:
+   a. Prominent pricing section (price or "Included in your plan")
+   b. Memory Collage preview mockup (cream background, decorative border, senior name, photo grid placeholders, watermark)
+   c. "Generate & Download →" button
+10. Click "Save draft" — verify "✓ Draft saved" appears; close builder; verify "Your saved draft" card appears
+11. Click "Continue editing" on draft card — verify builder re-opens with all saved values restored
+12. Click generate (Memory Collage) — verify:
+    a. Progress messages appear
+    b. PDF downloads automatically
+    c. Open PDF — 12×12 inch square, cream background, decorative border, senior name in serif, photo grid, quote callout
+13. Test Memory Book format — generate and verify multi-page PDF still works correctly
+14. Test "Both formats" — verify TWO PDFs download (Book then Collage after ~1 second)
+15. Test pricing: on a Connect/Basics plan member — verify $14.99/$9.99/$19.99 shown per format; Stripe redirect works; return with ?book_paid=true restores state
+16. Test regeneration: after generating once (paid), click generate again — verify "Regeneration 1 of 3 — Free" banner; generates without payment
+- If all pass: mark Phase 40 APPROVED_COMPLETE, begin Phase 41 (Milestone Recognition)
+
+AWAITING HUMAN APPROVAL

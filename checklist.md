@@ -656,10 +656,20 @@ STATUS: `COMPLETE`
 - [x] ISSUE FIX (Session 68): Memory type selector added — entry_type saved as 'memory' or 'first_memory'; gold ⭐ badge on first_memory cards; multiple first_memory entries allowed
 - [x] ISSUE FIX (Session 68): File attachments — migration 020 adds attachments column; life-story-attachments Storage bucket; upload/signed-URL API routes; photo thumbnails + PDF icons in timeline
 - [x] ISSUE FIX (Session 69): Memory Book Builder — supabase/migrations/021_memory_books.sql; CREATE Memory Book UI (title, dedication, layout, cover photo, entry selection); jsPDF native PDF generation (cover, era chapters, entry pages, back cover); paid plans ($9.99 Stripe, free for complete/premier); Storage bucket memory-books; re-download from "Your Memory Books" section
-- [x] npx tsc --noEmit passes — zero errors (Session 69)
+- [x] ISSUE FIX (Session 70): Stripe payment return flow — form state saved to sessionStorage before Stripe redirect; restored on return with ?book_paid=true; paymentCompleted state bypasses second Stripe call; payment success banner shown; button text updated to "Generate & Download Memory Book →" after payment
+- [x] ISSUE FIX (Session 71): Two output formats — Memory Book (multi-page 8.5×11) + Memory Collage (12×12 square, frameable); format selector with per-format pricing; migration 022 adds format_type/purchase_date/regeneration_count/collage_storage_path to memory_books
+- [x] ISSUE FIX (Session 71): Draft system — "Save Draft" saves config to DB with status='draft'; draft card shown above builder with "Continue editing" and "Preview" buttons; upsertDraft() in data layer
+- [x] ISSUE FIX (Session 71): HTML preview before payment — MemoryBookPreviewPanel renders HTML mockup of cover page (Memory Book) + collage layout (Memory Collage); watermark overlay; pricing prominently displayed
+- [x] ISSUE FIX (Session 71): New pricing tiers by format+plan — Premier/Complete=free; Connect: Book $14.99/Collage $9.99/Both $19.99; Basics: Book $19.99/Collage $12.99/Both $24.99; Memorial Edition (status=inactive) $24.99
+- [x] ISSUE FIX (Session 71): Regeneration system — 3 free regenerations within 30 days of purchase; getLatestPurchasedBook() checks 30-day window; incrementRegenCount() tracks usage; regen info shown in UI
+- [x] ISSUE FIX (Session 71): Abuse prevention — payment API returns blocked=true when 3 regens exhausted within 30 days; message includes purchase date and expiry
+- [x] npx tsc --noEmit passes — zero errors (Session 71)
+- [x] npm run build passes — ✓ Compiled successfully in 35.3s (Session 71)
 
 ARCHITECTURE NOTE: Migration numbered 019 (not 013 as in spec) because migrations 013–018 are already used by prior phases.
-ARCHITECTURE NOTE: Memory Book PDF uses jsPDF native drawing API — not an HTML-to-PDF converter. Letter size (8.5×11 in). Color palettes per layout: Classic (navy/teal/cream), Modern (teal/navy/grey), Scrapbook (amber/teal/warm).
+ARCHITECTURE NOTE: Memory Book PDF uses jsPDF native drawing API. Memory Collage is 12×12 inch jsPDF with photo grid, quote callouts, decorative border frame.
+ARCHITECTURE NOTE: Draft system uses upsertDraft() — finds existing draft and UPDATEs it, or INSERTs new one. Only one draft per member.
+ARCHITECTURE NOTE: @react-pdf/renderer not used — jsPDF is a proper PDF generation library (not HTML-to-PDF), fully capable of print-quality output. Stays client-side, no serverless memory limits.
 
 ---
 

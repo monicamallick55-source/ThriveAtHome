@@ -1083,11 +1083,15 @@ export interface Database {
           title: string
           dedication: string | null
           layout_style: string
+          format_type: string
           entry_ids: string[]
           cover_photo_path: string | null
           storage_path: string | null
+          collage_storage_path: string | null
           page_count: number | null
           status: string
+          purchase_date: string | null
+          regeneration_count: number
         }
         Insert: {
           id?: string
@@ -1096,11 +1100,15 @@ export interface Database {
           title?: string
           dedication?: string | null
           layout_style?: string
+          format_type?: string
           entry_ids?: string[]
           cover_photo_path?: string | null
           storage_path?: string | null
+          collage_storage_path?: string | null
           page_count?: number | null
           status?: string
+          purchase_date?: string | null
+          regeneration_count?: number
         }
         Update: Partial<Database['public']['Tables']['memory_books']['Insert']>
         Relationships: [

@@ -63,9 +63,11 @@ interface Props {
   planTier: string
   memberId: string
   initialMemoryBooks: MemoryBook[]
+  memberDob?: string | null
+  memberStatus?: string
 }
 
-export default function LifeStoryClient({ initialEntries, memberName, planTier, memberId, initialMemoryBooks }: Props) {
+export default function LifeStoryClient({ initialEntries, memberName, planTier, memberId, initialMemoryBooks, memberDob, memberStatus }: Props) {
   const [entries, setEntries] = useState<LifeStoryEntry[]>(initialEntries)
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState<FormState>(EMPTY_FORM)
@@ -713,6 +715,8 @@ export default function LifeStoryClient({ initialEntries, memberName, planTier, 
         entries={entries}
         memberName={memberName}
         planTier={planTier}
+        memberStatus={memberStatus ?? 'active'}
+        memberDob={memberDob ?? null}
         initialMemoryBooks={initialMemoryBooks}
         parentSignedUrls={signedUrls}
       />
