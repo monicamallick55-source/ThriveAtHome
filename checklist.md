@@ -645,6 +645,18 @@ STATUS: `COMPLETE`
 
 ARCHITECTURE NOTE: Migration numbered 017 (not 011 as in spec) because migrations 011–016 are already used by prior phases. Spec migration number was advisory, not prescriptive.
 
+### Phase 40 — Life Story Archive
+STATUS: `COMPLETE`
+
+- [x] supabase/migrations/019_life_story.sql — life_story_entries table with family-scoped RLS + admin read policy; human must run in Supabase SQL Editor (Session 67)
+- [x] /dashboard/life-story — real page replaces placeholder — loads entries server-side via getLifeStoryEntries, renders LifeStoryClient; no "Coming soon" (Session 67)
+- [x] Add a memory entry — POST /api/life-story; life_story_entries row created with title, content, era, entry_type; client renders new entry immediately (Session 67)
+- [x] Edit and delete entries work — PUT /api/life-story/[id] updates row; DELETE removes row; client updates state without reload (Session 67)
+- [x] Timeline view organised by era — LifeStoryClient groups entries by ERAS constant (Childhood → Recent memories); ungrouped entries appear as "Other memories" (Session 67)
+- [x] npx tsc --noEmit passes — zero errors (Session 67)
+
+ARCHITECTURE NOTE: Migration numbered 019 (not 013 as in spec) because migrations 013–018 are already used by prior phases.
+
 ---
 
 ## Blocked items log

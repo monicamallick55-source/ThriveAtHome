@@ -1045,6 +1045,34 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['celebration_events']['Insert']>
         Relationships: []
       }
+      life_story_entries: {
+        Row: {
+          id: string
+          created_at: string
+          member_id: string
+          title: string
+          content: string
+          era: string | null
+          entry_type: string
+          created_by: string | null
+          is_private: boolean
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          member_id: string
+          title: string
+          content: string
+          era?: string | null
+          entry_type?: string
+          created_by?: string | null
+          is_private?: boolean
+        }
+        Update: Partial<Database['public']['Tables']['life_story_entries']['Insert']>
+        Relationships: [
+          { foreignKeyName: 'life_story_entries_member_id_fkey'; columns: ['member_id']; referencedRelation: 'members'; referencedColumns: ['id'] }
+        ]
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>
