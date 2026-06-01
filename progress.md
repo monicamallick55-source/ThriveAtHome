@@ -5532,3 +5532,355 @@ NEXT SESSION MUST:
 - If Phase 44 issue fixes approved: begin Phase 45 (Transport Services)
 AWAITING HUMAN APPROVAL
 APPROVED Begin phase 45
+
+---
+SESSION: 77
+DATE: 2026-06-01 UTC
+MILESTONE: M17
+PHASE: 45 — Transport Services (M17 Services Marketplace)
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 45 checklist: 8 of 8 items [x] — all code verified (tsc + build)
+- Migration written; awaiting human to run in Supabase SQL Editor, then browser verify
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider (TwilioSmsProvider built; activates when TWILIO_ACCOUNT_SID set)
+- emailProvider: StubEmailProvider (SendGridEmailProvider built; activates when SENDGRID_API_KEY set)
+- billingProvider: StripeBillingProvider
+- transportProvider: StubTransportProvider (activates when LYFT_HEALTHCARE_API_KEY set)
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+Phase 45 — Transport Services (M17 Services Marketplace) built from scratch.
+
+FILES CREATED:
+- supabase/migrations/025_services.sql — booking_status enum ('requested'/'confirmed'/'in_progress'/'completed'/'cancelled'); service_bookings table (id, created_at, member_id, service_type, provider_name, booking_details jsonb, status, requested_for, confirmed_at, completed_at, provider_booking_id, cost_estimate, notes); family RLS policy (all own bookings); navigator read policy (navigator/admin can read all)
+- lib/data/services.ts — data layer: getServiceBookingsForMember (filterable by status), getUpcomingServiceBookings (requested/confirmed/in_progress), createServiceBooking, updateBookingStatus, getAllBookingsForNavigator; BookingStatus + ServiceBooking types exported; ServiceType union type
+- app/api/services/route.ts — POST handler: getCurrentUser + getFamilyMemberByAuthId; validates service_type against 7 allowed types; creates service_bookings row; logs "[STUB][Transport] Would book ride..." for transport type
+- components/services/ServicesClient.tsx — 6 category card hub: Transport/Home Services/Meals & Nutrition/Health Services/Legal & Financial/Tech Help; clicking card expands request form; TransportForm: pickup address, destination, datetime-local, notes; GenericServiceForm: description + optional datetime; Legal & Financial shows resource type directory (elder law, financial advisor, document vault, housing & benefits) with navigator CTA (no specific firm names); Scheduled services section with status badges; Service history section; empty state; success banner
+- app/api/services/route.ts — POST endpoint with auth, member check, service_type validation
+
+FILES MODIFIED:
+- app/dashboard/services/page.tsx — rebuilt: requireAuth + getFamilyMemberByAuthId + getServiceBookingsForMember; passes data to ServicesClient
+- app/dashboard/page.tsx — added getUpcomingServiceBookings to parallel fetch; passes upcomingServices prop to DashboardClient
+- components/dashboard/DashboardClient.tsx — added ServiceBooking import; SERVICE_EMOJIS/SERVICE_LABELS constants; ScheduledServicesSection component; upcomingServices prop; renders ScheduledServicesSection when bookings.length > 0 (between Milestones and Health timeline)
+- app/api/navigator/members/[id]/detail/route.ts — added getServiceBookingsForMember to parallel fetch; includes bookings in JSON response
+- components/navigator/MemberDetailPanel.tsx — added ServiceBooking import; SERVICE_LABELS constant; "Service bookings" Section at bottom of panel showing bookings with status color badges
+- types/database.ts — added BookingStatus type; service_bookings Row/Insert/Update/Relationships; booking_status enum entry
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — ✓ Compiled successfully in 32.6s; /dashboard/services (ƒ Dynamic), /api/services (ƒ Dynamic) in build output
+- git commit 7319f39 pushed to origin/main
+
+ERRORS ENCOUNTERED:
+- app/dashboard/services/page.tsx: implicit any[] type — fixed by adding ServiceBooking[] type annotation
+- lib/data/services.ts: jsonb booking_details type conflict with Supabase strict types — fixed by casting as never for insert/update operations (standard pattern)
+
+DECISIONS MADE:
+- Legal & Financial section: shows resource type directory with navigator CTA instead of a simple request form — matches spec ("never specific firm names — always a warm handoff description")
+- Transport stub: logs full "[STUB][Transport] Would book ride for member [id]: [pickup] → [destination] at [date_time]" matching spec exactly
+- ScheduledServicesSection on dashboard: shows max 3 upcoming bookings to keep dashboard scannable; "View all →" links to /dashboard/services
+- Navigator panel: shows all bookings (not just upcoming) sorted by created_at desc, max 5 shown; includes status color badges
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- Human runs migration 025_services.sql in Supabase SQL Editor (REQUIRED before testing)
+  VERIFY: Supabase Table Editor → service_bookings table present with correct columns; booking_status enum created
+- Human must verify in browser (logged in as FAMILY account):
+  1. /dashboard/services → page loads (not "Coming soon"); 6 category cards visible
+  2. Click "Transport" card → card expands with form: Pickup address, Destination, Date & time, Notes
+  3. Fill in: Pickup = "123 Main St, Springfield", Destination = "Dr. Smith's office", date/time = any future time → click "Request a ride →"
+  4. Verify: success banner appears "Your Transport request has been submitted!"
+  5. Verify: "Scheduled services" section appears with the transport booking card showing "🚗 Transport" + "Requested" badge
+  6. Reload /dashboard (main dashboard) → "Scheduled services" section appears above Health timeline with the booking
+  7. Click "View all →" → navigates to /dashboard/services
+  8. Check terminal logs: "[STUB][Transport] Would book ride for member [id]: 123 Main St... → Dr. Smith's office..."
+  9. Click a non-transport category (e.g., "Meals & Nutrition") → generic request form appears with description + optional date/time
+  10. Submit a meals request → success banner; appears in Scheduled services list
+  11. Log in as navigator, navigate to /navigator → click a member row → open detail panel → scroll to "Service bookings" section → booking with status badge visible
+- If all pass: mark Phase 45 APPROVED_COMPLETE, begin Phase 46 (Home Services + Meals)
+
+AWAITING HUMAN APPROVAL
+ISSUE: Redesign the navigator console /navigator for optimal workflow. The current design shows a caseload table that requires clicking into each member to find what needs action. Redesign to a unified action-first view: (1) HEADER SUMMARY BAR — show 4 stat cards at the top: "Alerts needing action [N]", "Service requests pending [N]", "Grief support requests [N]", "Overdue tasks [N]" — clicking any card filters the list below to that category; (2) UNIFIED ACTION FEED — replace the separate alerts queue and tasks sections with a single prioritized action feed showing ALL items that need navigator attention in one list, sorted by urgency: each item shows member name, action type badge (ALERT / SERVICE REQUEST / GRIEF SUPPORT / TASK / MEDICATION), brief description, time ago, and action buttons. Emergency and urgent items at top in red/amber, then service requests in teal, then tasks in grey; (3) MEMBER TABLE stays below the action feed but is collapsed by default — expandable for browsing the full caseload. Each row shows member name, plan, last check-in, mood, and a summary of open items count (e.g. "2 alerts, 1 service request"); (4) MEMBER DETAIL PANEL (on clicking View) shows full drill-down: profile, recent calls, all open items (alerts, service requests, grief requests, tasks), notes, and action buttons — this is where navigators take action on individual items. The goal: a navigator should be able to see everything needing attention across all members in under 10 seconds without clicking into any individual record.
+ISSUE: In the navigator member detail panel, clicking on service request items does nothing. Each service request card should be interactive: (1) Clicking a service request card expands it to show full booking details — service type, requested date/time, pickup/destination (for transport), any notes from the family member, and current status; (2) Add action buttons on the expanded card: "Mark confirmed" (updates status to 'confirmed'), "Mark completed" (updates status to 'completed'), "Cancel booking" (updates status to 'cancelled' with a reason field), and "Add navigator note" (saves a note linked to this booking); (3) Status badge on each card should update immediately after action without page reload; (4) When a booking is confirmed or completed, push a Realtime notification to the family dashboard so they see the update instantly.
+
+---
+SESSION: 78
+DATE: 2026-06-01 UTC
+MILESTONE: M17
+PHASE: 45 (ISSUE fixes) — Navigator Console Redesign + Interactive Service Cards
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Both ISSUE items from Phase 45 human review addressed and verified
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — ✓ Compiled successfully in 32.5s
+
+WHAT WAS DONE THIS SESSION:
+
+ISSUE FIX 1 — Interactive service request cards in MemberDetailPanel:
+- Clicking any service booking card now expands it (toggle) to show full details
+- Expanded view shows: service label, requested date/time (formatted), pickup address, destination, description, existing notes
+- Action buttons on expanded card:
+  - "Mark confirmed" (blue) → PATCH /api/services/[bookingId] with status='confirmed'; pushes Realtime notification to family
+  - "Mark completed" (green) → status='completed'; pushes Realtime notification to family
+  - "Cancel booking" (red) → reveals cancel reason input; "Confirm cancel" saves with reason text as notes
+  - "Save note" input → appends "[Navigator Jun 1] <text>" to booking notes; keeps booking open
+- Status badge updates immediately in local state after each action (no page reload)
+- Realtime `service_booking_update` notification pushed to family on confirmed/completed
+- Completed/cancelled bookings still expandable to view details; action buttons hidden on inactive bookings
+
+ISSUE FIX 2 — Navigator console redesign (action-first workflow):
+- Header summary bar: 4 clickable stat cards (Alerts needing action, Service requests pending, Grief support requests, Open tasks)
+  - Clicking a card filters the action feed to that category; clicking again resets to "all"
+  - Cards use color-coded accent: red for alerts, teal for service, purple for grief, amber for tasks
+  - Active card inverts to filled background for clear selected state
+- Unified action feed: replaces separate "Alerts requiring acknowledgement", "Grief queue", "Today's tasks" sections
+  - All items (alerts, grief, service, tasks) merged into one feed sorted by urgency score (emergency=10, grief=7, service=6, task critical=4, etc.)
+  - Each item type has distinct visual style: red/amber left-border for alerts, purple for grief, teal for service, grey for tasks
+  - Each item shows: member name, action type badge, urgency/priority badge, description, time ago, action buttons
+  - Alert items: Acknowledge + View buttons
+  - Grief items: Contact member (expand/collapse outreach panel) + View buttons
+  - Service items: "View member →" button (opens detail panel to act on booking)
+  - Task items: Complete + View buttons
+  - "Show all" button resets filter when a category filter is active
+- Caseload member table: collapsed by default; expandable by clicking "Caseload (N members) ▼" header
+  - When expanded: search bar, full table with member name/plan/check-in/mood/open items count
+  - Open items column shows "2 alerts, 1 service req" summary per member row
+  - Open items text is amber/red when alerts exist; grey otherwise
+
+FILES CREATED:
+- app/api/services/[bookingId]/route.ts — PATCH endpoint; requires navigator/admin role; validates status; updates service_bookings; appends navigator note if provided; pushes Realtime service_booking_update notification on confirmed/completed; returns updated booking
+
+FILES MODIFIED:
+- components/navigator/NavConsole.tsx — complete redesign per ISSUE spec
+- components/navigator/MemberDetailPanel.tsx — interactive service booking cards (expand, action buttons, optimistic updates)
+- app/navigator/page.tsx — added getAllBookingsForNavigator() fetch; passes pendingBookings prop to NavConsole
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — ✓ Compiled successfully in 32.5s
+
+DECISIONS MADE:
+- Header stat cards: active state uses filled background (inverted) for clear visual feedback
+- Grief outreach panel in action feed: reuses exact same expand/collapse pattern from old NavConsole, just inline in the feed
+- Service items in feed: "View member →" button opens MemberDetailPanel where navigator can act on the booking (consistent with Phase 45 spec)
+- Cancel booking: requires a reason input (revealed on click) before confirming — prevents accidental cancellations
+- Navigator note on booking: appended to booking.notes column with "[Navigator date]" prefix, not a separate table; keeps schema simple
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- Human verifies in browser (logged in as NAVIGATOR/ADMIN account):
+  1. /navigator loads — header shows 4 stat cards (numbers may be 0 if no data yet)
+  2. Clicking a stat card with count > 0 filters the action feed; "Show all" resets
+  3. Caseload table is collapsed by default; click "Caseload (N members) ▼" to expand
+  4. Expanded table shows new "Open items" column with alert/service req counts
+  5. Service request item in action feed shows "View member →" button; click opens detail panel
+  6. In member detail panel, click any service booking card → card expands with details
+  7. Click "Mark confirmed" → status badge changes to "Confirmed" immediately; family dashboard gets Realtime notification
+  8. Click "Mark completed" → status badge changes to "Completed"
+  9. Click "Cancel booking" → cancel reason input appears; type reason → "Confirm cancel" → status updates
+  10. "Add navigator note" input: type note, click "Save note" → note text appended to booking
+- If all pass: mark Phase 45 APPROVED_COMPLETE (both original build + both issue fixes), begin Phase 46
+
+AWAITING HUMAN APPROVAL
+ISSUE: Service request action panel in navigator member detail is incomplete — it only shows a notes field. Each service type needs specific dispatch/scheduling actions: (1) TRANSPORT — show pickup address, destination, requested date/time, then action buttons: "Dispatch via Lyft Healthcare" (stub — logs [STUB][Transport] Would dispatch Lyft ride), "Schedule volunteer driver" (opens volunteer assignment picker showing available drivers), "Confirm manual arrangement" (marks confirmed with a free-text field for how it was arranged); (2) TECH HELP — show request details, requested date/time, then: "Assign volunteer tech helper" (opens picker showing available tech volunteers), "Schedule in-home visit" (date/time picker + assigned volunteer), "Arrange remote help call" (sets up a scheduled phone session); (3) MEALS — show meal type and delivery date, then: "Order via partner" (stub), "Assign volunteer meal helper", "Confirm arrangement"; (4) HOME SERVICES — show service type and requested date, then: "Assign vetted provider", "Schedule visit" with date/time picker; (5) ALL SERVICE TYPES — after any dispatch action: show assigned volunteer/provider name, scheduled date/time on the booking card, update status to 'confirmed', push Realtime notification to family dashboard showing "Your [service] request has been confirmed for [date] at [time]". The navigator should never need to leave the panel to dispatch a service — everything should be actionable inline.
+
+---
+SESSION: 79
+DATE: 2026-06-01 UTC
+MILESTONE: M17
+PHASE: 45 (ISSUE fix 3) — Service-type-specific dispatch in navigator panel
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 45 ISSUE fix 3 complete — service-type-specific dispatch implemented
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — ✓ Compiled successfully in 33.0s
+- Loop state: AWAITING HUMAN REVIEW
+
+WHAT WAS DONE THIS SESSION:
+
+ISSUE FIX 3 — Service-type-specific dispatch actions in navigator member detail panel
+
+PROBLEM: The service request action panel in navigator member detail only showed generic action buttons (Mark confirmed / Mark completed / Cancel) and a notes field. There were no service-type-specific dispatch actions.
+
+SOLUTION: Added a full "Dispatch options" section that appears for active bookings with status='requested'. Each service type reveals its own dispatch workflow:
+
+TRANSPORT (service_type='transport'):
+- "🚗 Dispatch via Lyft Healthcare" → one-click; logs [STUB][Transport] Would dispatch Lyft Healthcare...
+- "🙋 Assign volunteer driver" → volunteer name input; logs [STUB][Dispatch] Would notify volunteer...
+- "✓ Confirm manual arrangement" → free text input describing how trip was arranged
+
+TECH HELP (service_type='tech_help'):
+- "🙋 Assign volunteer tech helper" → volunteer name input
+- "🏠 Schedule in-home visit" → volunteer/tech name + datetime-local picker; logs scheduled time
+- "📞 Arrange remote help call" → datetime-local picker for call scheduling
+
+MEALS (service_type='meals'):
+- "🥘 Order via meal partner" → one-click; logs [STUB][Meals] Would order from meal partner...
+- "🙋 Assign volunteer meal helper" → volunteer name input
+- "✓ Confirm arrangement" → free text (e.g. "Daughter brings meals Mon/Wed")
+
+HOME SERVICES (service_type='home_service'):
+- "🔧 Assign vetted provider" → provider name input
+- "📅 Schedule visit with provider" → provider name + datetime-local picker
+
+ALL TYPES — after dispatch action:
+- booking_details jsonb merged with dispatch info: dispatch_type, assigned_volunteer / assigned_provider / scheduled_time / arrangement / provider
+- status updated to 'confirmed'
+- confirmed_at timestamp set
+- Realtime notification pushed to family with specific time: "Your transport request has been confirmed for Mon, Jun 10 at 2:00 PM"
+- booking card collapses; localBookings updated in place (optimistic UI)
+- Expanded detail grid shows: "Dispatch method", "Assigned volunteer", "Assigned provider", "Scheduled for", "Arrangement" — all from booking_details after dispatch
+
+FILES MODIFIED:
+- components/navigator/MemberDetailPanel.tsx:
+  - Added DISPATCH_LABELS constant (11 dispatch type labels)
+  - Added 2 new state vars: activeDispatch, dispatchFormData
+  - Added handleDispatch() async function (calls PATCH with status='confirmed' + dispatch data)
+  - Added service-type-specific dispatch section in expanded booking view (after generic action buttons)
+  - Added dispatch info display in booking detail grid (dispatch_method, assigned_volunteer/provider, scheduled_time, arrangement)
+  - Added DispatchBtn helper component (accordion toggle button)
+  - Added DispatchForm helper component (styled expand container)
+- app/api/services/[bookingId]/route.ts:
+  - Parses dispatch_type and dispatch_details from PATCH body
+  - Merges dispatch_details into booking_details jsonb (preserving existing fields like pickup_address, destination)
+  - Stub logs for each dispatch type (lyft, meal_partner, volunteer assigns, provider assigns, scheduling)
+  - Notification body now includes time info: "confirmed for Mon, Jun 10" when requested_for or scheduled_time available
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — ✓ Compiled successfully in 33.0s
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- Human verifies in browser (logged in as NAVIGATOR/ADMIN account):
+  1. Navigate to /navigator → click any member row → open detail panel
+  2. Click any service booking card with status='Requested' → card expands
+  3. Generic action buttons visible: Mark confirmed / Mark completed / Cancel
+  4. Dispatch options section visible below (labeled "DISPATCH OPTIONS") with service-type-specific buttons
+  5. For a TRANSPORT booking: 3 dispatch buttons shown (Lyft, Volunteer driver, Manual arrangement)
+  6. Click "🚗 Dispatch via Lyft Healthcare" → button highlights, description + "Confirm Lyft dispatch" button appear
+  7. Click "Confirm Lyft dispatch" → booking card collapses; status updates to "Confirmed" in the list
+  8. Check terminal logs: "[STUB][Transport] Would dispatch Lyft Healthcare for member..."
+  9. Family dashboard: Realtime notification appears "Transport request confirmed for [date]"
+  10. Re-open the booking card (now Confirmed) → expanded view shows "Dispatch method: Lyft Healthcare"
+  11. For TECH HELP booking: "Schedule in-home visit" shows volunteer name + datetime picker
+  12. Enter volunteer name + pick a date → "Schedule visit" → booking confirmed; expanded detail shows "Assigned volunteer" and "Scheduled for"
+  13. For MEALS booking: "Assign volunteer meal helper" shows name input; works same way
+  14. For HOME SERVICES: "Schedule visit with provider" shows provider name + datetime picker
+  15. Generic buttons still work: "Mark confirmed" on any requested booking → status changes without dispatch
+- If all pass: mark Phase 45 APPROVED_COMPLETE (all 3 ISSUE fixes resolved), then begin Phase 46
+
+AWAITING HUMAN APPROVAL
+ISSUE: The volunteer/service technician picker in the navigator service dispatch panel shows an empty dropdown with no options. Fix the volunteer assignment picker to: (1) Query the volunteers table for active volunteers (status='active') who have the matching service_type in their service_types array — for tech help show volunteers with 'tech_help' in service_types, for transport show volunteers with 'walking_companion' or driver credentials, for home services show relevant service types; (2) Display each volunteer in the dropdown as: full name, city, availability_days, hours_per_week, and their rating_average if they have one; (3) If no volunteers match the service type, show "No volunteers available for this service type — consider posting a volunteer request" with a link to /admin/volunteers; (4) After selecting a volunteer from the dropdown, show their details in a confirmation card before saving — name, contact info, service types, availability; (5) When confirmed, update the service_bookings row with the assigned volunteer_id (add this column to service_bookings via migration if not present), update status to 'confirmed', and push Realtime notification to family. Also seed at least 2-3 test volunteers in the database with different service_types including 'tech_help' and transport so the dropdown has options to show during testing.
+---
+SESSION: 80
+DATE: 2026-06-01 UTC
+MILESTONE: M17
+PHASE: 45 (ISSUE fix 4) — Volunteer picker with real data in navigator dispatch panel
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 45 ISSUE fix 4 complete — volunteer picker replaces empty text inputs
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — ✓ Compiled successfully in 36.8s
+
+WHAT WAS DONE THIS SESSION:
+
+ISSUE FIX 4 — Real volunteer picker in navigator service dispatch panel
+
+PROBLEM: Volunteer assignment dispatch options (Assign volunteer driver, Assign volunteer tech helper, Schedule in-home visit, Assign volunteer meal helper) showed empty plain text inputs with no data from the volunteers table.
+
+SOLUTION: Replaced all volunteer name text inputs with a real VolunteerPicker component that:
+1. Fetches active volunteers from new GET /api/volunteers/active?serviceType=<visit_type> endpoint
+2. Filters by matching service_type from volunteers.service_types array
+3. Displays selectable volunteer cards with: name, rating, location, availability days, hours/week
+4. If no volunteers match: shows "No active volunteers available" + link to /admin/volunteers
+5. After selecting a volunteer: shows VolunteerConfirmCard with name, phone (clickable tel:), languages, service types, availability
+6. Confirm button is only enabled after a volunteer is selected (+ scheduledTime for inHome_visit)
+7. On dispatch: sends volunteer_id to PATCH /api/services/[bookingId] which sets volunteer_id column on service_bookings
+
+Service type to visit_type filter mapping:
+- volunteer_driver (transport) → filters by 'walking_companion'
+- volunteer_tech (tech help) → filters by 'tech_help'  
+- inHome_visit (tech help) → filters by 'tech_help'
+- volunteer_meals (meals) → filters by 'grocery_help'
+
+Volunteer picker UX:
+- Scrollable list (max 210px height) — each card shows name + rating on the right, location + availability below
+- Clicking a card highlights it (teal border, light background)
+- VolunteerConfirmCard appears below the list with full details: name, phone, languages, service types, availability
+- Confirm button fires dispatch with volunteer's full_name (for booking_details.assigned_volunteer) + volunteer.id (for service_bookings.volunteer_id column)
+
+FILES CREATED:
+- supabase/migrations/026_volunteer_booking_id.sql — adds volunteer_id column to service_bookings; seeds 3 test active volunteers (Sarah Chen/tech_help, James Rivera/walking_companion+grocery_help, Maria Santos/grocery_help+in_person_visit)
+- app/api/volunteers/active/route.ts — GET endpoint; navigator/admin only; accepts ?serviceType=<visit_type>; queries volunteers where status='active' and service_types contains the given type; returns sorted by rating_average desc
+
+FILES MODIFIED:
+- types/database.ts — added volunteer_id: string | null to service_bookings Row and Insert types
+- lib/data/services.ts — added volunteer_id: string | null to ServiceBooking interface
+- app/api/services/[bookingId]/route.ts — PATCH body now accepts volunteer_id; sets it on updates Record alongside dispatch
+- components/navigator/MemberDetailPanel.tsx:
+  - Added `import type { Volunteer }` from volunteers data layer
+  - Replaced volunteerName text input state with selectedVolunteer Record (keyed by bookingId_dispatchType)
+  - Updated handleDispatch() to accept optional volunteerId param and include in PATCH payload
+  - Replaced all 4 volunteer text inputs with VolunteerPicker + VolunteerConfirmCard components
+  - Added VolunteerPicker component: self-contained, fetches on mount, shows loading/empty/list states
+  - Added VolunteerConfirmCard component: shows all volunteer details after selection
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — ✓ Compiled successfully in 36.8s
+
+DECISIONS MADE:
+- VolunteerPicker is a self-contained stateful component — manages its own fetch/loading/error state
+- selectedVolunteer state is held in parent (MemberDetailPanel) — allows inHome_visit to combine with scheduledTime
+- inHome_visit shows datetime picker first, then volunteer picker below — clear visual ordering
+- Dispatch types without volunteer assignment (Lyft, meal_partner, manual, remote_call, etc.) unchanged — still simple confirm forms
+- volunteer_id stored both in service_bookings.volunteer_id column AND in booking_details.assigned_volunteer (name) — redundant but gives both structured FK and human-readable name in the JSONB
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- Human FIRST runs migration 026_volunteer_booking_id.sql in Supabase SQL Editor:
+  VERIFY: service_bookings table now has volunteer_id column; volunteers table has 3 new rows (Sarah Chen, James Rivera, Maria Santos) with status='active'
+- Human verifies in browser (logged in as NAVIGATOR/ADMIN account):
+  1. /navigator → click any member row → open member detail panel
+  2. Find a service booking with status='Requested' and service_type='transport'
+  3. Click the booking card to expand → "DISPATCH OPTIONS" section visible
+  4. Click "🙋 Assign volunteer driver" → dispatch form expands
+  5. Instead of text input: loading state, then volunteer cards appear — James Rivera should be visible (walking_companion service type)
+  6. Click James Rivera card → card highlights with teal border; confirmation card appears below showing his details (phone, languages, availability)
+  7. "Assign driver" button becomes enabled — click it → booking status updates to "Confirmed"
+  8. Check terminal logs: "[STUB][Dispatch] Would notify volunteer "James Rivera"..."
+  9. Family dashboard gets Realtime notification "Transport request confirmed..."
+  10. For TECH HELP booking: expand → "Assign volunteer tech helper" → picker shows Sarah Chen (tech_help type)
+  11. For MEALS booking: expand → "Assign volunteer meal helper" → picker shows James Rivera and Maria Santos (grocery_help type)
+  12. "Schedule in-home visit": datetime picker first, then volunteer picker for tech_help (Sarah Chen); "Schedule visit" only enabled when BOTH time and volunteer selected
+  13. If a service type has no matching volunteers: "No active volunteers available for this service type — Add volunteers →" link shown
+- If all pass: mark Phase 45 APPROVED_COMPLETE (all 4 ISSUE fixes resolved), then begin Phase 46
+
+AWAITING HUMAN APPROVAL

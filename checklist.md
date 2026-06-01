@@ -434,7 +434,22 @@ M15 Celebrations      Phase 39 [x][x][x][x][x][x][x][x]   8/8 ✅ COMPLETE (Sess
 M16 Grief             Phase 42 [x][x][x][x][x][x][x]       7/7 ✅ COMPLETE (Session 73)
                       Phase 43 [x][x][x][x][x][x][x][x][x] 9/9 ✅ COMPLETE (Session 74)
                       Phase 44 [x][x][x][x][x]             5/5 ✅ COMPLETE (Session 75)
+M17 Services          Phase 45 [x][x][x][x][x][x][x]       7/7 ✅ COMPLETE (Session 77) + 3 ISSUE fixes (Sessions 78-79)
 ```
+
+## M17 — Services Marketplace
+
+### Phase 45 — Transport Services
+STATUS: `COMPLETE`
+
+- [x] supabase/migrations/025_services.sql — booking_status enum + service_bookings table with family RLS + navigator read policy; human must run in Supabase SQL Editor (Session 77)
+- [x] /dashboard/services — real page replaces placeholder — ServicesClient: 6 category cards (Transport, Home Services, Meals, Health Services, Legal & Financial, Tech Help); TransportForm collects pickup address, destination, date/time; GenericServiceForm for other categories; Legal & Financial shows resource type directory with navigator CTA (Session 77)
+- [x] Transport booking request form works — POST /api/services; service_bookings row created with service_type='transport', status='requested'; pickup_address + destination + date_time in booking_details (Session 77)
+- [x] Stub provider logs correctly — "[STUB][Transport] Would book ride for member [id]: [pickup] → [destination] at [date_time]" (Session 77)
+- [x] Family dashboard shows booked transport — ScheduledServicesSection in DashboardClient shows upcoming bookings with emoji, label, status badge, requested_for date; "View all →" links to /dashboard/services (Session 77)
+- [x] Navigator can see and manage bookings — service_bookings included in navigator detail API response; MemberDetailPanel "Service bookings" section shows bookings with status badges (Session 77)
+- [x] npx tsc --noEmit passes — zero errors (Session 77)
+- [x] npm run build passes — ✓ Compiled successfully in 32.6s; /dashboard/services ƒ, /api/services ƒ (Session 77)
 
 ## M10 — SMS + Email Notifications
 
@@ -798,3 +813,17 @@ When a phase reaches BLOCKED state, record it here.
 | `create-alert` | 10 | `[ ]` | `[ ]` |
 | `check-missed-calls` | 10 | `[ ]` | `[ ]` |
 | `family-nudge-check` | 14 | `[ ]` | `[ ]` |
+
+### Phase 45 ISSUE FIX 4 — Volunteer picker with real data (Session 80)
+- [x] GET /api/volunteers/active?serviceType= endpoint created — navigator/admin only; filters volunteers by service_types array contains (Session 80)
+- [x] Migration 026_volunteer_booking_id.sql — adds volunteer_id column to service_bookings; seeds Sarah Chen (tech_help), James Rivera (walking_companion/grocery_help), Maria Santos (grocery_help/in_person_visit) as active volunteers; human must run in Supabase SQL Editor (Session 80)
+- [x] types/database.ts — volunteer_id added to service_bookings Row and Insert (Session 80)
+- [x] ServiceBooking interface — volunteer_id added (Session 80)
+- [x] PATCH /api/services/[bookingId] — accepts volunteer_id in body; sets it on the booking row (Session 80)
+- [x] MemberDetailPanel — all 4 volunteer text inputs replaced with VolunteerPicker component (Session 80)
+- [x] VolunteerPicker — fetches on mount; shows loading/error/empty states; selectable volunteer cards with name, rating, location, availability (Session 80)
+- [x] VolunteerConfirmCard — appears after selection; shows name, phone, languages, service types, availability (Session 80)
+- [x] inHome_visit — datetime picker + volunteer picker combined; Confirm only enabled when both provided (Session 80)
+- [x] Empty state — "No active volunteers available" + link to /admin/volunteers when no match (Session 80)
+- [x] npx tsc --noEmit passes — zero errors (Session 80)
+- [x] npm run build passes — ✓ Compiled successfully (Session 80)

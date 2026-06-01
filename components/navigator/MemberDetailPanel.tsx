@@ -4,6 +4,8 @@ import type { Member } from '@/lib/data/members'
 import type { CheckInCall } from '@/lib/data/calls'
 import type { FamilyMember, NavigatorNote } from '@/lib/data/navigator'
 import type { ServiceBooking } from '@/lib/data/services'
+import type { BookingStatus } from '@/types/database'
+import type { Volunteer } from '@/lib/data/volunteers'
 
 const SERVICE_LABELS: Record<string, string> = {
   transport: '🚗 Transport',
@@ -13,6 +15,28 @@ const SERVICE_LABELS: Record<string, string> = {
   legal_financial: '⚖️ Legal & Financial',
   tech_help: '💻 Tech Help',
   companion: '🤝 Companion',
+}
+
+const DISPATCH_LABELS: Record<string, string> = {
+  lyft: 'Lyft Healthcare',
+  volunteer_driver: 'Volunteer driver',
+  manual: 'Manual arrangement',
+  volunteer_tech: 'Volunteer tech helper',
+  inHome_visit: 'In-home visit',
+  remote_call: 'Remote help call',
+  meal_partner: 'Meal partner network',
+  volunteer_meals: 'Volunteer meal helper',
+  meal_arrangement: 'Manual arrangement',
+  vetted_provider: 'Vetted provider',
+  scheduled_visit: 'Scheduled visit',
+}
+
+function statusColor(s: string): { bg: string; text: string } {
+  if (s === 'completed') return { bg: '#d1fae5', text: '#065F46' }
+  if (s === 'cancelled') return { bg: '#f3f4f6', text: '#6b7280' }
+  if (s === 'confirmed') return { bg: '#dbeafe', text: '#1d4ed8' }
+  if (s === 'in_progress') return { bg: '#fef3c7', text: '#92400e' }
+  return { bg: '#fff3e0', text: '#c2410c' }
 }
 
 interface PanelData {
@@ -76,6 +100,24 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
   const [referralSaved, setReferralSaved] = useState(false)
   const [referralError, setReferralError] = useState<string | null>(null)
 
+  // Service booking interactive state
+  const [expandedBookingId, setExpandedBookingId] = useState<string | null>(null)
+  const [localBookings, setLocalBookings] = useState<ServiceBooking[]>([])
+  const [bookingActionLoading, setBookingActionLoading] = useState<Record<string, boolean>>({})
+  const [bookingActionError, setBookingActionError] = useState<Record<string, string>>({})
+  const [bookingNoteText, setBookingNoteText] = useState<Record<string, string>>({})
+  const [cancelReason, setCancelReason] = useState<Record<string, string>>({})
+  const [showCancelInput, setShowCancelInput] = useState<Record<string, boolean>>({})
+  const [activeDispatch, setActiveDispatch] = useState<Record<string, string | null>>({})
+  const [dispatchFormData, setDispatchFormData] = useState<Record<string, {
+    scheduledTime?: string
+    providerName?: string
+    arrangement?: string
+  }>>({})
+
+  // Volunteer picker state — keyed by `${bookingId}_${dispatchType}`
+  const [selectedVolunteer, setSelectedVolunteer] = useState<Record<string, Volunteer | null>>({})
+
   const panelRef = useRef<HTMLDivElement>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
 
@@ -92,6 +134,7 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
         } else {
           setPanelData(json)
           setLocalNotes(json.notes ?? [])
+          setLocalBookings(json.bookings ?? [])
         }
         setLoading(false)
       })
@@ -143,6 +186,49 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
     }
   }, [onClose, triggerRef])
 
+  const handleDispatch = async (
+    bookingId: string,
+    dispatchType: string,
+    dispatchDetails: Record<string, string>,
+    volunteerId?: string
+  ) => {
+    setBookingActionLoading(prev => ({ ...prev, [bookingId]: true }))
+    setBookingActionError(prev => { const n = { ...prev }; delete n[bookingId]; return n })
+    try {
+      const payload: Record<string, unknown> = {
+        status: 'confirmed',
+        dispatch_type: dispatchType,
+        dispatch_details: dispatchDetails,
+      }
+      if (volunteerId) payload.volunteer_id = volunteerId
+
+      const res = await fetch(`/api/services/${bookingId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        setBookingActionError(prev => ({ ...prev, [bookingId]: json.error ?? 'Dispatch failed.' }))
+      } else {
+        setLocalBookings(prev => prev.map(b => b.id === bookingId ? (json.booking as ServiceBooking) : b))
+        setActiveDispatch(prev => ({ ...prev, [bookingId]: null }))
+        setDispatchFormData(prev => ({ ...prev, [bookingId]: {} }))
+        // Clear volunteer selections for this booking
+        setSelectedVolunteer(prev => {
+          const next = { ...prev }
+          Object.keys(next).filter(k => k.startsWith(bookingId)).forEach(k => { delete next[k] })
+          return next
+        })
+        setExpandedBookingId(null)
+      }
+    } catch {
+      setBookingActionError(prev => ({ ...prev, [bookingId]: 'Network error. Please try again.' }))
+    } finally {
+      setBookingActionLoading(prev => { const n = { ...prev }; delete n[bookingId]; return n })
+    }
+  }
+
   const handleSaveNote = async () => {
     if (!noteText.trim() || !panelData) return
     setNoteSaving(true)
@@ -190,6 +276,35 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
       setReferralError('Network error. Please try again.')
     } finally {
       setReferralSaving(false)
+    }
+  }
+
+  const handleBookingAction = async (
+    bookingId: string,
+    status: BookingStatus,
+    opts?: { navigator_note?: string; cancel_reason?: string }
+  ) => {
+    setBookingActionLoading(prev => ({ ...prev, [bookingId]: true }))
+    setBookingActionError(prev => { const n = { ...prev }; delete n[bookingId]; return n })
+    try {
+      const res = await fetch(`/api/services/${bookingId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status, ...opts }),
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        setBookingActionError(prev => ({ ...prev, [bookingId]: json.error ?? 'Action failed.' }))
+      } else {
+        setLocalBookings(prev => prev.map(b => b.id === bookingId ? (json.booking as ServiceBooking) : b))
+        if (status === 'cancelled') setShowCancelInput(prev => ({ ...prev, [bookingId]: false }))
+        if (opts?.navigator_note) setBookingNoteText(prev => ({ ...prev, [bookingId]: '' }))
+        if (status !== 'cancelled') setExpandedBookingId(null)
+      }
+    } catch {
+      setBookingActionError(prev => ({ ...prev, [bookingId]: 'Network error. Please try again.' }))
+    } finally {
+      setBookingActionLoading(prev => { const n = { ...prev }; delete n[bookingId]; return n })
     }
   }
 
@@ -568,29 +683,317 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                 </button>
               </Section>
 
-              {/* Service Bookings */}
+              {/* Service Bookings — interactive */}
               <Section title="Service bookings">
-                {(panelData.bookings ?? []).length === 0 ? (
+                {localBookings.length === 0 ? (
                   <EmptyState text="No service bookings for this member." />
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {(panelData.bookings ?? []).slice(0, 5).map((b) => (
-                      <div key={b.id} style={{ backgroundColor: 'white', border: '1px solid var(--color-warm-grey)', borderRadius: 'var(--radius-md)', padding: '10px 14px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-                          <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, color: 'var(--color-navy)', margin: 0 }}>
-                            {SERVICE_LABELS[b.service_type] ?? b.service_type}
-                          </p>
-                          <span style={{ fontFamily: 'var(--font-body)', fontSize: '11px', fontWeight: 600, color: b.status === 'completed' ? '#43aa8b' : b.status === 'cancelled' ? '#adb5bd' : '#f8961e', backgroundColor: b.status === 'completed' ? '#d1fae5' : b.status === 'cancelled' ? '#f8f9fa' : '#fff3e0', borderRadius: '20px', padding: '2px 8px', flexShrink: 0 }}>
-                            {b.status.charAt(0).toUpperCase() + b.status.slice(1).replace('_', ' ')}
-                          </span>
+                    {localBookings.slice(0, 8).map((b) => {
+                      const isExpanded = expandedBookingId === b.id
+                      const sc = statusColor(b.status)
+                      const details = b.booking_details as Record<string, string>
+                      const isLoading = !!bookingActionLoading[b.id]
+                      const isActive = b.status !== 'completed' && b.status !== 'cancelled'
+                      return (
+                        <div
+                          key={b.id}
+                          style={{
+                            backgroundColor: 'white',
+                            border: isExpanded ? '2px solid var(--color-teal)' : '1px solid var(--color-warm-grey)',
+                            borderRadius: 'var(--radius-md)',
+                            overflow: 'hidden',
+                            transition: 'border 0.15s',
+                          }}
+                        >
+                          {/* Clickable header row */}
+                          <button
+                            type="button"
+                            onClick={() => setExpandedBookingId(isExpanded ? null : b.id)}
+                            style={{
+                              width: '100%',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              gap: '8px',
+                              padding: '10px 14px',
+                              background: 'none',
+                              border: 'none',
+                              cursor: 'pointer',
+                              textAlign: 'left',
+                            }}
+                            aria-expanded={isExpanded}
+                          >
+                            <div>
+                              <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, color: 'var(--color-navy)', margin: 0 }}>
+                                {SERVICE_LABELS[b.service_type] ?? b.service_type}
+                              </p>
+                              {b.requested_for && (
+                                <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)', margin: '2px 0 0' }}>
+                                  {new Date(b.requested_for).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' })}
+                                </p>
+                              )}
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                              <span style={{ fontFamily: 'var(--font-body)', fontSize: '11px', fontWeight: 600, color: sc.text, backgroundColor: sc.bg, borderRadius: '20px', padding: '2px 8px' }}>
+                                {b.status.charAt(0).toUpperCase() + b.status.slice(1).replace('_', ' ')}
+                              </span>
+                              <span style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>
+                                {isExpanded ? '▲' : '▼'}
+                              </span>
+                            </div>
+                          </button>
+
+                          {/* Expanded detail */}
+                          {isExpanded && (
+                            <div style={{ borderTop: '1px solid var(--color-warm-grey)', padding: '14px', backgroundColor: '#fafaf8' }}>
+                              {/* Booking details */}
+                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '12px' }}>
+                                <DetailItem label="Service" value={SERVICE_LABELS[b.service_type] ?? b.service_type} />
+                                {b.requested_for && (
+                                  <DetailItem label="Requested for" value={new Date(b.requested_for).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'UTC' })} />
+                                )}
+                                {details.pickup_address && <DetailItem label="Pickup" value={details.pickup_address} />}
+                                {details.destination && <DetailItem label="Destination" value={details.destination} />}
+                                {details.description && <DetailItem label="Description" value={details.description} />}
+                                {details.dispatch_type && <DetailItem label="Dispatch method" value={DISPATCH_LABELS[details.dispatch_type] ?? details.dispatch_type} />}
+                                {details.assigned_volunteer && <DetailItem label="Assigned volunteer" value={details.assigned_volunteer} />}
+                                {details.assigned_provider && <DetailItem label="Assigned provider" value={details.assigned_provider} />}
+                                {details.scheduled_time && <DetailItem label="Scheduled for" value={new Date(details.scheduled_time).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'UTC' })} />}
+                                {details.arrangement && <DetailItem label="Arrangement" value={details.arrangement} />}
+                                {details.provider && !details.dispatch_type?.includes('volunteer') && <DetailItem label="Provider" value={details.provider} />}
+                              </div>
+                              {b.notes && (
+                                <div style={{ backgroundColor: 'white', border: '1px solid var(--color-warm-grey)', borderRadius: 'var(--radius-sm)', padding: '8px 10px', marginBottom: '12px', fontSize: '13px', color: 'var(--color-text-primary)', lineHeight: 1.5, fontFamily: 'var(--font-body)' }}>
+                                  <span style={{ fontWeight: 600, color: 'var(--color-text-secondary)', marginRight: '4px' }}>Notes:</span>{b.notes}
+                                </div>
+                              )}
+
+                              {bookingActionError[b.id] && (
+                                <p style={{ fontSize: '13px', color: 'var(--color-emergency-text)', fontFamily: 'var(--font-body)', margin: '0 0 8px' }}>
+                                  {bookingActionError[b.id]}
+                                </p>
+                              )}
+
+                              {/* Action buttons — only for active bookings */}
+                              {isActive && (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                    {b.status !== 'confirmed' && (
+                                      <ActionBtn
+                                        label={isLoading ? 'Saving…' : 'Mark confirmed'}
+                                        onClick={() => handleBookingAction(b.id, 'confirmed')}
+                                        disabled={isLoading}
+                                        color="#1d4ed8"
+                                        bg="#dbeafe"
+                                      />
+                                    )}
+                                    <ActionBtn
+                                      label={isLoading ? 'Saving…' : 'Mark completed'}
+                                      onClick={() => handleBookingAction(b.id, 'completed')}
+                                      disabled={isLoading}
+                                      color="#065F46"
+                                      bg="#d1fae5"
+                                    />
+                                    <ActionBtn
+                                      label="Cancel booking"
+                                      onClick={() => setShowCancelInput(prev => ({ ...prev, [b.id]: !prev[b.id] }))}
+                                      disabled={isLoading}
+                                      color="#9f1239"
+                                      bg="#ffe4e6"
+                                    />
+                                  </div>
+
+                                  {showCancelInput[b.id] && (
+                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
+                                      <input
+                                        type="text"
+                                        value={cancelReason[b.id] ?? ''}
+                                        onChange={e => setCancelReason(prev => ({ ...prev, [b.id]: e.target.value }))}
+                                        placeholder="Reason for cancellation…"
+                                        style={{ flex: 1, fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #fca5a5', borderRadius: 'var(--radius-sm)', padding: '7px 10px', outline: 'none', backgroundColor: 'white' }}
+                                      />
+                                      <ActionBtn
+                                        label="Confirm cancel"
+                                        onClick={() => handleBookingAction(b.id, 'cancelled', { cancel_reason: cancelReason[b.id] })}
+                                        disabled={isLoading}
+                                        color="#9f1239"
+                                        bg="#ffe4e6"
+                                      />
+                                    </div>
+                                  )}
+
+                                  {/* Add navigator note to booking */}
+                                  <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end', marginTop: '4px' }}>
+                                    <input
+                                      type="text"
+                                      value={bookingNoteText[b.id] ?? ''}
+                                      onChange={e => setBookingNoteText(prev => ({ ...prev, [b.id]: e.target.value }))}
+                                      placeholder="Add navigator note to booking…"
+                                      style={{ flex: 1, fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid var(--color-warm-grey)', borderRadius: 'var(--radius-sm)', padding: '7px 10px', outline: 'none', backgroundColor: 'white' }}
+                                    />
+                                    <ActionBtn
+                                      label="Save note"
+                                      onClick={() => handleBookingAction(b.id, b.status as BookingStatus, { navigator_note: bookingNoteText[b.id] })}
+                                      disabled={isLoading || !bookingNoteText[b.id]?.trim()}
+                                      color="#374151"
+                                      bg="#f3f4f6"
+                                    />
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Service-type-specific dispatch — shown only for requested bookings */}
+                              {isActive && b.status === 'requested' && (
+                                <div style={{ borderTop: '1px solid #e5e7eb', marginTop: '12px', paddingTop: '12px' }}>
+                                  <p style={{ fontFamily: 'var(--font-body)', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: '#6b7280', margin: '0 0 8px' }}>
+                                    Dispatch options
+                                  </p>
+
+                                  {/* TRANSPORT */}
+                                  {b.service_type === 'transport' && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                      <DispatchBtn icon="🚗" label="Dispatch via Lyft Healthcare" isActive={activeDispatch[b.id] === 'lyft'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'lyft' ? null : 'lyft' }))} />
+                                      {activeDispatch[b.id] === 'lyft' && (
+                                        <DispatchForm bg="#eff6ff" border="#bfdbfe">
+                                          <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: '#1e40af', margin: '0 0 8px', lineHeight: 1.4 }}>
+                                            Dispatches a Lyft Healthcare vehicle to the pickup address above.
+                                          </p>
+                                          <ActionBtn label={isLoading ? 'Dispatching…' : 'Confirm Lyft dispatch'} onClick={() => handleDispatch(b.id, 'lyft', { provider: 'Lyft Healthcare' })} disabled={isLoading} color="white" bg="#1d4ed8" />
+                                        </DispatchForm>
+                                      )}
+                                      <DispatchBtn icon="🙋" label="Assign volunteer driver" isActive={activeDispatch[b.id] === 'volunteer_driver'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'volunteer_driver' ? null : 'volunteer_driver' }))} />
+                                      {activeDispatch[b.id] === 'volunteer_driver' && (() => {
+                                        const vkey = `${b.id}_volunteer_driver`
+                                        const picked = selectedVolunteer[vkey] ?? null
+                                        return (
+                                          <DispatchForm bg="#f0fdf4" border="#86efac">
+                                            <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#065f46', margin: '0 0 6px' }}>Select a volunteer driver:</p>
+                                            <VolunteerPicker visitType="walking_companion" selectedId={picked?.id} onSelect={vol => setSelectedVolunteer(prev => ({ ...prev, [vkey]: vol }))} />
+                                            {picked && <VolunteerConfirmCard volunteer={picked} />}
+                                            <ActionBtn label={isLoading ? 'Assigning…' : 'Assign driver'} onClick={() => handleDispatch(b.id, 'volunteer_driver', { assigned_volunteer: picked?.full_name ?? '' }, picked?.id)} disabled={isLoading || !picked} color="white" bg="#059669" />
+                                          </DispatchForm>
+                                        )
+                                      })()}
+                                      <DispatchBtn icon="✓" label="Confirm manual arrangement" isActive={activeDispatch[b.id] === 'manual'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'manual' ? null : 'manual' }))} />
+                                      {activeDispatch[b.id] === 'manual' && (
+                                        <DispatchForm bg="#f9fafb" border="#e5e7eb">
+                                          <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '3px' }}>How was this arranged?</label>
+                                          <input type="text" value={dispatchFormData[b.id]?.arrangement ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], arrangement: e.target.value } }))} placeholder="e.g. Son will drive, confirmed by phone" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #e5e7eb', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '8px' }} />
+                                          <ActionBtn label={isLoading ? 'Confirming…' : 'Confirm arrangement'} onClick={() => handleDispatch(b.id, 'manual', { arrangement: dispatchFormData[b.id]?.arrangement ?? '' })} disabled={isLoading || !dispatchFormData[b.id]?.arrangement?.trim()} color="white" bg="#374151" />
+                                        </DispatchForm>
+                                      )}
+                                    </div>
+                                  )}
+
+                                  {/* TECH HELP */}
+                                  {b.service_type === 'tech_help' && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                      <DispatchBtn icon="🙋" label="Assign volunteer tech helper" isActive={activeDispatch[b.id] === 'volunteer_tech'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'volunteer_tech' ? null : 'volunteer_tech' }))} />
+                                      {activeDispatch[b.id] === 'volunteer_tech' && (() => {
+                                        const vkey = `${b.id}_volunteer_tech`
+                                        const picked = selectedVolunteer[vkey] ?? null
+                                        return (
+                                          <DispatchForm bg="#f0fdf4" border="#86efac">
+                                            <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#065f46', margin: '0 0 6px' }}>Select a tech volunteer:</p>
+                                            <VolunteerPicker visitType="tech_help" selectedId={picked?.id} onSelect={vol => setSelectedVolunteer(prev => ({ ...prev, [vkey]: vol }))} />
+                                            {picked && <VolunteerConfirmCard volunteer={picked} />}
+                                            <ActionBtn label={isLoading ? 'Assigning…' : 'Assign tech helper'} onClick={() => handleDispatch(b.id, 'volunteer_tech', { assigned_volunteer: picked?.full_name ?? '' }, picked?.id)} disabled={isLoading || !picked} color="white" bg="#059669" />
+                                          </DispatchForm>
+                                        )
+                                      })()}
+                                      <DispatchBtn icon="🏠" label="Schedule in-home visit" isActive={activeDispatch[b.id] === 'inHome_visit'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'inHome_visit' ? null : 'inHome_visit' }))} />
+                                      {activeDispatch[b.id] === 'inHome_visit' && (() => {
+                                        const vkey = `${b.id}_inHome_visit`
+                                        const picked = selectedVolunteer[vkey] ?? null
+                                        return (
+                                          <DispatchForm bg="#eff6ff" border="#bfdbfe">
+                                            <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#1e40af', display: 'block', marginBottom: '3px' }}>Visit date &amp; time</label>
+                                            <input type="datetime-local" value={dispatchFormData[b.id]?.scheduledTime ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], scheduledTime: e.target.value } }))} style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #bfdbfe', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '10px' }} />
+                                            <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#1e40af', margin: '0 0 6px' }}>Assign a tech volunteer:</p>
+                                            <VolunteerPicker visitType="tech_help" selectedId={picked?.id} onSelect={vol => setSelectedVolunteer(prev => ({ ...prev, [vkey]: vol }))} />
+                                            {picked && <VolunteerConfirmCard volunteer={picked} />}
+                                            <ActionBtn label={isLoading ? 'Scheduling…' : 'Schedule visit'} onClick={() => handleDispatch(b.id, 'inHome_visit', { assigned_volunteer: picked?.full_name ?? '', scheduled_time: dispatchFormData[b.id]?.scheduledTime ?? '' }, picked?.id)} disabled={isLoading || !picked || !dispatchFormData[b.id]?.scheduledTime} color="white" bg="#1d4ed8" />
+                                          </DispatchForm>
+                                        )
+                                      })()}
+                                      <DispatchBtn icon="📞" label="Arrange remote help call" isActive={activeDispatch[b.id] === 'remote_call'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'remote_call' ? null : 'remote_call' }))} />
+                                      {activeDispatch[b.id] === 'remote_call' && (
+                                        <DispatchForm bg="#faf5ff" border="#d8b4fe">
+                                          <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#6b21a8', display: 'block', marginBottom: '3px' }}>Scheduled call date &amp; time</label>
+                                          <input type="datetime-local" value={dispatchFormData[b.id]?.scheduledTime ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], scheduledTime: e.target.value } }))} style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #d8b4fe', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '8px' }} />
+                                          <ActionBtn label={isLoading ? 'Scheduling…' : 'Schedule call'} onClick={() => handleDispatch(b.id, 'remote_call', { scheduled_time: dispatchFormData[b.id]?.scheduledTime ?? '' })} disabled={isLoading || !dispatchFormData[b.id]?.scheduledTime} color="white" bg="#7c3aed" />
+                                        </DispatchForm>
+                                      )}
+                                    </div>
+                                  )}
+
+                                  {/* MEALS */}
+                                  {b.service_type === 'meals' && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                      <DispatchBtn icon="🥘" label="Order via meal partner" isActive={activeDispatch[b.id] === 'meal_partner'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'meal_partner' ? null : 'meal_partner' }))} />
+                                      {activeDispatch[b.id] === 'meal_partner' && (
+                                        <DispatchForm bg="#fffbeb" border="#fde68a">
+                                          <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: '#92400e', margin: '0 0 8px', lineHeight: 1.4 }}>
+                                            Confirms a meal delivery order via our partner network.
+                                          </p>
+                                          <ActionBtn label={isLoading ? 'Ordering…' : 'Confirm meal order'} onClick={() => handleDispatch(b.id, 'meal_partner', { provider: 'Meal partner network' })} disabled={isLoading} color="white" bg="#d97706" />
+                                        </DispatchForm>
+                                      )}
+                                      <DispatchBtn icon="🙋" label="Assign volunteer meal helper" isActive={activeDispatch[b.id] === 'volunteer_meals'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'volunteer_meals' ? null : 'volunteer_meals' }))} />
+                                      {activeDispatch[b.id] === 'volunteer_meals' && (() => {
+                                        const vkey = `${b.id}_volunteer_meals`
+                                        const picked = selectedVolunteer[vkey] ?? null
+                                        return (
+                                          <DispatchForm bg="#f0fdf4" border="#86efac">
+                                            <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#065f46', margin: '0 0 6px' }}>Select a meal volunteer:</p>
+                                            <VolunteerPicker visitType="grocery_help" selectedId={picked?.id} onSelect={vol => setSelectedVolunteer(prev => ({ ...prev, [vkey]: vol }))} />
+                                            {picked && <VolunteerConfirmCard volunteer={picked} />}
+                                            <ActionBtn label={isLoading ? 'Assigning…' : 'Assign volunteer'} onClick={() => handleDispatch(b.id, 'volunteer_meals', { assigned_volunteer: picked?.full_name ?? '' }, picked?.id)} disabled={isLoading || !picked} color="white" bg="#059669" />
+                                          </DispatchForm>
+                                        )
+                                      })()}
+                                      <DispatchBtn icon="✓" label="Confirm arrangement" isActive={activeDispatch[b.id] === 'meal_arrangement'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'meal_arrangement' ? null : 'meal_arrangement' }))} />
+                                      {activeDispatch[b.id] === 'meal_arrangement' && (
+                                        <DispatchForm bg="#f9fafb" border="#e5e7eb">
+                                          <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '3px' }}>Arrangement details</label>
+                                          <input type="text" value={dispatchFormData[b.id]?.arrangement ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], arrangement: e.target.value } }))} placeholder="e.g. Daughter brings meals Mon/Wed" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #e5e7eb', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '8px' }} />
+                                          <ActionBtn label={isLoading ? 'Confirming…' : 'Confirm arrangement'} onClick={() => handleDispatch(b.id, 'meal_arrangement', { arrangement: dispatchFormData[b.id]?.arrangement ?? '' })} disabled={isLoading || !dispatchFormData[b.id]?.arrangement?.trim()} color="white" bg="#374151" />
+                                        </DispatchForm>
+                                      )}
+                                    </div>
+                                  )}
+
+                                  {/* HOME SERVICES */}
+                                  {b.service_type === 'home_service' && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                      <DispatchBtn icon="🔧" label="Assign vetted provider" isActive={activeDispatch[b.id] === 'vetted_provider'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'vetted_provider' ? null : 'vetted_provider' }))} />
+                                      {activeDispatch[b.id] === 'vetted_provider' && (
+                                        <DispatchForm bg="#eff6ff" border="#bfdbfe">
+                                          <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#1e40af', display: 'block', marginBottom: '3px' }}>Provider name</label>
+                                          <input type="text" value={dispatchFormData[b.id]?.providerName ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerName: e.target.value } }))} placeholder="e.g. HomeHelper Pro" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #bfdbfe', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '8px' }} />
+                                          <ActionBtn label={isLoading ? 'Assigning…' : 'Assign provider'} onClick={() => handleDispatch(b.id, 'vetted_provider', { assigned_provider: dispatchFormData[b.id]?.providerName ?? '' })} disabled={isLoading || !dispatchFormData[b.id]?.providerName?.trim()} color="white" bg="#1d4ed8" />
+                                        </DispatchForm>
+                                      )}
+                                      <DispatchBtn icon="📅" label="Schedule visit with provider" isActive={activeDispatch[b.id] === 'scheduled_visit'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'scheduled_visit' ? null : 'scheduled_visit' }))} />
+                                      {activeDispatch[b.id] === 'scheduled_visit' && (
+                                        <DispatchForm bg="#f0fdf4" border="#86efac">
+                                          <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#065f46', display: 'block', marginBottom: '3px' }}>Provider name</label>
+                                          <input type="text" value={dispatchFormData[b.id]?.providerName ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerName: e.target.value } }))} placeholder="e.g. HomeHelper Pro" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #86efac', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '6px' }} />
+                                          <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#065f46', display: 'block', marginBottom: '3px' }}>Visit date &amp; time</label>
+                                          <input type="datetime-local" value={dispatchFormData[b.id]?.scheduledTime ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], scheduledTime: e.target.value } }))} style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #86efac', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '8px' }} />
+                                          <ActionBtn label={isLoading ? 'Scheduling…' : 'Schedule visit'} onClick={() => handleDispatch(b.id, 'scheduled_visit', { assigned_provider: dispatchFormData[b.id]?.providerName ?? '', scheduled_time: dispatchFormData[b.id]?.scheduledTime ?? '' })} disabled={isLoading || !dispatchFormData[b.id]?.providerName?.trim() || !dispatchFormData[b.id]?.scheduledTime} color="white" bg="#059669" />
+                                        </DispatchForm>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
-                        {b.requested_for && (
-                          <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-muted)', margin: '3px 0 0' }}>
-                            {new Date(b.requested_for).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' })}
-                          </p>
-                        )}
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 )}
               </Section>
@@ -647,6 +1050,225 @@ function EmptyState({ text }: { text: string }) {
   return (
     <div style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', fontStyle: 'italic' }}>
       {text}
+    </div>
+  )
+}
+
+function DetailItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <div style={{ fontFamily: 'var(--font-body)', fontSize: '10px', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--color-text-secondary)', marginBottom: '2px' }}>
+        {label}
+      </div>
+      <div style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-primary)', fontWeight: 500 }}>
+        {value}
+      </div>
+    </div>
+  )
+}
+
+function ActionBtn({ label, onClick, disabled, color, bg }: { label: string; onClick: () => void; disabled: boolean; color: string; bg: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      style={{
+        fontFamily: 'var(--font-body)',
+        fontSize: '12px',
+        fontWeight: 600,
+        color: disabled ? '#9ca3af' : color,
+        backgroundColor: disabled ? '#f3f4f6' : bg,
+        border: 'none',
+        borderRadius: 'var(--radius-sm)',
+        padding: '6px 12px',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        whiteSpace: 'nowrap',
+        transition: 'opacity 0.15s',
+      }}
+    >
+      {label}
+    </button>
+  )
+}
+
+function DispatchBtn({ icon, label, isActive, onClick }: { icon: string; label: string; isActive: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        width: '100%',
+        fontFamily: 'var(--font-body)',
+        fontSize: '12px',
+        fontWeight: 600,
+        color: isActive ? 'var(--color-teal)' : 'var(--color-text-primary)',
+        backgroundColor: isActive ? 'rgba(26,122,106,0.07)' : 'white',
+        border: isActive ? '1.5px solid rgba(26,122,106,0.3)' : '1.5px solid var(--color-warm-grey)',
+        borderRadius: 'var(--radius-sm)',
+        padding: '7px 12px',
+        cursor: 'pointer',
+        textAlign: 'left',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        transition: 'all 0.12s',
+      }}
+    >
+      <span>{icon}</span>
+      <span style={{ flex: 1 }}>{label}</span>
+      <span style={{ fontSize: '10px', color: '#9ca3af' }}>{isActive ? '▲' : '▼'}</span>
+    </button>
+  )
+}
+
+function DispatchForm({ bg, border, children }: { bg: string; border: string; children: React.ReactNode }) {
+  return (
+    <div style={{
+      backgroundColor: bg,
+      border: `1px solid ${border}`,
+      borderRadius: 'var(--radius-sm)',
+      padding: '10px 12px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '4px',
+    }}>
+      {children}
+    </div>
+  )
+}
+
+// Volunteer picker — fetches active volunteers filtered by visit_type, displays as selectable cards
+function VolunteerPicker({
+  visitType,
+  selectedId,
+  onSelect,
+}: {
+  visitType: string
+  selectedId?: string
+  onSelect: (vol: Volunteer) => void
+}) {
+  const [loading, setLoading] = useState(true)
+  const [volunteers, setVolunteers] = useState<Volunteer[]>([])
+  const [fetchError, setFetchError] = useState<string | null>(null)
+
+  useEffect(() => {
+    setLoading(true)
+    setFetchError(null)
+    fetch(`/api/volunteers/active?serviceType=${encodeURIComponent(visitType)}`)
+      .then(r => r.json())
+      .then(d => {
+        setVolunteers(d.volunteers ?? [])
+        setLoading(false)
+      })
+      .catch(() => {
+        setFetchError('Could not load volunteers.')
+        setLoading(false)
+      })
+  }, [visitType])
+
+  if (loading) {
+    return (
+      <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)', padding: '8px 0' }}>
+        Loading volunteers…
+      </div>
+    )
+  }
+
+  if (fetchError) {
+    return (
+      <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-emergency-text)', padding: '6px 0' }}>
+        {fetchError}
+      </div>
+    )
+  }
+
+  if (volunteers.length === 0) {
+    return (
+      <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)', padding: '6px 0', lineHeight: 1.5 }}>
+        No active volunteers available for this service type.{' '}
+        <a href="/admin/volunteers" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-teal)', textDecoration: 'underline' }}>
+          Add volunteers →
+        </a>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', maxHeight: '210px', overflowY: 'auto', marginBottom: '6px' }}>
+      {volunteers.map(vol => {
+        const isSelected = vol.id === selectedId
+        const availDays = (vol.availability_days as string[] | null)?.join(', ') ?? '—'
+        const location = [vol.city, vol.state].filter(Boolean).join(', ') || '—'
+        return (
+          <button
+            key={vol.id}
+            type="button"
+            onClick={() => onSelect(vol)}
+            style={{
+              width: '100%',
+              textAlign: 'left',
+              background: isSelected ? '#e6f7f3' : 'white',
+              border: isSelected ? '2px solid var(--color-teal)' : '1px solid #d1d5db',
+              borderRadius: 'var(--radius-sm)',
+              padding: '7px 10px',
+              cursor: 'pointer',
+              transition: 'border 0.1s, background 0.1s',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-navy)' }}>
+                {vol.full_name}
+              </span>
+              {vol.rating_average != null && (
+                <span style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: '#ca8a04' }}>
+                  ⭐ {Number(vol.rating_average).toFixed(1)}
+                </span>
+              )}
+            </div>
+            <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>
+              {location} · {availDays} · {(vol.hours_per_week as string | null) ?? '—'} hrs/wk
+            </div>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+// Confirmation card shown after a volunteer is selected — displays key details before saving
+function VolunteerConfirmCard({ volunteer }: { volunteer: Volunteer }) {
+  const langs = (volunteer.languages as string[] | null)?.join(', ') || '—'
+  const serviceTypes = (volunteer.service_types as string[] | null)?.join(', ') || '—'
+  const availability = (volunteer.availability_days as string[] | null)?.join(', ') || '—'
+  return (
+    <div style={{
+      backgroundColor: '#f0fdf4',
+      border: '1px solid #86efac',
+      borderRadius: 'var(--radius-sm)',
+      padding: '8px 10px',
+      marginBottom: '6px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '2px',
+    }}>
+      <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 700, color: '#065f46' }}>
+        ✓ Selected: {volunteer.full_name}
+      </div>
+      {volunteer.phone && (
+        <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: '#065f46' }}>
+          📞 <a href={`tel:${volunteer.phone}`} style={{ color: '#065f46' }}>{volunteer.phone}</a>
+        </div>
+      )}
+      <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: '#065f46' }}>
+        🌐 {langs}
+      </div>
+      <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: '#065f46' }}>
+        📋 {serviceTypes}
+      </div>
+      <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: '#065f46' }}>
+        🗓 Available: {availability} · {(volunteer.hours_per_week as string | null) ?? '—'} hrs/wk
+      </div>
     </div>
   )
 }

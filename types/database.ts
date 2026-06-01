@@ -1131,6 +1131,7 @@ export interface Database {
           provider_booking_id: string | null
           cost_estimate: number | null
           notes: string | null
+          volunteer_id: string | null
         }
         Insert: {
           id?: string
@@ -1146,6 +1147,7 @@ export interface Database {
           provider_booking_id?: string | null
           cost_estimate?: number | null
           notes?: string | null
+          volunteer_id?: string | null
         }
         Update: Partial<Database['public']['Tables']['service_bookings']['Insert']>
         Relationships: [

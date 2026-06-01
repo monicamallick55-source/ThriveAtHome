@@ -16,6 +16,7 @@ export interface ServiceBooking {
   provider_booking_id: string | null
   cost_estimate: number | null
   notes: string | null
+  volunteer_id: string | null
 }
 
 export type ServiceType =
