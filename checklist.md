@@ -426,6 +426,14 @@ M13 Volunteer Network Phase 29 [x][x][x][x][x][x][x][x]  8/8 ✅ COMPLETE (Sessi
 M14 Community         Phase 34 [x][x][x][x][x][x][x][x][x][x] 10/10 ✅ COMPLETE (Session 54 APPROVED) + enhancements (Session 57–58)
                       Phase 35 [x][x][x][x][x][x][x][x]    8/8 ✅ COMPLETE (Session 57 CONFIRMED by human)
                       Phase 36 [x][x][x][x][x][x][x]       7/7 ✅ COMPLETE (Session 61)
+                      Phase 37 [x][x][x][x][x][x]          6/6 ✅ COMPLETE (Session 62)
+                      Phase 38 [x][x][x][x]                4/4 ✅ COMPLETE (Session 63)
+M15 Celebrations      Phase 39 [x][x][x][x][x][x][x][x]   8/8 ✅ COMPLETE (Session 64)
+                      Phase 40 [x][x][x][x][x]             5/5 ✅ COMPLETE (Session 71 APPROVED + ISSUE fixes)
+                      Phase 41 [x][x][x][x][x][x]          6/6 ✅ COMPLETE (Session 72 APPROVED)
+M16 Grief             Phase 42 [x][x][x][x][x][x][x]       7/7 ✅ COMPLETE (Session 73)
+                      Phase 43 [x][x][x][x][x][x][x][x][x] 9/9 ✅ COMPLETE (Session 74)
+                      Phase 44 [x][x][x][x][x]             5/5 ✅ COMPLETE (Session 75)
 ```
 
 ## M10 — SMS + Email Notifications
@@ -670,6 +678,80 @@ ARCHITECTURE NOTE: Migration numbered 019 (not 013 as in spec) because migration
 ARCHITECTURE NOTE: Memory Book PDF uses jsPDF native drawing API. Memory Collage is 12×12 inch jsPDF with photo grid, quote callouts, decorative border frame.
 ARCHITECTURE NOTE: Draft system uses upsertDraft() — finds existing draft and UPDATEs it, or INSERTs new one. Only one draft per member.
 ARCHITECTURE NOTE: @react-pdf/renderer not used — jsPDF is a proper PDF generation library (not HTML-to-PDF), fully capable of print-quality output. Stays client-side, no serverless memory limits.
+
+---
+
+### Phase 41 — Milestone Recognition
+STATUS: `COMPLETE`
+
+- [x] Milestone detection: first check-in call — /api/cron/milestones checks completed call count ≥ 1; creates celebration_events row with type='milestone_first_call'; pushes celebration_upcoming Realtime notification to all family members (Session 72)
+- [x] Milestone detection: 30-day streak — cron calls getCompletedCallDatesForStreak() + has30DayStreak(); creates milestone_30_day_streak row when 30 consecutive daily call dates found (Session 72)
+- [x] Milestones visible on dashboard — dashboard/page.tsx fetches recentCelebrations via getRecentCelebrationEvents(); MilestonesSection renders celebration cards with emoji, label, ai_message, "Today!" badge; "View all →" links to /dashboard/celebrations (Session 72)
+- [x] vercel.json updated — /api/cron/milestones cron added at schedule "0 9 * * *" (Session 72)
+- [x] npx tsc --noEmit passes — zero errors (Session 72)
+- [x] npm run build passes — ✓ Compiled successfully in 37.2s (Session 72)
+
+### Phase 42 — Grief Support Circles
+STATUS: `COMPLETE`
+
+- [x] supabase/migrations/023_grief.sql — grief_support_requests table with family RLS + navigator read/update policies; human must run in Supabase SQL Editor (Session 73)
+- [x] /dashboard/grief-support — warm landing page replaces placeholder — GriefSupportClient: 4 category cards (Loss of loved one, Major health diagnosis, Major life change, Caregiver support); selecting a card reveals the request form; not "Coming soon" (Session 73)
+- [x] Grief support request form submits — POST /api/grief-support; grief_support_requests row created with status='pending' (Session 73)
+- [x] Care team notified via stub email — emailProvider.sendGriefSupportNotification(); stub logs "[STUB][EMAIL]" to console (Session 73)
+- [x] Check-in frequency updated to daily on request — setDailyCheckInForGrief() updates members.check_in_frequency='daily' on submission (Session 73)
+- [x] Navigator can see requests in console — getAllPendingGriefRequests() fetches pending requests with member names; grief queue renders in NavConsole with purple styling before caseload table (Session 73)
+- [x] npx tsc --noEmit passes — zero errors (Session 73)
+
+ARCHITECTURE NOTE: Migration numbered 023 (not 014 as in spec) because migrations 014–022 are already used by prior phases.
+
+MEMORY COLLAGE ISSUE FIX (Session 73):
+- generateCollagePDF now accepts: photoCount, collageLayout, quoteProminence, backgroundStyle
+- 4 layout styles: Grid (equal squares), Mosaic (hero + supporting gallery), Timeline (strip with dates), Magazine (large featured + 4 stacked)
+- 3 quote prominence modes: full (180 chars), quote (120 chars), photos_only (no text)
+- 3 background styles: cream (solid), watercolor (soft wash patches), navy_frame (navy surround with inner accent)
+- photoCount: 4, 6, 9, 12, or 'all'
+- MemoryBookPreviewPanel: shows real photo thumbnails from parentSignedUrls; live preview updates as customization changes
+- Collage customization panel: pill buttons for photo count, 2x2 grid for layout style, pill buttons for quote prominence and background style
+- sessionStorage save/restore includes all new collage fields
+
+### Phase 42 ISSUE FIX — Trusted Resources + Navigator Grief Flow (Session 74)
+- [x] Trusted resources clickable — 6 resources now wrapped in `<a>` tags with href, target="_blank" rel="noopener noreferrer"; resource name shows underline + "↗" indicator (Session 74)
+- [x] Navigator grief action panel — "Contact member" replaced with expand/collapse panel; shows member name, phone (clickable tel: link), grief request details (support type, circle requested, availability, member notes); outreach notes textarea; "Mark as contacted" button → PATCH /api/grief-support/[requestId] with status='navigator_notified' + navigator_notes; contacted requests fade from queue immediately (Session 74)
+- [x] New API route — /api/grief-support/[requestId] PATCH — requires navigator/admin role, calls updateGriefRequestStatus() (Session 74)
+- [x] getAllPendingGriefRequests() — now includes phone_number in member join (Session 74)
+- [x] npx tsc --noEmit passes — zero errors (Session 74)
+- [x] npm run build passes — ✓ Compiled successfully (Session 74)
+
+### Phase 43 — Life Transition Support Pathways
+STATUS: `COMPLETE`
+
+- [x] 5 pathway cards on /dashboard/grief-support — LOSS_TYPES updated to exactly 5: Loss of a loved one, Major health diagnosis, Moving to a care setting (🏠), Loss of driving independence (🚗), Another major life change (Session 74)
+- [x] Each pathway has a request form — existing form structure; all 5 pathways share the same form (circle type, availability, notes, anniversary date) (Session 74)
+- [x] Anniversary date field — appears for 'loss_of_loved_one' pathway; date input saves to loss_anniversary_date column; user sees "we'll increase check-in frequency in the week before this date" note (Session 74)
+- [x] supabase/migrations/024_grief_anniversary.sql — ALTER TABLE grief_support_requests ADD COLUMN loss_anniversary_date date; human must run in Supabase SQL Editor (Session 74)
+- [x] Behavioral monitoring: prolonged grief detection — detectProlongedGriefMembers() queries check_in_calls last 90 days; members with >=10 calls where >=70% have mood_score<=4 flagged; createProlongedGriefTask() inserts navigator_tasks row type='prolonged_grief_review' priority='high'; idempotent (Session 74)
+- [x] Holiday sensitivity: loss anniversaries — getMembersNearLossAnniversary() matches MM-DD of loss_anniversary_date to next 7 days; setDailyCheckInForGrief() increases check-in to daily for matched members (Session 74)
+- [x] Grief monitoring cron — /api/cron/grief-monitoring runs both checks; added to vercel.json at "0 7 * * *" (Session 74)
+- [x] npx tsc --noEmit passes — zero errors (Session 74)
+- [x] npm run build passes — ✓ Compiled successfully (Session 74)
+
+---
+
+### Phase 44 — Professional Referral Network
+STATUS: `COMPLETE`
+
+- [x] Grief support results include professional referral option — submitted confirmation now shows: "💬 Talk to a navigator now" button (links to dashboard) + blue "Would you like to speak with a professional?" card explaining the warm referral process ("our navigators can provide a warm, personal introduction — never just a phone number") (Session 75)
+- [x] Professional resources listed on grief support page — 6 clickable resources already in place from Phase 42 fix: GriefShare, NAGC, SAMHSA Helpline, Hospice Foundation, AFSP, Veterans Crisis Line — all with href, target="_blank", descriptions (Session 74/75)
+- [x] Navigator can refer to external professional from member detail panel — "External support referral" section added to MemberDetailPanel: referral type select (8 types), referral note textarea, "↗ Record referral" button → POST /api/navigator/referral → saves as navigator note with "[REFERRAL: type]" prefix; success state clears form; referral appears in notes history (Session 75)
+- [x] npx tsc --noEmit passes — zero errors (Session 75)
+- [x] npm run build passes — ✓ Compiled successfully in 35.7s (Session 75)
+- [x] ISSUE FIX (Session 76): Hydration error fixed — date formatting uses timeZone: 'UTC' consistently on server and client; toLocaleDateString in existingRequests.map no longer produces different output server vs client
+
+FILES CREATED:
+- app/api/navigator/referral/route.ts — POST endpoint; requires navigator/admin role; validates referral_type against 8 allowed types; formats note as "[REFERRAL: type] note"; saves to navigator_notes; returns created note
+
+FILES MODIFIED (Session 76 issue fix):
+- components/grief/GriefSupportClient.tsx — date format at line 412 now uses timeZone: 'UTC' to prevent hydration mismatch
 
 ---
 

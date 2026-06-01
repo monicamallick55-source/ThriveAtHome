@@ -297,6 +297,10 @@ async function generateMemoryBookPDF(config: {
 
 // ── Memory Collage PDF (single page 12×12 square) ────────────────────────────
 
+type CollageLayout = 'grid' | 'mosaic' | 'timeline' | 'magazine'
+type QuoteProminence = 'full' | 'quote' | 'photos_only'
+type BackgroundStyle = 'cream' | 'watercolor' | 'navy_frame'
+
 async function generateCollagePDF(config: {
   memberName: string
   birthYear: number | null
@@ -305,15 +309,22 @@ async function generateCollagePDF(config: {
   entryImages: Record<string, Array<{ data: string; format: string; path: string }>>
   quoteEntryIds: string[]
   highlights: string
+  photoCount: number | 'all'
+  collageLayout: CollageLayout
+  quoteProminence: QuoteProminence
+  backgroundStyle: BackgroundStyle
   onProgress: (s: string) => void
 }): Promise<{ blob: Blob }> {
   const { jsPDF } = await import('jspdf')
-  const { memberName, birthYear, layoutStyle, selectedEntries, entryImages, quoteEntryIds, highlights } = config
+  const {
+    memberName, birthYear, layoutStyle, selectedEntries, entryImages,
+    quoteEntryIds, highlights, photoCount, collageLayout, quoteProminence, backgroundStyle,
+  } = config
 
   // 12×12 inches = 304.8mm × 304.8mm
   const SIZE = 304.8
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [SIZE, SIZE] })
-  const BRD = 10  // border inset
+  const BRD = backgroundStyle === 'navy_frame' ? 8 : 10
   const M = 18    // content margin
 
   const palette = {
@@ -329,132 +340,295 @@ async function generateCollagePDF(config: {
 
   config.onProgress('Designing Memory Collage…')
 
-  // Background
-  fill(C.bg); doc.rect(0, 0, SIZE, SIZE, 'F')
+  // ── Background ──────────────────────────────────────────────────────────
+  if (backgroundStyle === 'navy_frame') {
+    fill(C.primary); doc.rect(0, 0, SIZE, SIZE, 'F')
+    fill(C.bg); doc.rect(BRD + 2, BRD + 2, SIZE - (BRD + 2) * 2, SIZE - (BRD + 2) * 2, 'F')
+    // Gold inner accent line
+    draw([180, 140, 60]); doc.setLineWidth(0.8)
+    doc.rect(BRD + 5, BRD + 5, SIZE - (BRD + 5) * 2, SIZE - (BRD + 5) * 2)
+  } else if (backgroundStyle === 'watercolor') {
+    fill(C.bg); doc.rect(0, 0, SIZE, SIZE, 'F')
+    // Soft watercolor wash patches
+    doc.setFillColor(C.accent[0], C.accent[1], C.accent[2])
+    doc.setGState(doc.GState({ opacity: 0.04 }))
+    doc.ellipse(SIZE * 0.15, SIZE * 0.2, 80, 60, 'F')
+    doc.ellipse(SIZE * 0.82, SIZE * 0.75, 70, 55, 'F')
+    doc.setGState(doc.GState({ opacity: 1 }))
+    // Border
+    draw(C.primary); doc.setLineWidth(1.5)
+    doc.rect(BRD, BRD, SIZE - BRD * 2, SIZE - BRD * 2)
+    draw(C.accent); doc.setLineWidth(0.5)
+    doc.rect(BRD + 3, BRD + 3, SIZE - (BRD + 3) * 2, SIZE - (BRD + 3) * 2)
+  } else {
+    fill(C.bg); doc.rect(0, 0, SIZE, SIZE, 'F')
+    draw(C.primary); doc.setLineWidth(1.5)
+    doc.rect(BRD, BRD, SIZE - BRD * 2, SIZE - BRD * 2)
+    draw(C.accent); doc.setLineWidth(0.5)
+    doc.rect(BRD + 3, BRD + 3, SIZE - (BRD + 3) * 2, SIZE - (BRD + 3) * 2)
+  }
 
-  // Decorative border: outer navy frame + inner accent line
-  draw(C.primary); doc.setLineWidth(1.5)
-  doc.rect(BRD, BRD, SIZE - BRD * 2, SIZE - BRD * 2)
-  draw(C.accent); doc.setLineWidth(0.5)
-  doc.rect(BRD + 3, BRD + 3, SIZE - (BRD + 3) * 2, SIZE - (BRD + 3) * 2)
-
-  // Corner flourishes (small circles at inner-border corners)
+  // Corner flourishes
   fill(C.accent)
   const ci = BRD + 3
   ;[[ci, ci], [SIZE - ci, ci], [ci, SIZE - ci], [SIZE - ci, SIZE - ci]].forEach(([cx, cy]) => {
     doc.circle(cx, cy, 2, 'F')
   })
 
-  // Senior name — large display serif
+  // ── Header: Senior name ─────────────────────────────────────────────────
   doc.setFont('times', 'bold'); doc.setFontSize(44); txt(C.primary)
   doc.text(memberName, SIZE / 2, M + 22, { align: 'center', maxWidth: SIZE - M * 2 })
 
-  // Birth year
   if (birthYear) {
     doc.setFont('times', 'italic'); doc.setFontSize(18); txt(C.accent)
     doc.text(`born ${birthYear}`, SIZE / 2, M + 36, { align: 'center' })
   }
 
-  // Decorative divider line
   draw(C.accent); doc.setLineWidth(1.2)
   doc.line(M + 20, M + 44, SIZE - M - 20, M + 44)
   fill(C.accent)
   ;[SIZE / 2 - 6, SIZE / 2, SIZE / 2 + 6].forEach(x => doc.circle(x, M + 44, 1.2, 'F'))
 
-  // ── Photo grid ───────────────────────────────────────────────────────────
-  // Collect all available images across selected entries
-  const allImgs: Array<{ data: string; format: string }> = []
+  // ── Photo collection ────────────────────────────────────────────────────
+  // Collect images with their entry context
+  type ImgItem = { data: string; format: string; entryTitle: string; entryDate: string }
+  const imgItems: ImgItem[] = []
+  const maxPhotos = photoCount === 'all' ? 99 : photoCount
+
   for (const entry of selectedEntries) {
-    for (const img of (entryImages[entry.id] ?? [])) {
-      allImgs.push(img)
-      if (allImgs.length >= 9) break
+    const imgs = entryImages[entry.id] ?? []
+    const dateStr = new Date(entry.created_at).toLocaleDateString('en-US', { year: 'numeric', timeZone: 'UTC' })
+    for (const img of imgs) {
+      imgItems.push({ ...img, entryTitle: entry.title, entryDate: dateStr })
+      if (imgItems.length >= maxPhotos) break
     }
-    if (allImgs.length >= 9) break
+    if (imgItems.length >= maxPhotos) break
   }
 
   config.onProgress('Placing photos in collage…')
 
   const gridTop = M + 52
-  const gridBottom = SIZE - M - 44  // leave room for highlights + footer
+  const gridBottom = SIZE - M - (highlights.trim() ? 42 : 28)
   const gridHeight = gridBottom - gridTop
 
-  // Quote entries
   const quoteEntries = selectedEntries.filter(e => quoteEntryIds.includes(e.id))
-  const hasQuotes = quoteEntries.length > 0
+  const showQuotes = quoteProminence !== 'photos_only' && quoteEntries.length > 0
+  const quoteLen = quoteProminence === 'full' ? 180 : 120
 
-  if (allImgs.length > 0) {
-    const cols = Math.min(allImgs.length, 3)
-    const gap = 4
+  // ── Layout rendering ────────────────────────────────────────────────────
+  const gap = 4
+
+  if (collageLayout === 'mosaic' && imgItems.length > 0) {
+    // Mosaic: hero photo top-left (2/3 width), 2 smaller top-right, then row of equal-width photos
+    const heroW = (SIZE - M * 2) * 0.62
+    const sideW = SIZE - M * 2 - heroW - gap
+    const heroH = gridHeight * 0.52
+    const sideH = (heroH - gap) / 2
+    const rowH = gridHeight - heroH - gap - (showQuotes ? 28 : 0)
+    const rowCount = Math.min(imgItems.length - 3, 4)
+
+    // Hero
+    if (imgItems[0]) {
+      fill([255,255,255]); doc.rect(M, gridTop, heroW, heroH, 'F')
+      try { doc.addImage(imgItems[0].data, imgItems[0].format, M + 1.5, gridTop + 1.5, heroW - 3, heroH - 3) } catch {}
+      draw([220,220,230]); doc.setLineWidth(0.3); doc.rect(M, gridTop, heroW, heroH)
+    }
+    // Side 1
+    if (imgItems[1]) {
+      fill([255,255,255]); doc.rect(M + heroW + gap, gridTop, sideW, sideH, 'F')
+      try { doc.addImage(imgItems[1].data, imgItems[1].format, M + heroW + gap + 1.5, gridTop + 1.5, sideW - 3, sideH - 3) } catch {}
+      draw([220,220,230]); doc.setLineWidth(0.3); doc.rect(M + heroW + gap, gridTop, sideW, sideH)
+    }
+    // Side 2
+    if (imgItems[2]) {
+      const s2Y = gridTop + sideH + gap
+      fill([255,255,255]); doc.rect(M + heroW + gap, s2Y, sideW, sideH, 'F')
+      try { doc.addImage(imgItems[2].data, imgItems[2].format, M + heroW + gap + 1.5, s2Y + 1.5, sideW - 3, sideH - 3) } catch {}
+      draw([220,220,230]); doc.setLineWidth(0.3); doc.rect(M + heroW + gap, s2Y, sideW, sideH)
+    }
+    // Quote between rows
+    if (showQuotes && quoteEntries[0]) {
+      const qY = gridTop + heroH + gap
+      const qEntry = quoteEntries[0]
+      const qText = qEntry.content.substring(0, quoteLen) + (qEntry.content.length > quoteLen ? '…' : '')
+      fill([240, 248, 255]); doc.rect(M, qY, SIZE - M * 2, 24, 'F')
+      fill(C.accent); doc.rect(M, qY, 2.5, 24, 'F')
+      doc.setFont('times', 'italic'); doc.setFontSize(10); txt(C.primary)
+      const ql = doc.splitTextToSize(`"${qText}"`, SIZE - M * 2 - 12)
+      doc.text(ql.slice(0, 2), M + 6, qY + 8)
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(8); txt(C.accent)
+      doc.text(`— ${qEntry.title}`, M + 6, qY + 20)
+    }
+    // Bottom row
+    if (rowCount > 0 && rowH > 10) {
+      const rowY = gridTop + heroH + gap + (showQuotes ? 28 : 0)
+      const rowCols = Math.min(rowCount, 4)
+      const rW = (SIZE - M * 2 - gap * (rowCols - 1)) / rowCols
+      for (let i = 0; i < rowCols; i++) {
+        const img = imgItems[3 + i]
+        if (!img) break
+        const rx = M + i * (rW + gap)
+        fill([255,255,255]); doc.rect(rx, rowY, rW, rowH, 'F')
+        try { doc.addImage(img.data, img.format, rx + 1.5, rowY + 1.5, rW - 3, rowH - 3) } catch {}
+        draw([220,220,230]); doc.setLineWidth(0.3); doc.rect(rx, rowY, rW, rowH)
+      }
+    }
+
+  } else if (collageLayout === 'timeline' && imgItems.length > 0) {
+    // Timeline: horizontal photo strip with dates below each photo
+    const maxTimelinePhotos = Math.min(imgItems.length, 6)
+    const photoW = (SIZE - M * 2 - gap * (maxTimelinePhotos - 1)) / maxTimelinePhotos
+    const photoH = gridHeight * 0.55
+    const stripY = gridTop + gridHeight * 0.18 // centre vertically in grid area
+
+    // Timeline spine
+    draw(C.accent); doc.setLineWidth(1.2)
+    doc.line(M, stripY + photoH / 2, SIZE - M, stripY + photoH / 2)
+
+    for (let i = 0; i < maxTimelinePhotos; i++) {
+      const img = imgItems[i]
+      const px = M + i * (photoW + gap)
+      // Connector dot
+      fill(C.accent); doc.circle(px + photoW / 2, stripY + photoH / 2, 3.5, 'F')
+      // Photo
+      fill([255,255,255]); doc.rect(px, stripY, photoW, photoH, 'F')
+      if (img) {
+        try { doc.addImage(img.data, img.format, px + 2, stripY + 2, photoW - 4, photoH - 4) } catch {}
+      }
+      draw([220,220,230]); doc.setLineWidth(0.3); doc.rect(px, stripY, photoW, photoH)
+      // Date label below
+      if (img) {
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); txt(C.accent)
+        doc.text(img.entryDate, px + photoW / 2, stripY + photoH + 8, { align: 'center' })
+        // Entry title (truncated)
+        doc.setFontSize(6.5); txt(C.text)
+        const truncTitle = img.entryTitle.length > 14 ? img.entryTitle.substring(0, 13) + '…' : img.entryTitle
+        doc.text(truncTitle, px + photoW / 2, stripY + photoH + 15, { align: 'center' })
+      }
+    }
+
+    // Quote below strip
+    if (showQuotes && quoteEntries[0]) {
+      const qY = stripY + photoH + 26
+      const qEntry = quoteEntries[0]
+      const qText = qEntry.content.substring(0, quoteLen) + (qEntry.content.length > quoteLen ? '…' : '')
+      fill([240, 248, 255]); doc.rect(M, qY, SIZE - M * 2, 22, 'F')
+      fill(C.accent); doc.rect(M, qY, 2.5, 22, 'F')
+      doc.setFont('times', 'italic'); doc.setFontSize(9); txt(C.primary)
+      const ql = doc.splitTextToSize(`"${qText}"`, SIZE - M * 2 - 12)
+      doc.text(ql.slice(0, 2), M + 6, qY + 7)
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); txt(C.accent)
+      doc.text(`— ${qEntry.title}`, M + 6, qY + 18)
+    }
+
+  } else if (collageLayout === 'magazine' && imgItems.length > 0) {
+    // Magazine: large featured photo left (55% width), 4 smaller photos stacked right
+    const featW = (SIZE - M * 2) * 0.55
+    const sideW = SIZE - M * 2 - featW - gap
+    const featH = gridHeight * 0.7
+    const smallH = (featH - gap * 3) / 4
+    const qBlockH = showQuotes ? 26 : 0
+
+    // Featured photo
+    fill([255,255,255]); doc.rect(M, gridTop, featW, featH, 'F')
+    if (imgItems[0]) {
+      try { doc.addImage(imgItems[0].data, imgItems[0].format, M + 2, gridTop + 2, featW - 4, featH - 4) } catch {}
+    }
+    draw([220,220,230]); doc.setLineWidth(0.3); doc.rect(M, gridTop, featW, featH)
+    // Featured caption
+    if (imgItems[0]) {
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); txt(C.accent)
+      doc.text(imgItems[0].entryTitle.substring(0, 26), M + featW / 2, gridTop + featH + 6, { align: 'center' })
+    }
+
+    // 4 stacked photos on right
+    for (let i = 0; i < 4; i++) {
+      const img = imgItems[1 + i]
+      const sy = gridTop + i * (smallH + gap)
+      fill([255,255,255]); doc.rect(M + featW + gap, sy, sideW, smallH, 'F')
+      if (img) {
+        try { doc.addImage(img.data, img.format, M + featW + gap + 1.5, sy + 1.5, sideW - 3, smallH - 3) } catch {}
+      }
+      draw([220,220,230]); doc.setLineWidth(0.3); doc.rect(M + featW + gap, sy, sideW, smallH)
+    }
+
+    // Quote below
+    if (showQuotes && quoteEntries[0]) {
+      const qY = gridTop + featH + 14
+      const qEntry = quoteEntries[0]
+      const qText = qEntry.content.substring(0, quoteLen) + (qEntry.content.length > quoteLen ? '…' : '')
+      fill([240, 248, 255]); doc.rect(M, qY, SIZE - M * 2, qBlockH, 'F')
+      fill(C.accent); doc.rect(M, qY, 2.5, qBlockH, 'F')
+      doc.setFont('times', 'italic'); doc.setFontSize(9); txt(C.primary)
+      const ql = doc.splitTextToSize(`"${qText}"`, SIZE - M * 2 - 12)
+      doc.text(ql.slice(0, 2), M + 6, qY + 7)
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); txt(C.accent)
+      doc.text(`— ${qEntry.title}`, M + 6, qY + qBlockH - 6)
+    }
+
+  } else {
+    // Grid layout (default)
+    const maxGrid = imgItems.length
+    const cols = maxGrid <= 4 ? 2 : 3
+    const qReserve = showQuotes && quoteEntries.length > 0 ? 30 : 0
     const photoW = (SIZE - M * 2 - gap * (cols - 1)) / cols
-    const rowH = hasQuotes ? Math.min(photoW * 0.72, (gridHeight - 32) / 2) : Math.min(photoW * 0.72, gridHeight / 3)
-
-    const rows = Math.ceil(Math.min(allImgs.length, 6) / cols)
+    const totalRows = Math.ceil(Math.min(maxGrid, photoCount === 'all' ? maxGrid : photoCount) / cols)
+    const rowH = Math.min(photoW * 0.75, (gridHeight - qReserve - gap * (totalRows - 1)) / totalRows)
     let imgIdx = 0
 
-    for (let row = 0; row < rows; row++) {
-      const rowY = gridTop + row * (rowH + gap + (hasQuotes && row === 1 ? 28 : 0))
+    for (let row = 0; row < totalRows; row++) {
+      const isLastRow = row === totalRows - 1
+      const rowY = gridTop + row * (rowH + gap)
 
       for (let col = 0; col < cols; col++) {
-        if (imgIdx >= allImgs.length) break
+        if (imgIdx >= imgItems.length) break
         const imgX = M + col * (photoW + gap)
-        const imgY = rowY
-
-        // Soft shadow
-        fill([200, 200, 210]); doc.rect(imgX + 1.5, imgY + 1.5, photoW, rowH, 'F')
-
-        // White border frame
-        fill([255, 255, 255]); doc.rect(imgX, imgY, photoW, rowH, 'F')
-
+        fill([200, 200, 210]); doc.rect(imgX + 1.5, rowY + 1.5, photoW, rowH, 'F')
+        fill([255, 255, 255]); doc.rect(imgX, rowY, photoW, rowH, 'F')
         try {
-          doc.addImage(allImgs[imgIdx].data, allImgs[imgIdx].format, imgX + 2, imgY + 2, photoW - 4, rowH - 4)
+          doc.addImage(imgItems[imgIdx].data, imgItems[imgIdx].format, imgX + 2, rowY + 2, photoW - 4, rowH - 4)
         } catch { /* skip */ }
-
-        draw([230, 230, 235]); doc.setLineWidth(0.3)
-        doc.rect(imgX, imgY, photoW, rowH)
+        draw([230, 230, 235]); doc.setLineWidth(0.3); doc.rect(imgX, rowY, photoW, rowH)
         imgIdx++
       }
 
-      // Quote between rows
-      if (hasQuotes && row === 0 && quoteEntries.length > 0) {
+      // Quote between rows 0 and 1
+      if (showQuotes && !isLastRow && row === 0 && quoteEntries.length > 0) {
         const qEntry = quoteEntries[0]
-        const qText = qEntry.content.substring(0, 120) + (qEntry.content.length > 120 ? '…' : '')
-        const qY = rowY + rowH + 4
-
-        // Quote background
+        const qText = qEntry.content.substring(0, quoteLen) + (qEntry.content.length > quoteLen ? '…' : '')
+        const qY = rowY + rowH + gap
         fill([240, 248, 255]); doc.rect(M, qY, SIZE - M * 2, 24, 'F')
         fill(C.accent); doc.rect(M, qY, 2.5, 24, 'F')
-
         doc.setFont('times', 'italic'); doc.setFontSize(10); txt(C.primary)
-        const qLines = doc.splitTextToSize(`"${qText}"`, SIZE - M * 2 - 12)
-        doc.text(qLines.slice(0, 2), M + 6, qY + 8)
+        const ql = doc.splitTextToSize(`"${qText}"`, SIZE - M * 2 - 12)
+        doc.text(ql.slice(0, 2), M + 6, qY + 8)
         doc.setFont('helvetica', 'normal'); doc.setFontSize(8); txt(C.accent)
         doc.text(`— ${qEntry.title}`, M + 6, qY + 20)
       }
     }
-  } else {
-    // No photos: show quote in center if available
-    if (quoteEntries.length > 0) {
+
+    // If no photos: show quotes centred
+    if (imgItems.length === 0 && quoteEntries.length > 0 && quoteProminence !== 'photos_only') {
       const qEntry = quoteEntries[0]
-      const qText = qEntry.content.substring(0, 200) + (qEntry.content.length > 200 ? '…' : '')
+      const qText = qEntry.content.substring(0, 240) + (qEntry.content.length > 240 ? '…' : '')
       doc.setFont('times', 'italic'); doc.setFontSize(14); txt(C.primary)
-      const qLines = doc.splitTextToSize(`"${qText}"`, SIZE - M * 2 - 20)
-      doc.text(qLines, SIZE / 2, SIZE / 2 - 10, { align: 'center' })
+      const ql = doc.splitTextToSize(`"${qText}"`, SIZE - M * 2 - 20)
+      doc.text(ql, SIZE / 2, SIZE / 2 - 10, { align: 'center' })
     }
-  }
 
-  // Second quote (if two quote entries selected)
-  if (quoteEntries.length > 1 && allImgs.length > 0) {
-    const qEntry = quoteEntries[1]
-    const qText = qEntry.content.substring(0, 100) + (qEntry.content.length > 100 ? '…' : '')
-    const qY = SIZE - M - 56
-
-    fill([255, 248, 235]); doc.rect(M, qY, SIZE - M * 2, 20, 'F')
-    fill(C.primary); doc.rect(M, qY, 2.5, 20, 'F')
-    doc.setFont('times', 'italic'); doc.setFontSize(9); txt(C.primary)
-    const qLines = doc.splitTextToSize(`"${qText}"`, SIZE - M * 2 - 12)
-    doc.text(qLines.slice(0, 2), M + 6, qY + 7)
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); txt(C.accent)
-    doc.text(`— ${qEntry.title}`, M + 6, qY + 16)
+    // Second quote
+    if (showQuotes && quoteEntries.length > 1 && imgItems.length > 0) {
+      const qEntry = quoteEntries[1]
+      const qText = qEntry.content.substring(0, 100) + (qEntry.content.length > 100 ? '…' : '')
+      const qY = SIZE - M - 58
+      fill([255, 248, 235]); doc.rect(M, qY, SIZE - M * 2, 20, 'F')
+      fill(C.primary); doc.rect(M, qY, 2.5, 20, 'F')
+      doc.setFont('times', 'italic'); doc.setFontSize(9); txt(C.primary)
+      const ql = doc.splitTextToSize(`"${qText}"`, SIZE - M * 2 - 12)
+      doc.text(ql.slice(0, 2), M + 6, qY + 7)
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); txt(C.accent)
+      doc.text(`— ${qEntry.title}`, M + 6, qY + 16)
+    }
   }
 
   // ── Key highlights ───────────────────────────────────────────────────────
@@ -485,6 +659,7 @@ function MemoryBookPreviewPanel({
   formatType, title, dedication, layoutStyle, memberName, selectedEntries,
   coverPhotoUrl, priceCents, isFree, planTier, isMemorial,
   regenInfo, onClose, onGenerate, isGenerating,
+  parentSignedUrls, photoCount, collageLayout, quoteProminence, backgroundStyle, quoteEntryIds,
 }: {
   formatType: FormatType
   title: string
@@ -501,6 +676,12 @@ function MemoryBookPreviewPanel({
   onClose: () => void
   onGenerate: () => void
   isGenerating: boolean
+  parentSignedUrls: Record<string, SignedUrlInfo[]>
+  photoCount: number | 'all'
+  collageLayout: CollageLayout
+  quoteProminence: QuoteProminence
+  backgroundStyle: BackgroundStyle
+  quoteEntryIds: string[]
 }) {
   const paletteBg: Record<string, string> = { classic: '#FFFBF7', modern: '#F8FAFC', scrapbook: '#FFFDF0' }
   const paletteNav: Record<string, string> = { classic: '#1E3A5F', modern: '#0D9488', scrapbook: '#B45309' }
@@ -591,28 +772,172 @@ function MemoryBookPreviewPanel({
         )}
 
         {/* Preview mock — Memory Collage */}
-        {(formatType === 'collage' || formatType === 'both') && (
-          <div style={{ position: 'relative', borderRadius: '8px', overflow: 'hidden', marginBottom: '20px', boxShadow: '0 4px 20px rgba(0,0,0,0.15)' }}>
-            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10, pointerEvents: 'none' }}>
-              <div style={{ transform: 'rotate(-30deg)', fontSize: '22px', fontWeight: 800, color: 'rgba(0,0,0,0.12)', textAlign: 'center', letterSpacing: '2px', userSelect: 'none', whiteSpace: 'nowrap' }}>
-                PREVIEW ONLY · PREVIEW ONLY · PREVIEW ONLY
+        {(formatType === 'collage' || formatType === 'both') && (() => {
+          // Collect preview image URLs from selected entries
+          const previewImgUrls: Array<{ url: string; entryTitle: string }> = []
+          const maxP = photoCount === 'all' ? 12 : photoCount
+          for (const entry of selectedEntries) {
+            for (const u of (parentSignedUrls[entry.id] ?? [])) {
+              if (u.mime !== 'application/pdf') {
+                previewImgUrls.push({ url: u.url, entryTitle: entry.title })
+                if (previewImgUrls.length >= maxP) break
+              }
+            }
+            if (previewImgUrls.length >= maxP) break
+          }
+
+          const quoteEntryData = selectedEntries.filter(e => quoteEntryIds.includes(e.id))
+          const bgStyle: React.CSSProperties = backgroundStyle === 'navy_frame'
+            ? { background: `linear-gradient(${nav} 0%, ${nav} 100%)`, padding: '12px' }
+            : backgroundStyle === 'watercolor'
+            ? { background: `radial-gradient(ellipse at 20% 20%, ${accent}18 0%, ${bg} 60%), radial-gradient(ellipse at 80% 80%, ${accent}12 0%, ${bg} 60%)`, border: `2.5px solid ${nav}` }
+            : { backgroundColor: bg, border: `2.5px solid ${nav}` }
+
+          const innerBg = backgroundStyle === 'navy_frame' ? bg : undefined
+
+          // Grid cols based on layout + count
+          const gridCols = collageLayout === 'magazine' ? undefined
+            : collageLayout === 'timeline' ? undefined
+            : previewImgUrls.length <= 4 ? 2 : 3
+
+          return (
+            <div style={{ position: 'relative', borderRadius: '8px', overflow: 'hidden', marginBottom: '20px', boxShadow: '0 4px 20px rgba(0,0,0,0.15)' }}>
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10, pointerEvents: 'none' }}>
+                <div style={{ transform: 'rotate(-30deg)', fontSize: '22px', fontWeight: 800, color: 'rgba(0,0,0,0.15)', textAlign: 'center', letterSpacing: '2px', userSelect: 'none', whiteSpace: 'nowrap' }}>
+                  PREVIEW ONLY · PREVIEW ONLY · PREVIEW ONLY
+                </div>
+              </div>
+              <div style={{ ...bgStyle, padding: backgroundStyle === 'navy_frame' ? '12px' : '16px' }}>
+                <div style={{ ...(backgroundStyle === 'navy_frame' ? { backgroundColor: innerBg, padding: '16px', borderRadius: '4px', border: `1px solid ${accent}` } : {}) }}>
+                  {/* Header */}
+                  <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+                    <div style={{ fontFamily: 'serif', fontSize: '22px', fontWeight: 700, color: nav }}>{memberName}</div>
+                    <div style={{ fontSize: '10px', fontStyle: 'italic', color: accent }}>A Life in Memories</div>
+                    <div style={{ width: '60px', height: '1.5px', backgroundColor: accent, margin: '6px auto' }} />
+                  </div>
+
+                  {/* Photo display based on layout */}
+                  {collageLayout === 'magazine' && (
+                    <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
+                      {/* Featured */}
+                      <div style={{ flex: '0 0 55%', aspectRatio: '4/5', borderRadius: '4px', overflow: 'hidden', border: `1px solid ${accent}20` }}>
+                        {previewImgUrls[0]
+                          // eslint-disable-next-line @next/next/no-img-element
+                          ? <img src={previewImgUrls[0].url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          : <div style={{ width: '100%', height: '100%', background: '#E8EFF8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>🖼️</div>}
+                      </div>
+                      {/* 4 stacked */}
+                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        {[1, 2, 3, 4].map(i => (
+                          <div key={i} style={{ flex: 1, borderRadius: '3px', overflow: 'hidden', border: `1px solid ${accent}20` }}>
+                            {previewImgUrls[i]
+                              // eslint-disable-next-line @next/next/no-img-element
+                              ? <img src={previewImgUrls[i].url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                              : <div style={{ width: '100%', height: '100%', background: '#E8F8F5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' }}>🖼️</div>}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {collageLayout === 'mosaic' && (
+                    <div style={{ marginBottom: '8px' }}>
+                      <div style={{ display: 'flex', gap: '4px', marginBottom: '4px' }}>
+                        {/* Hero */}
+                        <div style={{ flex: '0 0 62%', aspectRatio: '4/3', borderRadius: '4px', overflow: 'hidden', border: `1px solid ${accent}20` }}>
+                          {previewImgUrls[0]
+                            // eslint-disable-next-line @next/next/no-img-element
+                            ? <img src={previewImgUrls[0].url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            : <div style={{ width: '100%', height: '100%', background: '#E8EFF8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px' }}>🖼️</div>}
+                        </div>
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                          {[1, 2].map(i => (
+                            <div key={i} style={{ flex: 1, borderRadius: '3px', overflow: 'hidden', border: `1px solid ${accent}20` }}>
+                              {previewImgUrls[i]
+                                // eslint-disable-next-line @next/next/no-img-element
+                                ? <img src={previewImgUrls[i].url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                                : <div style={{ width: '100%', height: '100%', background: '#E8F8F5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' }}>🖼️</div>}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      {quoteProminence !== 'photos_only' && quoteEntryData[0] && (
+                        <div style={{ background: '#EFF6FF', borderLeft: `3px solid ${accent}`, padding: '6px 8px', fontSize: '10px', fontStyle: 'italic', color: nav, marginBottom: '4px' }}>
+                          "{quoteEntryData[0].content.substring(0, 80)}…"
+                        </div>
+                      )}
+                      <div style={{ display: 'flex', gap: '4px' }}>
+                        {[3, 4, 5, 6].slice(0, Math.min(previewImgUrls.length - 3, 4)).map(i => (
+                          <div key={i} style={{ flex: 1, aspectRatio: '1/1', borderRadius: '3px', overflow: 'hidden', border: `1px solid ${accent}20` }}>
+                            {previewImgUrls[i]
+                              // eslint-disable-next-line @next/next/no-img-element
+                              ? <img src={previewImgUrls[i].url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                              : <div style={{ width: '100%', height: '100%', background: '#FEF3C7', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}>🖼️</div>}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {collageLayout === 'timeline' && (
+                    <div style={{ position: 'relative', marginBottom: '8px' }}>
+                      <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '2px', backgroundColor: accent, transform: 'translateY(-50%)' }} />
+                      <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '4px' }}>
+                        {previewImgUrls.slice(0, 5).map((img, i) => (
+                          <div key={i} style={{ flex: '0 0 18%', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+                            <div style={{ width: '8px', height: '8px', backgroundColor: accent, borderRadius: '50%', margin: '0 auto 4px' }} />
+                            <div style={{ aspectRatio: '1/1', borderRadius: '4px', overflow: 'hidden', border: `1px solid ${accent}20`, marginBottom: '3px' }}>
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={img.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                            </div>
+                            <div style={{ fontSize: '8px', color: accent, lineHeight: 1.2 }}>{img.entryTitle.substring(0, 10)}</div>
+                          </div>
+                        ))}
+                        {previewImgUrls.length === 0 && [1,2,3,4].map(i => (
+                          <div key={i} style={{ flex: '0 0 22%', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+                            <div style={{ width: '8px', height: '8px', backgroundColor: accent, borderRadius: '50%', margin: '0 auto 4px' }} />
+                            <div style={{ aspectRatio: '1/1', backgroundColor: '#E8EFF8', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px' }}>🖼️</div>
+                          </div>
+                        ))}
+                      </div>
+                      {quoteProminence !== 'photos_only' && quoteEntryData[0] && (
+                        <div style={{ background: '#EFF6FF', borderLeft: `3px solid ${accent}`, padding: '5px 8px', fontSize: '9px', fontStyle: 'italic', color: nav, marginTop: '6px' }}>
+                          "{quoteEntryData[0].content.substring(0, 70)}…"
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {collageLayout === 'grid' && (
+                    <>
+                      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${gridCols}, 1fr)`, gap: '5px', marginBottom: '8px' }}>
+                        {previewImgUrls.length > 0
+                          ? previewImgUrls.slice(0, typeof photoCount === 'number' ? photoCount : previewImgUrls.length).map((img, i) => (
+                            <div key={i} style={{ aspectRatio: '4/3', borderRadius: '4px', overflow: 'hidden', border: '1.5px solid white', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}>
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={img.url} alt={img.entryTitle} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                            </div>
+                          ))
+                          : [...Array(Math.min(typeof photoCount === 'number' ? photoCount : 6, 6))].map((_, i) => (
+                            <div key={i} style={{ backgroundColor: i % 2 === 0 ? '#E8EFF8' : '#E8F8F5', borderRadius: '4px', aspectRatio: '4/3', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}>🖼️</div>
+                          ))
+                        }
+                      </div>
+                      {quoteProminence !== 'photos_only' && quoteEntryData[0] && (
+                        <div style={{ background: '#EFF6FF', borderLeft: `3px solid ${accent}`, padding: '6px 8px', fontSize: '10px', fontStyle: 'italic', color: nav, marginBottom: '6px' }}>
+                          "{quoteEntryData[0].content.substring(0, 90)}{quoteEntryData[0].content.length > 90 ? '…' : ''}"
+                          <div style={{ fontSize: '8px', color: accent, marginTop: '3px', fontStyle: 'normal' }}>— {quoteEntryData[0].title}</div>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  <div style={{ fontSize: '8px', fontStyle: 'italic', color: accent, textAlign: 'center' }}>ThriveAtHome Memory Collage — 12×12" print-ready</div>
+                </div>
               </div>
             </div>
-            <div style={{ backgroundColor: bg, border: `3px solid ${nav}`, padding: '20px', aspectRatio: '1/1', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontFamily: 'serif', fontSize: '28px', fontWeight: 700, color: nav, marginBottom: '4px' }}>{memberName}</div>
-                <div style={{ fontSize: '11px', fontStyle: 'italic', color: accent }}>A Life in Memories</div>
-                <div style={{ width: '80px', height: '1.5px', backgroundColor: accent, margin: '8px auto' }} />
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px', width: '100%', flex: 1, marginTop: '8px', marginBottom: '8px' }}>
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} style={{ backgroundColor: i < 3 ? '#E8EFF8' : '#E8F8F5', borderRadius: '4px', aspectRatio: '4/3', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}>🖼️</div>
-                ))}
-              </div>
-              <div style={{ fontSize: '9px', fontStyle: 'italic', color: accent, textAlign: 'center' }}>ThriveAtHome Memory Collage — 12×12" print-ready</div>
-            </div>
-          </div>
-        )}
+          )
+        })()}
 
         {/* Generate button */}
         <button
@@ -659,6 +984,12 @@ export default function MemoryBookBuilder({
   const [coverPhotoPath, setCoverPhotoPath] = useState<string | null>(null)
   const [quoteEntryIds, setQuoteEntryIds] = useState<string[]>([])
   const [highlights, setHighlights] = useState('')
+
+  // Collage customization
+  const [photoCount, setPhotoCount] = useState<number | 'all'>(6)
+  const [collageLayout, setCollageLayout] = useState<CollageLayout>('grid')
+  const [quoteProminence, setQuoteProminence] = useState<QuoteProminence>('quote')
+  const [backgroundStyle, setBackgroundStyle] = useState<BackgroundStyle>('cream')
 
   // Draft state
   const [draftSaved, setDraftSaved] = useState(false)
@@ -793,6 +1124,7 @@ export default function MemoryBookBuilder({
             title, dedication, layoutStyle, formatType,
             selectedEntryIds: Array.from(selectedEntryIds),
             coverPhotoPath, quoteEntryIds, highlights,
+            photoCount, collageLayout, quoteProminence, backgroundStyle,
           }))
         } catch { /* sessionStorage unavailable */ }
         window.location.href = json.checkoutUrl
@@ -870,6 +1202,7 @@ export default function MemoryBookBuilder({
         const { blob: collageBlob } = await generateCollagePDF({
           memberName, birthYear, layoutStyle, selectedEntries, entryImages,
           quoteEntryIds, highlights,
+          photoCount, collageLayout, quoteProminence, backgroundStyle,
           onProgress: setGenerationStatus,
         })
         setGenerationStatus('Saving Memory Collage…')
@@ -925,6 +1258,10 @@ export default function MemoryBookBuilder({
           if (saved.coverPhotoPath !== undefined) setCoverPhotoPath(saved.coverPhotoPath)
           if (Array.isArray(saved.quoteEntryIds)) setQuoteEntryIds(saved.quoteEntryIds)
           if (saved.highlights !== undefined) setHighlights(saved.highlights)
+          if (saved.photoCount !== undefined) setPhotoCount(saved.photoCount)
+          if (saved.collageLayout) setCollageLayout(saved.collageLayout as CollageLayout)
+          if (saved.quoteProminence) setQuoteProminence(saved.quoteProminence as QuoteProminence)
+          if (saved.backgroundStyle) setBackgroundStyle(saved.backgroundStyle as BackgroundStyle)
         } catch { /* ignore */ }
         sessionStorage.removeItem('memoryBookBuilderState')
       }
@@ -956,6 +1293,12 @@ export default function MemoryBookBuilder({
           onClose={() => setShowPreview(false)}
           onGenerate={handleGenerate}
           isGenerating={isGenerating}
+          parentSignedUrls={parentSignedUrls}
+          photoCount={photoCount}
+          collageLayout={collageLayout}
+          quoteProminence={quoteProminence}
+          backgroundStyle={backgroundStyle}
+          quoteEntryIds={quoteEntryIds}
         />
       )}
 
@@ -1188,6 +1531,123 @@ export default function MemoryBookBuilder({
                 rows={2}
                 style={{ width: '100%', border: '1.5px solid var(--color-warm-grey)', borderRadius: '8px', padding: '10px 14px', fontSize: '14px', resize: 'vertical', boxSizing: 'border-box' }}
               />
+            </div>
+          )}
+
+          {/* ── Collage customization ─────────────────────────────────────── */}
+          {(formatType === 'collage' || formatType === 'both') && (
+            <div style={{ backgroundColor: '#F8FAFF', border: '1px solid #DBEAFE', borderRadius: '12px', padding: '18px', marginBottom: '20px' }}>
+              <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--color-navy)', marginBottom: '16px' }}>🎨 Collage customization</div>
+
+              {/* Photo count */}
+              <div style={{ marginBottom: '14px' }}>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--color-navy)', marginBottom: '8px' }}>
+                  Number of photos
+                </label>
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  {([4, 6, 9, 12, 'all'] as const).map(n => (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => setPhotoCount(n)}
+                      style={{
+                        padding: '6px 14px', borderRadius: '20px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+                        border: photoCount === n ? '2px solid var(--color-navy)' : '1.5px solid var(--color-warm-grey)',
+                        backgroundColor: photoCount === n ? 'var(--color-navy)' : 'white',
+                        color: photoCount === n ? 'white' : 'var(--color-text-secondary)',
+                      }}
+                    >
+                      {n === 'all' ? 'All' : `${n}`}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Layout style */}
+              <div style={{ marginBottom: '14px' }}>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--color-navy)', marginBottom: '8px' }}>
+                  Layout style
+                </label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
+                  {([
+                    { id: 'grid' as CollageLayout,     emoji: '▦', label: 'Grid',     desc: 'Equal squares, clean and classic' },
+                    { id: 'mosaic' as CollageLayout,   emoji: '⊞', label: 'Mosaic',   desc: 'Hero photo with supporting gallery' },
+                    { id: 'timeline' as CollageLayout, emoji: '⟶', label: 'Timeline', desc: 'Strip with dates — tells a story' },
+                    { id: 'magazine' as CollageLayout, emoji: '◱', label: 'Magazine', desc: 'Large featured photo with accents' },
+                  ]).map(opt => (
+                    <div
+                      key={opt.id}
+                      onClick={() => setCollageLayout(opt.id)}
+                      style={{
+                        border: collageLayout === opt.id ? '2px solid var(--color-navy)' : '1.5px solid var(--color-warm-grey)',
+                        borderRadius: '8px', padding: '10px 12px', cursor: 'pointer',
+                        backgroundColor: collageLayout === opt.id ? '#EFF6FF' : 'white',
+                      }}
+                    >
+                      <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--color-navy)', marginBottom: '2px' }}>
+                        {collageLayout === opt.id ? '✓ ' : ''}{opt.emoji} {opt.label}
+                      </div>
+                      <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)' }}>{opt.desc}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Quote prominence */}
+              <div style={{ marginBottom: '14px' }}>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--color-navy)', marginBottom: '8px' }}>
+                  Quote prominence
+                </label>
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  {([
+                    { id: 'full' as QuoteProminence,         label: 'Full text' },
+                    { id: 'quote' as QuoteProminence,        label: 'Key quote' },
+                    { id: 'photos_only' as QuoteProminence,  label: 'Photos only' },
+                  ]).map(opt => (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => setQuoteProminence(opt.id)}
+                      style={{
+                        padding: '6px 14px', borderRadius: '20px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+                        border: quoteProminence === opt.id ? '2px solid var(--color-navy)' : '1.5px solid var(--color-warm-grey)',
+                        backgroundColor: quoteProminence === opt.id ? 'var(--color-navy)' : 'white',
+                        color: quoteProminence === opt.id ? 'white' : 'var(--color-text-secondary)',
+                      }}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Background style */}
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--color-navy)', marginBottom: '8px' }}>
+                  Background style
+                </label>
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  {([
+                    { id: 'cream' as BackgroundStyle,       label: '☁ Warm cream' },
+                    { id: 'watercolor' as BackgroundStyle,  label: '🎨 Watercolor wash' },
+                    { id: 'navy_frame' as BackgroundStyle,  label: '🖼 Navy frame' },
+                  ]).map(opt => (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => setBackgroundStyle(opt.id)}
+                      style={{
+                        padding: '6px 14px', borderRadius: '20px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+                        border: backgroundStyle === opt.id ? '2px solid var(--color-navy)' : '1.5px solid var(--color-warm-grey)',
+                        backgroundColor: backgroundStyle === opt.id ? 'var(--color-navy)' : 'white',
+                        color: backgroundStyle === opt.id ? 'white' : 'var(--color-text-secondary)',
+                      }}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
 

@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { formatDistanceToNow } from 'date-fns'
 import type { CaseloadEntry, NavigatorTask } from '@/lib/data/navigator'
+import type { GriefSupportRequest } from '@/lib/data/grief'
 import { MemberDetailPanel } from './MemberDetailPanel'
 
 const SEVERITY_STYLE: Record<string, { bg: string; text: string; border: string; label: string }> = {
@@ -54,6 +55,7 @@ export interface NavConsoleProps {
   membersById: Record<string, string>
   caseloadError: string | null
   tasksError: string | null
+  griefRequests?: (GriefSupportRequest & { members: { preferred_name: string; full_name: string; phone_number: string } | null })[]
 }
 
 export function NavConsole({
@@ -63,6 +65,7 @@ export function NavConsole({
   membersById,
   caseloadError,
   tasksError,
+  griefRequests = [],
 }: NavConsoleProps) {
   const router = useRouter()
   const [search, setSearch] = useState('')
@@ -72,6 +75,10 @@ export function NavConsole({
   const [panelMemberId, setPanelMemberId] = useState<string | null>(null)
   const [panelMemberName, setPanelMemberName] = useState('')
   const panelTriggerRef = useRef<HTMLElement | null>(null)
+  const [activeGriefReq, setActiveGriefReq] = useState<(typeof griefRequests)[0] | null>(null)
+  const [griefNotes, setGriefNotes] = useState('')
+  const [griefContacting, setGriefContacting] = useState(false)
+  const [contactedIds, setContactedIds] = useState<Set<string>>(new Set())
 
   const handleSignOut = async () => {
     const supabase = createClient()
@@ -104,6 +111,27 @@ export function NavConsole({
     } catch {
       setCompletedTaskIds(prev => { const n = new Set(prev); n.delete(taskId); return n })
       setActionErrors(prev => ({ ...prev, [taskId]: 'Network error. Please try again.' }))
+    }
+  }
+
+  const handleMarkContacted = async () => {
+    if (!activeGriefReq) return
+    setGriefContacting(true)
+    try {
+      const res = await fetch(`/api/grief-support/${activeGriefReq.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'navigator_notified', navigatorNotes: griefNotes || undefined }),
+      })
+      if (res.ok) {
+        setContactedIds(prev => new Set([...prev, activeGriefReq.id]))
+        setActiveGriefReq(null)
+        setGriefNotes('')
+      }
+    } catch {
+      // silently fail — navigator can retry
+    } finally {
+      setGriefContacting(false)
     }
   }
 
@@ -341,6 +369,124 @@ export function NavConsole({
                     >
                       Acknowledge
                     </button>
+                  </div>
+                )
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* ── Grief Support Queue ─────────────────────── */}
+        {griefRequests.filter(r => !contactedIds.has(r.id)).length > 0 && (
+          <section aria-label="Grief support requests" style={{ marginBottom: '40px' }}>
+            <h2 style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#6B21A8', marginBottom: '12px' }}>
+              🕊️ Grief &amp; transition support — pending ({griefRequests.filter(r => !contactedIds.has(r.id)).length})
+            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {griefRequests.filter(r => !contactedIds.has(r.id)).map(req => {
+                const memberDisplayName = req.members?.preferred_name ?? req.members?.full_name ?? 'Unknown member'
+                const date = new Date(req.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                const lossLabel: Record<string, string> = {
+                  loss_of_loved_one: '🕊️ Loss of a loved one',
+                  major_health_diagnosis: '🏥 Major health diagnosis',
+                  major_life_change: '🌱 Major life change',
+                  loss_of_independence: '🤝 Caregiver support',
+                }
+                const isActive = activeGriefReq?.id === req.id
+                return (
+                  <div key={req.id} style={{ borderRadius: 'var(--radius-md)', overflow: 'hidden', border: isActive ? '2px solid #7C3AED' : '1px solid #E9D5FF' }}>
+                    <div
+                      style={{ backgroundColor: '#FDF4FF', borderLeft: '4px solid #7C3AED', padding: '14px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}
+                    >
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '4px' }}>
+                          <span style={{ fontWeight: 700, fontSize: '15px', color: '#4C1D95' }}>{memberDisplayName}</span>
+                          <span style={{ fontSize: '12px', fontWeight: 600, backgroundColor: '#DDD6FE', color: '#5B21B6', padding: '2px 8px', borderRadius: '20px' }}>Pending</span>
+                          <span style={{ fontSize: '12px', color: '#6B7280' }}>Submitted {date}</span>
+                        </div>
+                        <div style={{ fontSize: '14px', color: '#4C1D95' }}>{lossLabel[req.loss_type] ?? req.loss_type}</div>
+                        {req.circle_type_requested && (
+                          <div style={{ fontSize: '13px', color: '#6B7280', marginTop: '2px' }}>Requested: {req.circle_type_requested}</div>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (isActive) { setActiveGriefReq(null); setGriefNotes('') }
+                          else { setActiveGriefReq(req); setGriefNotes('') }
+                        }}
+                        style={{ padding: '7px 14px', borderRadius: '6px', backgroundColor: isActive ? '#5B21B6' : '#7C3AED', color: 'white', border: 'none', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
+                      >
+                        {isActive ? 'Close ×' : 'Contact member'}
+                      </button>
+                    </div>
+
+                    {/* Outreach action panel */}
+                    {isActive && (
+                      <div style={{ backgroundColor: 'white', borderTop: '1px solid #E9D5FF', padding: '20px 22px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px', marginBottom: '16px' }}>
+                          <div>
+                            <div style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#9CA3AF', marginBottom: '3px' }}>Member</div>
+                            <div style={{ fontSize: '15px', fontWeight: 700, color: '#4C1D95' }}>{memberDisplayName}</div>
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#9CA3AF', marginBottom: '3px' }}>Phone</div>
+                            <div style={{ fontSize: '15px', fontWeight: 700, color: '#1F2937' }}>
+                              {req.members?.phone_number
+                                ? <a href={`tel:${req.members.phone_number}`} style={{ color: '#7C3AED', textDecoration: 'none' }}>{req.members.phone_number}</a>
+                                : <span style={{ color: '#9CA3AF' }}>—</span>}
+                            </div>
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#9CA3AF', marginBottom: '3px' }}>Support type</div>
+                            <div style={{ fontSize: '14px', color: '#4C1D95' }}>{lossLabel[req.loss_type] ?? req.loss_type}</div>
+                          </div>
+                          {req.circle_type_requested && (
+                            <div>
+                              <div style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#9CA3AF', marginBottom: '3px' }}>Requested</div>
+                              <div style={{ fontSize: '14px', color: '#6B7280' }}>{req.circle_type_requested}</div>
+                            </div>
+                          )}
+                          {req.availability_preference && (
+                            <div>
+                              <div style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#9CA3AF', marginBottom: '3px' }}>Best time</div>
+                              <div style={{ fontSize: '14px', color: '#6B7280' }}>{req.availability_preference}</div>
+                            </div>
+                          )}
+                        </div>
+
+                        {req.additional_notes && (
+                          <div style={{ backgroundColor: '#F5F3FF', borderRadius: '8px', padding: '10px 14px', marginBottom: '16px' }}>
+                            <div style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#9CA3AF', marginBottom: '4px' }}>Member notes</div>
+                            <div style={{ fontSize: '14px', color: '#4C1D95', lineHeight: 1.5 }}>{req.additional_notes}</div>
+                          </div>
+                        )}
+
+                        <div style={{ marginBottom: '14px' }}>
+                          <label htmlFor={`grief-notes-${req.id}`} style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '6px' }}>
+                            Outreach notes (logged to member record)
+                          </label>
+                          <textarea
+                            id={`grief-notes-${req.id}`}
+                            value={griefNotes}
+                            onChange={e => setGriefNotes(e.target.value)}
+                            placeholder="e.g. Called at 2pm — left voicemail. Will follow up Thursday."
+                            rows={3}
+                            style={{ width: '100%', border: '1.5px solid #E9D5FF', borderRadius: '8px', padding: '10px 12px', fontSize: '14px', resize: 'vertical', boxSizing: 'border-box', fontFamily: 'inherit' }}
+                          />
+                        </div>
+
+                        <button
+                          type="button"
+                          disabled={griefContacting}
+                          onClick={handleMarkContacted}
+                          style={{ padding: '9px 20px', borderRadius: '8px', backgroundColor: griefContacting ? '#9CA3AF' : '#7C3AED', color: 'white', border: 'none', fontSize: '14px', fontWeight: 700, cursor: griefContacting ? 'not-allowed' : 'pointer' }}
+                        >
+                          {griefContacting ? 'Saving…' : '✓ Mark as contacted'}
+                        </button>
+                        <span style={{ fontSize: '12px', color: '#9CA3AF', marginLeft: '12px' }}>Updates status to &quot;navigator notified&quot;</span>
+                      </div>
+                    )}
                   </div>
                 )
               })}

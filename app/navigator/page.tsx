@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import { requireAuth, getUserRole } from '@/lib/auth'
 import { getNavigatorByAuthId, getNavigatorCaseload, getNavigatorTasks } from '@/lib/data/navigator'
+import { getAllPendingGriefRequests } from '@/lib/data/grief'
 import { NavConsole } from '@/components/navigator/NavConsole'
 import { ToastProvider } from '@/components/ui/Toast'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
@@ -38,6 +39,7 @@ export default async function NavigatorPage() {
     membersById[entry.member.id] = entry.member.preferred_name || entry.member.full_name
   }
 
+  const { data: griefRequests } = await getAllPendingGriefRequests()
   const navigatorName = navigator?.full_name ?? (role === 'admin' ? 'Admin' : 'Navigator')
 
   return (
@@ -50,6 +52,7 @@ export default async function NavigatorPage() {
           membersById={membersById}
           caseloadError={navigator ? caseloadError : null}
           tasksError={navigator ? tasksError : null}
+          griefRequests={griefRequests ?? []}
         />
       </ErrorBoundary>
     </ToastProvider>

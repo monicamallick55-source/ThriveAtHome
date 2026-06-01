@@ -106,3 +106,74 @@ export function isTodayBirthday(dateOfBirth: string): boolean {
   const todayMD = `${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
   return dateOfBirth.slice(5) === todayMD
 }
+
+/** Check whether a milestone celebration event already exists for this member+type. */
+export async function getMilestoneExists(
+  memberId: string,
+  celebrationType: string
+): Promise<boolean> {
+  const admin = createAdminClient()
+  const { data } = await admin
+    .from('celebration_events')
+    .select('id')
+    .eq('member_id', memberId)
+    .eq('celebration_type', celebrationType)
+    .limit(1)
+  return (data?.length ?? 0) > 0
+}
+
+/** Get unique calendar dates (YYYY-MM-DD) of all completed calls for a member, newest first. */
+export async function getCompletedCallDatesForStreak(
+  memberId: string
+): Promise<string[]> {
+  const admin = createAdminClient()
+  const { data } = await admin
+    .from('check_in_calls')
+    .select('scheduled_at, created_at')
+    .eq('member_id', memberId)
+    .eq('status', 'completed')
+    .order('scheduled_at', { ascending: false, nullsFirst: false })
+
+  if (!data) return []
+  const dateSet = new Set<string>()
+  for (const call of data) {
+    const raw = (call.scheduled_at as string | null) ?? (call.created_at as string)
+    dateSet.add(raw.slice(0, 10))
+  }
+  return Array.from(dateSet).sort().reverse()
+}
+
+/** Returns true if the sorted-descending date list contains at least 30 consecutive calendar days. */
+export function has30DayStreak(sortedDatesDesc: string[]): boolean {
+  if (sortedDatesDesc.length < 30) return false
+  const asc = [...sortedDatesDesc].sort()
+  let streak = 1
+  for (let i = 1; i < asc.length; i++) {
+    const prev = new Date(asc[i - 1] + 'T00:00:00Z')
+    const curr = new Date(asc[i] + 'T00:00:00Z')
+    const diffDays = Math.round((curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24))
+    if (diffDays === 1) {
+      streak++
+      if (streak >= 30) return true
+    } else {
+      streak = 1
+    }
+  }
+  return false
+}
+
+/** Get the N most recent celebration events for a member (upcoming or past). */
+export async function getRecentCelebrationEvents(
+  memberId: string,
+  limit = 3
+): Promise<{ data: CelebrationEvent[] | null; error: string | null }> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('celebration_events')
+    .select('*')
+    .eq('member_id', memberId)
+    .order('event_date', { ascending: false })
+    .limit(limit)
+  if (error) return { data: null, error: error.message }
+  return { data: data as CelebrationEvent[], error: null }
+}

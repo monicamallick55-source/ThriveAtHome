@@ -16,6 +16,64 @@ import type { CheckInCall } from '@/lib/data/calls'
 import type { Alert } from '@/lib/data/alerts'
 import type { RealtimeNotification } from '@/lib/data/notifications'
 import type { FamilyTaskItem } from '@/lib/data/tasks'
+import type { CelebrationEvent } from '@/lib/data/celebrations'
+import type { ServiceBooking } from '@/lib/data/services'
+
+const SERVICE_EMOJIS: Record<string, string> = {
+  transport: '🚗',
+  home_service: '🏠',
+  meals: '🥗',
+  telehealth: '🏥',
+  legal_financial: '⚖️',
+  tech_help: '💻',
+  companion: '🤝',
+}
+
+const SERVICE_LABELS: Record<string, string> = {
+  transport: 'Transport',
+  home_service: 'Home Services',
+  meals: 'Meals & Nutrition',
+  telehealth: 'Health Services',
+  legal_financial: 'Legal & Financial',
+  tech_help: 'Tech Help',
+  companion: 'Companion',
+}
+
+function ScheduledServicesSection({ bookings }: { bookings: ServiceBooking[] }) {
+  if (bookings.length === 0) return null
+  return (
+    <section aria-labelledby="services-heading">
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+        <h2 id="services-heading" style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: 'var(--color-navy)', margin: 0 }}>
+          Scheduled services
+        </h2>
+        <Link href="/dashboard/services" style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-teal)', textDecoration: 'none', fontWeight: 500 }}>
+          View all →
+        </Link>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        {bookings.slice(0, 3).map((b) => (
+          <div key={b.id} style={{ backgroundColor: 'white', border: '1px solid var(--color-warm-grey)', borderRadius: 'var(--radius-xl)', padding: '16px 20px', boxShadow: 'var(--shadow-card)', display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <span style={{ fontSize: '24px', flexShrink: 0 }} aria-hidden="true">{SERVICE_EMOJIS[b.service_type] ?? '📋'}</span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: '16px', fontWeight: 500, color: 'var(--color-navy)', margin: 0 }}>
+                {SERVICE_LABELS[b.service_type] ?? b.service_type}
+              </p>
+              {b.requested_for && (
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-muted)', margin: '2px 0 0' }}>
+                  {new Date(b.requested_for).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' })}
+                </p>
+              )}
+            </div>
+            <span style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#f8961e', backgroundColor: '#fff3e0', borderRadius: '20px', padding: '3px 10px', flexShrink: 0 }}>
+              {b.status.charAt(0).toUpperCase() + b.status.slice(1).replace('_', ' ')}
+            </span>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
 
 export interface DashboardClientProps {
   member: Member
@@ -30,6 +88,8 @@ export interface DashboardClientProps {
   tasksError: string | null
   showSubscribedBanner?: boolean
   isBirthday?: boolean
+  recentCelebrations?: CelebrationEvent[]
+  upcomingServices?: ServiceBooking[]
 }
 
 function QuickActions() {
@@ -110,6 +170,75 @@ function QuickActions() {
   )
 }
 
+const MILESTONE_LABELS: Record<string, { emoji: string; label: string; color: string }> = {
+  birthday: { emoji: '🎂', label: 'Birthday', color: '#f9c74f' },
+  milestone_first_call: { emoji: '📞', label: 'First Check-In', color: '#4cc9f0' },
+  milestone_30_day_streak: { emoji: '🔥', label: '30-Day Streak', color: '#f77f00' },
+  milestone_90_days: { emoji: '⭐', label: '90 Days Together', color: '#9d4edd' },
+  anniversary: { emoji: '🌟', label: 'Anniversary', color: '#43aa8b' },
+}
+
+function MilestonesSection({ events }: { events: CelebrationEvent[] }) {
+  if (events.length === 0) return null
+  return (
+    <section aria-labelledby="milestones-heading">
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+        <h2
+          id="milestones-heading"
+          style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: 'var(--color-navy)', margin: 0 }}
+        >
+          Milestones &amp; Celebrations
+        </h2>
+        <Link
+          href="/dashboard/celebrations"
+          style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-teal)', textDecoration: 'none', fontWeight: 500 }}
+        >
+          View all →
+        </Link>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        {events.map((event) => {
+          const info = MILESTONE_LABELS[event.celebration_type] ?? { emoji: '🎉', label: event.celebration_type.replace(/_/g, ' '), color: '#4361ee' }
+          const today = new Date().toISOString().slice(0, 10)
+          const isToday = event.event_date === today
+          return (
+            <div
+              key={event.id}
+              style={{
+                backgroundColor: isToday ? '#fff9e6' : 'white',
+                border: isToday ? '2px solid #f9c74f' : '1px solid var(--color-warm-grey)',
+                borderRadius: 'var(--radius-xl)',
+                padding: '16px 20px',
+                boxShadow: 'var(--shadow-card)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '16px',
+              }}
+            >
+              <span style={{ fontSize: '28px', flexShrink: 0 }} aria-hidden="true">{info.emoji}</span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: '17px', fontWeight: 500, color: 'var(--color-navy)', margin: '0 0 2px' }}>
+                  {info.label}
+                </p>
+                {event.ai_message && (
+                  <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', margin: 0 }}>
+                    {event.ai_message}
+                  </p>
+                )}
+              </div>
+              {isToday && (
+                <span style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 700, color: '#d4a017', backgroundColor: '#fff3cd', padding: '4px 10px', borderRadius: '20px', flexShrink: 0 }}>
+                  Today!
+                </span>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
 function DashboardInner(props: DashboardClientProps) {
   const {
     member,
@@ -122,6 +251,8 @@ function DashboardInner(props: DashboardClientProps) {
     tasksError,
     showSubscribedBanner = false,
     isBirthday = false,
+    recentCelebrations = [],
+    upcomingServices = [],
   } = props
 
   const [bannerVisible, setBannerVisible] = useState(showSubscribedBanner)
@@ -279,6 +410,18 @@ function DashboardInner(props: DashboardClientProps) {
               />
             </ErrorBoundary>
           </section>
+
+          {/* Milestones & Celebrations */}
+          {recentCelebrations.length > 0 && (
+            <ErrorBoundary section="milestones">
+              <MilestonesSection events={recentCelebrations} />
+            </ErrorBoundary>
+          )}
+
+          {/* Scheduled Services */}
+          {upcomingServices.length > 0 && (
+            <ScheduledServicesSection bookings={upcomingServices} />
+          )}
 
           {/* Health timeline */}
           <section aria-labelledby="timeline-heading">

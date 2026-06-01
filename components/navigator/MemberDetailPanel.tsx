@@ -3,6 +3,17 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import type { Member } from '@/lib/data/members'
 import type { CheckInCall } from '@/lib/data/calls'
 import type { FamilyMember, NavigatorNote } from '@/lib/data/navigator'
+import type { ServiceBooking } from '@/lib/data/services'
+
+const SERVICE_LABELS: Record<string, string> = {
+  transport: '🚗 Transport',
+  home_service: '🏠 Home Services',
+  meals: '🥗 Meals',
+  telehealth: '🏥 Health Services',
+  legal_financial: '⚖️ Legal & Financial',
+  tech_help: '💻 Tech Help',
+  companion: '🤝 Companion',
+}
 
 interface PanelData {
   member: Member
@@ -11,6 +22,7 @@ interface PanelData {
   notes: NavigatorNote[]
   brief: string
   navigatorId: string
+  bookings: ServiceBooking[]
 }
 
 function formatDate(iso: string | null | undefined): string {
@@ -57,6 +69,12 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
   const [noteSaving, setNoteSaving] = useState(false)
   const [noteError, setNoteError] = useState<string | null>(null)
   const [localNotes, setLocalNotes] = useState<NavigatorNote[]>([])
+
+  const [referralType, setReferralType] = useState('')
+  const [referralNote, setReferralNote] = useState('')
+  const [referralSaving, setReferralSaving] = useState(false)
+  const [referralSaved, setReferralSaved] = useState(false)
+  const [referralError, setReferralError] = useState<string | null>(null)
 
   const panelRef = useRef<HTMLDivElement>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
@@ -146,6 +164,32 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
       setNoteError('Network error. Please try again.')
     } finally {
       setNoteSaving(false)
+    }
+  }
+
+  const handleSaveReferral = async () => {
+    if (!referralType || !referralNote.trim() || !panelData) return
+    setReferralSaving(true)
+    setReferralError(null)
+    try {
+      const res = await fetch('/api/navigator/referral', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ member_id: memberId, referral_type: referralType, referral_note: referralNote.trim() }),
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        setReferralError(json.error ?? 'Failed to record referral.')
+      } else {
+        setLocalNotes(prev => [json.note as NavigatorNote, ...prev])
+        setReferralSaved(true)
+        setReferralType('')
+        setReferralNote('')
+      }
+    } catch {
+      setReferralError('Network error. Please try again.')
+    } finally {
+      setReferralSaving(false)
     }
   }
 
@@ -427,6 +471,127 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                       </span>
                     </div>
                   ))
+                )}
+              </Section>
+
+              {/* External support referral */}
+              <Section title="Refer to external support">
+                {referralSaved && (
+                  <div style={{ backgroundColor: '#F0FDF4', border: '1px solid #86EFAC', borderRadius: 'var(--radius-md)', padding: '12px 16px', marginBottom: '12px', fontFamily: 'var(--font-body)', fontSize: '14px', color: '#065F46', fontWeight: 500 }}>
+                    ✓ Referral recorded and logged to member notes.
+                  </div>
+                )}
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '12px', lineHeight: 1.5 }}>
+                  Record a warm referral to an external professional. This will be saved to the member&apos;s notes.
+                  Always provide a personal introduction — never just a phone number.
+                </p>
+                <div style={{ marginBottom: '10px' }}>
+                  <label htmlFor="referral-type" style={{ display: 'block', fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '5px' }}>
+                    Referral type
+                  </label>
+                  <select
+                    id="referral-type"
+                    value={referralType}
+                    onChange={e => setReferralType(e.target.value)}
+                    style={{
+                      width: '100%',
+                      fontFamily: 'var(--font-body)',
+                      fontSize: '14px',
+                      color: referralType ? 'var(--color-text-primary)' : 'var(--color-text-secondary)',
+                      backgroundColor: 'white',
+                      border: '1.5px solid var(--color-warm-grey)',
+                      borderRadius: 'var(--radius-md)',
+                      padding: '9px 12px',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                  >
+                    <option value="">Select a referral type…</option>
+                    <option>Grief / bereavement counselor</option>
+                    <option>Mental health professional (therapist)</option>
+                    <option>Elder law attorney</option>
+                    <option>Financial advisor / planner</option>
+                    <option>Hospice / palliative care</option>
+                    <option>Social worker</option>
+                    <option>Psychiatric medication support</option>
+                    <option>Other professional support</option>
+                  </select>
+                </div>
+                <div style={{ marginBottom: '10px' }}>
+                  <label htmlFor="referral-note" style={{ display: 'block', fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '5px' }}>
+                    Referral note (what you told the member, and why)
+                  </label>
+                  <textarea
+                    id="referral-note"
+                    value={referralNote}
+                    onChange={e => setReferralNote(e.target.value)}
+                    placeholder="e.g. Member expressed interest in speaking with a grief counselor after loss of spouse. Mentioned she prefers someone who speaks Spanish. Will warm-introduce to Dr. Santos."
+                    rows={3}
+                    style={{
+                      width: '100%',
+                      fontFamily: 'var(--font-body)',
+                      fontSize: '13px',
+                      color: 'var(--color-text-primary)',
+                      backgroundColor: 'white',
+                      border: '1.5px solid var(--color-warm-grey)',
+                      borderRadius: 'var(--radius-md)',
+                      padding: '10px 12px',
+                      resize: 'vertical',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+                {referralError && (
+                  <p role="alert" style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-emergency-text)', margin: '0 0 8px' }}>
+                    {referralError}
+                  </p>
+                )}
+                <button
+                  onClick={handleSaveReferral}
+                  disabled={referralSaving || !referralType || !referralNote.trim()}
+                  style={{
+                    fontFamily: 'var(--font-body)',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    color: 'white',
+                    backgroundColor: referralSaving || !referralType || !referralNote.trim() ? 'var(--color-warm-grey)' : '#7C3AED',
+                    border: 'none',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '9px 20px',
+                    cursor: referralSaving || !referralType || !referralNote.trim() ? 'not-allowed' : 'pointer',
+                    minHeight: '38px',
+                    transition: 'background-color 0.15s',
+                  }}
+                >
+                  {referralSaving ? 'Saving…' : '↗ Record referral'}
+                </button>
+              </Section>
+
+              {/* Service Bookings */}
+              <Section title="Service bookings">
+                {(panelData.bookings ?? []).length === 0 ? (
+                  <EmptyState text="No service bookings for this member." />
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {(panelData.bookings ?? []).slice(0, 5).map((b) => (
+                      <div key={b.id} style={{ backgroundColor: 'white', border: '1px solid var(--color-warm-grey)', borderRadius: 'var(--radius-md)', padding: '10px 14px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                          <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, color: 'var(--color-navy)', margin: 0 }}>
+                            {SERVICE_LABELS[b.service_type] ?? b.service_type}
+                          </p>
+                          <span style={{ fontFamily: 'var(--font-body)', fontSize: '11px', fontWeight: 600, color: b.status === 'completed' ? '#43aa8b' : b.status === 'cancelled' ? '#adb5bd' : '#f8961e', backgroundColor: b.status === 'completed' ? '#d1fae5' : b.status === 'cancelled' ? '#f8f9fa' : '#fff3e0', borderRadius: '20px', padding: '2px 8px', flexShrink: 0 }}>
+                            {b.status.charAt(0).toUpperCase() + b.status.slice(1).replace('_', ' ')}
+                          </span>
+                        </div>
+                        {b.requested_for && (
+                          <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-muted)', margin: '3px 0 0' }}>
+                            {new Date(b.requested_for).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' })}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 )}
               </Section>
             </>

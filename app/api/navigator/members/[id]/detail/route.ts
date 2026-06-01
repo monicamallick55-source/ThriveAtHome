@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getCurrentUser, getUserRole } from '@/lib/auth'
 import { getNavigatorByAuthId, getMemberRecentCalls, getMemberFamilyContacts, getMemberNavigatorNotes, isMemberAssignedToNavigator } from '@/lib/data/navigator'
 import { getMemberById } from '@/lib/data/members'
+import { getServiceBookingsForMember } from '@/lib/data/services'
 import { aiProvider } from '@/lib/providers'
 
 export async function GET(
@@ -31,11 +32,12 @@ export async function GET(
     }
   }
 
-  const [memberResult, callsResult, familyResult, notesResult] = await Promise.all([
+  const [memberResult, callsResult, familyResult, notesResult, bookingsResult] = await Promise.all([
     getMemberById(memberId),
     getMemberRecentCalls(memberId, 5),
     getMemberFamilyContacts(memberId),
     getMemberNavigatorNotes(memberId),
+    getServiceBookingsForMember(memberId),
   ])
 
   if (memberResult.error || !memberResult.data) {
@@ -60,5 +62,6 @@ export async function GET(
     notes: notesResult.data ?? [],
     brief,
     navigatorId: navigator.id,
+    bookings: bookingsResult.data ?? [],
   })
 }

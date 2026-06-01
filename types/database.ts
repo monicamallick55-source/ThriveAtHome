@@ -21,6 +21,7 @@ export type VolunteerStatus = 'pending' | 'background_check' | 'active' | 'inact
 export type VisitType = 'phone_call' | 'in_person_visit' | 'virtual_event' | 'grocery_help' | 'walking_companion' | 'reading_aloud' | 'tech_help'
 export type EventFormat = 'phone_only' | 'video_or_phone' | 'in_person'
 export type EventStatus = 'upcoming' | 'live' | 'completed' | 'cancelled'
+export type BookingStatus = 'requested' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled'
 
 export interface Database {
   public: {
@@ -1115,6 +1116,74 @@ export interface Database {
           { foreignKeyName: 'memory_books_member_id_fkey'; columns: ['member_id']; referencedRelation: 'members'; referencedColumns: ['id'] }
         ]
       }
+      service_bookings: {
+        Row: {
+          id: string
+          created_at: string
+          member_id: string
+          service_type: string
+          provider_name: string | null
+          booking_details: Record<string, unknown>
+          status: BookingStatus
+          requested_for: string | null
+          confirmed_at: string | null
+          completed_at: string | null
+          provider_booking_id: string | null
+          cost_estimate: number | null
+          notes: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          member_id: string
+          service_type: string
+          provider_name?: string | null
+          booking_details?: Record<string, unknown>
+          status?: BookingStatus
+          requested_for?: string | null
+          confirmed_at?: string | null
+          completed_at?: string | null
+          provider_booking_id?: string | null
+          cost_estimate?: number | null
+          notes?: string | null
+        }
+        Update: Partial<Database['public']['Tables']['service_bookings']['Insert']>
+        Relationships: [
+          { foreignKeyName: 'service_bookings_member_id_fkey'; columns: ['member_id']; referencedRelation: 'members'; referencedColumns: ['id'] }
+        ]
+      }
+      grief_support_requests: {
+        Row: {
+          id: string
+          created_at: string
+          member_id: string
+          loss_type: string
+          circle_type_requested: string | null
+          availability_preference: string | null
+          additional_notes: string | null
+          status: string
+          navigator_notes: string | null
+          matched_at: string | null
+          loss_anniversary_date: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          member_id: string
+          loss_type: string
+          circle_type_requested?: string | null
+          availability_preference?: string | null
+          additional_notes?: string | null
+          status?: string
+          navigator_notes?: string | null
+          matched_at?: string | null
+          loss_anniversary_date?: string | null
+        }
+        Update: Partial<Database['public']['Tables']['grief_support_requests']['Insert']>
+        Relationships: [
+          { foreignKeyName: 'grief_support_requests_member_id_fkey'; columns: ['member_id']; referencedRelation: 'members'; referencedColumns: ['id'] }
+        ]
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>
@@ -1136,6 +1205,7 @@ export interface Database {
       visit_type: VisitType
       event_format: EventFormat
       event_status: EventStatus
+      booking_status: BookingStatus
     }
     CompositeTypes: Record<string, never>
   }

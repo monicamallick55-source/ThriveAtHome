@@ -9,13 +9,16 @@ import { getNotificationsForMember } from '@/lib/data/notifications'
 import { getTasksForMember } from '@/lib/data/tasks'
 import { getFamilyMemberByAuthId } from '@/lib/data/family'
 import { syncMemberSubscription } from '@/lib/stripe/sync'
-import { isTodayBirthday } from '@/lib/data/celebrations'
+import { isTodayBirthday, getRecentCelebrationEvents } from '@/lib/data/celebrations'
+import { getUpcomingServiceBookings } from '@/lib/data/services'
 import DashboardClient from '@/components/dashboard/DashboardClient'
 import type { CheckInCall } from '@/lib/data/calls'
 import type { Alert } from '@/lib/data/alerts'
 import type { RealtimeNotification } from '@/lib/data/notifications'
 import type { FamilyTaskItem } from '@/lib/data/tasks'
 import type { FamilyMember } from '@/lib/data/family'
+import type { CelebrationEvent } from '@/lib/data/celebrations'
+import type { ServiceBooking } from '@/lib/data/services'
 
 export const metadata: Metadata = { title: 'Dashboard — ThriveAtHome' }
 
@@ -64,12 +67,16 @@ export default async function DashboardPage({
     notifResult,
     tasksResult,
     fmResult,
+    celebrationsResult,
+    servicesResult,
   ] = await Promise.all([
     withTimeout<CheckInCall[]>(getCallsForMember(member.id, 90, 0, user.id)),
     withTimeout<Alert[]>(getAlertsForMember(member.id)),
     withTimeout<RealtimeNotification[]>(getNotificationsForMember(member.id)),
     withTimeout<FamilyTaskItem[]>(getTasksForMember(member.id)),
     withTimeout<FamilyMember>(getFamilyMemberByAuthId(user.id)),
+    withTimeout<CelebrationEvent[]>(getRecentCelebrationEvents(member.id, 3)),
+    withTimeout<ServiceBooking[]>(getUpcomingServiceBookings(member.id)),
   ])
 
   const memberIsBirthday = member.date_of_birth ? isTodayBirthday(member.date_of_birth) : false
@@ -88,6 +95,8 @@ export default async function DashboardPage({
       tasksError={tasksResult.error}
       showSubscribedBanner={showSubscribedBanner}
       isBirthday={memberIsBirthday}
+      recentCelebrations={celebrationsResult.data ?? []}
+      upcomingServices={servicesResult.data ?? []}
     />
   )
 }
