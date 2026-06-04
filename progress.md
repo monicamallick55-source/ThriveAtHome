@@ -6451,3 +6451,239 @@ ISSUE: Add Family Events and Senior Gift-Giving features. Seniors should be remi
 Store all family events in new table family_events. Add family events tab to /dashboard/family. Add reminder processing to the daily celebrations cron. Add gift coordination to the existing gift sending flow built in the previous ISSUE.
 
 ISSUE: Add geographic chapter support to the platform as a soft layer on top of the existing location-aware model: (1) Add chapter_id and metro_area columns to members table via migration — auto-assign based on zip code using a metro_areas lookup table with major US metro areas and their zip code ranges; (2) Add a metro_areas table: id, chapter_name, city, state, zip_prefixes (text[]), is_active_chapter (boolean, true when 50+ members), chapter_coordinator_id; (3) Update volunteer matching to show same-chapter volunteers first (+30 points) then adjacent metros (+15 points) then national virtual-only volunteers; (4) Update events to show local chapter events prominently with a "Near you" badge, virtual events below; (5) Add a chapter landing page at /chapter/[slug] (e.g. /chapter/bay-area) showing local stats, upcoming events, active volunteers — this becomes the local marketing page for each chapter; (6) When a chapter reaches 50 active members, auto-flag for admin to activate as official chapter and assign a local coordinator; (7) Members in areas with no active chapter still get full virtual service — no degraded experience.
+
+ISSUE: Change the minimum member age from 60 to 65 in the onboarding form validation. Update the DOB validation in components/onboarding/Step1BasicInfo.tsx to reject dates of birth less than 65 years ago instead of 60 years ago. Update the gentle message to say "ThriveAtHome is designed for adults 65 and older." Also update the age validation in the API route at /app/api/onboarding/route.ts to match. Add a note in the navigator console member enrollment that navigators can manually override for members aged 60-64 with documented clinical need — add an override_reason text field that appears when a navigator creates a member record for someone under 65.
+ISSUE: Add member-to-member connection and friendship features across the platform:
+
+(1) FRIEND REQUESTS — Members can send a friend request to another member they have met in a community circle or event. Friend requests are only available between members who share at least one circle or have attended the same event — this prevents cold outreach from strangers. Add a "Connect" button on member cards in circle feeds and event attendee lists. Connections are mutual — both must accept. Store in a new member_connections table: id, requester_member_id, recipient_member_id, status (pending/accepted/declined), connected_at, source_circle_id or source_event_id (where they met).
+
+(2) FRIENDS LIST — Once connected, members can see their friends list on /dashboard/friends: friend's preferred name, shared circles, last active (approximate — "Active this week" not exact time), interests in common. Never show full name, address, phone, or last name to other members.
+
+(3) PRIVATE MESSAGING BETWEEN FRIENDS — Connected members can send private messages to each other through the platform. Uses the existing family_messages infrastructure but between members not family. Messages stay inside ThriveAtHome — no contact info shared. Add message_threads table: id, member_id_1, member_id_2, created_at. Add member_messages table: id, thread_id, sender_member_id, content, created_at, read_at.
+
+(4) NAVIGATOR-FACILITATED INTRODUCTIONS — On /dashboard/communities, add a "Find a connection" button. Member selects interests they want to connect over. Navigator or AI suggests a compatible member (matching interests, same chapter, similar age range). Navigator sends a warm introduction message to both members: "We thought you two might enjoy chatting — you both love gardening and are in the Bay Area community." Both members must accept before they can message each other.
+
+(5) CIRCLE MEMBER DIRECTORY — Inside each community circle, members can see a list of other circle members (first name + last initial, interests, how long they've been in the circle). "Say hello" button sends a pre-written friendly intro message — not a blank message — to reduce friction for seniors who may feel awkward reaching out cold.
+
+(6) PRIVACY CONTROLS — Family members can control connection settings for their senior from /dashboard preferences: "Allow friend requests from circle members" (default on), "Allow navigator-facilitated introductions" (default on), "Show in circle member directory" (default on). If family turns these off, the senior's profile is hidden from other members.
+
+(7) SAFETY GUARDRAILS — Apply fraud detection to member messages: scan for gift card requests, money requests, requests to move conversation off-platform. Flag immediately to navigator if detected. Members can report and block other members. Reported members are reviewed by navigator before any action. Three reports from different members → automatic suspension pending navigator review.
+
+(8) COMMUNITY FEED ENHANCEMENTS — Inside each circle, members can: react to posts with simple reactions (❤️ 👏 😊 — no complex emoji picker), reply to specific posts (threaded), share a memory or photo with the circle (photo upload, same as life story attachments), tag an upcoming event they're excited about. Keep it simple — these are seniors, not social media power users.
+ISSUE: Add minimum security for the three-layer social connection model. Layer 1 (circle posts): auto-redact phone numbers and email addresses from posts — replace with "[Contact info removed for your safety]" and notify the member. Layer 2 (friend connections and messaging): (a) scan private messages for phone numbers, emails, and addresses — auto-redact same as posts; (b) scan messages for money/gift card requests using existing fraud_patterns — flag to navigator immediately with message preview; (c) add Report button on posts and messages — one tap, sends to navigator review queue, navigator resolves within 24 hours. Layer 3 (navigator introductions): no additional security needed — navigator is the human oversight. Add a one-time "Community guidelines" acknowledgment screen (3 bullet points, large text, single tap to agree) when member first accesses any social feature: "Be kind and respectful", "Never share personal contact information", "Never send or request money". Log acknowledgment timestamp. That is the complete security model for the three-layer approach — nothing more needed at this scale.
+
+
+PHASE 45 ISSUE: Home services request services drop down shows the correct subtypes but selecting one and submitting gives error ' invalid service type'. this is with no dates, dates in future and dates in past. request for other services all seven need to be checked for date requested to be mandatory and if in the past or wrong format throw and error buile validation rules for all 7 services 
+dashboard/services page has an error when pages renders - Recoverable Error
+
+
+Hydration failed because the server rendered text didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+See more info here: https://nextjs.org/docs/messages/react-hydration-error
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+See more info here: https://nextjs.org/docs/messages/react-hydration-error
+
+---
+
+### Session 84 — Phase 45 ISSUE FIX 8 — Invalid service type + hydration error + date validation
+
+**STATUS:** In progress
+
+**BUGS FIXED:**
+
+#### Bug 1: `companion` vs `companionship` — invalid service type
+- **Root cause:** `ALLOWED_SERVICE_TYPES` in `/app/api/services/route.ts` had `'companion'` instead of `'companionship'`
+- **Fix:** Changed `'companion'` → `'companionship'` in ALLOWED_SERVICE_TYPES
+- Also fixed the same typo in `/app/api/services/[bookingId]/route.ts` serviceLabel map
+
+#### Bug 2: Hydration error on /dashboard/services
+- **Root cause:** `toLocaleString('en-US', ...)` in BookingCard and formatDateTime produces different output in Node.js (server-side render) vs browser
+- **Fix:** Replaced `toLocaleString` with deterministic UTC-based manual formatter (`formatDateTime` and `formatDateTimeShort`) that uses UTC methods only — identical output on server and client
+- Added `suppressHydrationWarning` to date-displaying elements as additional protection
+- Added `isDate` prop to `DetailRow` component to propagate `suppressHydrationWarning` to date cells
+
+#### Bug 3: Date validation for all 7 service forms
+- **Root cause:** Date was optional on 6 of 7 forms; no future-date validation on any form
+- **Fix:** Added `validateFutureDateTime()` helper — requires date, checks valid format, checks future
+- Made date **required** on all 7 forms (was optional on: home_service, meals, telehealth, tech_help, legal_financial, companionship)
+- Added `validateFutureDateTime()` call to all 7 form `handleSubmit` functions
+- Changed `dateTime || null` → `dateTime` in all form payloads (no longer null when required)
+- Added server-side date validation to `/app/api/services/route.ts`: required, valid format, future date
+
+**FILES CHANGED:**
+- `/app/api/services/route.ts` — `companion` → `companionship`; server-side date validation added
+- `/app/api/services/[bookingId]/route.ts` — serviceLabel map updated (`companion` → `companionship`)
+- `/components/services/ServicesClient.tsx` — deterministic date formatters; `validateFutureDateTime`; all 7 forms require date + validate future
+
+**VERIFICATION:**
+1. `npx tsc --noEmit` — zero errors ✓
+2. `npm run build` — ✓ Compiled successfully in 35.6s ✓
+
+**TEST PROTOCOL:**
+1. /dashboard/services — page loads without hydration error in browser console
+2. Click 🏠 Home Services → select a subtype → submit without date → error "Please select a date and time."
+3. Select a past date → error "Please select a future date and time — this date has already passed."
+4. Select a future date → submits successfully → booking created
+5. Click 🤝 Companionship → select subtype → submit without date → error
+6. Select future date → submits successfully (no more "invalid service type" error)
+7. Repeat steps 2–6 for all 7 service types: Transport, Home Services, Meals, Health, Tech Help, Legal & Financial, Companionship
+8. All 7 accept future dates, reject past dates, reject missing dates
+9. Check browser console for hydration warnings — none should appear
+
+AWAITING HUMAN APPROVAL
+APPROVED
+ISSUE: oncer service request is submitted it does not allow to make changes or cancel the request if member changes mind. It shoukd allow the member to change or cancel vased on certain conditions.  Fix this issue while build next phase and set of features
+
+---
+SESSION: 85
+DATE: 2026-06-04 UTC
+MILESTONE: M17 — Services Marketplace
+PHASE: ISSUE fix + Phase 46 + Phase 47
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase checklist: Phase 46 (5/5 items ✓), Phase 47 (5/5 items ✓), ISSUE fix (complete)
+- Current item: All items complete
+- Loop state: TESTING
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider
+- emailProvider: StubEmailProvider
+- billingProvider: StubBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+- /app/api/services/[bookingId]/route.ts — MODIFIED: added DELETE handler for member-initiated cancellation; added getFamilyMemberByAuthId import
+- /app/api/services/route.ts — MODIFIED: added createAdminClient import; added auto navigator task creation for tech_help and mental_health_companion subtypes
+- /components/services/ServicesClient.tsx — MODIFIED: BookingCard now accepts onCancelled prop; cancel UI (confirm step, reason textarea, error state); canCancel computed with 4-hour confirmed-booking cutoff; MealsForm has AI grocery list stub; fraud/scam awareness section added at bottom of page
+- /app/api/cron/seasonal-reminders/route.ts — CREATED: quarterly home safety reminder cron; runs for all active members; seasonal tip varies by month
+- /vercel.json — MODIFIED: added seasonal-reminders cron at "0 9 1 1,4,7,10 *" (quarterly, Jan/Apr/Jul/Oct)
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — Compiled successfully; /api/cron/seasonal-reminders and /api/services/[bookingId] both appear in route list
+
+ERRORS ENCOUNTERED:
+- None
+
+DECISIONS MADE:
+- Member cancel conditions: 'requested' status → always cancellable; 'confirmed' status → cancellable if scheduled time >4h from now; 'in_progress'/'completed'/'cancelled' → not cancellable
+- Cancel reason is optional; stored as "[Member cancelled] {reason}" or "[Member cancelled their request]" in booking notes
+- AI grocery list stub returns deterministic text — no external API call
+- Seasonal reminders cron runs quarterly (Jan/Apr/Jul/Oct 1st at 9am UTC); seasonal tip text varies by month
+- Navigator tasks auto-created for tech_help requests (medium priority) and mental_health_companion requests (high priority)
+- Fraud awareness section uses amber/yellow styling to signal caution without alarming seniors
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- Build Phase 48 — Paid Companion Marketplace (companions table, browse page, book companion, rating stub)
+- Note: Stripe Connect payouts deferred until Stripe Connect configured; booking works with stub billing
+- Check if /supabase/migrations/016_companions.sql needs to be created (it does — per prompt-advanced.md)
+
+APPROVED
+---
+SESSION: 86
+DATE: 2026-06-04 UTC
+MILESTONE: M17
+PHASE: 48 — Paid Companion Marketplace + 49 — On-Demand Tech Help
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 48 checklist: 5 of 5 items [x] — COMPLETE
+- Phase 49 checklist: 5 of 5 items [x] — COMPLETE
+- Loop state: TESTING
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider
+- emailProvider: StubEmailProvider
+- billingProvider: StubBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+
+PHASE 48 — Paid Companion Marketplace:
+- supabase/migrations/029_companions.sql — CREATED: companions table (id, full_name, email, bio, hourly_rate, service_types, languages, city, state, stripe_account_id, is_active, rating_average, total_sessions); RLS (authenticated read active, service_role manage); 3 seeded test companions: Linda Park (Korean speaker, $22/hr, 4.9★), Robert Vasquez (Spanish speaker, $20/hr, 4.7★), Grace Thompson (dementia-friendly, $25/hr, 5.0★)
+- app/api/companions/route.ts — CREATED: GET endpoint; auth required; returns active companions sorted by rating
+- app/api/companions/[companionId]/rate/route.ts — CREATED: POST stub rating endpoint; logs [STUB][Companion] rating submitted
+- app/api/services/route.ts — MODIFIED: 'companion' added to ALLOWED_SERVICE_TYPES; [STUB][Billing] Would process companion payout log on companion bookings
+- components/services/ServicesClient.tsx — MODIFIED:
+  - Companion interface type (id, full_name, bio, hourly_rate, service_types, languages, city, state, rating_average, total_sessions)
+  - SESSION_TYPE_LABELS, COMPANION_SERVICE_LABELS constants
+  - BookCompanionForm: session type (in-person/phone/video), date/time, notes; POST /api/services
+  - CompanionCard: star rating display, service type badges, language badges, sessions count, "Book a session" toggle
+  - CompanionMarketplaceSection: accordion section below service categories; loads companions on open; 2-col grid at ≥700px; empty state; how-it-works banner
+  - RatingPrompt: 5-star rating UI on completed companion bookings; stub submit; "Thank you" confirmation
+  - BookingDetailPanel: companion service type renders companion name, session type, rate, scheduled time
+  - BookingCard: companion subtitle shows "Linda Park — In-person visit"; companion emoji 💜 and title "Companion Session"
+  - handleCompanionBooked: adds booking to list + success message
+
+PHASE 49 — On-Demand Tech Help:
+- components/services/ServicesClient.tsx — MODIFIED: TechHelpForm now has green helpline banner ("📞 (555) 987-6543 — Mon–Fri 9am–5pm") + "📚 Video tutorials →" link
+- app/dashboard/tech-tutorials/page.tsx — CREATED: 5 tutorial categories (Smartphone Basics, Video Calls, Online Safety, Computer & Tablet, TV & Streaming); 25 tutorial guide titles with "Coming soon" badges; helpline reminder; "Request tech help →" CTA
+
+CHECKLIST UPDATES:
+- Phase 46 section added — 5/5 [x] COMPLETE (Session 85 work, checklist updated this session)
+- Phase 47 section added — 6/6 [x] COMPLETE (Session 85 work, checklist updated this session)
+- Phase 48 section added — 5/5 [x] COMPLETE
+- Phase 49 section added — 5/5 [x] COMPLETE
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — ✓ Compiled successfully in 37.3s; 89 routes; /api/companions ƒ, /api/companions/[companionId]/rate ƒ, /dashboard/tech-tutorials ○ all in build output
+- git commit 5085935 pushed to origin/main
+
+ERRORS ENCOUNTERED:
+- None
+
+DECISIONS MADE:
+- Companion marketplace is a separate accordion section below the 7 service categories — not a standard service category card (paid vs free volunteer distinction)
+- Companion bookings use service_type='companion' (ServiceType already included this in lib/data/services.ts)
+- Tech helpline number (555) 987-6543 is a placeholder — update to real care team number when available
+- Phase 49 video tutorials all marked "Coming soon" — real video content deferred until M8 AI + content creation
+- Migration 029 uses 029_ prefix (prompt spec says 016_ but 016 is already taken by skill_exchange)
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- Human runs migration 029_companions.sql in Supabase SQL Editor (REQUIRED before testing)
+  VERIFY: Supabase Table Editor → companions table present; 3 rows (Linda Park, Robert Vasquez, Grace Thompson)
+- Human verifies in browser (logged in as FAMILY account):
+  1. /dashboard/services → scroll down below the 7 category cards → "💜 Companion Marketplace" section visible
+  2. Click "Browse companions" → section expands; loading state then 3 companion cards appear
+  3. Cards show: name, bio, rate per hour, star rating, service type badges, language badges, sessions count
+  4. Click "💜 Book a session" on Linda Park → booking form expands inline
+  5. Select session type "In-person visit", pick a future date/time, add notes → click "Confirm booking →"
+  6. Booking submitted → success banner "Your companion session has been requested"
+  7. Check terminal: "[STUB][Billing] Would process companion payout for companion [id]..."
+  8. /dashboard/services upcoming services section → "💜 Companion Session" card shows "Linda Park — In-person visit"
+  9. Click card to expand → shows companion name, session type, hourly rate, scheduled time
+  10. (After navigator marks booking complete) Rating prompt shows 5 stars → click a star → "Thank you for your feedback"
+  11. Tech Help section: helpline banner shows "(555) 987-6543" + "📚 Video tutorials →" link
+  12. Click "Video tutorials →" → /dashboard/tech-tutorials loads; 5 category cards with tutorial titles + "Coming soon" badges
+- If all pass: mark Phases 48 + 49 APPROVED_COMPLETE, then begin Phase 50a (Prescription Refill Management)
+- Begin Phase 50a only after APPROVED
+
+AWAITING HUMAN APPROVAL

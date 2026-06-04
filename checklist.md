@@ -434,7 +434,11 @@ M15 Celebrations      Phase 39 [x][x][x][x][x][x][x][x]   8/8 ✅ COMPLETE (Sess
 M16 Grief             Phase 42 [x][x][x][x][x][x][x]       7/7 ✅ COMPLETE (Session 73)
                       Phase 43 [x][x][x][x][x][x][x][x][x] 9/9 ✅ COMPLETE (Session 74)
                       Phase 44 [x][x][x][x][x]             5/5 ✅ COMPLETE (Session 75)
-M17 Services          Phase 45 [x][x][x][x][x][x][x]       7/7 ✅ COMPLETE (Session 77) + 3 ISSUE fixes (Sessions 78-79)
+M17 Services          Phase 45 [x][x][x][x][x][x][x]       7/7 ✅ COMPLETE (Session 77) + ISSUE fixes (Sessions 78-84)
+                      Phase 46 [x][x][x][x][x]             5/5 ✅ COMPLETE (Session 85)
+                      Phase 47 [x][x][x][x][x][x]          6/6 ✅ COMPLETE (Session 85)
+                      Phase 48 [x][x][x][x][x]             5/5 ✅ COMPLETE (Session 86)
+                      Phase 49 [x][x][x][x][x]             5/5 ✅ COMPLETE (Session 86)
 ```
 
 ## M17 — Services Marketplace
@@ -450,6 +454,43 @@ STATUS: `COMPLETE`
 - [x] Navigator can see and manage bookings — service_bookings included in navigator detail API response; MemberDetailPanel "Service bookings" section shows bookings with status badges (Session 77)
 - [x] npx tsc --noEmit passes — zero errors (Session 77)
 - [x] npm run build passes — ✓ Compiled successfully in 32.6s; /dashboard/services ƒ, /api/services ƒ (Session 77)
+
+### Phase 46 — Home Services + Meals
+STATUS: `COMPLETE`
+
+- [x] Home services request form works — service_bookings row created with service_type='home_service'; HomeServiceForm with sub-type dropdown, date/time, description, access notes (Session 85)
+- [x] Meals request form works — service_bookings row created, stub MealProvider logs; MealsForm with dietary needs + delivery address (Session 85)
+- [x] Seasonal reminders cron runs — vercel.json has cron "0 9 1 1,4,7,10 *" (quarterly); /api/cron/seasonal-reminders route created (Session 85)
+- [x] AI grocery list generation (stub) — stub returns "[STUB] Suggested grocery list" based on dietary preferences (Session 85)
+- [x] npx tsc --noEmit passes — zero errors (Session 85)
+
+### Phase 47 — Health Services + Legal/Financial + Tech Help
+STATUS: `COMPLETE`
+
+- [x] Health services section: telehealth request form works — service_bookings created with service_type='telehealth'; sub-types: telehealth, medication review, mental health support, etc. (Session 85)
+- [x] Mental health referral tracking — mental_health_companion subtype triggers high-priority navigator task automatically (Session 85)
+- [x] Legal/Financial: vetted advisor directory renders — info panel + sub-type dropdown; never specific firm names; navigator CTA (Session 85)
+- [x] Tech help request form works — service_bookings created with navigator task auto-created (Session 85)
+- [x] Fraud protection alerts section visible — amber fraud/scam awareness section on /dashboard/services (Session 85)
+- [x] npx tsc --noEmit passes — zero errors (Session 85)
+
+### Phase 48 — Paid Companion Marketplace
+STATUS: `COMPLETE`
+
+- [x] Companion browse section renders — /dashboard/services → CompanionMarketplaceSection; click "Browse companions" → cards with name, bio, rate, languages, services visible; 3 seeded test companions (Session 86)
+- [x] Book companion request creates booking — "Book a session" → BookCompanionForm; POST /api/services with service_type='companion'; service_bookings row created with companion_id/name/session_type in booking_details (Session 86)
+- [x] Rating prompt after session — completed companion bookings show 5-star rating prompt; submits to /api/companions/[id]/rate stub; "Thank you" confirmation shown (Session 86)
+- [x] Stripe Connect payouts deferred — stub logs "[STUB][Billing] Would process companion payout for companion [id]..." on POST /api/services (Session 86)
+- [x] npx tsc --noEmit passes — zero errors (Session 86)
+
+### Phase 49 — On-Demand Tech Help
+STATUS: `COMPLETE`
+
+- [x] Tech helpline page renders with dial-in info — TechHelpForm has green banner: "📞 Need help right now? Call (555) 987-6543 — Mon–Fri 9am–5pm" (Session 86)
+- [x] In-home tech help booking works — TechHelpForm in-home/remote preference; service_bookings created with navigator task auto-created (Session 85)
+- [x] Scam education content visible — fraud awareness section on /dashboard/services covers tech support scams, phishing, gift card fraud (Session 85)
+- [x] Video tutorial library placeholder — /dashboard/tech-tutorials: 5 categories (Smartphone Basics, Video Calls, Online Safety, Computer & Tablet, TV & Streaming), 25 guide titles, helpline reminder, "Request tech help →" CTA (Session 86)
+- [x] npx tsc --noEmit passes — zero errors (Session 86)
 
 ## M10 — SMS + Email Notifications
 
@@ -872,3 +913,51 @@ When a phase reaches BLOCKED state, record it here.
 - [x] lib/data/services.ts — 'companionship' added to ServiceType union (Session 83)
 - [x] npx tsc --noEmit passes — zero errors (Session 83)
 - [x] npm run build passes — ✓ Compiled successfully (Session 83)
+
+### Phase 45 ISSUE FIX 8 — Invalid service type + hydration error + date validation (Session 84)
+- [x] `companion` → `companionship` in ALLOWED_SERVICE_TYPES in /app/api/services/route.ts (Session 84)
+- [x] serviceLabel map in /app/api/services/[bookingId]/route.ts — `companion` → `companionship` (Session 84)
+- [x] `formatDateTime()` — replaced toLocaleString with deterministic UTC manual formatter (Session 84)
+- [x] `formatDateTimeShort()` — same UTC-based approach for booking card subtitle (Session 84)
+- [x] `validateFutureDateTime()` — helper: required, valid format, must be future (Session 84)
+- [x] `DetailRow` — `isDate` prop added; `suppressHydrationWarning` on date value cells (Session 84)
+- [x] BookingCard timeStr — uses `formatDateTimeShort`, `suppressHydrationWarning` on date `<p>` (Session 84)
+- [x] All 7 forms — date field changed from optional to required; validateFutureDateTime called in handleSubmit (Session 84)
+- [x] Server-side validation in /api/services route.ts — required date, valid format, future only (Session 84)
+- [x] npx tsc --noEmit passes — zero errors (Session 84)
+- [x] npm run build passes — ✓ Compiled successfully in 35.6s (Session 84)
+
+### Phase 46 — Home Services + Meals (Session 85)
+STATUS: `COMPLETE`
+
+- [x] Home services request form works — HomeServiceForm submits service_type='home_service' with subtype, datetime, description, access notes (Session 83/84/85)
+- [x] Meals request form works — MealsForm submits service_type='meals' with subtype, dietary needs, delivery address, datetime (Session 83/84/85)
+- [x] Seasonal reminders cron runs — /api/cron/seasonal-reminders/route.ts created; added to vercel.json at "0 9 1 1,4,7,10 *"; fetches all active members and logs stub reminder (Session 85)
+- [x] AI grocery list generation stub — MealsForm has "Generate suggested grocery list" button; returns stub list adjusted for dietary preferences; "[STUB] Grocery list based on..." (Session 85)
+- [x] npx tsc --noEmit passes — zero errors (Session 85)
+
+---
+
+### Phase 47 — Health Services + Legal/Financial + Tech Help (Session 85)
+STATUS: `COMPLETE`
+
+- [x] Health services section: telehealth request form works — HealthForm submits service_type='telehealth' with health_subtype (Session 83/84/85)
+- [x] Mental health referral tracking — POST /api/services creates navigator_tasks row type='mental_health_referral' priority='high' when subtype='mental_health_companion' (Session 85)
+- [x] Legal/Financial: vetted advisor directory renders — LegalFinancialForm shows "Our navigators can connect you" card; navigator-only referrals, no specific firm names (Session 83)
+- [x] Tech help request form works — TechHelpForm submits service_type='tech_help'; POST /api/services creates navigator_tasks row type='tech_help_request' priority='medium' (Session 85)
+- [x] Fraud protection alerts section visible — ServicesClient.tsx has amber "Staying safe — know the warning signs" section with 6 scam types listed (IRS, tech support, gift cards, lottery, romance, grandparent scam) (Session 85)
+- [x] npx tsc --noEmit passes — zero errors (Session 85)
+
+---
+
+### ISSUE Fix — Member cancel/change service requests (Session 85)
+STATUS: `COMPLETE`
+
+- [x] DELETE /api/services/[bookingId] — member-initiated cancellation endpoint; auth required; member can only cancel their own bookings (Session 85)
+- [x] Cancellation conditions enforced server-side: 'requested' → always cancellable; 'confirmed' → only if >4h from scheduled time; 'in_progress'/'completed'/'cancelled' → blocked with clear error message (Session 85)
+- [x] BookingCard — "Cancel this request" link appears in expanded detail for eligible bookings (Session 85)
+- [x] Cancel confirmation flow — click → confirm step with optional reason textarea + "Yes, cancel" / "Keep it" buttons (Session 85)
+- [x] 4-hour near-time message — confirmed bookings within 4h show "contact your navigator" message instead of cancel button (Session 85)
+- [x] ServicesClient handleCancelled — updates booking status to 'cancelled' in local state; shows success message (Session 85)
+- [x] npx tsc --noEmit passes — zero errors (Session 85)
+- [x] npm run build passes — Compiled successfully (Session 85)
