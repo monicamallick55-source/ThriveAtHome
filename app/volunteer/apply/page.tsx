@@ -1,21 +1,12 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
-import type { Metadata } from 'next'
+import { VOLUNTEER_SUBTYPE_GROUPS } from '@/lib/services/serviceTypes'
 
 const LANGUAGES = ['English', 'Spanish', 'Mandarin', 'Cantonese', 'Vietnamese', 'Korean', 'Tagalog', 'Hindi', 'Arabic', 'Portuguese', 'Russian', 'Polish', 'Other']
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 const HOURS_OPTIONS = ['1–2 hours', '3–5 hours', '5–10 hours', '10+ hours']
-const SERVICE_TYPES = [
-  { value: 'phone_call', label: 'Phone call companion' },
-  { value: 'in_person_visit', label: 'In-person visit' },
-  { value: 'virtual_event', label: 'Virtual events' },
-  { value: 'grocery_help', label: 'Grocery help' },
-  { value: 'walking_companion', label: 'Walking companion' },
-  { value: 'reading_aloud', label: 'Reading aloud' },
-  { value: 'tech_help', label: 'Tech help' },
-]
-const DRIVING_SERVICE_TYPES = ['in_person_visit', 'grocery_help', 'walking_companion']
+const DRIVING_SERVICE_TYPES = ['medical_transport', 'grocery_transport', 'social_transport']
 const CONTACT_METHODS = [
   { value: 'email', label: 'Email' },
   { value: 'phone', label: 'Phone call' },
@@ -344,15 +335,32 @@ export default function VolunteerApplyPage() {
             </div>
           </div>
 
-          {/* Service types */}
+          {/* Service types — grouped by category */}
           <div style={sectionStyle}>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '26px', color: 'var(--color-navy)', fontWeight: 500, marginBottom: '8px' }}>Types of support</h2>
-            <p style={{ fontFamily: 'var(--font-body)', fontSize: '16px', color: 'var(--color-text-secondary)', marginBottom: '20px' }}>What kinds of visits are you comfortable doing? Select all that apply.</p>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-              {SERVICE_TYPES.map(st => (
-                <button key={st.value} type="button" onClick={() => setField('service_types', toggleItem(form.service_types, st.value))} style={pillStyle(form.service_types.includes(st.value))} aria-pressed={form.service_types.includes(st.value)}>
-                  {st.label}
-                </button>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '16px', color: 'var(--color-text-secondary)', marginBottom: '24px' }}>
+              Select all the types of support you are willing and able to provide. This helps us match you with seniors who need exactly your skills.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              {VOLUNTEER_SUBTYPE_GROUPS.map(group => (
+                <div key={group.category}>
+                  <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 700, color: 'var(--color-navy)', marginBottom: '10px' }}>
+                    {group.emoji} {group.category}
+                  </p>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                    {group.subtypes.map(st => (
+                      <button
+                        key={st.value}
+                        type="button"
+                        onClick={() => setField('service_types', toggleItem(form.service_types, st.value))}
+                        style={pillStyle(form.service_types.includes(st.value))}
+                        aria-pressed={form.service_types.includes(st.value)}
+                      >
+                        {st.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           </div>

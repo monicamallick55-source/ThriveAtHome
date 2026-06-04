@@ -1154,6 +1154,36 @@ export interface Database {
           { foreignKeyName: 'service_bookings_member_id_fkey'; columns: ['member_id']; referencedRelation: 'members'; referencedColumns: ['id'] }
         ]
       }
+      service_providers: {
+        Row: {
+          id: string
+          created_at: string
+          full_name: string
+          company_name: string | null
+          phone: string | null
+          email: string | null
+          service_types: string[]
+          city: string | null
+          state: string | null
+          is_active: boolean
+          rating_average: number | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          full_name: string
+          company_name?: string | null
+          phone?: string | null
+          email?: string | null
+          service_types?: string[]
+          city?: string | null
+          state?: string | null
+          is_active?: boolean
+          rating_average?: number | null
+        }
+        Update: Partial<Database['public']['Tables']['service_providers']['Insert']>
+        Relationships: []
+      }
       grief_support_requests: {
         Row: {
           id: string

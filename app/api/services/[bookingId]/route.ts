@@ -24,13 +24,15 @@ export async function PATCH(
   const body = await req.json().catch(() => null)
   if (!body) return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
 
-  const { status, navigator_note, cancel_reason, dispatch_type, dispatch_details, volunteer_id } = body as {
+  const { status, navigator_note, cancel_reason, dispatch_type, dispatch_details, volunteer_id, action, scheduled_time } = body as {
     status?: string
     navigator_note?: string
     cancel_reason?: string
     dispatch_type?: string
     dispatch_details?: Record<string, string>
     volunteer_id?: string
+    action?: string  // 'reassign' | 'reschedule'
+    scheduled_time?: string
   }
 
   if (!status || !VALID_STATUSES.includes(status as BookingStatus)) {
@@ -62,6 +64,11 @@ export async function PATCH(
     updates.notes = `${existing}[Navigator ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}] ${navigator_note}`
   }
 
+  if (action === 'reschedule' && scheduled_time) {
+    const existingDetails = (booking.booking_details as Record<string, unknown>) ?? {}
+    updates.booking_details = { ...existingDetails, scheduled_time }
+  }
+
   if (dispatch_type && dispatch_details) {
     const existingDetails = (booking.booking_details as Record<string, unknown>) ?? {}
     updates.booking_details = { ...existingDetails, dispatch_type, ...dispatch_details }
@@ -88,36 +95,65 @@ export async function PATCH(
     return NextResponse.json({ error: updateErr.message }, { status: 500 })
   }
 
-  // Push Realtime notification to family on confirm/complete
-  if (status === 'confirmed' || status === 'completed') {
-    const serviceLabel: Record<string, string> = {
-      transport: 'Transport',
-      home_service: 'Home Services',
-      meals: 'Meals',
-      telehealth: 'Health Services',
-      legal_financial: 'Legal & Financial',
-      tech_help: 'Tech Help',
-      companion: 'Companion',
-    }
-    const label = serviceLabel[booking.service_type] ?? booking.service_type
-    const title = status === 'confirmed'
-      ? `${label} request confirmed`
-      : `${label} service completed`
+  // Push Realtime notification based on action and status
+  const serviceLabel: Record<string, string> = {
+    transport: 'Transport',
+    home_service: 'Home Services',
+    meals: 'Meals',
+    telehealth: 'Health Services',
+    legal_financial: 'Legal & Financial',
+    tech_help: 'Tech Help',
+    companion: 'Companion',
+  }
+  const label = serviceLabel[booking.service_type] ?? booking.service_type
+
+  if (action === 'reschedule' && scheduled_time) {
+    const timeLabel = new Date(scheduled_time).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'UTC' })
+    await pushRealtimeNotification({
+      type: 'service_booking_update',
+      memberId: booking.member_id as string,
+      title: `${label} rescheduled`,
+      body: `Your ${label.toLowerCase()} has been rescheduled to ${timeLabel}.`,
+      severity: 'info',
+    })
+  } else if (status === 'confirmed' && action === 'reassign') {
+    const newName = dispatch_details?.assigned_volunteer || dispatch_details?.assigned_provider || null
     const scheduledTimeStr = dispatch_details?.scheduled_time
+    const timeLabel = scheduledTimeStr
+      ? new Date(scheduledTimeStr).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'UTC' })
+      : null
+    await pushRealtimeNotification({
+      type: 'service_booking_update',
+      memberId: booking.member_id as string,
+      title: `${label} reassigned`,
+      body: `Your ${label.toLowerCase()} has been reassigned${newName ? ` to ${newName}` : ''}${timeLabel ? ` — still scheduled for ${timeLabel}` : ''}.`,
+      severity: 'info',
+    })
+  } else if (status === 'confirmed' || status === 'completed') {
+    const scheduledTimeStr = dispatch_details?.scheduled_time || scheduled_time
     const timeLabel = scheduledTimeStr
       ? new Date(scheduledTimeStr).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'UTC' })
       : booking.requested_for
         ? new Date(booking.requested_for as string).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' })
         : null
+    const title = status === 'confirmed' ? `${label} request confirmed` : `${label} service completed`
     const body_text = status === 'confirmed'
       ? `Your ${label.toLowerCase()} request has been confirmed${timeLabel ? ` for ${timeLabel}` : ''}.`
       : `Your ${label.toLowerCase()} service has been marked as completed.`
-
     await pushRealtimeNotification({
       type: 'service_booking_update',
       memberId: booking.member_id as string,
       title,
       body: body_text,
+      severity: 'info',
+    })
+  } else if (status === 'cancelled') {
+    const reason = cancel_reason ? ` Reason: ${cancel_reason}.` : ''
+    await pushRealtimeNotification({
+      type: 'service_booking_update',
+      memberId: booking.member_id as string,
+      title: `${label} request cancelled`,
+      body: `Your ${label.toLowerCase()} request has been cancelled.${reason} Please contact your navigator if you need to rebook.`,
       severity: 'info',
     })
   }

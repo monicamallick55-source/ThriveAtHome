@@ -27,6 +27,7 @@ export type ServiceType =
   | 'legal_financial'
   | 'tech_help'
   | 'companion'
+  | 'companionship'
 
 export async function getServiceBookingsForMember(
   memberId: string,

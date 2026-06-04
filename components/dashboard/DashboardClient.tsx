@@ -39,6 +39,108 @@ const SERVICE_LABELS: Record<string, string> = {
   companion: 'Companion',
 }
 
+function statusBadge(status: string): { color: string; bg: string; label: string } {
+  if (status === 'confirmed') return { color: '#1d4ed8', bg: '#dbeafe', label: 'Confirmed' }
+  if (status === 'in_progress') return { color: '#92400e', bg: '#fef3c7', label: 'In progress' }
+  if (status === 'completed') return { color: '#065f46', bg: '#d1fae5', label: 'Completed' }
+  if (status === 'cancelled') return { color: '#6b7280', bg: '#f3f4f6', label: 'Cancelled' }
+  return { color: '#c2410c', bg: '#fff3e0', label: 'Requested' }
+}
+
+function warmServiceMessage(b: ServiceBooking): string {
+  const details = (b.booking_details ?? {}) as Record<string, string | undefined>
+  const assignedName = details.assigned_volunteer || details.assigned_provider || null
+  const scheduledTime = details.scheduled_time || b.requested_for
+  const timeStr = scheduledTime
+    ? new Date(scheduledTime).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'UTC' })
+    : null
+  const label = SERVICE_LABELS[b.service_type] ?? b.service_type
+
+  if (b.status === 'confirmed' && assignedName) {
+    const lastName = assignedName.trim().split(' ')
+    const privateName = lastName.length > 1
+      ? `${lastName[0]} ${lastName[lastName.length - 1][0]}.`
+      : lastName[0]
+    return `Your volunteer ${privateName} will assist with your ${label.toLowerCase()}${timeStr ? ` on ${timeStr}` : ''}.`
+  }
+  if (b.status === 'confirmed') {
+    return `Your ${label.toLowerCase()} has been confirmed${timeStr ? ` for ${timeStr}` : ''}. Your navigator will be in touch with details.`
+  }
+  return `We are arranging your ${label.toLowerCase()}${timeStr ? ` for ${timeStr}` : ''}. Your navigator will confirm shortly.`
+}
+
+function ServiceBookingCard({ b }: { b: ServiceBooking }) {
+  const [expanded, setExpanded] = useState(false)
+  const details = (b.booking_details ?? {}) as Record<string, string | undefined>
+  const badge = statusBadge(b.status)
+  const isActive = b.status !== 'completed' && b.status !== 'cancelled'
+
+  return (
+    <div style={{ backgroundColor: 'white', border: '1px solid var(--color-warm-grey)', borderRadius: 'var(--radius-xl)', boxShadow: 'var(--shadow-card)', overflow: 'hidden' }}>
+      {/* Summary row */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '16px 20px' }}>
+        <span style={{ fontSize: '24px', flexShrink: 0 }} aria-hidden="true">{SERVICE_EMOJIS[b.service_type] ?? '📋'}</span>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p style={{ fontFamily: 'var(--font-display)', fontSize: '16px', fontWeight: 500, color: 'var(--color-navy)', margin: 0 }}>
+            {SERVICE_LABELS[b.service_type] ?? b.service_type}
+          </p>
+          {isActive && (
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: '3px 0 0', lineHeight: 1.4 }}>
+              {warmServiceMessage(b)}
+            </p>
+          )}
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px', flexShrink: 0 }}>
+          <span style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: badge.color, backgroundColor: badge.bg, borderRadius: '20px', padding: '3px 10px' }}>
+            {badge.label}
+          </span>
+          <button
+            type="button"
+            onClick={() => setExpanded(p => !p)}
+            style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-teal)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontWeight: 500 }}
+          >
+            {expanded ? 'Hide details ▲' : 'View details ▼'}
+          </button>
+        </div>
+      </div>
+
+      {/* Expanded details */}
+      {expanded && (
+        <div style={{ borderTop: '1px solid var(--color-warm-grey)', padding: '14px 20px', backgroundColor: '#fafaf8', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          {b.requested_for && (
+            <DetailRow label="Requested for" value={new Date(b.requested_for).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'UTC' })} />
+          )}
+          {details.scheduled_time && (
+            <DetailRow label="Scheduled" value={new Date(details.scheduled_time).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'UTC' })} />
+          )}
+          {details.pickup_address && <DetailRow label="Pickup" value={details.pickup_address} />}
+          {details.destination && <DetailRow label="Destination" value={details.destination} />}
+          {details.description && <DetailRow label="Details" value={details.description} />}
+          {details.health_subtype && <DetailRow label="Service type" value={details.health_subtype} />}
+          {details.arrangement && <DetailRow label="Arrangement" value={details.arrangement} />}
+          {details.assigned_volunteer && (() => {
+            const av = details.assigned_volunteer
+            const parts = av.trim().split(' ')
+            const privateName = parts.length > 1 ? `${parts[0]} ${parts[parts.length - 1][0]}.` : parts[0]
+            return <DetailRow label="Assigned volunteer" value={privateName} />
+          })()}
+          {details.assigned_provider && <DetailRow label="Assigned provider" value={details.assigned_provider} />}
+          {b.notes && <DetailRow label="Navigator note" value={b.notes} />}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div style={{ display: 'flex', gap: '8px', fontFamily: 'var(--font-body)', fontSize: '13px' }}>
+      <span style={{ color: 'var(--color-text-secondary)', minWidth: '130px', flexShrink: 0 }}>{label}</span>
+      <span style={{ color: 'var(--color-text-primary)', fontWeight: 500 }}>{value}</span>
+    </div>
+  )
+}
+
 function ScheduledServicesSection({ bookings }: { bookings: ServiceBooking[] }) {
   if (bookings.length === 0) return null
   return (
@@ -53,22 +155,7 @@ function ScheduledServicesSection({ bookings }: { bookings: ServiceBooking[] }) 
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {bookings.slice(0, 3).map((b) => (
-          <div key={b.id} style={{ backgroundColor: 'white', border: '1px solid var(--color-warm-grey)', borderRadius: 'var(--radius-xl)', padding: '16px 20px', boxShadow: 'var(--shadow-card)', display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <span style={{ fontSize: '24px', flexShrink: 0 }} aria-hidden="true">{SERVICE_EMOJIS[b.service_type] ?? '📋'}</span>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ fontFamily: 'var(--font-display)', fontSize: '16px', fontWeight: 500, color: 'var(--color-navy)', margin: 0 }}>
-                {SERVICE_LABELS[b.service_type] ?? b.service_type}
-              </p>
-              {b.requested_for && (
-                <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-muted)', margin: '2px 0 0' }}>
-                  {new Date(b.requested_for).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' })}
-                </p>
-              )}
-            </div>
-            <span style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#f8961e', backgroundColor: '#fff3e0', borderRadius: '20px', padding: '3px 10px', flexShrink: 0 }}>
-              {b.status.charAt(0).toUpperCase() + b.status.slice(1).replace('_', ' ')}
-            </span>
-          </div>
+          <ServiceBookingCard key={b.id} b={b} />
         ))}
       </div>
     </section>

@@ -9,18 +9,43 @@
 
 ---
 
+## STRATEGIC VISION
+
+**ThriveAtHome is a consumer brand first.** Families trust ThriveAtHome. Partners use ThriveAtHome. The brand always belongs to ThriveAtHome.
+
+### Brand Strategy
+- **Own the consumer relationship end-to-end** — families subscribe to ThriveAtHome directly, not through an agency
+- **B2B partners amplify, never own** — employers, agencies, and health plans bring members TO ThriveAtHome, but the family's loyalty stays with the ThriveAtHome brand
+- **White-label is available but controlled** — agencies can co-brand the platform (Phase 60) but ThriveAtHome is always credited as "Powered by ThriveAtHome"
+- **Never white-label to direct competitors** — no company offering the same senior care AI service can license the platform to compete against ThriveAtHome under their own brand
+
+### Launch Sequence (aligned with brand vision)
+1. **Months 1–3:** 20 real families, manually enrolled, no charge or $1/mo — learn what actually matters
+2. **Months 4–6:** Charge real prices, get to $3K–$10K MRR, collect testimonials
+3. **Months 7–12:** First employer pilot, local senior center partnerships, press outreach
+4. **Year 2:** First employer contract, first Medicare Advantage conversation, hire first navigator
+5. **Year 3:** Medicare Advantage contract signed, 10+ employer clients, consider Series A
+
+### B2B Model (agencies use ThriveAtHome, families trust ThriveAtHome)
+B2B partners are channels that bring families to ThriveAtHome — they do NOT own the member relationship.
+The distinction: **agencies use ThriveAtHome. Families trust ThriveAtHome.**
+
+---
+
 ## SCOPE AND BUILD ORDER
 
-Build order is prioritised by business impact for early users:
+Build order is prioritised by consumer value first, then B2B enablement:
 
-| Milestone | Phases | Delivers | Cost |
-|-----------|--------|---------|------|
-| M13 — Volunteer Network | 29–33 | Application, matching, scheduling, student portal, VSO integration | Free (Checkr ~$30/check when volunteers join) |
-| M14 — Community Features | 34–38 | Cultural circles, virtual events, skill exchange, interest groups, benefits finder | Free |
-| M15 — Celebrations & Life Story | 39–41 | Birthday arcs, milestone recognition, life story archive | Free (physical goods deferred) |
-| M16 — Grief & Transitions | 42–44 | Grief circles, life transition pathways, professional referral network | Free |
-| M17 — Services Marketplace | 45–50 | Transport, home services, meals, health services, legal/financial, tech help | Free to build; services cost money to use |
-| M18 — Enterprise | 51–55 | Employer portal, outcomes dashboard, university partnerships, Medicare Advantage | Free to build |
+| Milestone | Phases | Delivers | Brand Impact |
+|-----------|--------|---------|-------------|
+| M13 — Volunteer Network | 29–33 | Human connection layer — what makes ThriveAtHome irreplaceable | High — drives retention and word of mouth |
+| M14 — Community Features | 34–38 | Cultural circles, events, skill exchange, benefits finder | High — community drives long-term engagement |
+| M15 — Celebrations & Life Story | 39–41 | Emotional depth — Memory Book, birthday arcs, life archive | Very High — most emotionally sticky features |
+| M16 — Grief & Transitions | 42–44 | Grief circles, life transition support, professional referrals | High — builds trust in hardest moments |
+| M17 — Services Marketplace | 45–50 | Practical daily utility — transport, meals, tech, health, legal | High — makes platform practically essential |
+| M18 — Enterprise | 51–55 | Employer portal, outcomes dashboard, Medicare Advantage API | Revenue — B2B channels that amplify consumer growth |
+| M19 — Care Industry | 59–62 | Agency portal, white-label, clinical docs, multi-location | Revenue — agencies bring members to ThriveAtHome |
+| M20 — Community Orgs | 63–66 | Villages, AAAs, senior centers, network federation (DEFERRED) | Revenue — mission-aligned orgs refer members |
 
 ---
 
@@ -33,6 +58,12 @@ Build order is prioritised by business impact for early users:
 **New placeholder pages** — any route not in the current app needs a placeholder first, then the real page. Check `/app/` before creating new routes.
 
 **Realtime** — use the existing `push-notification` Edge Function for all new notification types. The `notif_type` enum already includes `volunteer_matched`, `celebration_upcoming`, and `grief_support_assigned`.
+
+**Brand integrity rule** — every page, notification, email, and PDF must display the ThriveAtHome brand. When building B2B portals (employer, agency, university, nonprofit): the portal is "powered by ThriveAtHome" — never invisible. Family-facing pages always show ThriveAtHome branding even when a partner has co-branding configured (Phase 60). The only exception is the white-label option in Phase 60 where agencies pay for co-branding rights.
+
+**B2B portals are admin tools, not consumer products** — employer portals, agency portals, and university portals are for staff/admin users only. Seniors and their families always use the standard ThriveAtHome consumer interface. Never build a separate "agency version" of the family dashboard — there is one family dashboard, one consumer brand, one product.
+
+**Member ownership** — every member record belongs to ThriveAtHome, not to the referring agency or employer. If an agency stops using ThriveAtHome, their members' accounts remain active and the family relationship continues. Contracts must reflect this.
 
 ---
 
@@ -697,6 +728,9 @@ PHASE 38 CHECKLIST
 [ ] /employers — real page replaces placeholder
     VERIFY: Navigate to /employers (logged out)
     PASS: Employer landing page loads with value proposition and demo request form
+         Headline: "Give your caregiving employees the peace of mind they deserve"
+         Clear message: employees get ThriveAtHome subscriptions — the ThriveAtHome brand,
+         not a generic "employee benefit platform"
 
 [ ] Demo request form submits
     VERIFY: Fill in and submit demo request form
@@ -705,6 +739,11 @@ PHASE 38 CHECKLIST
 [ ] /employer-admin page exists (placeholder for now)
     VERIFY: Navigate to /employer-admin
     PASS: Coming soon with "Contact us to set up your employer account"
+
+[ ] Brand integrity: employer landing page always references ThriveAtHome by name
+    VERIFY: Check /employers page for brand references
+    PASS: Page clearly states employees will receive ThriveAtHome subscriptions —
+          never described as a white-label or generic benefit tool
 
 [ ] npx tsc --noEmit passes
 ```
@@ -1141,6 +1180,538 @@ PHASE 49 CHECKLIST
 
 ---
 
+### PHASE 50a — Prescription Refill Management
+
+**What this builds:** Automated prescription refill detection and coordination — one of the most practically valuable automations for seniors who may forget to reorder medications.
+
+**Checklist:**
+```
+PHASE 50a CHECKLIST
+[ ] Refill intent detection in call transcript processing
+    VERIFY: Process transcript containing "running low on my medication" or "almost out of pills"
+    PASS: medication_supply alert created with severity 'concern', navigator task created
+
+[ ] 28-day refill cycle prediction
+    VERIFY: Member with diabetes medication flagged, trigger prediction cron
+    PASS: If last refill mention was 23+ days ago, informational alert created: "Margaret may need a Metformin refill soon"
+
+[ ] Refill section in /dashboard/services
+    VERIFY: Navigate to /dashboard/services → Medication & Refills section
+    PASS: Shows current medications from member profile, last refill flag date, "Request refill coordination" button
+
+[ ] Navigator refill coordination panel
+    VERIFY: Open member detail panel in navigator console
+    PASS: Medications section shows current meds, last refill flag, "Coordinate refill" button that creates task and notifies family
+
+[ ] Pharmacy stub integration
+    VERIFY: Click "Coordinate refill" for a medication
+    PASS: Logs [STUB][Pharmacy] Would initiate refill for [medication] for member [id]
+
+[ ] npx tsc --noEmit passes
+```
+
+---
+
+### PHASE 50b — Gift Sending Platform
+
+**What this builds:** A way for seniors to send gifts to family members, coordinated through the platform — one of the most emotionally meaningful features for senior dignity and connection.
+
+**New table (`/supabase/migrations/028_gifts.sql`):**
+```sql
+CREATE TABLE gift_orders (
+  id                uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at        timestamptz DEFAULT now() NOT NULL,
+  member_id         uuid NOT NULL REFERENCES members(id) ON DELETE CASCADE,
+  occasion          text NOT NULL,
+  recipient_name    text NOT NULL,
+  gift_type         text NOT NULL,
+  -- flowers, food, gift_card, physical_card, celebration_note, gift_basket
+  gift_details      jsonb NOT NULL DEFAULT '{}',
+  amount_cents      int,
+  platform_fee_cents int,
+  status            text NOT NULL DEFAULT 'pending',
+  -- pending, processing, shipped, delivered, cancelled
+  tracking_info     text,
+  ordered_by        uuid REFERENCES family_members(id),
+  created_from      text NOT NULL DEFAULT 'family_dashboard'
+  -- family_dashboard, aria_intent, navigator
+);
+ALTER TABLE gift_orders ENABLE ROW LEVEL SECURITY;
+```
+
+**Checklist:**
+```
+PHASE 50b CHECKLIST
+[ ] Gift intent detection in call processing
+    VERIFY: Process transcript containing "I want to send my daughter flowers for her birthday"
+    PASS: gift_intent flag created, navigator task created, family notification pushed:
+          "Margaret mentioned wanting to send a gift — would you like to help arrange this?"
+
+[ ] Gift marketplace in /dashboard
+    VERIFY: Navigate to /dashboard → "Send a gift" section
+    PASS: 5 gift categories visible: Flowers & Plants, Food & Treats, Gift Cards,
+          Handwritten Card, Celebration Note
+
+[ ] Gift order creates correctly
+    VERIFY: Select Flowers, choose amount, enter recipient name, submit
+    PASS: gift_orders row created, stub logs [STUB][Goods] Would order flowers for [recipient]
+
+[ ] Physical card flow
+    VERIFY: Select Handwritten Card, type message, submit
+    PASS: Order created at $4.99, stub logs [STUB][Goods] Would print and mail card to [address]
+
+[ ] Celebration note (free)
+    VERIFY: Select Celebration Note, type message
+    PASS: Digital message generated as shareable link or downloadable PDF, no charge
+
+[ ] Platform commission tracked
+    VERIFY: Check gift_orders row after flower order
+    PASS: platform_fee_cents = amount_cents * 0.15
+
+[ ] Delivery tracking on dashboard
+    VERIFY: After gift order, check family dashboard
+    PASS: "Gift to Emma — In transit" visible in a gifts section
+
+[ ] npx tsc --noEmit passes
+```
+
+---
+
+### PHASE 50c — Family-Initiated Celebrations
+
+**What this builds:** Family members can request special occasion celebrations for their senior, with three service tiers handled by platform staff.
+
+**Checklist:**
+```
+PHASE 50c CHECKLIST
+[ ] Special occasion request form on /dashboard/celebrations
+    VERIFY: Navigate to /dashboard/celebrations → "Plan a special occasion"
+    PASS: Form shows occasion types: Birthday, Anniversary, Homecoming, Recovery Milestone, Holiday
+
+[ ] Three coordination tiers displayed clearly
+    VERIFY: Select Birthday occasion
+    PASS: Three options shown with pricing:
+          Digital (free): Special personalized Aria call + digital family card
+          Enhanced ($25): Digital + volunteer visit + gift coordination
+          Premier ($75): Enhanced + video family gathering + physical memory book
+
+[ ] Digital tier — personalized Aria call
+    VERIFY: Book Digital tier for Margaret's birthday
+    PASS: Special call scheduled, Aria prompt updated to reference life story entries:
+          "I heard you loved dancing at the Palomar Ballroom — what a wonderful life, Margaret. Happy 80th birthday!"
+
+[ ] Family coordination room
+    VERIFY: Enhanced or Premier tier booked
+    PASS: All linked family members see coordination room: contribute messages, coordinate visits, collectively fund gift
+
+[ ] Stripe payment for Enhanced and Premier
+    VERIFY: Book Enhanced tier, complete payment
+    PASS: $25 Stripe payment processed, navigator task created for logistics
+
+[ ] Navigator receives logistics task
+    VERIFY: Book Premier tier
+    PASS: Navigator sees task: "Coordinate Premier celebration for Margaret — [date]. Arrange: volunteer visit, video gathering, memory book."
+
+[ ] npx tsc --noEmit passes
+```
+
+---
+
+### PHASE 50d — Family Events Calendar & Senior Gift-Giving
+
+**What this builds:** A family events calendar so Aria knows about upcoming family occasions and can remind seniors — and help them send gifts or cards.
+
+**New table (`/supabase/migrations/029_family_events.sql`):**
+```sql
+CREATE TABLE family_events (
+  id                      uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at              timestamptz DEFAULT now() NOT NULL,
+  member_id               uuid NOT NULL REFERENCES members(id) ON DELETE CASCADE,
+  created_by              uuid REFERENCES family_members(id),
+  event_title             text NOT NULL,
+  event_date              date NOT NULL,
+  event_type              text NOT NULL DEFAULT 'other',
+  -- birthday, anniversary, graduation, travel, party, holiday, new_baby, wedding, other
+  person_name             text NOT NULL,
+  notes                   text,
+  remind_senior_days_before int NOT NULL DEFAULT 7,
+  reminder_sent_at        timestamptz,
+  is_recurring            boolean NOT NULL DEFAULT false,
+  recurrence_pattern      text
+  -- annual (for birthdays, anniversaries)
+);
+ALTER TABLE family_events ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "family_all_own_events" ON family_events FOR ALL
+  USING (EXISTS (
+    SELECT 1 FROM family_members fm
+    WHERE fm.member_id = family_events.member_id
+    AND fm.supabase_auth_id = auth.uid()
+  ));
+```
+
+**Checklist:**
+```
+PHASE 50d CHECKLIST
+[ ] Migration 029_family_events.sql runs without errors
+    VERIFY: family_events table visible in Supabase
+    PASS: Table present
+
+[ ] Family events calendar tab on /dashboard/family
+    VERIFY: Navigate to /dashboard/family → Events tab
+    PASS: Calendar view shows upcoming family events with add/edit/delete
+
+[ ] Add a family event
+    VERIFY: Add "Emma's 16th Birthday" on June 15, recurring annual
+    PASS: family_events row created with event_type='birthday', is_recurring=true
+
+[ ] Aria mentions event in check-in call (7 days before)
+    VERIFY: Set event date to 7 days from today, trigger celebrations cron
+    PASS: Call prompt for next check-in updated to include: "I wanted to remind you that Emma's 16th birthday is coming up Saturday — would you like to send her something special?"
+
+[ ] Gift prompt shown on family dashboard
+    VERIFY: 7 days before family event, reload dashboard
+    PASS: Gentle prompt visible: "Emma's birthday is in 7 days — help Margaret send something special" with "Send a gift" button
+
+[ ] Travel awareness adjusts Aria tone
+    VERIFY: Add family event type='travel' for family member, trigger cron
+    PASS: Aria call prompt updated to include awareness that [family member] is traveling
+
+[ ] New baby congratulations
+    VERIFY: Add event type='new_baby'
+    PASS: Aria call includes congratulations: "Congratulations on the new arrival! How does it feel to be a great-grandmother?"
+
+[ ] Recurring events auto-advance annually
+    VERIFY: Check that annual events roll forward after their date passes
+    PASS: Next year's date automatically calculated for is_recurring=true events
+
+[ ] npx tsc --noEmit passes
+```
+
+---
+
+### PHASE 50e — Platform Automations
+
+**What this builds:** 17 automated detection and notification rules that make the platform proactively helpful — reducing manual work for navigators and keeping families informed without them having to check constantly.
+
+**Checklist:**
+```
+PHASE 50e CHECKLIST
+[ ] Health: Isolation detection cron
+    VERIFY: Insert 7 consecutive call records with no social contact mentions
+    PASS: Navigator task created "Margaret has not mentioned social contact in 7 days"
+          Informational alert on family dashboard
+
+[ ] Health: Vaccination reminder
+    VERIFY: Trigger cron in October for a member aged 70+
+    PASS: Family dashboard shows "Time for Margaret's annual flu shot"
+
+[ ] Health: Doctor appointment reminder
+    VERIFY: Member with diabetes_in_health_conditions, no appointment mention in 90 days
+    PASS: Navigator task created "Schedule wellness check for Margaret — no appointment mentioned in 90 days"
+
+[ ] Safety: Extreme weather alert
+    VERIFY: Stub weather check returns heat index >100F for member's city
+    PASS: Family notification sent, Aria call prompt updated to ask about staying cool
+
+[ ] Safety: Seasonal home safety check
+    VERIFY: Trigger cron on October 1 for a member with lives_alone=true
+    PASS: Navigator task created "October heating safety check for Margaret"
+
+[ ] Safety: Fall risk flag
+    VERIFY: Process transcript with "feeling dizzy" for member with walker in mobility_devices
+    PASS: Urgent alert created "Fall risk flag: Margaret mentioned dizziness and uses a walker"
+
+[ ] Social: Volunteer re-engagement
+    VERIFY: Set volunteer_matches row last_visit to 31 days ago
+    PASS: Navigator task "Check on volunteer match — no visit logged in 30 days"
+
+[ ] Social: Event no-show follow-up
+    VERIFY: Set event_rsvps attended=false for past event
+    PASS: 24 hours later notification: "We missed you at [event] — hope you are doing well"
+
+[ ] Administrative: Subscription value summary
+    VERIFY: Member with renewal_date 7 days from today
+    PASS: Family email (stub): "Your month with ThriveAtHome — 28 calls, 2 alerts, 3 events"
+
+[ ] Administrative: Inactive family nudge
+    VERIFY: Set family_members.last_login_at to 31 days ago
+    PASS: Email sent with recent highlights and mood summary
+
+[ ] Administrative: Navigator caseload warning
+    VERIFY: Assign 121 members to a navigator
+    PASS: Admin alert "Sarah Williams approaching caseload limit (121/150)"
+
+[ ] Services: Transport follow-up
+    VERIFY: Mark medical transport booking as completed
+    PASS: Next day Aria call prompt updated to ask "How did your appointment go yesterday?"
+
+[ ] Services: Tech help success check
+    VERIFY: Mark tech help visit as completed
+    PASS: 3 days later Aria asks "Is your phone working better now?"
+
+[ ] Global: Max 2 notifications per family per day enforced
+    VERIFY: Trigger 5 automations for same family member on same day
+    PASS: Only 2 notifications sent, others queued for next day
+
+[ ] Global: Family opt-out respected
+    VERIFY: Set automation_opt_out for a member, trigger automation
+    PASS: No notification sent for that member
+
+[ ] npx tsc --noEmit passes
+```
+
+---
+
+### PHASE 50f — Geographic Chapter System
+
+**What this builds:** The hybrid chapter model — a national open platform with soft local chapters. Members can enroll anywhere and get full virtual service immediately. Behind the scenes they are grouped into metro areas. When a metro reaches 50+ active members it becomes an official ThriveAtHome Chapter with a local coordinator, local events, and a local volunteer pool.
+
+**New tables (`/supabase/migrations/030_chapters.sql`):**
+
+```sql
+CREATE TABLE metro_areas (
+  id                    uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at            timestamptz DEFAULT now() NOT NULL,
+  chapter_name          text NOT NULL,
+  -- e.g. "ThriveAtHome Bay Area", "ThriveAtHome Chicago"
+  city                  text NOT NULL,
+  state                 text NOT NULL,
+  zip_prefixes          text[] NOT NULL DEFAULT '{}',
+  -- Array of zip code prefixes that belong to this metro
+  -- e.g. ARRAY['940','941','942','943','944'] for Bay Area
+  is_active_chapter     boolean NOT NULL DEFAULT false,
+  -- true when 50+ active members
+  active_member_count   int NOT NULL DEFAULT 0,
+  chapter_coordinator_id uuid REFERENCES care_navigators(id),
+  chapter_slug          text UNIQUE,
+  -- e.g. 'bay-area', 'chicago', 'new-york'
+  launched_at           timestamptz
+);
+
+-- Add chapter assignment to members
+ALTER TABLE members
+  ADD COLUMN IF NOT EXISTS metro_area_id uuid REFERENCES metro_areas(id),
+  ADD COLUMN IF NOT EXISTS metro_area_name text;
+
+-- Seed initial metro areas
+INSERT INTO metro_areas (chapter_name, city, state, zip_prefixes, chapter_slug) VALUES
+('ThriveAtHome Bay Area', 'San Francisco', 'CA', ARRAY['940','941','942','943','944','945','946','947','948','949'], 'bay-area'),
+('ThriveAtHome Los Angeles', 'Los Angeles', 'CA', ARRAY['900','901','902','903','904','905','906','907','908','910','911','912','913','914','915','916','917','918'], 'los-angeles'),
+('ThriveAtHome Chicago', 'Chicago', 'IL', ARRAY['600','601','602','603','604','605','606','607','608'], 'chicago'),
+('ThriveAtHome New York', 'New York', 'NY', ARRAY['100','101','102','103','104','110','111','112','113','114','115','116','117','118','119'], 'new-york'),
+('ThriveAtHome Houston', 'Houston', 'TX', ARRAY['770','771','772','773','774','775','776','777'], 'houston'),
+('ThriveAtHome Phoenix', 'Phoenix', 'AZ', ARRAY['850','851','852','853','854','855','856','857'], 'phoenix'),
+('ThriveAtHome Philadelphia', 'Philadelphia', 'PA', ARRAY['190','191','192','193','194'], 'philadelphia'),
+('ThriveAtHome San Antonio', 'San Antonio', 'TX', ARRAY['782','783','784','785'], 'san-antonio'),
+('ThriveAtHome Dallas', 'Dallas', 'TX', ARRAY['750','751','752','753','754','755','756','757','758'], 'dallas'),
+('ThriveAtHome Seattle', 'Seattle', 'WA', ARRAY['980','981','982','983','984','985'], 'seattle');
+```
+
+**Checklist:**
+```
+PHASE 50f CHECKLIST
+[ ] Migration 030_chapters.sql runs without errors
+    VERIFY: metro_areas table visible in Supabase with 10 seeded metro areas
+    PASS: All 10 rows present, members table has metro_area_id and metro_area_name columns
+
+[ ] Member auto-assigned to metro area on enrollment
+    VERIFY: Enroll a test member with zip code 94403 (San Mateo, CA)
+    PASS: member.metro_area_id = Bay Area metro UUID, metro_area_name = "ThriveAtHome Bay Area"
+
+[ ] Members with no matching metro area still enroll successfully
+    VERIFY: Enroll a test member with zip code 59001 (rural Montana)
+    PASS: member.metro_area_id = null, metro_area_name = "ThriveAtHome National" — no error
+
+[ ] Volunteer matching prioritizes same chapter
+    VERIFY: Run matching for Bay Area member with Bay Area and Chicago volunteers
+    PASS: Bay Area volunteer scores 30 points higher than Chicago volunteer (same chapter bonus)
+
+[ ] Events show "Near you" badge for local chapter events
+    VERIFY: Create event tagged to Bay Area chapter, log in as Bay Area family member
+    PASS: Event shows "Near you" badge, appears above national virtual events
+
+[ ] Chapter activation at 50 members
+    VERIFY: Set Bay Area metro active_member_count to 50
+    PASS: Admin alert created "ThriveAtHome Bay Area has reached 50 members — ready to activate as official chapter"
+         is_active_chapter automatically set to true
+
+[ ] Chapter landing page at /chapter/[slug]
+    VERIFY: Navigate to /chapter/bay-area
+    PASS: Page shows: chapter name, active member count, upcoming local events, local volunteer count,
+          "Join ThriveAtHome Bay Area" CTA for new families
+
+[ ] Rural member gets full virtual service
+    VERIFY: Log in as member with no metro area assigned
+    PASS: Full dashboard loads, virtual events and national volunteer pool available,
+         no error or degraded messaging
+
+[ ] Navigator assigned from local chapter
+    VERIFY: Enroll Bay Area member, check navigator assignment
+    PASS: System suggests navigators with metro_area_id matching Bay Area first
+
+[ ] npx tsc --noEmit passes
+```
+
+**Build instructions:**
+
+Create a `getMetroArea(zipCode: string): MetroArea | null` function in `/lib/geo/chapters.ts`:
+- Takes a zip code string
+- Checks first 3 digits against all `zip_prefixes` arrays in metro_areas table
+- Returns matching metro area or null for rural/unmatched
+
+Call `getMetroArea` during member onboarding API route — set `metro_area_id` and `metro_area_name` on the new member record.
+
+Update volunteer matching in `/lib/volunteers/match.ts`:
+```ts
+// Chapter proximity bonus
+if (volunteer.metro_area_id && volunteer.metro_area_id === member.metro_area_id) {
+  score += 30  // Same chapter
+} else if (volunteer.state === member.state) {
+  score += 15  // Adjacent or same state
+}
+```
+
+Update events query in `/app/dashboard/events/page.tsx`:
+- Add `is_near_you` boolean to each event result
+- `is_near_you = true` if event has matching metro_area_id OR if event is within 25 miles of member address
+- Show "📍 Near you" badge on local events
+- Sort: active today → near you upcoming → virtual upcoming → other
+
+Chapter landing page (`/app/chapter/[slug]/page.tsx`) — public, no login required:
+- Fetch metro area by slug
+- Show: chapter name, city, member count (if active), upcoming public events, volunteer count, "Join ThriveAtHome" CTA
+- If not yet active chapter: "Coming soon to [city] — join the waitlist"
+
+Admin chapter management (`/app/admin/chapters/page.tsx`):
+- List all metro areas with member counts
+- "Activate chapter" button for metros with 50+ members
+- Assign chapter coordinator (from care_navigators)
+- View chapter-specific metrics
+
+---
+
+### PHASE 50g — Member Safety & Fraud Protection
+
+**What this builds:** Fraud detection and protection features that keep seniors safe from financial exploitation — without treating them as suspects. Plus the soft age verification approach for member enrollment.
+
+**Philosophy:** Protect seniors FROM harm, not FROM the platform. Background checks are for volunteers and workers, never for members. Age verification is soft (DOB field) not hard (ID upload).
+
+**New tables (`/supabase/migrations/031_fraud_protection.sql`):**
+
+```sql
+CREATE TABLE fraud_flags (
+  id                uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at        timestamptz DEFAULT now() NOT NULL,
+  member_id         uuid NOT NULL REFERENCES members(id) ON DELETE CASCADE,
+  flag_type         text NOT NULL,
+  -- large_purchase, new_vendor_contact, gift_card_mention, new_friend_money,
+  -- unsolicited_offer, tech_support_scam, romance_scam, lottery_scam
+  flag_source       text NOT NULL,
+  -- aria_call, service_booking, navigator_report, family_report
+  description       text NOT NULL,
+  severity          text NOT NULL DEFAULT 'informational',
+  -- informational, concern, urgent
+  acknowledged      boolean NOT NULL DEFAULT false,
+  acknowledged_by   uuid REFERENCES family_members(id),
+  acknowledged_at   timestamptz,
+  navigator_notes   text
+);
+ALTER TABLE fraud_flags ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "family_all_own_fraud_flags" ON fraud_flags FOR ALL
+  USING (EXISTS (
+    SELECT 1 FROM family_members fm
+    WHERE fm.member_id = fraud_flags.member_id
+    AND fm.supabase_auth_id = auth.uid()
+  ));
+```
+
+**Checklist:**
+```
+PHASE 50g CHECKLIST
+[ ] Migration 031_fraud_protection.sql runs without errors
+    VERIFY: fraud_flags table visible in Supabase
+    PASS: Table present
+
+[ ] Age verification: DOB validates 60+ at onboarding
+    VERIFY: Try enrolling a senior with DOB less than 60 years ago
+    PASS: Gentle message shown "ThriveAtHome is designed for adults 60 and older"
+         Form does not hard-block but shows the message clearly
+
+[ ] Age verification: family member DOB not required
+    VERIFY: Sign up as a family member — no age field shown
+    PASS: Family signup has no age or DOB field — not required
+
+[ ] Aria call: gift card mention detection
+    VERIFY: Process transcript containing "they asked me to buy gift cards"
+    PASS: fraud_flag created with flag_type='gift_card_mention', severity='urgent'
+         Family notified immediately: "Margaret mentioned someone asking her to buy gift cards — this is a common scam. Please check in with her."
+
+[ ] Aria call: new friend money mention detection
+    VERIFY: Process transcript containing "my new friend online needs money" or "someone asked me to send money"
+    PASS: fraud_flag created with flag_type='new_friend_money', severity='urgent'
+         Navigator task created: "Potential romance/friendship scam — follow up with Margaret immediately"
+
+[ ] Aria call: tech support scam detection
+    VERIFY: Process transcript containing "Microsoft called me" or "my computer has a virus and they need access"
+    PASS: fraud_flag created with flag_type='tech_support_scam', severity='urgent'
+
+[ ] Aria call: unsolicited offer detection
+    VERIFY: Process transcript containing "I won a prize" or "they said I owe back taxes"
+    PASS: fraud_flag created with flag_type='unsolicited_offer', severity='concern'
+
+[ ] Large purchase notification to family
+    VERIFY: Create service_booking with amount_cents > 5000 ($50)
+    PASS: Family notification pushed: "A $75 service was booked for Margaret — tap to review"
+
+[ ] New vendor contact alert
+    VERIFY: First time a new service_provider contacts a member
+    PASS: Family notification: "A new provider has been connected with Margaret — [provider name]"
+
+[ ] Fraud flag visible on family dashboard
+    VERIFY: Create test fraud_flag, reload dashboard
+    PASS: Fraud flag appears in alerts panel with appropriate severity badge and plain-English description
+
+[ ] Fraud flag visible in navigator console
+    VERIFY: Log in as navigator, check member detail panel
+    PASS: Fraud flags section visible with all active flags, acknowledge button
+
+[ ] Scam education in Aria calls
+    VERIFY: Check Aria system prompt for scam awareness content
+    PASS: Aria system prompt includes: if member mentions winning a prize, being owed a refund,
+         needing to buy gift cards, or a new online friend asking for money —
+         respond warmly and gently: "That sounds like it could be a scam — I would talk to your
+         family before doing anything. Would it be okay if I asked them to check in with you?"
+
+[ ] Family fraud report button
+    VERIFY: Navigate to /dashboard, find fraud/safety section
+    PASS: "Report a concern" button allows family to manually flag a potential scam situation
+
+[ ] npx tsc --noEmit passes
+```
+
+**Build instructions:**
+
+Add fraud detection to call transcript processing in the webhook handler. Scan transcripts for:
+
+```ts
+const FRAUD_PATTERNS = {
+  gift_card_mention: ['gift card', 'itunes card', 'google play card', 'buy cards', 'send cards'],
+  new_friend_money: ['online friend', 'new friend', 'send money', 'wire money', 'western union', 'zelle'],
+  tech_support_scam: ['microsoft called', 'apple called', 'computer virus', 'remote access', 'tech support called'],
+  unsolicited_offer: ['won a prize', 'won the lottery', 'back taxes', 'owe the irs', 'lawsuit against you', 'arrest warrant'],
+  romance_scam: ['met someone online', 'dating site', 'military overseas', 'needs money to come home'],
+  lottery_scam: ['claim your winnings', 'processing fee', 'customs fee', 'release the money'],
+}
+```
+
+For any match: create `fraud_flags` row, push urgent Realtime notification to family, create navigator task.
+
+Large purchase notification: add to service booking creation API — if `amount_cents > 5000`, push Realtime notification to all linked family members.
+
+Scam education section on `/dashboard/services` under Tech Help — "Protecting yourself from scams" with common scam types listed in plain English, what to do if contacted, how to report to the platform.
+
+---
+
 ### PHASE 50 — Services Dashboard Integration
 
 **Checklist:**
@@ -1298,13 +1869,591 @@ Priority languages: Spanish first, then Mandarin, Vietnamese, Tagalog.
 
 ---
 
+### PHASE 56 — School Partner Portal (K-12 + University)
+
+**What this builds:** A partner portal for schools to manage their student volunteers, verify service hours, and export records for registrars — covering both K-12 community service requirements and university service-learning programs.
+
+**New tables (`/supabase/migrations/028_school_partners.sql`):**
+
+```sql
+CREATE TABLE school_partners (
+  id                uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at        timestamptz DEFAULT now() NOT NULL,
+  school_name       text NOT NULL,
+  school_type       text NOT NULL DEFAULT 'university', -- 'k12' or 'university'
+  contact_name      text NOT NULL,
+  contact_email     text NOT NULL,
+  contact_phone     text,
+  city              text,
+  state             text,
+  partnership_tier  text NOT NULL DEFAULT 'free', -- 'free', 'basic' ($5k), 'partner' ($10k), 'partner_large' ($20k)
+  active_students   int NOT NULL DEFAULT 0,
+  start_date        date,
+  renewal_date      date,
+  status            text NOT NULL DEFAULT 'active',
+  requires_consent  boolean NOT NULL DEFAULT false -- true for K-12 (minor consent)
+);
+ALTER TABLE school_partners ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE parental_consents (
+  id                uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at        timestamptz DEFAULT now() NOT NULL,
+  student_id        uuid NOT NULL REFERENCES student_volunteers(id) ON DELETE CASCADE,
+  guardian_name     text NOT NULL,
+  guardian_email    text NOT NULL,
+  guardian_phone    text,
+  consent_given     boolean NOT NULL DEFAULT false,
+  consent_date      timestamptz,
+  consent_method    text -- 'email', 'in_person', 'digital_signature'
+);
+ALTER TABLE parental_consents ENABLE ROW LEVEL SECURITY;
+```
+
+**Checklist:**
+```
+PHASE 56 CHECKLIST
+[ ] Migration 028_school_partners.sql runs without errors
+    VERIFY: school_partners and parental_consents tables visible in Supabase
+    PASS: Both tables present
+
+[ ] /school-admin page exists and is role-protected
+    VERIFY: Log in as school_admin role, navigate to /school-admin
+    PASS: School admin portal loads with student roster
+
+[ ] Student roster shows all enrolled students with hours
+    VERIFY: School admin can see all student_volunteers linked to their school
+    PASS: Table shows student name, hours logged, visits completed, status
+
+[ ] Parental consent workflow for K-12
+    VERIFY: Create K-12 school partner (requires_consent=true), enroll a student
+    PASS: Consent request sent to guardian email (stub), student shows 'pending_consent' status until approved
+
+[ ] Semester CSV export works
+    VERIFY: Click "Export semester hours" with date range
+    PASS: CSV downloads with all student names, hours, visit dates for the selected period
+
+[ ] Official service record PDF generates
+    VERIFY: Click "Generate service record" for a student with logged visits
+    PASS: PDF downloads with school name, student name, total hours, visit dates, ThriveAtHome seal
+
+[ ] Bulk student enrollment
+    VERIFY: Upload a CSV of student emails from admin portal
+    PASS: Students receive invitation emails (stub), accounts created with school_id linked
+
+[ ] Integration hooks for x2VOL and Track it Forward
+    VERIFY: Check /school-admin for export format options
+    PASS: Export options include "x2VOL format" and "Track it Forward format" CSV downloads
+
+[ ] npx tsc --noEmit passes
+```
+
+**Build instructions:**
+
+School admin portal (`/app/school-admin/page.tsx`) — role: `school_admin`. Shows:
+- School name and partnership tier
+- Student roster table: name, enrollment date, total hours, visits, status, service record button
+- Semester summary: total students, total hours, average hours per student
+- Export section: date range picker + format selector (Standard CSV, x2VOL, Track it Forward)
+- Bulk enrollment: CSV upload field for student emails
+- Pending consents queue (for K-12 schools)
+
+For K-12 schools (`requires_consent=true`): when a student under 18 is enrolled, automatically send a consent request email to the guardian email on file. Student shows `pending_consent` status and cannot log visits until consent is recorded.
+
+---
+
+### PHASE 57 — VSO / Veteran Network Portal
+
+**What this builds:** A dedicated portal for Veterans Service Organizations (VSOs) and veteran volunteer networks to manage their chapter's volunteers, track veteran-to-veteran connections, and provide VA benefits navigation services.
+
+**New tables (`/supabase/migrations/029_vso_partners.sql`):**
+
+```sql
+CREATE TABLE vso_partners (
+  id                uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at        timestamptz DEFAULT now() NOT NULL,
+  organization_name text NOT NULL,
+  vso_type          text NOT NULL, -- 'VFW', 'American Legion', 'DAV', 'AMVETS', 'Other'
+  chapter_number    text,
+  contact_name      text NOT NULL,
+  contact_email     text NOT NULL,
+  contact_phone     text,
+  city              text,
+  state             text,
+  status            text NOT NULL DEFAULT 'active'
+);
+ALTER TABLE vso_partners ENABLE ROW LEVEL SECURITY;
+```
+
+**Checklist:**
+```
+PHASE 57 CHECKLIST
+[ ] Migration 029_vso_partners.sql runs without errors
+    VERIFY: vso_partners table visible in Supabase
+    PASS: Table present
+
+[ ] /vso-admin page exists and is role-protected
+    VERIFY: Log in as vso_admin role, navigate to /vso-admin
+    PASS: VSO admin portal loads with chapter volunteer roster
+
+[ ] VSO volunteer roster shows chapter volunteers
+    VERIFY: VSO admin sees only volunteers linked to their VSO chapter
+    PASS: Table shows volunteer name, service types, hours, veteran-to-veteran connections
+
+[ ] Veteran member flag on volunteer application
+    VERIFY: Check /volunteer/apply for veteran section
+    PASS: "Are you a veteran?" toggle reveals branch, years served, VSO affiliation, discharge status fields
+
+[ ] Veteran-to-veteran matching priority confirmed
+    VERIFY: Run matching algorithm for a veteran member
+    PASS: Volunteers with veteran flag score 20 points higher in matching results
+
+[ ] VA benefits navigation volunteer track
+    VERIFY: Check volunteer service_types includes 'va_benefits_navigation'
+    PASS: New service type visible in volunteer application and matching
+
+[ ] Impact report for VSO chapter
+    VERIFY: VSO admin clicks "Chapter impact report"
+    PASS: Report shows total volunteers, total hours, seniors connected, veteran-to-veteran pairs
+
+[ ] VAVS integration placeholder
+    VERIFY: Check /vso-admin for VAVS export option
+    PASS: "Export for VAVS reporting" button present (stub — logs [STUB] Would export to VA Volunteer Service system)
+
+[ ] npx tsc --noEmit passes
+```
+
+**Build instructions:**
+
+VSO admin portal (`/app/vso-admin/page.tsx`) — role: `vso_admin`. Shows:
+- Chapter name, VSO type, chapter number
+- Volunteer roster filtered to volunteers with `vso_partner_id` matching this chapter
+- Veteran-to-veteran connection pairs
+- Chapter impact stats: total hours, seniors helped, veteran members connected
+- VAVS export stub button
+- Referral form: refer a veteran senior to ThriveAtHome from the VSO admin
+
+Add `va_benefits_navigation` to the `visit_type` enum via migration. Add `vso_partner_id` column to `volunteers` table.
+
+Add veteran member identification to member profiles: `is_veteran boolean`, `branch_of_service text`, `years_served text` columns on `members` table. Show in onboarding Step 3 as optional fields.
+
+---
+
+### PHASE 58 — Nonprofit Partner Portal
+
+**What this builds:** A portal for nonprofit organizations, corporate volunteer programs, and community groups to manage their volunteers, track impact, and generate grant-ready reports.
+
+**New tables (`/supabase/migrations/030_nonprofit_partners.sql`):**
+
+```sql
+CREATE TABLE nonprofit_partners (
+  id                  uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at          timestamptz DEFAULT now() NOT NULL,
+  organization_name   text NOT NULL,
+  org_type            text NOT NULL DEFAULT 'nonprofit', -- 'nonprofit', 'corporate', 'faith_based', 'community_group'
+  ein_number          text, -- for 501(c)(3) orgs
+  contact_name        text NOT NULL,
+  contact_email       text NOT NULL,
+  contact_phone       text,
+  city                text,
+  state               text,
+  partnership_tier    text NOT NULL DEFAULT 'community', -- 'community' (free), 'partner' ($5k), 'corporate' ($15k)
+  active_volunteers   int NOT NULL DEFAULT 0,
+  grant_reporting     boolean NOT NULL DEFAULT false,
+  status              text NOT NULL DEFAULT 'active'
+);
+ALTER TABLE nonprofit_partners ENABLE ROW LEVEL SECURITY;
+```
+
+**Checklist:**
+```
+PHASE 58 CHECKLIST
+[ ] Migration 030_nonprofit_partners.sql runs without errors
+    VERIFY: nonprofit_partners table visible in Supabase
+    PASS: Table present
+
+[ ] /nonprofit-admin page exists and is role-protected
+    VERIFY: Log in as nonprofit_admin role, navigate to /nonprofit-admin
+    PASS: Nonprofit admin portal loads
+
+[ ] Volunteer roster shows org volunteers
+    VERIFY: Nonprofit admin sees volunteers linked to their organization
+    PASS: Table shows volunteer name, service types, hours logged, impact metrics
+
+[ ] Impact report generates in grant format
+    VERIFY: Click "Generate grant impact report" with date range
+    PASS: PDF report downloads with: org name, date range, total volunteers, total hours,
+          number of seniors served, types of services provided, demographic breakdown
+          formatted for foundation grant compliance reporting
+
+[ ] Corporate volunteer program integration
+    VERIFY: Create a corporate partner (org_type='corporate'), enroll employees as volunteers
+    PASS: Employees can log volunteer hours, corporate admin sees company-wide impact
+
+[ ] Mutual referral tracking
+    VERIFY: Nonprofit admin clicks "Refer a senior to ThriveAtHome"
+    PASS: Referral form creates a lead in admin system with nonprofit source tracking
+
+[ ] Faith-based organization support
+    VERIFY: Create faith_based org type partner
+    PASS: Portal shows faith community-appropriate language, congregation volunteer management
+
+[ ] Community partner directory
+    VERIFY: Navigate to /dashboard/services → Community Resources section
+    PASS: Approved nonprofit partners visible as community resources members can connect with
+
+[ ] npx tsc --noEmit passes
+```
+
+**Build instructions:**
+
+Nonprofit admin portal (`/app/nonprofit-admin/page.tsx`) — role: `nonprofit_admin`. Shows:
+- Organization name, type, EIN (if nonprofit), partnership tier
+- Volunteer roster filtered to their organization's volunteers
+- Impact dashboard: total volunteers, hours, seniors helped, services provided
+- Grant reporting section (if `grant_reporting=true`): date range picker + "Generate grant report" PDF button
+- Referral form: refer seniors in their community to ThriveAtHome
+- Corporate volunteer hours: for corporate partners, track employee volunteer hours separately
+
+Grant report PDF format (foundation-friendly):
+- Organization letterhead area with ThriveAtHome co-branding
+- Executive summary: key impact numbers in large format
+- Breakdown by service type (transport, meals, companionship, tech help)
+- Month-by-month activity table
+- Individual volunteer hours (anonymised option available)
+- Certification statement: "This report certifies community service hours logged through ThriveAtHome platform"
+
+Add `nonprofit_partner_id` column to `volunteers` table linking volunteers to their sponsoring nonprofit.
+
+Add community partner directory section to `/dashboard/services` showing approved nonprofit partners as local resources members can contact.
+
+---
+
+---
+
+## ═══ M19 — CARE INDUSTRY PARTNERSHIPS ═══
+
+### PHASE 59 — Home Care Agency Portal
+
+**What this builds:** A dedicated portal for home care agencies to manage their care workers, clients, and billable hours — making ThriveAtHome a platform home care agencies can adopt alongside or instead of their existing software.
+
+**New tables (`/supabase/migrations/031_care_agencies.sql`):**
+
+```sql
+CREATE TABLE care_agencies (
+  id                  uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at          timestamptz DEFAULT now() NOT NULL,
+  agency_name         text NOT NULL,
+  license_number      text,
+  contact_name        text NOT NULL,
+  contact_email       text NOT NULL,
+  contact_phone       text,
+  city                text,
+  state               text,
+  agency_type         text NOT NULL DEFAULT 'home_care',
+  billing_model       text NOT NULL DEFAULT 'pmpm',
+  monthly_rate        numeric,
+  active_clients      int NOT NULL DEFAULT 0,
+  active_care_workers int NOT NULL DEFAULT 0,
+  status              text NOT NULL DEFAULT 'active',
+  integration_type    text DEFAULT 'standalone'
+);
+ALTER TABLE care_agencies ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE care_workers (
+  id                uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at        timestamptz DEFAULT now() NOT NULL,
+  agency_id         uuid NOT NULL REFERENCES care_agencies(id) ON DELETE CASCADE,
+  supabase_auth_id  uuid UNIQUE,
+  full_name         text NOT NULL,
+  email             text NOT NULL,
+  phone             text,
+  role              text NOT NULL DEFAULT 'aide',
+  certifications    text[] DEFAULT '{}',
+  active_clients    int NOT NULL DEFAULT 0,
+  status            text NOT NULL DEFAULT 'active'
+);
+ALTER TABLE care_workers ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE care_visits (
+  id                uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at        timestamptz DEFAULT now() NOT NULL,
+  agency_id         uuid NOT NULL REFERENCES care_agencies(id) ON DELETE CASCADE,
+  care_worker_id    uuid NOT NULL REFERENCES care_workers(id) ON DELETE CASCADE,
+  member_id         uuid NOT NULL REFERENCES members(id) ON DELETE CASCADE,
+  visit_date        date NOT NULL,
+  check_in_time     timestamptz,
+  check_out_time    timestamptz,
+  duration_minutes  int,
+  visit_type        text NOT NULL,
+  tasks_completed   text[] DEFAULT '{}',
+  notes             text,
+  billing_code      text,
+  verified          boolean NOT NULL DEFAULT false,
+  verified_by       uuid REFERENCES care_workers(id)
+);
+ALTER TABLE care_visits ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE referrals (
+  id                  uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at          timestamptz DEFAULT now() NOT NULL,
+  referring_agency_id uuid REFERENCES care_agencies(id),
+  referring_type      text NOT NULL DEFAULT 'agency',
+  member_id           uuid REFERENCES members(id),
+  referral_status     text NOT NULL DEFAULT 'pending',
+  referral_notes      text,
+  converted_at        timestamptz
+);
+ALTER TABLE referrals ENABLE ROW LEVEL SECURITY;
+```
+
+**Checklist:**
+```
+PHASE 59 CHECKLIST
+[ ] Migration 031_care_agencies.sql runs without errors
+    VERIFY: care_agencies, care_workers, care_visits, referrals tables visible in Supabase
+    PASS: All 4 tables present
+
+[ ] /agency-admin page exists and is role-protected
+    VERIFY: Log in as agency_admin role, navigate to /agency-admin
+    PASS: Agency admin portal loads with client roster and care worker roster
+
+[ ] Client roster shows all agency clients
+    VERIFY: Seed test agency with 2 clients linked to members table
+    PASS: Client table shows name, care worker assigned, last visit, next scheduled visit, status
+
+[ ] Care worker mobile visit logging
+    VERIFY: Log in as care_worker role, navigate to /care-worker
+    PASS: Mobile-friendly interface shows today's visits, check-in/check-out buttons, task checklist
+
+[ ] Check-in/check-out time tracking works
+    VERIFY: Click check-in on a visit, wait 1 minute, click check-out
+    PASS: care_visits row created with correct times and duration_minutes
+
+[ ] Billable hours report generates
+    VERIFY: Agency admin clicks "Generate billing report" for a date range
+    PASS: Report shows hours per client, hours per care worker, total billable hours
+
+[ ] Referral intake workflow
+    VERIFY: Agency admin clicks "Refer a client to ThriveAtHome"
+    PASS: Referral form creates referral row, admin team notified
+
+[ ] Integration hook stubs visible
+    VERIFY: Check /agency-admin for integration settings
+    PASS: Shows "Connect to ClearCare", "Connect to AlayaCare", "Connect to WellSky" stub buttons
+
+[ ] npx tsc --noEmit passes
+```
+
+---
+
+### PHASE 60 — White Label / Co-branding
+
+**What this builds:** Allows adult care companies to co-brand the ThriveAtHome platform with their own logo and colors — while ThriveAtHome branding is always present. Families see "Agency Name, Powered by ThriveAtHome" — not a fully white-labeled product with ThriveAtHome invisible.
+
+**Brand rule for Phase 60:** ThriveAtHome is never invisible. The footer, the "Powered by" badge, and the support contact always reference ThriveAtHome. This protects the consumer brand and ensures families know who to trust. Agencies that want fully white-labeled (ThriveAtHome completely hidden) must negotiate a separate enterprise license agreement — this is not the default behavior.
+
+**New tables (`/supabase/migrations/032_white_label.sql`):**
+
+```sql
+CREATE TABLE brand_configs (
+  id                  uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at          timestamptz DEFAULT now() NOT NULL,
+  agency_id           uuid NOT NULL REFERENCES care_agencies(id) ON DELETE CASCADE UNIQUE,
+  brand_name          text NOT NULL,
+  logo_url            text,
+  primary_color       text NOT NULL DEFAULT '#1B3A6B',
+  secondary_color     text NOT NULL DEFAULT '#2A9D8F',
+  support_email       text,
+  support_phone       text,
+  custom_domain       text,
+  footer_text         text,
+  welcome_message     text
+);
+ALTER TABLE brand_configs ENABLE ROW LEVEL SECURITY;
+```
+
+**Checklist:**
+```
+PHASE 60 CHECKLIST
+[ ] Migration 032_white_label.sql runs without errors
+    VERIFY: brand_configs table visible in Supabase
+    PASS: Table present
+
+[ ] Agency admin can configure branding
+    VERIFY: Log in as agency_admin, navigate to /agency-admin/branding
+    PASS: Branding form shows logo upload, color pickers, support contact, welcome message
+
+[ ] Brand config applies to family dashboard
+    VERIFY: Family member linked to branded agency loads /dashboard
+    PASS: Dashboard shows agency logo and brand name instead of ThriveAtHome logo
+
+[ ] Brand colors apply correctly
+    VERIFY: Set primary color to test color, reload dashboard
+    PASS: Navigation and buttons reflect custom primary color
+
+[ ] Unbranded members see default ThriveAtHome branding
+    VERIFY: Log in as family member not linked to any agency
+    PASS: Default ThriveAtHome branding shown
+
+[ ] npx tsc --noEmit passes
+```
+
+---
+
+### PHASE 61 — Clinical Documentation
+
+**What this builds:** SOAP notes, care plan versioning, and clinical export for home health agencies that need clinical-grade documentation for Medicare/Medicaid billing.
+
+**New tables (`/supabase/migrations/033_clinical_docs.sql`):**
+
+```sql
+CREATE TABLE soap_notes (
+  id                uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at        timestamptz DEFAULT now() NOT NULL,
+  member_id         uuid NOT NULL REFERENCES members(id) ON DELETE CASCADE,
+  care_worker_id    uuid REFERENCES care_workers(id),
+  navigator_id      uuid REFERENCES care_navigators(id),
+  visit_date        date NOT NULL,
+  subjective        text NOT NULL,
+  objective         text NOT NULL,
+  assessment        text NOT NULL,
+  plan              text NOT NULL,
+  billing_code      text,
+  signed_by         text,
+  signed_at         timestamptz,
+  is_locked         boolean NOT NULL DEFAULT false
+);
+ALTER TABLE soap_notes ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE care_plan_versions (
+  id                uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at        timestamptz DEFAULT now() NOT NULL,
+  member_id         uuid NOT NULL REFERENCES members(id) ON DELETE CASCADE,
+  version_number    int NOT NULL DEFAULT 1,
+  created_by        text NOT NULL,
+  goals             jsonb NOT NULL DEFAULT '[]',
+  interventions     jsonb NOT NULL DEFAULT '[]',
+  review_date       date,
+  approved_by       text,
+  approved_at       timestamptz,
+  status            text NOT NULL DEFAULT 'draft'
+);
+ALTER TABLE care_plan_versions ENABLE ROW LEVEL SECURITY;
+```
+
+**Checklist:**
+```
+PHASE 61 CHECKLIST
+[ ] Migration 033_clinical_docs.sql runs without errors
+    VERIFY: soap_notes and care_plan_versions tables visible in Supabase
+    PASS: Both tables present
+
+[ ] SOAP note form in navigator member detail panel
+    VERIFY: Open member detail panel in navigator console
+    PASS: "Add SOAP note" button opens structured S/O/A/P form
+
+[ ] SOAP note locks after signing
+    VERIFY: Complete and sign a SOAP note
+    PASS: Note locked, edit button disappears, signed_by and signed_at recorded
+
+[ ] Care plan versioning works
+    VERIFY: Create v1, approve, create v2
+    PASS: Both versions visible, v1 superseded, v2 current
+
+[ ] Clinical export generates
+    VERIFY: Agency admin exports clinical records for a client
+    PASS: PDF/CSV downloads with SOAP notes, care plan, visit history
+
+[ ] Billing code suggestions shown
+    VERIFY: SOAP note form shows billing code field
+    PASS: Common Medicare codes shown as suggestions (G0179, G0181, T1019, T1020)
+
+[ ] AI SOAP draft stub
+    VERIFY: Click "Generate SOAP draft from call summary"
+    PASS: [STUB][AI] Would generate SOAP note from last check-in call summary
+
+[ ] npx tsc --noEmit passes
+```
+
+---
+
+### PHASE 62 — Multi-location Management
+
+**What this builds:** Allows home care franchises and senior living chains to manage multiple locations from a single parent admin account with aggregate and per-location reporting.
+
+**New tables (`/supabase/migrations/034_multi_location.sql`):**
+
+```sql
+CREATE TABLE agency_locations (
+  id                uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at        timestamptz DEFAULT now() NOT NULL,
+  parent_agency_id  uuid NOT NULL REFERENCES care_agencies(id) ON DELETE CASCADE,
+  location_name     text NOT NULL,
+  address           text,
+  city              text NOT NULL,
+  state             text NOT NULL,
+  zip               text,
+  location_manager  text,
+  manager_email     text,
+  active_clients    int NOT NULL DEFAULT 0,
+  status            text NOT NULL DEFAULT 'active'
+);
+ALTER TABLE agency_locations ENABLE ROW LEVEL SECURITY;
+```
+
+**Checklist:**
+```
+PHASE 62 CHECKLIST
+[ ] Migration 034_multi_location.sql runs without errors
+    VERIFY: agency_locations table visible in Supabase
+    PASS: Table present
+
+[ ] Parent agency admin sees all locations
+    VERIFY: Create parent agency with 2 locations, log in as parent agency_admin
+    PASS: /agency-admin shows location selector — "All locations" or individual location
+
+[ ] Per-location metrics filter correctly
+    VERIFY: Select a specific location
+    PASS: All metrics filter to that location only
+
+[ ] Aggregate metrics across all locations
+    VERIFY: Select "All locations"
+    PASS: Totals shown with breakdown table by location
+
+[ ] Location manager role restricts data access
+    VERIFY: Log in as location manager
+    PASS: Sees only their location's data — not other locations
+
+[ ] Multi-location billing report
+    VERIFY: Generate billing report for all locations
+    PASS: Report shows totals with per-location breakdown
+
+[ ] npx tsc --noEmit passes
+```
+
+---
+
+## M19 COMPLETION
+
+When Phase 62 is approved, add to `progress.md`:
+
+```
+M19 COMPLETE — CARE INDUSTRY PARTNERSHIPS APPROVED
+ThriveAtHome is enterprise-ready for adult care industry partners.
+Phases complete: 59 (Agency Portal), 60 (White Label), 61 (Clinical Docs), 62 (Multi-location)
+Deferred: ClearCare/AlayaCare/WellSky API sync, custom subdomain DNS routing,
+AI SOAP notes (activate with ANTHROPIC_API_KEY), Medicare billing clearinghouse.
+```
+
+---
+
 ## M13–M18 COMPLETION
 
-When Phase 55 is approved, add to `progress.md`:
+When Phase 58 is approved, add to `progress.md`:
 
 ```
 M13-M18 COMPLETE — ALL ADVANCED FEATURE PHASES APPROVED
-Platform is feature-complete across all 5 spec layers.
+Platform is feature-complete across all 5 spec layers including all partner portals.
 Remaining deferred items:
 - M8 AI Calls (activate with RETELL_API_KEY + TWILIO credentials)
 - M9 Concierge Line (activate with second Twilio number)
@@ -1313,6 +2462,8 @@ Remaining deferred items:
 - Stripe Connect for companion payouts (Phase 48)
 - Lyft Healthcare, Instacart, Teladoc integrations (Phase 45-47)
 - Full multilingual UI beyond Spanish (Phase 55)
+- VAVS integration for veteran volunteer reporting (Phase 57)
+- x2VOL and Track it Forward integration for school partners (Phase 56)
 ```
 
 ---
@@ -1334,3 +2485,261 @@ ONE800FLOWERS_API_KEY=         # 1-800-Flowers developer API (Phase 39)
 ```
 
 All other M13–M18 features use existing infrastructure (Supabase, Realtime, stub providers).
+
+---
+
+## ═══ M20 — COMMUNITY ORGANIZATION PORTAL (DEFERRED) ═══
+
+> **⏸ DEFERRED — Do not build until explicitly instructed.**
+> Build M19 first. Begin M20 only when you have a confirmed village network,
+> Area Agency on Aging, or senior center prospect actively requesting the platform.
+> The M19 architecture is designed to extend cleanly into M20 — no rework needed.
+
+### When to Start M20
+
+Start M20 when ANY of the following is true:
+- A Village to Village network member has requested a demo
+- An Area Agency on Aging has expressed interest in a contract
+- A senior center has asked about the platform
+- The Village to Village Network national office has been contacted
+- n4a (National Association of Area Agencies on Aging) has been engaged
+
+### Architecture Notes for M20
+
+The following M19 decisions were made specifically to support M20 without rework:
+- `care_agencies.agency_type` supports: 'village_network', 'area_agency_on_aging', 'senior_center', 'faith_community', 'norc'
+- `agency_locations` table works for multi-county AAA structure
+- `brand_configs` works for village co-branding
+- `referrals` table tracks member referrals from community orgs
+- No schema changes needed to start M20 — only new portal pages
+
+---
+
+### PHASE 63 — Village / Community Organization Portal
+
+**What this builds:** A lightweight coordinator portal for Village to Village networks, NORCs, and similar member-governed community organizations — focused on member-to-member help, volunteer coordination, and program tracking.
+
+**Key differences from M19 agency portal:**
+- Coordinator role is lighter than navigator — often a part-time volunteer themselves
+- Members can post needs directly to the volunteer pool (not just through coordinator)
+- Annual membership dues model instead of monthly subscription
+- Program-level tracking (aggregate metrics) not just individual service bookings
+- Governance tools for nonprofit board management
+
+**New tables (`/supabase/migrations/035_community_orgs.sql`):**
+
+```sql
+-- Extend care_agencies with community org fields
+ALTER TABLE care_agencies 
+  ADD COLUMN IF NOT EXISTS membership_model text DEFAULT 'monthly',
+  -- Values: monthly, annual, sliding_scale, free
+  ADD COLUMN IF NOT EXISTS annual_dues_amount numeric,
+  ADD COLUMN IF NOT EXISTS sliding_scale_min numeric,
+  ADD COLUMN IF NOT EXISTS sliding_scale_max numeric,
+  ADD COLUMN IF NOT EXISTS geographic_area text,
+  ADD COLUMN IF NOT EXISTS member_count int DEFAULT 0;
+
+CREATE TABLE member_needs (
+  id                uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at        timestamptz DEFAULT now() NOT NULL,
+  member_id         uuid NOT NULL REFERENCES members(id) ON DELETE CASCADE,
+  org_id            uuid NOT NULL REFERENCES care_agencies(id) ON DELETE CASCADE,
+  need_title        text NOT NULL,
+  need_description  text,
+  service_type      text NOT NULL,
+  needed_by         timestamptz,
+  status            text NOT NULL DEFAULT 'open',
+  -- open, claimed, completed, cancelled
+  claimed_by        uuid REFERENCES volunteers(id),
+  claimed_at        timestamptz,
+  completed_at      timestamptz
+);
+ALTER TABLE member_needs ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE org_programs (
+  id                uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at        timestamptz DEFAULT now() NOT NULL,
+  org_id            uuid NOT NULL REFERENCES care_agencies(id) ON DELETE CASCADE,
+  program_name      text NOT NULL,
+  program_type      text NOT NULL,
+  -- tech_help, transportation, social, health, home_services, meals
+  frequency         text,
+  -- weekly, monthly, drop_in, one_time
+  members_served    int NOT NULL DEFAULT 0,
+  volunteers_active int NOT NULL DEFAULT 0,
+  is_active         boolean NOT NULL DEFAULT true
+);
+ALTER TABLE org_programs ENABLE ROW LEVEL SECURITY;
+```
+
+**Checklist:**
+```
+PHASE 63 CHECKLIST
+[ ] Migration 035_community_orgs.sql runs without errors
+    VERIFY: member_needs and org_programs tables visible in Supabase
+    PASS: Both tables present, care_agencies has new columns
+
+[ ] /community-admin page exists and is role-protected
+    VERIFY: Log in as community_admin role, navigate to /community-admin
+    PASS: Community org portal loads — lighter design than agency portal
+
+[ ] Member needs board (bulletin board style)
+    VERIFY: Member posts a need "Need a ride to eye doctor Thursday 2pm"
+    PASS: Need appears on coordinator dashboard and volunteer dashboard as claimable
+
+[ ] Volunteer claims a need
+    VERIFY: Volunteer clicks "I can help" on a posted need
+    PASS: Need status updates to claimed, member notified, volunteer and member connected
+
+[ ] Annual membership dues billing
+    VERIFY: Set org to annual membership model, enroll a test member
+    PASS: Stripe annual subscription created at correct annual amount
+
+[ ] Sliding scale pricing
+    VERIFY: Set org sliding_scale_min=$100, max=$600
+    PASS: Enrollment flow shows income-based pricing options
+
+[ ] Program tracking
+    VERIFY: Create a "Tuesday Tech Help" program, log 5 attendees
+    PASS: org_programs row shows members_served=5, report shows program metrics
+
+[ ] npx tsc --noEmit passes
+```
+
+---
+
+### PHASE 64 — Area Agency on Aging (AAA) Portal
+
+**What this builds:** Multi-county management, Title III grant reporting, and NAPIS export for Area Agencies on Aging receiving Older Americans Act funding.
+
+**Checklist:**
+```
+PHASE 64 CHECKLIST
+[ ] AAA org type supported in care_agencies
+    VERIFY: Create agency with agency_type='area_agency_on_aging'
+    PASS: AAA-specific fields and reporting available
+
+[ ] Multi-county region management
+    VERIFY: Create AAA with 3 county locations
+    PASS: /agency-admin shows county selector, metrics filter by county
+
+[ ] Title III service categories tracked
+    VERIFY: Service bookings can be tagged with Title III categories
+    PASS: Categories available: III-B (supportive services), III-C (nutrition),
+          III-D (disease prevention), III-E (caregiver support)
+
+[ ] NAPIS export format
+    VERIFY: Generate NAPIS report for a quarter
+    PASS: CSV downloads in National Aging Program Information System format
+          with required fields: unduplicated count, units of service, demographic data
+
+[ ] Older Americans Act compliance fields
+    VERIFY: Member enrollment captures OAA-required demographics
+    PASS: Age, income level, minority status, rural status, disability status collected
+
+[ ] Title III grant report PDF
+    VERIFY: Generate grant report for a funding period
+    PASS: PDF shows: units of service by category, unduplicated client count,
+          demographic breakdown, outcome measures — formatted for state unit on aging submission
+
+[ ] npx tsc --noEmit passes
+```
+
+---
+
+### PHASE 65 — Senior Center Portal
+
+**What this builds:** Drop-in program attendance, activity calendar, room booking, and congregate meal tracking for senior centers.
+
+**Checklist:**
+```
+PHASE 65 CHECKLIST
+[ ] Drop-in attendance tracking
+    VERIFY: Center staff marks attendance for a drop-in program
+    PASS: Attendance record created with date, program, count
+
+[ ] Activity calendar management
+    VERIFY: Center admin creates weekly activity schedule
+    PASS: Calendar visible to members at /dashboard/events filtered to their center
+
+[ ] Room/resource booking
+    VERIFY: Volunteer books the computer lab for a tech help session
+    PASS: Room booking created, conflict detection prevents double-booking
+
+[ ] Congregate meal tracking
+    VERIFY: Log 45 meal participants for Tuesday lunch
+    PASS: Meal count recorded, monthly meal total updates for Title III-C reporting
+
+[ ] Center membership vs community membership
+    VERIFY: Member enrolled at a senior center has center-specific features
+    PASS: Member dashboard shows center events, programs, and meal schedule
+
+[ ] npx tsc --noEmit passes
+```
+
+---
+
+### PHASE 66 — Network Federation
+
+**What this builds:** A parent network account (e.g. Village to Village Network national office, n4a) that can aggregate data across all member organizations for national reporting and benchmarking.
+
+**Checklist:**
+```
+PHASE 66 CHECKLIST
+[ ] Network parent account type
+    VERIFY: Create network account with child member organizations
+    PASS: Network admin sees all member orgs in a directory
+
+[ ] Aggregate national reporting
+    VERIFY: Network admin generates national impact report
+    PASS: Report shows totals across all member orgs: members served, volunteer hours,
+          services provided, geographic coverage map
+
+[ ] Anonymized benchmarking
+    VERIFY: Individual org admin views benchmarking data
+    PASS: "Your village serves 127 members — median for villages your size is 89" shown
+          All individual org data anonymized in benchmarks
+
+[ ] Member org directory
+    VERIFY: Navigate to network directory page
+    PASS: Public-facing directory of member organizations with location and contact info
+
+[ ] Network dues billing
+    VERIFY: Network admin sets annual dues for member orgs
+    PASS: Stripe invoices generated for each member org at correct annual amount
+
+[ ] npx tsc --noEmit passes
+```
+
+---
+
+## M20 ENVIRONMENT VARIABLES
+
+No new environment variables needed for M20. All M20 features use existing Supabase, Stripe, and Realtime infrastructure.
+
+The only additions when activating real integrations:
+```bash
+NAPIS_SUBMISSION_ENDPOINT=    # State Unit on Aging NAPIS submission URL (per state)
+VTV_NETWORK_API_KEY=          # Village to Village Network API if they build one
+N4A_REPORTING_ENDPOINT=       # n4a national reporting API if available
+```
+
+---
+
+## M20 PARTNERSHIP NOTES
+
+Before building M20, establish relationships with:
+
+| Organization | Why | Contact |
+|-------------|-----|---------|
+| **Village to Village Network** | National umbrella for 350+ villages | vtnetwork.org |
+| **n4a** | National Association of Area Agencies on Aging | n4a.org |
+| **NISC** | National Institute of Senior Centers | ncoa.org/nisc |
+| **USAging** | Rebranded n4a — federal AAA advocate | usaging.org |
+| **NCOA** | National Council on Aging — benefits finder partnership | ncoa.org |
+
+These organizations can refer their entire member network to ThriveAtHome if you establish the right partnership — potentially hundreds of organizations at once.
+
+---
+
+*M20 is deferred. Do not build until explicitly instructed. Begin only after M19 is complete and a qualified community organization prospect has been identified.*

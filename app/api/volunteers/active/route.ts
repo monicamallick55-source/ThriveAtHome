@@ -24,8 +24,10 @@ export async function GET(req: NextRequest) {
     .order('rating_average', { ascending: false, nullsFirst: false })
 
   if (serviceType) {
-    // Filter volunteers whose service_types array contains the given visit_type
-    query = query.contains('service_types', [serviceType])
+    // Filter volunteers whose service_types enum[] array contains the given value.
+    // .contains() sends cs.{"value"} which works for text arrays but not enum arrays.
+    // Using .filter() with cs and explicit brace syntax handles the enum cast correctly.
+    query = query.filter('service_types', 'cs', `{${serviceType}}`)
   }
 
   const { data, error } = await query

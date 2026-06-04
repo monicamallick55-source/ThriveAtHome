@@ -1,5 +1,6 @@
 import type { Volunteer } from '../data/volunteers'
 import type { Database } from '../../types/database'
+import { getCategoryById } from '../services/serviceTypes'
 
 type Member = Database['public']['Tables']['members']['Row']
 
@@ -9,9 +10,33 @@ export interface MatchResult {
   reasons: string[]
 }
 
-export function scoreVolunteerForMember(volunteer: Volunteer, member: Member): { score: number; reasons: string[] } {
+// Returns true if volunteer's service_types includes this specific sub-type or a parent category visit_type
+export function volunteerCanHandleSubtype(volunteer: Volunteer, serviceType: string, subtype?: string): boolean {
+  const types = volunteer.service_types as string[]
+  if (!types || types.length === 0) return false
+  if (subtype && types.includes(subtype)) return true
+  const cat = getCategoryById(serviceType)
+  if (!cat) return types.includes(serviceType)
+  const catVisitTypes = cat.subtypes.map((s) => s.visitType).filter(Boolean)
+  return types.some((t) => catVisitTypes.includes(t) || t === serviceType)
+}
+
+export function scoreVolunteerForMember(volunteer: Volunteer, member: Member, serviceType?: string, subtype?: string): { score: number; reasons: string[] } {
   let score = 0
   const reasons: string[] = []
+
+  // Sub-type match — highest priority for service requests
+  if (serviceType && subtype) {
+    if (volunteerCanHandleSubtype(volunteer, serviceType, subtype)) {
+      score += 40
+      reasons.push('Matches service sub-type')
+    }
+  } else if (serviceType) {
+    if (volunteerCanHandleSubtype(volunteer, serviceType)) {
+      score += 30
+      reasons.push('Matches service category')
+    }
+  }
 
   // Location match
   const volunteerCity = volunteer.city?.trim().toLowerCase()

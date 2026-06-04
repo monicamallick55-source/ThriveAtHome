@@ -14,7 +14,8 @@ const SERVICE_LABELS: Record<string, string> = {
   telehealth: '🏥 Health Services',
   legal_financial: '⚖️ Legal & Financial',
   tech_help: '💻 Tech Help',
-  companion: '🤝 Companion',
+  companion: '🤝 Companionship',
+  companionship: '🤝 Companionship & Social',
 }
 
 const DISPATCH_LABELS: Record<string, string> = {
@@ -112,11 +113,26 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
   const [dispatchFormData, setDispatchFormData] = useState<Record<string, {
     scheduledTime?: string
     providerName?: string
+    providerCompany?: string
+    providerPhone?: string
     arrangement?: string
+    healthSubtype?: string
+    platform?: string
+    therapistName?: string
+    therapistContact?: string
+    followUpDate?: string
   }>>({})
 
   // Volunteer picker state — keyed by `${bookingId}_${dispatchType}`
   const [selectedVolunteer, setSelectedVolunteer] = useState<Record<string, Volunteer | null>>({})
+
+  // Reassign / reschedule / cancel-with-reason mode for confirmed bookings
+  const [reassignMode, setReassignMode] = useState<Record<string, string | null>>({}) // bookingId -> dispatchType
+  const [rescheduleMode, setRescheduleMode] = useState<Record<string, boolean>>({})
+  const [rescheduleTime, setRescheduleTime] = useState<Record<string, string>>({})
+  const [cancelReasonSelect, setCancelReasonSelect] = useState<Record<string, string>>({})
+  const [cancelReasonNote, setCancelReasonNote] = useState<Record<string, string>>({})
+  const [showCancelReason, setShowCancelReason] = useState<Record<string, boolean>>({})
 
   const panelRef = useRef<HTMLDivElement>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
@@ -190,7 +206,8 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
     bookingId: string,
     dispatchType: string,
     dispatchDetails: Record<string, string>,
-    volunteerId?: string
+    volunteerId?: string,
+    action?: string
   ) => {
     setBookingActionLoading(prev => ({ ...prev, [bookingId]: true }))
     setBookingActionError(prev => { const n = { ...prev }; delete n[bookingId]; return n })
@@ -201,6 +218,7 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
         dispatch_details: dispatchDetails,
       }
       if (volunteerId) payload.volunteer_id = volunteerId
+      if (action) payload.action = action
 
       const res = await fetch(`/api/services/${bookingId}`, {
         method: 'PATCH',
@@ -221,6 +239,57 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
           return next
         })
         setExpandedBookingId(null)
+      }
+    } catch {
+      setBookingActionError(prev => ({ ...prev, [bookingId]: 'Network error. Please try again.' }))
+    } finally {
+      setBookingActionLoading(prev => { const n = { ...prev }; delete n[bookingId]; return n })
+    }
+  }
+
+  const handleReschedule = async (bookingId: string, newTime: string) => {
+    setBookingActionLoading(prev => ({ ...prev, [bookingId]: true }))
+    setBookingActionError(prev => { const n = { ...prev }; delete n[bookingId]; return n })
+    try {
+      const res = await fetch(`/api/services/${bookingId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'confirmed', action: 'reschedule', scheduled_time: newTime }),
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        setBookingActionError(prev => ({ ...prev, [bookingId]: json.error ?? 'Reschedule failed.' }))
+      } else {
+        setLocalBookings(prev => prev.map(b => b.id === bookingId ? (json.booking as ServiceBooking) : b))
+        setRescheduleMode(prev => ({ ...prev, [bookingId]: false }))
+        setRescheduleTime(prev => ({ ...prev, [bookingId]: '' }))
+      }
+    } catch {
+      setBookingActionError(prev => ({ ...prev, [bookingId]: 'Network error. Please try again.' }))
+    } finally {
+      setBookingActionLoading(prev => { const n = { ...prev }; delete n[bookingId]; return n })
+    }
+  }
+
+  const handleCancelWithReason = async (bookingId: string) => {
+    const reason = cancelReasonSelect[bookingId] ?? ''
+    if (!reason) return
+    setBookingActionLoading(prev => ({ ...prev, [bookingId]: true }))
+    setBookingActionError(prev => { const n = { ...prev }; delete n[bookingId]; return n })
+    try {
+      const note = cancelReasonNote[bookingId] ?? ''
+      const fullNote = note.trim() ? `${reason}. ${note.trim()}` : reason
+      const res = await fetch(`/api/services/${bookingId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'cancelled', cancel_reason: fullNote }),
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        setBookingActionError(prev => ({ ...prev, [bookingId]: json.error ?? 'Cancellation failed.' }))
+      } else {
+        setLocalBookings(prev => prev.map(b => b.id === bookingId ? (json.booking as ServiceBooking) : b))
+        setShowCancelReason(prev => ({ ...prev, [bookingId]: false }))
       }
     } catch {
       setBookingActionError(prev => ({ ...prev, [bookingId]: 'Network error. Please try again.' }))
@@ -778,67 +847,83 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                               {/* Action buttons — only for active bookings */}
                               {isActive && (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                                    {b.status !== 'confirmed' && (
-                                      <ActionBtn
-                                        label={isLoading ? 'Saving…' : 'Mark confirmed'}
-                                        onClick={() => handleBookingAction(b.id, 'confirmed')}
-                                        disabled={isLoading}
-                                        color="#1d4ed8"
-                                        bg="#dbeafe"
-                                      />
-                                    )}
-                                    <ActionBtn
-                                      label={isLoading ? 'Saving…' : 'Mark completed'}
-                                      onClick={() => handleBookingAction(b.id, 'completed')}
-                                      disabled={isLoading}
-                                      color="#065F46"
-                                      bg="#d1fae5"
-                                    />
-                                    <ActionBtn
-                                      label="Cancel booking"
-                                      onClick={() => setShowCancelInput(prev => ({ ...prev, [b.id]: !prev[b.id] }))}
-                                      disabled={isLoading}
-                                      color="#9f1239"
-                                      bg="#ffe4e6"
-                                    />
-                                  </div>
 
-                                  {showCancelInput[b.id] && (
+                                  {/* REQUESTED: standard progression buttons */}
+                                  {b.status === 'requested' && (
+                                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                      <ActionBtn label={isLoading ? 'Saving…' : 'Mark confirmed'} onClick={() => handleBookingAction(b.id, 'confirmed')} disabled={isLoading} color="#1d4ed8" bg="#dbeafe" />
+                                      <ActionBtn label={isLoading ? 'Saving…' : 'Mark completed'} onClick={() => handleBookingAction(b.id, 'completed')} disabled={isLoading} color="#065F46" bg="#d1fae5" />
+                                      <ActionBtn label="Cancel" onClick={() => setShowCancelInput(prev => ({ ...prev, [b.id]: !prev[b.id] }))} disabled={isLoading} color="#9f1239" bg="#ffe4e6" />
+                                    </div>
+                                  )}
+
+                                  {/* CONFIRMED / IN_PROGRESS: reassign, reschedule, cancel with reason */}
+                                  {(b.status === 'confirmed' || b.status === 'in_progress') && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                        <ActionBtn label={isLoading ? 'Saving…' : 'Mark completed'} onClick={() => handleBookingAction(b.id, 'completed')} disabled={isLoading} color="#065F46" bg="#d1fae5" />
+                                        <ActionBtn label={isLoading ? '…' : '↺ Reassign'} onClick={() => setReassignMode(prev => ({ ...prev, [b.id]: prev[b.id] ? null : b.service_type }))} disabled={isLoading} color="#1d4ed8" bg="#dbeafe" />
+                                        <ActionBtn label={isLoading ? '…' : '📅 Reschedule'} onClick={() => setRescheduleMode(prev => ({ ...prev, [b.id]: !prev[b.id] }))} disabled={isLoading} color="#6b21a8" bg="#f5f3ff" />
+                                        <ActionBtn label="✕ Cancel" onClick={() => setShowCancelReason(prev => ({ ...prev, [b.id]: !prev[b.id] }))} disabled={isLoading} color="#9f1239" bg="#ffe4e6" />
+                                      </div>
+
+                                      {/* Reschedule panel */}
+                                      {rescheduleMode[b.id] && (
+                                        <div style={{ backgroundColor: '#faf5ff', border: '1px solid #d8b4fe', borderRadius: 'var(--radius-sm)', padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                          <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#6b21a8' }}>New date &amp; time</label>
+                                          <input type="datetime-local" value={rescheduleTime[b.id] ?? ''} onChange={e => setRescheduleTime(prev => ({ ...prev, [b.id]: e.target.value }))} style={{ fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #d8b4fe', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box' }} />
+                                          <ActionBtn label={isLoading ? 'Saving…' : 'Confirm reschedule'} onClick={() => handleReschedule(b.id, rescheduleTime[b.id] ?? '')} disabled={isLoading || !rescheduleTime[b.id]} color="white" bg="#7c3aed" />
+                                        </div>
+                                      )}
+
+                                      {/* Cancel with reason panel */}
+                                      {showCancelReason[b.id] && (
+                                        <div style={{ backgroundColor: '#fff1f2', border: '1px solid #fca5a5', borderRadius: 'var(--radius-sm)', padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                          <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#9f1239' }}>Reason for cancellation</label>
+                                          <select value={cancelReasonSelect[b.id] ?? ''} onChange={e => setCancelReasonSelect(prev => ({ ...prev, [b.id]: e.target.value }))} style={{ fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #fca5a5', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box' }}>
+                                            <option value="">Select a reason…</option>
+                                            <option>Volunteer unavailable</option>
+                                            <option>Member request</option>
+                                            <option>Scheduling conflict</option>
+                                            <option>Service no longer needed</option>
+                                            <option>Other</option>
+                                          </select>
+                                          <input type="text" value={cancelReasonNote[b.id] ?? ''} onChange={e => setCancelReasonNote(prev => ({ ...prev, [b.id]: e.target.value }))} placeholder="Additional notes (optional)…" style={{ fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #fca5a5', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box' }} />
+                                          <ActionBtn label={isLoading ? 'Cancelling…' : 'Confirm cancellation'} onClick={() => handleCancelWithReason(b.id)} disabled={isLoading || !cancelReasonSelect[b.id]} color="white" bg="#be123c" />
+                                        </div>
+                                      )}
+
+                                      {/* Reassign dispatch panel — same as dispatch options but sends action='reassign' */}
+                                      {reassignMode[b.id] && (
+                                        <ReassignPanel
+                                          bookingId={b.id}
+                                          serviceType={b.service_type}
+                                          isLoading={isLoading}
+                                          dispatchFormData={dispatchFormData}
+                                          setDispatchFormData={setDispatchFormData}
+                                          selectedVolunteer={selectedVolunteer}
+                                          setSelectedVolunteer={setSelectedVolunteer}
+                                          onReassign={(dispatchType, dispatchDetails, volunteerId) => {
+                                            setReassignMode(prev => ({ ...prev, [b.id]: null }))
+                                            handleDispatch(b.id, dispatchType, { ...dispatchDetails }, volunteerId, 'reassign')
+                                          }}
+                                        />
+                                      )}
+                                    </div>
+                                  )}
+
+                                  {/* Simple cancel for requested (existing flow) */}
+                                  {b.status === 'requested' && showCancelInput[b.id] && (
                                     <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
-                                      <input
-                                        type="text"
-                                        value={cancelReason[b.id] ?? ''}
-                                        onChange={e => setCancelReason(prev => ({ ...prev, [b.id]: e.target.value }))}
-                                        placeholder="Reason for cancellation…"
-                                        style={{ flex: 1, fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #fca5a5', borderRadius: 'var(--radius-sm)', padding: '7px 10px', outline: 'none', backgroundColor: 'white' }}
-                                      />
-                                      <ActionBtn
-                                        label="Confirm cancel"
-                                        onClick={() => handleBookingAction(b.id, 'cancelled', { cancel_reason: cancelReason[b.id] })}
-                                        disabled={isLoading}
-                                        color="#9f1239"
-                                        bg="#ffe4e6"
-                                      />
+                                      <input type="text" value={cancelReason[b.id] ?? ''} onChange={e => setCancelReason(prev => ({ ...prev, [b.id]: e.target.value }))} placeholder="Reason for cancellation…" style={{ flex: 1, fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #fca5a5', borderRadius: 'var(--radius-sm)', padding: '7px 10px', outline: 'none', backgroundColor: 'white' }} />
+                                      <ActionBtn label="Confirm cancel" onClick={() => handleBookingAction(b.id, 'cancelled', { cancel_reason: cancelReason[b.id] })} disabled={isLoading} color="#9f1239" bg="#ffe4e6" />
                                     </div>
                                   )}
 
                                   {/* Add navigator note to booking */}
                                   <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end', marginTop: '4px' }}>
-                                    <input
-                                      type="text"
-                                      value={bookingNoteText[b.id] ?? ''}
-                                      onChange={e => setBookingNoteText(prev => ({ ...prev, [b.id]: e.target.value }))}
-                                      placeholder="Add navigator note to booking…"
-                                      style={{ flex: 1, fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid var(--color-warm-grey)', borderRadius: 'var(--radius-sm)', padding: '7px 10px', outline: 'none', backgroundColor: 'white' }}
-                                    />
-                                    <ActionBtn
-                                      label="Save note"
-                                      onClick={() => handleBookingAction(b.id, b.status as BookingStatus, { navigator_note: bookingNoteText[b.id] })}
-                                      disabled={isLoading || !bookingNoteText[b.id]?.trim()}
-                                      color="#374151"
-                                      bg="#f3f4f6"
-                                    />
+                                    <input type="text" value={bookingNoteText[b.id] ?? ''} onChange={e => setBookingNoteText(prev => ({ ...prev, [b.id]: e.target.value }))} placeholder="Add navigator note to booking…" style={{ flex: 1, fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid var(--color-warm-grey)', borderRadius: 'var(--radius-sm)', padding: '7px 10px', outline: 'none', backgroundColor: 'white' }} />
+                                    <ActionBtn label="Save note" onClick={() => handleBookingAction(b.id, b.status as BookingStatus, { navigator_note: bookingNoteText[b.id] })} disabled={isLoading || !bookingNoteText[b.id]?.trim()} color="#374151" bg="#f3f4f6" />
                                   </div>
                                 </div>
                               )}
@@ -967,24 +1052,297 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                                   {/* HOME SERVICES */}
                                   {b.service_type === 'home_service' && (
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                      <DispatchBtn icon="🔧" label="Assign vetted provider" isActive={activeDispatch[b.id] === 'vetted_provider'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'vetted_provider' ? null : 'vetted_provider' }))} />
+                                      <DispatchBtn icon="🙋" label="Assign from platform volunteers" isActive={activeDispatch[b.id] === 'home_volunteer'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'home_volunteer' ? null : 'home_volunteer' }))} />
+                                      {activeDispatch[b.id] === 'home_volunteer' && (() => {
+                                        const vkey = `${b.id}_home_volunteer`
+                                        const picked = selectedVolunteer[vkey] ?? null
+                                        return (
+                                          <DispatchForm bg="#f0fdf4" border="#86efac">
+                                            <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#065f46', margin: '0 0 6px' }}>Select a home services volunteer:</p>
+                                            <VolunteerPicker visitType="in_person_visit" selectedId={picked?.id} onSelect={vol => setSelectedVolunteer(prev => ({ ...prev, [vkey]: vol }))} />
+                                            {picked && <VolunteerConfirmCard volunteer={picked} />}
+                                            <ActionBtn label={isLoading ? 'Assigning…' : 'Assign volunteer'} onClick={() => handleDispatch(b.id, 'home_volunteer', { assigned_volunteer: picked?.full_name ?? '' }, picked?.id)} disabled={isLoading || !picked} color="white" bg="#059669" />
+                                          </DispatchForm>
+                                        )
+                                      })()}
+
+                                      <DispatchBtn icon="🏢" label="Select from vetted providers" isActive={activeDispatch[b.id] === 'vetted_provider'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'vetted_provider' ? null : 'vetted_provider' }))} />
                                       {activeDispatch[b.id] === 'vetted_provider' && (
                                         <DispatchForm bg="#eff6ff" border="#bfdbfe">
-                                          <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#1e40af', display: 'block', marginBottom: '3px' }}>Provider name</label>
-                                          <input type="text" value={dispatchFormData[b.id]?.providerName ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerName: e.target.value } }))} placeholder="e.g. HomeHelper Pro" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #bfdbfe', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '8px' }} />
-                                          <ActionBtn label={isLoading ? 'Assigning…' : 'Assign provider'} onClick={() => handleDispatch(b.id, 'vetted_provider', { assigned_provider: dispatchFormData[b.id]?.providerName ?? '' })} disabled={isLoading || !dispatchFormData[b.id]?.providerName?.trim()} color="white" bg="#1d4ed8" />
+                                          <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#1e40af', margin: '0 0 6px' }}>Select a vetted provider:</p>
+                                          <ServiceProviderPicker serviceType="home_service" selectedProviderName={dispatchFormData[b.id]?.providerName} onSelect={(name) => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerName: name } }))} />
+                                          <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#1e40af', display: 'block', marginTop: '6px', marginBottom: '3px' }}>Visit date &amp; time (optional)</label>
+                                          <input type="datetime-local" value={dispatchFormData[b.id]?.scheduledTime ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], scheduledTime: e.target.value } }))} style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #bfdbfe', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '8px' }} />
+                                          <ActionBtn label={isLoading ? 'Assigning…' : 'Assign provider'} onClick={() => handleDispatch(b.id, 'vetted_provider', { assigned_provider: dispatchFormData[b.id]?.providerName ?? '', scheduled_time: dispatchFormData[b.id]?.scheduledTime ?? '' })} disabled={isLoading || !dispatchFormData[b.id]?.providerName?.trim()} color="white" bg="#1d4ed8" />
                                         </DispatchForm>
                                       )}
-                                      <DispatchBtn icon="📅" label="Schedule visit with provider" isActive={activeDispatch[b.id] === 'scheduled_visit'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'scheduled_visit' ? null : 'scheduled_visit' }))} />
-                                      {activeDispatch[b.id] === 'scheduled_visit' && (
+
+                                      <DispatchBtn icon="✏️" label="Add external provider (manual)" isActive={activeDispatch[b.id] === 'external_provider'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'external_provider' ? null : 'external_provider' }))} />
+                                      {activeDispatch[b.id] === 'external_provider' && (
+                                        <DispatchForm bg="#fafaf8" border="#e5e7eb">
+                                          <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '3px' }}>Provider name &amp; company</label>
+                                          <input type="text" value={dispatchFormData[b.id]?.providerName ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerName: e.target.value } }))} placeholder="Provider name" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #e5e7eb', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '4px' }} />
+                                          <input type="text" value={dispatchFormData[b.id]?.providerCompany ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerCompany: e.target.value } }))} placeholder="Company/agency name (optional)" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #e5e7eb', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '4px' }} />
+                                          <input type="tel" value={dispatchFormData[b.id]?.providerPhone ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerPhone: e.target.value } }))} placeholder="Phone number (optional)" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #e5e7eb', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '6px' }} />
+                                          <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '3px' }}>Visit date &amp; time</label>
+                                          <input type="datetime-local" value={dispatchFormData[b.id]?.scheduledTime ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], scheduledTime: e.target.value } }))} style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #e5e7eb', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '8px' }} />
+                                          <ActionBtn label={isLoading ? 'Saving…' : 'Assign external provider'} onClick={() => handleDispatch(b.id, 'external_provider', { assigned_provider: [dispatchFormData[b.id]?.providerName, dispatchFormData[b.id]?.providerCompany].filter(Boolean).join(' — '), provider_phone: dispatchFormData[b.id]?.providerPhone ?? '', scheduled_time: dispatchFormData[b.id]?.scheduledTime ?? '' })} disabled={isLoading || !dispatchFormData[b.id]?.providerName?.trim()} color="white" bg="#374151" />
+                                        </DispatchForm>
+                                      )}
+
+                                      <DispatchBtn icon="🔗" label="Request from partner network" isActive={activeDispatch[b.id] === 'partner_network'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'partner_network' ? null : 'partner_network' }))} />
+                                      {activeDispatch[b.id] === 'partner_network' && (
+                                        <DispatchForm bg="#fef9c3" border="#fde68a">
+                                          <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: '#92400e', margin: '0 0 6px', lineHeight: 1.4 }}>
+                                            Search partner home services network, then record the provider assigned.
+                                          </p>
+                                          <ActionBtn label="Search partner network (stub)" onClick={() => { console.log(`[STUB][HomeServices] Would search partner network for home_service near member ${b.member_id}`); setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], arrangement: 'Partner network search completed — assign provider below' } })) }} disabled={isLoading} color="white" bg="#d97706" />
+                                          <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#92400e', display: 'block', marginTop: '8px', marginBottom: '3px' }}>Provider found / assigned</label>
+                                          <input type="text" value={dispatchFormData[b.id]?.providerName ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerName: e.target.value } }))} placeholder="Provider or company name" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #fde68a', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '4px' }} />
+                                          <input type="tel" value={dispatchFormData[b.id]?.providerPhone ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerPhone: e.target.value } }))} placeholder="Phone (optional)" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #fde68a', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '4px' }} />
+                                          <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#92400e', display: 'block', marginBottom: '3px' }}>Scheduled date &amp; time</label>
+                                          <input type="datetime-local" value={dispatchFormData[b.id]?.scheduledTime ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], scheduledTime: e.target.value } }))} style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #fde68a', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '8px' }} />
+                                          <ActionBtn label={isLoading ? 'Assigning…' : 'Assign partner provider'} onClick={() => handleDispatch(b.id, 'partner_network', { assigned_provider: dispatchFormData[b.id]?.providerName ?? 'Partner network', provider_phone: dispatchFormData[b.id]?.providerPhone ?? '', scheduled_time: dispatchFormData[b.id]?.scheduledTime ?? '', arrangement: 'Via partner network' })} disabled={isLoading || !dispatchFormData[b.id]?.scheduledTime} color="white" bg="#b45309" />
+                                        </DispatchForm>
+                                      )}
+                                    </div>
+                                  )}
+
+                                  {/* HEALTH SERVICES (telehealth) */}
+                                  {b.service_type === 'telehealth' && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                      <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '2px' }}>Service sub-type</label>
+                                      <select value={dispatchFormData[b.id]?.healthSubtype ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], healthSubtype: e.target.value } }))} style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #e5e7eb', borderRadius: 'var(--radius-sm)', padding: '7px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '8px' }}>
+                                        <option value="">Select health service type…</option>
+                                        <option>Telehealth Consultation</option>
+                                        <option>Mental Health Support</option>
+                                        <option>Medication Review</option>
+                                        <option>Physical Therapy</option>
+                                        <option>Home Health Aide</option>
+                                        <option>Hospice/Palliative Care Referral</option>
+                                        <option>Other Health Service</option>
+                                      </select>
+
+                                      {/* Telehealth Consultation */}
+                                      {dispatchFormData[b.id]?.healthSubtype === 'Telehealth Consultation' && (
+                                        <>
+                                          <DispatchBtn icon="🩺" label="Schedule telehealth appointment" isActive={activeDispatch[b.id] === 'telehealth_appt'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'telehealth_appt' ? null : 'telehealth_appt' }))} />
+                                          {activeDispatch[b.id] === 'telehealth_appt' && (
+                                            <DispatchForm bg="#eff6ff" border="#bfdbfe">
+                                              <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#1e40af', display: 'block', marginBottom: '3px' }}>Provider name</label>
+                                              <input type="text" value={dispatchFormData[b.id]?.providerName ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerName: e.target.value } }))} placeholder="Doctor / provider name" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #bfdbfe', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '4px' }} />
+                                              <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#1e40af', display: 'block', marginBottom: '3px' }}>Platform</label>
+                                              <select value={dispatchFormData[b.id]?.platform ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], platform: e.target.value } }))} style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #bfdbfe', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '4px' }}>
+                                                <option value="">Select platform…</option>
+                                                <option>Teladoc (stub)</option>
+                                                <option>Amwell (stub)</option>
+                                                <option>Navigator will arrange</option>
+                                              </select>
+                                              <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#1e40af', display: 'block', marginBottom: '3px' }}>Appointment date &amp; time</label>
+                                              <input type="datetime-local" value={dispatchFormData[b.id]?.scheduledTime ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], scheduledTime: e.target.value } }))} style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #bfdbfe', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '8px' }} />
+                                              <ActionBtn label={isLoading ? 'Scheduling…' : 'Schedule appointment'} onClick={() => handleDispatch(b.id, 'telehealth_appt', { health_subtype: 'Telehealth Consultation', assigned_provider: dispatchFormData[b.id]?.providerName ?? '', platform: dispatchFormData[b.id]?.platform ?? '', scheduled_time: dispatchFormData[b.id]?.scheduledTime ?? '' })} disabled={isLoading || !dispatchFormData[b.id]?.providerName?.trim() || !dispatchFormData[b.id]?.scheduledTime} color="white" bg="#1d4ed8" />
+                                            </DispatchForm>
+                                          )}
+                                        </>
+                                      )}
+
+                                      {/* Mental Health Support */}
+                                      {dispatchFormData[b.id]?.healthSubtype === 'Mental Health Support' && (
+                                        <>
+                                          <DispatchBtn icon="🧠" label="Refer to mental health professional" isActive={activeDispatch[b.id] === 'mental_health'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'mental_health' ? null : 'mental_health' }))} />
+                                          {activeDispatch[b.id] === 'mental_health' && (
+                                            <DispatchForm bg="#faf5ff" border="#d8b4fe">
+                                              <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#6b21a8', display: 'block', marginBottom: '3px' }}>Therapist / counselor name</label>
+                                              <input type="text" value={dispatchFormData[b.id]?.therapistName ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], therapistName: e.target.value } }))} placeholder="Name" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #d8b4fe', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '4px' }} />
+                                              <input type="text" value={dispatchFormData[b.id]?.therapistContact ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], therapistContact: e.target.value } }))} placeholder="Contact info (phone or email)" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #d8b4fe', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '4px' }} />
+                                              <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#6b21a8', display: 'block', marginBottom: '3px' }}>Follow-up check-in date</label>
+                                              <input type="date" value={dispatchFormData[b.id]?.followUpDate ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], followUpDate: e.target.value } }))} style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #d8b4fe', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '8px' }} />
+                                              <ActionBtn label={isLoading ? 'Saving…' : 'Record referral'} onClick={() => handleDispatch(b.id, 'mental_health', { health_subtype: 'Mental Health Support', assigned_provider: dispatchFormData[b.id]?.therapistName ?? '', provider_contact: dispatchFormData[b.id]?.therapistContact ?? '', follow_up_date: dispatchFormData[b.id]?.followUpDate ?? '' })} disabled={isLoading || !dispatchFormData[b.id]?.therapistName?.trim()} color="white" bg="#7c3aed" />
+                                            </DispatchForm>
+                                          )}
+                                        </>
+                                      )}
+
+                                      {/* Medication Review */}
+                                      {dispatchFormData[b.id]?.healthSubtype === 'Medication Review' && (
+                                        <>
+                                          <DispatchBtn icon="💊" label="Create medication review task" isActive={activeDispatch[b.id] === 'med_review'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'med_review' ? null : 'med_review' }))} />
+                                          {activeDispatch[b.id] === 'med_review' && (
+                                            <DispatchForm bg="#fff7ed" border="#fed7aa">
+                                              <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: '#c2410c', margin: '0 0 8px', lineHeight: 1.4 }}>
+                                                Creates a navigator task to review this member&apos;s medication list with their primary care doctor.
+                                              </p>
+                                              <ActionBtn label={isLoading ? 'Creating task…' : 'Create medication review task'} onClick={() => handleDispatch(b.id, 'med_review', { health_subtype: 'Medication Review', arrangement: 'Navigator will coordinate medication review with PCP' })} disabled={isLoading} color="white" bg="#ea580c" />
+                                            </DispatchForm>
+                                          )}
+                                        </>
+                                      )}
+
+                                      {/* Home Health Aide */}
+                                      {dispatchFormData[b.id]?.healthSubtype === 'Home Health Aide' && (
+                                        <>
+                                          <DispatchBtn icon="🏥" label="Assign home health aide" isActive={activeDispatch[b.id] === 'health_aide'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'health_aide' ? null : 'health_aide' }))} />
+                                          {activeDispatch[b.id] === 'health_aide' && (() => {
+                                            const vkey = `${b.id}_health_aide`
+                                            const picked = selectedVolunteer[vkey] ?? null
+                                            return (
+                                              <DispatchForm bg="#f0fdf4" border="#86efac">
+                                                <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#065f46', margin: '0 0 6px' }}>Assign from platform volunteers:</p>
+                                                <VolunteerPicker visitType="in_person_visit" selectedId={picked?.id} onSelect={vol => setSelectedVolunteer(prev => ({ ...prev, [vkey]: vol }))} />
+                                                {picked && <VolunteerConfirmCard volunteer={picked} />}
+                                                <p style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: '#374151', margin: '6px 0 2px', fontStyle: 'italic' }}>Or enter an external aide&apos;s name:</p>
+                                                <input type="text" value={dispatchFormData[b.id]?.providerName ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerName: e.target.value } }))} placeholder="External aide name (optional)" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #86efac', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '6px' }} />
+                                                <ActionBtn label={isLoading ? 'Assigning…' : 'Assign aide'} onClick={() => handleDispatch(b.id, 'health_aide', { health_subtype: 'Home Health Aide', assigned_volunteer: picked?.full_name ?? dispatchFormData[b.id]?.providerName ?? '' }, picked?.id)} disabled={isLoading || (!picked && !dispatchFormData[b.id]?.providerName?.trim())} color="white" bg="#059669" />
+                                              </DispatchForm>
+                                            )
+                                          })()}
+                                        </>
+                                      )}
+
+                                      {/* Hospice/Palliative Care — high priority */}
+                                      {dispatchFormData[b.id]?.healthSubtype === 'Hospice/Palliative Care Referral' && (
+                                        <>
+                                          <DispatchBtn icon="🔔" label="Request hospice consultation (urgent)" isActive={activeDispatch[b.id] === 'hospice'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'hospice' ? null : 'hospice' }))} />
+                                          {activeDispatch[b.id] === 'hospice' && (
+                                            <DispatchForm bg="#fff1f2" border="#fca5a5">
+                                              <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: '#9f1239', margin: '0 0 8px', lineHeight: 1.4, fontWeight: 600 }}>
+                                                ⚠️ This creates an urgent navigator task, notifies the care team, and updates this member&apos;s check-in frequency to daily.
+                                              </p>
+                                              <ActionBtn label={isLoading ? 'Creating urgent task…' : 'Request hospice consultation'} onClick={() => { console.log(`[STUB][EMAIL] Would notify care team: URGENT hospice consultation request for member ${b.member_id}`); handleDispatch(b.id, 'hospice', { health_subtype: 'Hospice/Palliative Care Referral', arrangement: 'URGENT: Hospice consultation requested — care team notified' }) }} disabled={isLoading} color="white" bg="#be123c" />
+                                            </DispatchForm>
+                                          )}
+                                        </>
+                                      )}
+
+                                      {/* Physical Therapy / Other */}
+                                      {(dispatchFormData[b.id]?.healthSubtype === 'Physical Therapy' || dispatchFormData[b.id]?.healthSubtype === 'Other Health Service') && (
+                                        <>
+                                          <DispatchBtn icon="📋" label="Schedule service / assign provider" isActive={activeDispatch[b.id] === 'health_general'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'health_general' ? null : 'health_general' }))} />
+                                          {activeDispatch[b.id] === 'health_general' && (
+                                            <DispatchForm bg="#eff6ff" border="#bfdbfe">
+                                              <input type="text" value={dispatchFormData[b.id]?.providerName ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerName: e.target.value } }))} placeholder="Provider name" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #bfdbfe', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '4px' }} />
+                                              <input type="datetime-local" value={dispatchFormData[b.id]?.scheduledTime ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], scheduledTime: e.target.value } }))} style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #bfdbfe', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '8px' }} />
+                                              <ActionBtn label={isLoading ? 'Saving…' : 'Confirm service'} onClick={() => handleDispatch(b.id, 'health_general', { health_subtype: dispatchFormData[b.id]?.healthSubtype ?? '', assigned_provider: dispatchFormData[b.id]?.providerName ?? '', scheduled_time: dispatchFormData[b.id]?.scheduledTime ?? '' })} disabled={isLoading || !dispatchFormData[b.id]?.providerName?.trim()} color="white" bg="#1d4ed8" />
+                                            </DispatchForm>
+                                          )}
+                                        </>
+                                      )}
+                                    </div>
+                                  )}
+
+                                  {/* LEGAL & FINANCIAL */}
+                                  {b.service_type === 'legal_financial' && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                      <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '2px' }}>Service sub-type</label>
+                                      <select value={dispatchFormData[b.id]?.healthSubtype ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], healthSubtype: e.target.value } }))} style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #e5e7eb', borderRadius: 'var(--radius-sm)', padding: '7px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '8px' }}>
+                                        <option value="">Select service type…</option>
+                                        <option>Elder Law Attorney</option>
+                                        <option>Estate Planning Attorney</option>
+                                        <option>Financial Advisor / Planner</option>
+                                        <option>Benefits Counselor</option>
+                                        <option>Medicare / Medicaid Advisor</option>
+                                        <option>Power of Attorney Assistance</option>
+                                        <option>SHIP Counselor (Medicare Help)</option>
+                                        <option>Other Legal / Financial</option>
+                                      </select>
+
+                                      {/* Connect with navigator-vetted provider */}
+                                      {dispatchFormData[b.id]?.healthSubtype && dispatchFormData[b.id]?.healthSubtype !== 'SHIP Counselor (Medicare Help)' && (
+                                        <>
+                                          <DispatchBtn icon="🤝" label="Connect with vetted provider" isActive={activeDispatch[b.id] === 'legal_vetted'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'legal_vetted' ? null : 'legal_vetted' }))} />
+                                          {activeDispatch[b.id] === 'legal_vetted' && (
+                                            <DispatchForm bg="#f5f3ff" border="#d8b4fe">
+                                              <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: '#6b21a8', margin: '0 0 6px', lineHeight: 1.4 }}>
+                                                Our navigators provide a warm, personal introduction — never just a phone number.
+                                              </p>
+                                              <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#6b21a8', display: 'block', marginBottom: '3px' }}>Provider name</label>
+                                              <input type="text" value={dispatchFormData[b.id]?.providerName ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerName: e.target.value } }))} placeholder="Attorney / advisor name (optional)" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #d8b4fe', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '4px' }} />
+                                              <input type="tel" value={dispatchFormData[b.id]?.providerPhone ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerPhone: e.target.value } }))} placeholder="Contact phone (optional)" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #d8b4fe', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '4px' }} />
+                                              <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#6b21a8', display: 'block', marginBottom: '3px' }}>Scheduled date (optional)</label>
+                                              <input type="date" value={(dispatchFormData[b.id]?.scheduledTime ?? '').slice(0, 10)} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], scheduledTime: e.target.value } }))} style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #d8b4fe', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '8px' }} />
+                                              <ActionBtn label={isLoading ? 'Recording…' : 'Record referral & confirm'} onClick={() => handleDispatch(b.id, 'legal_vetted', { legal_subtype: dispatchFormData[b.id]?.healthSubtype ?? '', assigned_provider: dispatchFormData[b.id]?.providerName ?? 'Navigator will connect', provider_phone: dispatchFormData[b.id]?.providerPhone ?? '', scheduled_time: dispatchFormData[b.id]?.scheduledTime ?? '', arrangement: `Warm referral to ${dispatchFormData[b.id]?.healthSubtype ?? 'legal/financial professional'}` })} disabled={isLoading} color="white" bg="#7c3aed" />
+                                            </DispatchForm>
+                                          )}
+                                        </>
+                                      )}
+
+                                      {/* SHIP Counselor */}
+                                      {dispatchFormData[b.id]?.healthSubtype === 'SHIP Counselor (Medicare Help)' && (
+                                        <>
+                                          <DispatchBtn icon="📋" label="Request SHIP counselor (free Medicare help)" isActive={activeDispatch[b.id] === 'ship'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'ship' ? null : 'ship' }))} />
+                                          {activeDispatch[b.id] === 'ship' && (
+                                            <DispatchForm bg="#eff6ff" border="#bfdbfe">
+                                              <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: '#1e40af', margin: '0 0 6px', lineHeight: 1.4 }}>
+                                                SHIP (State Health Insurance Assistance Program) provides free, unbiased Medicare counseling.
+                                              </p>
+                                              <ActionBtn label={isLoading ? 'Connecting…' : 'Connect to SHIP counselor (stub)'} onClick={() => { console.log(`[STUB][SHIP] Would connect member ${b.member_id} to local SHIP counselor`); handleDispatch(b.id, 'ship', { legal_subtype: 'SHIP Counselor', arrangement: 'SHIP Medicare counselor referral — navigator will arrange introduction' }) }} disabled={isLoading} color="white" bg="#1d4ed8" />
+                                            </DispatchForm>
+                                          )}
+                                        </>
+                                      )}
+
+                                      {/* Add to benefits finder */}
+                                      <DispatchBtn icon="🔍" label="Flag for benefits finder review" isActive={activeDispatch[b.id] === 'benefits_flag'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'benefits_flag' ? null : 'benefits_flag' }))} />
+                                      {activeDispatch[b.id] === 'benefits_flag' && (
                                         <DispatchForm bg="#f0fdf4" border="#86efac">
-                                          <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#065f46', display: 'block', marginBottom: '3px' }}>Provider name</label>
-                                          <input type="text" value={dispatchFormData[b.id]?.providerName ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerName: e.target.value } }))} placeholder="e.g. HomeHelper Pro" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #86efac', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '6px' }} />
-                                          <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#065f46', display: 'block', marginBottom: '3px' }}>Visit date &amp; time</label>
-                                          <input type="datetime-local" value={dispatchFormData[b.id]?.scheduledTime ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], scheduledTime: e.target.value } }))} style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #86efac', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '8px' }} />
-                                          <ActionBtn label={isLoading ? 'Scheduling…' : 'Schedule visit'} onClick={() => handleDispatch(b.id, 'scheduled_visit', { assigned_provider: dispatchFormData[b.id]?.providerName ?? '', scheduled_time: dispatchFormData[b.id]?.scheduledTime ?? '' })} disabled={isLoading || !dispatchFormData[b.id]?.providerName?.trim() || !dispatchFormData[b.id]?.scheduledTime} color="white" bg="#059669" />
+                                          <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: '#065f46', margin: '0 0 6px', lineHeight: 1.4 }}>
+                                            Flag this member for a full benefits review session — navigator will run through all eligible programs.
+                                          </p>
+                                          <ActionBtn label={isLoading ? 'Flagging…' : 'Flag for benefits review'} onClick={() => handleDispatch(b.id, 'benefits_flag', { legal_subtype: 'Benefits Review', arrangement: 'Member flagged for comprehensive benefits finder review' })} disabled={isLoading} color="white" bg="#059669" />
                                         </DispatchForm>
                                       )}
+
+                                      {/* Fraud/scam alert */}
+                                      <DispatchBtn icon="⚠️" label="Flag potential fraud / scam concern" isActive={activeDispatch[b.id] === 'fraud_flag'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'fraud_flag' ? null : 'fraud_flag' }))} />
+                                      {activeDispatch[b.id] === 'fraud_flag' && (
+                                        <DispatchForm bg="#fff1f2" border="#fca5a5">
+                                          <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: '#9f1239', margin: '0 0 6px', lineHeight: 1.4, fontWeight: 600 }}>
+                                            ⚠️ Flag this member&apos;s situation for fraud/scam awareness review. A navigator will follow up immediately.
+                                          </p>
+                                          <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#9f1239', display: 'block', marginBottom: '3px' }}>Concern details</label>
+                                          <input type="text" value={dispatchFormData[b.id]?.arrangement ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], arrangement: e.target.value } }))} placeholder="Describe the suspected scam or fraud concern…" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #fca5a5', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '8px' }} />
+                                          <ActionBtn label={isLoading ? 'Flagging…' : 'Flag fraud concern (urgent)'} onClick={() => { console.log(`[STUB][FRAUD] Would alert care team: fraud concern for member ${b.member_id}`); handleDispatch(b.id, 'fraud_flag', { legal_subtype: 'Fraud Alert', arrangement: `FRAUD CONCERN: ${dispatchFormData[b.id]?.arrangement ?? ''}` }) }} disabled={isLoading || !dispatchFormData[b.id]?.arrangement?.trim()} color="white" bg="#be123c" />
+                                        </DispatchForm>
+                                      )}
+                                    </div>
+                                  )}
+
+                                  {/* COMPANIONSHIP & SOCIAL */}
+                                  {b.service_type === 'companionship' && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                      <DispatchBtn icon="🤝" label="Assign volunteer companion" isActive={activeDispatch[b.id] === 'volunteer_companion'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'volunteer_companion' ? null : 'volunteer_companion' }))} />
+                                      {activeDispatch[b.id] === 'volunteer_companion' && (() => {
+                                        const vkey = `${b.id}_volunteer_companion`
+                                        const picked = selectedVolunteer[vkey] ?? null
+                                        const subtype = (b.booking_details as Record<string, string>)?.subtype ?? 'friendly_visit'
+                                        return (
+                                          <DispatchForm bg="#fff1f2" border="#fecaca">
+                                            <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#9f1239', margin: '0 0 6px' }}>
+                                              Select a companion volunteer (filtered for {subtype.replace(/_/g, ' ')}):
+                                            </p>
+                                            <VolunteerPicker visitType={subtype} selectedId={picked?.id} onSelect={vol => setSelectedVolunteer(prev => ({ ...prev, [vkey]: vol }))} />
+                                            {picked && <VolunteerConfirmCard volunteer={picked} />}
+                                            <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#9f1239', display: 'block', marginTop: '6px', marginBottom: '3px' }}>Scheduled visit date &amp; time</label>
+                                            <input type="datetime-local" value={dispatchFormData[b.id]?.scheduledTime ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], scheduledTime: e.target.value } }))} style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #fecaca', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '8px' }} />
+                                            <ActionBtn label={isLoading ? 'Assigning…' : 'Assign companion'} onClick={() => handleDispatch(b.id, 'volunteer_companion', { assigned_volunteer: picked?.full_name ?? '', scheduled_time: dispatchFormData[b.id]?.scheduledTime ?? '' }, picked?.id)} disabled={isLoading || !picked} color="white" bg="#be123c" />
+                                          </DispatchForm>
+                                        )
+                                      })()}
+                                      <DispatchBtn icon="📞" label="Schedule phone friendship call" isActive={activeDispatch[b.id] === 'phone_companion'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'phone_companion' ? null : 'phone_companion' }))} />
+                                      {activeDispatch[b.id] === 'phone_companion' && (() => {
+                                        const vkey = `${b.id}_phone_companion`
+                                        const picked = selectedVolunteer[vkey] ?? null
+                                        return (
+                                          <DispatchForm bg="#f0fdf4" border="#86efac">
+                                            <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#065f46', margin: '0 0 6px' }}>Select a phone companion volunteer:</p>
+                                            <VolunteerPicker visitType="phone_call" selectedId={picked?.id} onSelect={vol => setSelectedVolunteer(prev => ({ ...prev, [vkey]: vol }))} />
+                                            {picked && <VolunteerConfirmCard volunteer={picked} />}
+                                            <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#065f46', display: 'block', marginTop: '6px', marginBottom: '3px' }}>Scheduled call date &amp; time</label>
+                                            <input type="datetime-local" value={dispatchFormData[b.id]?.scheduledTime ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], scheduledTime: e.target.value } }))} style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #86efac', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '8px' }} />
+                                            <ActionBtn label={isLoading ? 'Scheduling…' : 'Schedule call'} onClick={() => handleDispatch(b.id, 'phone_companion', { assigned_volunteer: picked?.full_name ?? '', scheduled_time: dispatchFormData[b.id]?.scheduledTime ?? '' }, picked?.id)} disabled={isLoading || !picked} color="white" bg="#059669" />
+                                          </DispatchForm>
+                                        )
+                                      })()}
                                     </div>
                                   )}
                                 </div>
@@ -1138,6 +1496,134 @@ function DispatchForm({ bg, border, children }: { bg: string; border: string; ch
   )
 }
 
+// Service provider picker — fetches from service_providers table filtered by service type
+function ServiceProviderPicker({
+  serviceType,
+  selectedProviderName,
+  onSelect,
+}: {
+  serviceType: string
+  selectedProviderName?: string
+  onSelect: (name: string) => void
+}) {
+  const [loading, setLoading] = useState(true)
+  const [providers, setProviders] = useState<Array<{ id: string; full_name: string; company_name: string | null; phone: string | null; rating_average: number | null; city: string | null }>>([])
+
+  useEffect(() => {
+    setLoading(true)
+    fetch(`/api/service-providers?serviceType=${encodeURIComponent(serviceType)}`)
+      .then(r => r.json())
+      .then(d => { setProviders(d.providers ?? []); setLoading(false) })
+      .catch(() => setLoading(false))
+  }, [serviceType])
+
+  if (loading) return <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)', padding: '6px 0' }}>Loading providers…</div>
+  if (providers.length === 0) return <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)', padding: '6px 0' }}>No vetted providers found. Enter manually below.</div>
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', maxHeight: '160px', overflowY: 'auto', marginBottom: '4px' }}>
+      {providers.map(p => {
+        const displayName = p.company_name ? `${p.full_name} — ${p.company_name}` : p.full_name
+        const isSelected = selectedProviderName === displayName
+        return (
+          <button key={p.id} type="button" onClick={() => onSelect(displayName)} style={{ textAlign: 'left', background: isSelected ? '#dbeafe' : 'white', border: isSelected ? '2px solid #3b82f6' : '1px solid #d1d5db', borderRadius: 'var(--radius-sm)', padding: '6px 10px', cursor: 'pointer', transition: 'border 0.1s, background 0.1s' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: 'var(--color-navy)' }}>{displayName}</span>
+              {p.rating_average != null && <span style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: '#ca8a04' }}>⭐ {Number(p.rating_average).toFixed(1)}</span>}
+            </div>
+            {p.phone && <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>{p.phone}{p.city ? ` · ${p.city}` : ''}</div>}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+// Reassign panel — same dispatch options as initial dispatch, but sends action='reassign'
+function ReassignPanel({
+  bookingId,
+  serviceType,
+  isLoading,
+  dispatchFormData,
+  setDispatchFormData,
+  selectedVolunteer,
+  setSelectedVolunteer,
+  onReassign,
+}: {
+  bookingId: string
+  serviceType: string
+  isLoading: boolean
+  dispatchFormData: Record<string, { scheduledTime?: string; providerName?: string; arrangement?: string }>
+  setDispatchFormData: React.Dispatch<React.SetStateAction<Record<string, { scheduledTime?: string; providerName?: string; providerCompany?: string; providerPhone?: string; arrangement?: string; healthSubtype?: string; platform?: string; therapistName?: string; therapistContact?: string; followUpDate?: string }>>>
+  selectedVolunteer: Record<string, Volunteer | null>
+  setSelectedVolunteer: React.Dispatch<React.SetStateAction<Record<string, Volunteer | null>>>
+  onReassign: (dispatchType: string, dispatchDetails: Record<string, string>, volunteerId?: string) => void
+}) {
+  const [innerDispatch, setInnerDispatch] = useState<string | null>(null)
+
+  // Determine which volunteer types to show based on service type
+  const getVisitType = (dtype: string): string => {
+    if (dtype === 'volunteer_driver') return 'walking_companion'
+    if (dtype === 'volunteer_tech' || dtype === 'inHome_visit') return 'tech_help'
+    if (dtype === 'volunteer_meals') return 'grocery_help'
+    return 'in_person_visit'
+  }
+
+  return (
+    <div style={{ backgroundColor: '#faf5ff', border: '1px solid #d8b4fe', borderRadius: 'var(--radius-sm)', padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+      <p style={{ fontFamily: 'var(--font-body)', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: '#6b21a8', margin: '0 0 4px' }}>Reassign to a different resource</p>
+
+      {/* Show relevant dispatch options based on service type */}
+      {(serviceType === 'transport' || serviceType === 'tech_help' || serviceType === 'meals' || serviceType === 'home_service') && (
+        <>
+          {['transport', 'tech_help', 'meals', 'home_service'].includes(serviceType) && (() => {
+            const dtype = serviceType === 'transport' ? 'volunteer_driver'
+              : serviceType === 'tech_help' ? 'volunteer_tech'
+              : serviceType === 'meals' ? 'volunteer_meals'
+              : 'home_volunteer'
+            const vkey = `${bookingId}_reassign_${dtype}`
+            const picked = selectedVolunteer[vkey] ?? null
+            const visitType = getVisitType(dtype)
+            return (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <button type="button" onClick={() => setInnerDispatch(p => p === dtype ? null : dtype)} style={{ width: '100%', textAlign: 'left', fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: innerDispatch === dtype ? '#6b21a8' : '#374151', background: innerDispatch === dtype ? 'rgba(109,40,217,0.06)' : 'white', border: innerDispatch === dtype ? '1.5px solid #d8b4fe' : '1.5px solid #e5e7eb', borderRadius: 'var(--radius-sm)', padding: '6px 10px', cursor: 'pointer', display: 'flex', gap: '6px', alignItems: 'center' }}>
+                  🙋 Assign different volunteer{innerDispatch === dtype ? ' ▲' : ' ▼'}
+                </button>
+                {innerDispatch === dtype && (
+                  <div style={{ backgroundColor: 'white', border: '1px solid #e5e7eb', borderRadius: 'var(--radius-sm)', padding: '8px 10px' }}>
+                    <VolunteerPicker visitType={visitType} selectedId={picked?.id} onSelect={vol => setSelectedVolunteer(prev => ({ ...prev, [vkey]: vol }))} />
+                    {picked && <VolunteerConfirmCard volunteer={picked} />}
+                    <button type="button" onClick={() => onReassign(dtype, { assigned_volunteer: picked?.full_name ?? '' }, picked?.id)} disabled={isLoading || !picked} style={{ marginTop: '4px', fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: 'white', backgroundColor: isLoading || !picked ? '#9ca3af' : '#7c3aed', border: 'none', borderRadius: 'var(--radius-sm)', padding: '6px 12px', cursor: isLoading || !picked ? 'not-allowed' : 'pointer' }}>
+                      {isLoading ? 'Reassigning…' : 'Confirm reassignment'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )
+          })()}
+        </>
+      )}
+
+      {/* Manual provider reassignment for home_service / telehealth */}
+      {(serviceType === 'home_service' || serviceType === 'telehealth') && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <button type="button" onClick={() => setInnerDispatch(p => p === 'manual_reassign' ? null : 'manual_reassign')} style={{ width: '100%', textAlign: 'left', fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#374151', background: 'white', border: '1.5px solid #e5e7eb', borderRadius: 'var(--radius-sm)', padding: '6px 10px', cursor: 'pointer' }}>
+            ✏️ Enter provider name manually{innerDispatch === 'manual_reassign' ? ' ▲' : ' ▼'}
+          </button>
+          {innerDispatch === 'manual_reassign' && (
+            <div style={{ backgroundColor: 'white', border: '1px solid #e5e7eb', borderRadius: 'var(--radius-sm)', padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <input type="text" value={dispatchFormData[bookingId]?.providerName ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [bookingId]: { ...prev[bookingId], providerName: e.target.value } }))} placeholder="New provider / volunteer name" style={{ fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #e5e7eb', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box' }} />
+              <button type="button" onClick={() => onReassign('vetted_provider', { assigned_provider: dispatchFormData[bookingId]?.providerName ?? '' })} disabled={isLoading || !dispatchFormData[bookingId]?.providerName?.trim()} style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: 'white', backgroundColor: isLoading || !dispatchFormData[bookingId]?.providerName?.trim() ? '#9ca3af' : '#7c3aed', border: 'none', borderRadius: 'var(--radius-sm)', padding: '6px 12px', cursor: 'pointer' }}>
+                {isLoading ? 'Reassigning…' : 'Confirm reassignment'}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // Volunteer picker — fetches active volunteers filtered by visit_type, displays as selectable cards
 function VolunteerPicker({
   visitType,
@@ -1187,8 +1673,8 @@ function VolunteerPicker({
     return (
       <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)', padding: '6px 0', lineHeight: 1.5 }}>
         No active volunteers available for this service type.{' '}
-        <a href="/admin/volunteers" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-teal)', textDecoration: 'underline' }}>
-          Add volunteers →
+        <a href="/volunteer/apply" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-teal)', textDecoration: 'underline' }}>
+          Add a volunteer →
         </a>
       </div>
     )
