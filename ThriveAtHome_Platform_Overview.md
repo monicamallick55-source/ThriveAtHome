@@ -9,7 +9,18 @@
 
 ## What ThriveAtHome Is
 
-ThriveAtHome is a senior independence platform that helps older adults live safely and with dignity at home — while giving their families real-time peace of mind.
+ThriveAtHome is a comprehensive digital and human-services platform designed to help adults aged 65 and older live with confidence, safety, purpose, and connection in their own homes — for as long as they choose. It bridges AI-powered intelligence with warm human relationships, volunteer community networks, paid companion services, intergenerational student programs, skill exchange economies, and proactive family engagement.
+
+**Core principles:**
+- AI augments — never replaces — human connection and judgment
+- Dignity first: seniors are contributors and teachers, not just recipients of care
+- Family is looped in proactively, not reactively
+- Community volunteers, paid companions, and students are a core part of the ecosystem
+- Skill exchange recognizes seniors' wisdom as an asset to be shared
+- Cultural identity and belonging are foundational to wellbeing
+- Grief and life transitions are met with compassionate, sustained support
+- Accessibility and simplicity are non-negotiable for UX
+- Privacy, data ethics, and trust are foundational
 
 **The core experience:**
 A senior receives a warm daily phone call from Aria, ThriveAtHome's AI care companion. Aria asks how they're doing, checks in on mood, sleep, medications, and wellbeing — in a natural, unhurried conversation, never a checklist. After every call, the family receives an instant summary. If anything needs attention, the family and care team are alerted immediately.
@@ -38,6 +49,20 @@ ThriveAtHome operates as a national open platform with soft local chapters. Memb
 
 ---
 
+## Five-Layer Architecture
+
+ThriveAtHome is built as a modular platform organized into five integrated service layers feeding a central member data hub:
+
+| Layer | Components |
+|-------|-----------|
+| **Layer 1 — AI Connection & Support** | Check-in calls, 24/7 concierge line, family updates, alerts engine |
+| **Layer 2 — Human Companion Network** | Volunteers, paid companions, student network, buddy programme, care coordination/navigators |
+| **Layer 3 — Community & Events** | Virtual events, local events, skill exchange/time banking, interest groups, cultural circles |
+| **Layer 4 — Services Marketplace** | Transportation, home services, health services, legal/financial, meals, on-demand tech help |
+| **Layer 5 — Celebrations, Culture & Transitions** | Personalized celebrations, cultural community circles, grief & life transition support |
+
+Every interaction — AI calls, volunteer visits, service requests, community attendance, family messages, celebration events, cultural programming, grief support touchpoints — flows through a unified member profile shared across all five layers.
+
 ## Brand Vision
 
 **ThriveAtHome is a consumer brand first.**
@@ -53,14 +78,51 @@ The goal: become the first beloved consumer brand in senior care — the way fam
 
 ---
 
+## The Three Core Roles
+
+ThriveAtHome uses three distinct roles that work together — each does something the others cannot:
+
+### Aria (AI Companion)
+- **Adaptive call frequency** — daily (default for all members), 3x/week (opt-down for resistant seniors), weekly (minimum viable signal for very resistant seniors)
+- On the third call, Aria explicitly offers frequency choice: "Do you prefer I call every day, or would a few times a week suit you better?"
+- Collects wellness data: mood, medications, energy, pain scores
+- References previous conversations from the very first week — this is the primary retention mechanism
+- Detects alerts: missed calls, mood drops, crisis language, medication misses
+- Triggers celebrations, milestones, and family notifications
+- Average call length: 15 minutes
+- Available on ALL plan tiers
+- Language rule: NEVER use "monitoring", "wellness check", "safety call", "check-up", "assessment" in any language Aria uses or that appears in UI. Always use "morning catch-up", "friendly call", "daily chat", "Aria's call"
+- First call: Aria says "Our conversations are private. Your family only sees a friendly summary — not a recording or transcript."
+- Family dashboard shows AI summary ONLY — never the transcript (trust design + HIPAA)
+- Buddy concern details (`concern_description`) are navigator-only — family NEVER sees this field. Family sees buddy notes and family_note only.
+
+### Human Buddy (Relationship Builder)
+- A real assigned person who knows and cares about the member
+- Relationship-focused, not task-focused — remembers stories, family, what matters
+- Regular scheduled check-in calls or visits they agree on together
+- Notices what Aria cannot — tone of voice, what's unsaid, loneliness between the lines
+- Volunteer buddy on Connect and Complete plans; paid companion buddy on Premier
+- Available on Connect, Complete, and Premier plans only
+- The heart of the platform — what makes ThriveAtHome irreplaceable
+
+### Navigator (Care Coordinator)
+- Operational and clinical oversight — never the relationship
+- Manages a caseload of up to 150 members
+- Responds to Aria alerts, dispatches services, coordinates care
+- Reviews care plans, manages crises, facilitates introductions
+- The infrastructure behind the human connection — not a friend, a coordinator
+- Available on Complete and Premier plans (shared pool for Basics and Connect — urgent only)
+
+---
+
 ## Pricing Model
 
-| Plan | Price | Best For |
-|------|-------|---------|
-| **Thrive Basics** | $19/month | Families who want daily peace of mind |
-| **Thrive Connect** | $39/month | Families who want community and volunteers too |
-| **Thrive Complete** | $69/month | Families who want active care navigation |
-| **Thrive Premier** | $129/month | Families who want dedicated, hands-on support |
+| Plan | Price | Aria | Human Buddy | Navigator |
+|------|-------|------|-------------|-----------|
+| **Thrive Basics** | $19/month | ✅ Daily AI calls | ❌ | Shared pool — urgent alerts only |
+| **Thrive Connect** | $39/month | ✅ Daily AI calls | ✅ Volunteer buddy 2x/month | Shared pool — urgent alerts only |
+| **Thrive Complete** | $69/month | ✅ Daily AI calls | ✅ Volunteer buddy weekly | ✅ Assigned navigator 2 hrs/month |
+| **Thrive Premier** | $129/month | ✅ Daily AI calls | ✅ Paid companion buddy bi-weekly + priority matching | ✅ Dedicated navigator 8 hrs/month |
 
 **Gift subscriptions:** Available in 1, 3, 6, and 12-month increments for all plans.
 
@@ -69,7 +131,35 @@ The goal: become the first beloved consumer brand in senior care — the way fam
 **B2B pricing:**
 - Employer benefits: $8–$22 PEPM (per employee per month)
 - University partnerships: $5K–$20K per year
+- School district partnerships: $3K–$10K per year
+- Corporate volunteer partnerships: $5K–$50K per year (3 tiers: Community Partner/Champion/Leader)
+- Nonprofit platform license: $2,400–$15,000 per year (Starter/Growth/Scale tiers)
 - Agency/enterprise: Custom PMPM (per member per month) contracts
+- Medicare Advantage: $25–$50 PMPM
+- Medicaid HCBS: $150–$300 PMPM
+- Insurance white-label: $250K setup + $10–$30 PMPM
+
+**B2C adult-children products:**
+- Gift subscription (3 months): $129 one-time
+- Gift subscription (1 year): $399 one-time
+- Caregiver Family Plan: $89/month (1 senior on Complete + up to 5 family on dashboard + monthly coordinator call)
+- Long-Distance Caregiver Add-on: $19/month
+- Family Onboarding Call: $29 one-time
+
+**Companion Device Bundle:** Pre-configured Thrive tablet — $99 one-time or $15/month, included free with 2+ year plan commitment
+
+**Premium add-ons (full catalog, vision-stage):**
+- Extra Care Navigator hours: $25/hour
+- Paid Companion Credit Bundle: $100 for $120 in credits (17% bonus)
+- Virtual Home Safety Assessment: $49 one-time
+- Annual Care Planning Session: $149/session
+- Benefits Maximizer Deep-Dive: $79 one-time
+- Milestone Birthday Memory Book (physical, 70th/75th/80th): $49 one-time
+- Physical birthday card (family co-signed): $9.99 one-time
+- Skill Exchange Premium (priority matching): $9/month
+- Cultural Circle Premium: $5/month
+- Volunteer Concierge (premium matching): $19/month
+- Extra annual legal consultation: $75/consultation
 
 ---
 
@@ -90,6 +180,21 @@ The goal: become the first beloved consumer brand in senior care — the way fam
 | Storage | Supabase Storage | Documents, life story attachments, memory books |
 
 **Stub providers:** All paid external services are built with stub implementations that log what they would do. They activate automatically when API credentials are added — zero code changes needed.
+
+## Full Vision — Device & Integration Layer (roadmap, not yet built)
+
+| Integration | Purpose | Status |
+|--------------|---------|--------|
+| Companion Device | Pre-configured Thrive Android tablet, simplified launcher | ⬜ Not built |
+| Amazon Alexa Skills / Google Assistant Actions | Voice interface for smart home members | ⬜ Not built |
+| Smart home (Echo, Nest, Ring, ADT, Philips Hue, GrandPad) | Passive safety signals, fall detection | ⬜ Not built |
+| Wearables (Apple HealthKit, Google Fit, Fitbit, Garmin) | Activity, fall detection, vitals | ⬜ Not built |
+| HL7 FHIR / Epic / Cerner EHR connectors | Clinical data exchange with health systems | ⬜ Not built |
+| Behavioral anomaly detection (Isolation Forest ML) | No-motion / pattern deviation alerts | ⬜ Not built |
+| Fall risk prediction (XGBoost) | Sensor + medication + history risk scoring | ⬜ Not built |
+| Social isolation detection (Sentiment NLP) | Engagement trend analysis beyond Aria calls | ⬜ Not built |
+
+These represent the technology layer of the full vision — they extend Aria's reach beyond phone calls into the home environment itself. Build when device/hardware partnerships and engineering capacity allow.
 
 ---
 
@@ -143,7 +248,7 @@ The goal: become the first beloved consumer brand in senior care — the way fam
 - Home services, meals, health, legal, tech help, companions — in progress
 
 ### Revenue Features (M17 additions) — IN PROGRESS
-- **Prescription Refill Management** — refill intent detection in Aria calls, 28-day cycle prediction, refill coordination workflow, pharmacy stub integration
+- **Important Dates & Renewals (supersedes Prescription Refill Management)** — flexible member-configurable system tracking prescriptions, home/car/health insurance, driver's license, car registration, AAA membership, passport, gym memberships, and any custom item. Document upload per item (insurance cards, registration docs). Aria proactively reminds in calls. Member can snooze, request navigator help renewing, mark complete, or reschedule/cancel appointments. Recurring items auto-advance; one-time items just complete.
 - **Gift Sending** — gift intent detection in calls, gift marketplace (flowers, food, gift cards, handwritten cards), 15% platform commission, delivery tracking
 - **Family-Initiated Celebrations** — special occasion requests, three coordination tiers (Digital free / Enhanced $25 / Premier $75), family coordination room, personalized Aria celebration calls using life story entries
 
@@ -163,6 +268,41 @@ The goal: become the first beloved consumer brand in senior care — the way fam
 - **Administrative:** Subscription value summary (7 days before renewal), inactive family nudge (30-day), onboarding completion reminder, navigator caseload warning (120+ members)
 - **Services:** Transport follow-up, tech help success check, meal delivery feedback
 - **Global rules:** Audit logged, family opt-out per member, max 2 automated notifications per family per day
+
+### Full Volunteer Ecosystem Vision (8 Categories)
+
+The complete vision calls for eight distinct volunteer categories — currently only General Community Volunteers and Student Network are built. The remaining six are genuine roadmap gaps to build toward:
+
+| Category | Status | Who They Are | What They Do |
+|----------|--------|---------------|---------------|
+| **Community Volunteers (General)** | ✅ Built (M13) | Adults applying directly | Phone calls, visits, errands, events |
+| **College Students** | ✅ Built (M13) | University students | Tech help, companionship, life story projects |
+| **Veteran Volunteers** | 🔄 Partial (Phase 57) | Veterans + VSO members | Peer support, benefits navigation, flag ceremonies |
+| **Youth in Schools (K-12)** | 🔄 Partial (Phase 56) | K-12 students | Pen-pal letters, Life Stories interviews, mentorship reversal — *specific curriculum programs not yet built* |
+| **Retired Professionals** | ⬜ Not built | Retired doctors, lawyers, CPAs, teachers, engineers | Health literacy circles, legal clinics, VITA tax help, tutoring, tech help, financial guidance |
+| **Faith Community Volunteers** | 🔄 Partial (cultural circles) | Congregation members | Pastoral visits, prayer partnerships, chaplain referral network — *chaplaincy network not yet built* |
+| **Corporate Volunteer Teams** | ⬜ Not built | Employee groups | Group event hosting, skills-based volunteering, 3-tier recognition (Partner/Champion/Leader) |
+| **Neighbor Volunteers** | ⬜ Not built | Members in same zip code | Informal check-ins, quick errands — light coordination |
+| **Family Volunteers (Reciprocity)** | ⬜ Not built | Other members' family caring for unrelated seniors | Caregiver reciprocity — earn hours helping others |
+
+**Also part of the vision, not yet built:**
+- Member Ambassador programme — experienced members welcome and guide new members
+- Annual Intergenerational Showcase — student-produced life story collections shared at campus events
+- Unified volunteer impact dashboard with LinkedIn credential integration
+- Volunteer milestone recognition (50/100/250/500 hour badges + mailed thank-you notes)
+
+### Social Connection Features (M17 addition) — IN PROGRESS
+Three-layer social model — warm connection without full social network complexity:
+- **Layer 1 — Circle Connections** (already built): members meet through shared circles and events, post to circle feeds, RSVP to events
+- **Layer 2 — Friend Connections**: after meeting in a circle or event, members can send friend requests, see each other's first name and interests, exchange private messages inside ThriveAtHome — no contact info shared
+- **Layer 3 — Navigator-Facilitated Introductions**: member requests a connection ("find me someone who loves gardening"), navigator or AI suggests compatible member, warm introduction sent to both
+
+**Security model (minimum viable):**
+- Auto-redact phone numbers and emails from posts and messages
+- Scan private messages for money/gift card requests — flag to navigator immediately
+- Report button on all posts and messages — navigator reviews within 24 hours
+- One-time community guidelines acknowledgment (3 bullet points, large text, single tap)
+- No public community feed, no full social graph — deferred to Year 2
 
 ### Enterprise + Partner Portals (M18–M19) — NOT STARTED
 - Outcomes dashboard, employer portal, university portal, Medicare Advantage API
@@ -194,7 +334,14 @@ The goal: become the first beloved consumer brand in senior care — the way fam
 ## Go-to-Market Plan
 
 ### Phase 1 — Seed (Months 1–3): 0–20 subscribers
-Enroll 20 families manually in ONE metro area (Bay Area recommended). Be their concierge. Learn what matters. Activate Retell AI and Twilio. Don't charge yet or charge $1.
+**Strategy: Parallel Blitz** — launch B2C subscriptions, free cultural circles, and university/MSW partnerships simultaneously from Month 1. Not sequentially.
+
+**Month 1:** Activate Retell AI + Twilio + Anthropic + SendGrid in Week 1 — Aria calls must be live immediately. Enrol first 5 seniors. Launch Latino/Hispanic and Chinese-American cultural circles FREE. Post on Handshake as service-learning partner. Initiate all BAAs. Send MSW field placement pitch to 3–5 social work department chairs.
+
+**Month 2:** Enrol seniors 6–12. First MSW placement student begins supervised buddy casework. Add buddy matching questions to onboarding for Connect+ plans.
+
+**Month 3:** Enrol seniors 13–20. First real alert caught and acted on. Meals on Wheels referral workflow live. First university partnership in active conversation (target signed Month 4). Charge $1/month to test payment flow.
+
 **Success signal:** 3 families say "I would pay $39/month for this." First local chapter taking shape.
 
 ### Phase 2 — Early Revenue (Months 4–6): 20–100 subscribers
@@ -260,24 +407,94 @@ First Medicare Advantage contract. 10+ employer clients. Agency portal live.
 
 ---
 
+## Full Success Metrics & Outcomes (the vision's definition of success)
+
+### Senior Wellbeing Outcomes (clinical-grade targets)
+- Emergency room visits reduced 25%+ vs baseline (monitored cohort)
+- Loneliness and social isolation: 30%+ improvement on UCLA Loneliness Scale
+- Medication adherence rate: >85% for enrolled seniors
+- Fall-related hospitalizations: 20%+ reduction through early detection + prevention
+- Purpose and contribution scores: 40%+ improvement for skill exchange participants
+- Senior NPS: target >65
+
+### Community & Engagement Metrics
+- Check-in completion rate: >80% of enrolled seniors weekly
+- Event participation: >50% of members attend at least 1 community event per month
+- Skill exchange: >30% of members participate in teaching or learning within 90 days
+- Interest group retention: >70% of group members still active at 90 days
+- Volunteer match fulfillment: >85% of requests filled within 48 hours
+- Student network hours: 10,000+ annually by end of Year 2
+
+### Celebrations & Cultural Metrics
+- Birthday celebration engagement: >85% of members with active community connections
+- Family coordination rate: >60% of birthdays include family-coordinated activity
+- Cultural circle participation: >40% of non-English-primary members joined within 60 days
+- Cultural event attendance: >50% of cultural circle members attend monthly
+- Language accessibility: >90% of non-English members can complete primary tasks in their language
+
+### Grief & Transition Support Metrics
+- Bereavement response time: 100% of reported losses receive navigator call within 24 hours
+- Grief circle participation: >50% of bereaved members join within 30 days
+- Prolonged grief disorder detection: >80% of at-risk members identified within 90 days
+- Nursing home transition retention: >70% of members who transition remain on platform
+- Transition support satisfaction: >85% rate platform support as helpful
+
+### Volunteer Ecosystem Metrics (full-scale targets)
+- Total active volunteers: 5,000 by Year 1; 25,000 by Year 2; 50,000 by Year 3
+- School partnerships: 25 by Year 1; 150 by Year 2; 500 by Year 3
+- Volunteer fulfillment rate: >88% matched within 48 hours
+- Volunteer retention (annual): >65% still active after 12 months
+- Corporate volunteer partnerships: 10 by Year 1; 100 by Year 2; 300 by Year 3
+- Veteran volunteer network: 2,000 veteran volunteers active by Year 2
+- Volunteer NPS: >70
+
+### Financial & Business Metrics (full-scale targets)
+- CAC: <$120 B2C; <$15,000 employer; <$200,000 MA plan
+- LTV:CAC ratio: >15:1 at steady state
+- Monthly churn: <2% B2C; <0.5% enterprise
+- Gross margin: >70% by Year 2
+- Marketplace GMV: $10M+ by Year 3
+
 ## Competitive Landscape
 
-| Competitor | Gap ThriveAtHome Fills |
-|-----------|----------------------|
-| Amazon Alexa Together | No AI conversation, no community, requires device |
-| Life Alert / Medical Guardian | Reactive only, no daily connection, no family dashboard |
-| Honor / CareLinx | Services only, no AI, no community layer |
-| Papa | Single service, no family dashboard, no AI |
-| Wellthy | No AI calls, no senior product, B2B only |
-| Current Health | Clinical/medical, requires wearables, no community |
+| Competitor | Focus | Missing Piece | ThriveAtHome Advantage |
+|-----------|-------|---------------|------------------------|
+| Best Buy Health / Current Health | Remote patient monitoring | No community, no AI check-in calls, not senior-first UX | Full social + cognitive layer + concierge phone + cultural circles + celebrations |
+| GrandPad | Simplified tablet for seniors | Device only — no care coordination or intelligence | AI engine + human navigators + community + cultural support built-in |
+| Papa Inc. | Companion/volunteer visits | Reactive visits only — no monitoring, no AI | AI proactive check-ins + skill exchange + events + grief support |
+| LifeStation / Medical Alert | Emergency SOS wearables | Emergency only — no wellness, community, or family layer | Wellness baseline + community + family reporting + cultural + celebrations |
+| Carely / Well | Family communication apps | Family-only — no senior experience or care coordination | Senior-facing platform + navigator + community + cultural circles |
+| AARP / SilverSneakers | Benefits + fitness | Fragmented — no monitoring, no care navigation | Integrated full-stack with AI + human + community |
+| Home Instead / Visiting Angels | In-home professional care agencies | Very high cost, no tech, no family integration, no community | 10x lower cost with tech layer + community engagement + cultural support |
+| Local Senior Centers | In-person programming | Geographic limitation; no tech layer, no AI, no family reporting | Everything local centers offer plus 24/7 AI, family layer, and anywhere access |
 
-**The gap:** No company combines daily AI connection + family real-time visibility + genuine community + full services marketplace into one trusted consumer brand. ThriveAtHome is the first.
+**The gap:** ThriveAtHome is the only platform that integrates: (1) proactive AI voice check-ins, (2) 24/7 concierge phone line, (3) paid companion marketplace, (4) volunteer + student networks, (5) skill exchange time banking, (6) persistent interest groups, (7) virtual + local events, (8) full services marketplace including meals, (9) family proactive reporting, (10) human care navigation, (11) personalized celebrations, (12) 12+ cultural community circles with language support, (13) grief and life transition support pathways, (14) an 8-category volunteer ecosystem, and (15) a human Buddy programme — all in a single platform, across multiple funding models.
+
+## Founding Team & Key Roles (full-scale org vision)
+
+| Role | Responsibilities | Ideal Background |
+|------|------------------|-------------------|
+| CEO / Co-Founder | Vision, fundraising, partnerships, culture | Aging/healthcare innovation, startup experience |
+| CTO / Co-Founder | Platform architecture, engineering leadership, AI strategy | Full-stack, healthtech, AI/ML, voice AI |
+| Chief Care Officer | Care navigator model, clinical protocols, quality, volunteer program | Gerontology, social work, nursing leadership |
+| VP Product | Roadmap, UX, senior accessibility design, community features | Consumer health product, accessibility focus |
+| VP Sales — Enterprise | Employer + insurance + government BD | Healthcare enterprise SaaS |
+| VP Marketing / Growth | Brand, B2C acquisition, content, community partnerships | Consumer health or senior market marketing |
+| Head of Community Programs | Volunteer, student network, skill exchange, events, cultural circles | Community organizing, education partnerships |
+| Head of Cultural Engagement | Cultural circle strategy, language access, advisory panels, festival programming | Multicultural community organizing, senior services |
+| Head of Grief & Transition Services | Grief support pathways, professional support network, transition protocols | Clinical social work, palliative care, gerontology |
+| Head of Volunteer Ecosystem | All volunteer categories: schools, veterans, professionals, faith, corporate | Volunteer management, corporate partnerships |
+| Head of Partnerships | Nonprofit, government, university, community org relationships | Aging services, government affairs |
+| Lead Data Scientist | AI models, behavioral analytics, outcomes research | ML/NLP, health data, responsible AI |
+| Head of Compliance | HIPAA, SOC2, government contracting, data ethics | Healthcare compliance, legal |
+
+*This is the full-scale organizational vision. As a solo founder today, prioritize hiring in this order: first Care Navigator (Month 10–11 per Strategy v4), then Head of Partnerships (when first university/employer contracts close), then Chief Care Officer and VP Product as Series A funding allows.*
 
 ---
 
 ## Member Safety & Verification Policy
 
-**Age verification:** Soft verification via date of birth at enrollment. Members must be 60+ to enroll as a senior. No ID upload required at launch. Medicare/Medicaid contracts will require formal age verification — handled at the B2B contract level when needed.
+**Age verification:** Soft verification via date of birth at enrollment. Members must be 65+ to enroll as a senior. No ID upload required at launch. Medicare/Medicaid contracts will require formal age verification — handled at the B2B contract level when needed.
 
 **Background checks:**
 - Senior members: ❌ Never — deeply undignified and a barrier to adoption
@@ -297,6 +514,27 @@ First Medicare Advantage contract. 10+ employer clients. Agency portal live.
 
 ---
 
+## Corporate Structure
+
+**Entity:** Delaware C-Corporation with Public Benefit Corporation (PBC) designation — filed simultaneously at formation.
+
+**Why Delaware C-Corp (not LLC):**
+Every VC term sheet, angel investment agreement, accelerator, and acquirer expects a Delaware C-Corp. Do not form an LLC — it converts poorly and has no preferred stock instrument.
+
+**Formation steps:**
+- Register Delaware C-Corp + PBC via Stripe Atlas or Clerky (~$500–$800 total)
+- Issue 10,000,000 founder shares at $0.0001/share — file 83(b) election with IRS within 30 days
+- Reserve 10–15% ESOP at formation for employees, advisors, future co-founders
+- 4-year founder vesting, 1-year cliff — required even as solo founder
+
+**B Corp Certification:** Start B Impact Assessment Month 3–4. Target certification during seed phase. Costs $2K–$5K. Unlocks university procurement preference, impact investors, AARP/foundation partners, press.
+
+**ThriveAtHome Foundation (Year 2–3):** Separate 501(c)(3) using 1% revenue model once ARR exceeds $500K. Funds subsidised Community Access memberships for low-income seniors. Unlocks grants from Robert Wood Johnson, AARP Foundation, Archstone, federal programmes. Use fiscal sponsorship with a local AAA for any earlier grant opportunity.
+
+**Pre-seed funding:** SAFE note $100K–$500K (no valuation negotiation needed). Target impact investors: Pivotal Ventures, Andreessen Horowitz Bio Fund, Obvious Ventures, AARP Foundation investment arm.
+
+---
+
 ## What This Platform Is NOT
 
 - Does not replace a doctor or provide medical advice
@@ -307,6 +545,78 @@ First Medicare Advantage contract. 10+ employer clients. Agency portal live.
 - Does not conduct background checks on senior members (this would be inappropriate and harmful)
 
 ---
+
+## KPI Dashboard
+
+| Metric | Month 3 | Month 6 | Month 12 | Why It Matters |
+|--------|---------|---------|---------|---------------|
+| Active paying subscribers | 20 | 100 | 400+ | Foundation for all B2B channels |
+| Aria call completion rate | >75% | >85% | >90% | Primary signal of senior acceptance |
+| Daily call opt-down rate | <20% | <15% | <10% | Higher opt-down = Aria quality issue |
+| Monthly churn | <8% | <5% | <3% | Above 5% = leaky bucket |
+| Family dashboard DAU/MAU | >25% | >40% | >50% | Daily checkers don't cancel |
+| Buddy assignments active | 0 | 20+ | 80+ | Buddy supply chain working |
+| Buddy call completion rate | — | >80% | >85% | Buddies keeping commitment |
+| Buddy matching fulfilment | — | <7 days | <5 days | Time from enrolment to first buddy call |
+| Connect+ churn vs Basics | — | Measure | Should be lower | Buddy programme retention proof |
+| Alert-to-human-action rate | >60% | >70% | >80% | Data-triggered human model working |
+| Cultural circle active members | 30+ | 150+ | 500+ | Community moat building |
+| University partnerships signed | 0 | 2 | 4–5 | ARR + buddy + navigator supply |
+| Navigator caseload ratio | <50:1 | <100:1 | <150:1 | Above 150:1 = quality degrades |
+| NPS score | >40 | >50 | >60 | Primary referral engine |
+
+## Full Monetization Model (10 Revenue Streams)
+
+ThriveAtHome is designed to be financially sustainable across ten distinct revenue streams — reaching seniors through the most appropriate funding mechanism for each demographic and market context:
+
+| # | Model | Primary Buyer | Mechanism | Market Size |
+|---|-------|---------------|-----------|-------------|
+| M1 | Nonprofit / Grant Funded | Foundations, government, donors | Grants + sliding-scale partner fees | $50B+ aging services grants/yr |
+| M2 | Corporate Employee Benefits | Employers (caregiver employees) | PEPM | $45B employer benefits market |
+| M3 | Government Programs | Medicare Advantage, Medicaid, VA | Capitated care + PMPM | $800B+ Medicare/Medicaid spend |
+| M4 | Insurance Partnerships | Health insurers, LTC insurers | License fee + outcomes-based PMPM | $150B+ supplemental benefits |
+| M5 | B2C — Seniors Direct | Adults 65+ | Monthly/annual subscription | 54M+ US seniors |
+| M6 | B2C — Adult Children | Adult children of aging parents | Gift sub + caregiver membership | 44M US family caregivers |
+| M7 | Community Hub (Travel + Premium) | Members + B2B | Trip fees, commissions, premium add-ons | Growing senior travel market |
+| M8 | Celebrations & Cultural | Members + sponsors | Celebration add-ons, festival sponsorships, physical goods | $3.2M Year 3 target |
+| M9 | Professional Services Network | Members + service providers | Legal/financial/tech referral fees + paid directory listings | $2.1M Year 3 target |
+| M10 | Corporate Volunteer Program | Employer clients | Corporate partner fees + skills-based engagement | $1.8M Year 3 target |
+
+## Long-Term Financial Vision (Full-Scale, from Comprehensive Specs)
+
+| Revenue Stream | Year 1 | Year 2 | Year 3 |
+|----------------|--------|--------|--------|
+| B2C Subscriptions | $2.4M | $13M | $44.8M |
+| Employer Benefits (PEPM) | $3.6M | $18M | $52M |
+| Government / Medicare Advantage | $1.2M | $12M | $45M |
+| Insurance White-Label / Partnerships | $0.5M | $4M | $15M |
+| Nonprofit Platform Fees | $0.3M | $1.5M | $4M |
+| Companion & Services Marketplace | $0.8M | $4.5M | $14M |
+| University + School Partnerships | $0.3M | $1.4M | $3M |
+| Community Hub (Travel + Premium) | — | $1M | $5.8M |
+| Celebrations & Cultural | — | $0.8M | $3.2M |
+| Professional Services Network | — | $0.55M | $2.1M |
+| Corporate Volunteer Program | — | $0.5M | $1.8M |
+| **TOTAL REVENUE** | **$9.1M** | **$56.8M** | **$190.7M** |
+
+*Target gross margin >70% by Year 2. EBITDA target: ($1.2M) Y1 → $26.8M Y2 → $120.7M Y3 at 63% margin at scale.*
+
+## Near-Term Execution Ramp (Parallel Blitz — first 12 months toward the vision above)
+
+The long-term vision above is the destination. The table below is the realistic Month 1–12 starting trajectory using the Parallel Blitz launch strategy — conservative, bottom-up, and tied to actual operational capacity as a solo founder before institutional capital and full team are in place:
+
+| Channel | Year 1 (realistic start) | Year 2 | Year 3 |
+|---------|--------------------------|--------|--------|
+| B2C subscriptions | $85K–$200K | $400K–$900K | $1.2M–$2.5M |
+| Employer PEPM | $15K–$60K | $150K–$500K | $600K–$1.5M |
+| University / schools | $20K–$75K | $100K–$300K | $250K–$600K |
+| Delivery marketplace | $9K–$35K | $110K–$340K | $300K–$800K |
+| Memory Book | $5K–$20K | $30K–$80K | $80K–$200K |
+| Companion marketplace | $3K–$12K | $25K–$80K | $80K–$250K |
+| Medicare Advantage | — | $50K–$200K | $500K–$2M |
+| **TOTAL** | **$137K–$402K** | **$865K–$2.4M** | **$3M–$7.85M** |
+
+*This ramp is the realistic bridge from $0 to the full-scale vision — once funded with Seed/Series A capital and a built-out team (Care Navigator team, Celebration Coordinators, Cultural Engagement leads, Volunteer Ecosystem staff), growth accelerates toward the long-term financial vision above.*
 
 ## Document Reference
 

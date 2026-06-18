@@ -177,19 +177,30 @@ For each new chapter launch, pursue these local partnerships first:
 
 When you're ready to start converting stubs to real integrations, do them in this order:
 
-### Phase A — First 50 paying subscribers
-1. ☐ Retell AI account + Aria agent setup
-2. ☐ Twilio account + phone numbers
-3. ☐ Anthropic API key
-4. ☐ SendGrid account + sender verification
-5. ☐ Checkr business account
+### Phase A — Week 1 (Parallel Blitz — activate immediately)
+> **Strategy D: Parallel Blitz.** Activate all core services in Week 1 — Aria calls must be live before anything else matters.
+1. ☐ Retell AI account + Aria agent setup — **Week 1**
+2. ☐ Twilio account + phone numbers — **Week 1**
+3. ☐ Anthropic API key — **Week 1**
+4. ☐ SendGrid account + sender verification — **Week 1**
+5. ☐ Checkr business account — before first volunteer
 
-### Phase B — First 200 paying subscribers
-6. ☐ Instacart Business
-7. ☐ Language Line
-8. ☐ GoGoGrandparent or Lyft Healthcare
-9. ☐ Artifact Uprising (Memory Book printing)
-10. ☐ Meals on Wheels local partnerships
+### Phase A2 — Month 1–3 (Parallel tracks, not sequential)
+6. ☐ Meals on Wheels local chapter referral workflow — **Month 3** (free, no cost)
+7. ☐ Handshake — post as service-learning partner for volunteer/buddy supply — **Month 1**
+8. ☐ MSW social work department outreach — 3–5 chairs — **Month 1–2**
+
+### Phase B — Month 6 (per Parallel Blitz schedule)
+9. ☐ GoGoGrandparent — transport dispatch — **Month 6**
+10. ☐ Instacart Business — grocery delivery — **Month 6**
+11. ☐ Language Line — 240+ language support — **Month 6**
+12. ☐ Artifact Uprising — Memory Book printing — **Month 6**
+13. ☐ First university contract signed — **Month 4** ($5K–$10K ARR)
+
+### Phase C — Month 9–12
+14. ☐ Lyft Healthcare — transport dispatch — **Month 9**
+15. ☐ Angi / TaskRabbit — home services — **Month 9**
+16. ☐ Teladoc or MDLive — telehealth — **Month 12**
 
 ### Phase C — First employer contract
 11. ☐ Teladoc or MDLive

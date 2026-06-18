@@ -195,12 +195,24 @@ Memory Book pricing: Premier/Complete = free unlimited; Connect = Book $14.99 / 
 
 **Phase 50 — Services Dashboard Integration** ⬜ Not started
 
-**Phase 50a — Prescription Refill Management** 🔄 In progress
-- Refill intent detection in Aria call transcripts
-- 28-day cycle prediction with 5-day early warning
-- Refill coordination section in /dashboard/services
-- Navigator refill coordination panel with medication history
-- Stub pharmacy integration (NimbleRx, PillPack)
+**Phase 50a — Prescription Refill Management** ⚠️ SUPERSEDED by Phase 50j
+- Original narrow prescription-only feature
+- Replaced by Phase 50j Important Dates & Renewals — prescriptions are now one item_type within
+  the broader configurable system rather than a standalone feature
+
+**Phase 50j — Important Dates & Renewals (NEW, replaces 50a)** 🔄 In progress
+- Generalized tracked_items system covering: prescriptions, home/car/health insurance,
+  driver's license, car registration, AAA membership, passport, gym membership, appointments, other
+- Member-configurable item types with sensible defaults (reminder lead time, recurrence cycle)
+  fully editable per item
+- Document upload per item — insurance card photo, registration document, appointment confirmation
+  (tracked-item-attachments Storage bucket)
+- Aria proactively mentions upcoming items in calls, same pattern as Family Events
+- Member response actions: snooze, request navigator help renewing, mark done, reschedule/cancel
+  (appointments)
+- Recurring items auto-advance to next cycle when marked complete; one-time items (passport) just complete
+- Navigator action panel shows all tracked items sorted soonest-first with renewal request tasks
+- Family dashboard card showing upcoming items color-coded by urgency
 
 **Phase 50b — Gift Sending Platform** 🔄 In progress
 - Gift intent detection in Aria calls → family notification
@@ -238,6 +250,13 @@ Memory Book pricing: Premier/Complete = free unlimited; Connect = Book $14.99 / 
 - Rural members get full virtual service — no degraded experience
 
 **Phase 50g — Member Safety & Fraud Protection** 🔄 In progress
+
+**Phase 50h — Three-Layer Social Connection** 🔄 In progress
+- Layer 1: Circle posts with auto-redact of contact info (already partially built)
+- Layer 2: Friend requests (circle/event members only), private messaging inside platform, contact info auto-redacted, money request scanning
+- Layer 3: Navigator-facilitated introductions with AI member matching
+- Security: Report button on posts/messages, community guidelines acknowledgment screen
+- Deferred to Year 2: public community feed, full social graph, friend feeds, mutual friends visibility
 - Soft age verification (60+ DOB) — no ID upload required
 - Background checks: volunteers/companions/navigators only — NEVER for members
 - Aria detects: gift card requests, new friend money requests, tech support scams, lottery scams, romance scams
@@ -460,6 +479,66 @@ ANTHROPIC_API_KEY           # M8 + AI features
 
 ---
 
+## Full Vision Roadmap — Beyond M20 (from Comprehensive Specs)
+
+These are genuine features in the original platform vision not yet scheduled into a build milestone. They represent the path from current M13–M20 scope to the full 5-layer, 10-revenue-stream vision. Build when team capacity and funding support them — track here so they are never lost.
+
+### M21 — Expanded Volunteer Ecosystem (6 new categories)
+- Retired Professionals Network — doctors, nurses, lawyers, CPAs, teachers, engineers, social workers, chefs volunteering expertise (health literacy circles, legal clinics, VITA tax help, tutoring, home safety tech assessments)
+- Faith Community Chaplaincy Network — certified chaplain referrals for spiritual care, non-proselytizing, member-requested only
+- Corporate Volunteer Program (3-tier: Community Partner 50-200hrs/yr, Champion 200-500hrs/yr, Leader 500+hrs/yr) with skills-based volunteering
+- Neighbor Volunteers — same-zip-code members for informal check-ins and quick errands
+- Family Volunteer Reciprocity Program — family members of one senior volunteer for other (unrelated) seniors, earning time credits
+- Member Ambassador programme — experienced members welcome and guide new members
+- Youth in Schools K-12 curriculum integration — elementary pen-pal letters, middle school "Life Stories" interview project, high school mentorship reversal
+- Annual Intergenerational Showcase — student-produced life story collections shared at campus events
+
+### M22 — Device & Smart Home Integration Layer
+- Companion Device — pre-configured Thrive Android tablet ($99 one-time or $15/month, free with 2yr+ commitment)
+- Amazon Alexa Skills + Google Assistant Actions voice interface
+- Smart home integration: Echo, Nest, Ring, ADT, Philips Hue, GrandPad
+- Wearable integration: Apple HealthKit, Google Fit, Fitbit, Garmin
+- Fall detection via wearable signal — emergency protocol within 60 seconds
+- No-motion smart home anomaly detection
+- HL7 FHIR / Epic / Cerner EHR connectors for clinical data exchange
+
+### M23 — Advanced AI/ML Layer
+- Wellness baseline modeling (custom ML on 30-day wearable/sensor/check-in data)
+- Behavioral anomaly detection (Isolation Forest time-series)
+- Fall risk prediction (XGBoost on sensor + medication + history)
+- Social isolation detection via sentiment NLP + engagement trend analysis (beyond Aria call-based detection)
+- Grief pattern monitoring via sentiment NLP + behavioral anomaly detection (prolonged grief disorder risk flags)
+
+### M24 — Professional Services Revenue Layer
+- Trusted Advisor Directory with paid annual listing fees ($2,400–$6,000/advisor) for elder law attorneys, financial advisors, benefits counselors
+- VITA (Volunteer Income Tax Assistance) integration for free tax prep
+- 988 Suicide & Crisis Lifeline + SAMHSA helpline explicit embedding throughout platform
+- Document vault for advance directives, insurance cards, estate documents
+
+### M25 — Cultural Programming Depth
+- Cultural festival calendars with specific dates (Lunar New Year, Diwali, Tết, Chuseok, Eid, etc.)
+- Community Potluck Coordination — platform helps organize local in-person potluck dinners
+- Cultural Story Circle — elders share homeland festival memories, recorded for life story archives
+- Intergenerational Heritage Event — students learn traditions from elders for school projects
+- Cultural Craft & Cooking Class — skill exchange tied to festival season (dumpling folding, diya painting)
+- Oral history archive in native languages
+
+### M26 — Premium Subscription Add-Ons
+- Caregiver Family Plan — $89/month (1 senior + up to 5 family dashboard seats + monthly coordinator call)
+- Long-Distance Caregiver Add-on — $19/month (enhanced alerts, task management, video diary)
+- Skill Exchange Premium — $9/month (priority matching)
+- Cultural Circle Premium — $5/month
+- Volunteer Concierge — $19/month (premium matching)
+- Annual Care Planning Session — $149/session
+- Benefits Maximizer Deep-Dive — $79 one-time
+- Milestone Birthday Memory Book physical (70th/75th/80th) — $49 one-time, tied to age milestones specifically
+- Extra annual legal consultation — $75/consultation
+
+### M27 — Pet & Companion Life Tracking
+- Pet profile in member record — proactive pet birthday/anniversary acknowledgment
+- Pet milestone celebrations alongside human milestones
+- Pet loss circle (distinct from human bereavement circles)
+
 ## Geographic Chapter Model
 
 ThriveAtHome uses a hybrid chapter system — national open platform with soft local chapters:
@@ -486,6 +565,82 @@ ThriveAtHome uses a hybrid chapter system — national open platform with soft l
 4. Rural/small-town members enrolled nationally on virtual service from day one
 
 ---
+
+## The Three Core Roles — Architecture
+
+Every feature in the platform maps to one of three roles. This distinction must be maintained across all UI, copy, and feature development:
+
+| Role | Type | Purpose | Plans |
+|------|------|---------|-------|
+| **Aria** | AI | Daily structured check-ins, wellness data, alerts, celebrations | All plans |
+| **Human Buddy** | Human relationship | Assigned person, regular calls/visits, relationship-focused, remembers what matters | Connect, Complete, Premier |
+| **Navigator** | Human admin/care | Caseload management, crisis response, service dispatch, care coordination | Complete + Premier (shared pool for Basics/Connect urgent only) |
+
+### Human Buddy Feature — Build Requirements
+
+The Human Buddy is a distinct feature that needs to be clearly represented in the platform:
+
+**Database:** Add `buddy_assignments` table: id, member_id, buddy_type (volunteer/paid_companion), volunteer_id or companion_id, assigned_at, check_in_frequency (twice_monthly/weekly/on_demand), status (active/paused/ended), notes
+
+**Family dashboard:** Add "Your Buddy" card showing: buddy's first name, photo (optional), last contact date, next scheduled contact, a message from the buddy if they left one
+
+**Volunteer dashboard:** Add "My buddy connections" section — different from general volunteer visits. Buddy connections are ongoing relationships, not one-off visits. Show: member name, how long connected, last contact, next scheduled contact, "Log a buddy check-in" button
+
+**Navigator console:** Show buddy assignment status for each member — assigned/unassigned. Unassigned members on Connect+ plans flagged for buddy matching. Navigator can reassign buddies when needed
+
+**Onboarding:** Step 4 plan selection cards updated to clearly show Human Buddy as a key differentiator between Basics and Connect plans
+
+**Plan gating:** Buddy features (browse buddies, request a buddy, buddy messaging) only visible on Connect, Complete, and Premier plans. Basics plan shows locked state with upgrade prompt
+
+---
+
+## Corporate Structure (from Corporate Structure v1.0 doc)
+
+**Entity:** Delaware C-Corp with Public Benefit Corporation (PBC) designation. Not an LLC.
+**B Corp:** Start certification Month 3–4. ~$2K–$5K. Recertify every 3 years.
+**Foundation:** ThriveAtHome Foundation (501c3) in Year 2–3 when ARR >$500K. 1% revenue model.
+**Equity:** 10M founder shares, 4-year vest, 1-year cliff, 83(b) election within 30 days, 10–15% ESOP.
+**Fundraising:** SAFE note pre-seed. Impact investors: Pivotal Ventures, a16z Bio Fund, Obvious Ventures, AARP Foundation.
+
+## Aria Design Rules (from Aria Research v4 doc)
+
+**Never say:** "monitoring", "wellness check", "safety call", "check-up", "assessment"
+**Always say:** "morning catch-up", "friendly call", "daily chat", "Aria's call"
+**Adaptive frequency:** daily (default), 3x/week (opt-down), weekly (resistant seniors)
+**Third call:** Aria offers frequency choice explicitly
+**First call:** Aria says "Our conversations are private. Your family only sees a friendly summary."
+**Context recall:** Reference previous conversations from first week — primary retention mechanism
+**Family dashboard:** Shows AI summary ONLY — never the raw transcript
+
+## Buddy Programme Phases (from Buddy Build Spec v1.0 doc)
+
+Phases 33a–33f insert between Phase 33 (Volunteer Portal) and Phase 34 (Grief Support):
+
+| Phase | Name | Status |
+|-------|------|--------|
+| 33a | Buddy database layer (buddy_assignments, buddy_calls tables) | ⬜ Not started |
+| 33b | Buddy assignment system + admin matching UI | ⬜ Not started |
+| 33c | Buddy portal — pre-call brief + call logging | ⬜ Not started |
+| 33d | Navigator buddy management tools | ⬜ Not started |
+| 33e | Family dashboard buddy integration | ⬜ Not started |
+| 33f | Onboarding buddy matching questions (5 questions, Connect+ only) | ⬜ Not started |
+
+**Corrected plan tiers:**
+- Connect $39: Volunteer buddy, weekly calls
+- Complete $69: Volunteer buddy, weekly calls
+- Premier $129: Buddy bi-weekly + priority matching (within 48 hrs)
+
+## Launch Strategy (from Strategy v4 doc — Parallel Blitz)
+
+**Strategy D — Parallel Blitz** is the recommended launch strategy:
+Launch B2C subscriptions + free cultural circles + MSW university partnerships simultaneously from Month 1.
+Aria calls must be live Week 1 — not deferred.
+
+**Delivery partner go-live schedule:**
+- Month 3: Meals on Wheels (free)
+- Month 6: GoGoGrandparent, Instacart Business
+- Month 9: Lyft Healthcare, Angi/TaskRabbit
+- Month 12: Teladoc/MDLive
 
 ## Key Design Decisions Made During Build
 

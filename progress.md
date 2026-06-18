@@ -6687,3 +6687,5 @@ NEXT SESSION MUST:
 - Begin Phase 50a only after APPROVED
 
 AWAITING HUMAN APPROVAL
+
+ISSUE: Add Travel Assistance as an 8th service category to /dashboard/services. Icon: ✈️. Sub-types: Flight booking assistance, Hotel/accommodation research, Airport transport coordination, Accessible travel research, Travel itinerary planning, Travel companion coordination, Travel insurance guidance, Other. The navigator coordinates travel assistance — for bookings, they connect the member with a vetted travel agent or help the family book directly. Add travel_assistance as a service_type to the service_bookings table. For travel companion requests, match with volunteers or paid companions willing to travel. Show travel sub-types in volunteer application matching the same as other service types.

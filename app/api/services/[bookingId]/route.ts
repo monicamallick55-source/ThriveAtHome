@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser, getUserRole } from '@/lib/auth'
 import { updateBookingStatus, getServiceBookingsForMember } from '@/lib/data/services'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getFamilyMemberByAuthId } from '@/lib/data/family'
 import { pushRealtimeNotification } from '@/lib/realtime/notifications'
 import type { BookingStatus } from '@/types/database'
 
@@ -103,7 +104,7 @@ export async function PATCH(
     telehealth: 'Health Services',
     legal_financial: 'Legal & Financial',
     tech_help: 'Tech Help',
-    companion: 'Companion',
+    companionship: 'Companionship & Social',
   }
   const label = serviceLabel[booking.service_type] ?? booking.service_type
 
@@ -166,4 +167,69 @@ export async function PATCH(
     .maybeSingle()
 
   return NextResponse.json({ booking: updated })
+}
+
+// Member-initiated cancellation
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ bookingId: string }> }
+) {
+  const { bookingId } = await params
+
+  const user = await getCurrentUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const { data: fm } = await getFamilyMemberByAuthId(user.id)
+  if (!fm?.member_id) return NextResponse.json({ error: 'No member linked' }, { status: 400 })
+
+  const body = await req.json().catch(() => ({}))
+  const { cancel_reason } = body as { cancel_reason?: string }
+
+  const admin = createAdminClient()
+
+  const { data: booking, error: fetchErr } = await admin
+    .from('service_bookings')
+    .select('*')
+    .eq('id', bookingId)
+    .eq('member_id', fm.member_id)
+    .maybeSingle()
+
+  if (fetchErr || !booking) {
+    return NextResponse.json({ error: 'Booking not found' }, { status: 404 })
+  }
+
+  if (['completed', 'cancelled'].includes(booking.status as string)) {
+    return NextResponse.json({ error: 'This booking cannot be cancelled.' }, { status: 400 })
+  }
+
+  if (booking.status === 'in_progress') {
+    return NextResponse.json({ error: 'Cannot cancel a service in progress. Please contact your navigator.' }, { status: 400 })
+  }
+
+  // For confirmed bookings, block if within 4 hours of scheduled time
+  if (booking.status === 'confirmed') {
+    const d = (booking.booking_details ?? {}) as Record<string, string>
+    const scheduledTime = d.scheduled_time ?? d.date_time ?? d.preferred_time ?? (booking.requested_for as string | undefined)
+    if (scheduledTime) {
+      const hoursUntil = (new Date(scheduledTime).getTime() - Date.now()) / (1000 * 60 * 60)
+      if (hoursUntil < 4) {
+        return NextResponse.json({
+          error: 'Your service is confirmed and less than 4 hours away. Please contact your navigator to cancel.',
+        }, { status: 400 })
+      }
+    }
+  }
+
+  const noteText = cancel_reason?.trim()
+    ? `[Member cancelled] ${cancel_reason.trim()}`
+    : '[Member cancelled their request]'
+
+  const { error: updateErr } = await admin
+    .from('service_bookings')
+    .update({ status: 'cancelled', notes: noteText })
+    .eq('id', bookingId)
+
+  if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 })
+
+  return NextResponse.json({ success: true })
 }

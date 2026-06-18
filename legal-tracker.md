@@ -26,13 +26,37 @@ A BAA is a legal contract required by HIPAA whenever a business associate handle
 
 ---
 
+## Corporate Structure Recommendation
+
+**Register as a Delaware C-Corporation with Public Benefit Corporation (PBC) designation.** Do not form an LLC.
+
+| Structure | Recommendation |
+|-----------|---------------|
+| **Delaware C-Corp + PBC** | ✅ Correct — use this. PBC embeds senior independence mission in charter. Protects against investor pressure to cut services. |
+| **LLC** | ❌ Wrong — converts poorly, no preferred stock, creates friction at Series A |
+| **501(c)(3) nonprofit** | ❌ Wrong — kills equity, investor capital, and control |
+
+**B Corp Certification:** Start B Impact Assessment Month 3–4. ~$2K–$5K. Unlocks university procurement, impact investors, AARP/foundation partners.
+
+**ThriveAtHome Foundation:** Create in Year 2–3 (when ARR >$500K). Separate 501(c)(3) using 1% revenue model. Use fiscal sponsorship via local AAA for any earlier grant opportunity.
+
+**Equity at formation:**
+- Issue 10,000,000 founder shares at $0.0001/share
+- File 83(b) election with IRS within 30 days — without exception
+- 4-year vesting, 1-year cliff — required even as solo founder
+- Reserve 10–15% ESOP at formation
+
+**Pre-seed:** SAFE note $100K–$500K. Target impact investors: Pivotal Ventures, a16z Bio Fund, Obvious Ventures, AARP Foundation investment arm.
+
+---
+
 ## Core Legal Documents
 
 ### Business Formation
 
 | Document | Purpose | Priority | Status | Action Required | Cost Estimate |
 |----------|---------|----------|--------|----------------|--------------|
-| **Business Entity (LLC or C-Corp)** | Legal structure for the business | 🔴 CRITICAL | ⬜ NOT STARTED | File with your state's Secretary of State. C-Corp recommended if raising investment. LLC fine for bootstrapped. | $50–$500 filing fee |
+| **Delaware C-Corp + PBC** | Legal structure — mission-protected for-profit | 🔴 CRITICAL | ⬜ NOT STARTED | File via Stripe Atlas or Clerky. Select PBC designation at filing. | ~$500–$800 total |
 | **EIN (Employer ID Number)** | Tax ID for the business | 🔴 CRITICAL | ⬜ NOT STARTED | Apply free at IRS.gov — takes 15 minutes online | Free |
 | **Business Bank Account** | Separate business finances | 🔴 CRITICAL | ⬜ NOT STARTED | Open at any bank with EIN + formation documents | Free |
 | **Registered Agent** | Legal address for official documents | 🔴 CRITICAL | ⬜ NOT STARTED | Use a registered agent service or your own address | $50–$150/year |
