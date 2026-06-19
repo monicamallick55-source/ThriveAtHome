@@ -9,6 +9,8 @@ export type ServiceCategoryId =
   | 'legal_financial'
   | 'tech_help'
   | 'companionship'
+  | 'travel_assistance'
+  | 'roadside'
 
 export interface ServiceSubtype {
   value: string
@@ -136,6 +138,40 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
       { value: 'other_companionship', label: 'Other companionship' },
     ],
   },
+  {
+    id: 'travel_assistance',
+    emoji: '✈️',
+    title: 'Travel Assistance',
+    description: 'Flight help, accessible travel research, and travel companion coordination',
+    color: '#0369a1',
+    subtypes: [
+      { value: 'flight_booking', label: 'Flight booking assistance' },
+      { value: 'hotel_research', label: 'Hotel & accommodation research' },
+      { value: 'airport_transport', label: 'Airport transport coordination' },
+      { value: 'accessible_travel', label: 'Accessible travel research' },
+      { value: 'travel_itinerary', label: 'Travel itinerary planning' },
+      { value: 'travel_companion', label: 'Travel companion coordination', visitType: 'travel_companion' },
+      { value: 'travel_insurance', label: 'Travel insurance guidance' },
+      { value: 'other_travel', label: 'Other travel assistance' },
+    ],
+  },
+  {
+    id: 'roadside',
+    emoji: '🚗🔧',
+    title: 'Roadside & Car Repair',
+    description: 'Flat tyre, battery, lockout, towing, and car repair help',
+    color: '#c2410c',
+    subtypes: [
+      { value: 'flat_tire', label: 'Flat tyre / Tyre change' },
+      { value: 'battery_jump', label: 'Battery jump start' },
+      { value: 'lockout', label: 'Lockout — keys locked in car' },
+      { value: 'towing', label: 'Towing service' },
+      { value: 'fuel_delivery', label: 'Fuel delivery' },
+      { value: 'minor_repair', label: 'Minor roadside repair' },
+      { value: 'mechanic_referral', label: 'Car repair shop referral' },
+      { value: 'other_roadside', label: 'Other roadside emergency' },
+    ],
+  },
 ]
 
 // Human-friendly labels for raw dispatch_type values stored in booking_details
@@ -163,6 +199,13 @@ export const DISPATCH_TYPE_LABELS: Record<string, string> = {
   manual: 'Manually arranged by navigator',
   vetted_provider: 'Vetted provider assigned',
   scheduled_visit: 'Scheduled visit',
+  travel_agent_referral: 'Referred to vetted travel agent',
+  volunteer_travel_companion: 'Volunteer travel companion assigned',
+  family_arranged_travel: 'Family-assisted travel arrangement',
+  aaa_roadside: 'AAA called on behalf of member',
+  insurance_roadside: 'Insurance roadside coverage used',
+  arranged_tow: 'Tow truck arranged',
+  mechanic_referral: 'Referred to vetted mechanic',
 }
 
 // Status badge labels — warm, plain English for members
@@ -279,6 +322,14 @@ export const VOLUNTEER_SUBTYPE_GROUPS = [
       { value: 'reading_companion', label: 'Reading companion' },
     ],
   },
+  {
+    category: 'Travel Assistance',
+    emoji: '✈️',
+    subtypes: [
+      { value: 'travel_companion', label: 'Travel companion (willing to travel with member)' },
+      { value: 'travel_coordination', label: 'Travel coordination (research & planning)' },
+    ],
+  },
 ]
 
 // All visit_type enum values (original + expanded) — matches the PostgreSQL enum
@@ -293,6 +344,7 @@ export const ALL_VISIT_TYPES = [
   'smartphone_help', 'computer_help', 'video_calling_setup', 'scam_prevention',
   'benefits_counseling',
   'friendly_visit', 'event_escort', 'reading_companion',
+  'travel_companion', 'travel_coordination',
 ] as const
 
 export type VisitType = (typeof ALL_VISIT_TYPES)[number]

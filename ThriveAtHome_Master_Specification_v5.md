@@ -334,6 +334,7 @@ A single flexible system replaces the original narrow Prescription Refill Manage
 | Tech Help | ⬜ Not started (Phase 49) | Smartphone, computer, video calling, WiFi, scam prevention, TV/streaming |
 | Companionship & Social | ✅ Built | Walking companion, friendly visit, phone friendship, event escort, reading companion |
 | **Travel Assistance** (8th, NEW) | 🔄 In progress | Flight booking, hotel research, airport transport, accessible travel, itinerary planning, travel companion, insurance guidance |
+| **Roadside Assistance & Car Repair** (9th, NEW) | 🔄 In progress (Phase 50k) | Flat tyre, battery jump, lockout, towing, fuel delivery, minor repair, mechanic referral. Pre-fills from member's AAA membership or car insurance stored in Important Dates & Renewals. Urgent flag bypasses standard queue for roadside emergencies. |
 
 All categories use a single source-of-truth `SERVICE_TYPES` constant — every sub-type, label, icon, and matched volunteer skill is defined once and propagated everywhere (volunteer application, matching, navigator dispatch, family dashboard, all portals).
 
@@ -702,16 +703,17 @@ The original vision's Phase 0–4 roadmap and the actual build's M1–M27 milest
 | M14 Community Layer | 34–38 | ✅ COMPLETE |
 | M15 Celebrations & Life Story | 39–41 | ✅ COMPLETE |
 | M16 Grief & Transitions | 42–44 | ✅ COMPLETE |
-| M17 Services Marketplace | 45–50 + 50a–50i | 🔄 IN PROGRESS |
-| M18 Enterprise | 51–55 | ⬜ NOT STARTED |
+| M17 Services Marketplace | 45–50 + 50a–50k | 🔄 IN PROGRESS |
+| M18 Enterprise | 51–54 (Phase 55 moved to after M21) | ⬜ NOT STARTED |
 | M19 Care Industry Partnerships | 59–62 | ⬜ NOT STARTED |
-| M20 Community Organizations | 63–66 | ⏸ DEFERRED (build only when prospect identified) |
+| M20 Community Organizations | 63–66 | ⬜ NOT STARTED — builds after M19, no longer deferred |
 
 ## Future Roadmap — M21–M27 (Captures Remaining Original Vision Gaps)
 
 | Milestone | Captures From Original Vision |
 |---|---|
 | M21 — Expanded Volunteer Ecosystem | Retired Professionals, Chaplaincy, Corporate Volunteer Program, Neighbor Volunteers, Family Reciprocity, Member Ambassador, Youth K-12 curriculum, Intergenerational Showcase |
+| **Multilingual UI (moved from M18 Phase 55)** | Full i18n framework, next-intl, Spanish first then Mandarin/Vietnamese/Tagalog, multilingual Aria calls, Language Line. Builds immediately after M21. |
 | M22 — Device & Smart Home Integration | Companion Device, Alexa/Google Assistant, smart home (Echo/Nest/Ring/ADT), wearables, fall detection, EHR connectors |
 | M23 — Advanced AI/ML Layer | Wellness baseline ML, behavioral anomaly detection, fall risk prediction, NLP-based isolation/grief detection |
 | M24 — Professional Services Revenue Layer | Paid Trusted Advisor Directory, VITA integration, 988/SAMHSA embedding, document vault |

@@ -6,7 +6,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { transportProvider } from '@/lib/providers'
 
 const ALLOWED_SERVICE_TYPES = [
-  'transport', 'home_service', 'meals', 'telehealth', 'legal_financial', 'tech_help', 'companionship', 'companion',
+  'transport', 'home_service', 'meals', 'telehealth', 'legal_financial', 'tech_help', 'companionship', 'companion', 'travel_assistance', 'roadside',
 ] as const
 type AllowedServiceType = (typeof ALLOWED_SERVICE_TYPES)[number]
 
@@ -92,6 +92,35 @@ export async function POST(req: NextRequest) {
         description: 'Member requested mental health support. Review and provide a warm referral to appropriate professional.',
         priority: 'high',
       })
+    } else if (service_type === 'travel_assistance') {
+      const travelDesc = subtype === 'travel_companion'
+        ? `Member needs a travel companion. Match with volunteers or paid companions willing to travel — subtype: ${subtype}.`
+        : `Member requested travel assistance — subtype: ${subtype || 'general'}. Connect with vetted travel agent or help family book directly.`
+      await admin.from('navigator_tasks').insert({
+        member_id: fm.member_id,
+        task_type: 'travel_assistance',
+        description: travelDesc,
+        priority: subtype === 'travel_companion' ? 'medium' : 'low',
+      })
+    } else if (service_type === 'roadside') {
+      const isEmergency = subtype === 'other_roadside'
+      const roadsideDetails = booking_details as Record<string, string>
+      const prefillNote = roadsideDetails.aaa_membership_info
+        ? ` AAA on file: ${roadsideDetails.aaa_membership_info}.`
+        : roadsideDetails.insurance_roadside_info
+          ? ` Car insurance roadside coverage: ${roadsideDetails.insurance_roadside_info}.`
+          : ''
+      await admin.from('navigator_tasks').insert({
+        member_id: fm.member_id,
+        task_type: 'roadside_assistance',
+        description: `Member needs roadside help — ${subtype?.replace(/_/g, ' ') || 'type unspecified'}.${prefillNote} Coordinate using member's AAA or insurance coverage.`,
+        priority: isEmergency ? 'critical' : 'high',
+      })
+      if (isEmergency) {
+        console.log(`[STUB][Roadside][URGENT] Emergency roadside request for member ${fm.member_id} — navigator notified immediately`)
+      } else {
+        console.log(`[STUB][Roadside] Roadside assistance request for member ${fm.member_id} — subtype: ${subtype}`)
+      }
     }
   }
 

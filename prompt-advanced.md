@@ -1356,6 +1356,85 @@ Replace all Phase 50a Prescription Refill Management UI and logic with the gener
 
 ---
 
+### PHASE 50k — Roadside Assistance & Car Repair (M17 addition)
+
+**What this builds:** A 9th service category for roadside assistance and car repair — allowing members to call for help from their AAA membership, roadside coverage from their car insurance, or other roadside plans stored in their Important Dates & Renewals profile. Navigator coordinates on behalf of the member.
+
+**How it integrates with tracked_items (Phase 50j):** When a member has an AAA membership or car insurance policy with roadside coverage stored in their tracked_items, the Roadside Assistance service request automatically pre-fills with that membership/policy information so the navigator can call the right provider immediately.
+
+**Checklist:**
+```
+PHASE 50k CHECKLIST
+[ ] Roadside Assistance added as 9th service category card on /dashboard/services
+    VERIFY: Navigate to /dashboard/services
+    PASS: 🚗🔧 Roadside & Car Repair card visible alongside the other 8 categories
+
+[ ] Roadside request form has correct sub-types
+    VERIFY: Click Roadside & Car Repair category
+    PASS: Sub-type dropdown shows:
+          Flat tire / Tyre change, Battery jump start, Lockout (keys locked in car),
+          Towing service, Fuel delivery, Minor roadside repair,
+          Car repair shop referral, Other roadside emergency
+
+[ ] Membership pre-fill from tracked_items
+    VERIFY: Member has AAA membership in tracked_items; submit a roadside request
+    PASS: Request form pre-fills "Using AAA membership" with the membership details
+          from tracked_items row where item_type='aaa_membership'; navigator sees
+          member's AAA number and contact info already populated in dispatch panel
+
+[ ] Car insurance roadside pre-fill
+    VERIFY: Member has car_insurance in tracked_items with roadside coverage noted
+    PASS: Request shows "Car insurance may include roadside — check [insurance name]"
+          with the renewal_contact_info from that tracked_items row
+
+[ ] Navigator dispatch panel for roadside requests
+    VERIFY: Open roadside request in navigator console member detail panel
+    PASS: Shows: service sub-type, member's location (address from profile),
+          pre-filled membership/insurance info, action buttons:
+          "Call AAA on behalf of member" (stub — logs [STUB][Roadside] Would call AAA for member),
+          "Call insurance roadside" (stub), "Arrange tow truck" (stub),
+          "Refer to mechanic" (shows vetted local mechanics from service_providers table)
+
+[ ] Urgent flag for roadside emergencies
+    VERIFY: Submit roadside request with sub-type "Other roadside emergency"
+    PASS: Request flagged as urgent in navigator action feed (same priority as urgent alerts)
+          Navigator notified immediately rather than in regular queue
+
+[ ] Family dashboard shows roadside request status
+    VERIFY: Submit roadside request; check family dashboard
+    PASS: Active roadside request visible with status and navigator action taken
+
+[ ] npx tsc --noEmit passes
+```
+
+**Build instructions:**
+
+Add to the `SERVICE_TYPES` constant in `/lib/services/serviceTypes.ts`:
+```ts
+{
+  category: 'roadside',
+  label: 'Roadside & Car Repair',
+  icon: '🚗🔧',
+  description: 'Flat tire, battery, lockout, towing, and car repair help',
+  subtypes: [
+    { value: 'flat_tire', label: 'Flat tyre / Tyre change' },
+    { value: 'battery_jump', label: 'Battery jump start' },
+    { value: 'lockout', label: 'Lockout — keys locked in car' },
+    { value: 'towing', label: 'Towing service' },
+    { value: 'fuel_delivery', label: 'Fuel delivery' },
+    { value: 'minor_repair', label: 'Minor roadside repair' },
+    { value: 'mechanic_referral', label: 'Car repair shop referral' },
+    { value: 'other_roadside', label: 'Other roadside emergency' },
+  ]
+}
+```
+
+Membership pre-fill logic: when loading the roadside request form, query `tracked_items` for the member where `item_type IN ('aaa_membership', 'car_insurance')` and `status='active'`. If found, show a pre-fill banner: "We found your [AAA membership / Car insurance] on file — your navigator will use this to help you." Pass the `renewal_contact_info` and item details to the navigator dispatch panel as pre-populated context.
+
+Urgency logic: `sub_type = 'other_roadside'` creates service booking with `urgency='urgent'`, pushes Realtime notification to navigator immediately, bypasses the standard dispatch queue.
+
+---
+
 ### PHASE 50 — Services Dashboard Integration
 
 **Checklist:**
@@ -1485,29 +1564,14 @@ PHASE 54 CHECKLIST
 
 ---
 
-### PHASE 55 — Full Multilingual UI
+### PHASE 55 — Full Multilingual UI ⏸ MOVED TO AFTER M21
 
-**Checklist:**
-```
-PHASE 55 CHECKLIST
-[ ] next-intl installed and configured
-    VERIFY: npm run build passes with i18n config
-    PASS: Zero build errors
+> **This phase has been moved.** Per updated roadmap, Full Multilingual UI builds AFTER M21 (Expanded Volunteer Ecosystem) — not as part of M18. M18 now ends at Phase 54 (Medicare Advantage Reporting API). Language Line concierge credentials still activate at Month 6 per Parallel Blitz schedule (no code change needed — just add LANGUAGE_LINE_ACCOUNT_NUMBER to env vars). The full i18n framework, next-intl setup, Spanish-first translation, and multilingual Aria calls build after M21 is approved.
+>
+> See the M21+ Multilingual section in the roadmap for the full build spec when ready.
 
-[ ] Spanish translation file complete for priority pages
-    VERIFY: Set browser language to Spanish, navigate to /onboarding
-    PASS: Onboarding form renders in Spanish
-
-[ ] Health-critical strings reviewed by native speaker
-    VERIFY: Human review required — cannot be automated
-    PASS: Native Spanish speaker confirms accuracy of health-related strings
-
-[ ] No untranslated string keys visible
-    VERIFY: Browse all pages in Spanish
-    PASS: No raw translation keys (e.g. "onboarding.step1.title") visible anywhere
-
-[ ] npx tsc --noEmit passes
-```
+**When to build:** After M21 (Expanded Volunteer Ecosystem) is complete and approved.
+**Build order:** M18 (Phases 51–54) → M19 → M20 → M21 → Multilingual (this phase) → M22–M27
 
 Priority languages: Spanish first, then Mandarin, Vietnamese, Tagalog.
 
@@ -1607,10 +1671,11 @@ agency_locations table. Parent agency with child locations. Location selector wi
 
 ---
 
-## ═══ M20 — COMMUNITY ORGANIZATION PORTAL (DEFERRED) ═══
+## ═══ M20 — COMMUNITY ORGANIZATION PORTAL ═══
 
-> **⏸ DEFERRED — Do not build until explicitly instructed.**
-> Build M19 first. Only begin M20 when a confirmed village network, AAA, or senior center prospect is identified.
+> **⬜ BUILD AFTER M19 — No longer deferred.**
+> Build M20 after M19 (Care Industry Partnerships) is complete.
+> M20 is now part of the active build sequence. Proceed directly after M19 approval.
 
 ### PHASE 63 — Village / Community Organization Portal
 member_needs bulletin board. Annual membership dues + sliding scale. org_programs table for aggregate program tracking.

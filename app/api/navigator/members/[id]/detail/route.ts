@@ -3,6 +3,7 @@ import { getCurrentUser, getUserRole } from '@/lib/auth'
 import { getNavigatorByAuthId, getMemberRecentCalls, getMemberFamilyContacts, getMemberNavigatorNotes, isMemberAssignedToNavigator } from '@/lib/data/navigator'
 import { getMemberById } from '@/lib/data/members'
 import { getServiceBookingsForMember } from '@/lib/data/services'
+import { getTrackedItemsForMember } from '@/lib/data/tracked-items'
 import { aiProvider } from '@/lib/providers'
 
 export async function GET(
@@ -32,12 +33,13 @@ export async function GET(
     }
   }
 
-  const [memberResult, callsResult, familyResult, notesResult, bookingsResult] = await Promise.all([
+  const [memberResult, callsResult, familyResult, notesResult, bookingsResult, trackedItemsResult] = await Promise.all([
     getMemberById(memberId),
     getMemberRecentCalls(memberId, 5),
     getMemberFamilyContacts(memberId),
     getMemberNavigatorNotes(memberId),
     getServiceBookingsForMember(memberId),
+    getTrackedItemsForMember(memberId, ['active', 'snoozed']),
   ])
 
   if (memberResult.error || !memberResult.data) {
@@ -63,5 +65,6 @@ export async function GET(
     brief,
     navigatorId: navigator.id,
     bookings: bookingsResult.data ?? [],
+    trackedItems: trackedItemsResult.data ?? [],
   })
 }

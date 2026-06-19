@@ -249,6 +249,13 @@ Memory Book pricing: Premier/Complete = free unlimited; Connect = Book $14.99 / 
 - Chapter landing page at /chapter/[slug]
 - Rural members get full virtual service — no degraded experience
 
+**Phase 50k — Roadside Assistance & Car Repair** 🔄 In progress
+- 9th service category: Flat tyre, battery jump, lockout, towing, fuel delivery, mechanic referral
+- Pre-fills from member's AAA membership or car insurance stored in tracked_items (Phase 50j)
+- Urgent flag for roadside emergencies — bypasses standard dispatch queue
+- Navigator dispatch panel shows membership/insurance details pre-populated
+- Stub: [STUB][Roadside] Would call AAA/insurance roadside on behalf of member
+
 **Phase 50g — Member Safety & Fraud Protection** 🔄 In progress
 
 **Phase 50h — Three-Layer Social Connection** 🔄 In progress
@@ -333,11 +340,11 @@ Memory Book pricing: Premier/Complete = free unlimited; Connect = Book $14.99 / 
 - Rate limiting (100 requests/partner/day)
 - API access audit logging
 
-**Phase 55 — Full Multilingual UI**
-- next-intl i18n framework
-- Spanish first (priority), then Mandarin, Vietnamese, Tagalog
-- Professional human translation for health-critical strings
-- Language Line integration placeholder
+**Phase 55 — Full Multilingual UI** ⏸ MOVED TO AFTER M21
+- Moved per updated roadmap — builds after M21 (Expanded Volunteer Ecosystem)
+- M18 now ends at Phase 54 (Medicare Advantage Reporting API)
+- Language Line credentials still activate at Month 6 per Parallel Blitz (env var only, no code change)
+- Full i18n, next-intl, Spanish-first, multilingual Aria builds after M21
 
 ---
 

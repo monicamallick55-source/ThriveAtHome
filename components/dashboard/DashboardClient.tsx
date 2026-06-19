@@ -18,6 +18,8 @@ import type { RealtimeNotification } from '@/lib/data/notifications'
 import type { FamilyTaskItem } from '@/lib/data/tasks'
 import type { CelebrationEvent } from '@/lib/data/celebrations'
 import type { ServiceBooking } from '@/lib/data/services'
+import type { TrackedItem } from '@/lib/data/tracked-items-types'
+import { ITEM_TYPE_DEFAULTS } from '@/lib/data/tracked-items-types'
 
 const SERVICE_EMOJIS: Record<string, string> = {
   transport: '🚗',
@@ -177,6 +179,7 @@ export interface DashboardClientProps {
   isBirthday?: boolean
   recentCelebrations?: CelebrationEvent[]
   upcomingServices?: ServiceBooking[]
+  upcomingTrackedItems?: TrackedItem[]
 }
 
 function QuickActions() {
@@ -265,6 +268,75 @@ const MILESTONE_LABELS: Record<string, { emoji: string; label: string; color: st
   anniversary: { emoji: '🌟', label: 'Anniversary', color: '#43aa8b' },
 }
 
+function getDaysUntil(dateStr: string): number {
+  const today = new Date()
+  today.setUTCHours(0, 0, 0, 0)
+  const d = new Date(dateStr)
+  d.setUTCHours(0, 0, 0, 0)
+  return Math.round((d.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+}
+
+function urgencyColor(days: number) {
+  if (days <= 7) return { color: '#dc2626', bg: '#fef2f2' }
+  if (days <= 30) return { color: '#d97706', bg: '#fffbeb' }
+  return { color: '#059669', bg: '#f0fdf4' }
+}
+
+function UpcomingTrackedItemsSection({ items }: { items: TrackedItem[] }) {
+  const upcoming = items
+    .filter(i => i.status === 'active' || i.status === 'snoozed')
+    .slice(0, 5)
+  if (upcoming.length === 0) return null
+  return (
+    <section aria-labelledby="tracked-heading">
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+        <h2
+          id="tracked-heading"
+          style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: 'var(--color-navy)', margin: 0 }}
+        >
+          Important Dates
+        </h2>
+        <Link href="/dashboard/important-dates" style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-teal)', textDecoration: 'none', fontWeight: 500 }}>
+          View all →
+        </Link>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        {upcoming.map(item => {
+          const days = getDaysUntil(item.expiration_or_appointment_date)
+          const { color, bg } = urgencyColor(days)
+          const defaults = ITEM_TYPE_DEFAULTS[item.item_type as keyof typeof ITEM_TYPE_DEFAULTS]
+          const emoji = defaults?.emoji ?? '📅'
+          const countdownText = days < 0 ? `${Math.abs(days)}d overdue` : days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `In ${days} days`
+          return (
+            <Link
+              key={item.id}
+              href="/dashboard/important-dates"
+              style={{ textDecoration: 'none' }}
+            >
+              <div style={{ backgroundColor: 'white', borderRadius: 'var(--radius-lg)', border: `1.5px solid ${color}20`, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '14px', boxShadow: 'var(--shadow-card)' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', flexShrink: 0 }}>
+                  {emoji}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 600, color: 'var(--color-text-primary)', margin: '0 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {item.item_name}
+                  </p>
+                  <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0 }}>
+                    {item.category === 'appointment' ? 'Appointment' : 'Renewal'} · {item.expiration_or_appointment_date}
+                  </p>
+                </div>
+                <span style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 700, color, flexShrink: 0 }}>
+                  {countdownText}
+                </span>
+              </div>
+            </Link>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
 function MilestonesSection({ events }: { events: CelebrationEvent[] }) {
   if (events.length === 0) return null
   return (
@@ -340,6 +412,7 @@ function DashboardInner(props: DashboardClientProps) {
     isBirthday = false,
     recentCelebrations = [],
     upcomingServices = [],
+    upcomingTrackedItems = [],
   } = props
 
   const [bannerVisible, setBannerVisible] = useState(showSubscribedBanner)
@@ -509,6 +582,9 @@ function DashboardInner(props: DashboardClientProps) {
           {upcomingServices.length > 0 && (
             <ScheduledServicesSection bookings={upcomingServices} />
           )}
+
+          {/* Important Dates */}
+          <UpcomingTrackedItemsSection items={upcomingTrackedItems} />
 
           {/* Health timeline */}
           <section aria-labelledby="timeline-heading">

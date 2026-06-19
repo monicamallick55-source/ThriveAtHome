@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import type { ServiceBooking } from '@/lib/data/services'
 import { SERVICE_CATEGORIES, STATUS_INFO, DISPATCH_TYPE_LABELS, getCategoryById, getSubtypeLabel } from '@/lib/services/serviceTypes'
@@ -209,6 +209,23 @@ function BookingDetailPanel({ booking }: { booking: ServiceBooking }) {
     if (time) rows.push({ label: 'Scheduled time', value: formatDateTime(time), isDate: true })
     if (d.hourly_rate) rows.push({ label: 'Rate', value: `$${d.hourly_rate}/hour` })
     if (d.notes) rows.push({ label: 'Your notes', value: d.notes })
+  } else if (booking.service_type === 'travel_assistance') {
+    if (d.destination) rows.push({ label: 'Destination', value: d.destination })
+    if (d.travel_dates) rows.push({ label: 'Travel dates', value: d.travel_dates })
+    const time = d.scheduled_time ?? d.preferred_time
+    if (time) rows.push({ label: 'Navigator follow-up', value: formatDateTime(time), isDate: true })
+    if (d.assigned_provider) rows.push({ label: 'Travel agent', value: d.assigned_provider })
+    if (d.assigned_volunteer) rows.push({ label: 'Travel companion', value: d.assigned_volunteer })
+    if (d.description) rows.push({ label: 'Details', value: d.description })
+    if (d.dispatch_type) rows.push({ label: 'Arranged via', value: DISPATCH_TYPE_LABELS[d.dispatch_type] ?? d.dispatch_type })
+  } else if (booking.service_type === 'roadside') {
+    if (d.subtype) rows.push({ label: 'Type of help', value: d.subtype.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()) })
+    if (d.aaa_membership_info) rows.push({ label: 'AAA on file', value: d.aaa_membership_info })
+    if (d.insurance_roadside_info) rows.push({ label: 'Car insurance', value: d.insurance_roadside_info })
+    if (d.description) rows.push({ label: 'Details', value: d.description })
+    if (d.dispatch_type) rows.push({ label: 'Arranged via', value: DISPATCH_TYPE_LABELS[d.dispatch_type] ?? d.dispatch_type })
+    if (d.assigned_provider) rows.push({ label: 'Provider', value: d.assigned_provider })
+    if (d.arrangement) rows.push({ label: 'Arrangement', value: d.arrangement })
   } else {
     const time = d.scheduled_time ?? d.preferred_time ?? d.date_time
     if (time) rows.push({ label: 'Scheduled time', value: formatDateTime(time), isDate: true })
@@ -984,6 +1001,201 @@ function CompanionshipForm({ onSuccess }: { onSuccess: (b: ServiceBooking) => vo
   )
 }
 
+// ── Travel Assistance Form ────────────────────────────────────────────────
+
+function TravelAssistanceForm({ onSuccess }: { onSuccess: (b: ServiceBooking) => void }) {
+  const cat = getCategoryById('travel_assistance')!
+  const [subtype, setSubtype] = useState('')
+  const [destination, setDestination] = useState('')
+  const [travelDates, setTravelDates] = useState('')
+  const [description, setDescription] = useState('')
+  const [dateTime, setDateTime] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const isTravelCompanion = subtype === 'travel_companion'
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!subtype) { setError('Please select the type of travel assistance you need.'); return }
+    const dtErr = validateFutureDateTime(dateTime)
+    if (dtErr) { setError(dtErr); return }
+    setSubmitting(true); setError(null)
+    try {
+      const res = await fetch('/api/services', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          service_type: 'travel_assistance',
+          booking_details: {
+            subtype,
+            destination: destination.trim() || null,
+            travel_dates: travelDates.trim() || null,
+            description: description.trim() || null,
+            preferred_time: dateTime,
+          },
+          requested_for: dateTime,
+        }),
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) { setError(json.error ?? 'Unable to submit request.'); return }
+      onSuccess(json.booking)
+      setSubtype(''); setDestination(''); setTravelDates(''); setDescription(''); setDateTime('')
+    } catch { setError('Network error. Please try again.') } finally { setSubmitting(false) }
+  }
+
+  return (
+    <div>
+      <div style={{ backgroundColor: '#e0f2fe', borderRadius: 'var(--radius-md)', padding: '14px 16px', marginBottom: '20px' }}>
+        <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: '#075985', margin: 0, lineHeight: 1.65 }}>
+          <strong>Your navigator coordinates travel.</strong> For bookings, they connect you with a vetted travel agent or help your family book directly. Travel companion requests are matched with volunteers or paid companions willing to travel.
+        </p>
+      </div>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div>
+          <Label htmlFor="ta-subtype" required>What kind of travel help do you need?</Label>
+          <select id="ta-subtype" value={subtype} onChange={e => setSubtype(e.target.value)} style={INPUT} required>
+            <option value="">Select travel assistance type…</option>
+            {cat.subtypes.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+          </select>
+        </div>
+        {isTravelCompanion && (
+          <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #86efac', borderRadius: 'var(--radius-md)', padding: '12px 14px' }}>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: '#065f46', margin: 0, lineHeight: 1.6 }}>
+              We will match you with a volunteer or paid companion willing to travel. Your navigator will confirm availability before finalising.
+            </p>
+          </div>
+        )}
+        <div>
+          <Label htmlFor="ta-dest">Destination (optional)</Label>
+          <input id="ta-dest" type="text" value={destination} onChange={e => setDestination(e.target.value)} placeholder="e.g. San Diego, CA or Florida" style={INPUT} />
+        </div>
+        <div>
+          <Label htmlFor="ta-dates">Travel dates (optional)</Label>
+          <input id="ta-dates" type="text" value={travelDates} onChange={e => setTravelDates(e.target.value)} placeholder="e.g. July 12–19, 2026 or TBD" style={INPUT} />
+        </div>
+        <div>
+          <Label htmlFor="ta-desc">Tell us more (optional)</Label>
+          <textarea id="ta-desc" value={description} onChange={e => setDescription(e.target.value)} placeholder="Any relevant details — mobility needs, travel preferences, number of travellers…" rows={3} style={{ ...INPUT, resize: 'vertical', minHeight: '80px' }} />
+        </div>
+        <div>
+          <Label htmlFor="ta-dt" required>When would you like us to reach out?</Label>
+          <input id="ta-dt" type="datetime-local" value={dateTime} onChange={e => setDateTime(e.target.value)} style={INPUT} required />
+        </div>
+        {error && <ErrorMsg msg={error} />}
+        <SubmitBtn color={cat.color} label="Request travel assistance →" submitting={submitting} />
+        <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-muted)', margin: 0, textAlign: 'center' }}>
+          A navigator will follow up within one business day.
+        </p>
+      </form>
+    </div>
+  )
+}
+
+function RoadsideForm({ onSuccess }: { onSuccess: (b: ServiceBooking) => void }) {
+  const cat = getCategoryById('roadside')!
+  const [subtype, setSubtype] = useState('')
+  const [description, setDescription] = useState('')
+  const [dateTime, setDateTime] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [aaaPrefill, setAaaPrefill] = useState<string | null>(null)
+  const [insurancePrefill, setInsurancePrefill] = useState<string | null>(null)
+
+  // Fetch tracked_items on mount to pre-fill membership info
+  useEffect(() => {
+    fetch('/api/tracked-items')
+      .then(r => r.ok ? r.json() : null)
+      .then(json => {
+        if (!json?.items) return
+        const aaa = json.items.find((i: { item_type: string; status: string; item_name?: string; renewal_contact_info?: string }) => i.item_type === 'aaa_membership' && i.status === 'active')
+        const car = json.items.find((i: { item_type: string; status: string; item_name?: string; renewal_contact_info?: string }) => i.item_type === 'car_insurance' && i.status === 'active')
+        if (aaa) setAaaPrefill(`${aaa.item_name ?? 'AAA Membership'}${aaa.renewal_contact_info ? ` — ${aaa.renewal_contact_info}` : ''}`)
+        if (car) setInsurancePrefill(`${car.item_name ?? 'Car Insurance'}${car.renewal_contact_info ? ` — ${car.renewal_contact_info}` : ''}`)
+      })
+      .catch(() => null)
+  }, [])
+
+  const isEmergency = subtype === 'other_roadside'
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!subtype) { setError('Please select the type of roadside help you need.'); return }
+    const dtErr = validateFutureDateTime(dateTime)
+    if (dtErr) { setError(dtErr); return }
+    setSubmitting(true); setError(null)
+    try {
+      const res = await fetch('/api/services', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          service_type: 'roadside',
+          booking_details: {
+            subtype,
+            description: description.trim() || null,
+            aaa_membership_info: aaaPrefill ?? null,
+            insurance_roadside_info: insurancePrefill ?? null,
+          },
+          requested_for: dateTime,
+        }),
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) { setError(json.error ?? 'Unable to submit request.'); return }
+      onSuccess(json.booking)
+      setSubtype(''); setDescription(''); setDateTime('')
+    } catch { setError('Network error. Please try again.') } finally { setSubmitting(false) }
+  }
+
+  return (
+    <div>
+      {/* Pre-fill banners */}
+      {aaaPrefill && (
+        <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #86efac', borderRadius: 'var(--radius-md)', padding: '12px 14px', marginBottom: '12px' }}>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: '#065f46', margin: 0, lineHeight: 1.6 }}>
+            🛣️ <strong>AAA membership on file:</strong> {aaaPrefill} — your navigator will use this.
+          </p>
+        </div>
+      )}
+      {insurancePrefill && (
+        <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 'var(--radius-md)', padding: '12px 14px', marginBottom: '12px' }}>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: '#1e40af', margin: 0, lineHeight: 1.6 }}>
+            🚗 <strong>Car insurance on file:</strong> {insurancePrefill} — may include roadside coverage.
+          </p>
+        </div>
+      )}
+      {isEmergency && (
+        <div style={{ backgroundColor: '#fef2f2', border: '1.5px solid #fca5a5', borderRadius: 'var(--radius-md)', padding: '12px 14px', marginBottom: '12px' }}>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: '#b91c1c', margin: 0, lineHeight: 1.6, fontWeight: 600 }}>
+            ⚠️ Emergency roadside — a navigator will be notified immediately.
+          </p>
+        </div>
+      )}
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div>
+          <Label htmlFor="rs-subtype" required>What do you need?</Label>
+          <select id="rs-subtype" value={subtype} onChange={e => setSubtype(e.target.value)} style={INPUT} required>
+            <option value="">Select roadside help type…</option>
+            {cat.subtypes.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+          </select>
+        </div>
+        <div>
+          <Label htmlFor="rs-desc">Tell us more (optional)</Label>
+          <textarea id="rs-desc" value={description} onChange={e => setDescription(e.target.value)} placeholder="Your location, what happened, any details that will help your navigator…" rows={3} style={{ ...INPUT, resize: 'vertical', minHeight: '80px' }} />
+        </div>
+        <div>
+          <Label htmlFor="rs-dt" required>When do you need help?</Label>
+          <input id="rs-dt" type="datetime-local" value={dateTime} onChange={e => setDateTime(e.target.value)} style={INPUT} required />
+        </div>
+        {error && <ErrorMsg msg={error} />}
+        <SubmitBtn color={cat.color} label={isEmergency ? 'Request emergency roadside help →' : 'Request roadside help →'} submitting={submitting} />
+        <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-muted)', margin: 0, textAlign: 'center' }}>
+          Your navigator will coordinate using your AAA membership or car insurance coverage where available.
+        </p>
+      </form>
+    </div>
+  )
+}
+
 // ── Companion Marketplace ────────────────────────────────────────────────
 
 const COMPANION_SERVICE_LABELS: Record<string, string> = {
@@ -1404,6 +1616,8 @@ export default function ServicesClient({ initialBookings }: Props) {
             {activeCategory === 'tech_help' && <TechHelpForm onSuccess={handleSuccess} />}
             {activeCategory === 'legal_financial' && <LegalFinancialForm onSuccess={handleSuccess} />}
             {activeCategory === 'companionship' && <CompanionshipForm onSuccess={handleSuccess} />}
+            {activeCategory === 'travel_assistance' && <TravelAssistanceForm onSuccess={handleSuccess} />}
+            {activeCategory === 'roadside' && <RoadsideForm onSuccess={handleSuccess} />}
           </section>
         )}
 

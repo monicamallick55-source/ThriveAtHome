@@ -13,6 +13,7 @@ export type NotifType =
   | 'new_alert' | 'call_completed' | 'call_summary_ready' | 'medication_reminder'
   | 'system_message' | 'service_booking_update' | 'grief_support_assigned'
   | 'family_nudge' | 'celebration_upcoming' | 'volunteer_matched'
+  | 'important_date_reminder'
 export type NotifSeverity = 'info' | 'concern' | 'urgent' | 'emergency'
 export type NotifChannel = 'realtime' | 'sms' | 'email'
 export type NotifStatus = 'sent' | 'failed' | 'stub'
@@ -1216,6 +1217,50 @@ export interface Database {
           { foreignKeyName: 'grief_support_requests_member_id_fkey'; columns: ['member_id']; referencedRelation: 'members'; referencedColumns: ['id'] }
         ]
       }
+      tracked_items: {
+        Row: {
+          id: string
+          created_at: string
+          member_id: string
+          item_type: string
+          category: string
+          item_name: string
+          expiration_or_appointment_date: string
+          reminder_lead_days: number
+          recurrence_cycle_days: number | null
+          is_recurring: boolean
+          renewal_contact_info: string | null
+          attachments: string[]
+          status: string
+          last_reminded_at: string | null
+          snoozed_until: string | null
+          notes: string | null
+          created_by: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          member_id: string
+          item_type?: string
+          category?: string
+          item_name: string
+          expiration_or_appointment_date: string
+          reminder_lead_days?: number
+          recurrence_cycle_days?: number | null
+          is_recurring?: boolean
+          renewal_contact_info?: string | null
+          attachments?: string[]
+          status?: string
+          last_reminded_at?: string | null
+          snoozed_until?: string | null
+          notes?: string | null
+          created_by?: string | null
+        }
+        Update: Partial<Database['public']['Tables']['tracked_items']['Insert']>
+        Relationships: [
+          { foreignKeyName: 'tracked_items_member_id_fkey'; columns: ['member_id']; referencedRelation: 'members'; referencedColumns: ['id'] }
+        ]
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>
@@ -1241,4 +1286,25 @@ export interface Database {
     }
     CompositeTypes: Record<string, never>
   }
+}
+
+// Manually maintained until migration 031 has run in Supabase
+export interface TrackedItemRow {
+  id: string
+  created_at: string
+  member_id: string
+  item_type: string
+  category: string
+  item_name: string
+  expiration_or_appointment_date: string
+  reminder_lead_days: number
+  recurrence_cycle_days: number | null
+  is_recurring: boolean
+  renewal_contact_info: string | null
+  attachments: string[]
+  status: string
+  last_reminded_at: string | null
+  snoozed_until: string | null
+  notes: string | null
+  created_by: string | null
 }

@@ -6689,3 +6689,89 @@ NEXT SESSION MUST:
 AWAITING HUMAN APPROVAL
 
 ISSUE: Add Travel Assistance as an 8th service category to /dashboard/services. Icon: ✈️. Sub-types: Flight booking assistance, Hotel/accommodation research, Airport transport coordination, Accessible travel research, Travel itinerary planning, Travel companion coordination, Travel insurance guidance, Other. The navigator coordinates travel assistance — for bookings, they connect the member with a vetted travel agent or help the family book directly. Add travel_assistance as a service_type to the service_bookings table. For travel companion requests, match with volunteers or paid companions willing to travel. Show travel sub-types in volunteer application matching the same as other service types.
+
+---
+SESSION: 87
+DATE: 2026-06-19 UTC
+MILESTONE: M17 — Services Marketplace
+PHASE: Phase 50j (Important Dates & Renewals — gaps filled) + Phase 50k (Roadside Assistance)
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 50j checklist: 13/13 items [x] — COMPLETE (1 item requires human Supabase action)
+- Phase 50k checklist: 9/9 items [x] — COMPLETE
+- Loop state: TESTING
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider
+- emailProvider: StubEmailProvider
+- billingProvider: StubBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+
+PHASE 50j GAP FILLS:
+- components/navigator/MemberDetailPanel.tsx — MODIFIED: Added "Important Dates" section after Service Bookings; renders panelData.trackedItems sorted by expiration_or_appointment_date with urgency colors (red <7d, amber <30d, green); shows item_name, emoji, countdown, renewal_contact_info; note that renewal_assistance tasks appear in navigator task queue
+- app/api/tracked-items/upload/route.ts — CREATED: POST endpoint; auth + member ownership check; ALLOWED_MIME: jpeg/png/webp/pdf; MAX_SIZE 10MB; uploads to tracked-item-attachments bucket; appends path to tracked_items.attachments array
+- app/api/tracked-items/signed-urls/route.ts — CREATED: POST endpoint; auth + member path security check (all paths must start with member_id/); createSignedUrls(paths, 3600) from tracked-item-attachments bucket
+- components/important-dates/ImportantDatesClient.tsx — MODIFIED: Added AttachmentUrl interface + fetchSignedUrls helper; ItemCard gains attachment state (AttachmentUrl[]), upload loading/error state, fileInputRef; useEffect fetches signed URLs on expand; handleFileUpload POSTs to /api/tracked-items/upload and re-fetches signed URLs; "📎 Documents" section in expanded card with attachment chips (PDF icon or image icon) + "+ Upload document" button + 10MB limit note; paperclip indicator on card header when attachments exist
+- app/api/cron/tracked-item-reminders/route.ts — MODIFIED: Added Aria stub log "[STUB][Aria] Would inject into next call..." with natural-language reminder phrase for each flagged item (renewal vs appointment phrasing)
+
+PHASE 50k — Roadside Assistance:
+- lib/services/serviceTypes.ts — MODIFIED: Added 'roadside' to ServiceCategoryId; added roadside ServiceCategory with 8 sub-types (flat_tire, battery_jump, lockout, towing, fuel_delivery, minor_repair, mechanic_referral, other_roadside); added aaa_roadside/insurance_roadside/arranged_tow/mechanic_referral to DISPATCH_TYPE_LABELS
+- lib/data/services.ts — MODIFIED: Added 'roadside' to ServiceType union
+- app/api/services/route.ts — MODIFIED: Added 'roadside' to ALLOWED_SERVICE_TYPES; added roadside handler: creates navigator task (priority='critical' for other_roadside, 'high' otherwise) with pre-filled AAA/insurance info from booking_details; stub logs for urgent and non-urgent cases
+- components/services/ServicesClient.tsx — MODIFIED: Added useEffect import; added RoadsideForm component (fetches /api/tracked-items on mount for AAA/car insurance pre-fill; shows green/blue pre-fill banners; emergency amber banner for other_roadside subtype; 8 sub-types; dateTime required; posts service_type='roadside' with pre-fill info in booking_details); added roadside BookingDetailPanel detail renderer; added {activeCategory === 'roadside' && <RoadsideForm .../>} to form render
+- components/navigator/MemberDetailPanel.tsx — MODIFIED: Added 'roadside' to SERVICE_LABELS; added roadside dispatch section in booking expanded view (AAA on-file/insurance banners from booking_details; stub dispatch buttons for AAA, car insurance, tow truck form, mechanic referral form)
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — ✓ Compiled successfully in 32.2s; 94 routes; all new routes appear in build output
+
+ERRORS ENCOUNTERED:
+- TaskPriority type didn't include 'urgent' — fixed to 'critical' (which IS in the TaskPriority enum)
+
+DECISIONS MADE:
+- tracked-item-attachments Storage bucket cannot be created programmatically — requires human to create in Supabase Dashboard; noted as HUMAN ACTION in checklist
+- Roadside navigator dispatch: single "Call AAA" and "Call insurance roadside" are one-click stub buttons (no form needed — navigator uses their phone); "Arrange tow truck" and "Mechanic referral" have input forms for provider name/phone
+- Phase 50k sub_type='other_roadside' maps to priority='critical' in navigator_tasks to match existing TaskPriority values
+- RoadsideForm fetches tracked_items from existing /api/tracked-items endpoint (no new API needed); if fetch fails, forms still work without pre-fill
+- Travel assistance migration (030_travel_assistance.sql) already exists from previous session; roadside service bookings don't need new visit_type enum values since navigator handles externally (not via volunteer matching)
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- Human runs migrations in Supabase SQL Editor before testing:
+  1. supabase/migrations/030_travel_assistance.sql (adds travel_companion, travel_coordination visit_types)
+  2. supabase/migrations/031_tracked_items.sql (creates tracked_items table)
+  3. Create Storage bucket 'tracked-item-attachments' in Supabase → Storage → New bucket (private)
+- Human verifies in browser:
+  PHASE 50j (Important Dates):
+  1. /dashboard/important-dates → page loads with "Add important date" button; empty state shows if no items
+  2. Click "Add important date" → type selector with 11 icons; select "🚗 Car Insurance" → reminder_lead_days pre-fills to 30, Recurring=Yes, cycle=365
+  3. Enter name "Honda Civic Insurance", date (future), contact info "(800) 555-0100" → click "Add item" → item appears in "Renewals & Subscriptions"
+  4. Click on the item to expand → shows contact info, recurrence info, "📎 Documents" section
+  5. Click "+ Upload document" → upload a photo or PDF → file attaches (needs Storage bucket created first)
+  6. Click "✅ I already took care of it" → date advances by 365 days
+  7. Add an appointment item → "📅 Appointment" type → "❌ Cancel appointment" appears; "📆 Reschedule" appears
+  8. Cancel an appointment → status=cancelled → disappears from active list
+  9. Click "🙋 Help me renew this" → "✓ Navigator notified" shown; check Supabase navigator_tasks for renewal_assistance row
+  10. /navigator → member detail panel → "Important Dates" section visible with tracked items
+  PHASE 50k (Roadside Assistance):
+  11. /dashboard/services → 9th card "🚗🔧 Roadside & Car Repair" visible
+  12. Click Roadside card → form expands
+  13. (If member has AAA or car_insurance tracked_item) → green/blue pre-fill banners visible
+  14. Select "Flat tyre / Tyre change" → date/time → submit → success message
+  15. Select "Other roadside emergency" → amber "⚠️ Emergency roadside" banner visible
+  16. Submit emergency request → check terminal for [STUB][Roadside][URGENT] log; check navigator_tasks for priority='critical' row
+  17. /navigator → open member with roadside booking → roadside dispatch panel shows tow truck + mechanic forms
+- If all pass: mark Phase 50j and 50k APPROVED_COMPLETE, then begin Phase 50 (Services Dashboard Integration) or Phase 50e (Platform Automations) per prompt-advanced.md
+
+AWAITING HUMAN APPROVAL

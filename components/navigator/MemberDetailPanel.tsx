@@ -6,6 +6,8 @@ import type { FamilyMember, NavigatorNote } from '@/lib/data/navigator'
 import type { ServiceBooking } from '@/lib/data/services'
 import type { BookingStatus } from '@/types/database'
 import type { Volunteer } from '@/lib/data/volunteers'
+import type { TrackedItem } from '@/lib/data/tracked-items-types'
+import { ITEM_TYPE_DEFAULTS } from '@/lib/data/tracked-items-types'
 
 const SERVICE_LABELS: Record<string, string> = {
   transport: '🚗 Transport',
@@ -16,6 +18,8 @@ const SERVICE_LABELS: Record<string, string> = {
   tech_help: '💻 Tech Help',
   companion: '🤝 Companionship',
   companionship: '🤝 Companionship & Social',
+  travel_assistance: '✈️ Travel Assistance',
+  roadside: '🚗🔧 Roadside & Car Repair',
 }
 
 const DISPATCH_LABELS: Record<string, string> = {
@@ -48,6 +52,7 @@ interface PanelData {
   brief: string
   navigatorId: string
   bookings: ServiceBooking[]
+  trackedItems: TrackedItem[]
 }
 
 function formatDate(iso: string | null | undefined): string {
@@ -1345,6 +1350,86 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                                       })()}
                                     </div>
                                   )}
+
+                                  {/* TRAVEL ASSISTANCE */}
+                                  {b.service_type === 'travel_assistance' && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                      <DispatchBtn icon="✈️" label="Refer to vetted travel agent" isActive={activeDispatch[b.id] === 'travel_agent_referral'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'travel_agent_referral' ? null : 'travel_agent_referral' }))} />
+                                      {activeDispatch[b.id] === 'travel_agent_referral' && (
+                                        <DispatchForm bg="#e0f2fe" border="#7dd3fc">
+                                          <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#075985', margin: '0 0 6px' }}>Record travel agent referral details:</p>
+                                          <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#075985', display: 'block', marginBottom: '3px' }}>Travel agent name</label>
+                                          <input type="text" value={dispatchFormData[b.id]?.arrangement ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], arrangement: e.target.value } }))} placeholder="Agent name or agency…" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #7dd3fc', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '8px' }} />
+                                          <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#075985', display: 'block', marginBottom: '3px' }}>Contact phone / email</label>
+                                          <input type="text" value={dispatchFormData[b.id]?.providerPhone ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerPhone: e.target.value } }))} placeholder="e.g. (415) 555-0100" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #7dd3fc', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '8px' }} />
+                                          <ActionBtn label={isLoading ? 'Recording…' : 'Record travel agent referral'} onClick={() => handleDispatch(b.id, 'travel_agent_referral', { assigned_provider: dispatchFormData[b.id]?.arrangement ?? '', provider_contact: dispatchFormData[b.id]?.providerPhone ?? '', dispatch_type: 'travel_agent_referral' })} disabled={isLoading || !dispatchFormData[b.id]?.arrangement?.trim()} color="white" bg="#0369a1" />
+                                        </DispatchForm>
+                                      )}
+                                      {((b.booking_details as Record<string, string>)?.subtype === 'travel_companion') && (
+                                        <>
+                                          <DispatchBtn icon="🤝" label="Assign volunteer travel companion" isActive={activeDispatch[b.id] === 'volunteer_travel_companion'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'volunteer_travel_companion' ? null : 'volunteer_travel_companion' }))} />
+                                          {activeDispatch[b.id] === 'volunteer_travel_companion' && (() => {
+                                            const vkey = `${b.id}_volunteer_travel_companion`
+                                            const picked = selectedVolunteer[vkey] ?? null
+                                            return (
+                                              <DispatchForm bg="#f0fdf4" border="#86efac">
+                                                <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#065f46', margin: '0 0 6px' }}>Select a volunteer willing to travel:</p>
+                                                <VolunteerPicker visitType="travel_companion" selectedId={picked?.id} onSelect={vol => setSelectedVolunteer(prev => ({ ...prev, [vkey]: vol }))} />
+                                                {picked && <VolunteerConfirmCard volunteer={picked} />}
+                                                <ActionBtn label={isLoading ? 'Assigning…' : 'Assign travel companion'} onClick={() => handleDispatch(b.id, 'volunteer_travel_companion', { assigned_volunteer: picked?.full_name ?? '', dispatch_type: 'volunteer_travel_companion' }, picked?.id)} disabled={isLoading || !picked} color="white" bg="#059669" />
+                                              </DispatchForm>
+                                            )
+                                          })()}
+                                        </>
+                                      )}
+                                      <DispatchBtn icon="👨‍👩‍👧" label="Help family book directly" isActive={activeDispatch[b.id] === 'family_arranged_travel'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'family_arranged_travel' ? null : 'family_arranged_travel' }))} />
+                                      {activeDispatch[b.id] === 'family_arranged_travel' && (
+                                        <DispatchForm bg="#fdf4ff" border="#d8b4fe">
+                                          <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#6b21a8', margin: '0 0 6px' }}>Coordinate family-assisted booking:</p>
+                                          <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#6b21a8', display: 'block', marginBottom: '3px' }}>Notes for family</label>
+                                          <textarea value={dispatchFormData[b.id]?.arrangement ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], arrangement: e.target.value } }))} placeholder="Steps for family to complete booking, links, preferences…" rows={3} style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #d8b4fe', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', resize: 'vertical', marginBottom: '8px' }} />
+                                          <ActionBtn label={isLoading ? 'Recording…' : 'Record family coordination'} onClick={() => handleDispatch(b.id, 'family_arranged_travel', { arrangement: dispatchFormData[b.id]?.arrangement ?? '', dispatch_type: 'family_arranged_travel' })} disabled={isLoading || !dispatchFormData[b.id]?.arrangement?.trim()} color="white" bg="#7c3aed" />
+                                        </DispatchForm>
+                                      )}
+                                    </div>
+                                  )}
+
+                                  {/* ROADSIDE & CAR REPAIR */}
+                                  {b.service_type === 'roadside' && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                      {/* Show pre-fill info if available */}
+                                      {(b.booking_details as Record<string, string>)?.aaa_membership_info && (
+                                        <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', backgroundColor: '#f0fdf4', border: '1px solid #86efac', borderRadius: 'var(--radius-sm)', padding: '8px 10px', color: '#065f46', marginBottom: '4px' }}>
+                                          🛣️ <strong>AAA on file:</strong> {(b.booking_details as Record<string, string>).aaa_membership_info}
+                                        </div>
+                                      )}
+                                      {(b.booking_details as Record<string, string>)?.insurance_roadside_info && (
+                                        <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 'var(--radius-sm)', padding: '8px 10px', color: '#1e40af', marginBottom: '4px' }}>
+                                          🚗 <strong>Car insurance roadside:</strong> {(b.booking_details as Record<string, string>).insurance_roadside_info}
+                                        </div>
+                                      )}
+                                      <DispatchBtn icon="🛣️" label="Call AAA on behalf of member (stub)" isActive={false} onClick={() => { console.log(`[STUB][Roadside] Would call AAA for member ${b.member_id} — subtype: ${(b.booking_details as Record<string, string>)?.subtype}`); handleDispatch(b.id, 'aaa_roadside', { dispatch_type: 'aaa_roadside', arrangement: 'Called AAA on behalf of member' }) }} />
+                                      <DispatchBtn icon="🚗" label="Use car insurance roadside coverage (stub)" isActive={false} onClick={() => { console.log(`[STUB][Roadside] Would contact car insurance roadside for member ${b.member_id}`); handleDispatch(b.id, 'insurance_roadside', { dispatch_type: 'insurance_roadside', arrangement: 'Contacted car insurance roadside coverage' }) }} />
+                                      <DispatchBtn icon="🚛" label="Arrange tow truck" isActive={activeDispatch[b.id] === 'arranged_tow'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'arranged_tow' ? null : 'arranged_tow' }))} />
+                                      {activeDispatch[b.id] === 'arranged_tow' && (
+                                        <DispatchForm bg="#fff7ed" border="#fed7aa">
+                                          <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#9a3412', display: 'block', marginBottom: '3px' }}>Tow company / driver name</label>
+                                          <input type="text" value={dispatchFormData[b.id]?.providerName ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerName: e.target.value } }))} placeholder="Company or driver name" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #fed7aa', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '4px' }} />
+                                          <input type="tel" value={dispatchFormData[b.id]?.providerPhone ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerPhone: e.target.value } }))} placeholder="Contact phone" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #fed7aa', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '8px' }} />
+                                          <ActionBtn label={isLoading ? 'Recording…' : 'Confirm tow truck arranged'} onClick={() => handleDispatch(b.id, 'arranged_tow', { dispatch_type: 'arranged_tow', assigned_provider: dispatchFormData[b.id]?.providerName ?? '', arrangement: `Tow truck arranged — ${dispatchFormData[b.id]?.providerName ?? 'provider TBD'} ${dispatchFormData[b.id]?.providerPhone ? `(${dispatchFormData[b.id].providerPhone})` : ''}`.trim() })} disabled={isLoading} color="white" bg="#ea580c" />
+                                        </DispatchForm>
+                                      )}
+                                      <DispatchBtn icon="🔧" label="Refer to mechanic" isActive={activeDispatch[b.id] === 'mechanic_referral'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'mechanic_referral' ? null : 'mechanic_referral' }))} />
+                                      {activeDispatch[b.id] === 'mechanic_referral' && (
+                                        <DispatchForm bg="#f9fafb" border="#d1d5db">
+                                          <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '3px' }}>Mechanic name / shop</label>
+                                          <input type="text" value={dispatchFormData[b.id]?.providerName ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerName: e.target.value } }))} placeholder="Shop name and address" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #d1d5db', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '4px' }} />
+                                          <input type="tel" value={dispatchFormData[b.id]?.providerPhone ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerPhone: e.target.value } }))} placeholder="Contact phone" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #d1d5db', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '8px' }} />
+                                          <ActionBtn label={isLoading ? 'Recording…' : 'Record mechanic referral'} onClick={() => handleDispatch(b.id, 'mechanic_referral', { dispatch_type: 'mechanic_referral', assigned_provider: dispatchFormData[b.id]?.providerName ?? '', arrangement: `Referred to mechanic: ${dispatchFormData[b.id]?.providerName ?? 'TBD'}` })} disabled={isLoading || !dispatchFormData[b.id]?.providerName?.trim()} color="white" bg="#374151" />
+                                        </DispatchForm>
+                                      )}
+                                    </div>
+                                  )}
                                 </div>
                               )}
                             </div>
@@ -1352,6 +1437,51 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                         </div>
                       )
                     })}
+                  </div>
+                )}
+              </Section>
+
+              {/* Important Dates */}
+              <Section title={`Important dates (${panelData.trackedItems.length})`}>
+                {panelData.trackedItems.length === 0 ? (
+                  <EmptyState text="No tracked items for this member." />
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    {panelData.trackedItems
+                      .filter(t => t.status === 'active' || t.status === 'snoozed')
+                      .sort((a, b) => a.expiration_or_appointment_date.localeCompare(b.expiration_or_appointment_date))
+                      .map(t => {
+                        const today = new Date(); today.setUTCHours(0, 0, 0, 0)
+                        const exp = new Date(t.expiration_or_appointment_date); exp.setUTCHours(0, 0, 0, 0)
+                        const days = Math.round((exp.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+                        const color = days <= 7 ? '#dc2626' : days <= 30 ? '#d97706' : '#059669'
+                        const bg = days <= 7 ? '#fef2f2' : days <= 30 ? '#fffbeb' : '#f0fdf4'
+                        const defaults = ITEM_TYPE_DEFAULTS[t.item_type]
+                        const emoji = defaults?.emoji ?? '📅'
+                        const countdownText = days < 0 ? `${Math.abs(days)}d overdue` : days === 0 ? 'Today' : `in ${days}d`
+                        return (
+                          <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', backgroundColor: 'white', border: `1px solid ${color}30`, borderRadius: 'var(--radius-md)', padding: '8px 12px' }}>
+                            <div style={{ width: '34px', height: '34px', borderRadius: '50%', backgroundColor: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
+                              {emoji}
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-primary)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {t.item_name}
+                              </p>
+                              <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)', margin: '2px 0 0' }}>
+                                {t.category === 'appointment' ? 'Appointment' : 'Renewal'} · {t.expiration_or_appointment_date}
+                                {t.renewal_contact_info ? ` · ${t.renewal_contact_info}` : ''}
+                              </p>
+                            </div>
+                            <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 700, color, flexShrink: 0 }}>
+                              {countdownText}
+                            </div>
+                          </div>
+                        )
+                      })}
+                    <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)', margin: '4px 0 0', fontStyle: 'italic' }}>
+                      Renewal help requests appear in the navigator task queue as &quot;renewal_assistance&quot; tasks.
+                    </p>
                   </div>
                 )}
               </Section>

@@ -11,6 +11,7 @@ import { getFamilyMemberByAuthId } from '@/lib/data/family'
 import { syncMemberSubscription } from '@/lib/stripe/sync'
 import { isTodayBirthday, getRecentCelebrationEvents } from '@/lib/data/celebrations'
 import { getUpcomingServiceBookings } from '@/lib/data/services'
+import { getUpcomingTrackedItems } from '@/lib/data/tracked-items'
 import DashboardClient from '@/components/dashboard/DashboardClient'
 import type { CheckInCall } from '@/lib/data/calls'
 import type { Alert } from '@/lib/data/alerts'
@@ -19,6 +20,7 @@ import type { FamilyTaskItem } from '@/lib/data/tasks'
 import type { FamilyMember } from '@/lib/data/family'
 import type { CelebrationEvent } from '@/lib/data/celebrations'
 import type { ServiceBooking } from '@/lib/data/services'
+import type { TrackedItem } from '@/lib/data/tracked-items-types'
 
 export const metadata: Metadata = { title: 'Dashboard — ThriveAtHome' }
 
@@ -69,6 +71,7 @@ export default async function DashboardPage({
     fmResult,
     celebrationsResult,
     servicesResult,
+    trackedItemsResult,
   ] = await Promise.all([
     withTimeout<CheckInCall[]>(getCallsForMember(member.id, 90, 0, user.id)),
     withTimeout<Alert[]>(getAlertsForMember(member.id)),
@@ -77,6 +80,7 @@ export default async function DashboardPage({
     withTimeout<FamilyMember>(getFamilyMemberByAuthId(user.id)),
     withTimeout<CelebrationEvent[]>(getRecentCelebrationEvents(member.id, 3)),
     withTimeout<ServiceBooking[]>(getUpcomingServiceBookings(member.id)),
+    withTimeout<TrackedItem[]>(getUpcomingTrackedItems(member.id)),
   ])
 
   const memberIsBirthday = member.date_of_birth ? isTodayBirthday(member.date_of_birth) : false
@@ -97,6 +101,7 @@ export default async function DashboardPage({
       isBirthday={memberIsBirthday}
       recentCelebrations={celebrationsResult.data ?? []}
       upcomingServices={servicesResult.data ?? []}
+      upcomingTrackedItems={trackedItemsResult.data ?? []}
     />
   )
 }

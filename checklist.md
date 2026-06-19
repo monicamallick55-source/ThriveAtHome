@@ -439,6 +439,8 @@ M17 Services          Phase 45 [x][x][x][x][x][x][x]       7/7 ✅ COMPLETE (Ses
                       Phase 47 [x][x][x][x][x][x]          6/6 ✅ COMPLETE (Session 85)
                       Phase 48 [x][x][x][x][x]             5/5 ✅ COMPLETE (Session 86)
                       Phase 49 [x][x][x][x][x]             5/5 ✅ COMPLETE (Session 86)
+                      Phase 50j [x][x][x][x][x][x][x][x][x][x][x][x][x] 13/13 ✅ COMPLETE (Session 87)
+                      Phase 50k [x][x][x][x][x][x][x][x][x]  9/9  ✅ COMPLETE (Session 87)
 ```
 
 ## M17 — Services Marketplace
@@ -491,6 +493,46 @@ STATUS: `COMPLETE`
 - [x] Scam education content visible — fraud awareness section on /dashboard/services covers tech support scams, phishing, gift card fraud (Session 85)
 - [x] Video tutorial library placeholder — /dashboard/tech-tutorials: 5 categories (Smartphone Basics, Video Calls, Online Safety, Computer & Tablet, TV & Streaming), 25 guide titles, helpline reminder, "Request tech help →" CTA (Session 86)
 - [x] npx tsc --noEmit passes — zero errors (Session 86)
+
+### Phase 50j — Important Dates & Renewals
+STATUS: `COMPLETE`
+
+- [x] Migration 031_tracked_items.sql — tracked_items table with family RLS + navigator read/update policies; human must run in Supabase SQL Editor (Session 87)
+- [ ] tracked-item-attachments Storage bucket — HUMAN ACTION REQUIRED: create private bucket named 'tracked-item-attachments' in Supabase Storage; bucket must exist before document upload will work
+- [x] Important Dates page at /dashboard/important-dates — server-fetches active/snoozed items; groups into "Renewals & Subscriptions" and "Appointments" sections; sorted soonest-first; urgency colors (red <7d, amber <30d, green otherwise) (Session 87)
+- [x] Add tracked item form — type selector (11 icons with emoji), item_name, date, reminder_lead_days (pre-fills from ITEM_TYPE_DEFAULTS, editable), recurring toggle + cycle days (editable), contact info, notes; tracked_items row created on submit (Session 87)
+- [x] Document upload on tracked item — expand card → "📎 Documents" section → "+ Upload document" button; POST /api/tracked-items/upload; file attached to tracked-item-attachments bucket (path stored in attachments array); existing attachments shown as paperclip links (Session 87)
+- [x] Aria proactive reminder stub — cron logs "[STUB][Aria] Would inject into next call..." with natural-language phrase for each flagged item (Session 87)
+- [x] Member response options — "I already took care of it" (recurring → advances date; one-time → marks completed), "Remind me in a week" (snoozed_until), "Help me renew this" (creates navigator task renewal_assistance), "Reschedule" (appointments only, date picker), "Cancel appointment" (appointments only) (Session 87)
+- [x] Navigator action panel shows tracked items — "Important Dates" section in MemberDetailPanel shows all active/snoozed items sorted soonest-first with urgency colors; renewal_contact_info shown; note explains renewal help requests appear in navigator task queue (Session 87)
+- [x] Family dashboard upcoming items card — UpcomingTrackedItemsSection shows items due within 30 days, color-coded by urgency; "View all →" links to /dashboard/important-dates (Session 87)
+- [x] Recurring vs one-time logic — car_registration 'complete' action → expiration_date += recurrence_cycle_days; passport 'complete' action → status = 'completed' (no new date) (Session 87)
+- [x] Configurable reminder lead time — reminder_lead_days editable per item in form; defaults from ITEM_TYPE_DEFAULTS, overridden per item (Session 87)
+- [x] npx tsc --noEmit passes — zero errors (Session 87)
+- [x] npm run build passes — ✓ Compiled successfully; /dashboard/important-dates ƒ, /api/tracked-items ƒ, /api/tracked-items/[id] ƒ, /api/tracked-items/upload ƒ, /api/tracked-items/signed-urls ƒ, /api/cron/tracked-item-reminders ƒ (Session 87)
+
+HUMAN ACTIONS REQUIRED BEFORE FULL TEST:
+1. Run migration 031_tracked_items.sql in Supabase SQL Editor
+   Creates: tracked_items table with RLS policies
+2. Create Storage bucket 'tracked-item-attachments' in Supabase Storage (private)
+   Settings → Storage → New bucket → Name: tracked-item-attachments → Private → Create
+3. Travel assistance migration: run 030_travel_assistance.sql
+   Adds: travel_companion, travel_coordination visit_type enum values
+
+### Phase 50k — Roadside Assistance & Car Repair
+STATUS: `COMPLETE`
+
+- [x] Roadside Assistance added as 9th service category card on /dashboard/services — 🚗🔧 card in SERVICE_CATEGORIES; RoadsideForm with 8 sub-types (flat_tire, battery_jump, lockout, towing, fuel_delivery, minor_repair, mechanic_referral, other_roadside) (Session 87)
+- [x] Roadside request form has correct sub-types — sub-type dropdown with all 8 options (Session 87)
+- [x] Membership pre-fill from tracked_items — RoadsideForm fetches /api/tracked-items on mount; finds aaa_membership and car_insurance items with status='active'; shows green/blue banner with membership details; passes aaa_membership_info + insurance_roadside_info to booking_details (Session 87)
+- [x] Car insurance roadside pre-fill — car_insurance tracked_item renewal_contact_info shown as "Car insurance may include roadside" banner (Session 87)
+- [x] Navigator dispatch panel for roadside requests — shows AAA/insurance pre-fill banners; 4 dispatch buttons: Call AAA (stub log), Use car insurance roadside (stub log), Arrange tow truck (form with company + phone), Refer to mechanic (form with name + phone) (Session 87)
+- [x] Urgent flag for roadside emergencies — sub_type='other_roadside' → navigator task priority='critical'; console log [STUB][Roadside][URGENT]; emergency banner shown in form (Session 87)
+- [x] Family dashboard shows roadside request status — roadside bookings appear in ScheduledServicesSection on dashboard via existing service booking display (Session 87)
+- [x] npx tsc --noEmit passes — zero errors (Session 87)
+- [x] npm run build passes — ✓ Compiled successfully (Session 87)
+
+---
 
 ## M10 — SMS + Email Notifications
 

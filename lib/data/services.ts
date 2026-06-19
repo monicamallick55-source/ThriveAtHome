@@ -28,6 +28,8 @@ export type ServiceType =
   | 'tech_help'
   | 'companion'
   | 'companionship'
+  | 'travel_assistance'
+  | 'roadside'
 
 export async function getServiceBookingsForMember(
   memberId: string,
