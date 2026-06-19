@@ -104,20 +104,26 @@ export async function POST(req: NextRequest) {
       })
     } else if (service_type === 'roadside') {
       const isEmergency = subtype === 'other_roadside'
+      const isCarRepair = ['scheduled_maintenance', 'body_shop', 'mechanic_non_urgent', 'car_inspection', 'mechanic_referral'].includes(subtype ?? '')
       const roadsideDetails = booking_details as Record<string, string>
       const prefillNote = roadsideDetails.aaa_membership_info
         ? ` AAA on file: ${roadsideDetails.aaa_membership_info}.`
         : roadsideDetails.insurance_roadside_info
           ? ` Car insurance roadside coverage: ${roadsideDetails.insurance_roadside_info}.`
           : ''
+      const taskDesc = isCarRepair
+        ? `Member needs car repair: ${subtype?.replace(/_/g, ' ') || 'type unspecified'}. Connect with a vetted local repair shop and coordinate appointment.`
+        : `Member needs roadside help — ${subtype?.replace(/_/g, ' ') || 'type unspecified'}.${prefillNote} Coordinate using member's AAA or insurance coverage.`
       await admin.from('navigator_tasks').insert({
         member_id: fm.member_id,
-        task_type: 'roadside_assistance',
-        description: `Member needs roadside help — ${subtype?.replace(/_/g, ' ') || 'type unspecified'}.${prefillNote} Coordinate using member's AAA or insurance coverage.`,
-        priority: isEmergency ? 'critical' : 'high',
+        task_type: isCarRepair ? 'car_repair_coordination' : 'roadside_assistance',
+        description: taskDesc,
+        priority: isEmergency ? 'critical' : isCarRepair ? 'low' : 'high',
       })
       if (isEmergency) {
         console.log(`[STUB][Roadside][URGENT] Emergency roadside request for member ${fm.member_id} — navigator notified immediately`)
+      } else if (isCarRepair) {
+        console.log(`[STUB][CarRepair] Car repair request for member ${fm.member_id} — subtype: ${subtype} — navigator will find vetted shop`)
       } else {
         console.log(`[STUB][Roadside] Roadside assistance request for member ${fm.member_id} — subtype: ${subtype}`)
       }

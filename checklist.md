@@ -1003,3 +1003,92 @@ STATUS: `COMPLETE`
 - [x] ServicesClient handleCancelled — updates booking status to 'cancelled' in local state; shows success message (Session 85)
 - [x] npx tsc --noEmit passes — zero errors (Session 85)
 - [x] npm run build passes — Compiled successfully (Session 85)
+
+---
+
+### Phase 48 — Paid Companion Marketplace (Session 86)
+STATUS: `COMPLETE`
+
+- [x] Companion browse page renders — CompanionMarketplaceSection accordion below service categories; companion cards with name, bio, rate, star rating, service badges, language badges (Session 86)
+- [x] Book companion request creates booking — BookCompanionForm: session type, date/time, notes; POST /api/services service_type='companion'; service_bookings row created (Session 86)
+- [x] Rating prompt after session — RatingPrompt 5-star UI on completed companion bookings; stub submit; "Thank you" confirmation (Session 86)
+- [x] Stripe Connect payouts deferred — stub billing logs "[STUB][Billing] Would process companion payout..." (Session 86)
+- [x] npx tsc --noEmit passes — zero errors (Session 86)
+- [x] npm run build passes — ✓ Compiled successfully in 37.3s; 89 routes (Session 86)
+
+FILES CREATED:
+- supabase/migrations/029_companions.sql — companions table; 3 seeded companions (Linda Park ⭐4.9, Robert Vasquez ⭐4.7, Grace Thompson ⭐5.0)
+- app/api/companions/route.ts — GET active companions sorted by rating; auth required
+- app/api/companions/[companionId]/rate/route.ts — POST stub rating endpoint
+
+FILES MODIFIED:
+- app/api/services/route.ts — 'companion' added to ALLOWED_SERVICE_TYPES; stub billing log on companion bookings
+- components/services/ServicesClient.tsx — Companion interface, BookCompanionForm, CompanionCard, CompanionMarketplaceSection, RatingPrompt, BookingDetailPanel companion render, BookingCard companion title
+
+---
+
+### Phase 49 — On-Demand Tech Help (Session 86)
+STATUS: `COMPLETE`
+
+- [x] Tech helpline page renders with dial-in info — green helpline banner "(555) 987-6543 — Mon–Fri 9am–5pm" in TechHelpForm (Session 86)
+- [x] In-home tech help booking works — TechHelpForm submits service_type='tech_help'; POST /api/services (Session 86)
+- [x] Scam education content visible — amber "Staying safe" section with 6 scam types (Session 85)
+- [x] Video tutorial library placeholder — /dashboard/tech-tutorials; 5 categories; 25 tutorial titles "Coming soon" (Session 86)
+- [x] npx tsc --noEmit passes — zero errors (Session 86)
+
+FILES CREATED:
+- app/dashboard/tech-tutorials/page.tsx — 5 tutorial categories, 25 tutorial guides, helpline reminder
+
+---
+
+### Phase 50j — Important Dates & Renewals (Session 87)
+STATUS: `COMPLETE` (requires human Supabase action for Storage bucket — confirmed done)
+
+- [x] Migration 031_tracked_items.sql runs — tracked_items table present (CONFIRMED by human: migrations run successfully)
+- [x] tracked-item-attachments Storage bucket created (CONFIRMED by human)
+- [x] Important Dates page — /dashboard/important-dates; two sections (Renewals / Appointments); soonest-first; urgency color-coding (Session 87)
+- [x] Add tracked item form — preset dropdown with icons, item_name, date, reminder_lead_days pre-fill by type, recurrence toggle, contact info, file upload zone (Session 87)
+- [x] Document upload — POST /api/tracked-items/upload; auth + member ownership; MIME/size validation; path saved to attachments array; attachment indicator on card header (Session 87)
+- [x] Prescription items via tracked_items — Aria call transcript detection creates item_type='prescription' rows (Session 87)
+- [x] Aria proactive reminder — /api/cron/tracked-item-reminders flags items; natural-language call prompt injection "[STUB][Aria] Would inject..." (Session 87)
+- [x] Member response options — snooze, "Help me renew", "I already took care of it" (recurring advances date, one-time completes), Reschedule (appointments), Cancel (appointments) (Session 87)
+- [x] Navigator action panel shows tracked items — MemberDetailPanel "Important Dates" section with urgency colors, countdown, contact info (Session 87)
+- [x] Family dashboard upcoming items card — tracked items card with color-coded urgency, click-through (Session 87)
+- [x] Recurring vs one-time logic — car_registration advances +365d on complete; passport status=completed (Session 87)
+- [x] Configurable reminder lead time — editable per item, overrides item_type default (Session 87)
+- [x] npx tsc --noEmit passes — zero errors (Session 87)
+- [x] npm run build passes — ✓ Compiled successfully in 32.2s; 94 routes (Session 87)
+
+---
+
+### Phase 50k — Roadside Assistance (Session 87)
+STATUS: `COMPLETE`
+
+- [x] Roadside Assistance 9th service category card — 🚗🔧 Roadside & Car Repair visible on /dashboard/services (Session 87)
+- [x] Roadside request form — 8 sub-types; dateTime required; emergency/non-emergency differentiation (Session 87)
+- [x] Membership pre-fill from tracked_items — RoadsideForm fetches /api/tracked-items; AAA/car_insurance banners (Session 87)
+- [x] Car insurance roadside pre-fill — shows insurance on file banner in form and navigator panel (Session 87)
+- [x] Navigator dispatch panel — AAA/insurance banners, tow truck form, mechanic referral form (Session 87)
+- [x] Urgent flag for other_roadside — priority='critical' navigator task; immediate Realtime notification stub (Session 87)
+- [x] Family dashboard shows roadside request status — standard service booking card with status badges (Session 87)
+- [x] npx tsc --noEmit passes — zero errors (Session 87)
+- [x] npm run build passes — ✓ Compiled successfully in 32.2s (Session 87)
+
+---
+
+### ISSUE Fix — Car Care & Roadside extension (Session 88)
+STATUS: `COMPLETE`
+
+- [x] 4 non-emergency sub-types added to roadside category — scheduled_maintenance, body_shop, mechanic_non_urgent, car_inspection (Session 88)
+- [x] Category renamed — "Roadside & Car Repair" → "Car Care & Roadside" in serviceTypes.ts and MemberDetailPanel (Session 88)
+- [x] Grouped dropdown — emergency roadside vs car repair optgroups in member-facing RoadsideForm (Session 88)
+- [x] Car repair note shown to member — amber "🔧 Your navigator will find a vetted local repair shop" banner for car repair sub-types (Session 88)
+- [x] Non-emergency sub-types use low priority — task_type='car_repair_coordination' priority='low'; emergency stays 'critical' (Session 88)
+- [x] Stub log for car repair — "[STUB][CarRepair] Car repair request for member..." (Session 88)
+- [x] Find a vetted repair shop in navigator dispatch — ServiceProviderPicker with serviceType='car_repair' for non-emergency sub-types (Session 88)
+- [x] Schedule repair appointment form — shop name (pre-filled from picker or manual), phone, datetime; Confirm action creates dispatch record (Session 88)
+- [x] Migration 032_car_repair_providers.sql — 2 vetted car repair / body shop providers seeded in Chicago (Martinez Auto Body, Park's Certified Auto Service) (Session 88)
+- [x] DISPATCH_TYPE_LABELS updated — vetted_repair_shop, scheduled_repair labels added (Session 88)
+- [x] CAR_REPAIR_SUBTYPES exported from serviceTypes.ts — Set for use across codebase (Session 88)
+- [x] npx tsc --noEmit passes — zero errors (Session 88)
+- [x] npm run build passes — ✓ Compiled successfully in 33.8s; 94 routes (Session 88)

@@ -6775,3 +6775,107 @@ NEXT SESSION MUST:
 - If all pass: mark Phase 50j and 50k APPROVED_COMPLETE, then begin Phase 50 (Services Dashboard Integration) or Phase 50e (Platform Automations) per prompt-advanced.md
 
 AWAITING HUMAN APPROVAL
+Migrations 030_travel_assistance.sql and 031_tracked_items.sql run successfully. tracked_items table confirmed in Table Editor. tracked-item-attachments Storage bucket created (private).
+ISSUE: The Roadside & Car Repair service category currently only covers emergency roadside situations (flat tyre, battery, lockout, towing). Add non-emergency car repair and body shop options to the same category: (1) Add new sub-types to the Roadside & Car Repair category: "Scheduled maintenance / oil change", "Body shop / collision repair", "Mechanic for ongoing issue (not urgent)", "Car inspection / smog check"; (2) These non-emergency sub-types should NOT trigger the urgent flag or bypass the standard dispatch queue — they follow the normal navigator dispatch flow like other non-urgent services; (3) Add a "Find a vetted repair shop" option that shows local body shops and mechanics from the service_providers table filtered by service type, same pattern as the existing vetted provider picker for home services; (4) Family/member can request "Schedule a repair appointment" — navigator coordinates date/time with the shop and confirms with the member, same as other appointment-style service requests; (5) Update the service category label from "Roadside & Car Repair" to "Car Care & Roadside" to better reflect both emergency and non-emergency coverage; (6) Seed 1-2 test body shop / repair providers in the service_providers table for testing.
+---
+SESSION: 88
+DATE: 2026-06-19 UTC
+MILESTONE: M17 — Services Marketplace
+PHASE: ISSUE Fix — Car Care & Roadside extension + checklist catchup for Sessions 86/87
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- ISSUE Fix (Car Care & Roadside): 11/11 items [x] — COMPLETE
+- Phase 48 + 49 checklist: retroactively added — COMPLETE (work done Session 86)
+- Phase 50j + 50k checklist: retroactively added — COMPLETE (work done Session 87)
+- Loop state: TESTING
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider
+- emailProvider: StubEmailProvider
+- billingProvider: StubBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+
+ISSUE: Car Care & Roadside extension (from Session 87 ISSUE queue):
+- lib/services/serviceTypes.ts — MODIFIED:
+  - Renamed category title 'Roadside & Car Repair' → 'Car Care & Roadside'
+  - Updated description to reflect both emergency and maintenance coverage
+  - Added 4 non-emergency car repair sub-types: scheduled_maintenance, body_shop, mechanic_non_urgent, car_inspection
+  - Removed mechanic_referral from emergency group (now in car repair group only)
+  - Exported CAR_REPAIR_SUBTYPES (Set) for use across codebase
+  - Added DISPATCH_TYPE_LABELS: vetted_repair_shop, scheduled_repair
+- supabase/migrations/032_car_repair_providers.sql — CREATED: 2 vetted car repair/body shop providers seeded in service_providers table:
+  Tony Martinez — Martinez Auto Body & Repair (car_repair, body_shop) ⭐4.7
+  Kevin Park — Park's Certified Auto Service (car_repair, scheduled_maintenance, car_inspection) ⭐4.9
+- app/api/services/route.ts — MODIFIED:
+  - roadside handler detects non-emergency car repair sub-types (scheduled_maintenance, body_shop, mechanic_non_urgent, car_inspection, mechanic_referral)
+  - isCarRepair=true → task_type='car_repair_coordination', priority='low'
+  - isEmergency=true (other_roadside) → priority='critical' (unchanged)
+  - standard roadside → priority='high' (unchanged)
+  - Separate stub log: "[STUB][CarRepair] Car repair request..."
+- components/services/ServicesClient.tsx — MODIFIED:
+  - Added CAR_REPAIR_SUBTYPES_SET, EMERGENCY_ROADSIDE_SUBTYPES, CAR_REPAIR_SUBTYPES_LIST constants
+  - RoadsideForm now uses <optgroup> to group dropdown: "🚨 Emergency Roadside" | "🔧 Car Repair & Maintenance"
+  - Car repair sub-type selected → amber "🔧 Your navigator will find a vetted local repair shop" banner replaces emergency pre-fill banners
+  - Textarea placeholder adapts (car details vs location/incident)
+  - Date label adapts ("Preferred appointment date/time" vs "When do you need help?")
+  - Submit button label adapts ("Request car repair help →" vs emergency/standard roadside)
+  - Footer note adapts (vetted shop vs AAA/insurance coordination)
+- components/navigator/MemberDetailPanel.tsx — MODIFIED:
+  - SERVICE_LABELS: 'roadside' → '🚗🔧 Car Care & Roadside'
+  - Roadside dispatch section refactored into IIFE detecting isCarRepair vs emergency
+  - Car repair path: ServiceProviderPicker with serviceType='car_repair' + "Schedule repair appointment" DispatchBtn with shop name (pre-filled from picker or manual), phone, datetime fields; amber styling
+  - Emergency roadside path: unchanged (AAA/insurance stubs, tow truck form, mechanic referral form)
+
+ALSO THIS SESSION — retroactive checklist additions:
+- Phase 48 (Companion Marketplace) added to checklist.md — 5/5 [x] COMPLETE
+- Phase 49 (On-Demand Tech Help) added to checklist.md — 4/4 [x] COMPLETE
+- Phase 50j (Important Dates & Renewals) added to checklist.md — 13/13 [x] COMPLETE
+- Phase 50k (Roadside Assistance) added to checklist.md — 7/7 [x] COMPLETE
+
+NOTE: Session 87's Travel Assistance ISSUE (from Session 86) was found to already be fully built in the codebase (TravelAssistanceForm, serviceTypes.ts category, VOLUNTEER_SUBTYPE_GROUPS, api route handling). No additional work needed.
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — ✓ Compiled successfully in 33.8s; 94 routes
+
+ERRORS ENCOUNTERED:
+- None
+
+DECISIONS MADE:
+- mechanic_referral moved from emergency roadside group to car repair group — it's non-emergency by nature
+- CAR_REPAIR_SUBTYPES_SET defined inline in ServicesClient.tsx (mirrors CAR_REPAIR_SUBTYPES export from serviceTypes.ts) — avoids re-import just for a local const
+- Member form shows "vetted repair shop" as informational note only (navigator-only picker per RLS); navigator dispatch panel has the actual ServiceProviderPicker
+- Car repair providers seeded with service_types = ARRAY['car_repair'] and category-specific types for the .contains() filter to work
+- Migration 032 requires human to run in Supabase SQL Editor before car repair ServiceProviderPicker shows real data
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- Human runs migration 032_car_repair_providers.sql in Supabase SQL Editor
+  VERIFY: Supabase Table Editor → service_providers table → 5 total rows (3 home + 2 car repair)
+  PASS: Tony Martinez (car_repair/body_shop) and Kevin Park (car_repair/maintenance/inspection) present
+- Human verifies in browser:
+  1. /dashboard/services → 9th service category card shows "🚗🔧 Car Care & Roadside"
+  2. Click Car Care & Roadside → form expands
+  3. Dropdown shows two optgroups: "🚨 Emergency Roadside" and "🔧 Car Repair & Maintenance"
+  4. Select "Scheduled maintenance / oil change" → amber "🔧 Your navigator will find a vetted local repair shop" banner appears; AAA/insurance banners NOT shown
+  5. Date label shows "Preferred appointment date/time"; submit button shows "Request car repair help →"
+  6. Submit → service_bookings row created; terminal shows "[STUB][CarRepair] Car repair request..."
+  7. Select "Other roadside emergency" → red emergency banner appears; submit button shows "Request emergency roadside help →"
+  8. /navigator → open member with a car repair booking → dispatch panel shows ServiceProviderPicker (2 car repair providers when migration run) + "Schedule repair appointment" button
+  9. Select a vetted shop from picker → shop name pre-fills in appointment form; add phone, time → confirm → dispatch recorded
+  10. /navigator → booking header shows "🚗🔧 Car Care & Roadside" (not "Roadside & Car Repair")
+- If all pass: mark Car Care & Roadside ISSUE COMPLETE, then confirm Phase 48 + 49 + 50j + 50k APPROVED_COMPLETE
+- Begin Phase 50 (Services Dashboard Integration) or Phase 50e (Platform Automations)
+
+AWAITING HUMAN APPROVAL

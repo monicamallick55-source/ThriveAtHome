@@ -158,21 +158,36 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
   {
     id: 'roadside',
     emoji: '🚗🔧',
-    title: 'Roadside & Car Repair',
-    description: 'Flat tyre, battery, lockout, towing, and car repair help',
+    title: 'Car Care & Roadside',
+    description: 'Roadside emergencies, scheduled maintenance, body shop, and car repair',
     color: '#c2410c',
     subtypes: [
+      // Emergency roadside
       { value: 'flat_tire', label: 'Flat tyre / Tyre change' },
       { value: 'battery_jump', label: 'Battery jump start' },
       { value: 'lockout', label: 'Lockout — keys locked in car' },
       { value: 'towing', label: 'Towing service' },
       { value: 'fuel_delivery', label: 'Fuel delivery' },
       { value: 'minor_repair', label: 'Minor roadside repair' },
-      { value: 'mechanic_referral', label: 'Car repair shop referral' },
       { value: 'other_roadside', label: 'Other roadside emergency' },
+      // Non-emergency car repair
+      { value: 'scheduled_maintenance', label: 'Scheduled maintenance / oil change' },
+      { value: 'body_shop', label: 'Body shop / collision repair' },
+      { value: 'mechanic_non_urgent', label: 'Mechanic — ongoing issue (not urgent)' },
+      { value: 'car_inspection', label: 'Car inspection / smog check' },
+      { value: 'mechanic_referral', label: 'Car repair shop referral' },
     ],
   },
 ]
+
+// Sub-types that are non-emergency car repair (normal priority, navigator coordinates appointment)
+export const CAR_REPAIR_SUBTYPES = new Set([
+  'scheduled_maintenance',
+  'body_shop',
+  'mechanic_non_urgent',
+  'car_inspection',
+  'mechanic_referral',
+])
 
 // Human-friendly labels for raw dispatch_type values stored in booking_details
 export const DISPATCH_TYPE_LABELS: Record<string, string> = {
@@ -206,6 +221,8 @@ export const DISPATCH_TYPE_LABELS: Record<string, string> = {
   insurance_roadside: 'Insurance roadside coverage used',
   arranged_tow: 'Tow truck arranged',
   mechanic_referral: 'Referred to vetted mechanic',
+  vetted_repair_shop: 'Vetted repair shop assigned',
+  scheduled_repair: 'Repair appointment scheduled',
 }
 
 // Status badge labels — warm, plain English for members

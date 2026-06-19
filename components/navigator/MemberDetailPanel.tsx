@@ -19,7 +19,7 @@ const SERVICE_LABELS: Record<string, string> = {
   companion: '🤝 Companionship',
   companionship: '🤝 Companionship & Social',
   travel_assistance: '✈️ Travel Assistance',
-  roadside: '🚗🔧 Roadside & Car Repair',
+  roadside: '🚗🔧 Car Care & Roadside',
 }
 
 const DISPATCH_LABELS: Record<string, string> = {
@@ -1394,42 +1394,107 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                                     </div>
                                   )}
 
-                                  {/* ROADSIDE & CAR REPAIR */}
-                                  {b.service_type === 'roadside' && (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                      {/* Show pre-fill info if available */}
-                                      {(b.booking_details as Record<string, string>)?.aaa_membership_info && (
-                                        <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', backgroundColor: '#f0fdf4', border: '1px solid #86efac', borderRadius: 'var(--radius-sm)', padding: '8px 10px', color: '#065f46', marginBottom: '4px' }}>
-                                          🛣️ <strong>AAA on file:</strong> {(b.booking_details as Record<string, string>).aaa_membership_info}
-                                        </div>
-                                      )}
-                                      {(b.booking_details as Record<string, string>)?.insurance_roadside_info && (
-                                        <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 'var(--radius-sm)', padding: '8px 10px', color: '#1e40af', marginBottom: '4px' }}>
-                                          🚗 <strong>Car insurance roadside:</strong> {(b.booking_details as Record<string, string>).insurance_roadside_info}
-                                        </div>
-                                      )}
-                                      <DispatchBtn icon="🛣️" label="Call AAA on behalf of member (stub)" isActive={false} onClick={() => { console.log(`[STUB][Roadside] Would call AAA for member ${b.member_id} — subtype: ${(b.booking_details as Record<string, string>)?.subtype}`); handleDispatch(b.id, 'aaa_roadside', { dispatch_type: 'aaa_roadside', arrangement: 'Called AAA on behalf of member' }) }} />
-                                      <DispatchBtn icon="🚗" label="Use car insurance roadside coverage (stub)" isActive={false} onClick={() => { console.log(`[STUB][Roadside] Would contact car insurance roadside for member ${b.member_id}`); handleDispatch(b.id, 'insurance_roadside', { dispatch_type: 'insurance_roadside', arrangement: 'Contacted car insurance roadside coverage' }) }} />
-                                      <DispatchBtn icon="🚛" label="Arrange tow truck" isActive={activeDispatch[b.id] === 'arranged_tow'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'arranged_tow' ? null : 'arranged_tow' }))} />
-                                      {activeDispatch[b.id] === 'arranged_tow' && (
-                                        <DispatchForm bg="#fff7ed" border="#fed7aa">
-                                          <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#9a3412', display: 'block', marginBottom: '3px' }}>Tow company / driver name</label>
-                                          <input type="text" value={dispatchFormData[b.id]?.providerName ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerName: e.target.value } }))} placeholder="Company or driver name" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #fed7aa', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '4px' }} />
-                                          <input type="tel" value={dispatchFormData[b.id]?.providerPhone ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerPhone: e.target.value } }))} placeholder="Contact phone" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #fed7aa', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '8px' }} />
-                                          <ActionBtn label={isLoading ? 'Recording…' : 'Confirm tow truck arranged'} onClick={() => handleDispatch(b.id, 'arranged_tow', { dispatch_type: 'arranged_tow', assigned_provider: dispatchFormData[b.id]?.providerName ?? '', arrangement: `Tow truck arranged — ${dispatchFormData[b.id]?.providerName ?? 'provider TBD'} ${dispatchFormData[b.id]?.providerPhone ? `(${dispatchFormData[b.id].providerPhone})` : ''}`.trim() })} disabled={isLoading} color="white" bg="#ea580c" />
-                                        </DispatchForm>
-                                      )}
-                                      <DispatchBtn icon="🔧" label="Refer to mechanic" isActive={activeDispatch[b.id] === 'mechanic_referral'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'mechanic_referral' ? null : 'mechanic_referral' }))} />
-                                      {activeDispatch[b.id] === 'mechanic_referral' && (
-                                        <DispatchForm bg="#f9fafb" border="#d1d5db">
-                                          <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '3px' }}>Mechanic name / shop</label>
-                                          <input type="text" value={dispatchFormData[b.id]?.providerName ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerName: e.target.value } }))} placeholder="Shop name and address" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #d1d5db', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '4px' }} />
-                                          <input type="tel" value={dispatchFormData[b.id]?.providerPhone ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerPhone: e.target.value } }))} placeholder="Contact phone" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #d1d5db', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '8px' }} />
-                                          <ActionBtn label={isLoading ? 'Recording…' : 'Record mechanic referral'} onClick={() => handleDispatch(b.id, 'mechanic_referral', { dispatch_type: 'mechanic_referral', assigned_provider: dispatchFormData[b.id]?.providerName ?? '', arrangement: `Referred to mechanic: ${dispatchFormData[b.id]?.providerName ?? 'TBD'}` })} disabled={isLoading || !dispatchFormData[b.id]?.providerName?.trim()} color="white" bg="#374151" />
-                                        </DispatchForm>
-                                      )}
-                                    </div>
-                                  )}
+                                  {/* CAR CARE & ROADSIDE */}
+                                  {b.service_type === 'roadside' && (() => {
+                                    const bd = b.booking_details as Record<string, string>
+                                    const subtype = bd?.subtype ?? ''
+                                    const isCarRepair = ['scheduled_maintenance', 'body_shop', 'mechanic_non_urgent', 'car_inspection', 'mechanic_referral'].includes(subtype)
+                                    return (
+                                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                        {/* Pre-fill banners (emergency roadside only) */}
+                                        {!isCarRepair && bd?.aaa_membership_info && (
+                                          <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', backgroundColor: '#f0fdf4', border: '1px solid #86efac', borderRadius: 'var(--radius-sm)', padding: '8px 10px', color: '#065f46', marginBottom: '4px' }}>
+                                            🛣️ <strong>AAA on file:</strong> {bd.aaa_membership_info}
+                                          </div>
+                                        )}
+                                        {!isCarRepair && bd?.insurance_roadside_info && (
+                                          <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 'var(--radius-sm)', padding: '8px 10px', color: '#1e40af', marginBottom: '4px' }}>
+                                            🚗 <strong>Car insurance roadside:</strong> {bd.insurance_roadside_info}
+                                          </div>
+                                        )}
+
+                                        {isCarRepair ? (
+                                          /* Car Repair dispatch — vetted repair shop picker */
+                                          <>
+                                            <p style={{ fontFamily: 'var(--font-body)', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: '#92400e', margin: '0 0 4px' }}>Find a vetted repair shop</p>
+                                            <ServiceProviderPicker
+                                              serviceType="car_repair"
+                                              selectedProviderName={dispatchFormData[b.id]?.providerName}
+                                              onSelect={(name) => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerName: name } }))}
+                                            />
+                                            <DispatchBtn
+                                              icon="🔧"
+                                              label="Schedule repair appointment"
+                                              isActive={activeDispatch[b.id] === 'scheduled_repair'}
+                                              onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'scheduled_repair' ? null : 'scheduled_repair' }))}
+                                            />
+                                            {activeDispatch[b.id] === 'scheduled_repair' && (
+                                              <DispatchForm bg="#fefce8" border="#fde68a">
+                                                <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#92400e', display: 'block', marginBottom: '3px' }}>
+                                                  Shop name {dispatchFormData[b.id]?.providerName ? `(pre-filled from selection)` : '(enter manually)'}
+                                                </label>
+                                                <input
+                                                  type="text"
+                                                  value={dispatchFormData[b.id]?.providerName ?? ''}
+                                                  onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerName: e.target.value } }))}
+                                                  placeholder="Shop name and address"
+                                                  style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #fde68a', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '4px' }}
+                                                />
+                                                <input
+                                                  type="tel"
+                                                  value={dispatchFormData[b.id]?.providerPhone ?? ''}
+                                                  onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerPhone: e.target.value } }))}
+                                                  placeholder="Shop phone number"
+                                                  style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #fde68a', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '4px' }}
+                                                />
+                                                <input
+                                                  type="datetime-local"
+                                                  value={dispatchFormData[b.id]?.scheduledTime ?? ''}
+                                                  onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], scheduledTime: e.target.value } }))}
+                                                  style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #fde68a', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '8px' }}
+                                                />
+                                                <ActionBtn
+                                                  label={isLoading ? 'Recording…' : 'Confirm repair appointment scheduled'}
+                                                  onClick={() => handleDispatch(b.id, 'scheduled_repair', {
+                                                    dispatch_type: 'scheduled_repair',
+                                                    assigned_provider: dispatchFormData[b.id]?.providerName ?? '',
+                                                    arrangement: `Car repair appointment at ${dispatchFormData[b.id]?.providerName ?? 'shop TBD'}${dispatchFormData[b.id]?.providerPhone ? ` (${dispatchFormData[b.id].providerPhone})` : ''}${dispatchFormData[b.id]?.scheduledTime ? ` — ${dispatchFormData[b.id].scheduledTime}` : ''}`.trim(),
+                                                  })}
+                                                  disabled={isLoading || !dispatchFormData[b.id]?.providerName?.trim()}
+                                                  color="white"
+                                                  bg="#92400e"
+                                                />
+                                              </DispatchForm>
+                                            )}
+                                          </>
+                                        ) : (
+                                          /* Emergency Roadside dispatch */
+                                          <>
+                                            <DispatchBtn icon="🛣️" label="Call AAA on behalf of member (stub)" isActive={false} onClick={() => { console.log(`[STUB][Roadside] Would call AAA for member ${b.member_id} — subtype: ${subtype}`); handleDispatch(b.id, 'aaa_roadside', { dispatch_type: 'aaa_roadside', arrangement: 'Called AAA on behalf of member' }) }} />
+                                            <DispatchBtn icon="🚗" label="Use car insurance roadside coverage (stub)" isActive={false} onClick={() => { console.log(`[STUB][Roadside] Would contact car insurance roadside for member ${b.member_id}`); handleDispatch(b.id, 'insurance_roadside', { dispatch_type: 'insurance_roadside', arrangement: 'Contacted car insurance roadside coverage' }) }} />
+                                            <DispatchBtn icon="🚛" label="Arrange tow truck" isActive={activeDispatch[b.id] === 'arranged_tow'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'arranged_tow' ? null : 'arranged_tow' }))} />
+                                            {activeDispatch[b.id] === 'arranged_tow' && (
+                                              <DispatchForm bg="#fff7ed" border="#fed7aa">
+                                                <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#9a3412', display: 'block', marginBottom: '3px' }}>Tow company / driver name</label>
+                                                <input type="text" value={dispatchFormData[b.id]?.providerName ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerName: e.target.value } }))} placeholder="Company or driver name" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #fed7aa', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '4px' }} />
+                                                <input type="tel" value={dispatchFormData[b.id]?.providerPhone ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerPhone: e.target.value } }))} placeholder="Contact phone" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #fed7aa', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '8px' }} />
+                                                <ActionBtn label={isLoading ? 'Recording…' : 'Confirm tow truck arranged'} onClick={() => handleDispatch(b.id, 'arranged_tow', { dispatch_type: 'arranged_tow', assigned_provider: dispatchFormData[b.id]?.providerName ?? '', arrangement: `Tow truck arranged — ${dispatchFormData[b.id]?.providerName ?? 'provider TBD'} ${dispatchFormData[b.id]?.providerPhone ? `(${dispatchFormData[b.id].providerPhone})` : ''}`.trim() })} disabled={isLoading} color="white" bg="#ea580c" />
+                                              </DispatchForm>
+                                            )}
+                                            <DispatchBtn icon="🔧" label="Refer to mechanic" isActive={activeDispatch[b.id] === 'mechanic_referral'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'mechanic_referral' ? null : 'mechanic_referral' }))} />
+                                            {activeDispatch[b.id] === 'mechanic_referral' && (
+                                              <DispatchForm bg="#f9fafb" border="#d1d5db">
+                                                <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '3px' }}>Mechanic name / shop</label>
+                                                <input type="text" value={dispatchFormData[b.id]?.providerName ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerName: e.target.value } }))} placeholder="Shop name and address" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #d1d5db', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '4px' }} />
+                                                <input type="tel" value={dispatchFormData[b.id]?.providerPhone ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerPhone: e.target.value } }))} placeholder="Contact phone" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #d1d5db', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '8px' }} />
+                                                <ActionBtn label={isLoading ? 'Recording…' : 'Record mechanic referral'} onClick={() => handleDispatch(b.id, 'mechanic_referral', { dispatch_type: 'mechanic_referral', assigned_provider: dispatchFormData[b.id]?.providerName ?? '', arrangement: `Referred to mechanic: ${dispatchFormData[b.id]?.providerName ?? 'TBD'}` })} disabled={isLoading || !dispatchFormData[b.id]?.providerName?.trim()} color="white" bg="#374151" />
+                                              </DispatchForm>
+                                            )}
+                                          </>
+                                        )}
+                                      </div>
+                                    )
+                                  })()}
                                 </div>
                               )}
                             </div>

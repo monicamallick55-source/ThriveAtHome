@@ -1092,6 +1092,28 @@ function TravelAssistanceForm({ onSuccess }: { onSuccess: (b: ServiceBooking) =>
   )
 }
 
+const CAR_REPAIR_SUBTYPES_SET = new Set([
+  'scheduled_maintenance', 'body_shop', 'mechanic_non_urgent', 'car_inspection', 'mechanic_referral',
+])
+
+const EMERGENCY_ROADSIDE_SUBTYPES = [
+  { value: 'flat_tire', label: 'Flat tyre / Tyre change' },
+  { value: 'battery_jump', label: 'Battery jump start' },
+  { value: 'lockout', label: 'Lockout — keys locked in car' },
+  { value: 'towing', label: 'Towing service' },
+  { value: 'fuel_delivery', label: 'Fuel delivery' },
+  { value: 'minor_repair', label: 'Minor roadside repair' },
+  { value: 'other_roadside', label: 'Other roadside emergency' },
+]
+
+const CAR_REPAIR_SUBTYPES_LIST = [
+  { value: 'scheduled_maintenance', label: 'Scheduled maintenance / oil change' },
+  { value: 'body_shop', label: 'Body shop / collision repair' },
+  { value: 'mechanic_non_urgent', label: 'Mechanic — ongoing issue (not urgent)' },
+  { value: 'car_inspection', label: 'Car inspection / smog check' },
+  { value: 'mechanic_referral', label: 'Car repair shop referral' },
+]
+
 function RoadsideForm({ onSuccess }: { onSuccess: (b: ServiceBooking) => void }) {
   const cat = getCategoryById('roadside')!
   const [subtype, setSubtype] = useState('')
@@ -1117,10 +1139,11 @@ function RoadsideForm({ onSuccess }: { onSuccess: (b: ServiceBooking) => void })
   }, [])
 
   const isEmergency = subtype === 'other_roadside'
+  const isCarRepair = CAR_REPAIR_SUBTYPES_SET.has(subtype)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!subtype) { setError('Please select the type of roadside help you need.'); return }
+    if (!subtype) { setError('Please select the type of car care or roadside help you need.'); return }
     const dtErr = validateFutureDateTime(dateTime)
     if (dtErr) { setError(dtErr); return }
     setSubmitting(true); setError(null)
@@ -1148,15 +1171,15 @@ function RoadsideForm({ onSuccess }: { onSuccess: (b: ServiceBooking) => void })
 
   return (
     <div>
-      {/* Pre-fill banners */}
-      {aaaPrefill && (
+      {/* Pre-fill banners — emergency roadside only */}
+      {!isCarRepair && aaaPrefill && (
         <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #86efac', borderRadius: 'var(--radius-md)', padding: '12px 14px', marginBottom: '12px' }}>
           <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: '#065f46', margin: 0, lineHeight: 1.6 }}>
             🛣️ <strong>AAA membership on file:</strong> {aaaPrefill} — your navigator will use this.
           </p>
         </div>
       )}
-      {insurancePrefill && (
+      {!isCarRepair && insurancePrefill && (
         <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 'var(--radius-md)', padding: '12px 14px', marginBottom: '12px' }}>
           <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: '#1e40af', margin: 0, lineHeight: 1.6 }}>
             🚗 <strong>Car insurance on file:</strong> {insurancePrefill} — may include roadside coverage.
@@ -1170,26 +1193,53 @@ function RoadsideForm({ onSuccess }: { onSuccess: (b: ServiceBooking) => void })
           </p>
         </div>
       )}
+      {isCarRepair && (
+        <div style={{ backgroundColor: '#fefce8', border: '1px solid #fde68a', borderRadius: 'var(--radius-md)', padding: '12px 14px', marginBottom: '12px' }}>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: '#92400e', margin: 0, lineHeight: 1.6 }}>
+            🔧 <strong>Your navigator will find a vetted local repair shop</strong> and coordinate the appointment for you.
+          </p>
+        </div>
+      )}
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <div>
           <Label htmlFor="rs-subtype" required>What do you need?</Label>
           <select id="rs-subtype" value={subtype} onChange={e => setSubtype(e.target.value)} style={INPUT} required>
-            <option value="">Select roadside help type…</option>
-            {cat.subtypes.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+            <option value="">Select type of help…</option>
+            <optgroup label="🚨 Emergency Roadside">
+              {EMERGENCY_ROADSIDE_SUBTYPES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+            </optgroup>
+            <optgroup label="🔧 Car Repair &amp; Maintenance">
+              {CAR_REPAIR_SUBTYPES_LIST.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+            </optgroup>
           </select>
         </div>
         <div>
           <Label htmlFor="rs-desc">Tell us more (optional)</Label>
-          <textarea id="rs-desc" value={description} onChange={e => setDescription(e.target.value)} placeholder="Your location, what happened, any details that will help your navigator…" rows={3} style={{ ...INPUT, resize: 'vertical', minHeight: '80px' }} />
+          <textarea
+            id="rs-desc"
+            value={description}
+            onChange={e => setDescription(e.target.value)}
+            placeholder={isCarRepair
+              ? 'Describe the issue, your car make/model, any shop preferences…'
+              : 'Your location, what happened, any details that will help your navigator…'}
+            rows={3}
+            style={{ ...INPUT, resize: 'vertical', minHeight: '80px' }}
+          />
         </div>
         <div>
-          <Label htmlFor="rs-dt" required>When do you need help?</Label>
+          <Label htmlFor="rs-dt" required>{isCarRepair ? 'Preferred appointment date/time' : 'When do you need help?'}</Label>
           <input id="rs-dt" type="datetime-local" value={dateTime} onChange={e => setDateTime(e.target.value)} style={INPUT} required />
         </div>
         {error && <ErrorMsg msg={error} />}
-        <SubmitBtn color={cat.color} label={isEmergency ? 'Request emergency roadside help →' : 'Request roadside help →'} submitting={submitting} />
+        <SubmitBtn
+          color={cat.color}
+          label={isEmergency ? 'Request emergency roadside help →' : isCarRepair ? 'Request car repair help →' : 'Request roadside help →'}
+          submitting={submitting}
+        />
         <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-muted)', margin: 0, textAlign: 'center' }}>
-          Your navigator will coordinate using your AAA membership or car insurance coverage where available.
+          {isCarRepair
+            ? 'A navigator will find a vetted local shop and follow up within one business day.'
+            : 'Your navigator will coordinate using your AAA membership or car insurance coverage where available.'}
         </p>
       </form>
     </div>
