@@ -57,6 +57,22 @@ export async function getUpcomingServiceBookings(
   return getServiceBookingsForMember(memberId, ['requested', 'confirmed', 'in_progress'])
 }
 
+export async function getRecentCompletedServiceBookings(
+  memberId: string,
+  limit = 3
+): Promise<{ data: ServiceBooking[] | null; error: string | null }> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('service_bookings')
+    .select('*')
+    .eq('member_id', memberId)
+    .in('status', ['completed', 'cancelled'])
+    .order('created_at', { ascending: false })
+    .limit(limit)
+  if (error) return { data: null, error: error.message }
+  return { data: data as ServiceBooking[], error: null }
+}
+
 export async function createServiceBooking(
   memberId: string,
   serviceType: ServiceType,

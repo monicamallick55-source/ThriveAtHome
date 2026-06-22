@@ -36,6 +36,7 @@ function makeVolunteer(overrides: Partial<Volunteer>): Volunteer {
     license_state: null,
     insurance_provider: null,
     insurance_expiry: null,
+    corporate_program_id: null,
     ...overrides,
   }
 }

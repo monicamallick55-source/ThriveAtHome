@@ -242,4 +242,19 @@ ${ctaButton('Review Application', dashboardUrl() + '/admin/volunteers')}`
     })
     console.log(`[SendGrid] Volunteer application notification sent to ${to.substring(0, 6)}xxx`)
   }
+
+  async sendEmployeeInvitation(to: string, companyName: string, acceptUrl: string): Promise<void> {
+    this.init()
+    const body = `<p style="margin:0 0 16px;font-family:Georgia,serif;font-size:22px;line-height:1.4;">You've been invited to ThriveAtHome.</p>
+<p style="margin:0 0 16px;font-size:18px;line-height:1.6;"><strong>${companyName}</strong> has added ThriveAtHome to your employee benefits — a daily check-in and care coordination service for your aging loved ones.</p>
+<p style="margin:0 0 24px;font-size:18px;line-height:1.6;">Create your account to get started. This link expires in 7 days.</p>
+${ctaButton('Accept invitation & create account', acceptUrl)}`
+    await sgMail.send({
+      to,
+      from: getFrom(),
+      subject: `You're invited to ThriveAtHome — ${companyName} benefit`,
+      html: baseTemplate('Invitation to ThriveAtHome', body),
+    })
+    console.log(`[SendGrid] Employee invitation sent to ${to.substring(0, 6)}xxx`)
+  }
 }

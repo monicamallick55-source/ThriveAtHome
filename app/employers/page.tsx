@@ -178,6 +178,71 @@ export default function EmployersPage() {
         </div>
       </section>
 
+      {/* Corporate Volunteer Program — dual benefit section */}
+      <section style={{ backgroundColor: 'var(--color-navy)', padding: '72px 32px' }}>
+        <div style={{ maxWidth: '960px', margin: '0 auto' }}>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--color-teal)', marginBottom: '12px', textAlign: 'center' }}>
+            Two employer benefits. One partnership.
+          </p>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '38px', fontWeight: 500, color: 'var(--color-cream)', textAlign: 'center', marginBottom: '16px', lineHeight: 1.2 }}>
+            Give your team purpose <em>and</em> peace of mind
+          </h2>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '17px', color: 'rgba(250,250,245,0.75)', textAlign: 'center', marginBottom: '56px', lineHeight: 1.7, maxWidth: '640px', margin: '0 auto 56px' }}>
+            ThriveAtHome offers employers two distinct programmes — the eldercare subscription benefit for caregiving employees, and a Corporate Volunteer Program for employees who want to give back.
+          </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '28px' }}>
+            {/* Benefit 1: Eldercare subscription */}
+            <div style={{ backgroundColor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '36px' }}>
+              <div style={{ fontSize: '40px', marginBottom: '16px' }}>💚</div>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 500, color: 'var(--color-cream)', marginBottom: '12px' }}>
+                Eldercare Subscription Benefit
+              </h3>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'rgba(250,250,245,0.75)', lineHeight: 1.7, marginBottom: '24px' }}>
+                For employees who are caring for aging parents. ThriveAtHome keeps their loved one safe, connected, and supported — so employees can be fully present at work.
+              </p>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {['Daily AI check-in calls for the senior', 'Real-time safety alerts for the family', 'Human care navigator on call', 'Volunteer companions and community circles'].map(item => (
+                  <li key={item} style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'rgba(250,250,245,0.8)', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                    <span style={{ color: 'var(--color-teal)', fontWeight: 700, flexShrink: 0 }}>✓</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'rgba(250,250,245,0.5)', marginTop: '20px', marginBottom: 0 }}>
+                PEPM pricing · from $15/employee/month · billed from your HR benefits budget
+              </p>
+            </div>
+
+            {/* Benefit 2: Corporate Volunteer Program */}
+            <div style={{ backgroundColor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '36px' }}>
+              <div style={{ fontSize: '40px', marginBottom: '16px' }}>🤝</div>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 500, color: 'var(--color-cream)', marginBottom: '12px' }}>
+                Corporate Volunteer Program
+              </h3>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'rgba(250,250,245,0.75)', lineHeight: 1.7, marginBottom: '24px' }}>
+                For employees who want to give back. They volunteer time with seniors on ThriveAtHome. Your company matches their hours with a cash donation — tracked and exported automatically to Benevity, YourCause, or Bright Funds.
+              </p>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {['Volunteer hours tracked automatically', 'Benevity / YourCause / Bright Funds export', 'Real impact: seniors matched with employee volunteers', 'Flexible matching rates ($10–$25/hr typical)'].map(item => (
+                  <li key={item} style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'rgba(250,250,245,0.8)', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                    <span style={{ color: 'var(--color-teal)', fontWeight: 700, flexShrink: 0 }}>✓</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'rgba(250,250,245,0.5)', marginTop: '20px', marginBottom: 0 }}>
+                Annual programme fee · from $5K/year · billed from your CSR / giving budget
+              </p>
+            </div>
+          </div>
+
+          <p style={{ textAlign: 'center', fontFamily: 'var(--font-body)', fontSize: '15px', color: 'rgba(250,250,245,0.6)', marginTop: '36px' }}>
+            Programmes can be purchased independently or bundled together. Ask us about combined pricing.
+          </p>
+        </div>
+      </section>
+
       {/* Pricing tiers */}
       <section style={{ backgroundColor: 'white', padding: '64px 32px' }}>
         <div style={{ maxWidth: '780px', margin: '0 auto', textAlign: 'center' }}>

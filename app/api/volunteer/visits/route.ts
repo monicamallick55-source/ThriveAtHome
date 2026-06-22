@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
 import { getVolunteerByAuthId, logVolunteerVisit } from '@/lib/data/volunteers'
+import { createCorporateHourFromVisit } from '@/lib/data/corporate-volunteers'
 import type { VisitType } from '@/types/database'
 
 export async function POST(req: NextRequest) {
@@ -27,7 +28,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'duration_minutes must be between 1 and 480' }, { status: 400 })
     }
 
-    const { error } = await logVolunteerVisit({
+    const { data: visitData, error } = await logVolunteerVisit({
       volunteer_id: volunteer.id,
       member_id,
       visit_date,
@@ -37,6 +38,18 @@ export async function POST(req: NextRequest) {
       volunteer_rating,
     })
     if (error) return NextResponse.json({ error }, { status: 500 })
+
+    // Auto-attribute hours to corporate program if volunteer is enrolled
+    if (volunteer.corporate_program_id && visitData?.id) {
+      const hoursLogged = duration_minutes / 60
+      await createCorporateHourFromVisit(
+        volunteer.corporate_program_id,
+        volunteer.id,
+        visitData.id,
+        hoursLogged,
+        visit_date
+      )
+    }
 
     return NextResponse.json({ ok: true }, { status: 201 })
   } catch (e) {

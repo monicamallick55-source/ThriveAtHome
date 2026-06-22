@@ -143,23 +143,47 @@ function DetailRow({ label, value }: { label: string; value: string }) {
   )
 }
 
-function ScheduledServicesSection({ bookings }: { bookings: ServiceBooking[] }) {
-  if (bookings.length === 0) return null
+function ScheduledServicesSection({ bookings, history }: { bookings: ServiceBooking[]; history: ServiceBooking[] }) {
+  if (bookings.length === 0 && history.length === 0) return null
   return (
     <section aria-labelledby="services-heading">
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
         <h2 id="services-heading" style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: 'var(--color-navy)', margin: 0 }}>
-          Scheduled services
+          Services
         </h2>
         <Link href="/dashboard/services" style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-teal)', textDecoration: 'none', fontWeight: 500 }}>
           View all →
         </Link>
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        {bookings.slice(0, 3).map((b) => (
-          <ServiceBookingCard key={b.id} b={b} />
-        ))}
-      </div>
+      {bookings.length > 0 && (
+        <>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 10px' }}>
+            Scheduled
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: history.length > 0 ? '20px' : 0 }}>
+            {bookings.slice(0, 3).map((b) => (
+              <ServiceBookingCard key={b.id} b={b} />
+            ))}
+          </div>
+        </>
+      )}
+      {history.length > 0 && (
+        <>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 10px' }}>
+            Recent history
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {history.map((b) => (
+              <ServiceBookingCard key={b.id} b={b} />
+            ))}
+          </div>
+          <div style={{ textAlign: 'center', marginTop: '12px' }}>
+            <Link href="/dashboard/services" style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-teal)', textDecoration: 'none' }}>
+              View full service history →
+            </Link>
+          </div>
+        </>
+      )}
     </section>
   )
 }
@@ -180,6 +204,7 @@ export interface DashboardClientProps {
   recentCelebrations?: CelebrationEvent[]
   upcomingServices?: ServiceBooking[]
   upcomingTrackedItems?: TrackedItem[]
+  serviceHistory?: ServiceBooking[]
 }
 
 function QuickActions() {
@@ -413,6 +438,7 @@ function DashboardInner(props: DashboardClientProps) {
     recentCelebrations = [],
     upcomingServices = [],
     upcomingTrackedItems = [],
+    serviceHistory = [],
   } = props
 
   const [bannerVisible, setBannerVisible] = useState(showSubscribedBanner)
@@ -578,10 +604,8 @@ function DashboardInner(props: DashboardClientProps) {
             </ErrorBoundary>
           )}
 
-          {/* Scheduled Services */}
-          {upcomingServices.length > 0 && (
-            <ScheduledServicesSection bookings={upcomingServices} />
-          )}
+          {/* Scheduled Services + History */}
+          <ScheduledServicesSection bookings={upcomingServices} history={serviceHistory} />
 
           {/* Important Dates */}
           <UpcomingTrackedItemsSection items={upcomingTrackedItems} />

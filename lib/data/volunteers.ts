@@ -27,6 +27,7 @@ export interface VolunteerApplicationData {
   license_state?: string
   insurance_provider?: string
   insurance_expiry?: string
+  corporate_program_id?: string
 }
 
 export async function submitVolunteerApplication(
@@ -54,6 +55,7 @@ export async function submitVolunteerApplication(
         license_state: data.license_state ?? null,
         insurance_provider: data.insurance_provider ?? null,
         insurance_expiry: data.insurance_expiry ?? null,
+        corporate_program_id: data.corporate_program_id ?? null,
         status: 'pending',
       })
       .select()
@@ -324,10 +326,10 @@ export async function getVolunteerMatchedMembers(
 
 export async function logVolunteerVisit(
   visitData: VolunteerVisitInsert
-): Promise<{ error: string | null }> {
+): Promise<{ data: { id: string } | null; error: string | null }> {
   try {
     const admin = createAdminClient()
-    const { error: insertErr } = await admin
+    const { data: insertedVisit, error: insertErr } = await admin
       .from('volunteer_visits')
       .insert({
         volunteer_id: visitData.volunteer_id,
@@ -339,7 +341,9 @@ export async function logVolunteerVisit(
         volunteer_rating: visitData.volunteer_rating ?? null,
         verified: false,
       })
-    if (insertErr) return { error: insertErr.message }
+      .select('id')
+      .maybeSingle()
+    if (insertErr) return { data: null, error: insertErr.message }
 
     // Update cumulative hours and distinct members helped
     const durationHours = visitData.duration_minutes / 60
@@ -362,10 +366,10 @@ export async function logVolunteerVisit(
         total_seniors_helped: distinctMembersCount,
       })
       .eq('id', visitData.volunteer_id)
-    return { error: null }
+    return { data: insertedVisit, error: null }
   } catch (e) {
     console.error('[data/volunteers/logVolunteerVisit] Unexpected error:', e)
-    return { error: e instanceof Error ? e.message : String(e) }
+    return { data: null, error: e instanceof Error ? e.message : String(e) }
   }
 }
 

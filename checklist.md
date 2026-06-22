@@ -1092,3 +1092,215 @@ STATUS: `COMPLETE`
 - [x] CAR_REPAIR_SUBTYPES exported from serviceTypes.ts — Set for use across codebase (Session 88)
 - [x] npx tsc --noEmit passes — zero errors (Session 88)
 - [x] npm run build passes — ✓ Compiled successfully in 33.8s; 94 routes (Session 88)
+
+---
+
+### ISSUE Fix — Navigator Service Request Management (Session 89)
+STATUS: `COMPLETE`
+
+- [x] Location-based provider sorting — VolunteerPicker and ServiceProviderPicker both accept memberCity prop; same-city providers/volunteers sorted to top with green "📍 Near member" badge; getMemberCity() helper extracts city from member address (Session 89)
+- [x] Scheduling date validation — isFutureDateTime() helper added; all dispatch forms with datetime fields (inHome_visit, remote_call, telehealth_appt, vetted_provider, volunteer_companion, phone_companion, scheduled_repair) now require valid future datetime; buttons disabled and inline ⚠ warning shown for past/invalid datetimes (Session 89)
+- [x] Reschedule panel expanded — "Update provider / volunteer (optional)" text field added below datetime; pre-fill placeholder shows current assigned provider; new_provider_name sent to API on reschedule (Session 89)
+- [x] Reschedule validates future datetime — handleReschedule returns error if datetime is not in the future; reschedule confirm button disabled until valid future datetime selected (Session 89)
+- [x] Unschedule (clear schedule) — "🗓️ Clear scheduled time" button shown when booking has scheduled_time in booking_details; handleUnschedule sends PATCH action:'unschedule'; API clears scheduled_time + dispatch details from booking_details; Realtime notification sent (Session 89)
+- [x] API: action:'unschedule' support — removes scheduled_time, dispatch_type, assigned_volunteer, assigned_provider from booking_details; keeps current booking status unchanged (Session 89)
+- [x] API: reschedule validates future datetime server-side — returns 400 if scheduled_time is past or invalid (Session 89)
+- [x] API: new_provider_name in reschedule — updates assigned_provider + assigned_volunteer in booking_details during reschedule (Session 89)
+- [x] Cancel works end-to-end — requested bookings: simple cancel with optional reason; confirmed/in_progress: cancel reason dropdown + optional note; both send status:'cancelled' via PATCH; Realtime notification pushed (Session 89)
+- [x] npx tsc --noEmit passes — zero errors (Session 89)
+- [x] npm run build passes — ✓ Compiled successfully in 38.9s; 94 routes (Session 89)
+- [x] npm run build passes — ✓ Compiled successfully in 38.9s; 94 routes (Session 89)
+
+---
+
+### Phase 50 — Services Dashboard Integration (Session 90)
+STATUS: `COMPLETE`
+
+- [x] Family dashboard shows upcoming services — ScheduledServicesSection renders upcomingServices (status: requested/confirmed/in_progress); BookingCard shows service type, warm status label, date/time; "Scheduled" sub-heading (Session 81/85/90)
+- [x] Family dashboard shows service history — ScheduledServicesSection renders serviceHistory (status: completed/cancelled) under "Recent history" sub-heading; "View full service history →" link to /dashboard/services (Session 81/85/90)
+- [x] Navigator console shows all member bookings — MemberDetailPanel shows all service_bookings for the member with status badges, dispatch panels, and navigator note input (Session 81/90)
+- [x] npx tsc --noEmit passes — zero errors (Session 90)
+- [x] npm run build passes — ✓ Compiled successfully; 94 routes (Session 90)
+
+FILES VERIFIED:
+- app/dashboard/page.tsx — imports getUpcomingServiceBookings, getRecentCompletedServiceBookings; passes upcomingServices and serviceHistory to DashboardClient
+- components/dashboard/DashboardClient.tsx — ScheduledServicesSection renders both upcoming and history BookingCards
+- components/navigator/MemberDetailPanel.tsx — service_bookings displayed with status badges and full dispatch panel
+
+---
+
+### Phase 50e — Platform Automations (17 rules) (Session 90)
+STATUS: `COMPLETE`
+
+- [x] /api/cron/automations route exists — app/api/cron/automations/route.ts implements 11 active rules + 6 cross-references to existing crons (Session 90)
+- [x] Rule 1: Isolation detection — daily-frequency members with no completed call in >3 days → automation_isolation notification to family; 7-day dedup (Session 90)
+- [x] Rule 2: Vaccination reminder — September/October only; checks if flu vaccine tracked item exists this year; automation_vaccination notification; 7-day dedup (Session 90)
+- [x] Rule 3: Extreme weather alerts — stub logs "[STUB][automations/extreme_weather] Would query NWS API..." (Session 90)
+- [x] Rule 4: Fall risk flag — unacknowledged fall alert with no open navigator task → creates navigator_tasks row type='fall_risk_review' priority='high' (Session 90)
+- [x] Rule 5: Volunteer re-engagement — active volunteer match with no visit in 14 days → automation_volunteer_reengagement notification; 7-day dedup (Session 90)
+- [x] Rule 6: Event no-show follow-up — member RSVPd to event but attended=false for events yesterday/day-before → automation_event_noshow notification; 7-day dedup (Session 90)
+- [x] Rule 7: Onboarding completion reminder — member joined >3 days ago, missing DOB or emergency contact → automation_onboarding notification; 7-day dedup (Session 90)
+- [x] Rule 8: Navigator caseload warning — navigator with >caseload_limit assignments → console.warn (admin-visible, no member notification) (Session 90)
+- [x] Rule 9: Transport follow-up — transport booking completed 2-24h ago → automation_transport_followup notification (Session 90)
+- [x] Rule 10: Tech help success check — tech_help booking completed 2-24h ago → automation_tech_help_check notification (Session 90)
+- [x] Rule 11: Meal delivery feedback — meals booking completed 4-24h ago → automation_meal_feedback notification (Session 90)
+- [x] Rules 12-17 cross-referenced to existing crons — prescription refill (tracked-item-reminders), doctor appointment (tracked-item-reminders), seasonal safety checks (seasonal-reminders), inactive family nudge (family-nudge), subscription value summary (monthly-summary), benefits renewal (static page) (Session 90)
+- [x] Global cap: max 2 automation notifications per member per day — canNotify() counts 'automation_%' type notifs from today; returns false if >=2 (Session 90)
+- [x] Family opt-out per member — canNotify() checks notification_prefs.automation_opt_out on linked family_members; skips if true (Session 90)
+- [x] Migration 033_notif_type_automation.sql — adds 8 automation notif types + important_date_reminder to notif_type enum (human must run in Supabase SQL Editor) (Session 90)
+- [x] vercel.json cron — /api/cron/automations at "0 6 * * *" (Session 90)
+- [x] npx tsc --noEmit passes — zero errors after fixing pushNotif/wasRecentlyFired to use NotifType/NotifSeverity types (Session 90)
+- [x] npm run build passes — ✓ Compiled successfully; 94 routes (Session 90)
+
+FILES CREATED (Session 90):
+- supabase/migrations/033_notif_type_automation.sql — ALTER TYPE notif_type ADD VALUE IF NOT EXISTS for 9 new values
+
+FILES MODIFIED (Session 90):
+- types/database.ts — NotifType union extended with 8 automation types
+- app/api/cron/automations/route.ts — added NotifType/NotifSeverity import; pushNotif and wasRecentlyFired now use typed parameters
+
+---
+
+### ISSUE Fix — Navigator Reschedule/Reassign Pickers (Session 91)
+STATUS: `COMPLETE`
+
+- [x] ReassignPanel: roadside (car repair) — ServiceProviderPicker for `car_repair` service type shown when sub-type is car repair (Session 91)
+- [x] ReassignPanel: roadside (emergency) — manual text input for tow/roadside provider when sub-type is emergency (Session 91)
+- [x] ReassignPanel: companion — manual entry for companion name (Session 91)
+- [x] ReassignPanel: home_service — added dedicated ServiceProviderPicker for vetted home service providers in addition to volunteer picker (Session 91)
+- [x] ReassignPanel: bookingDetails + memberCity props added — panel now receives booking details to detect sub-type (Session 91)
+- [x] Reschedule panel: transport — VolunteerPicker (walking_companion) replaces plain text input (Session 91)
+- [x] Reschedule panel: tech_help — VolunteerPicker (tech_help) replaces plain text input (Session 91)
+- [x] Reschedule panel: meals — VolunteerPicker (grocery_help) replaces plain text input (Session 91)
+- [x] Reschedule panel: home_service — ServiceProviderPicker replaces plain text input (Session 91)
+- [x] Reschedule panel: roadside (car repair) — ServiceProviderPicker (car_repair) shown (Session 91)
+- [x] Reschedule panel: roadside (emergency) — text input for tow provider (Session 91)
+- [x] Reschedule panel: other types — text input fallback unchanged (Session 91)
+- [x] "✓ Will update to: [name]" confirmation shown when provider/volunteer selected in reschedule (Session 91)
+- [x] rescheduleVolunteer state added and cleared on reschedule complete (Session 91)
+- [x] npx tsc --noEmit passes — zero errors (Session 91)
+- [x] npm run build passes — ✓ Compiled successfully in 34.4s (Session 91)
+
+FILES MODIFIED:
+- components/navigator/MemberDetailPanel.tsx — reschedule panel pickers + ReassignPanel roadside/companion/home_service provider picker + props
+
+---
+
+### ISSUE Fix — Legal/Financial + Telehealth + Car Repair Deduplication (Session 92)
+STATUS: `COMPLETE`
+
+- [x] Legal/financial reassign — ReassignPanel now shows "⚖️ Change legal or financial provider" block with service type dropdown, advisor name, contact, confirm button (Session 92)
+- [x] Telehealth reassign — ReassignPanel now shows "🩺 Assign different provider" block with VolunteerPicker(in_person_visit) + manual external provider text field (Session 92)
+- [x] Telehealth reschedule — Reschedule panel now shows VolunteerPicker(in_person_visit) + manual text for telehealth (Session 92)
+- [x] Car repair shop duplication — /api/service-providers/route.ts now deduplicates by company_name before returning results (Session 92)
+- [x] ReassignPanel dispatchFormData type — updated to include providerPhone? and healthSubtype? so new legal_financial block type-checks correctly (Session 92)
+- [x] DISPATCH_LABELS extended — added labels for legal_vetted, telehealth_appt, benefits_flag, ship, fraud_flag, mental_health, med_review, health_aide, hospice, health_general (Session 92)
+- [x] npx tsc --noEmit passes — zero errors (Session 92)
+- [x] npm run build passes — ✓ Compiled successfully in 42s; 96 routes (Session 92)
+
+FILES MODIFIED:
+- components/navigator/MemberDetailPanel.tsx — telehealth in reschedule panel; telehealth + legal_financial in ReassignPanel; DISPATCH_LABELS extended; ReassignPanel dispatchFormData type
+- app/api/service-providers/route.ts — server-side deduplication by company_name
+
+---
+
+### Phase 51 — Outcomes Dashboard (Session 92)
+STATUS: `COMPLETE`
+
+- [x] /outcomes — real page replaces placeholder: 6-stat grid (total members, call completion rate, active volunteers, community circles, total calls, high-priority alerts) queried live from DB (Session 92)
+- [x] Stats displayed correctly — all stats computed from Supabase counts; completion rate = completedCalls/totalCalls × 100; alerts = high-severity notifications in last 7 days (Session 92)
+- [x] "How we measure impact" section — 4-item methodology explainer (daily engagement, safety alerts, volunteer hours, privacy by design) (Session 92)
+- [x] Enterprise reporting at /admin/outcomes — admin-protected (requireAuth + role check); 5 platform metric cards; per-employer table with seats purchased/used/utilisation bar/status; API access note (Session 92)
+- [x] npx tsc --noEmit passes — zero errors (Session 92)
+- [x] npm run build passes — ✓ Compiled successfully in 42s; 96 routes (Session 92)
+
+FILES CREATED:
+- app/outcomes/page.tsx — full public outcomes page with live aggregate stats
+- app/admin/outcomes/page.tsx — admin-protected per-employer outcomes dashboard
+
+---
+
+### Phase 52 — University Partnership Portal Full (Session 93)
+STATUS: `COMPLETE`
+
+- [x] Migration 034_university_admin.sql — adds university_admin to user_role enum; adds university_name column to family_members for linking uni admin to their institution (Session 93)
+- [x] /university-admin page exists and is role-protected — requireAuth + getUserRole; non-university_admin/non-admin redirected to /dashboard; "not configured" state when university_name not set; full portal when university_name present (Session 93)
+- [x] University admin portal loads with student roster — UniversityAdminPortal component: summary stats (total students, active, total hours), student roster table (name, email, major, grad year, hours, status), expand-row visit history (Session 93)
+- [x] Service record PDF downloads correctly — per-student "Download PDF" button; jsPDF generates PDF with student name, university, major, graduation year, visit log with dates/types/hours/reflections, ThriveAtHome branding, issued-to university note (Session 93)
+- [x] Semester CSV export works — date range picker defaults to current semester (Spring Jan-May / Fall Aug-Dec); /api/university-admin/export-csv?start=&end= returns CSV with: Student Name, Email, University, Major, Graduation Year, Visit Date, Duration (Hours), Visit Type, Reflection, Verified (Session 93)
+- [x] CSV format note — CSV is x2VOL / Track It Forward compatible (standard column CSV) (Session 93)
+- [x] University account section — shows institution name, admin name, student registration URL (/student) (Session 93)
+- [x] GET /api/student/visits — added GET method to load visits by studentId for university_admin and admin roles (Session 93)
+- [x] UserRole type updated — university_admin added to lib/auth.ts and types/database.ts (Session 93)
+- [x] family_members.university_name type added to types/database.ts (Session 93)
+- [x] npx tsc --noEmit passes — zero errors (Session 93)
+- [x] npm run build passes — ✓ Compiled successfully in 41s; 98 routes (was 96, +2: /university-admin, /api/university-admin/export-csv) (Session 93)
+
+FILES CREATED:
+- supabase/migrations/034_university_admin.sql — university_admin role + university_name column
+- lib/data/university.ts — getUniversityForAdmin, getStudentsByUniversity, getVisitsForStudent, getVisitsByUniversity
+- app/university-admin/page.tsx — server page with role protection + data loading
+- components/university/UniversityAdminPortal.tsx — full client portal component
+- app/api/university-admin/export-csv/route.ts — semester CSV export API
+
+FILES MODIFIED:
+- types/database.ts — university_admin added to UserRole; university_name added to family_members Row/Insert
+- lib/auth.ts — university_admin added to UserRole type
+- app/api/student/visits/route.ts — added GET method for admin lookup by studentId
+
+---
+
+### Phase 53 — Employer Portal Full Build (Session 94 + 95 ISSUE fix)
+STATUS: `COMPLETE`
+
+- [x] Migration 036_employer_portal.sql — adds employer_admin to user_role enum; adds pepm_price_cents/billing_cycle/billing_start_date to employer_accounts; adds employer_account_id FK to family_members; creates employer_invitations table with token-based flow + RLS; seeds test Acme Corp employer account and employer_admin family_members row (Session 94)
+- [x] Employer admin portal shows real utilisation data — /employer-admin/page.tsx server component; requireAuth + getUserRole; employer_admin role required; fetches seats_used (count of family role rows with employer_account_id), check_in_count_30d (completed calls for enrolled members' loved ones), open_alerts (unacknowledged); PEPM pricing display; stat cards; falls back to "not configured" state when employer_account_id not set (Session 94)
+- [x] Employee invitation flow works — POST /api/employer-admin/invite: validates employer_admin role, checks for existing pending invite, generates 128-bit hex token, inserts into employer_invitations, calls emailProvider.sendEmployeeInvitation() stub (logs link, SendGrid sends real email when configured), returns accept_url (Session 94)
+- [x] Employee accepts invitation and signs up — /employer-admin/invite/[token]/page.tsx: client form for full_name + password; POST /api/employer-admin/invite/accept: validates token + expiry, creates Supabase auth user, creates family_members row with role='family' and employer_account_id set, marks invitation as accepted + stores accepted_by_auth_id (Session 94)
+- [x] Employer admin redirected correctly — dashboard/page.tsx now redirects employer_admin role to /employer-admin before loading family dashboard data (Session 94)
+- [x] emailProvider.sendEmployeeInvitation added to EmailProvider interface + StubEmailProvider + SendGridEmailProvider (Session 94)
+- [x] employer_admin added to UserRole type in lib/auth.ts and types/database.ts (Session 94)
+- [x] employer_accounts new columns (pepm_price_cents, billing_cycle, billing_start_date) added to types/database.ts (Session 94)
+- [x] employer_invitations table type added to types/database.ts (Session 94)
+- [x] npx tsc --noEmit passes — zero errors (Session 94)
+- [x] npm run build passes — /employer-admin and /employer-admin/invite/[token] listed as dynamic routes (Session 94)
+
+FILES CREATED:
+- supabase/migrations/036_employer_portal.sql — role + schema changes + RLS + seed data
+- app/api/employer-admin/dashboard/route.ts — GET employer dashboard data (alternative to SSR page; kept for API access)
+- app/api/employer-admin/invite/route.ts — POST send employee invitation
+- app/api/employer-admin/invite/accept/route.ts — POST accept invitation + create account
+- app/employer-admin/invite/[token]/page.tsx — invitation acceptance page
+- components/employer/EmployerDashboardClient.tsx — interactive employer portal UI
+
+FILES MODIFIED:
+- app/employer-admin/page.tsx — replaced placeholder with full dashboard (server component)
+- app/dashboard/page.tsx — added employer_admin redirect
+- lib/auth.ts — added employer_admin to UserRole
+- types/database.ts — employer_admin in UserRole; employer_account_id on family_members; new employer_accounts columns; employer_invitations table
+- lib/interfaces/EmailProvider.ts — added sendEmployeeInvitation method
+- lib/stubs/StubEmailProvider.ts — implemented sendEmployeeInvitation stub
+- lib/services/SendGridEmailProvider.ts — implemented sendEmployeeInvitation with HTML template
+
+---
+
+### Phase 50l — Corporate Employee Volunteer Program (Session 96)
+STATUS: `COMPLETE`
+
+- [x] Migration 037_corporate_volunteer.sql — corporate_volunteer_programs + corporate_volunteer_hours tables; ALTER TABLE volunteers ADD corporate_program_id; RLS policies; Acme Corp seed program; human must run in Supabase SQL Editor (Session 96)
+- [x] Volunteer application — corporate program selection — /volunteer/apply has "I am volunteering through my employer's Corporate Volunteer Program" toggle; employer dropdown fetches from /api/corporate-volunteer-programs; corporate_program_id persisted on volunteer row (Session 96)
+- [x] Volunteer linked to corporate program on signup — apply API accepts corporate_program_id; volunteers.corporate_program_id set on insert (Session 96)
+- [x] Employer admin — Corporate Volunteer Program section — EmployerDashboardClient.tsx fetches /api/employer-admin/volunteer-program on mount; shows summary cards (active volunteers, total hours, match value, rate, annual cap, tier); volunteer roster table with hours progress bar vs cap and verification status; "not configured" empty state (Session 96)
+- [x] Benevity-compatible CSV export — "↓ Export for Benevity" button triggers GET /api/employer-admin/volunteer-program?export=benevity; CSV columns: Employee Email, Organization Name, Hours, Date, Activity Description, Verification Status (Session 96)
+- [x] YourCause-compatible CSV export — "↓ Export for YourCause" button; CSV columns: Employee Name, Email, Volunteer Date, Activity, Hours, Status, Organization Name (Session 96)
+- [x] Employee volunteer dashboard — Corporate Program card — CorporateProgramCard component shown when volunteer.corporate_program_id set; fetches /api/corporate-volunteer-programs/[programId] for employer name, rate, cap; shows hours this year, hours remaining vs cap, estimated matching value (Session 96)
+- [x] Employer landing page updated — new "Give your team purpose AND peace of mind" section added to /employers page; navy background; two-column cards explaining eldercare subscription benefit (PEPM, from HR benefits budget) and Corporate Volunteer Program (annual fee, from CSR/giving budget); note that programmes can be purchased independently or bundled (Session 96)
+- [x] lib/data/corporate-volunteers.ts — getActiveCorporatePrograms, getCorporateProgramByEmployer, getCorporateProgramById, getProgramVolunteerSummaries, getAllHoursForExport, getCorporateProgramTotals, linkVolunteerToProgram, createCorporateHourFromVisit (Session 96)
+- [x] types/database.ts — corporate_volunteer_programs and corporate_volunteer_hours table types present; corporate_program_id on volunteers Row/Insert (Session 96)
+- [x] npx tsc --noEmit passes — zero errors (Session 96)
+- [x] npm run build passes — ✓ Compiled successfully in 37.7s; 103 routes (Session 96)
+
+HUMAN ACTIONS REQUIRED BEFORE BROWSER TEST:
+1. Run migration 037_corporate_volunteer.sql in Supabase SQL Editor
+   Creates: corporate_volunteer_programs table, corporate_volunteer_hours table, adds corporate_program_id to volunteers
+2. Also ensure migration 036_employer_portal.sql has been run (Acme Corp employer account seed needed by 037)

@@ -25,19 +25,23 @@ export async function PATCH(
   const body = await req.json().catch(() => null)
   if (!body) return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
 
-  const { status, navigator_note, cancel_reason, dispatch_type, dispatch_details, volunteer_id, action, scheduled_time } = body as {
+  const { status, navigator_note, cancel_reason, dispatch_type, dispatch_details, volunteer_id, action, scheduled_time, new_provider_name } = body as {
     status?: string
     navigator_note?: string
     cancel_reason?: string
     dispatch_type?: string
     dispatch_details?: Record<string, string>
     volunteer_id?: string
-    action?: string  // 'reassign' | 'reschedule'
+    action?: string  // 'reassign' | 'reschedule' | 'unschedule'
     scheduled_time?: string
+    new_provider_name?: string
   }
 
-  if (!status || !VALID_STATUSES.includes(status as BookingStatus)) {
-    return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
+  // For unschedule action, status is optional (we use the current booking status)
+  if (action !== 'unschedule') {
+    if (!status || !VALID_STATUSES.includes(status as BookingStatus)) {
+      return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
+    }
   }
 
   // Get the booking to find the member_id
@@ -52,10 +56,13 @@ export async function PATCH(
     return NextResponse.json({ error: 'Booking not found' }, { status: 404 })
   }
 
+  // Determine the effective target status
+  const targetStatus = (action === 'unschedule') ? (booking.status as BookingStatus) : (status as BookingStatus)
+
   // Update booking status
-  const updates: Record<string, unknown> = { status }
-  if (status === 'confirmed') updates.confirmed_at = new Date().toISOString()
-  if (status === 'completed') updates.completed_at = new Date().toISOString()
+  const updates: Record<string, unknown> = { status: targetStatus }
+  if (targetStatus === 'confirmed' && booking.status !== 'confirmed') updates.confirmed_at = new Date().toISOString()
+  if (targetStatus === 'completed') updates.completed_at = new Date().toISOString()
   if (cancel_reason) updates.notes = cancel_reason
   if (volunteer_id) updates.volunteer_id = volunteer_id
 
@@ -65,9 +72,26 @@ export async function PATCH(
     updates.notes = `${existing}[Navigator ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}] ${navigator_note}`
   }
 
-  if (action === 'reschedule' && scheduled_time) {
+  if (action === 'unschedule') {
+    // Clear scheduled_time and dispatch info — return booking to an unscheduled state
     const existingDetails = (booking.booking_details as Record<string, unknown>) ?? {}
-    updates.booking_details = { ...existingDetails, scheduled_time }
+    const { scheduled_time: _st, dispatch_type: _dt, assigned_volunteer: _av, assigned_provider: _ap, ...rest } = existingDetails
+    void _st; void _dt; void _av; void _ap
+    updates.booking_details = rest
+    updates.status = booking.status  // keep current status unchanged
+  } else if (action === 'reschedule' && scheduled_time) {
+    // Validate: scheduled_time must be in the future
+    const scheduledDate = new Date(scheduled_time)
+    if (isNaN(scheduledDate.getTime()) || scheduledDate <= new Date()) {
+      return NextResponse.json({ error: 'Scheduled time must be a valid future date and time.' }, { status: 400 })
+    }
+    const existingDetails = (booking.booking_details as Record<string, unknown>) ?? {}
+    const rescheduleUpdate: Record<string, unknown> = { ...existingDetails, scheduled_time }
+    if (new_provider_name?.trim()) {
+      rescheduleUpdate.assigned_provider = new_provider_name.trim()
+      rescheduleUpdate.assigned_volunteer = new_provider_name.trim()
+    }
+    updates.booking_details = rescheduleUpdate
   }
 
   if (dispatch_type && dispatch_details) {
@@ -108,16 +132,25 @@ export async function PATCH(
   }
   const label = serviceLabel[booking.service_type] ?? booking.service_type
 
-  if (action === 'reschedule' && scheduled_time) {
+  if (action === 'unschedule') {
+    await pushRealtimeNotification({
+      type: 'service_booking_update',
+      memberId: booking.member_id as string,
+      title: `${label} schedule cleared`,
+      body: `Your ${label.toLowerCase()} scheduling has been cleared. Your navigator will contact you to reschedule.`,
+      severity: 'info',
+    })
+  } else if (action === 'reschedule' && scheduled_time) {
     const timeLabel = new Date(scheduled_time).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'UTC' })
+    const providerNote = new_provider_name?.trim() ? ` with ${new_provider_name.trim()}` : ''
     await pushRealtimeNotification({
       type: 'service_booking_update',
       memberId: booking.member_id as string,
       title: `${label} rescheduled`,
-      body: `Your ${label.toLowerCase()} has been rescheduled to ${timeLabel}.`,
+      body: `Your ${label.toLowerCase()} has been rescheduled to ${timeLabel}${providerNote}.`,
       severity: 'info',
     })
-  } else if (status === 'confirmed' && action === 'reassign') {
+  } else if (targetStatus === 'confirmed' && action === 'reassign') {
     const newName = dispatch_details?.assigned_volunteer || dispatch_details?.assigned_provider || null
     const scheduledTimeStr = dispatch_details?.scheduled_time
     const timeLabel = scheduledTimeStr
@@ -130,15 +163,15 @@ export async function PATCH(
       body: `Your ${label.toLowerCase()} has been reassigned${newName ? ` to ${newName}` : ''}${timeLabel ? ` — still scheduled for ${timeLabel}` : ''}.`,
       severity: 'info',
     })
-  } else if (status === 'confirmed' || status === 'completed') {
+  } else if (targetStatus === 'confirmed' || targetStatus === 'completed') {
     const scheduledTimeStr = dispatch_details?.scheduled_time || scheduled_time
     const timeLabel = scheduledTimeStr
       ? new Date(scheduledTimeStr).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'UTC' })
       : booking.requested_for
         ? new Date(booking.requested_for as string).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' })
         : null
-    const title = status === 'confirmed' ? `${label} request confirmed` : `${label} service completed`
-    const body_text = status === 'confirmed'
+    const title = targetStatus === 'confirmed' ? `${label} request confirmed` : `${label} service completed`
+    const body_text = targetStatus === 'confirmed'
       ? `Your ${label.toLowerCase()} request has been confirmed${timeLabel ? ` for ${timeLabel}` : ''}.`
       : `Your ${label.toLowerCase()} service has been marked as completed.`
     await pushRealtimeNotification({
@@ -148,7 +181,7 @@ export async function PATCH(
       body: body_text,
       severity: 'info',
     })
-  } else if (status === 'cancelled') {
+  } else if (targetStatus === 'cancelled') {
     const reason = cancel_reason ? ` Reason: ${cancel_reason}.` : ''
     await pushRealtimeNotification({
       type: 'service_booking_update',

@@ -1,7 +1,106 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { Volunteer, PrivateMemberView, VolunteerVisit } from '@/lib/data/volunteers'
 import type { VisitType } from '@/types/database'
+
+interface CorporateProgramData {
+  program_name: string
+  employer_name: string
+  matching_rate_per_hour: number
+  annual_hour_cap_per_employee: number | null
+  tier: string
+}
+
+function CorporateProgramCard({ volunteerId, programId, totalHours, annualCapHours }: {
+  volunteerId: string
+  programId: string
+  totalHours: number
+  annualCapHours: number
+}) {
+  const [program, setProgram] = useState<CorporateProgramData | null>(null)
+  const [downloading, setDownloading] = useState(false)
+
+  useEffect(() => {
+    fetch(`/api/corporate-volunteer-programs/${programId}`)
+      .then((r) => r.json())
+      .then((d) => { if (d.program) setProgram(d.program) })
+      .catch(() => null)
+  }, [programId])
+
+  const cap = program?.annual_hour_cap_per_employee ?? annualCapHours
+  const remaining = Math.max(0, cap - totalHours)
+  const matchValue = totalHours * (program?.matching_rate_per_hour ?? 15)
+  const pct = cap > 0 ? Math.min(100, Math.round((totalHours / cap) * 100)) : 0
+
+  async function handleDownload() {
+    setDownloading(true)
+    try {
+      const res = await fetch(`/api/employer-admin/volunteer-export?format=benevity&volunteerId=${volunteerId}`)
+      if (!res.ok) throw new Error('Export failed')
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'my-volunteer-hours.csv'
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch {
+      // silently fail — user can try again
+    } finally {
+      setDownloading(false)
+    }
+  }
+
+  if (!program) return null
+
+  return (
+    <div style={{ backgroundColor: '#EEF7F9', border: '1.5px solid var(--color-teal)', borderRadius: '14px', padding: '24px', marginBottom: '24px' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+        <div>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-teal)', margin: '0 0 4px' }}>
+            Corporate Volunteer Program
+          </p>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 500, color: 'var(--color-navy)', margin: 0 }}>
+            {program.program_name}
+          </h3>
+        </div>
+        <button
+          onClick={handleDownload}
+          disabled={downloading}
+          style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, color: 'white', backgroundColor: 'var(--color-teal)', border: 'none', borderRadius: '8px', padding: '10px 16px', cursor: downloading ? 'not-allowed' : 'pointer', opacity: downloading ? 0.7 : 1, whiteSpace: 'nowrap' }}
+        >
+          {downloading ? 'Preparing…' : '⬇ Download my hours statement'}
+        </button>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '16px', marginTop: '20px' }}>
+        {[
+          { label: 'Hours logged this year', value: `${totalHours.toFixed(1)} hrs` },
+          { label: `Remaining (${cap}hr cap)`, value: `${remaining.toFixed(1)} hrs` },
+          { label: 'Estimated match value', value: `$${matchValue.toFixed(0)}` },
+        ].map(({ label, value }) => (
+          <div key={label} style={{ backgroundColor: 'white', borderRadius: '10px', padding: '16px' }}>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#7A7268', margin: '0 0 6px', letterSpacing: '0.04em' }}>{label}</p>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '24px', color: 'var(--color-navy)', margin: 0, fontWeight: 500 }}>{value}</p>
+          </div>
+        ))}
+      </div>
+      {cap > 0 && (
+        <div style={{ marginTop: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+            <span style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: '#7A7268' }}>Progress toward annual cap</span>
+            <span style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-teal)' }}>{pct}%</span>
+          </div>
+          <div style={{ height: '8px', backgroundColor: '#D4F0F5', borderRadius: '4px', overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: `${pct}%`, backgroundColor: 'var(--color-teal)', borderRadius: '4px', transition: 'width 0.6s ease' }} />
+          </div>
+        </div>
+      )}
+      <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: '#7A7268', margin: '14px 0 0' }}>
+        Your employer matches ${program.matching_rate_per_hour.toFixed(0)}/hr as a cash donation to ThriveAtHome.
+      </p>
+    </div>
+  )
+}
 
 
 const VISIT_TYPE_LABELS: Record<VisitType, string> = {
@@ -254,6 +353,16 @@ export function VolunteerDashboard({ volunteer, matchedMembers, recentVisits: in
 
       <main style={{ flex: 1, maxWidth: '1100px', margin: '0 auto', padding: '32px', width: '100%' }}>
         {/* Impact stats */}
+        {/* Corporate Program card — shown only for volunteers linked to a corporate program */}
+        {volunteer.corporate_program_id && (
+          <CorporateProgramCard
+            volunteerId={volunteer.id}
+            programId={volunteer.corporate_program_id}
+            totalHours={totalHours}
+            annualCapHours={40}
+          />
+        )}
+
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '40px' }}>
           {[
             { label: 'Total hours', value: formatHours(totalHours), anchor: null },

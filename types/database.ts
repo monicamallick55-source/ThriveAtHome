@@ -3,7 +3,7 @@
 
 export type PlanTier = 'basics' | 'connect' | 'complete' | 'premier'
 export type MemberStatus = 'active' | 'inactive' | 'paused'
-export type UserRole = 'family' | 'navigator' | 'admin' | 'volunteer' | 'student'
+export type UserRole = 'family' | 'navigator' | 'admin' | 'volunteer' | 'student' | 'university_admin' | 'employer_admin'
 export type CallStatus = 'scheduled' | 'in_progress' | 'completed' | 'missed' | 'failed'
 export type CallType = 'check_in' | 'concierge' | 'navigator'
 export type AlertType = 'missed_call' | 'mood_drop' | 'medication_miss' | 'wellness_drift' | 'fall' | 'crisis' | 'emergency'
@@ -14,6 +14,9 @@ export type NotifType =
   | 'system_message' | 'service_booking_update' | 'grief_support_assigned'
   | 'family_nudge' | 'celebration_upcoming' | 'volunteer_matched'
   | 'important_date_reminder'
+  | 'automation_isolation' | 'automation_vaccination' | 'automation_volunteer_reengagement'
+  | 'automation_event_noshow' | 'automation_onboarding' | 'automation_transport_followup'
+  | 'automation_tech_help_check' | 'automation_meal_feedback'
 export type NotifSeverity = 'info' | 'concern' | 'urgent' | 'emergency'
 export type NotifChannel = 'realtime' | 'sms' | 'email'
 export type NotifStatus = 'sent' | 'failed' | 'stub'
@@ -103,12 +106,14 @@ export interface Database {
           alert_level: string
           role: UserRole
           last_login_at: string | null
+          university_name: string | null
+          employer_account_id: string | null
         }
         Insert: {
           id?: string
           created_at?: string
           member_id?: string | null
-          supabase_auth_id: string
+          supabase_auth_id?: string
           full_name: string
           email: string
           phone?: string | null
@@ -117,10 +122,42 @@ export interface Database {
           alert_level?: string
           role?: UserRole
           last_login_at?: string | null
+          university_name?: string | null
+          employer_account_id?: string | null
         }
         Update: Partial<Database['public']['Tables']['family_members']['Insert']>
         Relationships: [
           { foreignKeyName: 'family_members_member_id_fkey'; columns: ['member_id']; referencedRelation: 'members'; referencedColumns: ['id'] }
+        ]
+      }
+      employer_invitations: {
+        Row: {
+          id: string
+          created_at: string
+          employer_account_id: string
+          invited_by_auth_id: string
+          email: string
+          token: string
+          status: string
+          expires_at: string
+          accepted_at: string | null
+          accepted_by_auth_id: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          employer_account_id: string
+          invited_by_auth_id: string
+          email: string
+          token: string
+          status?: string
+          expires_at?: string
+          accepted_at?: string | null
+          accepted_by_auth_id?: string | null
+        }
+        Update: Partial<Database['public']['Tables']['employer_invitations']['Insert']>
+        Relationships: [
+          { foreignKeyName: 'employer_invitations_employer_account_id_fkey'; columns: ['employer_account_id']; referencedRelation: 'employer_accounts'; referencedColumns: ['id'] }
         ]
       }
       check_in_calls: {
@@ -533,6 +570,7 @@ export interface Database {
           license_state: string | null
           insurance_provider: string | null
           insurance_expiry: string | null
+          corporate_program_id: string | null
         }
         Insert: {
           id?: string
@@ -561,6 +599,7 @@ export interface Database {
           license_state?: string | null
           insurance_provider?: string | null
           insurance_expiry?: string | null
+          corporate_program_id?: string | null
         }
         Update: Partial<Database['public']['Tables']['volunteers']['Insert']>
         Relationships: []
@@ -978,6 +1017,9 @@ export interface Database {
           seats_purchased: number
           seats_used: number
           status: string
+          pepm_price_cents: number
+          billing_cycle: string
+          billing_start_date: string | null
         }
         Insert: {
           id?: string
@@ -989,6 +1031,9 @@ export interface Database {
           seats_purchased?: number
           seats_used?: number
           status?: string
+          pepm_price_cents?: number
+          billing_cycle?: string
+          billing_start_date?: string | null
         }
         Update: Partial<Database['public']['Tables']['employer_accounts']['Insert']>
         Relationships: []
@@ -1259,6 +1304,71 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['tracked_items']['Insert']>
         Relationships: [
           { foreignKeyName: 'tracked_items_member_id_fkey'; columns: ['member_id']; referencedRelation: 'members'; referencedColumns: ['id'] }
+        ]
+      }
+      corporate_volunteer_programs: {
+        Row: {
+          id: string
+          created_at: string
+          employer_account_id: string
+          program_name: string
+          matching_rate_per_hour: number
+          annual_hour_cap_per_employee: number | null
+          total_hours_logged: number
+          total_matched_value: number
+          integration_type: string
+          package_type: string
+          tier: string
+          status: string
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          employer_account_id: string
+          program_name: string
+          matching_rate_per_hour?: number
+          annual_hour_cap_per_employee?: number | null
+          total_hours_logged?: number
+          total_matched_value?: number
+          integration_type?: string
+          package_type?: string
+          tier?: string
+          status?: string
+        }
+        Update: Partial<Database['public']['Tables']['corporate_volunteer_programs']['Insert']>
+        Relationships: [
+          { foreignKeyName: 'corporate_volunteer_programs_employer_account_id_fkey'; columns: ['employer_account_id']; referencedRelation: 'employer_accounts'; referencedColumns: ['id'] }
+        ]
+      }
+      corporate_volunteer_hours: {
+        Row: {
+          id: string
+          created_at: string
+          corporate_program_id: string
+          volunteer_id: string
+          visit_id: string | null
+          hours_logged: number
+          logged_date: string
+          verified: boolean
+          verified_by: string | null
+          export_status: string
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          corporate_program_id: string
+          volunteer_id: string
+          visit_id?: string | null
+          hours_logged: number
+          logged_date: string
+          verified?: boolean
+          verified_by?: string | null
+          export_status?: string
+        }
+        Update: Partial<Database['public']['Tables']['corporate_volunteer_hours']['Insert']>
+        Relationships: [
+          { foreignKeyName: 'corporate_volunteer_hours_corporate_program_id_fkey'; columns: ['corporate_program_id']; referencedRelation: 'corporate_volunteer_programs'; referencedColumns: ['id'] },
+          { foreignKeyName: 'corporate_volunteer_hours_volunteer_id_fkey'; columns: ['volunteer_id']; referencedRelation: 'volunteers'; referencedColumns: ['id'] }
         ]
       }
     }

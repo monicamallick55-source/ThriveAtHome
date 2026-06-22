@@ -206,7 +206,7 @@ export function OnboardingForm() {
         {/* Top nav: back link + wordmark */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '32px' }}>
           <a
-            href="/dashboard"
+            href="/"
             style={{
               fontFamily: 'var(--font-body)',
               fontSize: '15px',
@@ -218,7 +218,7 @@ export function OnboardingForm() {
               gap: '6px',
             }}
           >
-            ← Dashboard
+            ← Home
           </a>
           <p
             style={{

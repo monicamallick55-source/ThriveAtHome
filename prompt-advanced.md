@@ -1435,6 +1435,128 @@ Urgency logic: `sub_type = 'other_roadside'` creates service booking with `urgen
 
 ---
 
+### PHASE 50l — Corporate Employee Volunteer Program
+
+**What this builds:** A B2B feature distinct from the subscription caregiver benefit — allowing employer clients' employees to volunteer their time on ThriveAtHome and have those hours tracked/exported for their employer's corporate giving and volunteer matching programs (Benevity, YourCause, Bright Funds — the platforms companies like Cisco and Genentech use to match employee volunteer hours with cash donations). This captures employer budget from a second line item beyond the PEPM subscription benefit — the corporate social responsibility/giving budget.
+
+**New tables (`/supabase/migrations/034_corporate_volunteer.sql`):**
+
+```sql
+CREATE TABLE corporate_volunteer_programs (
+  id                        uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at                timestamptz DEFAULT now() NOT NULL,
+  employer_account_id       uuid NOT NULL REFERENCES employer_accounts(id) ON DELETE CASCADE,
+  program_name              text NOT NULL,
+  matching_rate_per_hour    numeric NOT NULL DEFAULT 15.00,
+  -- typical employer commitment $10-25/hr matched as cash donation
+  annual_hour_cap_per_employee int DEFAULT 40,
+  total_hours_logged        numeric NOT NULL DEFAULT 0,
+  total_matched_value       numeric NOT NULL DEFAULT 0,
+  integration_type          text NOT NULL DEFAULT 'manual_export',
+  -- benevity, yourcause, brightfunds, manual_export, none
+  package_type              text NOT NULL DEFAULT 'standalone',
+  -- standalone, bundled_with_subscription
+  tier                      text NOT NULL DEFAULT 'community_partner',
+  -- community_partner ($5K-15K/yr, 50-200hrs), champion ($15K-35K/yr, 200-500hrs),
+  -- leader ($35K-50K+/yr, 500+hrs, co-branded recognition)
+  status                    text NOT NULL DEFAULT 'active'
+);
+ALTER TABLE corporate_volunteer_programs ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE corporate_volunteer_hours (
+  id                  uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at          timestamptz DEFAULT now() NOT NULL,
+  corporate_program_id uuid NOT NULL REFERENCES corporate_volunteer_programs(id) ON DELETE CASCADE,
+  volunteer_id        uuid NOT NULL REFERENCES volunteers(id) ON DELETE CASCADE,
+  visit_id            uuid REFERENCES volunteer_visits(id),
+  hours_logged        numeric NOT NULL,
+  logged_date         date NOT NULL,
+  verified            boolean NOT NULL DEFAULT false,
+  verified_by         uuid REFERENCES care_navigators(id),
+  export_status       text NOT NULL DEFAULT 'pending'
+  -- pending, exported, matched
+);
+ALTER TABLE corporate_volunteer_hours ENABLE ROW LEVEL SECURITY;
+
+-- Link volunteer to a corporate program
+ALTER TABLE volunteers
+  ADD COLUMN IF NOT EXISTS corporate_program_id uuid REFERENCES corporate_volunteer_programs(id);
+```
+
+**Checklist:**
+```
+PHASE 50l CHECKLIST
+[ ] Migration 034_corporate_volunteer.sql runs without errors
+    VERIFY: corporate_volunteer_programs and corporate_volunteer_hours tables visible in Supabase
+    PASS: Both tables present, volunteers table has corporate_program_id column
+
+[ ] Volunteer application — corporate program selection
+    VERIFY: Navigate to /volunteer/apply
+    PASS: Optional field "Are you volunteering through a corporate program?" with employer
+          search/select dropdown matching active corporate_volunteer_programs
+
+[ ] Volunteer linked to corporate program on signup
+    VERIFY: Apply selecting a corporate program
+    PASS: volunteers.corporate_program_id set; all future visit hours auto-attribute to that program
+
+[ ] Employer admin — Corporate Volunteer Program section
+    VERIFY: Log in as employer_admin, navigate to employer admin portal
+    PASS: "Corporate Volunteer Program" section shows: enrolled employee-volunteers,
+          total hours logged this period, estimated matching value (hours × matching_rate_per_hour)
+
+[ ] Benevity-compatible CSV export
+    VERIFY: Click "Export for Benevity"
+    PASS: CSV downloads with columns: Employee Email, Organization Name ("ThriveAtHome"),
+          Hours, Date, Activity Description, Verification Status
+
+[ ] YourCause-compatible CSV export
+    VERIFY: Click "Export for YourCause"
+    PASS: CSV downloads in YourCause-compatible column format (separate export option)
+
+[ ] Employee volunteer dashboard — Corporate Program card
+    VERIFY: Log in as a volunteer linked to a corporate program
+    PASS: "Corporate Program" card shows: total hours this year, hours remaining before
+          annual_hour_cap_per_employee, estimated matching value generated for [Employer Name],
+          "Download my hours statement" button (PDF)
+
+[ ] Navigator spot-check verification
+    VERIFY: Navigator opens a logged corporate volunteer hour entry
+    PASS: "Verify" button available — not required for every entry, but verified hours flagged
+          differently in employer export than unverified hours
+
+[ ] Pricing tiers reflected in admin
+    VERIFY: Create a corporate_volunteer_programs row, check tier field
+    PASS: Tier values available: community_partner, champion, leader — matches original
+          vision pricing ($5K-15K / $15K-35K / $35K-50K+ per year)
+
+[ ] Package type — standalone vs bundled
+    VERIFY: Check package_type field
+    PASS: Can be set independently of whether employer also has a subscription PEPM benefit —
+          employer can have Corporate Volunteer Program with or without the caregiver subscription
+
+[ ] Employer landing page updated
+    VERIFY: Navigate to /employers
+    PASS: New section: "Give your team purpose AND give your team peace of mind" explaining
+          both the caregiver subscription benefit and volunteer hour matching as two parts
+          of one employer partnership
+
+[ ] npx tsc --noEmit passes
+```
+
+**Build instructions:**
+
+This is distinct from the Student Network (Phase 32-33) in one key way: student hours feed back to the student's school for service-hour credit; corporate hours feed back to the employer's giving platform for cash matching. Both use the same underlying `volunteers` and `volunteer_visits` tables — only the attribution and export destination differ.
+
+Employer admin Corporate Volunteer Program section (`/app/employer-admin/volunteer-program/page.tsx` or equivalent route matching existing employer admin structure):
+- Summary cards: active employee-volunteers, total hours this period, total estimated match value
+- Employee roster table: name, hours logged, hours remaining vs cap, verification status
+- Export buttons: "Export for Benevity" and "Export for YourCause" — both produce CSV, column mapping differs per platform's known import format
+- Programme settings: matching_rate_per_hour, annual_hour_cap_per_employee, tier selection
+
+Employee volunteer dashboard addition — reuse the existing impact-stats card pattern from the general volunteer dashboard, add a distinctly-styled "Corporate Program" card only visible when `corporate_program_id` is set on the volunteer record.
+
+---
+
 ### PHASE 50 — Services Dashboard Integration
 
 **Checklist:**
@@ -1564,14 +1686,14 @@ PHASE 54 CHECKLIST
 
 ---
 
-### PHASE 55 — Full Multilingual UI ⏸ MOVED TO AFTER M21
+### PHASE 55 — Full Multilingual UI ⏸ MOVED TO LAST — AFTER M19, M20, M21, M22, M23, M24, M25, M26, M27
 
-> **This phase has been moved.** Per updated roadmap, Full Multilingual UI builds AFTER M21 (Expanded Volunteer Ecosystem) — not as part of M18. M18 now ends at Phase 54 (Medicare Advantage Reporting API). Language Line concierge credentials still activate at Month 6 per Parallel Blitz schedule (no code change needed — just add LANGUAGE_LINE_ACCOUNT_NUMBER to env vars). The full i18n framework, next-intl setup, Spanish-first translation, and multilingual Aria calls build after M21 is approved.
+> **This phase has been moved to the very end of the roadmap.** Full Multilingual UI is the LAST thing built — only after every other milestone through M27 is complete. M18 now ends at Phase 54 (Medicare Advantage Reporting API). Language Line concierge credentials still activate at Month 6 per Parallel Blitz schedule (no code change needed — just add LANGUAGE_LINE_ACCOUNT_NUMBER to env vars) — that early activation is unrelated to this phase and does not require the full i18n framework. The full i18n framework, next-intl setup, Spanish-first translation, and multilingual Aria calls build only after M27 is approved.
 >
-> See the M21+ Multilingual section in the roadmap for the full build spec when ready.
+> See the M21–M27 roadmap section for the full build spec when ready.
 
-**When to build:** After M21 (Expanded Volunteer Ecosystem) is complete and approved.
-**Build order:** M18 (Phases 51–54) → M19 → M20 → M21 → Multilingual (this phase) → M22–M27
+**When to build:** LAST — after M19, M20, M21, M22, M23, M24, M25, M26, AND M27 are all complete and approved.
+**Full build order:** M18 (Phases 51–54) → M19 → M20 → M21 → M22 → M23 → M24 → M25 → M26 → M27 → Multilingual UI (this phase, Phase 55)
 
 Priority languages: Spanish first, then Mandarin, Vietnamese, Tagalog.
 
@@ -1691,13 +1813,38 @@ Parent network account (VtVN, n4a). Aggregate national reporting. Anonymized ben
 
 ---
 
-## M13–M18 COMPLETION
+## ═══ M21–M27 — FUTURE ROADMAP (build after M20, before Phase 55 Multilingual) ═══
 
-When Phase 55 is approved, add to `progress.md`:
+> **Build sequence after M20:** M21 → M22 → M23 → M24 → M25 → M26 → M27 → Phase 55 (Full Multilingual UI, LAST)
+> Full detailed phase specs for M21–M27 are not yet written — they are tracked at milestone level in
+> `ThriveAtHome_Build_Phases_v4.md` and `ThriveAtHome_Master_Specification_v5.md`. When ready to build
+> each milestone, expand it into full PHASE checklists following the same pattern as M13–M20 above
+> before starting that milestone's build session.
+
+**M21 — Expanded Volunteer Ecosystem:** Retired Professionals Network, Faith Community Chaplaincy, Neighbor Volunteers, Family Volunteer Reciprocity, Member Ambassador programme, Youth K-12 curriculum (pen-pals, Life Stories project, mentorship reversal), Annual Intergenerational Showcase. (Note: Corporate Volunteer Program with Benevity/YourCause hour-matching export was moved up and built early as Phase 50l within M17 — not part of M21.)
+
+**M22 — Device & Smart Home Integration Layer:** Companion Device (pre-configured tablet), Alexa Skills + Google Assistant Actions, smart home integration (Echo/Nest/Ring/ADT/Philips Hue/GrandPad), wearable integration (Apple HealthKit/Google Fit/Fitbit/Garmin), fall detection via wearable, HL7 FHIR/Epic/Cerner EHR connectors.
+
+**M23 — Advanced AI/ML Layer:** Wellness baseline modeling, behavioral anomaly detection (Isolation Forest), fall risk prediction (XGBoost), social isolation detection via sentiment NLP, grief pattern monitoring via sentiment NLP + behavioral anomaly detection.
+
+**M24 — Professional Services Revenue Layer:** Trusted Advisor Directory with paid annual listings, VITA tax help integration, 988 Suicide & Crisis Lifeline + SAMHSA explicit embedding, document vault for advance directives/insurance/estate documents.
+
+**M25 — Cultural Programming Depth:** Cultural festival calendars with specific dates, Community Potluck Coordination, Cultural Story Circle (recorded to life story archive), Intergenerational Heritage Event, Cultural Craft & Cooking Class, oral history archive in native languages.
+
+**M26 — Premium Subscription Add-Ons:** Caregiver Family Plan ($89/mo), Long-Distance Caregiver Add-on ($19/mo), Skill Exchange Premium ($9/mo), Cultural Circle Premium ($5/mo), Volunteer Concierge ($19/mo), Annual Care Planning Session ($149/session), Benefits Maximizer Deep-Dive ($79), Milestone Birthday Memory Book physical (70th/75th/80th, $49), extra annual legal consultation ($75).
+
+**M27 — Pet & Companion Life Tracking:** Pet profile in member record, proactive pet birthday/anniversary acknowledgment, pet milestone celebrations alongside human milestones, pet loss circle distinct from human bereavement circles.
+
+---
+
+## M13–M27 COMPLETION
+
+When Phase 55 (Full Multilingual UI) is approved — which only happens after M19, M20, M21, M22, M23, M24, M25, M26, AND M27 are all complete — add to `progress.md`:
 
 ```
-M13-M18 COMPLETE — ALL ADVANCED FEATURE PHASES APPROVED
-Platform is feature-complete across all 5 spec layers.
+M13-M27 COMPLETE — ALL MILESTONES APPROVED INCLUDING FULL MULTILINGUAL UI
+Platform is feature-complete across all 5 spec layers plus the full future roadmap.
+Build sequence completed: M13 → M14 → M15 → M16 → M17 → M18 → M19 → M20 → M21 → M22 → M23 → M24 → M25 → M26 → M27 → Phase 55 (Multilingual, built last)
 Remaining deferred items:
 - M8 AI Calls (activate with RETELL_API_KEY + TWILIO credentials)
 - M9 Concierge Line (activate with second Twilio number)
@@ -1705,7 +1852,7 @@ Remaining deferred items:
 - Physical goods fulfillment (Artifact Uprising, 1-800-Flowers — Phase 39)
 - Stripe Connect for companion payouts (Phase 48)
 - Lyft Healthcare, Instacart, Teladoc integrations (Phase 45-47)
-- Full multilingual UI beyond Spanish (Phase 55)
+- Device/wearable/smart-home partnerships (M22 — require hardware partnerships)
 ```
 
 ---

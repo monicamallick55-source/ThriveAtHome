@@ -76,6 +76,7 @@ ThriveAtHome is built as a modular, cloud-native platform organized into five in
 | **Human Buddy Programme** | Assigned relationship-focused person — distinct from Aria (AI) and Navigator (admin) | 🔄 In progress (Phases 33a–33f) | Connect: weekly volunteer buddy; Complete: weekly volunteer buddy; Premier: bi-weekly + priority companion buddy | Buddy logs calls, flags concerns to navigator, never acts alone on concerns |
 | Paid Companions | Errand escorts, event attendance, social visits | 🔄 In progress (Phase 48) | Marketplace: $15–$25/hr; platform takes 20% fee | Requires Stripe Connect setup |
 | Student Network | Intergenerational service-hours program | ✅ Built (M13) | University partnership; students earn credit hours | Service hours tracker, PDF service record |
+| **Corporate Volunteer Program** | Employee volunteer hours tracked/exported for employer's CSR matching programs | 🔄 In progress (Phase 50l, moved up from M21) | Benevity/YourCause/Bright Funds-compatible CSV export | Distinct from subscription benefit — captures employer's CSR/giving budget separately from HR/benefits budget |
 | Care Coordination (Navigators) | Case managers, appointment escorts, crisis support | ✅ Built (M7) | Staff + contracted navigators | Unified action feed console; ratio 1:150 standard, 1:50 Premier (vision target) |
 
 **The Three Core Roles (clear delineation, must never blur in UI/copy):**
@@ -171,7 +172,7 @@ A single flexible system replaces the original narrow Prescription Refill Manage
 - Dial-In Access: Twilio-powered phone number — ⏸ Built, deferred until Twilio credentials added
 - Volunteer / Companion / Buddy Portal: Web dashboard — ✅ Built
 - Care Coordinator (Navigator) Console: Unified action feed — ✅ Built, redesigned from original caseload-table concept
-- Cultural Circle Platform: Community spaces — ✅ Built (English UI; full i18n is roadmap M25)
+- Cultural Circle Platform: Community spaces — ✅ Built (English UI; full i18n is Phase 55, builds LAST after M27)
 
 ## 3.2 AI & Intelligence Engine
 
@@ -199,7 +200,7 @@ A single flexible system replaces the original narrow Prescription Refill Manage
 - Real-time: Supabase Realtime + Edge Functions — ✅ Built
 - File/Media: Supabase Storage — ✅ Built (member-documents, life-story-attachments, memory-books buckets)
 - Phone Infrastructure: Twilio Programmable Voice — ⏸ Built, deferred
-- i18n Framework: ⬜ Roadmap (M25) — currently English-only UI
+- i18n Framework: ⬜ Roadmap (Phase 55, builds LAST after M19–M27 complete) — currently English-only UI
 
 ### Key Integration Partners — Status
 
@@ -407,7 +408,7 @@ See Sections 5, 6, 7 for full detail on each component.
 | Circle Feature | Description | Status |
 |---|---|---|
 | Cultural Community Space | Dedicated group page: feed, posts, event calendar | ✅ Built |
-| Language Settings | Full platform UI in member's language | ⬜ Roadmap (M25) — English only currently |
+| Language Settings | Full platform UI in member's language | ⬜ Roadmap (Phase 55, builds LAST after M27) — English only currently |
 | Cultural Event Calendar | Festivals and heritage events | 🔄 Generic events built; specific festival calendar with dates not yet built |
 | Cultural Content Feed | Culturally relevant content | ⬜ Not yet built |
 | Cultural Companion Matching | Volunteer/buddy matching by cultural compatibility | 🔄 Language match scored (+20); specific cultural-heritage matching not yet built |
@@ -433,10 +434,10 @@ See Sections 5, 6, 7 for full detail on each component.
 **At launch, M14 build prioritized Latino/Hispanic and Chinese-American circles to go live FREE in Month 1 per Parallel Blitz strategy — the other 10 follow per the build queue.**
 
 ## 6.3 Cultural Festival Programming — Vision, Not Yet Built
-- Virtual Festival Gathering, Community Potluck Coordination, Cultural Story Circle (recorded to life story archive), Intergenerational Heritage Event, Cultural Craft & Cooking Class — all ⬜ roadmap (M25)
+- Virtual Festival Gathering, Community Potluck Coordination, Cultural Story Circle (recorded to life story archive), Intergenerational Heritage Event, Cultural Craft & Cooking Class — all ⬜ roadmap (M25, in normal build sequence after M24)
 
 ## 6.4 Language Access Across the Platform — Vision, Not Yet Built
-- Full i18n framework, multilingual Aria calls, Language Line concierge integration — all ⬜ roadmap (M25), targeted Month 6 for Language Line specifically per Parallel Blitz
+- Full i18n framework and multilingual Aria calls — ⬜ Phase 55, builds LAST only after M19 through M27 are all complete. Language Line concierge integration is separate and activates at Month 6 per Parallel Blitz (env var only, does not require the full i18n framework).
 
 ---
 
@@ -529,13 +530,17 @@ Health literacy circles (retired physicians/nurses), legal clinics (retired lawy
 - ✅ Built: Faith circle exists as one of the 8 interest communities
 - ⬜ Not built: formal denominational MOU partnerships, chaplain referral network for spiritual care (non-proselytizing, member-requested only)
 
-## 8.6 Corporate Volunteer Program — ⬜ Not Built (Roadmap M21)
+## 8.6 Corporate Volunteer Program — 🔄 In Progress (Phase 50l, built early within M17)
 
-| Tier | Hours/Year | Activities | Recognition |
-|---|---|---|---|
-| Community Partner | 50–200 | Group volunteer days, meal delivery, event hosting | Partner badge, press support |
-| Community Champion | 200–500 | + skills-based volunteering, mentorship | Champion recognition, impact video |
-| Community Leader | 500+ | + strategic partnership, employee ambassador | Naming rights, CEO recognition |
+A B2B feature distinct from the subscription caregiver benefit — employees volunteer their time on ThriveAtHome (helping seniors generally, not just their own parents), and hours are tracked and exported in formats compatible with corporate giving and volunteer-matching platforms such as Benevity, YourCause, and Bright Funds — the systems companies like Cisco and Genentech use to match employee volunteer hours with cash donations. This captures employer budget from a second line item: the corporate social responsibility/giving budget, separate from the HR/benefits budget that funds the subscription product.
+
+| Tier | Annual Price | Hours/Year | Activities | Recognition |
+|---|---|---|---|---|
+| Community Partner | $5,000–$15,000 | 50–200 | Group volunteer days, meal delivery, event hosting | Partner badge, press support |
+| Community Champion | $15,000–$35,000 | 200–500 | + skills-based volunteering, mentorship | Champion recognition, impact video |
+| Community Leader | $35,000–$50,000+ | 500+ | + strategic partnership, employee ambassador | Naming rights, CEO recognition |
+
+**Can be sold standalone or bundled** with the subscription PEPM caregiver benefit — an employer relationship can include either, both, or grow from one to the other over time.
 
 ## 8.7 Volunteer Platform Infrastructure
 
@@ -615,7 +620,7 @@ Health literacy circles (retired physicians/nurses), legal clinics (retired lawy
 | M7 | Community Hub (Travel + Premium) | Members + B2B | Trip fees, commissions | 🔄 Travel Assistance category in progress |
 | M8 | Celebrations & Cultural | Members + sponsors | Add-ons, sponsorships, physical goods | 🔄 In progress (Phases 50b/c/d) |
 | M9 | Professional Services Network | Members + providers | Referral fees + directory | ⬜ Not started — paid advisor directory listing model not built |
-| M10 | Corporate Volunteer Program | Employer clients | Partner fees | ⬜ Not started |
+| M10 | Corporate Volunteer Program | Employer clients | Partner fees + employee hour matching (Benevity/YourCause export) | 🔄 In progress (Phase 50l) |
 
 ## 11.2–11.7 — Full Pricing Detail (B2C, Employer, Government, Insurance — Vision Reference)
 
@@ -685,7 +690,8 @@ The original vision's Phase 0–4 roadmap and the actual build's M1–M27 milest
 | Phase 1 — Launch (Months 4–6) | M13 (Volunteers), M17 partial (Services), early M8/M9/M10 activation | 🔄 In progress |
 | Phase 2 — Community (Months 7–12) | M14 (Community), M15 (Celebrations), M16 (Grief) | ✅ Complete |
 | Phase 3 — Enterprise (Year 2) | M18 (Enterprise), M19 (Care Industry Partnerships) | ⬜ Not started |
-| Phase 4 — National Scale (Year 3) | M20 (Community Orgs, deferred), M21–M27 (Future Roadmap) | ⏸ Deferred / ⬜ Roadmap |
+| Phase 4 — National Scale (Year 3) | M20 (Community Orgs, no longer deferred), M21–M27 (Future Roadmap) | ⬜ Not started |
+| Final — Language Access | Phase 55 Full Multilingual UI — builds LAST, only after M19 through M27 are all complete | ⬜ Not started |
 
 ## Actual Build Status Detail (M1–M20)
 
@@ -707,19 +713,21 @@ The original vision's Phase 0–4 roadmap and the actual build's M1–M27 milest
 | M18 Enterprise | 51–54 (Phase 55 moved to after M21) | ⬜ NOT STARTED |
 | M19 Care Industry Partnerships | 59–62 | ⬜ NOT STARTED |
 | M20 Community Organizations | 63–66 | ⬜ NOT STARTED — builds after M19, no longer deferred |
+| M21–M27 Future Roadmap | See table below | ⬜ NOT STARTED — builds after M20, in sequence |
+| Phase 55 Full Multilingual UI | — | ⬜ NOT STARTED — builds LAST, only after M27 completes |
 
 ## Future Roadmap — M21–M27 (Captures Remaining Original Vision Gaps)
 
 | Milestone | Captures From Original Vision |
 |---|---|
-| M21 — Expanded Volunteer Ecosystem | Retired Professionals, Chaplaincy, Corporate Volunteer Program, Neighbor Volunteers, Family Reciprocity, Member Ambassador, Youth K-12 curriculum, Intergenerational Showcase |
-| **Multilingual UI (moved from M18 Phase 55)** | Full i18n framework, next-intl, Spanish first then Mandarin/Vietnamese/Tagalog, multilingual Aria calls, Language Line. Builds immediately after M21. |
+| M21 — Expanded Volunteer Ecosystem | Retired Professionals, Chaplaincy, Neighbor Volunteers, Family Reciprocity, Member Ambassador, Youth K-12 curriculum, Intergenerational Showcase (Corporate Volunteer Program moved earlier — built as Phase 50l within M17) |
 | M22 — Device & Smart Home Integration | Companion Device, Alexa/Google Assistant, smart home (Echo/Nest/Ring/ADT), wearables, fall detection, EHR connectors |
 | M23 — Advanced AI/ML Layer | Wellness baseline ML, behavioral anomaly detection, fall risk prediction, NLP-based isolation/grief detection |
 | M24 — Professional Services Revenue Layer | Paid Trusted Advisor Directory, VITA integration, 988/SAMHSA embedding, document vault |
-| M25 — Cultural Programming Depth | Festival calendars, potluck coordination, story circles, full i18n, multilingual Aria |
+| M25 — Cultural Programming Depth | Festival calendars, potluck coordination, story circles, oral history archive |
 | M26 — Premium Subscription Add-Ons | Caregiver Family Plan, all 11 premium SKUs from Section 11 |
 | M27 — Pet & Companion Life Tracking | Pet profiles, pet birthday/anniversary, pet loss circle |
+| **Phase 55 — Full Multilingual UI (moved from M18, builds LAST)** | Full i18n framework, next-intl, Spanish first then Mandarin/Vietnamese/Tagalog, multilingual Aria calls, Language Line. **Builds only after M19, M20, M21, M22, M23, M24, M25, M26, AND M27 are all complete** — the final feature on the entire roadmap. |
 
 ---
 

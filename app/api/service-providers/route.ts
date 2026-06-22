@@ -32,5 +32,14 @@ export async function GET(req: NextRequest) {
   const { data, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  return NextResponse.json({ providers: data ?? [] })
+  // Deduplicate by company_name (or full_name when no company) to guard against duplicate DB rows
+  const seen = new Set<string>()
+  const deduped = (data ?? []).filter(p => {
+    const key = ((p.company_name ?? p.full_name) as string).toLowerCase().trim()
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+
+  return NextResponse.json({ providers: deduped })
 }

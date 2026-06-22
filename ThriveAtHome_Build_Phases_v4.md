@@ -194,25 +194,14 @@ Memory Book pricing: Premier/Complete = free unlimited; Connect = Book $14.99 / 
 **Phase 49 — On-Demand Tech Help** ⬜ Not started
 
 **Phase 50 — Services Dashboard Integration** ⬜ Not started
+- Upcoming services on family dashboard
+- Service history view
+- Navigator console shows all member bookings
 
 **Phase 50a — Prescription Refill Management** ⚠️ SUPERSEDED by Phase 50j
 - Original narrow prescription-only feature
 - Replaced by Phase 50j Important Dates & Renewals — prescriptions are now one item_type within
   the broader configurable system rather than a standalone feature
-
-**Phase 50j — Important Dates & Renewals (NEW, replaces 50a)** 🔄 In progress
-- Generalized tracked_items system covering: prescriptions, home/car/health insurance,
-  driver's license, car registration, AAA membership, passport, gym membership, appointments, other
-- Member-configurable item types with sensible defaults (reminder lead time, recurrence cycle)
-  fully editable per item
-- Document upload per item — insurance card photo, registration document, appointment confirmation
-  (tracked-item-attachments Storage bucket)
-- Aria proactively mentions upcoming items in calls, same pattern as Family Events
-- Member response actions: snooze, request navigator help renewing, mark done, reschedule/cancel
-  (appointments)
-- Recurring items auto-advance to next cycle when marked complete; one-time items (passport) just complete
-- Navigator action panel shows all tracked items sorted soonest-first with renewal request tasks
-- Family dashboard card showing upcoming items color-coded by urgency
 
 **Phase 50b — Gift Sending Platform** 🔄 In progress
 - Gift intent detection in Aria calls → family notification
@@ -238,7 +227,13 @@ Memory Book pricing: Premier/Complete = free unlimited; Connect = Book $14.99 / 
 - Family travel awareness — Aria adjusts call tone during family travel
 - New baby/milestone Aria celebration scripts
 
-**Phase 50e — Platform Automations** 🔄 In progress
+**Phase 50e — Platform Automations (17 rules)** 🔄 In progress
+- Health: prescription refill prediction, doctor appointment reminder, vaccination reminders, isolation detection
+- Safety: extreme weather alerts, seasonal home safety checks, fall risk flag
+- Social: volunteer re-engagement, event no-show follow-up, benefits renewal reminder
+- Administrative: subscription value summary, inactive family nudge, onboarding completion reminder, navigator caseload warning
+- Services: transport follow-up, tech help success check, meal delivery feedback
+- Global rules: audit logged, family opt-out per member, max 2 notifications/day/family
 
 **Phase 50f — Geographic Chapter System** 🔄 In progress
 - metro_areas table with 10 seeded US metros
@@ -249,22 +244,8 @@ Memory Book pricing: Premier/Complete = free unlimited; Connect = Book $14.99 / 
 - Chapter landing page at /chapter/[slug]
 - Rural members get full virtual service — no degraded experience
 
-**Phase 50k — Roadside Assistance & Car Repair** 🔄 In progress
-- 9th service category: Flat tyre, battery jump, lockout, towing, fuel delivery, mechanic referral
-- Pre-fills from member's AAA membership or car insurance stored in tracked_items (Phase 50j)
-- Urgent flag for roadside emergencies — bypasses standard dispatch queue
-- Navigator dispatch panel shows membership/insurance details pre-populated
-- Stub: [STUB][Roadside] Would call AAA/insurance roadside on behalf of member
-
 **Phase 50g — Member Safety & Fraud Protection** 🔄 In progress
-
-**Phase 50h — Three-Layer Social Connection** 🔄 In progress
-- Layer 1: Circle posts with auto-redact of contact info (already partially built)
-- Layer 2: Friend requests (circle/event members only), private messaging inside platform, contact info auto-redacted, money request scanning
-- Layer 3: Navigator-facilitated introductions with AI member matching
-- Security: Report button on posts/messages, community guidelines acknowledgment screen
-- Deferred to Year 2: public community feed, full social graph, friend feeds, mutual friends visibility
-- Soft age verification (60+ DOB) — no ID upload required
+- Soft age verification (65+ DOB) — no ID upload required
 - Background checks: volunteers/companions/navigators only — NEVER for members
 - Aria detects: gift card requests, new friend money requests, tech support scams, lottery scams, romance scams
 - Large purchase notification to family (>$50)
@@ -272,51 +253,61 @@ Memory Book pricing: Premier/Complete = free unlimited; Connect = Book $14.99 / 
 - fraud_flags table visible to family and navigator
 - Scam education content in tech help section
 - "Report a concern" button on family dashboard
-- Health: prescription refill prediction, doctor appointment reminder, vaccination reminders, isolation detection
-- Safety: extreme weather alerts, seasonal home safety checks, fall risk flag
-- Social: volunteer re-engagement, event no-show follow-up, benefits renewal reminder
-- Administrative: subscription value summary, inactive family nudge, onboarding completion reminder, navigator caseload warning
-- Services: transport follow-up, tech help success check, meal delivery feedback
-- Global rules: audit logged, family opt-out per member, max 2 notifications/day/family
+
+**Phase 50h — Three-Layer Social Connection** 🔄 In progress
+- Layer 1: Circle posts with auto-redact of contact info (already partially built)
+- Layer 2: Friend requests (circle/event members only), private messaging inside platform, contact info auto-redacted, money request scanning
+- Layer 3: Navigator-facilitated introductions with AI member matching
+- Security: Report button on posts/messages, community guidelines acknowledgment screen
+- Deferred to Year 2: public community feed, full social graph, friend feeds, mutual friends visibility
+
+**Phase 50i — Human Buddy Feature** ⚠️ SUPERSEDED by Phases 33a–33f
+- Original draft of the Buddy feature, replaced by the fuller Phases 33a–33f spec
+  (database layer, matching UI, buddy portal, navigator tools, family dashboard, onboarding questions)
+
+**Phase 50j — Important Dates & Renewals (replaces Phase 50a)** 🔄 In progress
+- Generalized tracked_items system covering: prescriptions, home/car/health insurance,
+  driver's license, car registration, AAA membership, passport, gym membership, appointments, other
+- Member-configurable item types with sensible defaults (reminder lead time, recurrence cycle)
+  fully editable per item
+- Document upload per item — insurance card photo, registration document, appointment confirmation
+  (tracked-item-attachments Storage bucket)
+- Aria proactively mentions upcoming items in calls, same pattern as Family Events
+- Member response actions: snooze, request navigator help renewing, mark done, reschedule/cancel
+  (appointments)
+- Recurring items auto-advance to next cycle when marked complete; one-time items (passport) just complete
+- Navigator action panel shows all tracked items sorted soonest-first with renewal request tasks
+- Family dashboard card showing upcoming items color-coded by urgency
+
+**Phase 50l — Corporate Employee Volunteer Program** 🔄 In progress
+- B2B feature distinct from subscription caregiver benefit — second revenue line from
+  employer's corporate giving/CSR budget, not just HR/benefits budget
+- corporate_volunteer_programs + corporate_volunteer_hours tables
+- Volunteer application links employee to their employer's program
+- Employer admin exports hours in Benevity-compatible and YourCause-compatible CSV formats
+  (the platforms companies like Cisco and Genentech use to match employee volunteer hours
+  with cash donations)
+- Employee volunteer dashboard shows hours, cap remaining, and estimated matching value
+  generated for their employer
+- Navigator spot-check verification
+- Pricing tiers: Community Partner ($5K-15K/yr), Champion ($15K-35K/yr), Leader ($35K-50K+/yr)
+- Can be sold standalone or bundled with subscription PEPM benefit
+
+**Phase 50k — Roadside Assistance & Car Repair** 🔄 In progress
+- 9th service category — split into 🚨 Emergency Roadside and 🔧 Car Repair & Maintenance
+- Emergency: flat tyre, battery jump, lockout, towing, fuel delivery, other roadside emergency
+- Non-emergency: scheduled maintenance, body shop, mechanic (non-urgent), car inspection
+- Pre-fills from member's AAA membership or car insurance stored in tracked_items (Phase 50j)
+- Urgent flag for roadside emergencies only — bypasses standard dispatch queue; non-emergency
+  repair requests follow normal low-priority navigator dispatch
+- Navigator dispatch panel shows membership/insurance details pre-populated + ServiceProviderPicker
+  for vetted repair shops
+- Migration 032_car_repair_providers.sql seeded 2 vetted shops (Tony Martinez, Kevin Park)
+- Stub: [STUB][Roadside] Would call AAA/insurance roadside on behalf of member
 
 ---
 
-## Remaining Build
-
-### M17 Phases 46–50
-
-**Phase 46 — Home Services + Meals**
-- Home safety assessment request form
-- Grocery/meal delivery request
-- Seasonal safety reminder cron
-- Stub MealProvider logs
-
-**Phase 47 — Health + Legal/Financial + Tech Help**
-- Telehealth request form
-- Mental health referral tracking
-- Legal/financial vetted advisor directory (static, no specific firms)
-- Tech help request form with in-home scheduling
-- Fraud/scam awareness content
-
-**Phase 48 — Paid Companion Marketplace**
-- Companion browse page
-- Booking flow
-- Rating prompt after session
-- Stripe Connect payouts (deferred until configured)
-
-**Phase 49 — Tech Help Enhancement**
-- Tech helpline dial-in info
-- Scam education content
-- Video tutorial library placeholder
-
-**Phase 50 — Services Integration**
-- Upcoming services on family dashboard
-- Service history view
-- Navigator console shows all member bookings
-
----
-
-### M18 — Enterprise (Phases 51–55)
+### M18 — Enterprise (Phases 51–54, Phase 55 moved to after M21)
 
 **Phase 51 — Outcomes Dashboard**
 - Public outcomes page at /outcomes (anonymised aggregate stats)
@@ -340,11 +331,12 @@ Memory Book pricing: Premier/Complete = free unlimited; Connect = Book $14.99 / 
 - Rate limiting (100 requests/partner/day)
 - API access audit logging
 
-**Phase 55 — Full Multilingual UI** ⏸ MOVED TO AFTER M21
-- Moved per updated roadmap — builds after M21 (Expanded Volunteer Ecosystem)
+**Phase 55 — Full Multilingual UI** ⏸ MOVED TO LAST — builds after M19, M20, M21, M22, M23, M24, M25, M26, AND M27
+- Moved per updated roadmap — builds only after the ENTIRE M19–M27 sequence is complete
 - M18 now ends at Phase 54 (Medicare Advantage Reporting API)
-- Language Line credentials still activate at Month 6 per Parallel Blitz (env var only, no code change)
-- Full i18n, next-intl, Spanish-first, multilingual Aria builds after M21
+- Language Line credentials still activate at Month 6 per Parallel Blitz (env var only, no code change —
+  unrelated to the full i18n framework build)
+- Full i18n, next-intl, Spanish-first, multilingual Aria is the LAST feature built on the entire roadmap
 
 ---
 
@@ -486,9 +478,9 @@ ANTHROPIC_API_KEY           # M8 + AI features
 
 ---
 
-## Full Vision Roadmap — Beyond M20 (from Comprehensive Specs)
+## Full Vision Roadmap — M21–M27, Then Multilingual Last (from Comprehensive Specs)
 
-These are genuine features in the original platform vision not yet scheduled into a build milestone. They represent the path from current M13–M20 scope to the full 5-layer, 10-revenue-stream vision. Build when team capacity and funding support them — track here so they are never lost.
+These are genuine features in the original platform vision, now scheduled into the active build sequence after M20. Build order: M20 → M21 → M22 → M23 → M24 → M25 → M26 → M27 → **Phase 55 Full Multilingual UI (built LAST, after everything else)**.
 
 ### M21 — Expanded Volunteer Ecosystem (6 new categories)
 - Retired Professionals Network — doctors, nurses, lawyers, CPAs, teachers, engineers, social workers, chefs volunteering expertise (health literacy circles, legal clinics, VITA tax help, tutoring, home safety tech assessments)

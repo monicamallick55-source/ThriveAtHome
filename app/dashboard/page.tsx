@@ -1,7 +1,7 @@
 // Dashboard server component — fetches all data in parallel (8-second timeout per section).
 import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
-import { requireAuth } from '@/lib/auth'
+import { requireAuth, getUserRole } from '@/lib/auth'
 import { getMemberForAuthUser } from '@/lib/data/members'
 import { getCallsForMember } from '@/lib/data/calls'
 import { getAlertsForMember } from '@/lib/data/alerts'
@@ -10,7 +10,7 @@ import { getTasksForMember } from '@/lib/data/tasks'
 import { getFamilyMemberByAuthId } from '@/lib/data/family'
 import { syncMemberSubscription } from '@/lib/stripe/sync'
 import { isTodayBirthday, getRecentCelebrationEvents } from '@/lib/data/celebrations'
-import { getUpcomingServiceBookings } from '@/lib/data/services'
+import { getUpcomingServiceBookings, getRecentCompletedServiceBookings } from '@/lib/data/services'
 import { getUpcomingTrackedItems } from '@/lib/data/tracked-items'
 import DashboardClient from '@/components/dashboard/DashboardClient'
 import type { CheckInCall } from '@/lib/data/calls'
@@ -44,6 +44,15 @@ export default async function DashboardPage({
   const [user, params] = await Promise.all([requireAuth(), searchParams])
   const showSubscribedBanner = params.subscribed === 'true'
 
+  // Route non-family roles to their correct portals so the family dashboard never
+  // tries to render for a navigator, volunteer, student, or university_admin.
+  const role = await getUserRole(user.id)
+  if (role === 'university_admin') redirect('/university-admin')
+  if (role === 'employer_admin') redirect('/employer-admin')
+  if (role === 'navigator') redirect('/navigator')
+  if (role === 'volunteer') redirect('/volunteer/dashboard')
+  if (role === 'student') redirect('/student')
+
   const { data: member, error: memberError } = await withTimeout(
     getMemberForAuthUser(user.id)
   )
@@ -72,6 +81,7 @@ export default async function DashboardPage({
     celebrationsResult,
     servicesResult,
     trackedItemsResult,
+    serviceHistoryResult,
   ] = await Promise.all([
     withTimeout<CheckInCall[]>(getCallsForMember(member.id, 90, 0, user.id)),
     withTimeout<Alert[]>(getAlertsForMember(member.id)),
@@ -81,6 +91,7 @@ export default async function DashboardPage({
     withTimeout<CelebrationEvent[]>(getRecentCelebrationEvents(member.id, 3)),
     withTimeout<ServiceBooking[]>(getUpcomingServiceBookings(member.id)),
     withTimeout<TrackedItem[]>(getUpcomingTrackedItems(member.id)),
+    withTimeout<ServiceBooking[]>(getRecentCompletedServiceBookings(member.id, 3)),
   ])
 
   const memberIsBirthday = member.date_of_birth ? isTodayBirthday(member.date_of_birth) : false
@@ -102,6 +113,7 @@ export default async function DashboardPage({
       recentCelebrations={celebrationsResult.data ?? []}
       upcomingServices={servicesResult.data ?? []}
       upcomingTrackedItems={trackedItemsResult.data ?? []}
+      serviceHistory={serviceHistoryResult.data ?? []}
     />
   )
 }

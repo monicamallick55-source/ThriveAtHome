@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { VOLUNTEER_SUBTYPE_GROUPS } from '@/lib/services/serviceTypes'
 
@@ -42,6 +42,8 @@ type FormState = {
   veteran_branch: string
   veteran_years: string
   vso_affiliation: string
+  is_corporate_volunteer: boolean
+  corporate_program_id: string
 }
 
 const initial: FormState = {
@@ -52,6 +54,13 @@ const initial: FormState = {
   has_drivers_license: false, license_state: '', insurance_provider: '', insurance_expiry: '',
   background_check_consent: false,
   is_veteran: false, veteran_branch: '', veteran_years: '', vso_affiliation: '',
+  is_corporate_volunteer: false, corporate_program_id: '',
+}
+
+interface CorporateProgram {
+  id: string
+  program_name: string
+  tier: string
 }
 
 function toggleItem(arr: string[], val: string): string[] {
@@ -63,6 +72,14 @@ export default function VolunteerApplyPage() {
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [corporatePrograms, setCorporatePrograms] = useState<CorporateProgram[]>([])
+
+  useEffect(() => {
+    fetch('/api/corporate-volunteer-programs')
+      .then(r => r.json())
+      .then(d => { if (d.programs) setCorporatePrograms(d.programs) })
+      .catch(() => {})
+  }, [])
 
   function setField<K extends keyof FormState>(key: K, val: FormState[K]) {
     setForm(f => ({ ...f, [key]: val }))
@@ -97,6 +114,7 @@ export default function VolunteerApplyPage() {
           license_state: form.has_drivers_license ? form.license_state : undefined,
           insurance_provider: form.insurance_provider || undefined,
           insurance_expiry: form.insurance_expiry || undefined,
+          corporate_program_id: form.is_corporate_volunteer && form.corporate_program_id ? form.corporate_program_id : undefined,
         }),
       })
       const json = await res.json()
@@ -439,6 +457,46 @@ export default function VolunteerApplyPage() {
                 placeholder="Any previous caregiving, volunteering, or professional experience with older adults..." />
             </div>
           </div>
+
+          {/* Corporate Volunteer Program */}
+          {corporatePrograms.length > 0 && (
+            <div style={sectionStyle}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '26px', color: 'var(--color-navy)', fontWeight: 500, marginBottom: '8px' }}>Corporate Volunteer Program</h2>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: '16px', color: 'var(--color-text-secondary)', marginBottom: '20px', lineHeight: 1.6 }}>
+                If your employer sponsors a Corporate Volunteer Program through ThriveAtHome, select it below.
+                Your volunteer hours will be tracked and exported to your employer&apos;s giving platform (e.g. Benevity, YourCause) for hour-matching.
+              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: form.is_corporate_volunteer ? '20px' : '0' }}>
+                <button type="button"
+                  onClick={() => { setField('is_corporate_volunteer', !form.is_corporate_volunteer); if (form.is_corporate_volunteer) setField('corporate_program_id', '') }}
+                  style={{ width: '48px', height: '28px', borderRadius: '14px', border: 'none', cursor: 'pointer', position: 'relative', transition: 'background 0.2s', backgroundColor: form.is_corporate_volunteer ? 'var(--color-teal)' : 'var(--color-warm-grey)' }}
+                  aria-label="Volunteering through corporate program?"
+                >
+                  <span style={{ position: 'absolute', top: '4px', left: form.is_corporate_volunteer ? '24px' : '4px', width: '20px', height: '20px', borderRadius: '50%', backgroundColor: 'white', transition: 'left 0.2s' }} />
+                </button>
+                <span style={{ fontFamily: 'var(--font-body)', fontSize: '16px', color: 'var(--color-text)', fontWeight: 500 }}>I am volunteering through my employer&apos;s Corporate Volunteer Program</span>
+              </div>
+              {form.is_corporate_volunteer && (
+                <div>
+                  <label style={labelStyle} htmlFor="corp-program">Select your employer&apos;s program</label>
+                  <select
+                    id="corp-program"
+                    style={{ ...inputStyle, cursor: 'pointer' }}
+                    value={form.corporate_program_id}
+                    onChange={e => setField('corporate_program_id', e.target.value)}
+                  >
+                    <option value="">-- Select a program --</option>
+                    {corporatePrograms.map(p => (
+                      <option key={p.id} value={p.id}>{p.program_name}</option>
+                    ))}
+                  </select>
+                  <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', marginTop: '8px' }}>
+                    Don&apos;t see your employer&apos;s program? Ask your HR team about setting up a ThriveAtHome Corporate Volunteer Program.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Background check consent */}
           <div style={{ ...sectionStyle, borderColor: 'var(--color-teal)', backgroundColor: '#F0FAF9' }}>

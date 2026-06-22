@@ -1,6 +1,5 @@
 'use client'
 // Confirmation screen shown after successful onboarding submission.
-import Link from 'next/link'
 
 interface Props {
   preferredName: string
@@ -28,13 +27,13 @@ export function Confirmation({ preferredName }: Props) {
         </p>
       </div>
 
-      <Link
-        href="/dashboard"
-        className="w-full text-white font-semibold rounded-lg px-4 py-4 text-base text-center transition-opacity hover:opacity-90 inline-block"
-        style={{ backgroundColor: '#1B3A6B', minHeight: '52px', lineHeight: '28px' }}
+      <button
+        onClick={() => { window.location.href = '/dashboard' }}
+        className="w-full text-white font-semibold rounded-lg px-4 py-4 text-base text-center transition-opacity hover:opacity-90"
+        style={{ backgroundColor: '#1B3A6B', minHeight: '52px', border: 'none', cursor: 'pointer' }}
       >
         Go to dashboard
-      </Link>
+      </button>
     </div>
   )
 }

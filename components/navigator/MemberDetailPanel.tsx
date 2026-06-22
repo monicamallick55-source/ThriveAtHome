@@ -34,6 +34,16 @@ const DISPATCH_LABELS: Record<string, string> = {
   meal_arrangement: 'Manual arrangement',
   vetted_provider: 'Vetted provider',
   scheduled_visit: 'Scheduled visit',
+  legal_vetted: 'Legal/Financial referral',
+  telehealth_appt: 'Telehealth appointment',
+  benefits_flag: 'Benefits review flagged',
+  ship: 'SHIP Medicare counselor',
+  fraud_flag: 'Fraud alert',
+  mental_health: 'Mental health referral',
+  med_review: 'Medication review task',
+  health_aide: 'Home health aide',
+  hospice: 'Hospice consultation (urgent)',
+  health_general: 'Health service scheduled',
 }
 
 function statusColor(s: string): { bg: string; text: string } {
@@ -62,6 +72,21 @@ function formatDate(iso: string | null | undefined): string {
   } catch {
     return '—'
   }
+}
+
+function isFutureDateTime(dt: string | undefined): boolean {
+  if (!dt) return false
+  const parsed = new Date(dt)
+  return !isNaN(parsed.getTime()) && parsed > new Date()
+}
+
+function getMemberCity(address: string | null | undefined): string {
+  if (!address) return ''
+  const parts = address.split(',').map(s => s.trim()).filter(Boolean)
+  // "123 Main St, Chicago, IL 60601" → ["123 Main St", "Chicago", "IL 60601"]
+  // Return second-to-last segment as city if at least 2 parts
+  if (parts.length >= 2) return parts[parts.length - 2]
+  return ''
 }
 
 function calcAge(dob: string): string {
@@ -135,6 +160,8 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
   const [reassignMode, setReassignMode] = useState<Record<string, string | null>>({}) // bookingId -> dispatchType
   const [rescheduleMode, setRescheduleMode] = useState<Record<string, boolean>>({})
   const [rescheduleTime, setRescheduleTime] = useState<Record<string, string>>({})
+  const [rescheduleProvider, setRescheduleProvider] = useState<Record<string, string>>({})
+  const [rescheduleVolunteer, setRescheduleVolunteer] = useState<Record<string, Volunteer | null>>({})
   const [cancelReasonSelect, setCancelReasonSelect] = useState<Record<string, string>>({})
   const [cancelReasonNote, setCancelReasonNote] = useState<Record<string, string>>({})
   const [showCancelReason, setShowCancelReason] = useState<Record<string, boolean>>({})
@@ -252,14 +279,20 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
     }
   }
 
-  const handleReschedule = async (bookingId: string, newTime: string) => {
+  const handleReschedule = async (bookingId: string, newTime: string, newProvider?: string) => {
+    if (!isFutureDateTime(newTime)) {
+      setBookingActionError(prev => ({ ...prev, [bookingId]: 'Please select a valid future date and time.' }))
+      return
+    }
     setBookingActionLoading(prev => ({ ...prev, [bookingId]: true }))
     setBookingActionError(prev => { const n = { ...prev }; delete n[bookingId]; return n })
     try {
+      const payload: Record<string, unknown> = { status: 'confirmed', action: 'reschedule', scheduled_time: newTime }
+      if (newProvider?.trim()) payload.new_provider_name = newProvider.trim()
       const res = await fetch(`/api/services/${bookingId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'confirmed', action: 'reschedule', scheduled_time: newTime }),
+        body: JSON.stringify(payload),
       })
       const json = await res.json()
       if (!res.ok) {
@@ -268,6 +301,30 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
         setLocalBookings(prev => prev.map(b => b.id === bookingId ? (json.booking as ServiceBooking) : b))
         setRescheduleMode(prev => ({ ...prev, [bookingId]: false }))
         setRescheduleTime(prev => ({ ...prev, [bookingId]: '' }))
+        setRescheduleProvider(prev => ({ ...prev, [bookingId]: '' }))
+        setRescheduleVolunteer(prev => ({ ...prev, [bookingId]: null }))
+      }
+    } catch {
+      setBookingActionError(prev => ({ ...prev, [bookingId]: 'Network error. Please try again.' }))
+    } finally {
+      setBookingActionLoading(prev => { const n = { ...prev }; delete n[bookingId]; return n })
+    }
+  }
+
+  const handleUnschedule = async (bookingId: string, currentStatus: BookingStatus) => {
+    setBookingActionLoading(prev => ({ ...prev, [bookingId]: true }))
+    setBookingActionError(prev => { const n = { ...prev }; delete n[bookingId]; return n })
+    try {
+      const res = await fetch(`/api/services/${bookingId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'unschedule', status: currentStatus }),
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        setBookingActionError(prev => ({ ...prev, [bookingId]: json.error ?? 'Could not clear schedule.' }))
+      } else {
+        setLocalBookings(prev => prev.map(b => b.id === bookingId ? (json.booking as ServiceBooking) : b))
       }
     } catch {
       setBookingActionError(prev => ({ ...prev, [bookingId]: 'Network error. Please try again.' }))
@@ -838,8 +895,22 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                                 {details.provider && !details.dispatch_type?.includes('volunteer') && <DetailItem label="Provider" value={details.provider} />}
                               </div>
                               {b.notes && (
-                                <div style={{ backgroundColor: 'white', border: '1px solid var(--color-warm-grey)', borderRadius: 'var(--radius-sm)', padding: '8px 10px', marginBottom: '12px', fontSize: '13px', color: 'var(--color-text-primary)', lineHeight: 1.5, fontFamily: 'var(--font-body)' }}>
+                                <div style={{ backgroundColor: 'white', border: '1px solid var(--color-warm-grey)', borderRadius: 'var(--radius-sm)', padding: '8px 10px', marginBottom: '8px', fontSize: '13px', color: 'var(--color-text-primary)', lineHeight: 1.5, fontFamily: 'var(--font-body)' }}>
                                   <span style={{ fontWeight: 600, color: 'var(--color-text-secondary)', marginRight: '4px' }}>Notes:</span>{b.notes}
+                                </div>
+                              )}
+
+                              {/* Unschedule button — shown when booking has a scheduled_time and is still active */}
+                              {isActive && details.scheduled_time && (
+                                <div style={{ marginBottom: '8px' }}>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleUnschedule(b.id, b.status as BookingStatus)}
+                                    disabled={isLoading}
+                                    style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: '#6b7280', background: 'none', border: '1px solid #d1d5db', borderRadius: 'var(--radius-sm)', padding: '4px 10px', cursor: isLoading ? 'not-allowed' : 'pointer' }}
+                                  >
+                                    🗓️ Clear scheduled time
+                                  </button>
                                 </div>
                               )}
 
@@ -875,9 +946,65 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                                       {/* Reschedule panel */}
                                       {rescheduleMode[b.id] && (
                                         <div style={{ backgroundColor: '#faf5ff', border: '1px solid #d8b4fe', borderRadius: 'var(--radius-sm)', padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                          <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#6b21a8' }}>New date &amp; time</label>
-                                          <input type="datetime-local" value={rescheduleTime[b.id] ?? ''} onChange={e => setRescheduleTime(prev => ({ ...prev, [b.id]: e.target.value }))} style={{ fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #d8b4fe', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box' }} />
-                                          <ActionBtn label={isLoading ? 'Saving…' : 'Confirm reschedule'} onClick={() => handleReschedule(b.id, rescheduleTime[b.id] ?? '')} disabled={isLoading || !rescheduleTime[b.id]} color="white" bg="#7c3aed" />
+                                          <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#6b21a8' }}>New date &amp; time *</label>
+                                          <input
+                                            type="datetime-local"
+                                            value={rescheduleTime[b.id] ?? ''}
+                                            onChange={e => setRescheduleTime(prev => ({ ...prev, [b.id]: e.target.value }))}
+                                            style={{ fontFamily: 'var(--font-body)', fontSize: '13px', border: `1.5px solid ${rescheduleTime[b.id] && !isFutureDateTime(rescheduleTime[b.id]) ? '#fca5a5' : '#d8b4fe'}`, borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box' }}
+                                          />
+                                          {rescheduleTime[b.id] && !isFutureDateTime(rescheduleTime[b.id]) && (
+                                            <p style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: '#be123c', margin: '0' }}>⚠ Please select a future date and time.</p>
+                                          )}
+                                          <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#6b21a8', marginTop: '4px' }}>Update provider / volunteer <span style={{ fontWeight: 400 }}>(optional)</span></label>
+                                          {b.service_type === 'transport' && (
+                                            <>
+                                              <VolunteerPicker visitType="walking_companion" selectedId={rescheduleVolunteer[b.id]?.id} onSelect={vol => { setRescheduleVolunteer(prev => ({ ...prev, [b.id]: vol })); setRescheduleProvider(prev => ({ ...prev, [b.id]: vol.full_name })) }} memberCity={getMemberCity(panelData?.member.address)} />
+                                              {rescheduleVolunteer[b.id] && <VolunteerConfirmCard volunteer={rescheduleVolunteer[b.id]!} />}
+                                            </>
+                                          )}
+                                          {b.service_type === 'tech_help' && (
+                                            <>
+                                              <VolunteerPicker visitType="tech_help" selectedId={rescheduleVolunteer[b.id]?.id} onSelect={vol => { setRescheduleVolunteer(prev => ({ ...prev, [b.id]: vol })); setRescheduleProvider(prev => ({ ...prev, [b.id]: vol.full_name })) }} memberCity={getMemberCity(panelData?.member.address)} />
+                                              {rescheduleVolunteer[b.id] && <VolunteerConfirmCard volunteer={rescheduleVolunteer[b.id]!} />}
+                                            </>
+                                          )}
+                                          {b.service_type === 'meals' && (
+                                            <>
+                                              <VolunteerPicker visitType="grocery_help" selectedId={rescheduleVolunteer[b.id]?.id} onSelect={vol => { setRescheduleVolunteer(prev => ({ ...prev, [b.id]: vol })); setRescheduleProvider(prev => ({ ...prev, [b.id]: vol.full_name })) }} memberCity={getMemberCity(panelData?.member.address)} />
+                                              {rescheduleVolunteer[b.id] && <VolunteerConfirmCard volunteer={rescheduleVolunteer[b.id]!} />}
+                                            </>
+                                          )}
+                                          {b.service_type === 'home_service' && (
+                                            <ServiceProviderPicker serviceType="home_service" selectedProviderName={rescheduleProvider[b.id]} onSelect={(name) => setRescheduleProvider(prev => ({ ...prev, [b.id]: name }))} memberCity={getMemberCity(panelData?.member.address)} />
+                                          )}
+                                          {b.service_type === 'roadside' && (() => {
+                                            const rd = b.booking_details as Record<string, string>
+                                            const isRepairSub = ['scheduled_maintenance', 'body_shop', 'mechanic_non_urgent', 'car_inspection', 'mechanic_referral'].includes(rd?.subtype ?? '')
+                                            return isRepairSub
+                                              ? <ServiceProviderPicker serviceType="car_repair" selectedProviderName={rescheduleProvider[b.id]} onSelect={(name) => setRescheduleProvider(prev => ({ ...prev, [b.id]: name }))} memberCity={getMemberCity(panelData?.member.address)} />
+                                              : <input type="text" value={rescheduleProvider[b.id] ?? ''} onChange={e => setRescheduleProvider(prev => ({ ...prev, [b.id]: e.target.value }))} placeholder={details.assigned_provider ?? 'Tow company or roadside provider (leave blank to keep current)'} style={{ fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #d8b4fe', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box' }} />
+                                          })()}
+                                          {b.service_type === 'telehealth' && (
+                                            <>
+                                              <p style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: '#374151', margin: '0 0 2px', fontStyle: 'italic' }}>Assign from platform volunteers (health aide):</p>
+                                              <VolunteerPicker visitType="in_person_visit" selectedId={rescheduleVolunteer[b.id]?.id} onSelect={vol => { setRescheduleVolunteer(prev => ({ ...prev, [b.id]: vol })); setRescheduleProvider(prev => ({ ...prev, [b.id]: vol.full_name })) }} memberCity={getMemberCity(panelData?.member.address)} />
+                                              {rescheduleVolunteer[b.id] && <VolunteerConfirmCard volunteer={rescheduleVolunteer[b.id]!} />}
+                                              <p style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: '#374151', margin: '4px 0 2px', fontStyle: 'italic' }}>Or enter external provider name:</p>
+                                              <input type="text" value={!rescheduleVolunteer[b.id] ? (rescheduleProvider[b.id] ?? '') : ''} onChange={e => { setRescheduleProvider(prev => ({ ...prev, [b.id]: e.target.value })); setRescheduleVolunteer(prev => ({ ...prev, [b.id]: null })) }} placeholder={details.assigned_provider ?? 'Doctor / telehealth provider name'} style={{ fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #d8b4fe', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box' }} />
+                                            </>
+                                          )}
+                                          {!['transport', 'tech_help', 'meals', 'home_service', 'roadside', 'telehealth'].includes(b.service_type) && (
+                                            <input type="text" value={rescheduleProvider[b.id] ?? ''} onChange={e => setRescheduleProvider(prev => ({ ...prev, [b.id]: e.target.value }))} placeholder={details.assigned_volunteer ?? details.assigned_provider ?? 'Leave blank to keep current provider'} style={{ fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #d8b4fe', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box' }} />
+                                          )}
+                                          {rescheduleProvider[b.id] && <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: '#059669', margin: '0' }}>✓ Will update to: {rescheduleProvider[b.id]}</p>}
+                                          <ActionBtn
+                                            label={isLoading ? 'Saving…' : 'Confirm reschedule'}
+                                            onClick={() => handleReschedule(b.id, rescheduleTime[b.id] ?? '', rescheduleProvider[b.id])}
+                                            disabled={isLoading || !rescheduleTime[b.id] || !isFutureDateTime(rescheduleTime[b.id])}
+                                            color="white"
+                                            bg="#7c3aed"
+                                          />
                                         </div>
                                       )}
 
@@ -903,6 +1030,8 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                                         <ReassignPanel
                                           bookingId={b.id}
                                           serviceType={b.service_type}
+                                          bookingDetails={b.booking_details as Record<string, string>}
+                                          memberCity={getMemberCity(panelData?.member.address)}
                                           isLoading={isLoading}
                                           dispatchFormData={dispatchFormData}
                                           setDispatchFormData={setDispatchFormData}
@@ -959,7 +1088,7 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                                         return (
                                           <DispatchForm bg="#f0fdf4" border="#86efac">
                                             <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#065f46', margin: '0 0 6px' }}>Select a volunteer driver:</p>
-                                            <VolunteerPicker visitType="walking_companion" selectedId={picked?.id} onSelect={vol => setSelectedVolunteer(prev => ({ ...prev, [vkey]: vol }))} />
+                                            <VolunteerPicker visitType="walking_companion" selectedId={picked?.id} onSelect={vol => setSelectedVolunteer(prev => ({ ...prev, [vkey]: vol }))} memberCity={getMemberCity(panelData?.member.address)} />
                                             {picked && <VolunteerConfirmCard volunteer={picked} />}
                                             <ActionBtn label={isLoading ? 'Assigning…' : 'Assign driver'} onClick={() => handleDispatch(b.id, 'volunteer_driver', { assigned_volunteer: picked?.full_name ?? '' }, picked?.id)} disabled={isLoading || !picked} color="white" bg="#059669" />
                                           </DispatchForm>
@@ -986,7 +1115,7 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                                         return (
                                           <DispatchForm bg="#f0fdf4" border="#86efac">
                                             <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#065f46', margin: '0 0 6px' }}>Select a tech volunteer:</p>
-                                            <VolunteerPicker visitType="tech_help" selectedId={picked?.id} onSelect={vol => setSelectedVolunteer(prev => ({ ...prev, [vkey]: vol }))} />
+                                            <VolunteerPicker visitType="tech_help" selectedId={picked?.id} onSelect={vol => setSelectedVolunteer(prev => ({ ...prev, [vkey]: vol }))} memberCity={getMemberCity(panelData?.member.address)} />
                                             {picked && <VolunteerConfirmCard volunteer={picked} />}
                                             <ActionBtn label={isLoading ? 'Assigning…' : 'Assign tech helper'} onClick={() => handleDispatch(b.id, 'volunteer_tech', { assigned_volunteer: picked?.full_name ?? '' }, picked?.id)} disabled={isLoading || !picked} color="white" bg="#059669" />
                                           </DispatchForm>
@@ -996,25 +1125,31 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                                       {activeDispatch[b.id] === 'inHome_visit' && (() => {
                                         const vkey = `${b.id}_inHome_visit`
                                         const picked = selectedVolunteer[vkey] ?? null
+                                        const st = dispatchFormData[b.id]?.scheduledTime ?? ''
                                         return (
                                           <DispatchForm bg="#eff6ff" border="#bfdbfe">
-                                            <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#1e40af', display: 'block', marginBottom: '3px' }}>Visit date &amp; time</label>
-                                            <input type="datetime-local" value={dispatchFormData[b.id]?.scheduledTime ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], scheduledTime: e.target.value } }))} style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #bfdbfe', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '10px' }} />
-                                            <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#1e40af', margin: '0 0 6px' }}>Assign a tech volunteer:</p>
-                                            <VolunteerPicker visitType="tech_help" selectedId={picked?.id} onSelect={vol => setSelectedVolunteer(prev => ({ ...prev, [vkey]: vol }))} />
+                                            <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#1e40af', display: 'block', marginBottom: '3px' }}>Visit date &amp; time *</label>
+                                            <input type="datetime-local" value={st} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], scheduledTime: e.target.value } }))} style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: `1.5px solid ${st && !isFutureDateTime(st) ? '#fca5a5' : '#bfdbfe'}`, borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '4px' }} />
+                                            {st && !isFutureDateTime(st) && <p style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: '#be123c', margin: '0 0 6px' }}>⚠ Must be a future date and time.</p>}
+                                            <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#1e40af', margin: '6px 0 6px' }}>Assign a tech volunteer:</p>
+                                            <VolunteerPicker visitType="tech_help" selectedId={picked?.id} onSelect={vol => setSelectedVolunteer(prev => ({ ...prev, [vkey]: vol }))} memberCity={getMemberCity(panelData?.member.address)} />
                                             {picked && <VolunteerConfirmCard volunteer={picked} />}
-                                            <ActionBtn label={isLoading ? 'Scheduling…' : 'Schedule visit'} onClick={() => handleDispatch(b.id, 'inHome_visit', { assigned_volunteer: picked?.full_name ?? '', scheduled_time: dispatchFormData[b.id]?.scheduledTime ?? '' }, picked?.id)} disabled={isLoading || !picked || !dispatchFormData[b.id]?.scheduledTime} color="white" bg="#1d4ed8" />
+                                            <ActionBtn label={isLoading ? 'Scheduling…' : 'Schedule visit'} onClick={() => handleDispatch(b.id, 'inHome_visit', { assigned_volunteer: picked?.full_name ?? '', scheduled_time: st }, picked?.id)} disabled={isLoading || !picked || !isFutureDateTime(st)} color="white" bg="#1d4ed8" />
                                           </DispatchForm>
                                         )
                                       })()}
                                       <DispatchBtn icon="📞" label="Arrange remote help call" isActive={activeDispatch[b.id] === 'remote_call'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'remote_call' ? null : 'remote_call' }))} />
-                                      {activeDispatch[b.id] === 'remote_call' && (
-                                        <DispatchForm bg="#faf5ff" border="#d8b4fe">
-                                          <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#6b21a8', display: 'block', marginBottom: '3px' }}>Scheduled call date &amp; time</label>
-                                          <input type="datetime-local" value={dispatchFormData[b.id]?.scheduledTime ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], scheduledTime: e.target.value } }))} style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #d8b4fe', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '8px' }} />
-                                          <ActionBtn label={isLoading ? 'Scheduling…' : 'Schedule call'} onClick={() => handleDispatch(b.id, 'remote_call', { scheduled_time: dispatchFormData[b.id]?.scheduledTime ?? '' })} disabled={isLoading || !dispatchFormData[b.id]?.scheduledTime} color="white" bg="#7c3aed" />
-                                        </DispatchForm>
-                                      )}
+                                      {activeDispatch[b.id] === 'remote_call' && (() => {
+                                        const st = dispatchFormData[b.id]?.scheduledTime ?? ''
+                                        return (
+                                          <DispatchForm bg="#faf5ff" border="#d8b4fe">
+                                            <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#6b21a8', display: 'block', marginBottom: '3px' }}>Scheduled call date &amp; time *</label>
+                                            <input type="datetime-local" value={st} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], scheduledTime: e.target.value } }))} style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: `1.5px solid ${st && !isFutureDateTime(st) ? '#fca5a5' : '#d8b4fe'}`, borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '4px' }} />
+                                            {st && !isFutureDateTime(st) && <p style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: '#be123c', margin: '0 0 6px' }}>⚠ Must be a future date and time.</p>}
+                                            <ActionBtn label={isLoading ? 'Scheduling…' : 'Schedule call'} onClick={() => handleDispatch(b.id, 'remote_call', { scheduled_time: st })} disabled={isLoading || !isFutureDateTime(st)} color="white" bg="#7c3aed" />
+                                          </DispatchForm>
+                                        )
+                                      })()}
                                     </div>
                                   )}
 
@@ -1037,7 +1172,7 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                                         return (
                                           <DispatchForm bg="#f0fdf4" border="#86efac">
                                             <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#065f46', margin: '0 0 6px' }}>Select a meal volunteer:</p>
-                                            <VolunteerPicker visitType="grocery_help" selectedId={picked?.id} onSelect={vol => setSelectedVolunteer(prev => ({ ...prev, [vkey]: vol }))} />
+                                            <VolunteerPicker visitType="grocery_help" selectedId={picked?.id} onSelect={vol => setSelectedVolunteer(prev => ({ ...prev, [vkey]: vol }))} memberCity={getMemberCity(panelData?.member.address)} />
                                             {picked && <VolunteerConfirmCard volunteer={picked} />}
                                             <ActionBtn label={isLoading ? 'Assigning…' : 'Assign volunteer'} onClick={() => handleDispatch(b.id, 'volunteer_meals', { assigned_volunteer: picked?.full_name ?? '' }, picked?.id)} disabled={isLoading || !picked} color="white" bg="#059669" />
                                           </DispatchForm>
@@ -1064,7 +1199,7 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                                         return (
                                           <DispatchForm bg="#f0fdf4" border="#86efac">
                                             <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#065f46', margin: '0 0 6px' }}>Select a home services volunteer:</p>
-                                            <VolunteerPicker visitType="in_person_visit" selectedId={picked?.id} onSelect={vol => setSelectedVolunteer(prev => ({ ...prev, [vkey]: vol }))} />
+                                            <VolunteerPicker visitType="in_person_visit" selectedId={picked?.id} onSelect={vol => setSelectedVolunteer(prev => ({ ...prev, [vkey]: vol }))} memberCity={getMemberCity(panelData?.member.address)} />
                                             {picked && <VolunteerConfirmCard volunteer={picked} />}
                                             <ActionBtn label={isLoading ? 'Assigning…' : 'Assign volunteer'} onClick={() => handleDispatch(b.id, 'home_volunteer', { assigned_volunteer: picked?.full_name ?? '' }, picked?.id)} disabled={isLoading || !picked} color="white" bg="#059669" />
                                           </DispatchForm>
@@ -1072,15 +1207,19 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                                       })()}
 
                                       <DispatchBtn icon="🏢" label="Select from vetted providers" isActive={activeDispatch[b.id] === 'vetted_provider'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'vetted_provider' ? null : 'vetted_provider' }))} />
-                                      {activeDispatch[b.id] === 'vetted_provider' && (
-                                        <DispatchForm bg="#eff6ff" border="#bfdbfe">
-                                          <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#1e40af', margin: '0 0 6px' }}>Select a vetted provider:</p>
-                                          <ServiceProviderPicker serviceType="home_service" selectedProviderName={dispatchFormData[b.id]?.providerName} onSelect={(name) => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerName: name } }))} />
-                                          <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#1e40af', display: 'block', marginTop: '6px', marginBottom: '3px' }}>Visit date &amp; time (optional)</label>
-                                          <input type="datetime-local" value={dispatchFormData[b.id]?.scheduledTime ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], scheduledTime: e.target.value } }))} style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #bfdbfe', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '8px' }} />
-                                          <ActionBtn label={isLoading ? 'Assigning…' : 'Assign provider'} onClick={() => handleDispatch(b.id, 'vetted_provider', { assigned_provider: dispatchFormData[b.id]?.providerName ?? '', scheduled_time: dispatchFormData[b.id]?.scheduledTime ?? '' })} disabled={isLoading || !dispatchFormData[b.id]?.providerName?.trim()} color="white" bg="#1d4ed8" />
-                                        </DispatchForm>
-                                      )}
+                                      {activeDispatch[b.id] === 'vetted_provider' && (() => {
+                                        const st = dispatchFormData[b.id]?.scheduledTime ?? ''
+                                        return (
+                                          <DispatchForm bg="#eff6ff" border="#bfdbfe">
+                                            <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#1e40af', margin: '0 0 6px' }}>Select a vetted provider:</p>
+                                            <ServiceProviderPicker serviceType="home_service" selectedProviderName={dispatchFormData[b.id]?.providerName} onSelect={(name) => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerName: name } }))} memberCity={getMemberCity(panelData?.member.address)} />
+                                            <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#1e40af', display: 'block', marginTop: '6px', marginBottom: '3px' }}>Visit date &amp; time (optional — must be future if set)</label>
+                                            <input type="datetime-local" value={st} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], scheduledTime: e.target.value } }))} style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: `1.5px solid ${st && !isFutureDateTime(st) ? '#fca5a5' : '#bfdbfe'}`, borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '4px' }} />
+                                            {st && !isFutureDateTime(st) && <p style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: '#be123c', margin: '0 0 6px' }}>⚠ Must be a future date and time (or leave blank).</p>}
+                                            <ActionBtn label={isLoading ? 'Assigning…' : 'Assign provider'} onClick={() => handleDispatch(b.id, 'vetted_provider', { assigned_provider: dispatchFormData[b.id]?.providerName ?? '', scheduled_time: st })} disabled={isLoading || !dispatchFormData[b.id]?.providerName?.trim() || (!!st && !isFutureDateTime(st))} color="white" bg="#1d4ed8" />
+                                          </DispatchForm>
+                                        )
+                                      })()}
 
                                       <DispatchBtn icon="✏️" label="Add external provider (manual)" isActive={activeDispatch[b.id] === 'external_provider'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'external_provider' ? null : 'external_provider' }))} />
                                       {activeDispatch[b.id] === 'external_provider' && (
@@ -1132,22 +1271,26 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                                       {dispatchFormData[b.id]?.healthSubtype === 'Telehealth Consultation' && (
                                         <>
                                           <DispatchBtn icon="🩺" label="Schedule telehealth appointment" isActive={activeDispatch[b.id] === 'telehealth_appt'} onClick={() => setActiveDispatch(prev => ({ ...prev, [b.id]: prev[b.id] === 'telehealth_appt' ? null : 'telehealth_appt' }))} />
-                                          {activeDispatch[b.id] === 'telehealth_appt' && (
-                                            <DispatchForm bg="#eff6ff" border="#bfdbfe">
-                                              <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#1e40af', display: 'block', marginBottom: '3px' }}>Provider name</label>
-                                              <input type="text" value={dispatchFormData[b.id]?.providerName ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerName: e.target.value } }))} placeholder="Doctor / provider name" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #bfdbfe', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '4px' }} />
-                                              <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#1e40af', display: 'block', marginBottom: '3px' }}>Platform</label>
-                                              <select value={dispatchFormData[b.id]?.platform ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], platform: e.target.value } }))} style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #bfdbfe', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '4px' }}>
-                                                <option value="">Select platform…</option>
-                                                <option>Teladoc (stub)</option>
-                                                <option>Amwell (stub)</option>
-                                                <option>Navigator will arrange</option>
-                                              </select>
-                                              <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#1e40af', display: 'block', marginBottom: '3px' }}>Appointment date &amp; time</label>
-                                              <input type="datetime-local" value={dispatchFormData[b.id]?.scheduledTime ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], scheduledTime: e.target.value } }))} style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #bfdbfe', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '8px' }} />
-                                              <ActionBtn label={isLoading ? 'Scheduling…' : 'Schedule appointment'} onClick={() => handleDispatch(b.id, 'telehealth_appt', { health_subtype: 'Telehealth Consultation', assigned_provider: dispatchFormData[b.id]?.providerName ?? '', platform: dispatchFormData[b.id]?.platform ?? '', scheduled_time: dispatchFormData[b.id]?.scheduledTime ?? '' })} disabled={isLoading || !dispatchFormData[b.id]?.providerName?.trim() || !dispatchFormData[b.id]?.scheduledTime} color="white" bg="#1d4ed8" />
-                                            </DispatchForm>
-                                          )}
+                                          {activeDispatch[b.id] === 'telehealth_appt' && (() => {
+                                            const st = dispatchFormData[b.id]?.scheduledTime ?? ''
+                                            return (
+                                              <DispatchForm bg="#eff6ff" border="#bfdbfe">
+                                                <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#1e40af', display: 'block', marginBottom: '3px' }}>Provider name *</label>
+                                                <input type="text" value={dispatchFormData[b.id]?.providerName ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerName: e.target.value } }))} placeholder="Doctor / provider name" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #bfdbfe', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '4px' }} />
+                                                <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#1e40af', display: 'block', marginBottom: '3px' }}>Platform</label>
+                                                <select value={dispatchFormData[b.id]?.platform ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], platform: e.target.value } }))} style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #bfdbfe', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '4px' }}>
+                                                  <option value="">Select platform…</option>
+                                                  <option>Teladoc (stub)</option>
+                                                  <option>Amwell (stub)</option>
+                                                  <option>Navigator will arrange</option>
+                                                </select>
+                                                <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#1e40af', display: 'block', marginBottom: '3px' }}>Appointment date &amp; time *</label>
+                                                <input type="datetime-local" value={st} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], scheduledTime: e.target.value } }))} style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: `1.5px solid ${st && !isFutureDateTime(st) ? '#fca5a5' : '#bfdbfe'}`, borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '4px' }} />
+                                                {st && !isFutureDateTime(st) && <p style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: '#be123c', margin: '0 0 6px' }}>⚠ Must be a future date and time.</p>}
+                                                <ActionBtn label={isLoading ? 'Scheduling…' : 'Schedule appointment'} onClick={() => handleDispatch(b.id, 'telehealth_appt', { health_subtype: 'Telehealth Consultation', assigned_provider: dispatchFormData[b.id]?.providerName ?? '', platform: dispatchFormData[b.id]?.platform ?? '', scheduled_time: st })} disabled={isLoading || !dispatchFormData[b.id]?.providerName?.trim() || !isFutureDateTime(st)} color="white" bg="#1d4ed8" />
+                                              </DispatchForm>
+                                            )
+                                          })()}
                                         </>
                                       )}
 
@@ -1193,7 +1336,7 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                                             return (
                                               <DispatchForm bg="#f0fdf4" border="#86efac">
                                                 <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#065f46', margin: '0 0 6px' }}>Assign from platform volunteers:</p>
-                                                <VolunteerPicker visitType="in_person_visit" selectedId={picked?.id} onSelect={vol => setSelectedVolunteer(prev => ({ ...prev, [vkey]: vol }))} />
+                                                <VolunteerPicker visitType="in_person_visit" selectedId={picked?.id} onSelect={vol => setSelectedVolunteer(prev => ({ ...prev, [vkey]: vol }))} memberCity={getMemberCity(panelData?.member.address)} />
                                                 {picked && <VolunteerConfirmCard volunteer={picked} />}
                                                 <p style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: '#374151', margin: '6px 0 2px', fontStyle: 'italic' }}>Or enter an external aide&apos;s name:</p>
                                                 <input type="text" value={dispatchFormData[b.id]?.providerName ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerName: e.target.value } }))} placeholder="External aide name (optional)" style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #86efac', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '6px' }} />
@@ -1320,16 +1463,18 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                                         const vkey = `${b.id}_volunteer_companion`
                                         const picked = selectedVolunteer[vkey] ?? null
                                         const subtype = (b.booking_details as Record<string, string>)?.subtype ?? 'friendly_visit'
+                                        const st = dispatchFormData[b.id]?.scheduledTime ?? ''
                                         return (
                                           <DispatchForm bg="#fff1f2" border="#fecaca">
                                             <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#9f1239', margin: '0 0 6px' }}>
                                               Select a companion volunteer (filtered for {subtype.replace(/_/g, ' ')}):
                                             </p>
-                                            <VolunteerPicker visitType={subtype} selectedId={picked?.id} onSelect={vol => setSelectedVolunteer(prev => ({ ...prev, [vkey]: vol }))} />
+                                            <VolunteerPicker visitType={subtype} selectedId={picked?.id} onSelect={vol => setSelectedVolunteer(prev => ({ ...prev, [vkey]: vol }))} memberCity={getMemberCity(panelData?.member.address)} />
                                             {picked && <VolunteerConfirmCard volunteer={picked} />}
-                                            <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#9f1239', display: 'block', marginTop: '6px', marginBottom: '3px' }}>Scheduled visit date &amp; time</label>
-                                            <input type="datetime-local" value={dispatchFormData[b.id]?.scheduledTime ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], scheduledTime: e.target.value } }))} style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #fecaca', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '8px' }} />
-                                            <ActionBtn label={isLoading ? 'Assigning…' : 'Assign companion'} onClick={() => handleDispatch(b.id, 'volunteer_companion', { assigned_volunteer: picked?.full_name ?? '', scheduled_time: dispatchFormData[b.id]?.scheduledTime ?? '' }, picked?.id)} disabled={isLoading || !picked} color="white" bg="#be123c" />
+                                            <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#9f1239', display: 'block', marginTop: '6px', marginBottom: '3px' }}>Scheduled visit date &amp; time *</label>
+                                            <input type="datetime-local" value={st} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], scheduledTime: e.target.value } }))} style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: `1.5px solid ${st && !isFutureDateTime(st) ? '#fca5a5' : '#fecaca'}`, borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '4px' }} />
+                                            {st && !isFutureDateTime(st) && <p style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: '#be123c', margin: '0 0 6px' }}>⚠ Must be a future date and time.</p>}
+                                            <ActionBtn label={isLoading ? 'Assigning…' : 'Assign companion'} onClick={() => handleDispatch(b.id, 'volunteer_companion', { assigned_volunteer: picked?.full_name ?? '', scheduled_time: st }, picked?.id)} disabled={isLoading || !picked || !isFutureDateTime(st)} color="white" bg="#be123c" />
                                           </DispatchForm>
                                         )
                                       })()}
@@ -1337,14 +1482,16 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                                       {activeDispatch[b.id] === 'phone_companion' && (() => {
                                         const vkey = `${b.id}_phone_companion`
                                         const picked = selectedVolunteer[vkey] ?? null
+                                        const st = dispatchFormData[b.id]?.scheduledTime ?? ''
                                         return (
                                           <DispatchForm bg="#f0fdf4" border="#86efac">
                                             <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#065f46', margin: '0 0 6px' }}>Select a phone companion volunteer:</p>
-                                            <VolunteerPicker visitType="phone_call" selectedId={picked?.id} onSelect={vol => setSelectedVolunteer(prev => ({ ...prev, [vkey]: vol }))} />
+                                            <VolunteerPicker visitType="phone_call" selectedId={picked?.id} onSelect={vol => setSelectedVolunteer(prev => ({ ...prev, [vkey]: vol }))} memberCity={getMemberCity(panelData?.member.address)} />
                                             {picked && <VolunteerConfirmCard volunteer={picked} />}
-                                            <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#065f46', display: 'block', marginTop: '6px', marginBottom: '3px' }}>Scheduled call date &amp; time</label>
-                                            <input type="datetime-local" value={dispatchFormData[b.id]?.scheduledTime ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], scheduledTime: e.target.value } }))} style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #86efac', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '8px' }} />
-                                            <ActionBtn label={isLoading ? 'Scheduling…' : 'Schedule call'} onClick={() => handleDispatch(b.id, 'phone_companion', { assigned_volunteer: picked?.full_name ?? '', scheduled_time: dispatchFormData[b.id]?.scheduledTime ?? '' }, picked?.id)} disabled={isLoading || !picked} color="white" bg="#059669" />
+                                            <label style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#065f46', display: 'block', marginTop: '6px', marginBottom: '3px' }}>Scheduled call date &amp; time *</label>
+                                            <input type="datetime-local" value={st} onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], scheduledTime: e.target.value } }))} style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: `1.5px solid ${st && !isFutureDateTime(st) ? '#fca5a5' : '#86efac'}`, borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '4px' }} />
+                                            {st && !isFutureDateTime(st) && <p style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: '#be123c', margin: '0 0 6px' }}>⚠ Must be a future date and time.</p>}
+                                            <ActionBtn label={isLoading ? 'Scheduling…' : 'Schedule call'} onClick={() => handleDispatch(b.id, 'phone_companion', { assigned_volunteer: picked?.full_name ?? '', scheduled_time: st }, picked?.id)} disabled={isLoading || !picked || !isFutureDateTime(st)} color="white" bg="#059669" />
                                           </DispatchForm>
                                         )
                                       })()}
@@ -1374,7 +1521,7 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                                             return (
                                               <DispatchForm bg="#f0fdf4" border="#86efac">
                                                 <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#065f46', margin: '0 0 6px' }}>Select a volunteer willing to travel:</p>
-                                                <VolunteerPicker visitType="travel_companion" selectedId={picked?.id} onSelect={vol => setSelectedVolunteer(prev => ({ ...prev, [vkey]: vol }))} />
+                                                <VolunteerPicker visitType="travel_companion" selectedId={picked?.id} onSelect={vol => setSelectedVolunteer(prev => ({ ...prev, [vkey]: vol }))} memberCity={getMemberCity(panelData?.member.address)} />
                                                 {picked && <VolunteerConfirmCard volunteer={picked} />}
                                                 <ActionBtn label={isLoading ? 'Assigning…' : 'Assign travel companion'} onClick={() => handleDispatch(b.id, 'volunteer_travel_companion', { assigned_volunteer: picked?.full_name ?? '', dispatch_type: 'volunteer_travel_companion' }, picked?.id)} disabled={isLoading || !picked} color="white" bg="#059669" />
                                               </DispatchForm>
@@ -1421,6 +1568,7 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                                               serviceType="car_repair"
                                               selectedProviderName={dispatchFormData[b.id]?.providerName}
                                               onSelect={(name) => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], providerName: name } }))}
+                                              memberCity={getMemberCity(panelData?.member.address)}
                                             />
                                             <DispatchBtn
                                               icon="🔧"
@@ -1451,8 +1599,9 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                                                   type="datetime-local"
                                                   value={dispatchFormData[b.id]?.scheduledTime ?? ''}
                                                   onChange={e => setDispatchFormData(prev => ({ ...prev, [b.id]: { ...prev[b.id], scheduledTime: e.target.value } }))}
-                                                  style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #fde68a', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '8px' }}
+                                                  style={{ width: '100%', fontFamily: 'var(--font-body)', fontSize: '13px', border: `1.5px solid ${dispatchFormData[b.id]?.scheduledTime && !isFutureDateTime(dispatchFormData[b.id]?.scheduledTime) ? '#fca5a5' : '#fde68a'}`, borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box', marginBottom: '4px' }}
                                                 />
+                                                {dispatchFormData[b.id]?.scheduledTime && !isFutureDateTime(dispatchFormData[b.id]?.scheduledTime) && <p style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: '#be123c', margin: '0 0 6px' }}>⚠ Must be a future date and time.</p>}
                                                 <ActionBtn
                                                   label={isLoading ? 'Recording…' : 'Confirm repair appointment scheduled'}
                                                   onClick={() => handleDispatch(b.id, 'scheduled_repair', {
@@ -1460,7 +1609,7 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                                                     assigned_provider: dispatchFormData[b.id]?.providerName ?? '',
                                                     arrangement: `Car repair appointment at ${dispatchFormData[b.id]?.providerName ?? 'shop TBD'}${dispatchFormData[b.id]?.providerPhone ? ` (${dispatchFormData[b.id].providerPhone})` : ''}${dispatchFormData[b.id]?.scheduledTime ? ` — ${dispatchFormData[b.id].scheduledTime}` : ''}`.trim(),
                                                   })}
-                                                  disabled={isLoading || !dispatchFormData[b.id]?.providerName?.trim()}
+                                                  disabled={isLoading || !dispatchFormData[b.id]?.providerName?.trim() || (!!dispatchFormData[b.id]?.scheduledTime && !isFutureDateTime(dispatchFormData[b.id]?.scheduledTime))}
                                                   color="white"
                                                   bg="#92400e"
                                                 />
@@ -1692,14 +1841,17 @@ function DispatchForm({ bg, border, children }: { bg: string; border: string; ch
 }
 
 // Service provider picker — fetches from service_providers table filtered by service type
+// Sorts same-city providers (relative to member's location) to the top with a "📍 Near member" badge
 function ServiceProviderPicker({
   serviceType,
   selectedProviderName,
   onSelect,
+  memberCity,
 }: {
   serviceType: string
   selectedProviderName?: string
   onSelect: (name: string) => void
+  memberCity?: string
 }) {
   const [loading, setLoading] = useState(true)
   const [providers, setProviders] = useState<Array<{ id: string; full_name: string; company_name: string | null; phone: string | null; rating_average: number | null; city: string | null }>>([])
@@ -1708,9 +1860,24 @@ function ServiceProviderPicker({
     setLoading(true)
     fetch(`/api/service-providers?serviceType=${encodeURIComponent(serviceType)}`)
       .then(r => r.json())
-      .then(d => { setProviders(d.providers ?? []); setLoading(false) })
+      .then(d => {
+        const raw = d.providers ?? []
+        // Sort same-city providers first
+        if (memberCity) {
+          const city = memberCity.toLowerCase().trim()
+          raw.sort((a: { city: string | null }, b: { city: string | null }) => {
+            const aLocal = (a.city ?? '').toLowerCase().trim() === city
+            const bLocal = (b.city ?? '').toLowerCase().trim() === city
+            if (aLocal && !bLocal) return -1
+            if (!aLocal && bLocal) return 1
+            return 0
+          })
+        }
+        setProviders(raw)
+        setLoading(false)
+      })
       .catch(() => setLoading(false))
-  }, [serviceType])
+  }, [serviceType, memberCity])
 
   if (loading) return <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)', padding: '6px 0' }}>Loading providers…</div>
   if (providers.length === 0) return <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)', padding: '6px 0' }}>No vetted providers found. Enter manually below.</div>
@@ -1720,11 +1887,15 @@ function ServiceProviderPicker({
       {providers.map(p => {
         const displayName = p.company_name ? `${p.full_name} — ${p.company_name}` : p.full_name
         const isSelected = selectedProviderName === displayName
+        const isNearMember = memberCity ? (p.city ?? '').toLowerCase().trim() === memberCity.toLowerCase().trim() : false
         return (
-          <button key={p.id} type="button" onClick={() => onSelect(displayName)} style={{ textAlign: 'left', background: isSelected ? '#dbeafe' : 'white', border: isSelected ? '2px solid #3b82f6' : '1px solid #d1d5db', borderRadius: 'var(--radius-sm)', padding: '6px 10px', cursor: 'pointer', transition: 'border 0.1s, background 0.1s' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <button key={p.id} type="button" onClick={() => onSelect(displayName)} style={{ textAlign: 'left', background: isSelected ? '#dbeafe' : isNearMember ? '#f0fdf4' : 'white', border: isSelected ? '2px solid #3b82f6' : isNearMember ? '1px solid #86efac' : '1px solid #d1d5db', borderRadius: 'var(--radius-sm)', padding: '6px 10px', cursor: 'pointer', transition: 'border 0.1s, background 0.1s' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '4px' }}>
               <span style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: 'var(--color-navy)' }}>{displayName}</span>
-              {p.rating_average != null && <span style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: '#ca8a04' }}>⭐ {Number(p.rating_average).toFixed(1)}</span>}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexShrink: 0 }}>
+                {isNearMember && <span style={{ fontFamily: 'var(--font-body)', fontSize: '10px', fontWeight: 700, color: '#059669', backgroundColor: '#dcfce7', borderRadius: '4px', padding: '1px 4px' }}>📍 Near</span>}
+                {p.rating_average != null && <span style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: '#ca8a04' }}>⭐ {Number(p.rating_average).toFixed(1)}</span>}
+              </div>
             </div>
             {p.phone && <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>{p.phone}{p.city ? ` · ${p.city}` : ''}</div>}
           </button>
@@ -1738,6 +1909,8 @@ function ServiceProviderPicker({
 function ReassignPanel({
   bookingId,
   serviceType,
+  bookingDetails,
+  memberCity,
   isLoading,
   dispatchFormData,
   setDispatchFormData,
@@ -1747,8 +1920,10 @@ function ReassignPanel({
 }: {
   bookingId: string
   serviceType: string
+  bookingDetails?: Record<string, string>
+  memberCity?: string
   isLoading: boolean
-  dispatchFormData: Record<string, { scheduledTime?: string; providerName?: string; arrangement?: string }>
+  dispatchFormData: Record<string, { scheduledTime?: string; providerName?: string; providerPhone?: string; arrangement?: string; healthSubtype?: string }>
   setDispatchFormData: React.Dispatch<React.SetStateAction<Record<string, { scheduledTime?: string; providerName?: string; providerCompany?: string; providerPhone?: string; arrangement?: string; healthSubtype?: string; platform?: string; therapistName?: string; therapistContact?: string; followUpDate?: string }>>>
   selectedVolunteer: Record<string, Volunteer | null>
   setSelectedVolunteer: React.Dispatch<React.SetStateAction<Record<string, Volunteer | null>>>
@@ -1756,7 +1931,6 @@ function ReassignPanel({
 }) {
   const [innerDispatch, setInnerDispatch] = useState<string | null>(null)
 
-  // Determine which volunteer types to show based on service type
   const getVisitType = (dtype: string): string => {
     if (dtype === 'volunteer_driver') return 'walking_companion'
     if (dtype === 'volunteer_tech' || dtype === 'inHome_visit') return 'tech_help'
@@ -1764,43 +1938,164 @@ function ReassignPanel({
     return 'in_person_visit'
   }
 
+  const isCarRepairSubtype = serviceType === 'roadside' &&
+    ['scheduled_maintenance', 'body_shop', 'mechanic_non_urgent', 'car_inspection', 'mechanic_referral'].includes(bookingDetails?.subtype ?? '')
+
   return (
     <div style={{ backgroundColor: '#faf5ff', border: '1px solid #d8b4fe', borderRadius: 'var(--radius-sm)', padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
       <p style={{ fontFamily: 'var(--font-body)', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: '#6b21a8', margin: '0 0 4px' }}>Reassign to a different resource</p>
 
-      {/* Show relevant dispatch options based on service type */}
-      {(serviceType === 'transport' || serviceType === 'tech_help' || serviceType === 'meals' || serviceType === 'home_service') && (
-        <>
-          {['transport', 'tech_help', 'meals', 'home_service'].includes(serviceType) && (() => {
-            const dtype = serviceType === 'transport' ? 'volunteer_driver'
-              : serviceType === 'tech_help' ? 'volunteer_tech'
-              : serviceType === 'meals' ? 'volunteer_meals'
-              : 'home_volunteer'
-            const vkey = `${bookingId}_reassign_${dtype}`
-            const picked = selectedVolunteer[vkey] ?? null
-            const visitType = getVisitType(dtype)
-            return (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <button type="button" onClick={() => setInnerDispatch(p => p === dtype ? null : dtype)} style={{ width: '100%', textAlign: 'left', fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: innerDispatch === dtype ? '#6b21a8' : '#374151', background: innerDispatch === dtype ? 'rgba(109,40,217,0.06)' : 'white', border: innerDispatch === dtype ? '1.5px solid #d8b4fe' : '1.5px solid #e5e7eb', borderRadius: 'var(--radius-sm)', padding: '6px 10px', cursor: 'pointer', display: 'flex', gap: '6px', alignItems: 'center' }}>
-                  🙋 Assign different volunteer{innerDispatch === dtype ? ' ▲' : ' ▼'}
+      {/* Volunteer-based services: transport, tech_help, meals, home_service */}
+      {['transport', 'tech_help', 'meals', 'home_service'].includes(serviceType) && (() => {
+        const dtype = serviceType === 'transport' ? 'volunteer_driver'
+          : serviceType === 'tech_help' ? 'volunteer_tech'
+          : serviceType === 'meals' ? 'volunteer_meals'
+          : 'home_volunteer'
+        const vkey = `${bookingId}_reassign_${dtype}`
+        const picked = selectedVolunteer[vkey] ?? null
+        const visitType = getVisitType(dtype)
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <button type="button" onClick={() => setInnerDispatch(p => p === dtype ? null : dtype)} style={{ width: '100%', textAlign: 'left', fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: innerDispatch === dtype ? '#6b21a8' : '#374151', background: innerDispatch === dtype ? 'rgba(109,40,217,0.06)' : 'white', border: innerDispatch === dtype ? '1.5px solid #d8b4fe' : '1.5px solid #e5e7eb', borderRadius: 'var(--radius-sm)', padding: '6px 10px', cursor: 'pointer', display: 'flex', gap: '6px', alignItems: 'center' }}>
+              🙋 Assign different volunteer{innerDispatch === dtype ? ' ▲' : ' ▼'}
+            </button>
+            {innerDispatch === dtype && (
+              <div style={{ backgroundColor: 'white', border: '1px solid #e5e7eb', borderRadius: 'var(--radius-sm)', padding: '8px 10px' }}>
+                <VolunteerPicker visitType={visitType} selectedId={picked?.id} onSelect={vol => setSelectedVolunteer(prev => ({ ...prev, [vkey]: vol }))} memberCity={memberCity} />
+                {picked && <VolunteerConfirmCard volunteer={picked} />}
+                <button type="button" onClick={() => onReassign(dtype, { assigned_volunteer: picked?.full_name ?? '' }, picked?.id)} disabled={isLoading || !picked} style={{ marginTop: '4px', fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: 'white', backgroundColor: isLoading || !picked ? '#9ca3af' : '#7c3aed', border: 'none', borderRadius: 'var(--radius-sm)', padding: '6px 12px', cursor: isLoading || !picked ? 'not-allowed' : 'pointer' }}>
+                  {isLoading ? 'Reassigning…' : 'Confirm reassignment'}
                 </button>
-                {innerDispatch === dtype && (
-                  <div style={{ backgroundColor: 'white', border: '1px solid #e5e7eb', borderRadius: 'var(--radius-sm)', padding: '8px 10px' }}>
-                    <VolunteerPicker visitType={visitType} selectedId={picked?.id} onSelect={vol => setSelectedVolunteer(prev => ({ ...prev, [vkey]: vol }))} />
-                    {picked && <VolunteerConfirmCard volunteer={picked} />}
-                    <button type="button" onClick={() => onReassign(dtype, { assigned_volunteer: picked?.full_name ?? '' }, picked?.id)} disabled={isLoading || !picked} style={{ marginTop: '4px', fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: 'white', backgroundColor: isLoading || !picked ? '#9ca3af' : '#7c3aed', border: 'none', borderRadius: 'var(--radius-sm)', padding: '6px 12px', cursor: isLoading || !picked ? 'not-allowed' : 'pointer' }}>
-                      {isLoading ? 'Reassigning…' : 'Confirm reassignment'}
-                    </button>
-                  </div>
-                )}
               </div>
-            )
-          })()}
-        </>
+            )}
+          </div>
+        )
+      })()}
+
+      {/* Provider picker for home_service */}
+      {serviceType === 'home_service' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <button type="button" onClick={() => setInnerDispatch(p => p === 'provider_pick' ? null : 'provider_pick')} style={{ width: '100%', textAlign: 'left', fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: innerDispatch === 'provider_pick' ? '#1d4ed8' : '#374151', background: innerDispatch === 'provider_pick' ? '#eff6ff' : 'white', border: innerDispatch === 'provider_pick' ? '1.5px solid #bfdbfe' : '1.5px solid #e5e7eb', borderRadius: 'var(--radius-sm)', padding: '6px 10px', cursor: 'pointer' }}>
+            🏠 Select vetted home service provider{innerDispatch === 'provider_pick' ? ' ▲' : ' ▼'}
+          </button>
+          {innerDispatch === 'provider_pick' && (
+            <div style={{ backgroundColor: 'white', border: '1px solid #e5e7eb', borderRadius: 'var(--radius-sm)', padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <ServiceProviderPicker serviceType="home_service" selectedProviderName={dispatchFormData[bookingId]?.providerName} onSelect={(name) => setDispatchFormData(prev => ({ ...prev, [bookingId]: { ...prev[bookingId], providerName: name } }))} memberCity={memberCity} />
+              <button type="button" onClick={() => onReassign('vetted_provider', { assigned_provider: dispatchFormData[bookingId]?.providerName ?? '' })} disabled={isLoading || !dispatchFormData[bookingId]?.providerName?.trim()} style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: 'white', backgroundColor: isLoading || !dispatchFormData[bookingId]?.providerName?.trim() ? '#9ca3af' : '#1d4ed8', border: 'none', borderRadius: 'var(--radius-sm)', padding: '6px 12px', cursor: 'pointer' }}>
+                {isLoading ? 'Reassigning…' : 'Confirm reassignment'}
+              </button>
+            </div>
+          )}
+        </div>
       )}
 
-      {/* Manual provider reassignment for home_service / telehealth */}
-      {(serviceType === 'home_service' || serviceType === 'telehealth') && (
+      {/* Car Care & Roadside: car repair shop picker (car repair sub-types) or manual text (emergency) */}
+      {serviceType === 'roadside' && (
+        isCarRepairSubtype ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <button type="button" onClick={() => setInnerDispatch(p => p === 'car_repair_reassign' ? null : 'car_repair_reassign')} style={{ width: '100%', textAlign: 'left', fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: innerDispatch === 'car_repair_reassign' ? '#92400e' : '#374151', background: innerDispatch === 'car_repair_reassign' ? '#fefce8' : 'white', border: innerDispatch === 'car_repair_reassign' ? '1.5px solid #fde68a' : '1.5px solid #e5e7eb', borderRadius: 'var(--radius-sm)', padding: '6px 10px', cursor: 'pointer' }}>
+              🔧 Select different repair shop{innerDispatch === 'car_repair_reassign' ? ' ▲' : ' ▼'}
+            </button>
+            {innerDispatch === 'car_repair_reassign' && (
+              <div style={{ backgroundColor: 'white', border: '1px solid #e5e7eb', borderRadius: 'var(--radius-sm)', padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <ServiceProviderPicker serviceType="car_repair" selectedProviderName={dispatchFormData[bookingId]?.providerName} onSelect={(name) => setDispatchFormData(prev => ({ ...prev, [bookingId]: { ...prev[bookingId], providerName: name } }))} memberCity={memberCity} />
+                <button type="button" onClick={() => onReassign('vetted_repair_shop', { assigned_provider: dispatchFormData[bookingId]?.providerName ?? '' })} disabled={isLoading || !dispatchFormData[bookingId]?.providerName?.trim()} style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: 'white', backgroundColor: isLoading || !dispatchFormData[bookingId]?.providerName?.trim() ? '#9ca3af' : '#92400e', border: 'none', borderRadius: 'var(--radius-sm)', padding: '6px 12px', cursor: 'pointer' }}>
+                  {isLoading ? 'Reassigning…' : 'Confirm repair shop change'}
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <button type="button" onClick={() => setInnerDispatch(p => p === 'roadside_manual' ? null : 'roadside_manual')} style={{ width: '100%', textAlign: 'left', fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#374151', background: 'white', border: '1.5px solid #e5e7eb', borderRadius: 'var(--radius-sm)', padding: '6px 10px', cursor: 'pointer' }}>
+              🚛 Enter different roadside provider{innerDispatch === 'roadside_manual' ? ' ▲' : ' ▼'}
+            </button>
+            {innerDispatch === 'roadside_manual' && (
+              <div style={{ backgroundColor: 'white', border: '1px solid #e5e7eb', borderRadius: 'var(--radius-sm)', padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <input type="text" value={dispatchFormData[bookingId]?.providerName ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [bookingId]: { ...prev[bookingId], providerName: e.target.value } }))} placeholder="Tow company or roadside provider name" style={{ fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #e5e7eb', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box' }} />
+                <button type="button" onClick={() => onReassign('arranged_tow', { assigned_provider: dispatchFormData[bookingId]?.providerName ?? '' })} disabled={isLoading || !dispatchFormData[bookingId]?.providerName?.trim()} style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: 'white', backgroundColor: isLoading || !dispatchFormData[bookingId]?.providerName?.trim() ? '#9ca3af' : '#ea580c', border: 'none', borderRadius: 'var(--radius-sm)', padding: '6px 12px', cursor: 'pointer' }}>
+                  {isLoading ? 'Reassigning…' : 'Confirm provider change'}
+                </button>
+              </div>
+            )}
+          </div>
+        )
+      )}
+
+      {/* Companion: manual entry */}
+      {serviceType === 'companion' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <button type="button" onClick={() => setInnerDispatch(p => p === 'companion_manual' ? null : 'companion_manual')} style={{ width: '100%', textAlign: 'left', fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#374151', background: 'white', border: '1.5px solid #e5e7eb', borderRadius: 'var(--radius-sm)', padding: '6px 10px', cursor: 'pointer' }}>
+            👤 Enter different companion name{innerDispatch === 'companion_manual' ? ' ▲' : ' ▼'}
+          </button>
+          {innerDispatch === 'companion_manual' && (
+            <div style={{ backgroundColor: 'white', border: '1px solid #e5e7eb', borderRadius: 'var(--radius-sm)', padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <input type="text" value={dispatchFormData[bookingId]?.providerName ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [bookingId]: { ...prev[bookingId], providerName: e.target.value } }))} placeholder="Companion full name" style={{ fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #e5e7eb', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box' }} />
+              <button type="button" onClick={() => onReassign('vetted_provider', { assigned_provider: dispatchFormData[bookingId]?.providerName ?? '' })} disabled={isLoading || !dispatchFormData[bookingId]?.providerName?.trim()} style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: 'white', backgroundColor: isLoading || !dispatchFormData[bookingId]?.providerName?.trim() ? '#9ca3af' : '#7c3aed', border: 'none', borderRadius: 'var(--radius-sm)', padding: '6px 12px', cursor: 'pointer' }}>
+                {isLoading ? 'Reassigning…' : 'Confirm reassignment'}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Telehealth: volunteer picker (health aide) + manual external provider */}
+      {serviceType === 'telehealth' && (() => {
+        const vkey = `${bookingId}_reassign_telehealth`
+        const picked = selectedVolunteer[vkey] ?? null
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <button type="button" onClick={() => setInnerDispatch(p => p === 'telehealth_reassign' ? null : 'telehealth_reassign')} style={{ width: '100%', textAlign: 'left', fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: innerDispatch === 'telehealth_reassign' ? '#1e40af' : '#374151', background: innerDispatch === 'telehealth_reassign' ? '#eff6ff' : 'white', border: innerDispatch === 'telehealth_reassign' ? '1.5px solid #bfdbfe' : '1.5px solid #e5e7eb', borderRadius: 'var(--radius-sm)', padding: '6px 10px', cursor: 'pointer' }}>
+              🩺 Assign different provider{innerDispatch === 'telehealth_reassign' ? ' ▲' : ' ▼'}
+            </button>
+            {innerDispatch === 'telehealth_reassign' && (
+              <div style={{ backgroundColor: 'white', border: '1px solid #e5e7eb', borderRadius: 'var(--radius-sm)', padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#1e40af', margin: '0 0 4px' }}>Select from platform volunteers (health aide):</p>
+                <VolunteerPicker visitType="in_person_visit" selectedId={picked?.id} onSelect={vol => setSelectedVolunteer(prev => ({ ...prev, [vkey]: vol }))} memberCity={memberCity} />
+                {picked && <VolunteerConfirmCard volunteer={picked} />}
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: '#374151', margin: '4px 0 2px', fontStyle: 'italic' }}>Or enter external provider name:</p>
+                <input type="text" value={!picked ? (dispatchFormData[bookingId]?.providerName ?? '') : ''} onChange={e => { setDispatchFormData(prev => ({ ...prev, [bookingId]: { ...prev[bookingId], providerName: e.target.value } })); setSelectedVolunteer(prev => ({ ...prev, [vkey]: null })) }} placeholder="Doctor / telehealth provider name" style={{ fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #e5e7eb', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box' }} />
+                <button type="button" onClick={() => onReassign('telehealth_appt', { assigned_provider: picked?.full_name ?? dispatchFormData[bookingId]?.providerName ?? '' }, picked?.id)} disabled={isLoading || (!picked && !dispatchFormData[bookingId]?.providerName?.trim())} style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: 'white', backgroundColor: isLoading || (!picked && !dispatchFormData[bookingId]?.providerName?.trim()) ? '#9ca3af' : '#1d4ed8', border: 'none', borderRadius: 'var(--radius-sm)', padding: '6px 12px', cursor: 'pointer', marginTop: '2px' }}>
+                  {isLoading ? 'Reassigning…' : 'Confirm reassignment'}
+                </button>
+              </div>
+            )}
+          </div>
+        )
+      })()}
+
+      {/* Legal & Financial: sub-type selector + manual provider entry */}
+      {serviceType === 'legal_financial' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <button type="button" onClick={() => setInnerDispatch(p => p === 'legal_reassign' ? null : 'legal_reassign')} style={{ width: '100%', textAlign: 'left', fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: innerDispatch === 'legal_reassign' ? '#6b21a8' : '#374151', background: innerDispatch === 'legal_reassign' ? '#faf5ff' : 'white', border: innerDispatch === 'legal_reassign' ? '1.5px solid #d8b4fe' : '1.5px solid #e5e7eb', borderRadius: 'var(--radius-sm)', padding: '6px 10px', cursor: 'pointer' }}>
+            ⚖️ Change legal or financial provider{innerDispatch === 'legal_reassign' ? ' ▲' : ' ▼'}
+          </button>
+          {innerDispatch === 'legal_reassign' && (
+            <div style={{ backgroundColor: 'white', border: '1px solid #e5e7eb', borderRadius: 'var(--radius-sm)', padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <label style={{ fontFamily: 'var(--font-body)', fontSize: '11px', fontWeight: 600, color: '#6b21a8' }}>Service type</label>
+              <select value={dispatchFormData[bookingId]?.healthSubtype ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [bookingId]: { ...prev[bookingId], healthSubtype: e.target.value } }))} style={{ fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #d8b4fe', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box' }}>
+                <option value="">Select type…</option>
+                <option>Elder Law Attorney</option>
+                <option>Financial Advisor</option>
+                <option>SHIP Medicare Counselor</option>
+                <option>Benefits Assistance</option>
+                <option>Estate Planning</option>
+                <option>Tax Help / VITA</option>
+              </select>
+              <label style={{ fontFamily: 'var(--font-body)', fontSize: '11px', fontWeight: 600, color: '#6b21a8', marginTop: '2px' }}>Advisor or organization name *</label>
+              <input type="text" value={dispatchFormData[bookingId]?.providerName ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [bookingId]: { ...prev[bookingId], providerName: e.target.value } }))} placeholder="e.g. Bay Area Legal Aid, SHIP counselor name" style={{ fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #d8b4fe', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box' }} />
+              <label style={{ fontFamily: 'var(--font-body)', fontSize: '11px', fontWeight: 600, color: '#6b21a8', marginTop: '2px' }}>Contact phone or email</label>
+              <input type="text" value={dispatchFormData[bookingId]?.providerPhone ?? ''} onChange={e => setDispatchFormData(prev => ({ ...prev, [bookingId]: { ...prev[bookingId], providerPhone: e.target.value } }))} placeholder="Phone or email (optional)" style={{ fontFamily: 'var(--font-body)', fontSize: '13px', border: '1.5px solid #d8b4fe', borderRadius: 'var(--radius-sm)', padding: '6px 10px', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box' }} />
+              <button type="button" onClick={() => onReassign('legal_vetted', { legal_subtype: dispatchFormData[bookingId]?.healthSubtype ?? '', assigned_provider: dispatchFormData[bookingId]?.providerName ?? '', provider_phone: dispatchFormData[bookingId]?.providerPhone ?? '' })} disabled={isLoading || !dispatchFormData[bookingId]?.providerName?.trim()} style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: 'white', backgroundColor: isLoading || !dispatchFormData[bookingId]?.providerName?.trim() ? '#9ca3af' : '#7c3aed', border: 'none', borderRadius: 'var(--radius-sm)', padding: '6px 12px', cursor: 'pointer', marginTop: '2px' }}>
+                {isLoading ? 'Reassigning…' : 'Confirm reassignment'}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Manual provider entry for home_service */}
+      {serviceType === 'home_service' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
           <button type="button" onClick={() => setInnerDispatch(p => p === 'manual_reassign' ? null : 'manual_reassign')} style={{ width: '100%', textAlign: 'left', fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#374151', background: 'white', border: '1.5px solid #e5e7eb', borderRadius: 'var(--radius-sm)', padding: '6px 10px', cursor: 'pointer' }}>
             ✏️ Enter provider name manually{innerDispatch === 'manual_reassign' ? ' ▲' : ' ▼'}
@@ -1820,14 +2115,17 @@ function ReassignPanel({
 }
 
 // Volunteer picker — fetches active volunteers filtered by visit_type, displays as selectable cards
+// Sorts same-city volunteers (relative to member's location) to the top with a "📍 Near member" badge
 function VolunteerPicker({
   visitType,
   selectedId,
   onSelect,
+  memberCity,
 }: {
   visitType: string
   selectedId?: string
   onSelect: (vol: Volunteer) => void
+  memberCity?: string
 }) {
   const [loading, setLoading] = useState(true)
   const [volunteers, setVolunteers] = useState<Volunteer[]>([])
@@ -1839,14 +2137,26 @@ function VolunteerPicker({
     fetch(`/api/volunteers/active?serviceType=${encodeURIComponent(visitType)}`)
       .then(r => r.json())
       .then(d => {
-        setVolunteers(d.volunteers ?? [])
+        const raw: Volunteer[] = d.volunteers ?? []
+        // Sort same-city volunteers first, then by existing rating order
+        if (memberCity) {
+          const city = memberCity.toLowerCase().trim()
+          raw.sort((a, b) => {
+            const aLocal = (a.city ?? '').toLowerCase().trim() === city
+            const bLocal = (b.city ?? '').toLowerCase().trim() === city
+            if (aLocal && !bLocal) return -1
+            if (!aLocal && bLocal) return 1
+            return 0
+          })
+        }
+        setVolunteers(raw)
         setLoading(false)
       })
       .catch(() => {
         setFetchError('Could not load volunteers.')
         setLoading(false)
       })
-  }, [visitType])
+  }, [visitType, memberCity])
 
   if (loading) {
     return (
@@ -1881,6 +2191,7 @@ function VolunteerPicker({
         const isSelected = vol.id === selectedId
         const availDays = (vol.availability_days as string[] | null)?.join(', ') ?? '—'
         const location = [vol.city, vol.state].filter(Boolean).join(', ') || '—'
+        const isNearMember = memberCity ? (vol.city ?? '').toLowerCase().trim() === memberCity.toLowerCase().trim() : false
         return (
           <button
             key={vol.id}
@@ -1889,23 +2200,26 @@ function VolunteerPicker({
             style={{
               width: '100%',
               textAlign: 'left',
-              background: isSelected ? '#e6f7f3' : 'white',
-              border: isSelected ? '2px solid var(--color-teal)' : '1px solid #d1d5db',
+              background: isSelected ? '#e6f7f3' : isNearMember ? '#f0fdf4' : 'white',
+              border: isSelected ? '2px solid var(--color-teal)' : isNearMember ? '1px solid #86efac' : '1px solid #d1d5db',
               borderRadius: 'var(--radius-sm)',
               padding: '7px 10px',
               cursor: 'pointer',
               transition: 'border 0.1s, background 0.1s',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '4px' }}>
               <span style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-navy)' }}>
                 {vol.full_name}
               </span>
-              {vol.rating_average != null && (
-                <span style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: '#ca8a04' }}>
-                  ⭐ {Number(vol.rating_average).toFixed(1)}
-                </span>
-              )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                {isNearMember && <span style={{ fontFamily: 'var(--font-body)', fontSize: '10px', fontWeight: 700, color: '#059669', backgroundColor: '#dcfce7', borderRadius: '4px', padding: '1px 5px' }}>📍 Near member</span>}
+                {vol.rating_average != null && (
+                  <span style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: '#ca8a04' }}>
+                    ⭐ {Number(vol.rating_average).toFixed(1)}
+                  </span>
+                )}
+              </div>
             </div>
             <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>
               {location} · {availDays} · {(vol.hours_per_week as string | null) ?? '—'} hrs/wk
