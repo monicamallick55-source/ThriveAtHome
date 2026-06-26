@@ -447,9 +447,13 @@ M18 Enterprise        Phase 51 [x][x][x][x]                  4/4 ✅ COMPLETE (S
                       Phase 53 [x][x][x][x][x][x][x]         7/7 ✅ COMPLETE (Session 94 APPROVED)
                       Phase 54 [x][x][x][x][x]               5/5 ✅ COMPLETE (Session 98)
 M19 Care Industry     Phase 59 [x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x] ✅ COMPLETE (Session 99 APPROVED)
-                      Phase 60 [x][x][x][x][x][x][x][x][x]   9/9 ✅ COMPLETE (Session 100)
-                      Phase 61 [x][x][x][x][x][x][x][x]      8/8 ✅ COMPLETE (Session 100)
-                      Phase 62 [x][x][x][x][x][x][x][x]      8/8 ✅ COMPLETE (Session 100)
+                      Phase 60 [x][x][x][x][x][x][x][x][x]   9/9 ✅ COMPLETE (Session 100 APPROVED)
+                      Phase 61 [x][x][x][x][x][x][x][x]      8/8 ✅ COMPLETE (Session 100 APPROVED)
+                      Phase 62 [x][x][x][x][x][x][x][x]      8/8 ✅ COMPLETE (Session 100 APPROVED)
+M20 Community Org     Phase 63 [x][x][x][x][x][x][x][x][x][x][x][x] 12/12 ✅ COMPLETE (Session 101)
+                      Phase 64 [x][x][x][x][x][x][x]         7/7 ✅ COMPLETE (Session 101)
+                      Phase 65 [x][x][x][x][x][x][x][x]      8/8 ✅ COMPLETE (Session 101)
+                      Phase 66 [x][x][x][x][x][x][x][x]      8/8 ✅ COMPLETE (Session 101)
 ```
 
 ## M17 — Services Marketplace
@@ -1488,3 +1492,97 @@ STATUS: `COMPLETE`
 - [x] Assign worker to location — per-worker location dropdown in Workers tab; PATCH /api/agency/locations/assign-worker; worker.location_id updated; location badge shown on worker card (Session 99)
 - [x] npx tsc --noEmit passes — zero errors (Session 100)
 - [x] npm run build passes — ✓ Compiled successfully (Session 100)
+
+---
+
+## M20 — Community Organization Portal
+
+### Phase 63 — Village / Community Organization Portal (Session 101)
+STATUS: `COMPLETE`
+
+- [x] Migration 043_community_orgs.sql — community_orgs, org_programs, org_memberships, member_needs tables; Bay Area Village Network seeded; migration run in Session 99 as part of M19 pre-build (Session 99/101)
+- [x] /org-admin loads with org name in header — server component; org_admin or admin role required; getBrandConfigForAdmin; OrgAdminPortal renders org_name in nav header (Session 101)
+- [x] Overview tab shows stat cards — member_count, active programs, open needs, dues collected YTD all shown via OrgStats (Session 101)
+- [x] Programs tab lists seeded programs — 3 seeded programs (Friendly Visitor, Tech Help Tuesdays, Ride Share Network); "+ Add Program" creates org_programs row (Session 101)
+- [x] Needs Board tab — post a need using member NAME dropdown (not UUID) — memberships joined with members table via getOrgMemberships (select '*, member:members(full_name…)'); dropdown shows full_name; member_id stored internally (Session 101)
+- [x] Members tab lists org members — org_memberships with member join displayed in Members tab (Session 101)
+- [x] Membership Dues tab — record a payment — "+ Record Payment" → select member name from dropdown, tier, amount → upsertOrgMembership creates dues record (Session 101)
+- [x] Membership fee configuration — Settings tab → Membership Fees section; standard/sliding_mid/sliding_low in dollars (not cents) — divides by 100 for display; PATCH /api/org-admin/settings saves to community_orgs row (Session 101)
+- [x] Donations tab — record a donation — Donations tab lazy-loads on click; "+ Record Donation" → donor name, amount, date, payment method, notes → POST /api/org-admin/donations; total YTD updates (Session 101)
+- [x] Email Members tab — send with recipient group selection — recipient_group dropdown ("All Members", "Members in program [X]", etc.); POST /api/org-admin/send-email; stub log shows recipient count; sent email appears in history (Session 101)
+- [x] Documents tab — upload a PDF — Documents tab lazy-loads; file picker, title, category, visibility; POST /api/org-admin/documents multipart; uploads to platform-documents bucket; appears in list (Session 101)
+- [x] Sign out works from /org-admin — "Sign out" link → /api/auth/signout in nav header; confirmed present (Session 101)
+- [x] npx tsc --noEmit passes — zero errors (Session 101)
+- [x] npm run build passes — ✓ Compiled successfully in 36.5s (Session 101)
+
+HUMAN ACTIONS REQUIRED BEFORE BROWSER TEST:
+1. Confirm migrations 043 and 044 were run in Supabase SQL Editor (run in Session 99)
+   043 — community_orgs, org_programs, org_memberships, member_needs + Bay Area Village Network seed
+   044 — org_membership_tiers
+2. In Supabase, set family_members.org_id for a test org_admin user to Bay Area Village Network's UUID
+3. Also create a Supabase Storage bucket "platform-documents" (private) if not already done
+
+---
+
+### Phase 64 — Area Agency on Aging Portal (Session 101)
+STATUS: `COMPLETE`
+
+- [x] Migration 045_area_agency_on_aging.sql — area_agencies_on_aging, aaa_service_units tables; aaa_admin role; aaa_id on family_members; Bay Area AAA seeded (Session 99/101)
+- [x] /aaa-admin loads with agency name in header — server component; aaa_admin or admin role; AAAAdminPortal renders aaa.agency_name and psa_number in nav (Session 101)
+- [x] Overview tab shows stat cards — total clients served (distinct member_ids), service units YTD, units by Title III category (III-B/C1/C2/D/E) shown via getAAAStats (Session 101)
+- [x] Service Log tab — log a service unit — title3_category dropdown auto-selects service_type; unit_type auto-set; OAA Demographics section with poverty/minority/rural/disability/at-risk checkboxes; POST /api/aaa/service-units creates aaa_service_units row (Session 101)
+- [x] Counties tab shows per-county breakdown — aaa.counties_served array; each county shown as card with service unit count filtered from loaded units (Session 101)
+- [x] Reports tab — download NAPIS CSV — GET /api/aaa/export?fiscal_year=; CSV downloads with exactly 17 NAPIS-compliant columns; filename includes fiscal year and AAA name (Session 101)
+- [x] OAA client assessment saves — POST /api/aaa/assessments creates oaa_client_assessments row with poverty/minority/rural/disability/at-risk fields (Session 101)
+- [x] npx tsc --noEmit passes — zero errors (Session 101)
+- [x] npm run build passes — ✓ Compiled successfully in 36.5s (Session 101)
+
+HUMAN ACTIONS REQUIRED BEFORE BROWSER TEST:
+1. Confirm migration 045 was run in Supabase SQL Editor (run in Session 99)
+2. In Supabase, set family_members.aaa_id and role='aaa_admin' for a test user to the Bay Area AAA UUID
+
+---
+
+### Phase 65 — Senior Center Portal (Session 101)
+STATUS: `COMPLETE`
+
+- [x] Migration 046_senior_centers.sql — senior_centers, center_dropins, center_activities, activity_registrations, room_bookings, congregate_meals tables; senior_center_admin role; San Francisco Senior Center seeded (Session 99/101)
+- [x] /senior-center-admin loads with center name in header — server component; senior_center_admin or admin role; SeniorCenterPortal renders center.center_name in nav (Session 101)
+- [x] Drop-in attendance — check in a visitor — "+ Check In" form with visitor_name, visitor_type (member/guest/volunteer/staff); POST /api/senior-center/checkin creates center_dropins row with check_in_at timestamp; Today's count shown in Overview (Session 101)
+- [x] Activity calendar — add an activity — "+ Add Activity" form with title, activity_type, room, scheduled_at, duration_minutes, max_capacity; POST /api/senior-center/activities creates center_activities row; appears on calendar (Session 101)
+- [x] Activity registration — register an attendee — click activity → "+ Register" → enter name; POST /api/senior-center/activities/[id]/register creates activity_registrations row; registration_count increments (Session 101)
+- [x] Room booking — book a room — Room Bookings tab → "+ Book Room" → room name, title, start_time, end_time; POST /api/senior-center/rooms with conflict detection (same room + overlapping times → 409 error shown); room_bookings row created (Session 101)
+- [x] Congregate meals — log a meal service — Meals tab → "+ Log Meal" → date, meal_type (breakfast/lunch/dinner), attendee_count; POST /api/senior-center/meals; UNIQUE constraint (center_id, meal_date, meal_type) prevents duplicates (Session 101)
+- [x] Reports — export attendance CSV — Reports tab → "↓ Download Attendance CSV" generates client-side CSV with date, visitor_name, visitor_type, check-in/check-out times; center_name used in filename (Session 101)
+- [x] npx tsc --noEmit passes — zero errors after fixing center.name → center.center_name (×3) and a.capacity → a.max_capacity (Session 101)
+- [x] npm run build passes — ✓ Compiled successfully in 36.5s (Session 101)
+
+FIXES APPLIED (Session 101):
+- components/senior-center/SeniorCenterPortal.tsx: center.name → center.center_name (lines 674, 700, 722) and a.capacity → a.max_capacity (line 695)
+
+HUMAN ACTIONS REQUIRED BEFORE BROWSER TEST:
+1. Confirm migration 046 was run in Supabase SQL Editor (run in Session 99)
+2. In Supabase, set family_members.senior_center_id and role='senior_center_admin' for a test user
+
+---
+
+### Phase 66 — Network Federation (Session 101)
+STATUS: `COMPLETE`
+
+- [x] Migration 051_network_federation.sql — network_accounts, network_dues tables; network_admin role; community_orgs.network_id FK; family_members.network_id FK; VtVN and n4a seeded (Session 101)
+- [x] /network-admin loads with network name in header — server component; network_admin or admin role; NetworkAdminPortal renders network.name in nav (Session 101)
+- [x] Overview tab shows aggregate stats — total member orgs, total members served, dues revenue all shown via getNetworkStats (Session 101)
+- [x] Member Organizations tab lists linked orgs — getNetworkOrgs fetches community_orgs with network_id match; org list with member_count, dues status badge (paid/unpaid/overdue) (Session 101)
+- [x] Dues Billing tab — record a payment — "Record Payment" button per org; POST /api/network/dues; network_dues row status updated from 'unpaid' to 'paid', paid_date set (Session 101)
+- [x] Dues Billing tab — generate invoices for new fiscal year — "Generate invoices" button → confirm dialog → POST /api/network/generate-invoices with fiscal_year; network_dues rows created for all linked orgs for that year (UNIQUE constraint prevents duplicates); result shows created count and skipped count (Session 101)
+- [x] Aggregate Reports tab — aggregate stats across all member orgs shown; "Requires min. 10 orgs for benchmarking" note shown (Session 101)
+- [x] Benchmark report placeholder — "View benchmarks" → "Benchmarking available when network reaches 10+ member organizations" message shown (Session 101)
+- [x] npx tsc --noEmit passes — zero errors (Session 101)
+- [x] npm run build passes — ✓ Compiled successfully in 36.5s (Session 101)
+
+HUMAN ACTIONS REQUIRED BEFORE BROWSER TEST:
+1. Run migration 051_network_federation.sql in Supabase SQL Editor
+   Creates: network_accounts, network_dues tables; adds network_id columns
+   Seeds: VtVN and n4a network accounts
+2. Link Bay Area Village Network (community_orgs) to VtVN (network_accounts) by setting network_id FK
+3. In Supabase, set family_members.network_id and role='network_admin' for a test user

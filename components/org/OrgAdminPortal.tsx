@@ -687,9 +687,17 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
                 {needFormError && <p style={{ color: '#D62828', fontFamily: 'var(--font-body)', fontSize: '14px', marginBottom: '12px' }}>{needFormError}</p>}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                   <div>
-                    <label style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-navy)', display: 'block', marginBottom: '6px' }}>Member ID *</label>
-                    <input value={needForm.member_id} onChange={e => setNeedForm(f => ({ ...f, member_id: e.target.value }))} style={{ width: '100%', padding: '10px 14px', border: '1px solid #D1C9BC', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '14px', boxSizing: 'border-box' }} placeholder="Paste member UUID" />
-                    <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)', marginTop: '4px' }}>Find in Supabase → members table</p>
+                    <label style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-navy)', display: 'block', marginBottom: '6px' }}>Member *</label>
+                    {memberships.length > 0 ? (
+                      <select value={needForm.member_id} onChange={e => setNeedForm(f => ({ ...f, member_id: e.target.value }))} style={{ width: '100%', padding: '10px 14px', border: '1px solid #D1C9BC', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '14px', boxSizing: 'border-box' }}>
+                        <option value="">— Select a member —</option>
+                        {memberships.map(m => (
+                          <option key={m.member_id} value={m.member_id}>{m.member?.full_name ?? m.member_id}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input value={needForm.member_id} onChange={e => setNeedForm(f => ({ ...f, member_id: e.target.value }))} style={{ width: '100%', padding: '10px 14px', border: '1px solid #D1C9BC', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '14px', boxSizing: 'border-box' }} placeholder="Member UUID (no membership records yet)" />
+                    )}
                   </div>
                   <div>
                     <label style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-navy)', display: 'block', marginBottom: '6px' }}>Need Type *</label>
@@ -863,9 +871,17 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
                 {duesError && <p style={{ color: '#D62828', fontFamily: 'var(--font-body)', fontSize: '14px', marginBottom: '12px' }}>{duesError}</p>}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                   <div>
-                    <label style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-navy)', display: 'block', marginBottom: '6px' }}>Member ID *</label>
-                    <input value={duesForm.member_id} onChange={e => setDuesForm(f => ({ ...f, member_id: e.target.value }))} style={{ width: '100%', padding: '10px 14px', border: '1px solid #D1C9BC', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '14px', boxSizing: 'border-box' }} placeholder="Paste member UUID" />
-                    <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)', marginTop: '4px' }}>Find in Supabase → members table</p>
+                    <label style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-navy)', display: 'block', marginBottom: '6px' }}>Member *</label>
+                    {memberships.length > 0 ? (
+                      <select value={duesForm.member_id} onChange={e => setDuesForm(f => ({ ...f, member_id: e.target.value }))} style={{ width: '100%', padding: '10px 14px', border: '1px solid #D1C9BC', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '14px', boxSizing: 'border-box' }}>
+                        <option value="">— Select a member —</option>
+                        {memberships.map(m => (
+                          <option key={m.member_id} value={m.member_id}>{m.member?.full_name ?? m.member_id}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input value={duesForm.member_id} onChange={e => setDuesForm(f => ({ ...f, member_id: e.target.value }))} style={{ width: '100%', padding: '10px 14px', border: '1px solid #D1C9BC', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '14px', boxSizing: 'border-box' }} placeholder="Member UUID" />
+                    )}
                   </div>
                   <div>
                     <label style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-navy)', display: 'block', marginBottom: '6px' }}>Membership Tier</label>

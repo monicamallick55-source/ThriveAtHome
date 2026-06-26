@@ -31,7 +31,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ no
   const action = body.action as string | undefined
 
   if (action === 'sign') {
-    const signerName = (body.signer_name as string) || 'Agency Admin'
+    // Pull signer's actual full_name from family_members
+    const admin = createAdminClient()
+    const { data: fm } = await admin.from('family_members').select('full_name').eq('supabase_auth_id', user.id).maybeSingle()
+    const signerName = fm?.full_name || (body.signer_name as string) || 'Agency Admin'
     const { data, error } = await signSoapNote(noteId, signerName)
     if (error) return NextResponse.json({ error }, { status: 500 })
     return NextResponse.json({ data })

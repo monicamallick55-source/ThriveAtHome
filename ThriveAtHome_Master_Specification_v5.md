@@ -530,6 +530,26 @@ Health literacy circles (retired physicians/nurses), legal clinics (retired lawy
 - ✅ Built: Faith circle exists as one of the 8 interest communities
 - ⬜ Not built: formal denominational MOU partnerships, chaplain referral network for spiritual care (non-proselytizing, member-requested only)
 
+## 8.5a Platform-Wide Additions — Phases 67–72 (build after M20, before M21)
+
+These six features benefit every channel — B2C direct, employer benefits, agency white-label, village/community orgs, and Medicare Advantage. They are not village-specific; they are core platform capabilities that make ThriveAtHome competitive across all markets.
+
+| Feature | What It Does | Applies To | Status |
+|---------|-------------|-----------|--------|
+| **Phase 67 — Member Self-Service Portal** | Members log in directly (not only through family) to view profile, post needs, see events, update preferences, access life story | All members on all plans | ⬜ Not built — platform currently family-first only |
+| **Phase 68 — Volunteer Self-Service 24/7 Claiming** | Volunteers browse and claim open service requests and member needs directly, without navigator/admin intervention | All volunteer categories | 🔄 Partial — navigator dispatch exists, direct claiming not built |
+| **Phase 69 — Donations Management** | Record donations, track totals, export donor list for tax receipts, "Donate" option for families | All org types + B2C | ⬜ Not built |
+| **Phase 70 — Email/Newsletter Broadcast** | Any admin composes and sends email to their members/employees/clients; filtered subgroups; schedule; basic stats | All admin roles | ⏸ Stub only — activates with SendGrid credentials |
+| **Phase 71 — Public Landing Pages** | /chapter/[slug], /org/[slug], /employer/[slug] as proper public-facing marketing pages with about, programs, events, volunteer opps, contact form, SEO | All chapters/orgs/employers | 🔄 Partial — basic /chapter/[slug] exists, not full marketing page |
+| **Phase 72 — Document Library** | Upload/organize/share documents (policies, forms, newsletters, care plans) with role-based visibility; Supabase Storage | All admin roles | ⬜ Not built |
+
+**Why these matter across all GTM streams:**
+- B2C families: member self-service means seniors can engage directly, not just through an adult child's account
+- Employer partners: HR admins need email broadcast to enrolled employees and a public landing page for their benefits portal
+- Agency partners: care coordinators need document library for care plans, policies, training materials
+- Village/community orgs: all six features are essential for daily village operations
+- Medicare Advantage: member self-service and document library are required for clinical-grade care management
+
 ## 8.6 Corporate Volunteer Program — 🔄 In Progress (Phase 50l, built early within M17)
 
 A B2B feature distinct from the subscription caregiver benefit — employees volunteer their time on ThriveAtHome (helping seniors generally, not just their own parents), and hours are tracked and exported in formats compatible with corporate giving and volunteer-matching platforms such as Benevity, YourCause, and Bright Funds — the systems companies like Cisco and Genentech use to match employee volunteer hours with cash donations. This captures employer budget from a second line item: the corporate social responsibility/giving budget, separate from the HR/benefits budget that funds the subscription product.
@@ -712,7 +732,18 @@ The original vision's Phase 0–4 roadmap and the actual build's M1–M27 milest
 | M17 Services Marketplace | 45–50 + 50a–50k | 🔄 IN PROGRESS |
 | M18 Enterprise | 51–54 (Phase 55 moved to after M21) | ⬜ NOT STARTED |
 | M19 Care Industry Partnerships | 59–62 | ⬜ NOT STARTED |
-| M20 Community Organizations | 63–66 | ⬜ NOT STARTED — builds after M19, no longer deferred |
+| M20 Community Organizations | 63–66 | 🔄 IN PROGRESS — Phase 64 complete, Phases 63/65/66 in progress |
+
+**M20 Detail — Phase by Phase:**
+
+| Phase | Name | What It Builds | Status |
+|-------|------|---------------|--------|
+| 63 | Village / Community Organization Portal | community_orgs, org_programs, org_memberships, member_needs tables; sliding-scale dues; needs bulletin board; Bay Area Village Network seeded with 3 programs | 🔄 In progress |
+| 64 | Area Agency on Aging Portal | area_agencies_on_aging, aaa_service_units, oaa_client_assessments tables; Title III tracking (III-B/C1/C2/D/E); NAPIS 17-column CSV export; Bay Area AAA seeded | ✅ Complete |
+| 65 | Senior Center Portal | senior_centers, center_dropins, center_activities, room_bookings, congregate_meals tables; drop-in tracking; activity calendar; room booking; SF Senior Center seeded | 🔄 In progress |
+| 66 | Network Federation | network_accounts, network_dues tables; VtVN and n4a seeded; aggregate reporting; anonymized benchmarking; /network-admin portal | 🔄 In progress |
+
+**Revenue model:** Annual license fee per organization — $2,400 (Starter, up to 100 members), $6,000 (Growth, up to 500 members), $15,000 (Scale, unlimited members). Separate from per-member B2C subscription revenue.
 | M21–M27 Future Roadmap | See table below | ⬜ NOT STARTED — builds after M20, in sequence |
 | Phase 55 Full Multilingual UI | — | ⬜ NOT STARTED — builds LAST, only after M27 completes |
 

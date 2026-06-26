@@ -478,9 +478,68 @@ ANTHROPIC_API_KEY           # M8 + AI features
 
 ---
 
+## M20 — Community Organization Portal (Phases 63–66) 🔄 IN PROGRESS
+
+M20 builds portals for four types of community organizations. Revenue model: annual license fee per org ($2,400–$15,000/year).
+
+**Phase 63 — Village / Community Organization Portal** 🔄 In progress
+- community_orgs, org_programs, org_memberships, member_needs tables
+- Member needs bulletin board with urgency levels and volunteer claiming
+- Annual membership dues with sliding-scale tiers (free / $25 / $50 per year)
+- Org programs tracking with participant and volunteer counts
+- Email broadcast to all org members (Phase 70 infrastructure)
+- Document library (Phase 72 infrastructure)
+- Donations tracking (Phase 69 infrastructure)
+- Bay Area Village Network seeded with 3 programs
+- Issues pending: member UUID input needs name dropdown, membership fee config UI needed
+
+**Phase 64 — Area Agency on Aging Portal** ✅ Built
+- area_agencies_on_aging, aaa_service_units, oaa_client_assessments tables
+- Multi-county management with county-level breakdowns
+- Title III service category tracking (III-B Supportive, III-C1 Congregate Meals, III-C2 Home-Delivered Meals, III-D Disease Prevention, III-E Family Caregiver Support)
+- NAPIS-compliant 17-column CSV export for federal reporting
+- OAA demographic fields (age group, gender, poverty/minority/rural/disability status)
+- Bay Area AAA seeded (PSA-06, serving SF/Marin/San Mateo)
+- /aaa-admin portal with 4 tabs: Overview, Service Log, Counties, Reports
+
+**Phase 65 — Senior Center Portal** 🔄 In progress
+- senior_centers, center_dropins, center_activities, activity_registrations, room_bookings, congregate_meals tables
+- Drop-in attendance tracking with check-in/check-out times
+- Activity calendar with registration and capacity management
+- Room booking system with conflict detection
+- Congregate meal tracking (feeds OAA Title III-C1 reporting)
+- SF Senior Center seeded (481 O'Farrell Street, capacity 150)
+- /senior-center-admin portal
+
+**Phase 66 — Network Federation** 🔄 In progress
+- network_accounts, network_dues tables
+- Parent network accounts for umbrella organizations
+- Village to Village Network (VtVN, $750/org/yr) and n4a seeded
+- Annual dues invoicing with paid/unpaid/waived/overdue tracking
+- Aggregate reporting across all member orgs
+- Anonymized benchmarking (requires min. 10 orgs)
+- /network-admin portal with 4 tabs: Overview, Member Organizations, Dues Billing, Aggregate Reports
+
+---
+
+## Platform-Wide Additions — Phases 67–72 (build after M20 Phases 63–66, before M21)
+
+These six phases apply to ALL GTM streams — B2C direct, employer benefits, agency white-label, village/community orgs, Medicare Advantage.
+
+**Build sequence:** M20 (63–66) → Phases 67–72 → M21 → M22 → M23 → M24 → M25 → M26 → M27 → Phase 55 (Multilingual, LAST)
+
+| Phase | Feature | Status | Priority |
+|-------|---------|--------|---------|
+| **Phase 67** | Member Self-Service Portal — /member-portal, direct member login, post needs, view profile, life story | ⬜ Not built | HIGH |
+| **Phase 68** | Volunteer 24/7 Self-Service Claiming — browse and claim open requests directly; urgent still requires navigator | 🔄 Partial | HIGH |
+| **Phase 69** | Donations Management — donations table (migration 046), org admin UI, donor CSV export, "Donate" option | ⬜ Not built | MEDIUM |
+| **Phase 70** | Email/Newsletter Broadcast — any admin sends to members/employees/clients; filtered subgroups; sent history | ⏸ Stub only | HIGH |
+| **Phase 71** | Public Landing Pages — /chapter/[slug], /org/[slug], /employer/[slug] full SEO marketing pages | 🔄 Partial | HIGH |
+| **Phase 72** | Document Library — upload/organise/share docs with role-based visibility; "platform-documents" Storage bucket | ⬜ Not built | MEDIUM |
+
 ## Full Vision Roadmap — M21–M27, Then Multilingual Last (from Comprehensive Specs)
 
-These are genuine features in the original platform vision, now scheduled into the active build sequence after M20. Build order: M20 → M21 → M22 → M23 → M24 → M25 → M26 → M27 → **Phase 55 Full Multilingual UI (built LAST, after everything else)**.
+These are genuine features in the original platform vision, now scheduled into the active build sequence after Phases 67–72. Build order: Phases 67–72 → M21 → M22 → M23 → M24 → M25 → M26 → M27 → **Phase 55 Full Multilingual UI (built LAST, after everything else)**.
 
 ### M21 — Expanded Volunteer Ecosystem (6 new categories)
 - Retired Professionals Network — doctors, nurses, lawyers, CPAs, teachers, engineers, social workers, chefs volunteering expertise (health literacy circles, legal clinics, VITA tax help, tutoring, home safety tech assessments)

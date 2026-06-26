@@ -31,6 +31,8 @@ export default function NetworkAdminPortal({ network, initialOrgs, initialDues, 
   const [dues, setDues] = useState(initialDues)
   const [recordingDues, setRecordingDues] = useState<string | null>(null)
   const [duesError, setDuesError] = useState('')
+  const [generatingInvoices, setGeneratingInvoices] = useState(false)
+  const [invoiceGenResult, setInvoiceGenResult] = useState('')
 
   const tabs = [
     { id: 'overview', label: '📊 Overview' },
@@ -59,6 +61,22 @@ export default function NetworkAdminPortal({ network, initialOrgs, initialDues, 
         return [...prev, json.data]
       })
     }
+  }
+
+  async function handleGenerateInvoices() {
+    const nextYear = currentYear + 1
+    if (!confirm(`Generate ${nextYear} dues invoices for all ${initialOrgs.length} member organizations? This will create unpaid invoice records for orgs that don't already have one.`)) return
+    setGeneratingInvoices(true); setInvoiceGenResult(''); setDuesError('')
+    const res = await fetch('/api/network/generate-invoices', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fiscal_year: nextYear }),
+    })
+    const json = await res.json().catch(() => ({ error: 'Server error' }))
+    setGeneratingInvoices(false)
+    if (!res.ok) { setDuesError(json.error ?? 'Failed to generate invoices'); return }
+    setInvoiceGenResult(`✓ Generated ${json.created} invoice${json.created !== 1 ? 's' : ''} for ${nextYear}. ${json.skipped > 0 ? `${json.skipped} org${json.skipped !== 1 ? 's' : ''} already had a record.` : ''}`)
+    setTimeout(() => setInvoiceGenResult(''), 6000)
   }
 
   const orgDuesMap = new Map(dues.filter(d => d.fiscal_year === currentYear).map(d => [d.org_id, d]))
@@ -211,10 +229,20 @@ export default function NetworkAdminPortal({ network, initialOrgs, initialDues, 
         {/* ── DUES BILLING TAB ── */}
         {activeTab === 'dues' && (
           <div>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '8px' }}>Dues Billing — {currentYear}</h2>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '8px', gap: '16px' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: 'var(--color-navy)', margin: 0 }}>Dues Billing — {currentYear}</h2>
+              <button
+                onClick={handleGenerateInvoices}
+                disabled={generatingInvoices || initialOrgs.length === 0}
+                style={{ padding: '10px 20px', backgroundColor: generatingInvoices ? '#9CA3AF' : 'var(--color-navy)', color: 'white', border: 'none', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, cursor: generatingInvoices || initialOrgs.length === 0 ? 'default' : 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}
+              >
+                {generatingInvoices ? 'Generating…' : `Generate ${currentYear + 1} invoices`}
+              </button>
+            </div>
             <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)', marginBottom: '24px' }}>
               Annual dues: {duePerOrg} per organization. Track and record payments for all member orgs.
             </p>
+            {invoiceGenResult && <div style={{ marginBottom: '16px', padding: '12px 16px', backgroundColor: '#F0FFF4', borderRadius: '8px', border: '1px solid #22C55E40', fontFamily: 'var(--font-body)', fontSize: '14px', color: '#15803D' }}>{invoiceGenResult}</div>}
             {duesError && <div style={{ marginBottom: '16px', padding: '12px 16px', backgroundColor: '#FFF5F5', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '14px', color: '#D62828' }}>{duesError}</div>}
 
             {initialOrgs.length === 0 ? (

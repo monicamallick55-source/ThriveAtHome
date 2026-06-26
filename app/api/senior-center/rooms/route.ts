@@ -19,6 +19,23 @@ export async function POST(request: NextRequest) {
     const isAdmin = await verifyCenterAdmin(user.id, center_id)
     if (!isAdmin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
+    // Conflict detection — check for overlapping active bookings in same room
+    const admin = createAdminClient()
+    const { data: conflicts } = await admin
+      .from('room_bookings')
+      .select('id, booking_title, start_time, end_time')
+      .eq('center_id', center_id)
+      .eq('room', room.trim())
+      .neq('status', 'cancelled')
+      .lt('start_time', end_time)
+      .gt('end_time', start_time)
+    if (conflicts && conflicts.length > 0) {
+      const c = conflicts[0] as { booking_title: string; start_time: string; end_time: string }
+      return NextResponse.json({
+        error: `Room conflict: "${c.booking_title}" is already booked in this room during that time.`
+      }, { status: 409 })
+    }
+
     const { data, error } = await createRoomBooking({
       center_id,
       room: room.trim(),

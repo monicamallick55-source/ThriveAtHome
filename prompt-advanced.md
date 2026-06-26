@@ -1800,26 +1800,443 @@ agency_locations table. Parent agency with child locations. Location selector wi
 > M20 is now part of the active build sequence. Proceed directly after M19 approval.
 
 ### PHASE 63 — Village / Community Organization Portal
-member_needs bulletin board. Annual membership dues + sliding scale. org_programs table for aggregate program tracking.
 
-### PHASE 64 — Area Agency on Aging Portal
-Multi-county management. Title III service category tracking. NAPIS export. OAA compliance fields.
+**Tables:** community_orgs, org_programs, org_memberships, member_needs, org_membership_tiers, org_sent_emails, org_donations, platform_documents (see Phase 72)
+**Migration:** 043_community_orgs.sql (run in parts — enum first, then tables, then FK constraints)
+**Seed:** Bay Area Village Network with 3 programs (Friendly Visitor, Tech Help Tuesdays, Ride Share Network)
+**Portal route:** /org-admin (requires role='org_admin' and org_id set on family_members)
 
-### PHASE 65 — Senior Center Portal
-Drop-in attendance. Activity calendar and room booking. Congregate meal tracking.
+**Checklist:**
+```
+PHASE 63 CHECKLIST
+[ ] /org-admin loads with org name in header
+    VERIFY: Log in as org_admin → navigate to /org-admin
+    PASS: "Bay Area Village Network" shown in header, 5+ tabs visible
 
-### PHASE 66 — Network Federation
-Parent network account (VtVN, n4a). Aggregate national reporting. Anonymized benchmarking. Network dues billing.
+[ ] Overview tab shows stat cards
+    VERIFY: Overview tab
+    PASS: Member count, active programs, open needs, dues collected YTD all shown
+
+[ ] Programs tab lists seeded programs
+    VERIFY: Programs tab
+    PASS: 3 programs shown (Friendly Visitor, Tech Help Tuesdays, Ride Share Network)
+    PASS: "+ Add Program" button works and creates new org_programs row
+
+[ ] Needs Board tab — post a need using member NAME dropdown (not UUID)
+    VERIFY: Needs Board tab → "+ Post a Need" → member dropdown shows names not UUIDs
+    PASS: Dropdown populated with member names; selecting a name stores the member_id internally
+
+[ ] Members tab lists org members
+    VERIFY: Members tab
+    PASS: Members linked via org_memberships shown with tier and dues status
+
+[ ] Membership Dues tab — record a payment
+    VERIFY: Dues tab → "+ Record Payment" → select member, tier, amount → save
+    PASS: org_memberships row created with dues_paid_date set
+
+[ ] Membership fee configuration
+    VERIFY: Settings tab → Membership Fees section
+    PASS: Current fee tiers shown in dollars (not cents), each editable, saves to community_orgs row
+
+[ ] Donations tab — record a donation
+    VERIFY: Donations tab → "+ Record Donation" → donor name, amount, date → save
+    PASS: org_donations row created, total donations YTD updates
+
+[ ] Email Members tab — send with recipient group selection
+    VERIFY: Email Members tab → compose → select "Members in [program]" from dropdown → send
+    PASS: [STUB][Email] log shows correct recipient count and subject
+    PASS: Sent email appears in history list
+
+[ ] Documents tab — upload a PDF
+    VERIFY: Documents tab → Upload a document → choose file, set title and visibility → Upload
+    PASS: File uploads to platform-documents bucket, platform_documents row created, file appears in list
+
+[ ] Sign out works from /org-admin
+    VERIFY: Click Sign out
+    PASS: Redirects to /login
+
+[ ] npx tsc --noEmit passes
+```
 
 ---
 
-## ═══ M21–M27 — FUTURE ROADMAP (build after M20, before Phase 55 Multilingual) ═══
+### PHASE 64 — Area Agency on Aging Portal
 
-> **Build sequence after M20:** M21 → M22 → M23 → M24 → M25 → M26 → M27 → Phase 55 (Full Multilingual UI, LAST)
-> Full detailed phase specs for M21–M27 are not yet written — they are tracked at milestone level in
-> `ThriveAtHome_Build_Phases_v4.md` and `ThriveAtHome_Master_Specification_v5.md`. When ready to build
-> each milestone, expand it into full PHASE checklists following the same pattern as M13–M20 above
-> before starting that milestone's build session.
+**Tables:** area_agencies_on_aging, aaa_service_units, oaa_client_assessments
+**Migration:** 045_area_agency_on_aging.sql (run ALTER TYPE alone first, then rest, then FK constraint separately)
+**Seed:** Bay Area Area Agency on Aging (PSA-06, serving SF/Marin/San Mateo)
+**Portal route:** /aaa-admin (requires role='aaa_admin' and aaa_id set on family_members)
+
+**Checklist:**
+```
+PHASE 64 CHECKLIST
+[ ] /aaa-admin loads with agency name in header
+    VERIFY: Log in as aaa_admin → navigate to /aaa-admin
+    PASS: "Bay Area Area Agency on Aging" shown, 4 tabs visible
+
+[ ] Overview tab shows stat cards
+    VERIFY: Overview tab
+    PASS: Total clients served, service units YTD, units by Title III category (III-B/C1/C2/D/E) shown
+
+[ ] Service Log tab — log a service unit
+    VERIFY: Service Log tab → "+ Log Service Unit" → select "Title III-C2 Home-Delivered Nutrition"
+    PASS: service_type auto-selects home_delivered_meal, unit_type auto-sets to meal
+    PASS: OAA Demographics section expands with poverty/minority/rural/disability/at-risk checkboxes
+    PASS: Log button creates aaa_service_units row
+
+[ ] Counties tab shows per-county breakdown
+    VERIFY: Counties tab
+    PASS: SF, Marin, San Mateo shown as separate cards with service unit counts
+
+[ ] Reports tab — download NAPIS CSV
+    VERIFY: Reports tab → "↓ Download NAPIS CSV"
+    PASS: CSV downloads with exactly 17 columns in NAPIS-compliant format
+    PASS: Filename includes fiscal year and AAA name
+
+[ ] OAA client assessment saves
+    VERIFY: Log a service unit with member linked, check oaa_client_assessments table
+    PASS: Assessment row created or updated for that member
+
+[ ] npx tsc --noEmit passes
+```
+
+---
+
+### PHASE 65 — Senior Center Portal
+
+**Tables:** senior_centers, center_dropins, center_activities, activity_registrations, room_bookings, congregate_meals
+**Migration:** 046_senior_centers.sql (run ALTER TYPE alone first, then create table, then add FK column, then policies)
+**Seed:** San Francisco Senior Center (481 O'Farrell Street, capacity 150)
+**Portal route:** /senior-center-admin (requires role='senior_center_admin' and senior_center_id set)
+
+**Checklist:**
+```
+PHASE 65 CHECKLIST
+[ ] /senior-center-admin loads with center name in header
+    VERIFY: Log in as senior_center_admin → navigate to /senior-center-admin
+    PASS: "San Francisco Senior Center" shown in header, tabs visible
+
+[ ] Drop-in attendance — check in a visitor
+    VERIFY: Drop-ins tab → "+ Check In" → enter visitor name, select type (member/guest/volunteer/staff)
+    PASS: center_dropins row created with check_in_at timestamp
+    PASS: Today's attendance count shown in Overview
+
+[ ] Activity calendar — add an activity
+    VERIFY: Activities tab → "+ Add Activity" → title, type, room, date/time, capacity → save
+    PASS: center_activities row created, activity appears on calendar
+
+[ ] Activity registration — register an attendee
+    VERIFY: Click an activity → "+ Register Attendee" → enter name
+    PASS: activity_registrations row created, registration_count increments
+
+[ ] Room booking — book a room
+    VERIFY: Room Bookings tab → "+ Book Room" → room name, title, start/end time → save
+    PASS: room_bookings row created
+    PASS: Conflict detection: attempt to book same room same time → error shown
+
+[ ] Congregate meals — log a meal service
+    VERIFY: Meals tab → "+ Log Meal" → date, type (lunch), attendee count → save
+    PASS: congregate_meals row created, UNIQUE constraint prevents duplicate date+type
+
+[ ] Reports — export attendance CSV
+    VERIFY: Reports tab → "Download attendance CSV"
+    PASS: CSV downloads with date, visitor name, type, check-in/out times
+
+[ ] npx tsc --noEmit passes
+```
+
+---
+
+### PHASE 66 — Network Federation
+
+**Tables:** network_accounts, network_dues
+**Migration:** 051_network_federation.sql (run ALTER TYPE alone first, then create table, then add FK columns, then policies and seed)
+**Seed:** Village to Village Network ($750/org/yr), National Association of Area Agencies on Aging ($1,000/org/yr)
+**Portal route:** /network-admin (requires role='network_admin' and network_id set on family_members)
+
+**Checklist:**
+```
+PHASE 66 CHECKLIST
+[ ] /network-admin loads with network name in header
+    VERIFY: Log in as network_admin → navigate to /network-admin
+    PASS: "Village to Village Network" shown in header, 4 tabs visible
+
+[ ] Overview tab shows aggregate stats
+    VERIFY: Overview tab
+    PASS: Total member orgs, total members served across all orgs, total dues collected YTD shown
+
+[ ] Member Organizations tab lists linked orgs
+    VERIFY: Member Organizations tab
+    PASS: Bay Area Village Network shown with member count, dues status badge (paid/unpaid/overdue)
+
+[ ] Dues Billing tab — record a payment
+    VERIFY: Dues Billing tab → find Bay Area Village Network → "Record Payment"
+    PASS: network_dues row status updates from 'unpaid' to 'paid', paid_date set
+
+[ ] Dues Billing tab — generate invoices for new fiscal year
+    VERIFY: "Generate invoices" button → confirm
+    PASS: network_dues rows created for all linked orgs for the new fiscal year
+
+[ ] Aggregate Reports tab
+    VERIFY: Reports tab
+    PASS: Aggregate stats across all member orgs shown
+    PASS: "Requires min. 10 orgs for benchmarking" note shown (anonymized benchmarking placeholder)
+
+[ ] Benchmark report placeholder
+    VERIFY: Click "View benchmarks"
+    PASS: "Benchmarking available when network reaches 10+ member organizations" message shown
+
+[ ] npx tsc --noEmit passes
+```
+
+---
+
+## ═══ PLATFORM-WIDE ADDITIONS — Phases 67–72 (build after M20 Phases 63–66, before M21) ═══
+
+> **Build sequence:** M20 (Phases 63–66) → Platform-Wide Additions (Phases 67–72) → M21 → M22 → M23 → M24 → M25 → M26 → M27 → Phase 55 (Multilingual, LAST)
+> These six phases apply to ALL GTM streams — B2C direct, employer benefits, agency white-label, village/community orgs, Medicare Advantage.
+
+### PHASE 67 — Member Self-Service Portal
+
+**What this builds:** Direct member login so seniors can use the platform themselves, not only through a family member's account. Adds a new `member` auth role and a member-facing portal at `/member-portal`.
+
+**Checklist:**
+```
+PHASE 67 CHECKLIST
+[ ] Add 'member' to user_role enum and migration
+    VERIFY: SELECT enum_range(NULL::user_role) shows 'member'
+    PASS: member role present
+
+[ ] Member login works
+    VERIFY: Create a test auth user, link to an existing members row, log in
+    PASS: Redirects to /member-portal (not /dashboard family view)
+
+[ ] /member-portal shows member's own profile, upcoming services, events, communities
+    VERIFY: Navigate to /member-portal as logged-in member
+    PASS: Profile section, upcoming services card, communities/circles visible
+
+[ ] Member can post a need to their community org
+    VERIFY: Click "Post a Need", fill form (need type, description, date)
+    PASS: Need appears in org admin's Needs Board
+
+[ ] Member can update their own preferences and language settings
+    VERIFY: Edit preferences, save
+    PASS: Changes persist on reload
+
+[ ] Member can access their life story archive and Memory Book
+    VERIFY: Click Life Story link
+    PASS: Life story entries visible, Memory Book download works
+
+[ ] Family dashboard still works for family members linked to the same member
+    VERIFY: Log in as family member linked to same senior
+    PASS: Family dashboard unchanged, no regression
+
+[ ] npx tsc --noEmit passes
+```
+
+---
+
+### PHASE 68 — Volunteer 24/7 Self-Service Claiming
+
+**What this builds:** Volunteers can browse ALL open service requests and member_needs and claim them directly without navigator or org admin intervention.
+
+**Checklist:**
+```
+PHASE 68 CHECKLIST
+[ ] Volunteer dashboard shows "Open Requests" tab with all unclaimed service requests
+    VERIFY: Log in as volunteer, click Open Requests tab
+    PASS: List of open, unassigned service requests visible sorted by urgency then date
+
+[ ] Volunteer can claim a request directly
+    VERIFY: Click "Claim this request" on any open service request
+    PASS: Request assigned to volunteer, status changes to 'assigned', navigator notified
+
+[ ] Volunteer can browse member_needs from community orgs they are linked to
+    VERIFY: Community org member_needs visible in volunteer's Open Requests tab
+    PASS: Needs from linked orgs appear, volunteer can claim them
+
+[ ] Claimed requests appear in volunteer's "My Upcoming" section
+    VERIFY: After claiming, check My Upcoming
+    PASS: Claimed request appears with date, member name, service type
+
+[ ] Navigator sees which requests were self-claimed vs dispatcher-assigned
+    VERIFY: Open service request detail in navigator console
+    PASS: "Claimed by volunteer" label vs "Assigned by navigator" label visible
+
+[ ] Urgent requests still require navigator dispatch (not self-claimable)
+    VERIFY: Attempt to claim an urgent/emergency service request
+    PASS: Urgent requests show "Contact navigator" instead of "Claim" button
+
+[ ] npx tsc --noEmit passes
+```
+
+---
+
+### PHASE 69 — Donations Management
+
+**What this builds:** Donations tracking for any org type, plus a member/family "Support ThriveAtHome" donation option.
+
+**Migration (`046_donations.sql`):**
+```sql
+CREATE TABLE donations (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at timestamptz DEFAULT now() NOT NULL,
+  org_id uuid REFERENCES community_orgs(id) ON DELETE SET NULL,
+  employer_account_id uuid REFERENCES employer_accounts(id) ON DELETE SET NULL,
+  agency_id uuid REFERENCES care_agencies(id) ON DELETE SET NULL,
+  donor_name text NOT NULL,
+  donor_email text,
+  amount_cents int NOT NULL,
+  payment_method text NOT NULL DEFAULT 'check',
+  donation_date date NOT NULL,
+  is_recurring boolean NOT NULL DEFAULT false,
+  campaign text,
+  notes text,
+  receipt_sent boolean NOT NULL DEFAULT false
+);
+ALTER TABLE donations ENABLE ROW LEVEL SECURITY;
+```
+
+**Checklist:**
+```
+PHASE 69 CHECKLIST
+[ ] Migration 046_donations.sql runs without errors
+    VERIFY: donations table visible in Supabase Table Editor
+    PASS: Table present
+
+[ ] Org admin can record a donation
+    VERIFY: Log in as org_admin → find Donations section → "+ Record Donation"
+    PASS: Form accepts donor name, amount, date, payment method, notes — saves to donations table
+
+[ ] Donations total visible on org admin dashboard
+    VERIFY: Check org admin overview after recording donation
+    PASS: Total donations YTD shown alongside dues revenue
+
+[ ] Export donor list as CSV
+    VERIFY: Click "Export donor list"
+    PASS: CSV downloads with donor name, email, amount, date, receipt status
+
+[ ] Family/member "Support ThriveAtHome" donation option visible
+    VERIFY: Navigate to /dashboard or /member-portal
+    PASS: "Support ThriveAtHome" or "Donate" link visible, opens donation form
+
+[ ] npx tsc --noEmit passes
+```
+
+---
+
+### PHASE 70 — Email/Newsletter Broadcast
+
+**What this builds:** Any admin can compose and send an email to their members, employees, or clients. Uses existing SendGrid stub — activates with real credentials.
+
+**Checklist:**
+```
+PHASE 70 CHECKLIST
+[ ] Org admin can compose and send email to all org members
+    VERIFY: Log in as org_admin → Email tab → Compose → send to "All members"
+    PASS: [STUB][Email] log shows recipient count and subject line
+
+[ ] Employer admin can send email to enrolled employees
+    VERIFY: Log in as employer_admin → Email section → Compose → send to "All enrolled employees"
+    PASS: [STUB][Email] log shows correct recipients
+
+[ ] Agency admin can send email to care clients
+    VERIFY: Log in as agency_admin → Email section → Compose → send
+    PASS: [STUB][Email] log shows correct recipients
+
+[ ] Navigator can send email to their member caseload
+    VERIFY: Log in as navigator → Email section → Compose → send to "My members"
+    PASS: [STUB][Email] log shows correct recipients
+
+[ ] Filtered subgroup sending works
+    VERIFY: Compose email, filter to "Only members in [specific circle]"
+    PASS: Only members in that circle receive the email
+
+[ ] Email history/sent log visible to admin
+    VERIFY: Check sent emails list after sending
+    PASS: Sent email appears in history with recipient count, subject, date
+
+[ ] npx tsc --noEmit passes
+```
+
+---
+
+### PHASE 71 — Public Landing Pages
+
+**What this builds:** Full SEO-optimised public marketing pages for each chapter, org, employer, and agency.
+
+**Checklist:**
+```
+PHASE 71 CHECKLIST
+[ ] /chapter/[slug] shows full public marketing page
+    VERIFY: Navigate to /chapter/bay-area (not logged in)
+    PASS: Page shows: hero, about section, programs/services, upcoming public events,
+          volunteer opportunities, "Join us" CTA with contact form
+
+[ ] /org/[slug] public page works for community orgs
+    VERIFY: Navigate to /org/bay-area-village-network
+    PASS: Village public page loads with org description, programs, how to join, dues info
+
+[ ] /employer/[slug] public page works for employer partners
+    VERIFY: Navigate to /employer/acme-corp
+    PASS: Employer benefits page loads describing ThriveAtHome benefit for Acme Corp employees
+
+[ ] Pages are SEO-friendly
+    VERIFY: View page source
+    PASS: <title>, <meta description>, Open Graph tags present and populated with org-specific content
+
+[ ] Contact/join form on each public page works
+    VERIFY: Fill and submit the contact form on /chapter/bay-area
+    PASS: [STUB][Email] log shows inquiry received, navigator notified
+
+[ ] Pages are accessible without login
+    VERIFY: Open in incognito window
+    PASS: All public pages load without requiring authentication
+
+[ ] npx tsc --noEmit passes
+```
+
+---
+
+### PHASE 72 — Document Library
+
+**What this builds:** Upload, organise, and share documents with role-based visibility for all admin types.
+
+**Checklist:**
+```
+PHASE 72 CHECKLIST
+[ ] Create Supabase Storage bucket "platform-documents" (private)
+    VERIFY: Supabase → Storage → platform-documents bucket visible
+    PASS: Bucket present, private
+
+[ ] Org admin can upload a document
+    VERIFY: Log in as org_admin → Documents tab → Upload file (PDF or Word)
+    PASS: File uploads to platform-documents bucket, document record created in documents table
+
+[ ] Document visibility settings work
+    VERIFY: Upload a document, set visibility to "Members only"
+    PASS: Document visible to org members but not to the public
+
+[ ] Members can view documents shared with them
+    VERIFY: Log in as member → Documents section
+    PASS: Documents shared with members are visible and downloadable
+
+[ ] Agency admin can upload clinical policy documents
+    VERIFY: Log in as agency_admin → Documents tab → upload policy PDF
+    PASS: Document visible to care workers and navigators, not to families
+
+[ ] Navigator can upload care-related documents for a specific member
+    VERIFY: Open member detail in navigator console → Documents → Upload
+    PASS: Document visible to that member's family and navigators, not others
+
+[ ] npx tsc --noEmit passes
+```
+
+---
+
+## ═══ M21–M27 — FUTURE ROADMAP (build after Platform-Wide Additions Phases 67–72) ═══
+
+> **Full build sequence:** M20 (63–66) → Phases 67–72 (Platform-Wide) → M21 → M22 → M23 → M24 → M25 → M26 → M27 → Phase 55 (Multilingual, LAST)
 
 **M21 — Expanded Volunteer Ecosystem:** Retired Professionals Network, Faith Community Chaplaincy, Neighbor Volunteers, Family Volunteer Reciprocity, Member Ambassador programme, Youth K-12 curriculum (pen-pals, Life Stories project, mentorship reversal), Annual Intergenerational Showcase. (Note: Corporate Volunteer Program with Benevity/YourCause hour-matching export was moved up and built early as Phase 50l within M17 — not part of M21.)
 

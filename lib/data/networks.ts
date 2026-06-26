@@ -179,6 +179,41 @@ export async function recordDuesPayment(
   }
 }
 
+export async function generateInvoicesForYear(
+  networkId: string,
+  orgIds: string[],
+  fiscalYear: number,
+  amountCents: number
+): Promise<{ created: number; skipped: number; error: string | null }> {
+  try {
+    const admin = createAdminClient()
+    let created = 0
+    let skipped = 0
+    for (const orgId of orgIds) {
+      // Check if a dues record already exists for this org + year
+      const { data: existing } = await (admin.from as any)('network_dues')
+        .select('id')
+        .eq('network_id', networkId)
+        .eq('org_id', orgId)
+        .eq('fiscal_year', fiscalYear)
+        .maybeSingle()
+      if (existing) { skipped++; continue }
+      const { error } = await (admin.from as any)('network_dues').insert({
+        network_id: networkId,
+        org_id: orgId,
+        fiscal_year: fiscalYear,
+        amount_cents: amountCents,
+        due_date: `${fiscalYear}-01-31`,
+        status: 'unpaid',
+      })
+      if (!error) created++
+    }
+    return { created, skipped, error: null }
+  } catch (e) {
+    return { created: 0, skipped: 0, error: e instanceof Error ? e.message : String(e) }
+  }
+}
+
 export async function linkOrgToNetwork(
   orgId: string,
   networkId: string

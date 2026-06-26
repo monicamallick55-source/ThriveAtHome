@@ -65,7 +65,7 @@ interface Props {
 }
 
 export default function SeniorCenterPortal({ center, initialDropins, initialActivities, initialRooms, initialMeals, stats }: Props) {
-  const [activeTab, setActiveTab] = useState<'attendance' | 'activities' | 'rooms' | 'meals'>('attendance')
+  const [activeTab, setActiveTab] = useState<'attendance' | 'activities' | 'rooms' | 'meals' | 'reports'>('attendance')
 
   // Attendance state
   const [dropins, setDropins] = useState<CenterDropinRow[]>(initialDropins)
@@ -254,6 +254,7 @@ export default function SeniorCenterPortal({ center, initialDropins, initialActi
     { id: 'activities', label: '📅 Activity Calendar', count: activities.length },
     { id: 'rooms', label: '🏢 Room Bookings', count: rooms.filter(r => r.status !== 'cancelled').length },
     { id: 'meals', label: '🍽️ Congregate Meals', count: null },
+    { id: 'reports', label: '📊 Reports', count: null },
   ] as const
 
   const inputStyle: React.CSSProperties = { width: '100%', height: '44px', padding: '0 12px', border: '1.5px solid var(--color-warm-grey)', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '16px', color: 'var(--color-text-primary)', backgroundColor: 'var(--color-warm-white)', boxSizing: 'border-box' }
@@ -638,6 +639,94 @@ export default function SeniorCenterPortal({ center, initialDropins, initialActi
                 </table>
               </div>
             )}
+          </div>
+        )}
+
+        {/* ── REPORTS TAB ── */}
+        {activeTab === 'reports' && (
+          <div>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '8px' }}>Reports</h2>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)', marginBottom: '28px' }}>
+              Download attendance and activity data for reporting and grant documentation.
+            </p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
+              {/* Attendance CSV */}
+              <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '24px', border: '1px solid #E8E4DC' }}>
+                <div style={{ fontSize: '32px', marginBottom: '12px' }}>👥</div>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '8px' }}>Attendance Log</h3>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', marginBottom: '16px', lineHeight: 1.5 }}>
+                  All drop-in visits — date, visitor name, type, check-in/out times.
+                </p>
+                <button
+                  onClick={() => {
+                    const headers = ['Date', 'Visitor Name', 'Visitor Type', 'Check-in Time', 'Check-out Time']
+                    const rows = dropins.map(d => [
+                      d.check_in_at ? d.check_in_at.split('T')[0] : '',
+                      d.visitor_name,
+                      d.visitor_type,
+                      d.check_in_at ? new Date(d.check_in_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '',
+                      d.check_out_at ? new Date(d.check_out_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '',
+                    ])
+                    const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n')
+                    const blob = new Blob([csv], { type: 'text/csv' })
+                    const a = document.createElement('a'); a.href = URL.createObjectURL(blob)
+                    a.download = `attendance_${center.center_name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`; a.click()
+                  }}
+                  style={{ padding: '10px 20px', backgroundColor: 'var(--color-navy)', color: 'white', border: 'none', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}
+                >
+                  ↓ Download Attendance CSV
+                </button>
+              </div>
+
+              {/* Activities CSV */}
+              <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '24px', border: '1px solid #E8E4DC' }}>
+                <div style={{ fontSize: '32px', marginBottom: '12px' }}>📅</div>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '8px' }}>Activity Report</h3>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', marginBottom: '16px', lineHeight: 1.5 }}>
+                  All scheduled activities with registration counts and status.
+                </p>
+                <button
+                  onClick={() => {
+                    const headers = ['Title', 'Activity Type', 'Room', 'Date/Time', 'Capacity', 'Registered', 'Status']
+                    const rows = activities.map(a => [
+                      a.title, a.activity_type ?? '', a.room ?? '',
+                      a.scheduled_at ? new Date(a.scheduled_at).toLocaleString('en-US') : '',
+                      a.max_capacity ?? '', a.registration_count, a.status,
+                    ])
+                    const csv = [headers, ...rows].map(r => r.map(c => `"${String(c ?? '').replace(/"/g, '""')}"`).join(',')).join('\n')
+                    const blob = new Blob([csv], { type: 'text/csv' })
+                    const a = document.createElement('a'); a.href = URL.createObjectURL(blob)
+                    a.download = `activities_${center.center_name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`; a.click()
+                  }}
+                  style={{ padding: '10px 20px', backgroundColor: 'var(--color-navy)', color: 'white', border: 'none', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}
+                >
+                  ↓ Download Activities CSV
+                </button>
+              </div>
+
+              {/* Meals CSV */}
+              <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '24px', border: '1px solid #E8E4DC' }}>
+                <div style={{ fontSize: '32px', marginBottom: '12px' }}>🍽️</div>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '8px' }}>Meals Report (OAA III-C1)</h3>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', marginBottom: '16px', lineHeight: 1.5 }}>
+                  Congregate meal service log for OAA Title III-C1 reporting.
+                </p>
+                <button
+                  onClick={() => {
+                    const headers = ['Date', 'Meal Type', 'Attendees', 'Menu', 'Notes']
+                    const rows = meals.map(m => [m.meal_date, m.meal_type, m.attendee_count, m.menu_description ?? '', m.notes ?? ''])
+                    const csv = [headers, ...rows].map(r => r.map(c => `"${String(c ?? '').replace(/"/g, '""')}"`).join(',')).join('\n')
+                    const blob = new Blob([csv], { type: 'text/csv' })
+                    const a = document.createElement('a'); a.href = URL.createObjectURL(blob)
+                    a.download = `meals_${center.center_name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`; a.click()
+                  }}
+                  style={{ padding: '10px 20px', backgroundColor: 'var(--color-navy)', color: 'white', border: 'none', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}
+                >
+                  ↓ Download Meals CSV
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </main>
