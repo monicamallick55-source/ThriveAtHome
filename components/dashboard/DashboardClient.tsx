@@ -205,6 +205,7 @@ export interface DashboardClientProps {
   upcomingServices?: ServiceBooking[]
   upcomingTrackedItems?: TrackedItem[]
   serviceHistory?: ServiceBooking[]
+  brandConfig?: { agency_display_name: string | null; primary_color: string; secondary_color: string; logo_url: string | null; tagline: string | null; powered_by_label: string } | null
 }
 
 function QuickActions() {
@@ -439,6 +440,7 @@ function DashboardInner(props: DashboardClientProps) {
     upcomingServices = [],
     upcomingTrackedItems = [],
     serviceHistory = [],
+    brandConfig = null,
   } = props
 
   const [bannerVisible, setBannerVisible] = useState(showSubscribedBanner)
@@ -458,6 +460,43 @@ function DashboardInner(props: DashboardClientProps) {
         unreadCount={unreadCount}
         onMarkAllRead={markAllRead}
       />
+
+      {/* Co-branded agency strip — shows "Agency Name, Powered by ThriveAtHome" for agency-referred members */}
+      {brandConfig && (brandConfig.agency_display_name || brandConfig.tagline) && (
+        <div
+          role="banner"
+          aria-label="Agency co-branding"
+          style={{
+            backgroundColor: brandConfig.primary_color,
+            borderBottom: `2px solid ${brandConfig.secondary_color}`,
+            padding: '8px 24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '8px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {brandConfig.logo_url && (
+              <img
+                src={brandConfig.logo_url}
+                alt={brandConfig.agency_display_name ?? 'Agency logo'}
+                style={{ height: '28px', width: 'auto', objectFit: 'contain' }}
+              />
+            )}
+            <span style={{ fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 600, color: '#FAFAF5' }}>
+              {brandConfig.agency_display_name}
+              {brandConfig.tagline && (
+                <span style={{ fontWeight: 400, marginLeft: '8px', opacity: 0.8 }}>— {brandConfig.tagline}</span>
+              )}
+            </span>
+          </div>
+          <span style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'rgba(255,255,255,0.7)', fontStyle: 'italic' }}>
+            {brandConfig.powered_by_label}
+          </span>
+        </div>
+      )}
 
       {/* Birthday banner */}
       {isBirthday && (

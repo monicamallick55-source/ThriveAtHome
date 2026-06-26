@@ -35,6 +35,28 @@ export async function getMemberById(
   }
 }
 
+/** Fetch a member who has logged in directly (members.supabase_auth_id = authUserId). */
+export async function getMemberByDirectAuth(
+  authUserId: string
+): Promise<{ data: Member | null; error: string | null }> {
+  try {
+    const admin = createAdminClient()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (admin.from as any)('members')
+      .select('*')
+      .eq('supabase_auth_id', authUserId)
+      .maybeSingle()
+    if (error) {
+      console.error('[data/members/getMemberByDirectAuth]', error)
+      return { data: null, error: error.message }
+    }
+    return { data: data as Member | null, error: null }
+  } catch (e) {
+    console.error('[data/members/getMemberByDirectAuth] Unexpected error:', e)
+    return { data: null, error: e instanceof Error ? e.message : String(e) }
+  }
+}
+
 /** Fetch the member linked to a given Supabase auth user UUID (via family_members.member_id). */
 export async function getMemberForAuthUser(
   authUserId: string

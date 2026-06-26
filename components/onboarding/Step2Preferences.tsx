@@ -1,4 +1,5 @@
 'use client'
+import { useState } from 'react'
 import type { OnboardingFormData } from './types'
 
 interface Props {
@@ -26,6 +27,25 @@ const TOPICS = [
   'Books', 'Movies & TV', 'Faith & spirituality', 'History', 'Nature', 'Current events',
 ]
 
+const BUDDY_MATCH_TOPICS = [
+  'Family', 'Gardening', 'Cooking', 'Music', 'Travel memories', 'Sports',
+  'Books', 'Movies & TV', 'Faith & spirituality', 'History', 'Nature', 'Current events',
+]
+
+const ERAS = [
+  { value: 'childhood', label: 'Childhood' },
+  { value: 'young_adult', label: 'Young adult years' },
+  { value: 'career', label: 'Career days' },
+  { value: 'family', label: 'Raising a family' },
+  { value: 'retirement', label: 'Retirement & now' },
+]
+
+const CALL_LENGTHS = [
+  { value: 'short', label: 'Short', desc: '15–20 minutes' },
+  { value: 'medium', label: 'Medium', desc: 'Around 30 minutes' },
+  { value: 'flexible', label: 'Flexible', desc: 'Whatever feels right' },
+]
+
 const labelStyle: React.CSSProperties = {
   fontSize: '18px',
   fontWeight: 500,
@@ -42,6 +62,22 @@ const hintStyle: React.CSSProperties = {
 }
 
 export function Step2Preferences({ data, onChange }: Props) {
+  const [showBuddyQuestions, setShowBuddyQuestions] = useState(false)
+
+  const selectedBuddyTopics = data.buddy_match_topics
+    ? data.buddy_match_topics.split(',').map((t) => t.trim()).filter(Boolean)
+    : []
+
+  function toggleBuddyTopic(topic: string) {
+    const current = new Set(selectedBuddyTopics)
+    if (current.has(topic)) {
+      current.delete(topic)
+    } else if (current.size < 3) {
+      current.add(topic)
+    }
+    onChange('buddy_match_topics', Array.from(current).join(', '))
+  }
+
   const selectedTopics = data.topics_enjoy
     ? data.topics_enjoy.split(',').map((t) => t.trim()).filter(Boolean)
     : []
@@ -252,6 +288,188 @@ export function Step2Preferences({ data, onChange }: Props) {
           }}
           placeholder="e.g. politics, health worries, recent news"
         />
+      </div>
+
+      {/* Human Buddy matching questions */}
+      <div style={{ borderRadius: 'var(--radius-lg)', border: '1.5px solid #99d8d8', backgroundColor: '#f0fafa', padding: '24px' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', marginBottom: '16px' }}>
+          <span style={{ fontSize: '28px', flexShrink: 0 }}>🤝</span>
+          <div>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '18px', fontWeight: 600, color: '#005f5f', margin: '0 0 4px' }}>
+              Human Buddy Programme (optional)
+            </p>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: '#2d7a7a', margin: 0 }}>
+              On Connect, Complete, and Premier plans, we match seniors with a real volunteer who calls regularly — a friendly face beyond Aria. Answer these questions to help us find the best match.
+            </p>
+          </div>
+        </div>
+
+        {!showBuddyQuestions ? (
+          <button
+            type="button"
+            onClick={() => setShowBuddyQuestions(true)}
+            style={{
+              padding: '12px 24px',
+              borderRadius: 'var(--radius-md)',
+              border: '1.5px solid #2d7a7a',
+              backgroundColor: 'white',
+              color: '#005f5f',
+              fontSize: '16px',
+              fontFamily: 'var(--font-body)',
+              fontWeight: 500,
+              cursor: 'pointer',
+            }}
+          >
+            Answer buddy matching questions
+          </button>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+            {/* Buddy topic interests */}
+            <div>
+              <p style={{ ...labelStyle, color: '#005f5f', marginBottom: '4px' }}>Topics to connect over (pick up to 3)</p>
+              <p style={{ ...hintStyle, color: '#2d7a7a' }}>Used to match with a buddy who shares the same interests.</p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                {BUDDY_MATCH_TOPICS.map((topic) => {
+                  const isSel = selectedBuddyTopics.includes(topic)
+                  const isDisabled = !isSel && selectedBuddyTopics.length >= 3
+                  return (
+                    <button
+                      key={topic}
+                      type="button"
+                      onClick={() => toggleBuddyTopic(topic)}
+                      disabled={isDisabled}
+                      aria-pressed={isSel}
+                      style={{
+                        padding: '10px 18px',
+                        borderRadius: 'var(--radius-full)',
+                        border: `1.5px solid ${isSel ? '#005f5f' : isDisabled ? '#c8e6e6' : '#99d8d8'}`,
+                        backgroundColor: isSel ? '#005f5f' : 'white',
+                        color: isSel ? 'white' : isDisabled ? '#a0c8c8' : '#2d7a7a',
+                        fontSize: '16px',
+                        fontFamily: 'var(--font-body)',
+                        fontWeight: isSel ? 500 : 400,
+                        cursor: isDisabled ? 'not-allowed' : 'pointer',
+                        transition: 'all 0.2s',
+                        minHeight: '44px',
+                        opacity: isDisabled ? 0.6 : 1,
+                      }}
+                    >
+                      {topic}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Era for reminiscing */}
+            <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
+              <legend style={{ ...labelStyle, color: '#005f5f' }}>Era they most enjoy reminiscing about</legend>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
+                {ERAS.map((era) => {
+                  const isSel = data.buddy_match_era === era.value
+                  return (
+                    <label
+                      key={era.value}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        padding: '14px 18px',
+                        borderRadius: 'var(--radius-md)',
+                        border: `1.5px solid ${isSel ? '#005f5f' : '#99d8d8'}`,
+                        backgroundColor: isSel ? '#e0f5f5' : 'white',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <input
+                        type="radio"
+                        name="buddy_match_era"
+                        value={era.value}
+                        checked={isSel}
+                        onChange={() => onChange('buddy_match_era', era.value)}
+                        style={{ accentColor: '#005f5f', width: '18px', height: '18px', flexShrink: 0 }}
+                      />
+                      <span style={{ fontFamily: 'var(--font-body)', fontSize: '17px', color: isSel ? '#005f5f' : '#2d7a7a', fontWeight: isSel ? 600 : 400 }}>
+                        {era.label}
+                      </span>
+                    </label>
+                  )
+                })}
+              </div>
+            </fieldset>
+
+            {/* Preferred call length */}
+            <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
+              <legend style={{ ...labelStyle, color: '#005f5f' }}>Preferred call length with buddy</legend>
+              <div style={{ display: 'flex', gap: '10px', marginTop: '8px', flexWrap: 'wrap' }}>
+                {CALL_LENGTHS.map((opt) => {
+                  const isSel = data.buddy_call_length_preference === opt.value
+                  return (
+                    <label
+                      key={opt.value}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        padding: '16px 24px',
+                        borderRadius: 'var(--radius-md)',
+                        border: `1.5px solid ${isSel ? '#005f5f' : '#99d8d8'}`,
+                        backgroundColor: isSel ? '#e0f5f5' : 'white',
+                        cursor: 'pointer',
+                        minWidth: '120px',
+                        flex: '1',
+                      }}
+                    >
+                      <input
+                        type="radio"
+                        name="buddy_call_length_preference"
+                        value={opt.value}
+                        checked={isSel}
+                        onChange={() => onChange('buddy_call_length_preference', opt.value)}
+                        style={{ display: 'none' }}
+                      />
+                      <span style={{ fontFamily: 'var(--font-body)', fontSize: '17px', fontWeight: isSel ? 600 : 400, color: isSel ? '#005f5f' : '#2d7a7a' }}>
+                        {opt.label}
+                      </span>
+                      <span style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: '#5a9a9a', marginTop: '4px' }}>
+                        {opt.desc}
+                      </span>
+                    </label>
+                  )
+                })}
+              </div>
+            </fieldset>
+
+            {/* Intro note */}
+            <div>
+              <label htmlFor="buddy_intro_note" style={{ ...labelStyle, color: '#005f5f' }}>
+                Anything their buddy should know? <span style={{ fontWeight: 400, fontSize: '15px', color: '#5a9a9a' }}>(optional)</span>
+              </label>
+              <textarea
+                id="buddy_intro_note"
+                value={data.buddy_intro_note}
+                onChange={(e) => onChange('buddy_intro_note', e.target.value)}
+                rows={3}
+                style={{
+                  width: '100%',
+                  backgroundColor: 'white',
+                  border: '1.5px solid #99d8d8',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '14px 16px',
+                  fontSize: '17px',
+                  fontFamily: 'var(--font-body)',
+                  color: '#2d7a7a',
+                  outline: 'none',
+                  resize: 'vertical',
+                  minHeight: '100px',
+                  boxSizing: 'border-box',
+                  marginTop: '8px',
+                }}
+                placeholder="e.g. She loves hearing about grandkids. He served in the Navy and loves sea stories."
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

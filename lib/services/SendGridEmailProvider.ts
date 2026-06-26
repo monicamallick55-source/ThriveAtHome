@@ -257,4 +257,18 @@ ${ctaButton('Accept invitation & create account', acceptUrl)}`
     })
     console.log(`[SendGrid] Employee invitation sent to ${to.substring(0, 6)}xxx`)
   }
+
+  async sendOrgNewsletter(to: string, recipientName: string, orgName: string, subject: string, body: string): Promise<void> {
+    this.init()
+    const htmlBody = `<p style="margin:0 0 16px;font-size:18px;line-height:1.6;">Dear ${recipientName},</p>
+<div style="margin:0 0 24px;font-size:18px;line-height:1.6;">${body.replace(/\n/g, '<br>')}</div>
+<p style="margin:24px 0 0;font-size:16px;color:#6B7280;">— ${orgName}, via ThriveAtHome</p>`
+    await sgMail.send({
+      to,
+      from: getFrom(),
+      subject: `[${orgName}] ${subject}`,
+      html: baseTemplate(subject, htmlBody),
+    })
+    console.log(`[SendGrid] Org newsletter "${subject}" sent to ${to.substring(0, 6)}xxx`)
+  }
 }

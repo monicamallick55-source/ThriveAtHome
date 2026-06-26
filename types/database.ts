@@ -3,7 +3,7 @@
 
 export type PlanTier = 'basics' | 'connect' | 'complete' | 'premier'
 export type MemberStatus = 'active' | 'inactive' | 'paused'
-export type UserRole = 'family' | 'navigator' | 'admin' | 'volunteer' | 'student' | 'university_admin' | 'employer_admin'
+export type UserRole = 'family' | 'navigator' | 'admin' | 'volunteer' | 'student' | 'university_admin' | 'employer_admin' | 'agency_admin' | 'aaa_admin' | 'org_admin' | 'senior_center_admin' | 'network_admin'
 export type CallStatus = 'scheduled' | 'in_progress' | 'completed' | 'missed' | 'failed'
 export type CallType = 'check_in' | 'concierge' | 'navigator'
 export type AlertType = 'missed_call' | 'mood_drop' | 'medication_miss' | 'wellness_drift' | 'fall' | 'crisis' | 'emergency'
@@ -108,6 +108,11 @@ export interface Database {
           last_login_at: string | null
           university_name: string | null
           employer_account_id: string | null
+          agency_id: string | null
+          org_id: string | null
+          network_id: string | null
+          senior_center_id: string | null
+          aaa_id: string | null
         }
         Insert: {
           id?: string
@@ -124,6 +129,11 @@ export interface Database {
           last_login_at?: string | null
           university_name?: string | null
           employer_account_id?: string | null
+          agency_id?: string | null
+          org_id?: string | null
+          network_id?: string | null
+          senior_center_id?: string | null
+          aaa_id?: string | null
         }
         Update: Partial<Database['public']['Tables']['family_members']['Insert']>
         Relationships: [
@@ -1066,6 +1076,32 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['employer_leads']['Insert']>
         Relationships: []
       }
+      partner_api_keys: {
+        Row: {
+          id: string
+          created_at: string
+          employer_account_id: string
+          key_name: string
+          api_key: string
+          is_active: boolean
+          requests_today: number
+          requests_date: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          employer_account_id: string
+          key_name?: string
+          api_key: string
+          is_active?: boolean
+          requests_today?: number
+          requests_date?: string | null
+        }
+        Update: Partial<Database['public']['Tables']['partner_api_keys']['Insert']>
+        Relationships: [
+          { foreignKeyName: 'partner_api_keys_employer_account_id_fkey'; columns: ['employer_account_id']; referencedRelation: 'employer_accounts'; referencedColumns: ['id'] }
+        ]
+      }
       celebration_events: {
         Row: {
           id: string
@@ -1398,6 +1434,71 @@ export interface Database {
   }
 }
 
+// Buddy Programme types (migration 054)
+export interface BuddyAssignmentRow {
+  id: string
+  created_at: string
+  member_id: string
+  volunteer_id: string
+  assigned_by: string
+  call_frequency: string
+  status: string
+  ended_at: string | null
+  end_reason: string | null
+  notes: string | null
+}
+
+export interface BuddyAssignmentInsert {
+  id?: string
+  created_at?: string
+  member_id: string
+  volunteer_id: string
+  assigned_by: string
+  call_frequency?: string
+  status?: string
+  ended_at?: string | null
+  end_reason?: string | null
+  notes?: string | null
+}
+
+export interface BuddyCallRow {
+  id: string
+  created_at: string
+  assignment_id: string
+  volunteer_id: string
+  member_id: string
+  call_date: string
+  duration_minutes: number | null
+  call_quality: string | null
+  buddy_notes: string | null
+  family_note: string | null
+  concern_flag: boolean
+  concern_description: string | null
+  milestone_flag: boolean
+  milestone_description: string | null
+  acknowledged_by: string | null
+  acknowledged_at: string | null
+}
+
+export interface BuddyCallInsert {
+  id?: string
+  created_at?: string
+  assignment_id: string
+  volunteer_id: string
+  member_id: string
+  call_date?: string
+  duration_minutes?: number | null
+  call_quality?: string | null
+  buddy_notes?: string | null
+  family_note?: string | null
+  concern_flag?: boolean
+  concern_description?: string | null
+  milestone_flag?: boolean
+  milestone_description?: string | null
+  acknowledged_by?: string | null
+  acknowledged_at?: string | null
+}
+
 // Manually maintained until migration 031 has run in Supabase
 export interface TrackedItemRow {
   id: string
@@ -1417,4 +1518,392 @@ export interface TrackedItemRow {
   snoozed_until: string | null
   notes: string | null
   created_by: string | null
+}
+
+// M19 Home Care Agency Portal types (migration 039)
+export interface CareAgencyRow {
+  id: string
+  created_at: string
+  name: string
+  agency_type: string
+  contact_name: string
+  contact_email: string
+  contact_phone: string | null
+  address: string | null
+  city: string | null
+  state: string | null
+  zip: string | null
+  license_number: string | null
+  clearcare_id: string | null
+  alayacare_id: string | null
+  wellsky_id: string | null
+  status: string
+  notes: string | null
+}
+
+export interface CareWorkerRow {
+  id: string
+  created_at: string
+  supabase_auth_id: string | null
+  agency_id: string
+  full_name: string
+  email: string
+  phone: string | null
+  worker_role: string
+  certifications: string[]
+  is_active: boolean
+  notes: string | null
+  location_id?: string | null
+}
+
+export interface CareVisitRow {
+  id: string
+  created_at: string
+  agency_id: string
+  care_worker_id: string
+  member_id: string
+  scheduled_date: string
+  scheduled_start_time: string
+  scheduled_end_time: string
+  actual_check_in_at: string | null
+  actual_check_out_at: string | null
+  duration_minutes: number | null
+  visit_type: string
+  status: string
+  care_worker_notes: string | null
+  supervisor_notes: string | null
+  billing_code: string | null
+  billable_hours: number | null
+  invoiced: boolean
+  location_id?: string | null
+}
+
+export interface AgencyReferralRow {
+  id: string
+  created_at: string
+  member_id: string
+  referring_navigator_id: string | null
+  agency_id: string | null
+  status: string
+  referral_reason: string | null
+  services_requested: string[]
+  notes: string | null
+  responded_at: string | null
+}
+
+// M19 Phase 62 Multi-location Management types (migration 042)
+export interface AgencyLocationRow {
+  id: string
+  created_at: string
+  updated_at: string
+  agency_id: string
+  location_name: string
+  address: string | null
+  city: string | null
+  state: string | null
+  zip_code: string | null
+  phone: string | null
+  is_headquarters: boolean
+  is_active: boolean
+  manager_name: string | null
+  manager_email: string | null
+  notes: string | null
+}
+
+export interface AgencyLocationInsert {
+  id?: string
+  created_at?: string
+  updated_at?: string
+  agency_id: string
+  location_name: string
+  address?: string | null
+  city?: string | null
+  state?: string | null
+  zip_code?: string | null
+  phone?: string | null
+  is_headquarters?: boolean
+  is_active?: boolean
+  manager_name?: string | null
+  manager_email?: string | null
+  notes?: string | null
+}
+
+export interface AgencyLocationUpdate {
+  location_name?: string
+  address?: string | null
+  city?: string | null
+  state?: string | null
+  zip_code?: string | null
+  phone?: string | null
+  is_headquarters?: boolean
+  is_active?: boolean
+  manager_name?: string | null
+  manager_email?: string | null
+  notes?: string | null
+}
+
+// M19 Phase 60 White Label / Co-branding types (migration 040)
+export interface BrandConfigRow {
+  id: string
+  created_at: string
+  updated_at: string
+  agency_id: string
+  agency_display_name: string | null
+  primary_color: string
+  secondary_color: string
+  logo_storage_path: string | null
+  logo_url: string | null
+  tagline: string | null
+  powered_by_label: string
+  is_active: boolean
+}
+
+export interface BrandConfigInsert {
+  id?: string
+  created_at?: string
+  updated_at?: string
+  agency_id: string
+  agency_display_name?: string | null
+  primary_color?: string
+  secondary_color?: string
+  logo_storage_path?: string | null
+  logo_url?: string | null
+  tagline?: string | null
+  powered_by_label?: string
+  is_active?: boolean
+}
+
+export type BrandConfigUpdate = Partial<BrandConfigInsert>
+
+// M19 Phase 61 Clinical Documentation types (migration 041)
+export interface SoapNoteRow {
+  id: string
+  created_at: string
+  updated_at: string
+  member_id: string
+  agency_id: string
+  care_worker_id: string | null
+  visit_id: string | null
+  subjective: string
+  objective: string
+  assessment: string
+  plan: string
+  billing_codes: string[]
+  status: 'draft' | 'signed' | 'locked'
+  signed_by_name: string | null
+  signed_at: string | null
+  locked_at: string | null
+  note_date: string
+  visit_type: string | null
+  duration_minutes: number | null
+}
+
+export interface SoapNoteInsert {
+  id?: string
+  created_at?: string
+  updated_at?: string
+  member_id: string
+  agency_id: string
+  care_worker_id?: string | null
+  visit_id?: string | null
+  subjective?: string
+  objective?: string
+  assessment?: string
+  plan?: string
+  billing_codes?: string[]
+  status?: 'draft' | 'signed' | 'locked'
+  signed_by_name?: string | null
+  signed_at?: string | null
+  locked_at?: string | null
+  note_date?: string
+  visit_type?: string | null
+  duration_minutes?: number | null
+}
+
+export type SoapNoteUpdate = Partial<SoapNoteInsert>
+
+export interface CarePlanVersionRow {
+  id: string
+  created_at: string
+  updated_at: string
+  member_id: string
+  agency_id: string
+  version_number: number
+  goals: string
+  interventions: string
+  visit_frequency: string
+  diagnoses: string[]
+  functional_status: string | null
+  safety_concerns: string | null
+  status: string
+  approved_by_name: string | null
+  approved_at: string | null
+  effective_date: string | null
+  review_date: string | null
+  notes: string | null
+}
+
+export interface CarePlanVersionInsert {
+  id?: string
+  created_at?: string
+  updated_at?: string
+  member_id: string
+  agency_id: string
+  version_number?: number
+  goals?: string
+  interventions?: string
+  visit_frequency?: string
+  diagnoses?: string[]
+  functional_status?: string | null
+  safety_concerns?: string | null
+  status?: string
+  approved_by_name?: string | null
+  approved_at?: string | null
+  effective_date?: string | null
+  review_date?: string | null
+  notes?: string | null
+}
+
+// M20 Senior Center Portal types (migration 046)
+export interface SeniorCenterRow {
+  id: string
+  created_at: string
+  center_name: string
+  address: string
+  city: string
+  state: string
+  zip: string | null
+  phone: string | null
+  email: string | null
+  operating_hours: string
+  capacity: number
+  is_active: boolean
+}
+
+export interface CenterDropinRow {
+  id: string
+  created_at: string
+  center_id: string
+  member_id: string | null
+  visitor_name: string
+  visitor_type: string
+  check_in_at: string
+  check_out_at: string | null
+  notes: string | null
+}
+
+export interface CenterDropinInsert {
+  id?: string
+  created_at?: string
+  center_id: string
+  member_id?: string | null
+  visitor_name: string
+  visitor_type?: string
+  check_in_at?: string
+  check_out_at?: string | null
+  notes?: string | null
+}
+
+export interface CenterActivityRow {
+  id: string
+  created_at: string
+  center_id: string
+  title: string
+  description: string | null
+  activity_type: string
+  room: string | null
+  instructor_name: string | null
+  scheduled_at: string
+  duration_minutes: number
+  max_capacity: number | null
+  registration_count: number
+  is_recurring: boolean
+  recurrence_rule: string | null
+  status: string
+}
+
+export interface CenterActivityInsert {
+  id?: string
+  created_at?: string
+  center_id: string
+  title: string
+  description?: string | null
+  activity_type?: string
+  room?: string | null
+  instructor_name?: string | null
+  scheduled_at: string
+  duration_minutes?: number
+  max_capacity?: number | null
+  registration_count?: number
+  is_recurring?: boolean
+  recurrence_rule?: string | null
+  status?: string
+}
+
+export interface ActivityRegistrationRow {
+  id: string
+  created_at: string
+  activity_id: string
+  center_id: string
+  member_id: string | null
+  visitor_name: string
+  registered_at: string
+  attended: boolean
+}
+
+export interface RoomBookingRow {
+  id: string
+  created_at: string
+  center_id: string
+  room: string
+  booking_title: string
+  booked_by: string | null
+  start_time: string
+  end_time: string
+  notes: string | null
+  status: string
+}
+
+export interface RoomBookingInsert {
+  id?: string
+  created_at?: string
+  center_id: string
+  room: string
+  booking_title: string
+  booked_by?: string | null
+  start_time: string
+  end_time: string
+  notes?: string | null
+  status?: string
+}
+
+export interface CongregrateMealRow {
+  id: string
+  created_at: string
+  center_id: string
+  meal_date: string
+  meal_type: string
+  attendee_count: number
+  menu_description: string | null
+  notes: string | null
+}
+
+export interface CongregrateMealInsert {
+  id?: string
+  created_at?: string
+  center_id: string
+  meal_date: string
+  meal_type?: string
+  attendee_count?: number
+  menu_description?: string | null
+  notes?: string | null
+}
+
+export interface SeniorCenterStats {
+  today_dropins: number
+  this_week_dropins: number
+  this_month_meals: number
+  total_meals_attendees_this_month: number
+  upcoming_activities: number
+  rooms_booked_today: number
 }

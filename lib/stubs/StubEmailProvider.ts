@@ -29,4 +29,7 @@ export class StubEmailProvider implements EmailProvider {
   async sendEmployeeInvitation(to: string, companyName: string, acceptUrl: string): Promise<void> {
     console.log(`[STUB][Email] Employee invitation → ${to} from ${companyName}: ${acceptUrl}`)
   }
+  async sendOrgNewsletter(to: string, recipientName: string, orgName: string, subject: string, body: string): Promise<void> {
+    console.log(`[STUB][Email] Org newsletter "${subject}" from ${orgName} → ${recipientName} <${to}>: ${body.substring(0, 80)}...`)
+  }
 }

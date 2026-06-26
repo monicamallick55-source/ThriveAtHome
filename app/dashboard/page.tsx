@@ -12,6 +12,7 @@ import { syncMemberSubscription } from '@/lib/stripe/sync'
 import { isTodayBirthday, getRecentCelebrationEvents } from '@/lib/data/celebrations'
 import { getUpcomingServiceBookings, getRecentCompletedServiceBookings } from '@/lib/data/services'
 import { getUpcomingTrackedItems } from '@/lib/data/tracked-items'
+import { getBrandConfigForMember } from '@/lib/data/brandConfigs'
 import DashboardClient from '@/components/dashboard/DashboardClient'
 import type { CheckInCall } from '@/lib/data/calls'
 import type { Alert } from '@/lib/data/alerts'
@@ -21,6 +22,7 @@ import type { FamilyMember } from '@/lib/data/family'
 import type { CelebrationEvent } from '@/lib/data/celebrations'
 import type { ServiceBooking } from '@/lib/data/services'
 import type { TrackedItem } from '@/lib/data/tracked-items-types'
+import type { BrandConfigRow } from '@/types/database'
 
 export const metadata: Metadata = { title: 'Dashboard — ThriveAtHome' }
 
@@ -82,6 +84,7 @@ export default async function DashboardPage({
     servicesResult,
     trackedItemsResult,
     serviceHistoryResult,
+    brandConfigResult,
   ] = await Promise.all([
     withTimeout<CheckInCall[]>(getCallsForMember(member.id, 90, 0, user.id)),
     withTimeout<Alert[]>(getAlertsForMember(member.id)),
@@ -92,6 +95,7 @@ export default async function DashboardPage({
     withTimeout<ServiceBooking[]>(getUpcomingServiceBookings(member.id)),
     withTimeout<TrackedItem[]>(getUpcomingTrackedItems(member.id)),
     withTimeout<ServiceBooking[]>(getRecentCompletedServiceBookings(member.id, 3)),
+    withTimeout<BrandConfigRow>(getBrandConfigForMember(member.id)),
   ])
 
   const memberIsBirthday = member.date_of_birth ? isTodayBirthday(member.date_of_birth) : false
@@ -114,6 +118,7 @@ export default async function DashboardPage({
       upcomingServices={servicesResult.data ?? []}
       upcomingTrackedItems={trackedItemsResult.data ?? []}
       serviceHistory={serviceHistoryResult.data ?? []}
+      brandConfig={brandConfigResult.data ?? null}
     />
   )
 }

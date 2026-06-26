@@ -21,6 +21,11 @@ export interface OnboardingFormData {
   topics_avoid: string
   doctor_name: string
   doctor_phone: string
+  // Buddy matching (optional, shown during Step 2)
+  buddy_match_topics: string
+  buddy_match_era: string
+  buddy_call_length_preference: string
+  buddy_intro_note: string
 }
 
 export const EMPTY_FORM: OnboardingFormData = {
@@ -42,6 +47,10 @@ export const EMPTY_FORM: OnboardingFormData = {
   topics_avoid: '',
   doctor_name: '',
   doctor_phone: '',
+  buddy_match_topics: '',
+  buddy_match_era: '',
+  buddy_call_length_preference: '',
+  buddy_intro_note: '',
 }
 
 export const STORAGE_KEY = 'onboarding-form'

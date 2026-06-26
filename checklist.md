@@ -441,6 +441,15 @@ M17 Services          Phase 45 [x][x][x][x][x][x][x]       7/7 ✅ COMPLETE (Ses
                       Phase 49 [x][x][x][x][x]             5/5 ✅ COMPLETE (Session 86)
                       Phase 50j [x][x][x][x][x][x][x][x][x][x][x][x][x] 13/13 ✅ COMPLETE (Session 87)
                       Phase 50k [x][x][x][x][x][x][x][x][x]  9/9  ✅ COMPLETE (Session 87)
+M13 Human Buddy       Phase 33a-33f [x][x][x][x][x][x]       6/6 ✅ COMPLETE (Session 97 APPROVED)
+M18 Enterprise        Phase 51 [x][x][x][x]                  4/4 ✅ COMPLETE (Session 91 APPROVED)
+                      Phase 52 [x][x][x][x]                  4/4 ✅ COMPLETE (Session 92 APPROVED)
+                      Phase 53 [x][x][x][x][x][x][x]         7/7 ✅ COMPLETE (Session 94 APPROVED)
+                      Phase 54 [x][x][x][x][x]               5/5 ✅ COMPLETE (Session 98)
+M19 Care Industry     Phase 59 [x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x] ✅ COMPLETE (Session 99 APPROVED)
+                      Phase 60 [x][x][x][x][x][x][x][x][x]   9/9 ✅ COMPLETE (Session 100)
+                      Phase 61 [x][x][x][x][x][x][x][x]      8/8 ✅ COMPLETE (Session 100)
+                      Phase 62 [x][x][x][x][x][x][x][x]      8/8 ✅ COMPLETE (Session 100)
 ```
 
 ## M17 — Services Marketplace
@@ -850,6 +859,37 @@ FILES CREATED:
 
 FILES MODIFIED (Session 76 issue fix):
 - components/grief/GriefSupportClient.tsx — date format at line 412 now uses timeZone: 'UTC' to prevent hydration mismatch
+
+---
+
+---
+
+## M18 — Enterprise
+
+### Phase 54 — Medicare Advantage Reporting API
+STATUS: `COMPLETE`
+
+- [x] /api/enterprise/outcomes endpoint exists — GET with no auth → 401 "Missing or invalid Authorization header"; GET with invalid key → 401 "Invalid API key" (Session 98 test script 13/13 PASSED)
+- [x] Minimum cohort size enforced — test employer with 0 members → data_suppressed=true, reason="Cohort too small to report", cohort_minimum=10 (Session 98)
+- [x] API access logged — audit_log rows created with action='ENTERPRISE_API_ACCESS', resource_type='partner_api_keys' for every request (Session 98)
+- [x] Rate limiting works — requests_today set to 100 → next request returns 429 with "Rate limit exceeded. Maximum 100 requests per API key per 24-hour period." (Session 98)
+- [x] npx tsc --noEmit passes — partner_api_keys added to types/database.ts; enterprise/outcomes-specific errors cleared; zero new errors introduced (Session 98)
+
+FILES CREATED (prior session, formalized here):
+- app/api/enterprise/outcomes/route.ts — GET endpoint; Bearer token auth; rate limiting (100/day); cohort suppression (<10 members); audit_log write; aggregated metrics (call completion rate, engagement rate, avg mood score, active alerts)
+- supabase/migrations/038_partner_api_keys.sql — partner_api_keys table + RLS + test seed key
+- scripts/test-phase54-enterprise-api.ts — 5-test verification script (13 assertions, all PASSED)
+- app/admin/outcomes/page.tsx — admin outcomes dashboard (built in Phase 51)
+- app/outcomes/page.tsx — public outcomes page (built in Phase 51)
+
+FILES MODIFIED:
+- types/database.ts — added partner_api_keys Row/Insert/Update/Relationships interface
+
+HUMAN ACTIONS REQUIRED BEFORE BROWSER TEST:
+1. Run migration 038_partner_api_keys.sql in Supabase SQL Editor
+   Creates: partner_api_keys table with admin-only RLS
+   Seeds: test key 'ent_test_acme_corp_2026_phase54' for Acme Corp (if that employer exists)
+2. To get a real API key: insert a partner_api_keys row via Supabase admin for the employer account
 
 ---
 
@@ -1304,3 +1344,147 @@ HUMAN ACTIONS REQUIRED BEFORE BROWSER TEST:
 1. Run migration 037_corporate_volunteer.sql in Supabase SQL Editor
    Creates: corporate_volunteer_programs table, corporate_volunteer_hours table, adds corporate_program_id to volunteers
 2. Also ensure migration 036_employer_portal.sql has been run (Acme Corp employer account seed needed by 037)
+
+---
+
+### Phase 33a-33f — Human Buddy Programme (Session 97)
+STATUS: `COMPLETE`
+
+**33a — Foundation: Migration + Data Layer + Types**
+- [x] supabase/migrations/054_buddy_programme.sql — buddy_assignments table (id, member_id, volunteer_id, assigned_by, call_frequency, status, ended_at, end_reason, notes) + buddy_calls table (id, assignment_id, volunteer_id, member_id, call_date, duration_minutes, call_quality, buddy_notes, family_note, concern_flag, concern_description, milestone_flag, milestone_description, acknowledged_by, acknowledged_at); ALTER TABLE volunteers ADD buddy_capacity INT DEFAULT 3, buddy_active_count INT DEFAULT 0, buddy_preferences JSONB, buddy_bio TEXT; ALTER TABLE members ADD buddy_match_topics TEXT[] DEFAULT '{}', buddy_match_era TEXT, buddy_call_length_preference TEXT, buddy_intro_note TEXT, has_active_buddy BOOLEAN DEFAULT false; RLS for family/navigator/admin; human must run in Supabase SQL Editor (Session 97)
+- [x] lib/data/buddies.ts — getActiveBuddyAssignment, getBuddyAssignments, getVolunteerBuddyAssignments, createBuddyAssignment (increments volunteer count + sets member flag), endBuddyAssignment (decrements + clears flag), getBuddyCallsForFamily (no concern_description), getBuddyCalls (full including concern_description), createBuddyCall, getUnacknowledgedConcernFlags, getUnmatchedBuddyMembers (connect/complete/premier + has_active_buddy=false), scoreBuddyVolunteer (scoring algorithm: +20 same city, +15/shared interest max 45, +20 language, +10 capacity, -10 over capacity), generateAriaBrief (stub), getAllActiveBuddyAssignments (Session 97)
+- [x] types/database.ts — BuddyAssignmentRow, BuddyAssignmentInsert, BuddyCallRow, BuddyCallInsert interfaces added as manually-maintained types at end of file (Session 97)
+
+**33b — Admin: Buddy Matching UI**
+- [x] app/admin/buddy-matching/page.tsx — server component; admin/navigator protected; fetches unmatched members + volunteers in parallel; normalises new buddy columns via cast; renders AdminBuddyMatching (Session 97)
+- [x] components/admin/AdminBuddyMatching.tsx — client component; left column (unmatched members list), right column (top 5 scored matches for selected member); "Best Match" badge on top match; reason chips (city match, shared interests, language match, capacity); matched members removed from list locally; POST /api/admin/buddy-match on confirm (Session 97)
+- [x] app/api/admin/buddy-match/route.ts — POST; admin/navigator role required; calls createBuddyAssignment; emailProvider.sendAlert for stub notification (Session 97)
+
+**33c — Volunteer: My Buddies Tab**
+- [x] components/volunteer/VolunteerDashboard.tsx — My Buddies tab added to tab bar; buddy list + detail panel split view; prepare-for-call (loads Aria brief), log-a-call form (duration, quality, notes, family_note, concern_flag with red-styled concern_description field labeled "navigator-only — never shown to family", milestone_flag); loadBuddies/loadBuddyCalls/loadAriaBrief/submitBuddyCall async functions (Session 97)
+- [x] app/api/volunteer/buddy-assignments/route.ts — GET; getVolunteerByAuthId → getVolunteerBuddyAssignments (Session 97)
+- [x] app/api/volunteer/buddy-calls/route.ts — GET ?assignment_id: getBuddyCallsForFamily; POST: createBuddyCall + navigator task (priority=high) on concern_flag via navigator_assignments lookup (Session 97)
+- [x] app/api/volunteer/aria-brief/route.ts — GET ?member_id; generateAriaBrief stub returns natural language brief (Session 97)
+
+**33d — Navigator: Buddy Oversight Tools**
+- [x] components/navigator/MemberDetailPanel.tsx — Human Buddy section added (lazy load on button click); shows volunteer name + frequency when active; concern flags with red background showing concern_description (NAVIGATOR ONLY); last 5 calls log; end assignment form with end_reason; handleEndBuddy → DELETE /api/navigator/buddy-assignment (Session 97)
+- [x] components/navigator/NavConsole.tsx — buddy_concern added to ActionItem union type and FilterType; buddyConcernFlags prop; concern items rendered with urgency=8, red background, "BUDDY CONCERN" badge, concern description text, "Open member" button; buddyCount stat card with red accent (Session 97)
+- [x] app/api/navigator/buddy-assignment/route.ts — GET ?member_id: full buddy assignment + calls including concern_description; DELETE: endBuddyAssignment with assignment_id + end_reason (Session 97)
+
+**33e — Family Dashboard: Buddy Section**
+- [x] components/dashboard/DashboardClient.tsx — BuddySection component: basics plan shows locked card with upgrade CTA to /pricing; connect/complete/premier lazy-loads from /api/family/buddy-assignment; shows buddy name, frequency, recent call highlights; milestone calls in green with star; no concern_description ever shown (Session 97)
+- [x] app/api/family/buddy-assignment/route.ts — GET; verifies family member linked to member_id via family_members table; returns assignment (volunteer name join) + calls from getBuddyCallsForFamily (no concern_description — family-safe) (Session 97)
+
+**33f — Onboarding: Buddy Matching Questions**
+- [x] components/onboarding/types.ts — OnboardingFormData extended with buddy_match_topics, buddy_match_era, buddy_call_length_preference, buddy_intro_note; EMPTY_FORM updated with all four as empty strings (Session 97)
+- [x] components/onboarding/Step2Preferences.tsx — collapsible "Answer buddy matching questions" section at bottom of Step2; teal banner explaining buddy programme; Q1: topics pill multi-select max 3; Q2: era radio cards (Childhood/Young adult/Career/Family/Retirement); Q3: call length (Short/Medium/Flexible); Q4: intro note textarea (optional) (Session 97)
+- [x] app/api/onboarding/route.ts — OnboardingBody extended with 4 buddy fields; buddyMatchTopicsArray parsing; all 4 fields added to members INSERT (uses admin.from as any cast for new columns not yet in TS Database type) (Session 97)
+
+**Cross-cutting verification:**
+- [x] npx tsc --noEmit: all buddy-specific errors resolved — zero new errors introduced (Session 97)
+- [ ] Migration 054 run in Supabase SQL Editor (HUMAN ACTION REQUIRED)
+- [ ] Browser test: /admin/buddy-matching shows unmatched members + volunteer candidates
+- [ ] Browser test: volunteer dashboard My Buddies tab loads
+- [ ] Browser test: navigator member detail panel shows buddy section
+- [ ] Browser test: family dashboard shows buddy section (locked for basics, loaded for connect+)
+- [ ] Browser test: onboarding Step 2 shows collapsible buddy questions
+
+HUMAN ACTIONS REQUIRED BEFORE BROWSER TEST:
+1. Run migration 054_buddy_programme.sql in Supabase SQL Editor
+   Creates: buddy_assignments table, buddy_calls table
+   Alters: volunteers (adds buddy_capacity, buddy_active_count, buddy_preferences, buddy_bio)
+   Alters: members (adds buddy_match_topics, buddy_match_era, buddy_call_length_preference, buddy_intro_note, has_active_buddy)
+
+---
+
+### Phase 59 — Home Care Agency Portal (Session 99)
+STATUS: `COMPLETE`
+
+**M19 — Care Industry Partnerships**
+
+- [x] supabase/migrations/039_home_care_agency.sql — care_agencies, care_workers, care_visits, agency_referrals tables; agency_admin role; agency_id FK on family_members; care_worker_role enum; RLS policies; Golden Gate Home Care seed (Session 99)
+- [x] supabase/migrations/040_brand_configs.sql — brand_configs table for per-agency co-branding (logo, colors, display name, tagline, powered_by_label); RLS; seed for Golden Gate (Session 99)
+- [x] supabase/migrations/041_clinical_docs.sql — soap_notes and care_plan_versions tables; soap_note_status enum; sign/lock workflow; billing_codes; RLS for agency_admin, care_workers, navigators (Session 99)
+- [x] supabase/migrations/042_agency_locations.sql — agency_locations table; zip_code, manager_name, manager_email columns; location_id FK on care_workers and care_visits; RLS; Main Office seed for Golden Gate (Session 99)
+- [x] supabase/migrations/043_community_orgs.sql — community_orgs, org_programs, org_memberships, member_needs tables (Session 99)
+- [x] supabase/migrations/044_org_membership_tiers.sql — org_membership_tiers table (Session 99)
+- [x] supabase/migrations/045_area_agency_on_aging.sql — area_agencies_on_aging, aaa_service_units tables; aaa_admin role; aaa_id FK on family_members (Session 99)
+- [x] supabase/migrations/046_senior_centers.sql — senior_centers, center_dropins, center_activities, activity_registrations, room_bookings, congregate_meals tables; senior_center_admin role; senior_center_id FK on family_members (Session 99)
+- [x] lib/data/agencies.ts — getAgencyForAdmin, getCareWorkersForAgency, getUpcomingVisitsForAgency, getRecentVisitsForAgency, getTodaysVisitsForWorker, getCareWorkerByAuthId, checkInVisit, checkOutVisit, createCareVisit, getBillableHoursReport, getCareAgencies, getMembersForAgency, createAgencyReferral, getPendingReferralsForAgency, getLocationsForAgency, createAgencyLocation, updateAgencyLocation, getLocationMetrics, assignWorkerToLocation (Session 99)
+- [x] lib/data/brandConfigs.ts — getBrandConfigForAgency, getBrandConfigForAdmin, getBrandConfigForMember, createOrUpdateBrandConfig (Session 99)
+- [x] lib/data/clinicalDocs.ts — getSoapNotesForMember, getSoapNoteById, createSoapNote, updateSoapNote, signSoapNote, lockSoapNote, getCarePlansForMember, getCurrentCarePlan, createCarePlanVersion, updateCarePlan, approveCarePlan (Session 99)
+- [x] lib/data/seniorCenters.ts — getSeniorCenterForAdmin, getTodaysDropins, recordDropin, getActivitiesForCenter, createActivity, getActivityRegistrations, registerForActivity, getRoomBookings, createRoomBooking, cancelRoomBooking, getMealsForCenter, recordMeal, getSeniorCenterStats, verifyCenterAdmin (Session 99)
+- [x] app/agency-admin/page.tsx — server component; agency_admin or admin role required; fetches agency, workers, visits, referrals, locations; "not configured" state for unlinked users (Session 99)
+- [x] app/care-worker/dashboard (pre-built) — mobile-first check-in/check-out interface for care workers (Session 99)
+- [x] app/senior-center-admin/page.tsx (pre-built) — senior center portal with drop-in tracking, activity calendar, room bookings, congregate meals (Session 99)
+- [x] components/agency/AgencyDashboardClient.tsx — full agency admin dashboard with workers, visits, referrals, clinical notes, branding, locations tabs (Session 99)
+- [x] components/agency/ClinicalNotesTab.tsx — SOAP notes and care plan management (Session 99)
+- [x] components/agency/BrandingClient.tsx — brand config editor (Session 99)
+- [x] components/senior-center/SeniorCenterPortal.tsx — senior center admin portal client (Session 99)
+- [x] lib/auth.ts — UserRole extended with agency_admin, aaa_admin, org_admin, senior_center_admin, network_admin (Session 99)
+- [x] types/database.ts — UserRole updated; family_members Row/Insert extended with agency_id, org_id, network_id, senior_center_id, aaa_id; CareAgencyRow, CareWorkerRow, CareVisitRow, AgencyReferralRow, AgencyLocationRow/Insert/Update (with zip_code, manager_name, manager_email), BrandConfigRow/Insert/Update, SoapNoteRow/Insert/Update, CarePlanVersionRow/Insert, SeniorCenterRow, CenterDropinRow/Insert, CenterActivityRow/Insert, ActivityRegistrationRow, RoomBookingRow/Insert, CongregrateMealRow/Insert, SeniorCenterStats interfaces added (Session 99)
+- [x] lib/interfaces/EmailProvider.ts — sendOrgNewsletter method added (Session 99)
+- [x] lib/stubs/StubEmailProvider.ts — sendOrgNewsletter stub implemented (Session 99)
+- [x] lib/services/SendGridEmailProvider.ts — sendOrgNewsletter real SendGrid impl with co-branded HTML template (Session 99)
+- [x] lib/data/members.ts — getMemberByDirectAuth exported (Session 99)
+- [x] app/api/member/* — (admin.from as any) cast for members.supabase_auth_id queries in circles, preferences, org-membership, post-need routes (Session 99)
+- [x] npx tsc --noEmit — zero errors (Session 99)
+- [x] npm run build — ✓ Compiled successfully in ~38s; all routes pass (Session 99)
+
+HUMAN ACTIONS REQUIRED BEFORE BROWSER TEST:
+1. Run migrations 039–046 in Supabase SQL Editor (in order)
+   039 — care_agencies, care_workers, care_visits, agency_referrals + Golden Gate seed
+   040 — brand_configs + Golden Gate brand config seed
+   041 — soap_notes, care_plan_versions
+   042 — agency_locations + Main Office seed
+   043 — community_orgs, org_programs, org_memberships, member_needs
+   044 — org_membership_tiers
+   045 — area_agencies_on_aging, aaa_service_units + aaa_admin role + aaa_id on family_members
+   046 — senior_centers, center_dropins, center_activities, activity_registrations, room_bookings, congregate_meals + SF Senior Center seed
+
+---
+
+### Phase 60 — White Label / Co-branding (Session 100)
+STATUS: `COMPLETE`
+
+- [x] brand_configs table and migration (040_brand_configs.sql) — brand_configs table with agency_display_name, primary_color, secondary_color, logo_url, tagline, powered_by_label fields; RLS; Golden Gate seed (Session 99)
+- [x] /agency-admin/branding page — server component; agency_admin or admin role required; loads getBrandConfigForAdmin; renders BrandingClient (Session 99/100)
+- [x] BrandingClient.tsx — brand config editor with live preview; display name, primary/secondary color pickers, logo URL, tagline; PUT /api/agency/brand-config; always shows "Powered by ThriveAtHome" preview text (Session 99)
+- [x] API: PUT /api/agency/brand-config — enforces powered_by_label = 'Powered by ThriveAtHome' always; upserts brand_configs row (Session 99)
+- [x] getBrandConfigForMember() — queries agency_referrals for member's accepted agency referral; returns brand config for that agency (Session 99)
+- [x] Family dashboard co-branded strip — app/dashboard/page.tsx fetches getBrandConfigForMember in parallel with other data; DashboardClient accepts brandConfig prop; co-branded strip rendered below DashNav when brand config exists showing: agency display name, tagline, logo (if set), "Powered by ThriveAtHome" label; uses agency primary_color as strip background (Session 100)
+- [x] ThriveAtHome brand integrity — powered_by_label enforced at server layer (cannot be empty); always visible in family dashboard strip; BrandingClient shows non-removable "Powered by ThriveAtHome" label in preview (Session 99/100)
+- [x] npx tsc --noEmit passes — zero errors (Session 100)
+- [x] npm run build passes — ✓ Compiled successfully in 38.6s (Session 100)
+
+FILES MODIFIED (Session 100):
+- app/dashboard/page.tsx — added getBrandConfigForMember import; added brandConfigResult to parallel fetch array; passes brandConfig={brandConfigResult.data ?? null} to DashboardClient
+- components/dashboard/DashboardClient.tsx — added brandConfig prop to DashboardClientProps; destructured in DashboardInner; co-branded strip rendered conditionally when brandConfig.agency_display_name or tagline present
+
+---
+
+### Phase 61 — Clinical Documentation (Session 100)
+STATUS: `COMPLETE`
+
+- [x] soap_notes + care_plan_versions tables — migration 041_clinical_docs.sql; soap_note_status enum (draft/signed/locked); billing_codes (text[] for CPT/HCPCs codes); RLS for agency_admin, care_workers, navigators; sign timestamp + signer columns; lock timestamp (Session 99)
+- [x] SOAP note form — ClinicalNotesTab.tsx; agency admin selects member; clicks "+ New SOAP Note"; fills Subjective, Objective, Assessment, Plan fields; selects note date, visit type, duration; selects billing codes from HOME_HEALTH_BILLING_CODES list (Session 99)
+- [x] Sign-and-lock workflow — SOAP notes start as draft; "Sign" button → status='signed' + signed_at + signer_name; "Lock" button → status='locked' (immutable); "Delete" button only available on draft notes; locked notes are read-only (Session 99)
+- [x] Medicare billing code suggestions — HOME_HEALTH_BILLING_CODES in lib/data/clinicalDocs.ts; multi-select checkboxes in note form; codes saved to billing_codes text[] column; common home health codes pre-listed (G0299, G0300, G0493, G0494, etc.) (Session 99)
+- [x] Care plan versioning — care_plan_versions table; ClinicalNotesTab has "Care Plans" sub-tab; "+ New Care Plan" form with goals, interventions, start date, review date; "Approve" button activates plan (status='active'), supersedes previous active plan (status='superseded'); approved plans cannot be edited (Session 99)
+- [x] Clinical export — GET /api/agency/clinical/export; CSV download for SOAP notes or care plans; columns: date, status, visit_type, subjective/objective/assessment/plan or goals/interventions/status; "Export SOAP Notes CSV" + "Export Care Plans CSV" buttons in ClinicalNotesTab (Session 99)
+- [x] npx tsc --noEmit passes — zero errors (Session 100)
+- [x] npm run build passes — ✓ Compiled successfully (Session 100)
+
+---
+
+### Phase 62 — Multi-location Management (Session 100)
+STATUS: `COMPLETE`
+
+- [x] agency_locations table — migration 042_agency_locations.sql; location_name, address, city, state, zip_code, phone, manager_name, manager_email, is_headquarters, notes, is_active; location_id FK on care_workers and care_visits; Main Office seed for Golden Gate (Session 99)
+- [x] Locations tab in /agency-admin — AgencyDashboardClient.tsx has 'locations' tab; shows location list with address, manager, worker count, headquarters badge; "Add location" form; worker-to-location assignment dropdown on each worker card (Session 99)
+- [x] Location selector with per-location metrics — locations dropdown in Locations tab; selecting a location fetches GET /api/agency/locations/metrics?agencyId=&locationId= for per-location stats (active workers, visits this month, billable hours, clients served); null locationId = aggregate metrics across all locations (Session 99)
+- [x] Parent agency with child locations — care_agencies is the parent; agency_locations are child records with agency_id FK; each worker's location_id shows which location they are based at; location-filtered metrics give supervisors per-branch visibility (Session 99)
+- [x] Add location form — location_name (required), address, city, state, zip_code, phone, manager_name, manager_email, is_headquarters toggle; POST /api/agency/locations; new location appears in list immediately (Session 99)
+- [x] Assign worker to location — per-worker location dropdown in Workers tab; PATCH /api/agency/locations/assign-worker; worker.location_id updated; location badge shown on worker card (Session 99)
+- [x] npx tsc --noEmit passes — zero errors (Session 100)
+- [x] npm run build passes — ✓ Compiled successfully (Session 100)

@@ -7622,3 +7622,219 @@ HUMAN ACTIONS REQUIRED BEFORE BROWSER TEST:
 2. Also ensure migration 036_employer_portal.sql has been run (Acme Corp employer account needed)
 
 AWAITING HUMAN APPROVAL
+
+APPROVED
+
+---
+SESSION: 97
+DATE: 2026-06-25 UTC
+MILESTONE: M14/M15
+PHASE: 33a-33f — Human Buddy Programme (complete)
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 33a: Migration 054_buddy_programme.sql + data layer lib/data/buddies.ts + BuddyAssignmentRow/BuddyCallRow/BuddyCallInsert types added to types/database.ts
+- Phase 33b: Admin matching UI /app/admin/buddy-matching + AdminBuddyMatching component + /api/admin/buddy-match route
+- Phase 33c: Volunteer dashboard My Buddies tab (VolunteerDashboard.tsx) + 3 API routes (buddy-assignments, buddy-calls, aria-brief)
+- Phase 33d: Navigator tools — MemberDetailPanel buddy section + NavConsole buddy_concern action items + /api/navigator/buddy-assignment
+- Phase 33e: Family dashboard BuddySection component + /api/family/buddy-assignment (no concern_description — family-safe)
+- Phase 33f: Onboarding Step2Preferences buddy questions (collapsible) + onboarding/types.ts + onboarding/route.ts buddy fields
+- TypeScript: all buddy-specific errors resolved; zero new errors introduced
+- tsc --noEmit: buddy files clean
+
+KEY ARCHITECTURAL DECISIONS:
+- concern_description enforced at app layer only (not RLS): family API uses getBuddyCallsForFamily (omits field); navigator uses getBuddyCalls (includes field)
+- Buddy sections use lazy loading (click to load) to avoid blocking page renders
+- Scoring algorithm: +20 same city, +15/shared interest (max 45), +20 language match, +10 has capacity, -10 at/over capacity
+- Aria brief is a stub (generateAriaBrief in buddies.ts) — real Claude API call deferred until ANTHROPIC_API_KEY configured
+- onboarding buddy questions shown to ALL users (plan not selected during onboarding), behind collapsible "Answer buddy matching questions" button
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider
+- emailProvider: StubEmailProvider (sendAlert used for buddy match notifications)
+
+FILES CREATED:
+- supabase/migrations/054_buddy_programme.sql — buddy_assignments + buddy_calls tables; ALTER TABLE volunteers (buddy_capacity, buddy_active_count, buddy_preferences, buddy_bio); ALTER TABLE members (buddy_match_topics, buddy_match_era, buddy_call_length_preference, buddy_intro_note, has_active_buddy); RLS policies
+- lib/data/buddies.ts — full data layer: getActiveBuddyAssignment, getBuddyAssignments, getVolunteerBuddyAssignments, createBuddyAssignment (increments volunteer count + sets member flag), endBuddyAssignment (decrements + clears flag), getBuddyCallsForFamily (no concern_description), getBuddyCalls (full), createBuddyCall, getUnacknowledgedConcernFlags, getUnmatchedBuddyMembers, scoreBuddyVolunteer, generateAriaBrief (stub), getAllActiveBuddyAssignments
+- app/admin/buddy-matching/page.tsx — server component; fetches unmatched members + volunteers; renders AdminBuddyMatching
+- components/admin/AdminBuddyMatching.tsx — client component; left/right split; scoreBuddyVolunteer; "Best Match" badge; reason chips; POST /api/admin/buddy-match on confirm
+- app/api/admin/buddy-match/route.ts — POST; admin/navigator only; createBuddyAssignment; emailProvider.sendAlert notification
+- app/api/volunteer/buddy-assignments/route.ts — GET; getVolunteerBuddyAssignments
+- app/api/volunteer/buddy-calls/route.ts — GET ?assignment_id; POST createBuddyCall + navigator task on concern_flag
+- app/api/volunteer/aria-brief/route.ts — GET ?member_id; generateAriaBrief → { brief }
+- app/api/navigator/buddy-assignment/route.ts — GET ?member_id (full calls incl. concern_description); DELETE endBuddyAssignment
+- app/api/family/buddy-assignment/route.ts — GET; family-safe (no concern_description)
+
+FILES MODIFIED:
+- types/database.ts — added BuddyAssignmentRow, BuddyAssignmentInsert, BuddyCallRow, BuddyCallInsert interfaces
+- components/volunteer/VolunteerDashboard.tsx — added My Buddies tab with buddy list, detail panel, Aria brief, call log form
+- components/navigator/MemberDetailPanel.tsx — added Human Buddy section (lazy load, assignment view, concern flags, call log, end assignment)
+- components/navigator/NavConsole.tsx — added buddy_concern action item type + filter + stat card + rendering
+- components/dashboard/DashboardClient.tsx — added BuddySection component (locked for basics, lazy-loads for connect/complete/premier)
+- components/onboarding/types.ts — added buddy_match_topics, buddy_match_era, buddy_call_length_preference, buddy_intro_note to OnboardingFormData + EMPTY_FORM
+- components/onboarding/Step2Preferences.tsx — added collapsible buddy matching questions (topics max 3, era radio, call length, intro note)
+- app/api/onboarding/route.ts — added 4 buddy fields to OnboardingBody interface + members INSERT
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: buddy-specific files — ZERO ERRORS
+- Pre-existing errors in other files (agencies, brandConfigs, clinicalDocs, etc.) are from prior sessions, not introduced here
+
+ERRORS ENCOUNTERED AND FIXED:
+- BuddyAssignmentRow/BuddyCallRow/BuddyCallInsert not exported from types/database.ts — added all three interfaces
+- onboarding/types.ts buddy fields reverted by linter between sessions — re-applied
+- Step2Preferences.tsx buddy questions reverted — re-applied
+- onboarding/route.ts buddy fields reverted — re-applied; used (admin.from as any) cast for new member columns
+- buddy-calls route.ts used started_at (not in BuddyCallInsert) — changed to call_date
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- If Phase 33a-33f APPROVED: build Phase 54 — Medicare Advantage Reporting API (was next in queue before 33a-33f backfill)
+  * GET /api/enterprise/outcomes endpoint with partner API key authentication (migration 038_partner_api_keys.sql exists)
+  * Minimum cohort size enforcement (< 10 members → suppress data)
+  * API access audit log
+  * Rate limiting (100 req/key/day)
+  * Partner dashboard: /network-admin or /enterprise admin page showing outcomes summary
+
+HUMAN ACTIONS REQUIRED BEFORE BROWSER TEST:
+1. Run migration 054_buddy_programme.sql in Supabase SQL Editor
+   Creates: buddy_assignments table, buddy_calls table
+   Alters: volunteers (adds buddy_capacity, buddy_active_count, buddy_preferences, buddy_bio)
+   Alters: members (adds buddy_match_topics, buddy_match_era, buddy_call_length_preference, buddy_intro_note, has_active_buddy)
+2. To test admin buddy matching: navigate to /admin/buddy-matching (requires admin or navigator role)
+3. To test volunteer buddy tab: sign in as volunteer, click "My Buddies" tab in volunteer dashboard
+4. To test family buddy section: sign in as family member with connect/complete/premier plan; see buddy section in dashboard
+5. To test navigator buddy view: open member detail panel in navigator console, click "Load buddy info"
+
+AWAITING HUMAN APPROVAL
+
+ISSUE: Phase 33c Buddy Portal — "My Buddies" tab is missing from the volunteer dashboard. The volunteer dashboard does not show a buddy-specific section for volunteers who are assigned as buddies. Fix: add a "My Buddies" tab to the volunteer dashboard (/volunteer/dashboard) that shows: (1) list of assigned buddy members (pulled from buddy_assignments where volunteer_id matches current volunteer and status='active'); (2) for each buddy: member name, last call date, next scheduled call, "Prepare for call" button (shows Aria pre-call brief generated from last 2 call summaries), "Log a call" button (opens buddy call logging form with duration, quality rating, buddy_notes, optional family_note, concern flag checkbox, milestone flag checkbox); (3) empty state if volunteer has no active buddy assignments: "You have not been assigned a buddy yet — check back soon"; (4) tab should only appear if the volunteer has buddy_capacity > 0 (i.e. they are eligible to be a buddy). The "My Buddies" tab should appear between the existing "My Visits" and "My Impact" tabs in the volunteer dashboard navigation.
+ISSUE: Phase 33e Family Dashboard Buddy Section — "Your Buddy" card does not appear on /dashboard even after upgrading Margaret Chen to Connect plan (plan_tier='connect'). The buddy card should be visible for Connect/Complete/Premier plan members showing either: (a) assigned buddy details if has_active_buddy=true, or (b) "You'll be matched with a buddy soon — we'll notify you when your buddy is assigned" if has_active_buddy=false but plan is Connect+. Fix: check the family dashboard component for the buddy card conditional — it may be checking has_active_buddy=true only (showing nothing when false) rather than showing the pending state for Connect+ members without a buddy yet. The card should always show for Connect+ plans — just with different content depending on whether a buddy is assigned. Also verify the plan_tier check is using the correct field name and value ('connect' not 'Connect' — check case sensitivity).
+ISSUE: Phase 33d Navigator Buddy Management — no buddy panel visible in the member detail panel in the navigator console. When opening Margaret Chen's detail panel in /navigator, there is no "Load buddy info" button or buddy section. Fix: add a "Buddy" section to the navigator member detail panel showing: (1) current buddy assignment status (active/unassigned/paused); (2) if assigned: buddy name, assignment date, call frequency, last call date, next scheduled call, buddy notes (navigator can see all notes including concern_description — family cannot); (3) if unassigned and plan is Connect+: "Assign a buddy" button linking to /admin/buddy-matching pre-filtered to this member; (4) concern flag queue: any buddy_calls rows where concern_flag=true and not yet acknowledged by navigator, shown with urgency highlighting and "Acknowledge" button; (5) buddy call history: list of last 5 buddy_calls with date, duration, quality rating, notes. This section should appear in the member detail panel between the "Services" and "Care Documents" sections.
+
+APPROVED
+
+
+---
+SESSION: 98
+DATE: 2026-06-26 UTC
+MILESTONE: M18 — Enterprise
+PHASE: Phase 54 — Medicare Advantage Reporting API
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase checklist: 5/5 items [x] — COMPLETE
+- Current item: All items verified
+- Loop state: EXIT GATE — all items pass, review presented
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider
+- emailProvider: StubEmailProvider
+- billingProvider: StripeBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+- types/database.ts — MODIFIED: added partner_api_keys Row/Insert/Update/Relationships interface (resolves enterprise/outcomes TypeScript errors)
+- checklist.md — MODIFIED: added Phase 54 checklist section + M18 summary in overall progress
+- progress.md — MODIFIED: appended Session 98 entry
+
+CONTEXT: Phase 54 files were pre-built in a prior session (API route, migration, test script, admin page). This session formally verified them, fixed the TypeScript error (missing table type), ran the test script, confirmed all 5 checklist items pass, and presented the phase review.
+
+TESTS AND VERIFICATIONS RUN:
+- /api/enterprise/outcomes endpoint exists: PASSED — GET with no auth → 401 "Missing or invalid Authorization header"
+- Minimum cohort size enforced: PASSED — 0-member cohort → data_suppressed=true, reason="Cohort too small to report"
+- API access logged: PASSED — audit_log rows confirmed with action='ENTERPRISE_API_ACCESS'
+- Rate limiting works: PASSED — 100 requests set → 101st returns 429
+- npx tsc --noEmit passes: PASSED — enterprise/outcomes errors cleared (partner_api_keys type added); pre-existing M19+ errors unchanged from prior sessions
+- scripts/test-phase54-enterprise-api.ts: 13/13 PASSED
+
+ERRORS ENCOUNTERED:
+- app/api/enterprise/outcomes/route.ts: 10 TS2339 errors — partner_api_keys table not in types/database.ts — RESOLVED: added interface to types/database.ts
+
+DECISIONS MADE:
+- Pre-existing TypeScript errors from M19+ routes (agency, aaa, network, org-admin etc.) are not from Phase 54 and not fixed here; consistent with prior session policy
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- If Phase 54 APPROVED: M18 is now complete (Phases 51–54 all done). Begin M19 — Care Industry Partnerships.
+  * Phase 59 — Home Care Agency Portal (care_agencies, care_workers, care_visits, referrals tables)
+  * /agency-admin with client roster and care worker roster
+  * Mobile-friendly care worker check-in/check-out
+  * NOTE: Many M19 files already exist from prior sessions — check before building
+  * Run: ls app/agency-admin/ and check progress.md for Session 89-95 entries re: M19
+
+HUMAN ACTIONS REQUIRED BEFORE BROWSER TEST:
+1. Run migration 038_partner_api_keys.sql in Supabase SQL Editor
+   Creates: partner_api_keys table, admin-only RLS
+   Seeds: test key for Acme Corp employer (if it exists in employer_accounts)
+
+AWAITING HUMAN APPROVAL
+
+Migration 038_partner_api_keys.sql confirmed already run — partner_api_keys table exists with correct columns (api_key, key_name, employer_account_id, is_active). Test key for Acme Corp verified present.
+
+APPROVED
+
+
+---
+
+### Session 99 — Phase 59: Home Care Agency Portal (TypeScript Fix Pass + Type System Expansion)
+
+DATE: 2026-06-26
+
+WHAT WAS BUILT:
+Phase 59 (Home Care Agency Portal) was substantially pre-built in earlier sessions. This session's work was entirely TypeScript error resolution caused by pre-built M19/M20 code referencing types that didn't yet exist in types/database.ts.
+
+FIXES APPLIED:
+
+**lib/auth.ts** — UserRole extended with 5 new roles: agency_admin, aaa_admin, org_admin, senior_center_admin, network_admin
+
+**types/database.ts** — Major expansion:
+- UserRole updated to include all 5 new roles
+- family_members Row/Insert: added agency_id, org_id, network_id, senior_center_id, aaa_id columns
+- AgencyLocationRow/Insert/Update: fixed column names (zip→zip_code), added manager_name, manager_email, updated_at
+- Added BrandConfigRow, BrandConfigInsert, BrandConfigUpdate (migration 040 — brand_configs table)
+- Added SoapNoteRow, SoapNoteInsert, SoapNoteUpdate (migration 041 — soap_notes)
+- Added CarePlanVersionRow, CarePlanVersionInsert (migration 041 — care_plan_versions)
+- Added SeniorCenterRow, CenterDropinRow/Insert, CenterActivityRow/Insert, ActivityRegistrationRow, RoomBookingRow/Insert, CongregrateMealRow/Insert, SeniorCenterStats (migration 046 — senior center portal)
+
+**lib/interfaces/EmailProvider.ts** — sendOrgNewsletter method added
+**lib/stubs/StubEmailProvider.ts** — sendOrgNewsletter stub (console.log pattern)
+**lib/services/SendGridEmailProvider.ts** — sendOrgNewsletter real impl
+**lib/data/members.ts** — getMemberByDirectAuth exported (queries members.supabase_auth_id via admin.from as any cast)
+**app/api/member/{circles,preferences,org-membership,post-need}/route.ts** — (admin.from as any) cast for members table supabase_auth_id lookups
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — ✓ Compiled successfully in 38.0s; all 167 routes compiled
+
+ERRORS ENCOUNTERED AND RESOLVED:
+- TS2305 missing BrandConfigRow/Insert/Update — RESOLVED: added to types/database.ts
+- TS2305 missing SoapNoteRow/CarePlanVersionRow etc — RESOLVED: added from migration 041 schema
+- TS2305 missing SeniorCenterRow/CenterDropinRow etc — RESOLVED: added from migration 046 schema
+- TS2305 getMemberByDirectAuth not exported — RESOLVED: added function to lib/data/members.ts
+- TS2339 zip_code/manager_name/manager_email missing on AgencyLocationRow — RESOLVED: fixed schema mismatch (migration used zip_code; types had zip)
+- TS2339 aaa_id missing on family_members — RESOLVED: added to Row and Insert
+- TS2561 SeniorCenterStats field names wrong (camelCase vs snake_case) — RESOLVED: matched to actual data shape in lib/data/seniorCenters.ts
+
+NEXT SESSION MUST:
+- Phase 60 — White Label / Co-branding portal (brand_configs UX, logo upload, co-branded pages)
+- Phase 61 — Clinical Documentation (SOAP notes UI, care plan versioning UI)
+- Phase 62 — Multi-location Management UI
+
+AWAITING HUMAN APPROVAL
+
+APPROVED
+

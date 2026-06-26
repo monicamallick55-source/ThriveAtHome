@@ -23,6 +23,10 @@ interface OnboardingBody {
   topics_avoid?: string
   doctor_name?: string
   doctor_phone?: string
+  buddy_match_topics?: string
+  buddy_match_era?: string
+  buddy_call_length_preference?: string
+  buddy_intro_note?: string
 }
 
 export async function POST(req: NextRequest) {
@@ -77,8 +81,11 @@ export async function POST(req: NextRequest) {
     ? body.topics_enjoy.split(',').map((t) => t.trim()).filter(Boolean)
     : []
 
-  const { data: member, error: memberError } = await admin
-    .from('members')
+  const buddyMatchTopicsArray = body.buddy_match_topics
+    ? body.buddy_match_topics.split(',').map((t) => t.trim()).filter(Boolean)
+    : []
+
+  const { data: member, error: memberError } = await (admin.from as any)('members')
     .insert({
       full_name: full_name.trim(),
       preferred_name: preferred_name.trim(),
@@ -98,6 +105,10 @@ export async function POST(req: NextRequest) {
       topics_avoid: body.topics_avoid?.trim() || null,
       doctor_name: body.doctor_name?.trim() || null,
       doctor_phone: body.doctor_phone?.trim() || null,
+      buddy_match_topics: buddyMatchTopicsArray,
+      buddy_match_era: body.buddy_match_era?.trim() || null,
+      buddy_call_length_preference: body.buddy_call_length_preference?.trim() || null,
+      buddy_intro_note: body.buddy_intro_note?.trim() || null,
       plan_tier: 'basics',
       status: 'active',
     })
