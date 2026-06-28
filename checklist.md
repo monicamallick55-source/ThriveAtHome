@@ -1786,3 +1786,72 @@ STATUS: `COMPLETE`
 
 HUMAN ACTIONS REQUIRED:
 1. Run migration 060_agency_referral_program.sql in Supabase SQL Editor (creates agency_referral_links table)
+
+### Phase 79 — FHIR Integration (DEFERRED)
+STATUS: `DEFERRED — after M21`
+
+### Phase 80 — Competitor Comparison (DEFERRED)
+STATUS: `DEFERRED — after M21`
+
+---
+
+## M21 — Expanded Volunteer Ecosystem (Phases 81–86)
+
+### Phase 81 — Retired Professionals Network (Session 107)
+STATUS: `COMPLETE`
+
+- [x] Migration 061_m21_volunteer_ecosystem.sql — volunteers table extended with volunteer_specialty, professional_background, faith_affiliation, is_chaplain, is_neighbor_volunteer, is_family_reciprocal, zip_code; k12_schools, k12_student_volunteers, family_volunteer_links, member_ambassadors tables created; zip_code and faith_preference added to members table (Session 107)
+- [x] Database types updated — volunteers Row/Insert now includes M21 columns; k12_schools, k12_student_volunteers, member_ambassadors, family_volunteer_links added to Database['public']['Tables'] (Session 107)
+- [x] /volunteer/professionals page — server component calls getRetiredProfessionalVolunteers(); renders RetiredProfessionalsClient (Session 107)
+- [x] RetiredProfessionalsClient — SPECIALTIES filter pills (Law, Medicine, Engineering, Finance, Education, Architecture, Science, Social Work, Other); professional volunteer cards grid; "Become a professional volunteer" CTA → /volunteer/apply?track=professional (Session 107)
+- [x] /lib/data/m21Volunteers.ts — getRetiredProfessionalVolunteers(specialty?) queries volunteers WHERE volunteer_specialty IS NOT NULL (Session 107)
+- [x] npx tsc --noEmit passes — zero errors (Session 107)
+- [x] npm run build passes — ✓ Compiled successfully, 188 pages (Session 107)
+
+### Phase 82 — Faith Community Chaplaincy (Session 107)
+STATUS: `COMPLETE`
+
+- [x] /volunteer/chaplaincy page — server component calls getChaplainVolunteers(); renders ChaplaincyClient (Session 107)
+- [x] ChaplaincyClient — FAITHS filter pills (Christian, Jewish, Muslim, Hindu, Buddhist, Sikh, Unitarian, Secular, Other); chaplain cards; "What our chaplains offer" info box listing emotional support, prayer, life review, bereavement (Session 107)
+- [x] getChaplainVolunteers(faithAffiliation?) — queries volunteers WHERE is_chaplain = true (Session 107)
+
+### Phase 83 — Neighbor Volunteers (Session 107)
+STATUS: `COMPLETE`
+
+- [x] /volunteer/neighbors page — client component; 8 neighbour task cards (grocery, rides, garden, repairs, pets, visits, packages, weather); zip code search form; "Volunteer as a neighbour" CTA (Session 107)
+- [x] getNeighborVolunteers(zipCode?, city?) — queries volunteers WHERE is_neighbor_volunteer = true, with optional zip/city filter (Session 107)
+
+### Phase 84 — Family Volunteer Reciprocity (Session 107)
+STATUS: `COMPLETE`
+
+- [x] /volunteer/apply extended — four volunteer-track toggles added: Retired Professional, Faith Chaplain, Neighbour Volunteer, Family Reciprocal; each reveals relevant fields (specialty pills, faith pills, zip code, explanation text) (Session 107)
+- [x] /api/volunteer/apply extended — destructures and passes all M21 fields to submitVolunteerApplication(); is_family_reciprocal flag preserved (Session 107)
+- [x] lib/data/volunteers.ts extended — VolunteerApplicationData interface includes all M21 fields; submitVolunteerApplication uses conditional spread for M21 columns (Session 107)
+- [x] family_volunteer_links table created in migration 061 (Session 107)
+
+### Phase 85 — Member Ambassador Programme (Session 107)
+STATUS: `COMPLETE`
+
+- [x] /admin/ambassadors page — requireAuth + getUserRole check (admin or navigator); fetches active ambassadors via getActiveAmbassadors() (Session 107)
+- [x] AmbassadorsAdminClient — Nominate form (member ID, specialty pills, notes); active ambassadors table with Member, Since, Specialties, Members Welcomed, Events Hosted, Status columns (Session 107)
+- [x] /api/admin/ambassadors — GET (list active ambassadors) + POST (nominate member, verifies admin/navigator role) (Session 107)
+- [x] nominateMemberAsAmbassador() / getActiveAmbassadors() / getMemberAmbassador() in m21Volunteers.ts (Session 107)
+- [x] member_ambassadors table created in migration 061 (Session 107)
+
+### Phase 86 — Youth K-12 Curriculum (Session 107)
+STATUS: `COMPLETE`
+
+- [x] /k12 public landing page — three program cards (Pen Pals ages 8-18, Life Stories ages 12-18, Mentorship Reversal ages 14-18); Annual Intergenerational Showcase callout; school registration form (Session 107)
+- [x] /api/k12/register — POST; calls registerK12School(); notifies care team via emailProvider.sendOrgNewsletter() (Session 107)
+- [x] /k12-admin admin portal — admin/navigator role required; stats (pending/active/total); pending schools with Approve button; active schools list (Session 107)
+- [x] /api/k12/schools/[schoolId] — PATCH updates school status (Session 107)
+- [x] k12_schools and k12_student_volunteers tables created in migration 061 (Session 107)
+
+### M21 Cross-cutting (Session 107)
+STATUS: `COMPLETE`
+
+- [x] Volunteer matching algorithm extended — zip code match +30 pts (neighbour volunteers); faith tradition match +25 pts (chaplains); lib/volunteers/match.ts (Session 107)
+- [x] Volunteer apply form (/volunteer/apply) extended with M21 track toggles; all 4 tracks wired to API (Session 107)
+
+HUMAN ACTIONS REQUIRED:
+1. Run migration 061_m21_volunteer_ecosystem.sql in Supabase SQL Editor — extends volunteers table, creates k12_schools, k12_student_volunteers, family_volunteer_links, member_ambassadors; adds zip_code + faith_preference to members

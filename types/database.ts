@@ -65,6 +65,8 @@ export interface Database {
           buddy_intro_note: string | null
           grief_welcome_path: boolean
           grief_enrolled_at: string | null
+          zip_code: string | null
+          faith_preference: string | null
         }
         Insert: {
           id?: string
@@ -100,6 +102,8 @@ export interface Database {
           buddy_intro_note?: string | null
           grief_welcome_path?: boolean
           grief_enrolled_at?: string | null
+          zip_code?: string | null
+          faith_preference?: string | null
         }
         Update: Partial<Database['public']['Tables']['members']['Insert']>
         Relationships: []
@@ -607,6 +611,13 @@ export interface Database {
           insurance_provider: string | null
           insurance_expiry: string | null
           corporate_program_id: string | null
+          volunteer_specialty: string | null
+          professional_background: string | null
+          faith_affiliation: string | null
+          is_chaplain: boolean
+          is_neighbor_volunteer: boolean
+          is_family_reciprocal: boolean
+          zip_code: string | null
         }
         Insert: {
           id?: string
@@ -636,6 +647,13 @@ export interface Database {
           insurance_provider?: string | null
           insurance_expiry?: string | null
           corporate_program_id?: string | null
+          volunteer_specialty?: string | null
+          professional_background?: string | null
+          faith_affiliation?: string | null
+          is_chaplain?: boolean
+          is_neighbor_volunteer?: boolean
+          is_family_reciprocal?: boolean
+          zip_code?: string | null
         }
         Update: Partial<Database['public']['Tables']['volunteers']['Insert']>
         Relationships: []
@@ -1433,6 +1451,112 @@ export interface Database {
           { foreignKeyName: 'corporate_volunteer_hours_volunteer_id_fkey'; columns: ['volunteer_id']; referencedRelation: 'volunteers'; referencedColumns: ['id'] }
         ]
       }
+      k12_schools: {
+        Row: {
+          id: string
+          created_at: string
+          school_name: string
+          contact_name: string
+          contact_email: string
+          school_type: string
+          grade_levels: string[]
+          city: string | null
+          state: string | null
+          program_types: string[]
+          active_student_count: number
+          status: string
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          school_name: string
+          contact_name: string
+          contact_email: string
+          school_type?: string
+          grade_levels?: string[]
+          city?: string | null
+          state?: string | null
+          program_types?: string[]
+          active_student_count?: number
+          status?: string
+        }
+        Update: Partial<Database['public']['Tables']['k12_schools']['Insert']>
+        Relationships: []
+      }
+      k12_student_volunteers: {
+        Row: {
+          id: string
+          created_at: string
+          school_id: string
+          student_name: string
+          grade_level: string | null
+          program_type: string
+          member_id: string | null
+          total_hours_logged: number
+          sessions_completed: number
+          status: string
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          school_id: string
+          student_name: string
+          grade_level?: string | null
+          program_type?: string
+          member_id?: string | null
+          total_hours_logged?: number
+          sessions_completed?: number
+          status?: string
+        }
+        Update: Partial<Database['public']['Tables']['k12_student_volunteers']['Insert']>
+        Relationships: []
+      }
+      member_ambassadors: {
+        Row: {
+          id: string
+          created_at: string
+          member_id: string
+          nominated_by: string | null
+          status: string
+          ambassador_since: string
+          specialties: string[]
+          total_new_members_welcomed: number
+          total_events_hosted: number
+          notes: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          member_id: string
+          nominated_by?: string | null
+          status?: string
+          ambassador_since?: string
+          specialties?: string[]
+          total_new_members_welcomed?: number
+          total_events_hosted?: number
+          notes?: string | null
+        }
+        Update: Partial<Database['public']['Tables']['member_ambassadors']['Insert']>
+        Relationships: []
+      }
+      family_volunteer_links: {
+        Row: {
+          id: string
+          created_at: string
+          volunteer_id: string
+          family_member_id: string
+          linked_member_id: string
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          volunteer_id: string
+          family_member_id: string
+          linked_member_id: string
+        }
+        Update: Partial<Database['public']['Tables']['family_volunteer_links']['Insert']>
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>
@@ -1932,4 +2056,67 @@ export interface SeniorCenterStats {
   total_meals_attendees_this_month: number
   upcoming_activities: number
   rooms_booked_today: number
+}
+
+// ─── M21 — Expanded Volunteer Ecosystem ───────────────────────────────────────
+
+export interface K12SchoolRow {
+  id: string
+  created_at: string
+  school_name: string
+  contact_name: string
+  contact_email: string
+  school_type: string
+  grade_levels: string[]
+  city: string | null
+  state: string | null
+  program_types: string[]
+  active_student_count: number
+  status: string
+}
+
+export interface K12SchoolInsert {
+  school_name: string
+  contact_name: string
+  contact_email: string
+  school_type?: string
+  grade_levels?: string[]
+  city?: string | null
+  state?: string | null
+  program_types?: string[]
+}
+
+export interface K12StudentVolunteerRow {
+  id: string
+  created_at: string
+  school_id: string
+  student_name: string
+  grade_level: string | null
+  program_type: string
+  member_id: string | null
+  total_hours_logged: number
+  sessions_completed: number
+  status: string
+}
+
+export interface MemberAmbassadorRow {
+  id: string
+  created_at: string
+  member_id: string
+  nominated_by: string | null
+  status: string
+  ambassador_since: string
+  specialties: string[]
+  total_new_members_welcomed: number
+  total_events_hosted: number
+  notes: string | null
+  member?: { preferred_name: string; full_name: string } | null
+}
+
+export interface FamilyVolunteerLinkRow {
+  id: string
+  created_at: string
+  volunteer_id: string
+  family_member_id: string
+  linked_member_id: string
 }

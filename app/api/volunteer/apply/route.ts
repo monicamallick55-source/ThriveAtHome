@@ -8,10 +8,13 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
 
-    const { full_name, email, phone, city, state, preferred_contact, languages, availability_days,
+    const { full_name, email, phone, city, state, zip_code, preferred_contact, languages, availability_days,
             hours_per_week, service_types, interests, why_volunteer, prior_experience,
             has_drivers_license, license_state, insurance_provider, insurance_expiry,
-            background_check_consent, corporate_program_id } = body
+            background_check_consent, corporate_program_id,
+            // M21 fields
+            volunteer_specialty, professional_background, faith_affiliation,
+            is_chaplain, is_neighbor_volunteer, is_family_reciprocal } = body
 
     if (!full_name?.trim() || !email?.trim() || !why_volunteer?.trim()) {
       return NextResponse.json({ error: 'Name, email, and motivation are required.' }, { status: 400 })
@@ -44,6 +47,14 @@ export async function POST(req: NextRequest) {
       insurance_provider: insurance_provider?.trim() || undefined,
       insurance_expiry: insurance_expiry || undefined,
       corporate_program_id: corporate_program_id || undefined,
+      // M21 tracks
+      zip_code: zip_code?.trim() || undefined,
+      volunteer_specialty: volunteer_specialty || undefined,
+      professional_background: professional_background?.trim() || undefined,
+      faith_affiliation: faith_affiliation || undefined,
+      is_chaplain: !!is_chaplain || undefined,
+      is_neighbor_volunteer: !!is_neighbor_volunteer || undefined,
+      is_family_reciprocal: !!is_family_reciprocal || undefined,
     })
 
     if (error) {

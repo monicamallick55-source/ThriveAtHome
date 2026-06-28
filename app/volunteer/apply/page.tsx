@@ -19,12 +19,37 @@ const INTERESTS = [
 ]
 const US_STATES = ['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY']
 
+const PROFESSIONAL_SPECIALTIES = [
+  { value: 'tax_help', label: '🧾 Tax Help' },
+  { value: 'legal_guidance', label: '⚖️ Legal Guidance' },
+  { value: 'medical_support', label: '🏥 Medical Support' },
+  { value: 'tech_instruction', label: '💻 Tech Instruction' },
+  { value: 'financial_planning', label: '📊 Financial Planning' },
+  { value: 'career_counseling', label: '🎯 Life Counseling' },
+  { value: 'language_tutoring', label: '🌎 Language Tutoring' },
+  { value: 'fitness_wellness', label: '🏃 Fitness & Wellness' },
+  { value: 'other', label: '🌟 Other Expertise' },
+]
+
+const FAITH_TRADITIONS = [
+  { value: 'christian', label: '✝️ Christian' },
+  { value: 'jewish', label: '✡️ Jewish' },
+  { value: 'muslim', label: '☪️ Muslim' },
+  { value: 'hindu', label: '🕉️ Hindu' },
+  { value: 'buddhist', label: '☸️ Buddhist' },
+  { value: 'sikh', label: '🪯 Sikh' },
+  { value: 'unitarian', label: '🌈 Unitarian Universalist' },
+  { value: 'secular', label: '🌿 Non-Religious / Secular' },
+  { value: 'other', label: '🙏 Other' },
+]
+
 type FormState = {
   full_name: string
   email: string
   phone: string
   city: string
   state: string
+  zip_code: string
   preferred_contact: string
   languages: string[]
   availability_days: string[]
@@ -44,10 +69,18 @@ type FormState = {
   vso_affiliation: string
   is_corporate_volunteer: boolean
   corporate_program_id: string
+  // M21 tracks
+  is_retired_professional: boolean
+  volunteer_specialty: string
+  professional_background: string
+  is_chaplain: boolean
+  faith_affiliation: string
+  is_neighbor_volunteer: boolean
+  is_family_reciprocal: boolean
 }
 
 const initial: FormState = {
-  full_name: '', email: '', phone: '', city: '', state: '',
+  full_name: '', email: '', phone: '', city: '', state: '', zip_code: '',
   preferred_contact: 'email',
   languages: [], availability_days: [], hours_per_week: '',
   service_types: [], interests: [], why_volunteer: '', prior_experience: '',
@@ -55,6 +88,11 @@ const initial: FormState = {
   background_check_consent: false,
   is_veteran: false, veteran_branch: '', veteran_years: '', vso_affiliation: '',
   is_corporate_volunteer: false, corporate_program_id: '',
+  // M21 tracks
+  is_retired_professional: false, volunteer_specialty: '', professional_background: '',
+  is_chaplain: false, faith_affiliation: '',
+  is_neighbor_volunteer: false,
+  is_family_reciprocal: false,
 }
 
 interface CorporateProgram {
@@ -115,6 +153,14 @@ export default function VolunteerApplyPage() {
           insurance_provider: form.insurance_provider || undefined,
           insurance_expiry: form.insurance_expiry || undefined,
           corporate_program_id: form.is_corporate_volunteer && form.corporate_program_id ? form.corporate_program_id : undefined,
+          // M21 fields
+          volunteer_specialty: form.is_retired_professional ? form.volunteer_specialty : undefined,
+          professional_background: form.is_retired_professional ? form.professional_background : undefined,
+          faith_affiliation: form.is_chaplain ? form.faith_affiliation : undefined,
+          is_chaplain: form.is_chaplain || undefined,
+          is_neighbor_volunteer: form.is_neighbor_volunteer || undefined,
+          is_family_reciprocal: form.is_family_reciprocal || undefined,
+          zip_code: form.zip_code || undefined,
         }),
       })
       const json = await res.json()
@@ -315,6 +361,131 @@ export default function VolunteerApplyPage() {
                 </div>
               </div>
             )}
+          </div>
+
+          {/* M21: Retired Professional track */}
+          <div style={sectionStyle}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '26px', color: 'var(--color-navy)', fontWeight: 500, marginBottom: '8px' }}>Volunteer tracks — select all that apply</h2>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '16px', color: 'var(--color-text-secondary)', marginBottom: '20px' }}>
+              In addition to the standard volunteer role, you may qualify for one or more specialised tracks.
+            </p>
+
+            {/* Retired Professional */}
+            <div style={{ marginBottom: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: form.is_retired_professional ? '16px' : '0' }}>
+                <button type="button"
+                  onClick={() => setField('is_retired_professional', !form.is_retired_professional)}
+                  style={{ width: '48px', height: '28px', borderRadius: '14px', border: 'none', cursor: 'pointer', position: 'relative', transition: 'background 0.2s', backgroundColor: form.is_retired_professional ? '#4F46E5' : 'var(--color-warm-grey)' }}
+                  aria-label="Retired professional?"
+                >
+                  <span style={{ position: 'absolute', top: '4px', left: form.is_retired_professional ? '24px' : '4px', width: '20px', height: '20px', borderRadius: '50%', backgroundColor: 'white', transition: 'left 0.2s' }} />
+                </button>
+                <span style={{ fontFamily: 'var(--font-body)', fontSize: '16px', color: 'var(--color-text)', fontWeight: 500 }}>🎓 I am a retired professional offering my expertise</span>
+              </div>
+              {form.is_retired_professional && (
+                <div style={{ padding: '20px', backgroundColor: '#EEF2FF', borderRadius: '10px', border: '1.5px solid #C7D2FE', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div>
+                    <label style={{ ...labelStyle, color: '#3730A3' }}>Your specialty</label>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '8px' }}>
+                      {PROFESSIONAL_SPECIALTIES.map(s => (
+                        <button key={s.value} type="button"
+                          onClick={() => setField('volunteer_specialty', form.volunteer_specialty === s.value ? '' : s.value)}
+                          style={{
+                            padding: '6px 14px', borderRadius: '20px', border: form.volunteer_specialty === s.value ? '2px solid #4F46E5' : '1.5px solid #C7D2FE',
+                            backgroundColor: form.volunteer_specialty === s.value ? '#4F46E5' : 'white', color: form.volunteer_specialty === s.value ? 'white' : '#3730A3',
+                            fontSize: '13px', fontFamily: 'var(--font-body)', cursor: 'pointer',
+                          }}
+                        >{s.label}</button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label style={{ ...labelStyle, color: '#3730A3' }} htmlFor="pro-background">Professional background (optional)</label>
+                    <textarea id="pro-background" rows={3}
+                      value={form.professional_background}
+                      onChange={e => setField('professional_background', e.target.value)}
+                      placeholder="e.g. 25 years as a CPA specialising in small business tax returns…"
+                      style={{ ...inputStyle, height: '96px', padding: '12px 16px', resize: 'vertical' as const, lineHeight: 1.6 }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Faith Chaplain */}
+            <div style={{ marginBottom: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: form.is_chaplain ? '16px' : '0' }}>
+                <button type="button"
+                  onClick={() => setField('is_chaplain', !form.is_chaplain)}
+                  style={{ width: '48px', height: '28px', borderRadius: '14px', border: 'none', cursor: 'pointer', position: 'relative', transition: 'background 0.2s', backgroundColor: form.is_chaplain ? '#EA580C' : 'var(--color-warm-grey)' }}
+                  aria-label="Faith chaplain?"
+                >
+                  <span style={{ position: 'absolute', top: '4px', left: form.is_chaplain ? '24px' : '4px', width: '20px', height: '20px', borderRadius: '50%', backgroundColor: 'white', transition: 'left 0.2s' }} />
+                </button>
+                <span style={{ fontFamily: 'var(--font-body)', fontSize: '16px', color: 'var(--color-text)', fontWeight: 500 }}>🙏 I am a faith community chaplain or spiritual companion</span>
+              </div>
+              {form.is_chaplain && (
+                <div style={{ padding: '16px 20px', backgroundColor: '#FFF7ED', borderRadius: '10px', border: '1.5px solid #FED7AA' }}>
+                  <label style={{ ...labelStyle, color: '#9A3412', display: 'block', marginBottom: '8px' }}>Your faith tradition</label>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                    {FAITH_TRADITIONS.map(f => (
+                      <button key={f.value} type="button"
+                        onClick={() => setField('faith_affiliation', form.faith_affiliation === f.value ? '' : f.value)}
+                        style={{
+                          padding: '6px 14px', borderRadius: '20px', border: form.faith_affiliation === f.value ? '2px solid #EA580C' : '1.5px solid #FED7AA',
+                          backgroundColor: form.faith_affiliation === f.value ? '#EA580C' : 'white', color: form.faith_affiliation === f.value ? 'white' : '#9A3412',
+                          fontSize: '13px', fontFamily: 'var(--font-body)', cursor: 'pointer',
+                        }}
+                      >{f.label}</button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Neighbor Volunteer */}
+            <div style={{ marginBottom: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: form.is_neighbor_volunteer ? '16px' : '0' }}>
+                <button type="button"
+                  onClick={() => setField('is_neighbor_volunteer', !form.is_neighbor_volunteer)}
+                  style={{ width: '48px', height: '28px', borderRadius: '14px', border: 'none', cursor: 'pointer', position: 'relative', transition: 'background 0.2s', backgroundColor: form.is_neighbor_volunteer ? '#16A34A' : 'var(--color-warm-grey)' }}
+                  aria-label="Neighbor volunteer?"
+                >
+                  <span style={{ position: 'absolute', top: '4px', left: form.is_neighbor_volunteer ? '24px' : '4px', width: '20px', height: '20px', borderRadius: '50%', backgroundColor: 'white', transition: 'left 0.2s' }} />
+                </button>
+                <span style={{ fontFamily: 'var(--font-body)', fontSize: '16px', color: 'var(--color-text)', fontWeight: 500 }}>🏠 I want to volunteer as a neighbour for seniors near me</span>
+              </div>
+              {form.is_neighbor_volunteer && (
+                <div style={{ padding: '16px 20px', backgroundColor: '#F0FDF4', borderRadius: '10px', border: '1.5px solid #BBF7D0' }}>
+                  <label style={{ ...labelStyle, color: '#166534' }} htmlFor="vol-zip">Your zip code (for local matching)</label>
+                  <input id="vol-zip" type="text" maxLength={5}
+                    value={form.zip_code}
+                    onChange={e => setField('zip_code', e.target.value)}
+                    placeholder="e.g. 94102"
+                    style={{ ...inputStyle, width: '160px', marginTop: '8px' }}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Family Reciprocal */}
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <button type="button"
+                  onClick={() => setField('is_family_reciprocal', !form.is_family_reciprocal)}
+                  style={{ width: '48px', height: '28px', borderRadius: '14px', border: 'none', cursor: 'pointer', position: 'relative', transition: 'background 0.2s', backgroundColor: form.is_family_reciprocal ? 'var(--color-teal)' : 'var(--color-warm-grey)' }}
+                  aria-label="Family reciprocal volunteer?"
+                >
+                  <span style={{ position: 'absolute', top: '4px', left: form.is_family_reciprocal ? '24px' : '4px', width: '20px', height: '20px', borderRadius: '50%', backgroundColor: 'white', transition: 'left 0.2s' }} />
+                </button>
+                <div>
+                  <span style={{ fontFamily: 'var(--font-body)', fontSize: '16px', color: 'var(--color-text)', fontWeight: 500 }}>💛 My family member uses ThriveAtHome and I want to volunteer for other seniors in return</span>
+                  <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', margin: '4px 0 0' }}>
+                    Family Reciprocity: families of enrolled seniors volunteer for other families on the platform.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Languages */}

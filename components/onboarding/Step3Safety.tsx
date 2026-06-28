@@ -299,6 +299,67 @@ export function Step3Safety({ data, onChange }: Props) {
           placeholder="e.g. diabetes, arthritis, high blood pressure"
         />
       </div>
+
+      {/* Grief Welcome Path */}
+      <div
+        style={{
+          backgroundColor: '#FAF5FF',
+          border: '1.5px solid #E9D5FF',
+          borderRadius: 'var(--radius-lg)',
+          padding: '20px 24px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '12px',
+        }}
+      >
+        <p style={{ ...labelStyle, margin: 0 }}>
+          Has {data.preferred_name || 'the senior'} recently lost someone important?
+        </p>
+        <p style={{ fontSize: '15px', color: 'var(--color-text-muted)', fontFamily: 'var(--font-body)', margin: 0 }}>
+          If so, we will prioritise a daily check-in from Aria and aim to connect {data.preferred_name || 'them'} with a buddy within 48 hours.
+        </p>
+        <div
+          style={{
+            display: 'flex',
+            backgroundColor: 'var(--color-warm-grey)',
+            borderRadius: 'var(--radius-md)',
+            padding: '4px',
+            height: '56px',
+          }}
+          role="group"
+          aria-label="Recent loss — Grief Welcome Path"
+        >
+          {[
+            { value: '', label: 'No recent loss' },
+            { value: 'true', label: 'Yes, recent loss' },
+          ].map((option) => {
+            const isSelected = data.grief_welcome_path === option.value
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => onChange('grief_welcome_path', option.value)}
+                aria-pressed={isSelected}
+                style={{
+                  flex: 1,
+                  border: 'none',
+                  borderRadius: 'var(--radius-sm)',
+                  backgroundColor: isSelected ? (option.value === 'true' ? '#7C3AED' : 'white') : 'transparent',
+                  color: isSelected ? (option.value === 'true' ? 'white' : 'var(--color-navy)') : 'var(--color-text-muted)',
+                  fontSize: '17px',
+                  fontFamily: 'var(--font-body)',
+                  fontWeight: isSelected ? 600 : 400,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  boxShadow: isSelected ? 'var(--shadow-sm)' : 'none',
+                }}
+              >
+                {option.label}
+              </button>
+            )
+          })}
+        </div>
+      </div>
     </div>
   )
 }

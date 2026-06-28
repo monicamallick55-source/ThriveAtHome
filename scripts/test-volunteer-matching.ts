@@ -37,6 +37,13 @@ function makeVolunteer(overrides: Partial<Volunteer>): Volunteer {
     insurance_provider: null,
     insurance_expiry: null,
     corporate_program_id: null,
+    volunteer_specialty: null,
+    professional_background: null,
+    faith_affiliation: null,
+    is_chaplain: false,
+    is_neighbor_volunteer: false,
+    is_family_reciprocal: false,
+    zip_code: null,
     ...overrides,
   }
 }
@@ -76,6 +83,8 @@ function makeMember(overrides: Partial<Member>): Member {
     buddy_intro_note: null,
     grief_welcome_path: false,
     grief_enrolled_at: null,
+    zip_code: null,
+    faith_preference: null,
     ...overrides,
   }
 }

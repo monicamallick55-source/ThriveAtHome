@@ -14,6 +14,7 @@ interface MemberSummary {
 interface ClinicalNotesTabProps {
   agencyId: string
   members: MemberSummary[]
+  signerName?: string
 }
 
 type SubTab = 'soap' | 'care-plans'
@@ -37,7 +38,7 @@ function formatDate(d: string | null): string {
   return `${months[mo - 1]} ${da}, ${y}`
 }
 
-export default function ClinicalNotesTab({ agencyId, members }: ClinicalNotesTabProps) {
+export default function ClinicalNotesTab({ agencyId, members, signerName }: ClinicalNotesTabProps) {
   const [selectedMember, setSelectedMember] = useState<MemberSummary | null>(null)
   const [subTab, setSubTab] = useState<SubTab>('soap')
 
@@ -94,7 +95,7 @@ export default function ClinicalNotesTab({ agencyId, members }: ClinicalNotesTab
     const res = await fetch(`/api/agency/clinical/${noteId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action, signer_name: 'Agency Admin' }),
+      body: JSON.stringify({ action, signer_name: signerName || 'Agency Admin' }),
     })
     if (res.ok) {
       const json = await res.json()

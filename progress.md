@@ -8386,4 +8386,93 @@ HUMAN APPROVAL:
 NEXT SESSION MUST:
 - Human verifies on live Vercel site: (1) /org-admin → Settings → "Connect to Helpful Village" saves without error; (2) /agency-admin → Member Wellness → log visit → wellness tab refreshes; (3) /employer-admin → "ROI Dashboard" tab visible; (4) /navigator → Grief path filter (🕊️) visible; (5) /admin/settings → Referral Partners section visible; (6) /agency-admin → "Partner Program" tab visible
 - Upon APPROVAL: Begin M21 — Expanded Volunteer Ecosystem (Phases 81–86: Retired Professionals Network, Faith Community Chaplaincy, Neighbor Volunteers, Family Volunteer Reciprocity, Member Ambassador Programme, Youth K-12 Curriculum)
+
+APPROVED — Proceeding to next build phase. Browser testing deferred until Vercel deployment is configured. Issues queued for Claude to fix in upcoming sessions: (1) Phase 73 HV Integration save throws JSON SyntaxError; (2) Phase 74 Employer ROI Dashboard not yet tested; (3) Phase 75 Grief Welcome Path missing three UI elements — onboarding "Recent loss" toggle, navigator GRIEF PATH badge/filter, and /admin/settings Referral Partners section; (4) Phase 77 Agency Member Wellness logged visits don't refresh in UI after saving; (5) Phase 78 Agency Referral Partner Program tab not built in /agency-admin; (6) Phase 67 Member Portal all tabs redirect to profile — full 9-tab rebuild needed; (7) Phase 70 Email sent history not saved or viewable; (8) Phase 72 Document upload silently fails; (9) Phase 68 Volunteer Open Requests showed 3 seeded requests but claim flow not verified; (10) Phase 63 member needs form uses UUID input instead of name dropdown; (11) signed_by_name in SOAP notes shows "Agency Admin" not actual user name. All migrations 055-060 confirmed in Supabase. Begin next build phase.
+
 ---
+
+---
+SESSION: 107
+DATE: 2026-06-28 UTC
+MILESTONE: M21 — Expanded Volunteer Ecosystem (Phases 81–86)
+PHASE: Phase 81 Retired Professionals, Phase 82 Faith Chaplaincy, Phase 83 Neighbor Volunteers, Phase 84 Family Reciprocity, Phase 85 Member Ambassadors, Phase 86 Youth K-12 Curriculum
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 81 Retired Professionals: [x] /volunteer/professionals + RetiredProfessionalsClient + getRetiredProfessionalVolunteers()
+- Phase 82 Faith Chaplaincy: [x] /volunteer/chaplaincy + ChaplaincyClient + getChaplainVolunteers()
+- Phase 83 Neighbor Volunteers: [x] /volunteer/neighbors + NeighborVolunteersClient + getNeighborVolunteers()
+- Phase 84 Family Reciprocity: [x] /volunteer/apply extended with 4 M21 track toggles + API + data layer
+- Phase 85 Member Ambassadors: [x] /admin/ambassadors + AmbassadorsAdminClient + /api/admin/ambassadors
+- Phase 86 Youth K-12: [x] /k12 public + /k12-admin + /api/k12/register + /api/k12/schools/[id]
+- Database types: [x] M21 columns added to volunteers and members; k12_schools/k12_student_volunteers/member_ambassadors/family_volunteer_links added to Database['public']['Tables']
+- Volunteer matching: [x] zip code +30 pts, faith match +25 pts added to match.ts
+- Bug fixes (from Session 106 human approval issues): [x] Step3Safety grief_welcome_path toggle, [x] ClinicalNotesTab signerName from agency.contact_name, [x] TypeScript clean
+- npx tsc --noEmit: [x] PASSED — zero errors
+- npm run build: [x] PASSED — 188 pages compiled cleanly
+
+WHAT WAS DONE THIS SESSION:
+- supabase/migrations/061_m21_volunteer_ecosystem.sql — CREATED: extends volunteers table (volunteer_specialty, professional_background, faith_affiliation, is_chaplain, is_neighbor_volunteer, is_family_reciprocal, zip_code); creates k12_schools, k12_student_volunteers, family_volunteer_links, member_ambassadors; adds zip_code + faith_preference to members
+- types/database.ts — MODIFIED: added M21 columns to volunteers Row/Insert; added zip_code/faith_preference to members Row/Insert; added k12_schools, k12_student_volunteers, member_ambassadors, family_volunteer_links to Database['public']['Tables']
+- lib/data/m21Volunteers.ts — CREATED: getRetiredProfessionalVolunteers, getChaplainVolunteers, getNeighborVolunteers, getActiveAmbassadors, nominateMemberAsAmbassador, getMemberAmbassador, registerK12School, getK12Schools, getK12StudentsForSchool
+- app/volunteer/professionals/page.tsx — CREATED: server component for retired professional volunteers
+- components/volunteer/RetiredProfessionalsClient.tsx — CREATED: SPECIALTIES filter pills, professional cards grid
+- app/volunteer/chaplaincy/page.tsx — CREATED: server component for faith chaplain volunteers
+- components/volunteer/ChaplaincyClient.tsx — CREATED: FAITHS filter, chaplain cards, info box
+- app/volunteer/neighbors/page.tsx — CREATED: client component neighbor volunteer directory with zip search
+- components/volunteer/NeighborVolunteersClient.tsx — CREATED: 8 task cards, zip search, volunteer CTA
+- app/volunteer/apply/page.tsx — MODIFIED: added 4 M21 track toggles (Retired Professional, Faith Chaplain, Neighbour Volunteer, Family Reciprocal); relevant sub-fields revealed per track
+- lib/data/volunteers.ts — MODIFIED: VolunteerApplicationData + submitVolunteerApplication support M21 fields via conditional spread
+- app/api/volunteer/apply/route.ts — MODIFIED: destructures and passes M21 fields
+- lib/volunteers/match.ts — MODIFIED: zip code matching +30 pts; faith tradition matching +25 pts
+- app/admin/ambassadors/page.tsx — CREATED: admin/navigator role-gated ambassador management
+- components/admin/AmbassadorsAdminClient.tsx — CREATED: nominate form + ambassadors table
+- app/api/admin/ambassadors/route.ts — CREATED: GET list + POST nominate
+- app/k12/page.tsx — CREATED: public K-12 landing (no auth)
+- components/k12/K12LandingClient.tsx — CREATED: 3 program cards, showcase callout, school registration form
+- app/api/k12/register/route.ts — CREATED: POST registers K-12 school, notifies care team via sendOrgNewsletter
+- app/k12-admin/page.tsx — CREATED: admin K-12 school portal
+- components/k12/K12AdminClient.tsx — CREATED: stats, pending approval flow, active schools
+- app/api/k12/schools/[schoolId]/route.ts — CREATED: PATCH updates school status
+- components/onboarding/Step3Safety.tsx — MODIFIED: grief_welcome_path toggle added (purple card, two-option segmented button)
+- components/agency/ClinicalNotesTab.tsx — MODIFIED: signerName prop wired; signer_name now uses actual contact_name not hardcoded 'Agency Admin'
+- components/agency/AgencyDashboardClient.tsx — MODIFIED: signerName={agency.contact_name} passed to ClinicalNotesTab
+- scripts/test-volunteer-matching.ts — MODIFIED: makeVolunteer/makeMember defaults include M21 columns
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — 188 pages compiled cleanly, ✓ Compiled successfully in 37.8s
+
+ERRORS ENCOUNTERED AND FIXED:
+- emailProvider.sendEmail does not exist — K-12 register route called non-existent method; fixed by switching to sendOrgNewsletter() with best-effort void + .catch()
+- Supabase type errors on new volunteer/member columns — Database['public']['Tables']['volunteers'] Row/Insert lacked M21 columns; fixed by adding them to types/database.ts
+- k12_schools/member_ambassadors/etc. not in Database['public']['Tables'] — queries returned never type; fixed by adding all 4 new tables to the Database type
+- scripts/test-volunteer-matching.ts mock objects missing M21 columns — fixed by adding null defaults
+
+STUB STATUS: All providers remain as stubs (StubAiProvider, StubCallProvider, etc.)
+
+DECISIONS MADE:
+- Phases 79 (FHIR) and 80 (Competitor comparison) remain deferred; M21 built in full per priority order
+- emailProvider notification for K-12 registration uses sendOrgNewsletter (best-effort void) — no blocking await
+- family_volunteer_links table created; admin UI for viewing reciprocal connections is a future phase item
+- Annual Intergenerational Showcase: no new table needed; admin can create events with event_type='intergenerational_showcase' using existing events table
+
+WHAT TO TEST:
+- **Phase 81**: /volunteer/professionals — specialty filter pills; professional volunteer cards; "Become a professional volunteer" → /volunteer/apply?track=professional
+- **Phase 82**: /volunteer/chaplaincy — faith filter pills; chaplain cards; "What our chaplains offer" info box
+- **Phase 83**: /volunteer/neighbors — 8 task category cards; zip code search field; "Volunteer as a neighbour" CTA
+- **Phase 84**: /volunteer/apply — scroll to "Volunteer tracks" section; toggle each of 4 tracks; verify sub-fields appear; submit form
+- **Phase 85**: /admin/ambassadors — nominate a member (enter member ID + specialties + notes); confirm appears in ambassadors table
+- **Phase 86**: /k12 — view 3 program cards; fill school registration form and submit; /k12-admin — verify school appears as pending; click Approve
+
+HUMAN ACTIONS REQUIRED:
+1. Run migration 061_m21_volunteer_ecosystem.sql in Supabase SQL Editor
+   - Extends volunteers table with 7 M21 columns
+   - Creates k12_schools, k12_student_volunteers, family_volunteer_links, member_ambassadors tables
+   - Adds zip_code and faith_preference columns to members table
+
+NEXT SESSION MUST:
+- Upon APPROVAL: Begin M22 — next milestone (check ThriveAtHome_Build_Phases_v4.md for M22 definition)
+
+AWAITING HUMAN APPROVAL

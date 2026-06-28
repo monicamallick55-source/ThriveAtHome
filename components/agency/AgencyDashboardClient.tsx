@@ -1046,6 +1046,7 @@ export default function AgencyDashboardClient({
           <ClinicalNotesTab
             agencyId={agency.id}
             members={members.map(m => ({ id: m.id, preferred_name: m.preferred_name, full_name: m.full_name }))}
+            signerName={agency.contact_name}
           />
         )}
 

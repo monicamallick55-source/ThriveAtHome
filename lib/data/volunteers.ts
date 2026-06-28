@@ -15,6 +15,7 @@ export interface VolunteerApplicationData {
   phone?: string
   city?: string
   state?: string
+  zip_code?: string
   languages?: string[]
   availability_days?: string[]
   hours_per_week?: string
@@ -28,6 +29,13 @@ export interface VolunteerApplicationData {
   insurance_provider?: string
   insurance_expiry?: string
   corporate_program_id?: string
+  // M21 tracks
+  volunteer_specialty?: string
+  professional_background?: string
+  faith_affiliation?: string
+  is_chaplain?: boolean
+  is_neighbor_volunteer?: boolean
+  is_family_reciprocal?: boolean
 }
 
 export async function submitVolunteerApplication(
@@ -56,6 +64,14 @@ export async function submitVolunteerApplication(
         insurance_provider: data.insurance_provider ?? null,
         insurance_expiry: data.insurance_expiry ?? null,
         corporate_program_id: data.corporate_program_id ?? null,
+        // M21 extended fields (added by migration 061)
+        ...(data.zip_code !== undefined ? { zip_code: data.zip_code } : {}),
+        ...(data.volunteer_specialty !== undefined ? { volunteer_specialty: data.volunteer_specialty } : {}),
+        ...(data.professional_background !== undefined ? { professional_background: data.professional_background } : {}),
+        ...(data.faith_affiliation !== undefined ? { faith_affiliation: data.faith_affiliation } : {}),
+        ...(data.is_chaplain !== undefined ? { is_chaplain: data.is_chaplain } : {}),
+        ...(data.is_neighbor_volunteer !== undefined ? { is_neighbor_volunteer: data.is_neighbor_volunteer } : {}),
+        ...(data.is_family_reciprocal !== undefined ? { is_family_reciprocal: data.is_family_reciprocal } : {}),
         status: 'pending',
       })
       .select()

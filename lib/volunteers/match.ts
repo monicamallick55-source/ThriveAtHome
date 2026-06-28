@@ -74,6 +74,22 @@ export function scoreVolunteerForMember(volunteer: Volunteer, member: Member, se
     reasons.push('Veteran-to-veteran connection')
   }
 
+  // M21: Zip code match for neighbor volunteers (+30 pts — stronger than city alone)
+  const volZip = (volunteer as Volunteer & { zip_code?: string | null }).zip_code
+  const memberZip = (member as Member & { zip_code?: string | null }).zip_code
+  if (volZip && memberZip && volZip === memberZip) {
+    score += 30
+    reasons.push('Same zip code — neighbor volunteer')
+  }
+
+  // M21: Faith match for chaplain volunteers
+  const volFaith = (volunteer as Volunteer & { faith_affiliation?: string | null }).faith_affiliation
+  const memberFaith = (member as Member & { faith_preference?: string | null }).faith_preference
+  if (volFaith && memberFaith && volFaith === memberFaith) {
+    score += 25
+    reasons.push(`Shared faith tradition (${volFaith})`)
+  }
+
   // Availability (has hours)
   if (volunteer.hours_per_week && volunteer.hours_per_week !== '0') {
     score += 10
