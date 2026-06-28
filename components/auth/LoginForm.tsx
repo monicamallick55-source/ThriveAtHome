@@ -84,12 +84,44 @@ export function LoginForm() {
         .eq('supabase_auth_id', user.id)
         .maybeSingle()
 
+      if (!fm) {
+        // Check if this is a direct senior member login (members.supabase_auth_id — added in migration 049)
+        const { data: memberRow } = await (supabase as any)
+          .from('members')
+          .select('id')
+          .eq('supabase_auth_id', user.id)
+          .maybeSingle()
+        if (memberRow) {
+          router.push('/member-portal')
+          router.refresh()
+          return
+        }
+      }
+
       const role = fm?.role ?? 'family'
 
       if (role === 'navigator') {
         router.push('/navigator')
       } else if (role === 'admin') {
         router.push('/admin')
+      } else if (role === 'volunteer') {
+        router.push('/volunteer/dashboard')
+      } else if (role === 'student') {
+        router.push('/student')
+      } else if (role === 'university_admin') {
+        router.push('/university-admin')
+      } else if (role === 'employer_admin') {
+        router.push('/employer-admin')
+      } else if (role === 'agency_admin') {
+        router.push('/agency-admin')
+      } else if (role === 'aaa_admin') {
+        router.push('/aaa-admin')
+      } else if (role === 'org_admin') {
+        router.push('/org-admin')
+      } else if (role === 'senior_center_admin') {
+        router.push('/senior-center-admin')
+      } else if (role === 'network_admin') {
+        router.push('/network-admin')
       } else {
         router.push('/dashboard')
       }

@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { formatDistanceToNow } from 'date-fns'
 import type { CaseloadEntry, NavigatorTask } from '@/lib/data/navigator'
+import type { Member } from '@/lib/data/members'
 import type { GriefSupportRequest } from '@/lib/data/grief'
 import type { ServiceBooking } from '@/lib/data/services'
 import { MemberDetailPanel } from './MemberDetailPanel'
@@ -60,6 +61,7 @@ type ActionItem =
   | { kind: 'task'; id: string; memberName: string; memberId: string | null; priority: string; description: string; dueBy: string | null; urgency: number }
 
 type FilterType = 'all' | 'alerts' | 'service' | 'grief' | 'tasks'
+type CaseloadFilter = 'all' | 'grief_path'
 
 export interface NavConsoleProps {
   navigatorName: string
@@ -70,6 +72,81 @@ export interface NavConsoleProps {
   tasksError: string | null
   griefRequests?: (GriefSupportRequest & { members: { preferred_name: string; full_name: string; phone_number: string } | null })[]
   pendingBookings?: PendingBooking[]
+}
+
+function NavigatorEmailSection() {
+  const [subject, setSubject] = useState('')
+  const [message, setMessage] = useState('')
+  const [sending, setSending] = useState(false)
+  const [err, setErr] = useState<string | null>(null)
+  const [expanded, setExpanded] = useState(false)
+  const [sentHistory, setSentHistory] = useState<Array<{ subject: string; sentTo: number; sentAt: string }>>([])
+
+  async function handleSend(e: React.FormEvent) {
+    e.preventDefault()
+    if (!subject.trim() || !message.trim()) { setErr('Subject and message are required.'); return }
+    setSending(true); setErr(null)
+    const res = await fetch('/api/navigator/send-email', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subject, message }),
+    })
+    const json = await res.json()
+    setSending(false)
+    if (res.ok) {
+      setSentHistory(prev => [{ subject: subject.trim(), sentTo: json.sent ?? 0, sentAt: new Date().toLocaleString() }, ...prev])
+      setSubject(''); setMessage(''); setExpanded(false)
+    } else setErr(json.error ?? 'Failed to send.')
+  }
+
+  return (
+    <div style={{ backgroundColor: 'white', borderRadius: '14px', padding: '24px 28px', border: '1px solid #E8E4DC' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: expanded ? '20px' : 0 }}>
+        <div>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 500, color: 'var(--color-navy)', margin: 0 }}>Email My Members</h2>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: '2px 0 0' }}>Send a message to your caseload</p>
+        </div>
+        <button onClick={() => setExpanded(e => !e)}
+          style={{ padding: '8px 18px', backgroundColor: 'transparent', border: '1.5px solid var(--color-navy)', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, color: 'var(--color-navy)', cursor: 'pointer' }}>
+          {expanded ? 'Cancel' : 'Compose email'}
+        </button>
+      </div>
+      {expanded && (
+        <>
+          {err && <div style={{ padding: '12px 16px', backgroundColor: '#FEE2E2', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '14px', color: '#DC2626', marginBottom: '12px' }}>{err}</div>}
+          <form onSubmit={handleSend} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div>
+              <label style={{ display: 'block', fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: '#7A7268', marginBottom: '4px' }}>Subject</label>
+              <input value={subject} onChange={e => setSubject(e.target.value)} placeholder="Subject" required
+                style={{ width: '100%', padding: '10px 14px', border: '1.5px solid #D4CFC8', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '15px', boxSizing: 'border-box' }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: '#7A7268', marginBottom: '4px' }}>Message (to all members in My caseload)</label>
+              <textarea value={message} onChange={e => setMessage(e.target.value)} rows={5} placeholder="Write your message here…" required
+                style={{ width: '100%', padding: '10px 14px', border: '1.5px solid #D4CFC8', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '15px', resize: 'vertical', boxSizing: 'border-box' }} />
+            </div>
+            <button type="submit" disabled={sending}
+              style={{ alignSelf: 'flex-start', padding: '10px 24px', backgroundColor: sending ? '#7A7268' : 'var(--color-navy)', color: 'white', border: 'none', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 600, cursor: sending ? 'not-allowed' : 'pointer' }}>
+              {sending ? 'Sending…' : 'Send to My caseload'}
+            </button>
+          </form>
+        </>
+      )}
+      {sentHistory.length > 0 && (
+        <div style={{ marginTop: '16px', borderTop: '1px solid #E8E4DC', paddingTop: '16px' }}>
+          <h3 style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 700, color: '#7A7268', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 10px' }}>Sent this session</h3>
+          {sentHistory.map((item, i) => (
+            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '8px 12px', backgroundColor: '#F9F7F4', borderRadius: '8px', marginBottom: '6px', gap: '16px' }}>
+              <div>
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-navy)' }}>{item.subject}</div>
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: '#7A7268', marginTop: '2px' }}>Sent to {item.sentTo} member{item.sentTo !== 1 ? 's' : ''}</div>
+              </div>
+              <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: '#7A7268', whiteSpace: 'nowrap', flexShrink: 0 }}>{item.sentAt}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
 }
 
 export function NavConsole({
@@ -96,6 +173,7 @@ export function NavConsole({
   const [contactedIds, setContactedIds] = useState<Set<string>>(new Set())
   const [activeFilter, setActiveFilter] = useState<FilterType>('all')
   const [tableExpanded, setTableExpanded] = useState(false)
+  const [caseloadFilter, setCaseloadFilter] = useState<CaseloadFilter>('all')
   const actionFeedRef = useRef<HTMLElement | null>(null)
 
   const handleSignOut = async () => {
@@ -228,7 +306,19 @@ export function NavConsole({
   }
 
   // Caseload: build open items summary
-  const filteredCaseload = caseload.filter(entry =>
+  const griefPathMembers = caseload
+    .filter(entry => (entry.member as Member & { grief_welcome_path?: boolean }).grief_welcome_path)
+    .sort((a, b) => {
+      const aDate = (a.member as Member & { grief_enrolled_at?: string | null }).grief_enrolled_at
+      const bDate = (b.member as Member & { grief_enrolled_at?: string | null }).grief_enrolled_at
+      if (!aDate && !bDate) return 0
+      if (!aDate) return 1
+      if (!bDate) return -1
+      return new Date(aDate).getTime() - new Date(bDate).getTime()
+    })
+
+  const caseloadSource = caseloadFilter === 'grief_path' ? griefPathMembers : caseload
+  const filteredCaseload = caseloadSource.filter(entry =>
     entry.member.full_name.toLowerCase().includes(search.toLowerCase())
   )
 
@@ -545,7 +635,7 @@ export function NavConsole({
             }}
           >
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: 'var(--color-navy)', margin: 0 }}>
-              Caseload ({caseload.length} members) {tableExpanded ? '▲' : '▼'}
+              Caseload ({caseloadFilter === 'grief_path' ? `${griefPathMembers.length} grief path` : `${caseload.length} members`}) {tableExpanded ? '▲' : '▼'}
             </h2>
             <span style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)' }}>
               {tableExpanded ? 'Collapse' : 'Expand to browse'}
@@ -554,7 +644,23 @@ export function NavConsole({
 
           {tableExpanded && (
             <>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <button
+                    type="button"
+                    onClick={() => setCaseloadFilter('all')}
+                    style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: caseloadFilter === 'all' ? 700 : 500, padding: '6px 14px', borderRadius: '8px', border: caseloadFilter === 'all' ? '2px solid var(--color-navy)' : '1.5px solid #D4CFC8', backgroundColor: caseloadFilter === 'all' ? 'var(--color-navy)' : 'white', color: caseloadFilter === 'all' ? 'white' : 'var(--color-text-secondary)', cursor: 'pointer' }}
+                  >
+                    All ({caseload.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCaseloadFilter('grief_path')}
+                    style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: caseloadFilter === 'grief_path' ? 700 : 500, padding: '6px 14px', borderRadius: '8px', border: caseloadFilter === 'grief_path' ? '2px solid #7C3AED' : '1.5px solid #E9D5FF', backgroundColor: caseloadFilter === 'grief_path' ? '#7C3AED' : '#FDF4FF', color: caseloadFilter === 'grief_path' ? 'white' : '#7C3AED', cursor: 'pointer' }}
+                  >
+                    🕊️ Grief path ({griefPathMembers.length})
+                  </button>
+                </div>
                 <input
                   type="search"
                   value={search}
@@ -578,7 +684,10 @@ export function NavConsole({
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--font-body)', fontSize: '14px', backgroundColor: 'white' }} aria-label="Caseload table">
                     <thead>
                       <tr style={{ backgroundColor: 'var(--color-navy)', color: 'var(--color-cream)', textAlign: 'left' }}>
-                        {['Name', 'Plan', 'Last check-in', 'Mood', 'Open items', ''].map(col => (
+                        {(caseloadFilter === 'grief_path'
+                          ? ['Name', 'Plan', 'Enrolled (grief path)', 'Mood', 'Open items', '']
+                          : ['Name', 'Plan', 'Last check-in', 'Mood', 'Open items', '']
+                        ).map(col => (
                           <th key={col} scope="col" style={{ padding: '12px 16px', fontWeight: 600, fontSize: '12px', letterSpacing: '0.05em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{col}</th>
                         ))}
                       </tr>
@@ -594,10 +703,20 @@ export function NavConsole({
 
                         return (
                           <tr key={entry.member.id} style={{ backgroundColor: idx % 2 === 0 ? 'white' : 'var(--color-warm-white)', borderBottom: '1px solid var(--color-warm-grey)' }}>
-                            <td style={{ padding: '14px 16px', fontWeight: 500, color: 'var(--color-text-primary)' }}>{entry.member.preferred_name || entry.member.full_name}</td>
+                            <td style={{ padding: '14px 16px', fontWeight: 500, color: 'var(--color-text-primary)' }}>
+                              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                {entry.member.preferred_name || entry.member.full_name}
+                                {(entry.member as Member & { grief_welcome_path?: boolean }).grief_welcome_path && (
+                                  <span style={{ fontSize: '10px', fontWeight: 700, color: '#7C3AED', backgroundColor: '#F5F3FF', padding: '2px 7px', borderRadius: '20px', whiteSpace: 'nowrap' }}>GRIEF PATH</span>
+                                )}
+                              </span>
+                            </td>
                             <td style={{ padding: '14px 16px', color: 'var(--color-text-secondary)', textTransform: 'capitalize' }}>{entry.member.plan_tier}</td>
                             <td style={{ padding: '14px 16px', color: 'var(--color-text-secondary)', fontFamily: 'var(--font-mono)', fontSize: '13px' }}>
-                              {entry.latestCall?.ended_at ? formatDate(entry.latestCall.ended_at) : entry.latestCall?.created_at ? formatDate(entry.latestCall.created_at) : '—'}
+                              {caseloadFilter === 'grief_path'
+                                ? formatDate((entry.member as Member & { grief_enrolled_at?: string | null }).grief_enrolled_at ?? null)
+                                : (entry.latestCall?.ended_at ? formatDate(entry.latestCall.ended_at) : entry.latestCall?.created_at ? formatDate(entry.latestCall.created_at) : '—')
+                              }
                             </td>
                             <td style={{ padding: '14px 16px', color: 'var(--color-text-secondary)' }}>{moodLabel(entry.latestCall?.mood_score ?? null)}</td>
                             <td style={{ padding: '14px 16px', color: alertsCount > 0 ? 'var(--color-urgent-text)' : 'var(--color-text-secondary)', fontFamily: 'var(--font-body)', fontSize: '13px' }}>{openItemsLabel}</td>
@@ -619,6 +738,11 @@ export function NavConsole({
               )}
             </>
           )}
+        </section>
+
+        {/* Email Caseload Section */}
+        <section aria-label="Email members" style={{ marginBottom: '48px' }}>
+          <NavigatorEmailSection />
         </section>
       </main>
 

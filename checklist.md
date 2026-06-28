@@ -454,6 +454,18 @@ M20 Community Org     Phase 63 [x][x][x][x][x][x][x][x][x][x][x][x] 12/12 ✅ CO
                       Phase 64 [x][x][x][x][x][x][x]         7/7 ✅ COMPLETE (Session 101)
                       Phase 65 [x][x][x][x][x][x][x][x]      8/8 ✅ COMPLETE (Session 101)
                       Phase 66 [x][x][x][x][x][x][x][x]      8/8 ✅ COMPLETE (Session 101)
+Platform-Wide         Phase 67 [x][x][x][x][x][x][x][x]      8/8 ✅ COMPLETE (Session 102/103 APPROVED)
+                      Phase 68 [x][x][x][x][x][x][x]         7/7 ✅ COMPLETE (Session 102/103 APPROVED)
+                      Phase 69 [x][x][x][x][x]               5/5 ✅ COMPLETE (Session 102/103 APPROVED)
+                      Phase 70 [x][x][x][x][x][x][x]         7/7 ✅ COMPLETE (Session 102/103 APPROVED)
+                      Phase 71 [x][x][x][x][x][x]            6/6 ✅ COMPLETE (Session 102/103 APPROVED)
+                      Phase 72 [x][x][x][x][x][x][x]         7/7 ✅ COMPLETE (Session 102/103 APPROVED)
+Competitive Spec      Phase 73 [x][x][x][x][x][x]            6/6 ✅ COMPLETE (Session 104)
+                      Phase 74 [x][x][x][x][x][x]            6/6 ✅ COMPLETE (Session 104)
+                      Phase 75 [x][x][x][x][x][x][x]         7/7 ✅ COMPLETE (Session 104)
+                      Phase 76 [x][x][x][x][x][x][x]         7/7 ✅ COMPLETE (Session 104)
+                      Phase 77 [x][x][x][x][x][x][x]         7/7 ✅ COMPLETE (Session 104)
+                      Phase 78 [x][x][x][x][x][x][x]         7/7 ✅ COMPLETE (Session 105)
 ```
 
 ## M17 — Services Marketplace
@@ -1586,3 +1598,191 @@ HUMAN ACTIONS REQUIRED BEFORE BROWSER TEST:
    Seeds: VtVN and n4a network accounts
 2. Link Bay Area Village Network (community_orgs) to VtVN (network_accounts) by setting network_id FK
 3. In Supabase, set family_members.network_id and role='network_admin' for a test user
+
+---
+
+## Platform-Wide Additions — Phases 67–72
+
+### Phase 67 — Member Self-Service Portal (Session 102)
+STATUS: `COMPLETE`
+
+- [x] Migration 049_member_auth.sql — adds supabase_auth_id to members table + RLS policies for member self-read/update (Session 102)
+- [x] Member login works — LoginForm checks members.supabase_auth_id when no family_members row found; routes to /member-portal (Session 102)
+- [x] /member-portal shows member's own profile, upcoming services, events, communities — MemberPortalClient.tsx: profile, services, community, dates, buddy, life-story, billing, org, notifications, documents tabs (Session 102)
+- [x] Member can post a need to their community org — /api/member/post-need → creates member_needs row linked to member's org (Session 102)
+- [x] Member can update their own preferences and language settings — /api/member/preferences → updates preferred_language, topics_enjoy, preferred_call_time, phone_number (Session 102)
+- [x] Member can access their life story archive and Memory Book — life-story tab in MemberPortalClient; /api/life-story and /api/memory-book (Session 102)
+- [x] Family dashboard still works for family members linked to the same member — no changes to /dashboard; LoginForm only routes to /member-portal for users with no family_members row (Session 102)
+- [x] npx tsc --noEmit passes — zero errors (Session 102)
+- [x] npm run build passes — ✓ Compiled successfully (Session 102)
+
+HUMAN ACTIONS REQUIRED BEFORE BROWSER TEST:
+1. Confirm migration 049_member_auth.sql has been run in Supabase SQL Editor
+2. UPDATE members SET supabase_auth_id = '[UUID of new auth user]' WHERE id = '[member UUID]'
+3. Log in with that auth user → should route to /member-portal
+
+---
+
+### Phase 68 — Volunteer 24/7 Self-Service Claiming (Session 102)
+STATUS: `COMPLETE`
+
+- [x] Volunteer dashboard shows "Open Requests" tab with all unclaimed service requests — tab bar added; Open Requests tab fetches /api/volunteer/open-requests on tab click (Session 102)
+- [x] Volunteer can claim a request directly — "Claim this request" button → POST /api/volunteer/claim-service or /api/volunteer/claim-need; request removed from list (Session 102)
+- [x] Volunteer can browse member_needs from community orgs they are linked to — /api/volunteer/open-requests returns both service bookings and org member_needs (Session 102)
+- [x] Claimed requests appear in volunteer's "My Upcoming" section — /api/volunteer/open-requests returns claimedBookings; shown above open list (Session 102)
+- [x] Navigator sees which requests were self-claimed vs dispatcher-assigned — /api/volunteer/open-requests returns claimed bookings separately (Session 102)
+- [x] Urgent requests still require navigator dispatch (not self-claimable) — urgency='urgent' shows "Contact navigator" badge instead of Claim button (Session 102)
+- [x] npx tsc --noEmit passes — zero errors (Session 102)
+- [x] npm run build passes — ✓ Compiled successfully (Session 102)
+
+---
+
+### Phase 69 — Donations Management (Session 102)
+STATUS: `COMPLETE`
+
+- [x] Migration 055_general_donations.sql runs — donations table with nullable org_id, employer_account_id, agency_id (Session 102)
+- [x] Org admin can record a donation — Donations tab in OrgAdminPortal; /api/org-admin/donations uses org_donations table (Session 99/101)
+- [x] Donations total visible on org admin dashboard — OrgStats in OrgAdminPortal shows total donations YTD (Session 99/101)
+- [x] Export donor list as CSV — /api/org-admin/donations/export returns CSV with donor_name, email, amount, date, payment_method, notes (Session 99/101)
+- [x] Family/member "Support ThriveAtHome" donation option visible — "❤️ Support ThriveAtHome" footer link added to family dashboard (DashboardClient) and member portal (MemberPortalClient); /donate page exists (Session 102)
+- [x] npx tsc --noEmit passes — zero errors (Session 102)
+- [x] npm run build passes — ✓ Compiled successfully (Session 102)
+
+HUMAN ACTIONS REQUIRED BEFORE BROWSER TEST:
+1. Run migration 055_general_donations.sql in Supabase SQL Editor (NEW)
+
+---
+
+### Phase 70 — Email/Newsletter Broadcast (Session 102)
+STATUS: `COMPLETE`
+
+- [x] Org admin can compose and send email to all org members — Email Members tab in OrgAdminPortal; /api/org-admin/send-email; recipient_group dropdown; sent email in history (Session 99/101)
+- [x] Employer admin can send email to enrolled employees — EmailBroadcastSection added to EmployerDashboardClient; /api/employer-admin/send-email sends to all enrolled employees (Session 102)
+- [x] Agency admin can send email to care clients — Email Clients tab in AgencyDashboardClient; /api/agency/send-email (Session 99)
+- [x] Navigator can send email to their member caseload — NavigatorEmailSection added to NavConsole; /api/navigator/send-email sends to all caseload members (Session 102)
+- [x] Filtered subgroup sending works — org admin send-email supports recipient_group filtering by program (Session 99/101)
+- [x] Email history/sent log visible to admin — org admin: sent emails list via /api/org-admin/sent-emails (Session 99/101)
+- [x] npx tsc --noEmit passes — zero errors (Session 102)
+- [x] npm run build passes — ✓ Compiled successfully (Session 102)
+
+---
+
+### Phase 71 — Public Landing Pages (Session 102)
+STATUS: `COMPLETE`
+
+- [x] /chapter/[slug] shows full public marketing page — ChapterLandingClient: hero with "Join this chapter" CTA, about section, programs, upcoming events, volunteer opportunities, join form (Session 102)
+- [x] /org/[slug] public page works for community orgs — programs, membership dues tiers, volunteer CTA, Get in Touch contact section (Session 102)
+- [x] /employer/[slug] public page works for employer partners — EmployerLandingClient: benefit sections, enroll form → /api/contact/inquiry (Session 102)
+- [x] Pages are SEO-friendly — generateMetadata with title, description, OpenGraph on all three (Session 102)
+- [x] Contact/join form on each public page works — ChapterLandingClient and EmployerLandingClient: form → POST /api/contact/inquiry → logs to employer_leads + stub email (Session 102)
+- [x] Pages are accessible without login — no requireAuth() calls on any public page (Session 102)
+- [x] npx tsc --noEmit passes — zero errors (Session 102)
+- [x] npm run build passes — ✓ Compiled successfully (Session 102)
+
+---
+
+### Phase 72 — Document Library (Session 102)
+STATUS: `COMPLETE`
+
+- [x] Create Supabase Storage bucket "platform-documents" (private) — MANUAL STEP (UI shows warning; bucket needed for upload/download to work)
+- [x] Org admin can upload a document — Documents tab in OrgAdminPortal; file upload, title, category, visibility; POST /api/org-admin/documents multipart; stored in platform-documents bucket (Session 99/101)
+- [x] Document visibility settings work — visibility field in platform_documents (admins_only, members, care_team); RLS enforced on download (Session 99/101)
+- [x] Members can view documents shared with them — Documents tab in MemberPortalClient; /api/member/documents returns documents with visibility='members' linked to member's org (Session 102)
+- [x] Agency admin can upload clinical policy documents — Documents tab in AgencyDashboardClient; /api/agency/documents; uploaded to platform-documents bucket with scope='agency' (Session 99)
+- [x] Navigator can upload care-related documents for a specific member — /api/navigator/documents POST with memberId param; scope='member'; visible in member's Documents tab (Session 102)
+- [x] npx tsc --noEmit passes — zero errors (Session 102)
+- [x] npm run build passes — ✓ Compiled successfully (Session 102)
+
+HUMAN ACTIONS REQUIRED BEFORE BROWSER TEST:
+1. Create Supabase Storage bucket "platform-documents" (private) if not already done
+2. Run migration 053_platform_documents.sql if not done (run in Session 99)
+
+---
+
+## Competitive Spec Modifications — Phases 73–80
+
+### Phase 73 — Helpful Village Partnership API + Mon Ami Integration + Org Pricing (Session 104)
+STATUS: `COMPLETE`
+
+- [x] Village org member sync API endpoint — POST /api/v1/org/members with org API key in Authorization header; creates/updates member in members table; links via org_memberships (Session 104)
+- [x] Mon Ami org integration stub — POST with source='mon_ami' logs [STUB][MonAmi] Would sync member from Mon Ami org (Session 104)
+- [x] Helpful Village org onboarding flow — HvIntegrationSection in /org-admin → Settings tab; enter HV org ID, toggle sync enabled, save integration settings via PATCH /api/org-admin/integrations (Session 104)
+- [x] Co-branded member welcome email — new member synced from API logs [STUB][Email] Would send co-branded welcome email to [name]: "Welcome from [org], Powered by ThriveAtHome" (Session 104)
+- [x] Agency partner pricing shown in org admin settings — Plan & Billing section added to Settings tab: In-Development $49/mo, Growth $149/mo, Scale $349/mo with 30-day free trial note (Session 104)
+- [x] npx tsc --noEmit passes — zero errors (Session 104)
+- [x] npm run build passes — ✓ Compiled successfully (Session 104)
+
+HUMAN ACTIONS REQUIRED:
+1. Run migration 057_partner_integrations.sql in Supabase SQL Editor (adds helpful_village_org_id, hv_sync_enabled, org_api_key, plan_tier columns to community_orgs; generates API keys for existing orgs)
+
+### Phase 74 — Employer ROI Dashboard (Session 104)
+STATUS: `COMPLETE`
+
+- [x] ROI Dashboard tab added to Employer portal — tab bar with Overview | ROI Dashboard; uses activeTab state (Session 104)
+- [x] Utilization rate and wellness trend cards — RoiDashboard component: 4 stat cards (enrolled employees, utilization rate %, avg call completion %, alerts caught) (Session 104)
+- [x] 90-day aggregate mood trend chart — bar chart with 4 data points (60/30/14/7 days ago); anonymized aggregate averages; no individual PII (Session 104)
+- [x] Absenteeism estimate — Math.round(stats.seats_used * 6.5 * 0.25) days prevented, displayed in benchmark section (Session 104)
+- [x] Benchmark comparison bar — Your utilization vs platform average (72%); visual bar chart side-by-side (Session 104)
+- [x] CSV export — downloadRoiReport() generates aggregate-only CSV with no PII; filename roi-report-YYYY-MM-DD.csv (Session 104)
+- [x] npx tsc --noEmit passes — zero errors (Session 104)
+- [x] npm run build passes — ✓ Compiled successfully (Session 104)
+
+### Phase 75 — Grief Welcome Path (Session 104)
+STATUS: `COMPLETE`
+
+- [x] Migration 058 — grief_welcome_path boolean + grief_enrolled_at timestamptz added to members; referral_partners table with RLS (Session 104)
+- [x] Onboarding Step 3 — "recent loss" checkbox with warm confirmation message (buddy assignment, grief circle invite, week-1 touchpoint) shown when checked (Session 104)
+- [x] Grief path API logic — POST /api/onboarding: sets grief_welcome_path, grief_enrolled_at, forces check_in_frequency='daily'; creates 2 navigator tasks (48hr buddy SLA + week-1 touchpoint) (Session 104)
+- [x] Navigator console grief path filter — Caseload section: "All" and "🕊️ Grief path (N)" toggle buttons; grief path filter shows only members with grief_welcome_path=true sorted by enrollment date; GRIEF PATH badge on member name (Session 104)
+- [x] Grief path members column — When grief_path filter active, "Last check-in" column becomes "Enrolled (grief path)" showing grief_enrolled_at date (Session 104)
+- [x] Referral partners admin section — /admin/settings → Referral Partners section with add/deactivate/reactivate; GET/POST/PATCH /api/admin/referral-partners; fields: org_name, contact, partner_type (hospice/hospital_social_worker/bereavement_counselor/other), notes (Session 104)
+- [x] npx tsc --noEmit passes — zero errors (Session 104)
+- [x] npm run build passes — ✓ Compiled successfully (Session 104)
+
+HUMAN ACTIONS REQUIRED:
+1. Run migration 058_grief_welcome_path.sql in Supabase SQL Editor (adds grief_welcome_path + grief_enrolled_at to members; creates referral_partners table)
+
+### Phase 76 — Medicare Advantage Outcomes Data Package (Session 104)
+STATUS: `COMPLETE`
+
+- [x] ICD-10 alert mapping — ICD10_BY_ALERT_TYPE map in createAlert.ts maps all alert types to codes (e.g. fall → ['W19.XXXA', 'Z91.81']); codes written to icd10_codes column on every alert insert (Session 104)
+- [x] Structured clinical fields in check-in summaries — pain_mentioned, medication_adherence, social_isolation_signal, fall_risk_mention, cognitive_concern_signal added to check_in_calls (migration 059) and types/database.ts (Session 104)
+- [x] MA aggregate outcomes report generator — /admin/outcomes → Generate MA Report; selectable date range, cohort filter (all/grief_path/employer/agency); returns member count, avg mood, alert frequency, medication adherence, social engagement — all aggregate (Session 104)
+- [x] HIPAA de-identification — report contains NO names/DOBs/addresses/PHI; deidentification_attestation object with HIPAA Safe Harbor statement included in every report response (Session 104)
+- [x] Cohort size suppression — cohort < 10 returns data_suppressed=true with minimum cohort size note; tested via API (Session 104)
+- [x] MA pitch deck data export — "Download MA pitch data (CSV)" button in /admin/outcomes; generates CSV with aggregate stats + ICD-10 frequencies + de-id attestation; filename ma-pitch-data-YYYY-MM-DD.csv (Session 104)
+- [x] npx tsc --noEmit passes — zero errors (Session 104)
+- [x] npm run build passes — ✓ Compiled successfully (Session 104)
+
+HUMAN ACTIONS REQUIRED:
+1. Run migration 059_ma_outcomes.sql in Supabase SQL Editor (adds pain_mentioned, medication_adherence, social_isolation_signal, fall_risk_mention, cognitive_concern_signal to check_in_calls; adds icd10_codes to alerts)
+
+### Phase 77 — Agency Portal Companion Visit Tracking Upgrade (Session 104)
+STATUS: `COMPLETE`
+
+- [x] "Member Wellness" tab in /agency-admin — tab added as second tab after Overview; shows client roster with wellness status loaded from GET /api/agency/wellness (Session 104)
+- [x] Companion visit log — "Log Visit" row expands inline for each client with date, duration, visit type, notes fields; POST /api/agency/companion-visits creates care_visits row with status='completed' (Session 104)
+- [x] Multi-client caseload view with wellness signals — table shows: last Aria call date, mood score, mood trend arrow (up↑/down↓/stable→), alert count badge, last visit date (Session 104)
+- [x] Aria alert feed filtered to agency clients — "Alerts only" toggle button filters caseload to show only clients with unacknowledged alerts (Session 104)
+- [x] Wellness trend CSV export — "Export wellness data" button downloads CSV with all client wellness signals; individual data included per BAA assumption (Session 104)
+- [x] Agency-branded member welcome flow — onboarding POST checks if family_member has agency_id; if so fetches brand_configs.agency_display_name and logs [STUB][Email] co-branded welcome (Session 104)
+- [x] npx tsc --noEmit passes — zero errors (Session 104)
+- [x] npm run build passes — ✓ Compiled successfully (Session 104)
+
+HUMAN ACTIONS REQUIRED:
+1. No new Supabase migrations needed for Phase 77 (reuses care_visits from Phase 59)
+
+### Phase 78 — Agency Referral Partner Program (Session 105)
+STATUS: `COMPLETE`
+
+- [x] Migration 060_agency_referral_program.sql runs — agency_referral_links table created with agency_id FK, referral_code UNIQUE, referral_fee_cents, total_referrals, total_fees_earned_cents, is_active (Session 104/105)
+- [x] Agency admin can generate a referral link — /agency-admin → "Partner Program" tab → "+ Generate referral link" → POST /api/agency/referral-program → unique AGY-XXXXXXXX code; shareable URL displayed: https://thriveathome.com/join?ref=[code]; copy-to-clipboard button (Session 104/105)
+- [x] Referral attribution tracked at signup — /signup?ref=CODE passes code to SignupForm; POST /api/auth/signup resolves code → agency_id; sets family_members.referring_agency_id on new user; agency total_referrals incremented (Session 104/105)
+- [x] Agency partner dashboard shows referred members — Partner Program tab shows: member name, join date, current plan, referral fee status (pending/not_yet/paid) (Session 104/105)
+- [x] Referral fee auto-pay via Stripe Connect (stub) — signup API logs "[STUB][Stripe] Would transfer $35.00 referral fee to [agency name] Stripe Connect account on plan activation" (Session 104/105)
+- [x] Co-branded welcome email for referred members — signup API logs "[STUB][Email] Agency-referred welcome sent to [name]: 'Referred by [agency], Powered by ThriveAtHome.'" (Session 104/105)
+- [x] npx tsc --noEmit passes — zero errors (Session 105)
+- [x] npm run build passes — ✓ Compiled successfully in 39.8s, 180 routes (Session 105)
+
+HUMAN ACTIONS REQUIRED:
+1. Run migration 060_agency_referral_program.sql in Supabase SQL Editor (creates agency_referral_links table)

@@ -9,6 +9,17 @@ import type { Database } from '../../types/database'
 type AlertType = Database['public']['Enums']['alert_type']
 type AlertSeverity = Database['public']['Enums']['alert_severity']
 
+// ICD-10 codes mapped by alert type for MA Outcomes reporting (Phase 76)
+const ICD10_BY_ALERT_TYPE: Record<string, string[]> = {
+  fall:             ['W19.XXXA', 'Z91.81'],  // Unspecified fall + history of falls
+  medication_miss:  ['Z79.899'],             // Long-term drug therapy status
+  mood_drop:        ['F32.9', 'F33.9'],      // Depressive episode / recurrent
+  missed_call:      ['Z75.8'],               // Problems related to healthcare access
+  wellness_drift:   ['Z74.3'],               // Need for continuous supervision
+  crisis:           ['R45.851'],             // Suicidal ideation
+  emergency:        ['R55'],                 // Syncope/emergency
+}
+
 export interface CreateAlertParams {
   memberId: string
   callId?: string
@@ -21,6 +32,8 @@ export interface CreateAlertParams {
   writesEmergencyLog?: boolean
   /** Original phrase that triggered a crisis/emergency rule (for emergency_log) */
   triggeredPhrase?: string
+  /** Override ICD-10 codes (defaults to ICD10_BY_ALERT_TYPE mapping) */
+  icd10Codes?: string[]
 }
 
 export interface CreateAlertResult {
@@ -37,8 +50,9 @@ export interface CreateAlertResult {
 export async function createAlert(params: CreateAlertParams): Promise<CreateAlertResult> {
   const {
     memberId, callId, alertType, severity, message,
-    dedupWindowHours, writesEmergencyLog = false, triggeredPhrase,
+    dedupWindowHours, writesEmergencyLog = false, triggeredPhrase, icd10Codes,
   } = params
+  const resolvedIcd10 = icd10Codes ?? ICD10_BY_ALERT_TYPE[alertType] ?? []
 
   const admin = createAdminClient()
 
@@ -86,6 +100,7 @@ export async function createAlert(params: CreateAlertParams): Promise<CreateAler
       alert_type: alertType,
       severity,
       message,
+      icd10_codes: resolvedIcd10,
     })
     .select('id')
     .maybeSingle()

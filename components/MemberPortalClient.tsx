@@ -163,6 +163,13 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
     ? Math.floor((today.getTime() - new Date(member.date_of_birth).getTime()) / (365.25 * 24 * 60 * 60 * 1000))
     : null
 
+  // Persist active tab in URL hash so refreshing or sharing a link preserves the tab
+  useEffect(() => {
+    const VALID: Tab[] = ['profile','services','community','dates','buddy','life-story','billing','org','notifications','documents']
+    const hash = window.location.hash.replace('#', '') as Tab
+    if (VALID.includes(hash)) setActiveTab(hash)
+  }, [])
+
   function showToast(msg: string) {
     setToast(msg)
     setTimeout(() => setToast(null), 4500)
@@ -170,6 +177,7 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
 
   function switchTab(t: Tab) {
     setActiveTab(t)
+    window.history.replaceState(null, '', `#${t}`)
   }
 
   // Load circles when community tab opens
@@ -351,8 +359,8 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
       const fd = new FormData()
       fd.append('file', docFile)
       fd.append('title', docTitle.trim())
-      fd.append('scope', 'member')
-      const res = await fetch('/api/navigator/documents', { method: 'POST', body: fd })
+      fd.append('memberId', member.id)
+      const res = await fetch('/api/member/upload-document', { method: 'POST', body: fd })
       const json = await res.json().catch(() => ({ error: 'Server error' }))
       if (!res.ok) { setDocError(json.error ?? 'Upload failed'); return }
       setPortalDocs(prev => [json.data, ...prev])
@@ -1229,7 +1237,10 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
       </main>
 
       <footer style={{ textAlign: 'center', padding: '24px', fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', borderTop: '1px solid #E8E4DC' }}>
-        ThriveAtHome · Your care, your way · <a href="/privacy" style={{ color: 'var(--color-text-secondary)' }}>Privacy</a>
+        ThriveAtHome · Your care, your way ·{' '}
+        <a href="/donate" style={{ color: 'var(--color-teal)', fontWeight: 500 }}>Support ThriveAtHome</a>
+        {' · '}
+        <a href="/privacy" style={{ color: 'var(--color-text-secondary)' }}>Privacy</a>
       </footer>
     </div>
   )

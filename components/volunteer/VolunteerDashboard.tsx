@@ -138,7 +138,22 @@ interface Props {
   membersHelpedCount: number
 }
 
+type OpenRequest = {
+  id: string
+  created_at: string
+  type: 'service' | 'need'
+  service_type?: string
+  title?: string
+  need_type?: string
+  description?: string
+  requested_for?: string
+  preferred_date?: string
+  urgency?: string
+  status: string
+}
+
 export function VolunteerDashboard({ volunteer, matchedMembers, recentVisits: initialVisits, membersHelpedCount }: Props) {
+  const [activeTab, setActiveTab] = useState<'my-work' | 'open-requests'>('my-work')
   const [visits, setVisits] = useState<VolunteerVisit[]>(initialVisits)
   const [totalHours, setTotalHours] = useState(Number(volunteer.total_hours_logged ?? 0))
   const [membersHelped, setMembersHelped] = useState(membersHelpedCount)
@@ -146,6 +161,10 @@ export function VolunteerDashboard({ volunteer, matchedMembers, recentVisits: in
   const [submitting, setSubmitting] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const [connectionsHighlight, setConnectionsHighlight] = useState(false)
+  const [openRequests, setOpenRequests] = useState<OpenRequest[]>([])
+  const [claimedIds, setClaimedIds] = useState<Set<string>>(new Set())
+  const [claimedBookings, setClaimedBookings] = useState<OpenRequest[]>([])
+  const [openReqLoading, setOpenReqLoading] = useState(false)
   const [form, setForm] = useState({
     member_id: matchedMembers[0]?.id ?? '',
     visit_date: new Date().toISOString().slice(0, 10),
@@ -158,6 +177,57 @@ export function VolunteerDashboard({ volunteer, matchedMembers, recentVisits: in
   function showToast(msg: string) {
     setToast(msg)
     setTimeout(() => setToast(null), 4000)
+  }
+
+  async function loadOpenRequests() {
+    setOpenReqLoading(true)
+    try {
+      const res = await fetch('/api/volunteer/open-requests')
+      const json = await res.json()
+      if (res.ok) {
+        const svc: OpenRequest[] = (json.serviceBookings ?? []).map((b: Record<string, unknown>) => ({
+          id: b.id as string, created_at: b.created_at as string, type: 'service' as const,
+          service_type: b.service_type as string, requested_for: b.requested_for as string | undefined,
+          urgency: (b.booking_details as Record<string, unknown>)?.urgency as string | undefined,
+          status: b.status as string,
+        }))
+        const needs: OpenRequest[] = (json.memberNeeds ?? []).map((n: Record<string, unknown>) => ({
+          id: n.id as string, created_at: n.created_at as string, type: 'need' as const,
+          need_type: n.need_type as string, title: n.title as string,
+          description: n.description as string | undefined,
+          preferred_date: n.preferred_date as string | undefined,
+          urgency: n.urgency as string | undefined, status: n.status as string,
+        }))
+        setOpenRequests([...svc, ...needs].sort((a, b) => {
+          const ua = a.urgency === 'urgent' ? 0 : 1
+          const ub = b.urgency === 'urgent' ? 0 : 1
+          return ua - ub || a.created_at.localeCompare(b.created_at)
+        }))
+        setClaimedBookings((json.claimedBookings ?? []).map((b: Record<string, unknown>) => ({
+          id: b.id as string, created_at: b.created_at as string, type: 'service' as const,
+          service_type: b.service_type as string, requested_for: b.requested_for as string | undefined,
+          status: b.status as string,
+        })))
+      }
+    } finally {
+      setOpenReqLoading(false)
+    }
+  }
+
+  async function handleClaim(req: OpenRequest) {
+    const endpoint = req.type === 'service' ? '/api/volunteer/claim-service' : '/api/volunteer/claim-need'
+    const body = req.type === 'service' ? { booking_id: req.id } : { need_id: req.id }
+    const res = await fetch(endpoint, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+    })
+    const json = await res.json()
+    if (res.ok) {
+      setClaimedIds(prev => new Set([...prev, req.id]))
+      setOpenRequests(prev => prev.filter(r => r.id !== req.id))
+      showToast('Request claimed — it will appear in My Upcoming below.')
+    } else {
+      showToast(json.error ?? 'Could not claim request.')
+    }
   }
 
   async function handleLogVisit(e: React.FormEvent) {
@@ -351,7 +421,115 @@ export function VolunteerDashboard({ volunteer, matchedMembers, recentVisits: in
         </div>
       </header>
 
+      {/* Tab bar */}
+      <div style={{ backgroundColor: 'white', borderBottom: '1px solid var(--color-warm-grey)' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 32px', display: 'flex', gap: '32px' }}>
+          {[
+            { id: 'my-work', label: 'My Work' },
+            { id: 'open-requests', label: 'Open Requests' },
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => {
+                setActiveTab(tab.id as 'my-work' | 'open-requests')
+                if (tab.id === 'open-requests' && openRequests.length === 0 && !openReqLoading) loadOpenRequests()
+              }}
+              style={{
+                padding: '14px 0', background: 'none', border: 'none',
+                borderBottom: activeTab === tab.id ? '2px solid var(--color-navy)' : '2px solid transparent',
+                fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: activeTab === tab.id ? 700 : 400,
+                color: activeTab === tab.id ? 'var(--color-navy)' : 'var(--color-text-secondary)',
+                cursor: 'pointer', whiteSpace: 'nowrap',
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <main style={{ flex: 1, maxWidth: '1100px', margin: '0 auto', padding: '32px', width: '100%' }}>
+        {/* ── OPEN REQUESTS TAB ─────────────────────── */}
+        {activeTab === 'open-requests' && (
+          <div>
+            {/* My Upcoming (claimed) */}
+            {claimedBookings.length > 0 && (
+              <div style={{ marginBottom: '32px' }}>
+                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '16px' }}>My Upcoming</h2>
+                {claimedBookings.map(b => (
+                  <div key={b.id} style={{ backgroundColor: '#F0FBF8', border: '1.5px solid var(--color-teal)', borderRadius: '12px', padding: '20px 24px', marginBottom: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <span style={{ fontSize: '20px' }}>✅</span>
+                      <div>
+                        <p style={{ fontFamily: 'var(--font-body)', fontSize: '16px', fontWeight: 600, color: 'var(--color-navy)', margin: 0 }}>
+                          {b.service_type?.replace(/_/g, ' ') ?? 'Service request'} — <span style={{ fontWeight: 400, color: 'var(--color-text-secondary)' }}>Claimed by you</span>
+                        </p>
+                        {b.requested_for && (
+                          <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', margin: '4px 0 0' }}>
+                            Scheduled: {new Date(b.requested_for).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: 'var(--color-navy)', margin: 0 }}>Open Requests</h2>
+              <button onClick={loadOpenRequests} disabled={openReqLoading}
+                style={{ padding: '8px 16px', background: 'none', border: '1.5px solid var(--color-warm-grey)', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '14px', cursor: 'pointer', color: 'var(--color-text-secondary)' }}>
+                {openReqLoading ? 'Refreshing…' : '↻ Refresh'}
+              </button>
+            </div>
+
+            {openReqLoading && <p style={{ fontFamily: 'var(--font-body)', color: 'var(--color-text-secondary)' }}>Loading requests…</p>}
+            {!openReqLoading && openRequests.length === 0 && (
+              <div style={{ textAlign: 'center', padding: '48px 24px', backgroundColor: 'white', borderRadius: '16px', border: '1px solid var(--color-warm-grey)' }}>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: '16px', color: 'var(--color-text-secondary)' }}>No open requests right now. Check back soon.</p>
+              </div>
+            )}
+            {openRequests.filter(r => !claimedIds.has(r.id)).map(req => {
+              const isUrgent = req.urgency === 'urgent'
+              return (
+                <div key={req.id} style={{ backgroundColor: 'white', border: isUrgent ? '2px solid #EF4444' : '1px solid var(--color-warm-grey)', borderRadius: '12px', padding: '20px 24px', marginBottom: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+                    <div style={{ flex: 1 }}>
+                      {isUrgent && <span style={{ display: 'inline-block', marginBottom: '6px', padding: '2px 10px', backgroundColor: '#FEE2E2', color: '#DC2626', borderRadius: '6px', fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 700 }}>URGENT</span>}
+                      <p style={{ fontFamily: 'var(--font-body)', fontSize: '16px', fontWeight: 600, color: 'var(--color-navy)', margin: '0 0 4px' }}>
+                        {req.type === 'service'
+                          ? (req.service_type?.replace(/_/g, ' ') ?? 'Service request')
+                          : (req.title ?? req.need_type?.replace(/_/g, ' ') ?? 'Community need')}
+                      </p>
+                      {req.description && <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', margin: '0 0 4px' }}>{req.description}</p>}
+                      {(req.requested_for ?? req.preferred_date) && (
+                        <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0 }}>
+                          📅 {new Date((req.requested_for ?? req.preferred_date)!).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      {isUrgent ? (
+                        <div style={{ padding: '10px 18px', backgroundColor: '#FEE2E2', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, color: '#DC2626', textAlign: 'center' }}>
+                          Contact navigator
+                        </div>
+                      ) : (
+                        <button onClick={() => handleClaim(req)}
+                          style={{ padding: '10px 20px', backgroundColor: 'var(--color-teal)', color: 'white', border: 'none', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 600, cursor: 'pointer', minWidth: '140px' }}>
+                          Claim this request
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+
+        {/* ── MY WORK TAB ─────────────────────── */}
+        {activeTab === 'my-work' && <>
         {/* Impact stats */}
         {/* Corporate Program card — shown only for volunteers linked to a corporate program */}
         {volunteer.corporate_program_id && (
@@ -636,6 +814,7 @@ export function VolunteerDashboard({ volunteer, matchedMembers, recentVisits: in
             </div>
           </div>
         </div>
+        </>}
       </main>
     </div>
   )

@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { requireAuth, getUserRole } from '@/lib/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { MaReportSection } from '@/components/admin/MaReportSection'
 
 export const metadata: Metadata = { title: 'Outcomes Dashboard — Admin' }
 
@@ -178,7 +179,7 @@ export default async function AdminOutcomesPage() {
         </section>
 
         {/* API access note */}
-        <section>
+        <section style={{ marginBottom: '16px' }}>
           <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #86efac', borderRadius: 'var(--radius-md)', padding: '24px 28px' }}>
             <h3 style={{ fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 700, color: '#065f46', margin: '0 0 8px' }}>
               📊 Enterprise Reporting API
@@ -188,10 +189,12 @@ export default async function AdminOutcomesPage() {
               <code style={{ backgroundColor: '#dcfce7', padding: '1px 6px', borderRadius: '4px', fontSize: '13px' }}>GET /api/enterprise/outcomes</code>.
               Cohorts fewer than 10 members are suppressed. API access is logged and rate-limited.
             </p>
-            <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: '#059669', margin: '0' }}>
-              Phase 54 (Medicare Advantage Reporting API) is the next milestone after this.
-            </p>
           </div>
+        </section>
+
+        {/* MA Report Generator */}
+        <section>
+          <MaReportSection />
         </section>
 
       </main>

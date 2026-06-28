@@ -242,10 +242,24 @@ export async function upsertOrgMembership(
       membership_year: year,
       is_active: true,
     }, { onConflict: 'member_id,org_id,membership_year' })
-    .select()
+    .select('*, member:members(full_name, preferred_name, phone_number)')
     .single()
   if (error) return { data: null, error: error.message }
   return { data: data as unknown as OrgMembershipRow, error: null }
+}
+
+/** Returns members enrolled in the org (for dropdown/needs form). */
+export async function getOrgMembers(orgId: string): Promise<{ data: { id: string; full_name: string; preferred_name: string | null }[]; error: string | null }> {
+  const admin = createAdminClient()
+  const { data, error } = await (admin.from as any)('org_memberships')
+    .select('member_id, member:members(id, full_name, preferred_name)')
+    .eq('org_id', orgId)
+    .eq('is_active', true)
+  if (error) return { data: [], error: error.message }
+  const members = ((data ?? []) as Array<{ member: { id: string; full_name: string; preferred_name: string | null } | null }>)
+    .map(row => row.member)
+    .filter((m): m is { id: string; full_name: string; preferred_name: string | null } => m !== null)
+  return { data: members, error: null }
 }
 
 export interface OrgMembershipTierRow {

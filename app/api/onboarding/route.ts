@@ -27,6 +27,7 @@ interface OnboardingBody {
   buddy_match_era?: string
   buddy_call_length_preference?: string
   buddy_intro_note?: string
+  grief_welcome_path?: string
 }
 
 export async function POST(req: NextRequest) {
@@ -100,7 +101,7 @@ export async function POST(req: NextRequest) {
       medications: body.medications?.trim() || null,
       preferred_language: body.preferred_language?.trim() || 'english',
       preferred_call_time: body.preferred_call_time?.trim() || null,
-      check_in_frequency: body.check_in_frequency || 'daily',
+      check_in_frequency: body.grief_welcome_path === 'true' ? 'daily' : (body.check_in_frequency || 'daily'),
       topics_enjoy: topicsEnjoyArray,
       topics_avoid: body.topics_avoid?.trim() || null,
       doctor_name: body.doctor_name?.trim() || null,
@@ -109,6 +110,8 @@ export async function POST(req: NextRequest) {
       buddy_match_era: body.buddy_match_era?.trim() || null,
       buddy_call_length_preference: body.buddy_call_length_preference?.trim() || null,
       buddy_intro_note: body.buddy_intro_note?.trim() || null,
+      grief_welcome_path: body.grief_welcome_path === 'true',
+      grief_enrolled_at: body.grief_welcome_path === 'true' ? new Date().toISOString() : null,
       plan_tier: 'basics',
       status: 'active',
     })
@@ -128,11 +131,52 @@ export async function POST(req: NextRequest) {
 
   if (linkError) {
     console.error('[api/onboarding] member_id link failed:', linkError)
-    // Non-fatal: member row created; log for manual fix
     return NextResponse.json(
       { error: 'Profile saved but linking failed. Contact support.' },
       { status: 500 }
     )
+  }
+
+  // 7. Agency-branded welcome email stub — if registering family member is linked to an agency
+  const { data: fmWithAgency } = await admin
+    .from('family_members')
+    .select('agency_id')
+    .eq('id', fm.id)
+    .maybeSingle()
+
+  if (fmWithAgency?.agency_id) {
+    const { data: brandCfg } = await (admin as any)
+      .from('brand_configs')
+      .select('agency_display_name, primary_color')
+      .eq('agency_id', fmWithAgency.agency_id)
+      .maybeSingle() as { data: { agency_display_name?: string; primary_color?: string } | null }
+    const agencyName = brandCfg?.agency_display_name ?? 'your agency'
+    console.log(`[STUB][Email] Agency-branded welcome sent to ${member.preferred_name}: "Welcome from ${agencyName}, Powered by ThriveAtHome."`)
+  }
+
+  // 8. Grief Welcome Path — create navigator tasks + stub notifications
+  if (body.grief_welcome_path === 'true') {
+    const slaDate = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
+    const week1Date = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+    await (admin as any).from('navigator_tasks').insert([
+      {
+        member_id: member.id,
+        task_type: 'buddy_assignment',
+        description: `GRIEF PATH — buddy assignment needed within 48 hours for ${member.preferred_name}`,
+        priority: 'urgent',
+        due_date: slaDate,
+      },
+      {
+        member_id: member.id,
+        task_type: 'follow_up',
+        description: `Week 1 touchpoint — call ${member.preferred_name} (grief welcome path member)`,
+        priority: 'high',
+        due_date: week1Date,
+      },
+    ])
+    // Stub: grief circle invitation email
+    console.log(`[STUB][Email] Grief circle invitation sent to ${member.preferred_name}: "We have a Grief Support Circle that meets weekly — we'd love to invite you."`)
+    console.log(`[STUB][Navigator] GRIEF PATH member enrolled: ${member.preferred_name} (${member.id}) — buddy assignment SLA: 48 hours`)
   }
 
   return NextResponse.json({ success: true, preferred_name: member.preferred_name })

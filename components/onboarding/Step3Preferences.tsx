@@ -141,6 +141,31 @@ export function Step3Preferences({ data, onChange, errors }: Props) {
           </div>
         </div>
       </fieldset>
+
+      {/* Recent loss — Grief Welcome Path */}
+      <div style={{ padding: '20px', backgroundColor: '#F9F6F0', borderRadius: '12px', border: '1px solid #E8E4DC' }}>
+        <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: '#5E5852', marginBottom: '14px', lineHeight: 1.6 }}>
+          If {data.preferred_name || 'the senior'} has recently experienced a loss, we can make sure they receive extra support from the very start.
+        </p>
+        <label style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={data.grief_welcome_path === 'true'}
+            onChange={(e) => onChange('grief_welcome_path', e.target.checked ? 'true' : '')}
+            style={{ width: '20px', height: '20px', marginTop: '2px', cursor: 'pointer', flexShrink: 0 }}
+          />
+          <span style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: '#1B3A6B', lineHeight: 1.5 }}>
+            {data.preferred_name || 'They'} recently lost someone important to them and would benefit from extra support
+          </span>
+        </label>
+        {data.grief_welcome_path === 'true' && (
+          <div style={{ marginTop: '12px', padding: '12px 16px', backgroundColor: '#E8F4F1', borderRadius: '8px', border: '1px solid #2A9D8F30' }}>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: '#2A7A6A', margin: 0, lineHeight: 1.6 }}>
+              ✓ We'll assign a Human Buddy within 48 hours, send an invitation to our Grief Support Circle, and have a navigator check in during the first week.
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

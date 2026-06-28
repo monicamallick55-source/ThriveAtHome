@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import type { CareAgencyRow, CareWorkerRow, CareVisitRow, AgencyReferralRow, AgencyLocationRow } from '@/types/database'
 import ClinicalNotesTab from './ClinicalNotesTab'
 
@@ -47,7 +47,7 @@ const WORKER_ROLES = [
   { value: 'other', label: 'Other' },
 ]
 
-type Tab = 'overview' | 'clients' | 'workers' | 'visits' | 'reports' | 'clinical' | 'locations' | 'integrations' | 'email' | 'documents'
+type Tab = 'overview' | 'clients' | 'workers' | 'visits' | 'reports' | 'clinical' | 'locations' | 'integrations' | 'email' | 'documents' | 'wellness' | 'partner_program'
 
 const STATUS_COLORS: Record<string, string> = {
   scheduled: '#2563EB',
@@ -287,6 +287,8 @@ export default function AgencyDashboardClient({
 
   const tabs: { id: Tab; label: string }[] = [
     { id: 'overview', label: 'Overview' },
+    { id: 'wellness', label: '❤️ Member Wellness' },
+    { id: 'partner_program', label: '🤝 Partner Program' },
     { id: 'clients', label: `Clients (${members.length})` },
     { id: 'workers', label: `Care Workers (${workersList.length})` },
     { id: 'visits', label: 'Visits' },
@@ -297,6 +299,100 @@ export default function AgencyDashboardClient({
     { id: 'email', label: 'Email Clients' },
     { id: 'documents', label: '📎 Documents' },
   ]
+
+  // Member Wellness tab state (Phase 77)
+  type WellnessClient = {
+    id: string; preferred_name: string; full_name: string;
+    last_aria_call_at: string | null; last_mood_score: number | null; mood_trend: string;
+    alert_count: number; last_visit_date: string | null; last_visit_type: string | null;
+  }
+  const [wellnessClients, setWellnessClients] = useState<WellnessClient[]>([])
+  const [wellnessLoaded, setWellnessLoaded] = useState(false)
+  const [wellnessLoading, setWellnessLoading] = useState(false)
+  const [wellnessFilter, setWellnessFilter] = useState<'all' | 'alerts'>('all')
+  const [logVisitClientId, setLogVisitClientId] = useState<string | null>(null)
+  const [logVisitForm, setLogVisitForm] = useState({ visit_date: new Date().toISOString().split('T')[0], duration_minutes: 30, visit_type: 'companionship', notes: '' })
+  const [logVisitSaving, setLogVisitSaving] = useState(false)
+  const [logVisitErr, setLogVisitErr] = useState<string | null>(null)
+  const [logVisitSuccess, setLogVisitSuccess] = useState<string | null>(null)
+
+  async function loadWellness() {
+    if (wellnessLoaded) return
+    setWellnessLoading(true)
+    const res = await fetch('/api/agency/wellness')
+    const json = await res.json()
+    setWellnessLoading(false)
+    if (res.ok) { setWellnessClients(json.clients ?? []); setWellnessLoaded(true) }
+  }
+
+  async function handleLogVisit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!logVisitClientId) return
+    setLogVisitSaving(true); setLogVisitErr(null); setLogVisitSuccess(null)
+    const res = await fetch('/api/agency/companion-visits', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ member_id: logVisitClientId, ...logVisitForm }),
+    })
+    const json = await res.json()
+    setLogVisitSaving(false)
+    if (!res.ok) { setLogVisitErr(json.error ?? 'Failed to log visit'); return }
+    setLogVisitSuccess('Visit logged successfully.')
+    setLogVisitClientId(null)
+    setTimeout(() => setLogVisitSuccess(null), 3000)
+    // Re-fetch wellness data so the updated last_visit_date appears immediately
+    const wRes = await fetch('/api/agency/wellness')
+    const wJson = await wRes.json()
+    if (wRes.ok) setWellnessClients(wJson.clients ?? [])
+  }
+
+  // Partner Program tab state (Phase 78)
+  type ReferralLink = { id: string; referral_code: string; referral_fee_cents: number; total_referrals: number; total_fees_earned_cents: number; is_active: boolean; created_at: string }
+  type ReferredMember = { id: string; full_name: string; joined_at: string; has_member_profile: boolean; plan_tier: string | null; referral_fee_status: string }
+  const [referralLinks, setReferralLinks] = useState<ReferralLink[]>([])
+  const [referredMembers, setReferredMembers] = useState<ReferredMember[]>([])
+  const [partnerLoaded, setPartnerLoaded] = useState(false)
+  const [partnerLoading, setPartnerLoading] = useState(false)
+  const [generatingLink, setGeneratingLink] = useState(false)
+  const [partnerErr, setPartnerErr] = useState<string | null>(null)
+
+  async function loadPartnerProgram() {
+    if (partnerLoaded) return
+    setPartnerLoading(true)
+    const res = await fetch('/api/agency/referral-program')
+    const json = await res.json()
+    setPartnerLoading(false)
+    if (res.ok) { setReferralLinks(json.links ?? []); setReferredMembers(json.referred ?? []); setPartnerLoaded(true) }
+  }
+
+  async function handleGenerateLink() {
+    setGeneratingLink(true); setPartnerErr(null)
+    const res = await fetch('/api/agency/referral-program', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) })
+    const json = await res.json()
+    setGeneratingLink(false)
+    if (!res.ok) { setPartnerErr(json.error ?? 'Failed to generate link'); return }
+    setReferralLinks(prev => [json.link, ...prev])
+  }
+
+  function downloadWellnessCsv() {
+    const rows = [
+      ['Client Name', 'Last Aria Call', 'Mood Score', 'Mood Trend', 'Alert Count', 'Last Visit Date', 'Last Visit Type'],
+      ...wellnessClients.map(c => [
+        c.preferred_name || c.full_name,
+        c.last_aria_call_at ? new Date(c.last_aria_call_at).toLocaleDateString() : '',
+        c.last_mood_score ?? '',
+        c.mood_trend,
+        c.alert_count,
+        c.last_visit_date ?? '',
+        c.last_visit_type ?? '',
+      ])
+    ]
+    const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n')
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url; a.download = `agency-wellness-${new Date().toISOString().split('T')[0]}.csv`; a.click()
+    URL.revokeObjectURL(url)
+  }
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-cream)' }}>
@@ -353,7 +449,7 @@ export default function AgencyDashboardClient({
         {tabs.map((t) => (
           <button
             key={t.id}
-            onClick={() => { setActiveTab(t.id); if (t.id === 'documents') loadAgencyDocs() }}
+            onClick={() => { setActiveTab(t.id); if (t.id === 'documents') loadAgencyDocs(); if (t.id === 'wellness') loadWellness(); if (t.id === 'partner_program') loadPartnerProgram() }}
             style={{
               padding: '14px 20px',
               fontFamily: 'var(--font-body)',
@@ -716,6 +812,232 @@ export default function AgencyDashboardClient({
                 </div>
               )}
             </div>
+          </div>
+        )}
+
+        {/* MEMBER WELLNESS TAB — Phase 77 */}
+        {activeTab === 'wellness' && (
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+              <div>
+                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 500, color: 'var(--color-navy)', margin: 0 }}>Member Wellness</h2>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: '4px 0 0' }}>
+                  Aria call signals and companion visit history for your agency clients
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                <button type="button" onClick={() => setWellnessFilter(wellnessFilter === 'alerts' ? 'all' : 'alerts')}
+                  style={{ padding: '7px 16px', border: `1.5px solid ${wellnessFilter === 'alerts' ? '#DC2626' : '#D4CFC8'}`, borderRadius: '8px', backgroundColor: wellnessFilter === 'alerts' ? '#FEF2F2' : 'white', fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: wellnessFilter === 'alerts' ? '#DC2626' : '#6B7280', cursor: 'pointer' }}>
+                  🔔 Alerts only ({wellnessClients.filter(c => c.alert_count > 0).length})
+                </button>
+                <button type="button" onClick={downloadWellnessCsv}
+                  style={{ padding: '7px 16px', backgroundColor: 'var(--color-teal)', color: 'white', border: 'none', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>
+                  Export wellness data
+                </button>
+              </div>
+            </div>
+
+            {logVisitSuccess && (
+              <div style={{ padding: '12px 16px', backgroundColor: '#D1FAE5', border: '1px solid #6EE7B7', borderRadius: '8px', marginBottom: '16px', fontFamily: 'var(--font-body)', fontSize: '14px', color: '#065F46' }}>✅ {logVisitSuccess}</div>
+            )}
+
+            {wellnessLoading ? (
+              <div style={{ textAlign: 'center', padding: '40px', fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)' }}>Loading wellness data…</div>
+            ) : wellnessClients.length === 0 ? (
+              <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '40px 24px', textAlign: 'center', border: '1px solid #E8E4DC', fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)' }}>
+                No clients found. Clients appear here once they have a completed care visit logged.
+              </div>
+            ) : (
+              <div style={{ backgroundColor: 'white', borderRadius: '12px', border: '1px solid #E8E4DC', overflow: 'hidden' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--font-body)', fontSize: '14px' }}>
+                  <thead>
+                    <tr style={{ backgroundColor: 'var(--color-navy)', color: 'white', textAlign: 'left' }}>
+                      {['Client', 'Last Aria Call', 'Mood', 'Alerts', 'Last Visit', ''].map(col => (
+                        <th key={col} style={{ padding: '12px 16px', fontWeight: 600, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{col}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {wellnessClients
+                      .filter(c => wellnessFilter === 'alerts' ? c.alert_count > 0 : true)
+                      .map((c, i) => {
+                        const trendIcon = c.mood_trend === 'up' ? '↑' : c.mood_trend === 'down' ? '↓' : c.mood_trend === 'stable' ? '→' : '—'
+                        const trendColor = c.mood_trend === 'up' ? '#059669' : c.mood_trend === 'down' ? '#DC2626' : '#6B7280'
+                        const isLogging = logVisitClientId === c.id
+                        return (
+                          <React.Fragment key={c.id}>
+                            <tr style={{ backgroundColor: i % 2 === 0 ? 'white' : '#F9F7F4', borderBottom: '1px solid #E8E4DC' }}>
+                              <td style={{ padding: '14px 16px', fontWeight: 600, color: 'var(--color-navy)' }}>{c.preferred_name || c.full_name}</td>
+                              <td style={{ padding: '14px 16px', color: '#6B7280', fontSize: '13px' }}>
+                                {c.last_aria_call_at ? new Date(c.last_aria_call_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'}
+                              </td>
+                              <td style={{ padding: '14px 16px' }}>
+                                <span style={{ color: trendColor, fontWeight: 700 }}>{trendIcon}</span>
+                                {' '}<span style={{ color: '#374151' }}>{c.last_mood_score !== null ? `${c.last_mood_score}/10` : '—'}</span>
+                              </td>
+                              <td style={{ padding: '14px 16px' }}>
+                                {c.alert_count > 0 ? (
+                                  <span style={{ backgroundColor: '#FEF2F2', color: '#DC2626', fontWeight: 700, fontSize: '12px', padding: '2px 8px', borderRadius: '12px' }}>
+                                    {c.alert_count} alert{c.alert_count !== 1 ? 's' : ''}
+                                  </span>
+                                ) : <span style={{ color: '#6B7280' }}>—</span>}
+                              </td>
+                              <td style={{ padding: '14px 16px', color: '#6B7280', fontSize: '13px' }}>
+                                {c.last_visit_date ? new Date(c.last_visit_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'}
+                              </td>
+                              <td style={{ padding: '14px 16px' }}>
+                                <button type="button"
+                                  onClick={() => { setLogVisitClientId(isLogging ? null : c.id); setLogVisitErr(null) }}
+                                  style={{ padding: '5px 12px', backgroundColor: isLogging ? '#F3F4F6' : 'white', border: '1.5px solid var(--color-teal)', borderRadius: '6px', fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-teal)', cursor: 'pointer' }}>
+                                  {isLogging ? 'Cancel' : 'Log Visit'}
+                                </button>
+                              </td>
+                            </tr>
+                            {isLogging && (
+                              <tr key={`${c.id}-log`} style={{ backgroundColor: '#F0F9F7' }}>
+                                <td colSpan={6} style={{ padding: '18px 20px' }}>
+                                  <form onSubmit={handleLogVisit} style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+                                    <div>
+                                      <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Date</label>
+                                      <input type="date" value={logVisitForm.visit_date} onChange={e => setLogVisitForm(f => ({ ...f, visit_date: e.target.value }))}
+                                        style={{ padding: '7px 12px', border: '1.5px solid #D4CFC8', borderRadius: '6px', fontFamily: 'inherit', fontSize: '14px' }} />
+                                    </div>
+                                    <div>
+                                      <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Duration (min)</label>
+                                      <input type="number" min={5} max={480} value={logVisitForm.duration_minutes} onChange={e => setLogVisitForm(f => ({ ...f, duration_minutes: Number(e.target.value) }))}
+                                        style={{ padding: '7px 12px', border: '1.5px solid #D4CFC8', borderRadius: '6px', fontFamily: 'inherit', fontSize: '14px', width: '80px' }} />
+                                    </div>
+                                    <div>
+                                      <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Visit type</label>
+                                      <select value={logVisitForm.visit_type} onChange={e => setLogVisitForm(f => ({ ...f, visit_type: e.target.value }))}
+                                        style={{ padding: '7px 12px', border: '1.5px solid #D4CFC8', borderRadius: '6px', fontFamily: 'inherit', fontSize: '14px', backgroundColor: 'white' }}>
+                                        <option value="companionship">Companionship</option>
+                                        <option value="personal_care">Personal Care</option>
+                                        <option value="homemaking">Homemaking</option>
+                                        <option value="transportation">Transportation</option>
+                                        <option value="other">Other</option>
+                                      </select>
+                                    </div>
+                                    <div style={{ flex: 1, minWidth: '160px' }}>
+                                      <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Notes</label>
+                                      <input type="text" placeholder="Visit notes (optional)" value={logVisitForm.notes} onChange={e => setLogVisitForm(f => ({ ...f, notes: e.target.value }))}
+                                        style={{ padding: '7px 12px', border: '1.5px solid #D4CFC8', borderRadius: '6px', fontFamily: 'inherit', fontSize: '14px', width: '100%', boxSizing: 'border-box' }} />
+                                    </div>
+                                    <button type="submit" disabled={logVisitSaving}
+                                      style={{ padding: '8px 18px', backgroundColor: logVisitSaving ? '#9CA3AF' : 'var(--color-navy)', color: 'white', border: 'none', borderRadius: '6px', fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, cursor: logVisitSaving ? 'not-allowed' : 'pointer' }}>
+                                      {logVisitSaving ? 'Saving…' : 'Save Visit'}
+                                    </button>
+                                    {logVisitErr && <div style={{ color: '#DC2626', fontSize: '13px', fontFamily: 'var(--font-body)', alignSelf: 'center' }}>{logVisitErr}</div>}
+                                  </form>
+                                </td>
+                              </tr>
+                            )}
+                          </React.Fragment>
+                        )
+                      })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* Agency-branded welcome stub note */}
+            <div style={{ marginTop: '20px', padding: '16px 20px', backgroundColor: '#F9F7F4', borderRadius: '10px', border: '1px solid #E8E4DC', fontFamily: 'var(--font-body)', fontSize: '13px', color: '#6B7280' }}>
+              💌 New members referred by your agency receive a co-branded welcome email: "Welcome from {agency.name}, Powered by ThriveAtHome." Configure your branding in the <a href="/agency-admin/branding" style={{ color: 'var(--color-teal)' }}>Branding settings</a>.
+            </div>
+          </div>
+        )}
+
+        {/* PARTNER PROGRAM TAB — Phase 78 */}
+        {activeTab === 'partner_program' && (
+          <div>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+              <div>
+                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 500, color: 'var(--color-navy)', margin: 0 }}>Referral Partner Program</h2>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: '4px 0 0' }}>
+                  Earn $35 for every family you refer who activates a paid plan.
+                </p>
+              </div>
+              <button type="button" onClick={handleGenerateLink} disabled={generatingLink}
+                style={{ padding: '9px 20px', backgroundColor: generatingLink ? '#9CA3AF' : 'var(--color-navy)', color: 'white', border: 'none', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, cursor: generatingLink ? 'not-allowed' : 'pointer' }}>
+                {generatingLink ? 'Generating…' : '+ Generate referral link'}
+              </button>
+            </div>
+
+            {partnerErr && <div style={{ padding: '12px 16px', backgroundColor: '#FEE2E2', borderRadius: '8px', marginBottom: '16px', fontFamily: 'var(--font-body)', fontSize: '14px', color: '#DC2626' }}>{partnerErr}</div>}
+
+            {partnerLoading ? (
+              <div style={{ textAlign: 'center', padding: '40px', fontFamily: 'var(--font-body)', color: 'var(--color-text-secondary)' }}>Loading…</div>
+            ) : (
+              <>
+                {/* Referral links */}
+                {referralLinks.length > 0 && (
+                  <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '20px 24px', border: '1px solid #E8E4DC', marginBottom: '20px' }}>
+                    <h3 style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 14px' }}>Your referral links</h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      {referralLinks.map(link => (
+                        <div key={link.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', backgroundColor: '#F9F7F4', borderRadius: '8px', flexWrap: 'wrap', gap: '10px' }}>
+                          <div>
+                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '15px', fontWeight: 700, color: 'var(--color-navy)' }}>
+                              https://thriveathome.com/join?ref={link.referral_code}
+                            </div>
+                            <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: '#9CA3AF', marginTop: '2px' }}>
+                              {link.total_referrals} referrals · ${((link.total_fees_earned_cents ?? 0) / 100).toFixed(2)} earned · ${(link.referral_fee_cents / 100).toFixed(2)}/referral
+                            </div>
+                          </div>
+                          <button type="button"
+                            onClick={() => navigator.clipboard.writeText(`https://thriveathome.com/join?ref=${link.referral_code}`)}
+                            style={{ padding: '6px 14px', backgroundColor: 'var(--color-teal)', color: 'white', border: 'none', borderRadius: '6px', fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>
+                            Copy link
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Referred members */}
+                <div style={{ backgroundColor: 'white', borderRadius: '12px', border: '1px solid #E8E4DC', overflow: 'hidden' }}>
+                  <div style={{ padding: '18px 24px', borderBottom: '1px solid #E8E4DC', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h3 style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>
+                      Referred members ({referredMembers.length})
+                    </h3>
+                  </div>
+                  {referredMembers.length === 0 ? (
+                    <div style={{ padding: '40px 24px', textAlign: 'center', fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)' }}>
+                      No referred members yet. Share your referral link with families you serve.
+                    </div>
+                  ) : (
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--font-body)', fontSize: '14px' }}>
+                      <thead>
+                        <tr style={{ backgroundColor: '#F9F7F4', textAlign: 'left' }}>
+                          {['Member Name', 'Joined', 'Current Plan', 'Referral Fee'].map(col => (
+                            <th key={col} style={{ padding: '10px 16px', fontWeight: 700, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#9CA3AF' }}>{col}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {referredMembers.map((m, i) => (
+                          <tr key={m.id} style={{ borderTop: '1px solid #E8E4DC', backgroundColor: i % 2 === 0 ? 'white' : '#FAFAFA' }}>
+                            <td style={{ padding: '12px 16px', fontWeight: 600, color: 'var(--color-navy)' }}>{m.full_name}</td>
+                            <td style={{ padding: '12px 16px', color: '#6B7280' }}>{new Date(m.joined_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
+                            <td style={{ padding: '12px 16px' }}>
+                              {m.plan_tier ? (
+                                <span style={{ backgroundColor: '#DBEAFE', color: '#1E40AF', fontSize: '12px', fontWeight: 700, padding: '2px 8px', borderRadius: '12px', textTransform: 'capitalize' }}>{m.plan_tier}</span>
+                              ) : <span style={{ color: '#9CA3AF' }}>Onboarding</span>}
+                            </td>
+                            <td style={{ padding: '12px 16px' }}>
+                              <span style={{ backgroundColor: m.referral_fee_status === 'pending' ? '#FEF3C7' : '#F3F4F6', color: m.referral_fee_status === 'pending' ? '#92400E' : '#9CA3AF', fontSize: '12px', fontWeight: 700, padding: '2px 8px', borderRadius: '12px', textTransform: 'capitalize' }}>
+                                {m.referral_fee_status === 'pending' ? 'Pending ($35)' : m.referral_fee_status === 'not_yet' ? 'Profile not complete' : m.referral_fee_status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         )}
 

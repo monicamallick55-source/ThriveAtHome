@@ -70,6 +70,12 @@ function makeMember(overrides: Partial<Member>): Member {
     emergency_contact_2_rel: null,
     doctor_name: null,
     doctor_phone: null,
+    buddy_match_topics: null,
+    buddy_match_era: null,
+    buddy_call_length_preference: null,
+    buddy_intro_note: null,
+    grief_welcome_path: false,
+    grief_enrolled_at: null,
     ...overrides,
   }
 }

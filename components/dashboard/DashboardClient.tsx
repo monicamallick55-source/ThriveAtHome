@@ -750,6 +750,15 @@ function DashboardInner(props: DashboardClientProps) {
         </div>
       </main>
 
+      {/* Footer with donate link */}
+      <footer style={{ borderTop: '1px solid var(--color-warm-grey)', padding: '16px 32px', textAlign: 'center', backgroundColor: 'white' }}>
+        <a href="/donate" style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-teal)', textDecoration: 'none', fontWeight: 500 }}>
+          ❤️ Support ThriveAtHome
+        </a>
+        <span style={{ margin: '0 12px', color: 'var(--color-warm-grey)' }}>·</span>
+        <a href="/privacy" style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', textDecoration: 'none' }}>Privacy</a>
+      </footer>
+
       <style>{`
         @media (min-width: 768px) {
           .dash-two-col { grid-template-columns: 1fr 1fr !important; }

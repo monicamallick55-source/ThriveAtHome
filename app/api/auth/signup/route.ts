@@ -4,19 +4,40 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function POST(req: NextRequest) {
-  let body: { email?: string; password?: string; fullName?: string }
+  let body: { email?: string; password?: string; fullName?: string; referralCode?: string }
   try {
     body = await req.json()
   } catch {
     return NextResponse.json({ error: 'Invalid request body.' }, { status: 400 })
   }
 
-  const { email, password, fullName } = body
+  const { email, password, fullName, referralCode } = body
   if (!email || !password || !fullName) {
     return NextResponse.json({ error: 'Email, password, and full name are required.' }, { status: 400 })
   }
 
   const admin = createAdminClient()
+
+  // Resolve referral code to agency
+  let referringAgencyId: string | null = null
+  let referringAgencyName: string | null = null
+  if (referralCode?.trim()) {
+    const { data: link } = await (admin as any)
+      .from('agency_referral_links')
+      .select('agency_id, referral_code')
+      .eq('referral_code', referralCode.trim())
+      .eq('is_active', true)
+      .maybeSingle() as { data: { agency_id: string; referral_code: string } | null }
+    if (link) {
+      referringAgencyId = link.agency_id
+      const { data: agency } = await admin
+        .from('care_agencies' as any)
+        .select('name')
+        .eq('id', link.agency_id)
+        .maybeSingle() as { data: { name: string } | null }
+      referringAgencyName = agency?.name ?? null
+    }
+  }
 
   // Step 1: Create auth user (email confirmed immediately — no email verification in v1)
   const { data: authData, error: authError } = await admin.auth.admin.createUser({
@@ -39,6 +60,7 @@ export async function POST(req: NextRequest) {
     full_name: fullName,
     email,
     role: 'family',
+    referring_agency_id: referringAgencyId,
   })
 
   if (insertError) {
@@ -52,6 +74,12 @@ export async function POST(req: NextRequest) {
       { error: 'Could not complete sign-up. Please try again.' },
       { status: 500 }
     )
+  }
+
+  // Step 3: Co-branded welcome email stub for agency referrals
+  if (referringAgencyId && referringAgencyName) {
+    console.log(`[STUB][Email] Agency-referred welcome sent to ${fullName}: "Referred by ${referringAgencyName}, Powered by ThriveAtHome."`)
+    console.log(`[STUB][Stripe] Would transfer $${(3500 / 100).toFixed(2)} referral fee to ${referringAgencyName} Stripe Connect account on plan activation.`)
   }
 
   return NextResponse.json({ success: true })

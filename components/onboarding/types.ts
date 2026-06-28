@@ -26,6 +26,8 @@ export interface OnboardingFormData {
   buddy_match_era: string
   buddy_call_length_preference: string
   buddy_intro_note: string
+  // Grief welcome path (Phase 75)
+  grief_welcome_path: string // 'true' | '' (string to match onChange pattern)
 }
 
 export const EMPTY_FORM: OnboardingFormData = {
@@ -51,6 +53,7 @@ export const EMPTY_FORM: OnboardingFormData = {
   buddy_match_era: '',
   buddy_call_length_preference: '',
   buddy_intro_note: '',
+  grief_welcome_path: '',
 }
 
 export const STORAGE_KEY = 'onboarding-form'

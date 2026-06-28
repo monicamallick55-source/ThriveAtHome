@@ -4,6 +4,11 @@ import { SignupForm } from '@/components/auth/SignupForm'
 
 export const metadata: Metadata = { title: 'Create Account — ThriveAtHome' }
 
-export default function SignupPage() {
-  return <SignupForm />
+export default async function SignupPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ ref?: string }>
+}) {
+  const params = await searchParams
+  return <SignupForm referralCode={params.ref} />
 }

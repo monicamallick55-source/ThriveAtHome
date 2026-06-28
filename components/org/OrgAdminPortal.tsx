@@ -1,6 +1,6 @@
 'use client'
 // Community Organization Admin Portal — tabbed dashboard for village networks and community orgs.
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { CommunityOrgRow, OrgProgramRow, MemberNeedRow, OrgMembershipRow, OrgStats, OrgMembershipTierRow, OrgDonationRow } from '@/lib/data/communityOrgs'
 
 const PROGRAM_TYPES = [
@@ -65,12 +65,131 @@ interface Props {
   initialTiers: OrgMembershipTierRow[]
 }
 
+function HvIntegrationSection({ orgId }: { orgId: string }) {
+  const [hvOrgId, setHvOrgId] = useState('')
+  const [hvSyncEnabled, setHvSyncEnabled] = useState(false)
+  const [apiKey, setApiKey] = useState('')
+  const [memberCount, setMemberCount] = useState<number | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [error, setError] = useState('')
+  const [loaded, setLoaded] = useState(false)
+
+  useEffect(() => {
+    fetch('/api/org-admin/integrations')
+      .then(r => r.json())
+      .then(j => {
+        if (j.data) {
+          setHvOrgId(j.data.helpful_village_org_id ?? '')
+          setHvSyncEnabled(j.data.hv_sync_enabled ?? false)
+          setApiKey(j.data.org_api_key ?? '')
+          setMemberCount(j.data.member_count ?? null)
+        }
+        setLoaded(true)
+      })
+      .catch(() => setLoaded(true))
+  }, [orgId])
+
+  async function handleSave() {
+    setSaving(true); setError(''); setSaved(false)
+    const res = await fetch('/api/org-admin/integrations', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ helpful_village_org_id: hvOrgId, hv_sync_enabled: hvSyncEnabled }),
+    })
+    setSaving(false)
+    if (!res.ok) {
+      let msg = 'Failed to save'
+      try { const j = await res.json(); msg = j.error ?? msg } catch {}
+      setError(msg); return
+    }
+    setSaved(true)
+    setTimeout(() => setSaved(false), 3000)
+  }
+
+  if (!loaded) return <div style={{ padding: '24px', textAlign: 'center', fontFamily: 'var(--font-body)', color: 'var(--color-text-secondary)' }}>Loading integration settings…</div>
+
+  return (
+    <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '24px', border: '1px solid #E8E4DC', marginTop: '24px' }}>
+      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '6px' }}>Integrations</h3>
+      <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', marginBottom: '24px' }}>
+        Connect your organization to Helpful Village or Mon Ami to sync member records automatically.
+      </p>
+
+      {saved && <div style={{ marginBottom: '16px', padding: '12px 16px', backgroundColor: '#F0FFF4', borderRadius: '8px', border: '1px solid #22C55E40', fontFamily: 'var(--font-body)', fontSize: '14px', color: '#15803D' }}>Integration settings saved.</div>}
+      {error && <p style={{ color: '#D62828', fontFamily: 'var(--font-body)', fontSize: '14px', marginBottom: '12px' }}>{error}</p>}
+
+      {/* Your API key */}
+      {apiKey && (
+        <div style={{ marginBottom: '24px', padding: '16px 20px', backgroundColor: '#F0F9F7', borderRadius: '10px', border: '1px solid #2A9D8F30' }}>
+          <div style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 700, color: 'var(--color-navy)', marginBottom: '6px' }}>Your ThriveAtHome Org API Key</div>
+          <div style={{ fontFamily: 'var(--font-mono, monospace)', fontSize: '13px', color: 'var(--color-teal)', backgroundColor: 'white', padding: '8px 12px', borderRadius: '6px', border: '1px solid #D1C9BC', wordBreak: 'break-all' }}>{apiKey}</div>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)', marginTop: '8px', margin: '8px 0 0' }}>
+            Use this key in the Authorization header when posting to <code>POST /api/v1/org/members</code> to sync members programmatically.
+          </p>
+          {memberCount !== null && (
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-navy)', marginTop: '8px' }}>
+              <strong>{memberCount}</strong> members synced via API
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Connect to Helpful Village */}
+      <div style={{ marginBottom: '20px' }}>
+        <label style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 700, color: 'var(--color-navy)', display: 'block', marginBottom: '6px' }}>
+          Helpful Village Organization ID
+        </label>
+        <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>
+          Enter your Helpful Village org ID to enable member sync. Find it in your Helpful Village admin settings.
+        </p>
+        <input
+          value={hvOrgId}
+          onChange={e => setHvOrgId(e.target.value)}
+          placeholder="e.g. hv-bay-area-123"
+          style={{ width: '100%', maxWidth: '360px', padding: '10px 14px', border: '1px solid #D1C9BC', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '15px', boxSizing: 'border-box' }}
+        />
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+        <button
+          role="switch"
+          aria-checked={hvSyncEnabled}
+          onClick={() => setHvSyncEnabled(v => !v)}
+          style={{ width: '48px', height: '26px', borderRadius: '13px', border: 'none', cursor: 'pointer', backgroundColor: hvSyncEnabled ? 'var(--color-teal)' : '#D1C9BC', position: 'relative', transition: 'background-color 0.2s', flexShrink: 0 }}
+        >
+          <span style={{ position: 'absolute', top: '3px', left: hvSyncEnabled ? '23px' : '3px', width: '20px', height: '20px', borderRadius: '50%', backgroundColor: 'white', transition: 'left 0.2s' }} />
+        </button>
+        <span style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-navy)' }}>
+          {hvSyncEnabled ? 'Sync enabled — new members from Helpful Village will appear here automatically' : 'Sync disabled'}
+        </span>
+      </div>
+
+      <button
+        onClick={handleSave}
+        disabled={saving}
+        style={{ padding: '10px 24px', backgroundColor: saving ? '#9CA3AF' : 'var(--color-navy)', color: 'white', border: 'none', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, cursor: saving ? 'default' : 'pointer' }}
+      >
+        {saving ? 'Saving…' : 'Save integration settings'}
+      </button>
+    </div>
+  )
+}
+
 export default function OrgAdminPortal({ org, programs: initialPrograms, memberNeeds: initialNeeds, memberships: initialMemberships, stats: initialStats, initialTiers }: Props) {
   const [activeTab, setActiveTab] = useState<'overview' | 'programs' | 'needs' | 'members' | 'dues' | 'settings' | 'donations' | 'email' | 'documents'>('overview')
   const [programs, setPrograms] = useState(initialPrograms)
   const [memberNeeds, setMemberNeeds] = useState(initialNeeds)
   const [memberships, setMemberships] = useState(initialMemberships)
   const [stats] = useState(initialStats)
+  const [orgMembers, setOrgMembers] = useState<Array<{ id: string; full_name: string; preferred_name: string | null }>>([])
+
+  useEffect(() => {
+    fetch('/api/org-admin/members-list')
+      .then(r => r.json())
+      .then(j => { if (j.data) setOrgMembers(j.data) })
+      .catch(() => {})
+  }, [])
 
   // Program form
   const [showProgramForm, setShowProgramForm] = useState(false)
@@ -688,15 +807,15 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                   <div>
                     <label style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-navy)', display: 'block', marginBottom: '6px' }}>Member *</label>
-                    {memberships.length > 0 ? (
+                    {orgMembers.length > 0 ? (
                       <select value={needForm.member_id} onChange={e => setNeedForm(f => ({ ...f, member_id: e.target.value }))} style={{ width: '100%', padding: '10px 14px', border: '1px solid #D1C9BC', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '14px', boxSizing: 'border-box' }}>
                         <option value="">— Select a member —</option>
-                        {memberships.map(m => (
-                          <option key={m.member_id} value={m.member_id}>{m.member?.full_name ?? m.member_id}</option>
+                        {orgMembers.map(m => (
+                          <option key={m.id} value={m.id}>{m.preferred_name ? `${m.preferred_name} (${m.full_name})` : m.full_name}</option>
                         ))}
                       </select>
                     ) : (
-                      <input value={needForm.member_id} onChange={e => setNeedForm(f => ({ ...f, member_id: e.target.value }))} style={{ width: '100%', padding: '10px 14px', border: '1px solid #D1C9BC', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '14px', boxSizing: 'border-box' }} placeholder="Member UUID (no membership records yet)" />
+                      <input value={needForm.member_id} onChange={e => setNeedForm(f => ({ ...f, member_id: e.target.value }))} style={{ width: '100%', padding: '10px 14px', border: '1px solid #D1C9BC', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '14px', boxSizing: 'border-box' }} placeholder="Member UUID (no enrolled members yet)" />
                     )}
                   </div>
                   <div>
@@ -872,11 +991,11 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                   <div>
                     <label style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-navy)', display: 'block', marginBottom: '6px' }}>Member *</label>
-                    {memberships.length > 0 ? (
+                    {orgMembers.length > 0 ? (
                       <select value={duesForm.member_id} onChange={e => setDuesForm(f => ({ ...f, member_id: e.target.value }))} style={{ width: '100%', padding: '10px 14px', border: '1px solid #D1C9BC', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '14px', boxSizing: 'border-box' }}>
                         <option value="">— Select a member —</option>
-                        {memberships.map(m => (
-                          <option key={m.member_id} value={m.member_id}>{m.member?.full_name ?? m.member_id}</option>
+                        {orgMembers.map(m => (
+                          <option key={m.id} value={m.id}>{m.preferred_name ? `${m.preferred_name} (${m.full_name})` : m.full_name}</option>
                         ))}
                       </select>
                     ) : (
@@ -1070,6 +1189,35 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
                 </p>
               </div>
             </div>
+
+            {/* Plan & Billing */}
+            <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '24px', border: '1px solid #E8E4DC', marginTop: '24px' }}>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '6px' }}>Plan &amp; Billing</h3>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', marginBottom: '20px' }}>ThriveAtHome partnership tiers for your organization. Contact us to upgrade.</p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
+                {[
+                  { tier: 'in_development', label: 'In-Development', price: '$49/mo', desc: 'Up to 50 members. All core features.', highlight: false },
+                  { tier: 'growth', label: 'Growth', price: '$149/mo', desc: 'Up to 200 members. + Wellness data & Aria.', highlight: true },
+                  { tier: 'scale', label: 'Scale', price: '$349/mo', desc: 'Unlimited members. Full AI outcomes data.', highlight: false },
+                ].map(plan => (
+                  <div key={plan.tier} style={{ padding: '20px', borderRadius: '10px', border: plan.highlight ? '2px solid var(--color-teal)' : '1px solid #E8E4DC', backgroundColor: plan.highlight ? '#F0F9F7' : 'white', position: 'relative' }}>
+                    {plan.highlight && <div style={{ position: 'absolute', top: '-10px', left: '50%', transform: 'translateX(-50%)', backgroundColor: 'var(--color-teal)', color: 'white', padding: '2px 12px', borderRadius: '12px', fontFamily: 'var(--font-body)', fontSize: '11px', fontWeight: 700, whiteSpace: 'nowrap' }}>Most popular</div>}
+                    <div style={{ fontFamily: 'var(--font-body)', fontSize: '22px', fontWeight: 700, color: 'var(--color-navy)' }}>{plan.price}</div>
+                    <div style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 700, color: 'var(--color-teal)', marginBottom: '8px' }}>{plan.label}</div>
+                    <div style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: 1.5 }}>{plan.desc}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ marginTop: '16px', padding: '12px 16px', backgroundColor: '#F9F6F0', borderRadius: '8px', border: '1px solid #E8E4DC' }}>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0 }}>
+                  🆓 30-day free trial available for all plans. Data migration from Helpful Village or other platforms: <strong>$1,500 one-time</strong>.
+                  Contact <a href="mailto:partners@thriveathome.com" style={{ color: 'var(--color-teal)' }}>partners@thriveathome.com</a> to get started.
+                </p>
+              </div>
+            </div>
+
+            {/* Connect to Helpful Village */}
+            <HvIntegrationSection orgId={org.id} />
           </div>
         )}
 

@@ -59,6 +59,12 @@ export interface Database {
           emergency_contact_2_rel: string | null
           doctor_name: string | null
           doctor_phone: string | null
+          buddy_match_topics: string[] | null
+          buddy_match_era: string | null
+          buddy_call_length_preference: string | null
+          buddy_intro_note: string | null
+          grief_welcome_path: boolean
+          grief_enrolled_at: string | null
         }
         Insert: {
           id?: string
@@ -88,6 +94,12 @@ export interface Database {
           emergency_contact_2_rel?: string | null
           doctor_name?: string | null
           doctor_phone?: string | null
+          buddy_match_topics?: string[] | null
+          buddy_match_era?: string | null
+          buddy_call_length_preference?: string | null
+          buddy_intro_note?: string | null
+          grief_welcome_path?: boolean
+          grief_enrolled_at?: string | null
         }
         Update: Partial<Database['public']['Tables']['members']['Insert']>
         Relationships: []
@@ -113,6 +125,7 @@ export interface Database {
           network_id: string | null
           senior_center_id: string | null
           aaa_id: string | null
+          referring_agency_id: string | null
         }
         Insert: {
           id?: string
@@ -134,6 +147,7 @@ export interface Database {
           network_id?: string | null
           senior_center_id?: string | null
           aaa_id?: string | null
+          referring_agency_id?: string | null
         }
         Update: Partial<Database['public']['Tables']['family_members']['Insert']>
         Relationships: [
@@ -190,6 +204,11 @@ export interface Database {
           alert_flags: unknown[]
           recording_url: string | null
           retell_call_id: string | null
+          pain_mentioned: boolean | null
+          medication_adherence: boolean | null
+          social_isolation_signal: boolean | null
+          fall_risk_mention: boolean | null
+          cognitive_concern_signal: boolean | null
         }
         Insert: {
           id?: string
@@ -210,6 +229,11 @@ export interface Database {
           alert_flags?: unknown[]
           recording_url?: string | null
           retell_call_id?: string | null
+          pain_mentioned?: boolean | null
+          medication_adherence?: boolean | null
+          social_isolation_signal?: boolean | null
+          fall_risk_mention?: boolean | null
+          cognitive_concern_signal?: boolean | null
         }
         Update: Partial<Database['public']['Tables']['check_in_calls']['Insert']>
         Relationships: []
@@ -225,6 +249,7 @@ export interface Database {
           acknowledged: boolean
           acknowledged_by: string | null
           acknowledged_at: string | null
+          icd10_codes: string[]
         }
         Insert: {
           id?: string
@@ -236,6 +261,7 @@ export interface Database {
           acknowledged?: boolean
           acknowledged_by?: string | null
           acknowledged_at?: string | null
+          icd10_codes?: string[]
         }
         Update: Partial<Database['public']['Tables']['alerts']['Insert']>
         Relationships: []

@@ -60,7 +60,7 @@ const RELATIONSHIP_OPTIONS = [
   'Son', 'Daughter', 'Spouse', 'Partner', 'Sibling', 'Friend', 'Caregiver', 'Other',
 ]
 
-export function SignupForm() {
+export function SignupForm({ referralCode }: { referralCode?: string }) {
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -89,7 +89,7 @@ export function SignupForm() {
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, fullName }),
+        body: JSON.stringify({ email, password, fullName, referralCode: referralCode ?? undefined }),
       })
 
       const data = (await res.json()) as { error?: string; success?: boolean }
@@ -226,6 +226,13 @@ export function SignupForm() {
             ThriveAtHome
           </p>
 
+          {referralCode && (
+            <div style={{ backgroundColor: '#F0FDF4', border: '1px solid #86EFAC', borderRadius: '10px', padding: '12px 16px', marginBottom: '20px' }}>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: '#065F46', margin: 0 }}>
+                ✓ Referred by your care agency · 30-day free trial included
+              </p>
+            </div>
+          )}
           <h2
             style={{
               fontFamily: 'var(--font-display)',
