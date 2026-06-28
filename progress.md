@@ -8337,3 +8337,53 @@ ISSUE: Phase 75 Grief Welcome Path — three things missing: (1) no "Recent loss
 ISSUE: Phase 77 Agency Member Wellness — logged visits via UI do not appear in wellness tab after saving. Fix by re-fetching /api/agency/wellness after successful POST and updating wellnessClients state.
 
 ISSUE: Phase 78 Agency Referral Partner Program — Partner Program tab does not exist in /agency-admin. Build the tab with: referral link generator, referred members table, $35 fee stub, /join?ref=[code] attribution flow setting referring_agency_id on signup.
+
+---
+SESSION: 106
+DATE: 2026-06-28 UTC
+MILESTONE: Competitive Spec Phases 73–78 Issue Fixes
+PHASE: Issue resolution — Phases 73 (HV JSON bug) + 77 (wellness re-fetch) + commit/deploy all sessions 102-105 work
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Phase 73 fix: [x] HvIntegrationSection error handler wraps res.json() in try/catch
+- Phase 77 fix: [x] handleLogVisit re-fetches /api/agency/wellness after successful POST
+- All sessions 102-105 uncommitted work: [x] committed and pushed to GitHub (67020a4)
+- Loop state: AWAITING HUMAN REVIEW
+
+STUB STATUS:
+- aiProvider: StubAiProvider
+- callProvider: StubCallProvider
+- smsProvider: StubSmsProvider
+- emailProvider: StubEmailProvider
+- billingProvider: StubBillingProvider
+- transportProvider: StubTransportProvider
+- mealProvider: StubMealProvider
+- goodsProvider: StubGoodsProvider
+
+WHAT WAS DONE THIS SESSION:
+- /workspaces/ThriveAtHome/components/org/OrgAdminPortal.tsx — MODIFIED: HvIntegrationSection handleSave() wraps res.json() in try/catch so empty/non-JSON error responses no longer throw SyntaxError
+- /workspaces/ThriveAtHome/components/agency/AgencyDashboardClient.tsx — MODIFIED: handleLogVisit() re-fetches /api/agency/wellness after successful POST so updated last_visit_date appears immediately in wellness tab
+- git commit 67020a4 pushed — all session 102-105 uncommitted changes (41 files, 3348 insertions) now deployed to Vercel
+
+TESTS AND VERIFICATIONS RUN:
+- npx tsc --noEmit: PASSED — zero errors
+- npm run build: PASSED — 206 routes compiled cleanly
+
+ERRORS ENCOUNTERED:
+- Phase 73 "Unexpected end of JSON input" root cause: sessions 102-105 work was never committed; Vercel was running session 101 code where /api/org-admin/integrations did not exist → 404 with empty body → res.json() threw. Fixed by: (a) committing all code so route exists in production, (b) adding try/catch in frontend so even empty error responses are handled gracefully
+- Phase 77 wellness tab stale data: loadWellness() guards with `if (wellnessLoaded) return` preventing re-fetch; fixed by adding inline fetch after successful POST in handleLogVisit
+
+DECISIONS MADE:
+- Committed sessions 102-105 work as a single commit (67020a4) to bring Vercel in sync with local changes
+- Phase 74 (Employer ROI Dashboard), Phase 75 (Grief Welcome Path), Phase 78 (Partner Program tab) — code was present in working tree all along; human issues were because Vercel was running session 101 code. Now deployed, these should be visible on the live site.
+
+HUMAN APPROVAL:
+- Review presented: YES
+- User response: PENDING
+
+NEXT SESSION MUST:
+- Human verifies on live Vercel site: (1) /org-admin → Settings → "Connect to Helpful Village" saves without error; (2) /agency-admin → Member Wellness → log visit → wellness tab refreshes; (3) /employer-admin → "ROI Dashboard" tab visible; (4) /navigator → Grief path filter (🕊️) visible; (5) /admin/settings → Referral Partners section visible; (6) /agency-admin → "Partner Program" tab visible
+- Upon APPROVAL: Begin M21 — Expanded Volunteer Ecosystem (Phases 81–86: Retired Professionals Network, Faith Community Chaplaincy, Neighbor Volunteers, Family Volunteer Reciprocity, Member Ambassador Programme, Youth K-12 Curriculum)
+---
