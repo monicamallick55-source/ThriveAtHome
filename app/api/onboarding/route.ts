@@ -28,6 +28,7 @@ interface OnboardingBody {
   buddy_call_length_preference?: string
   buddy_intro_note?: string
   grief_welcome_path?: string
+  grief_loss_type?: string
 }
 
 export async function POST(req: NextRequest) {
@@ -112,6 +113,7 @@ export async function POST(req: NextRequest) {
       buddy_intro_note: body.buddy_intro_note?.trim() || null,
       grief_welcome_path: body.grief_welcome_path === 'true',
       grief_enrolled_at: body.grief_welcome_path === 'true' ? new Date().toISOString() : null,
+      grief_loss_type: body.grief_welcome_path === 'true' ? (body.grief_loss_type?.trim() || null) : null,
       plan_tier: 'basics',
       status: 'active',
     })
@@ -158,25 +160,30 @@ export async function POST(req: NextRequest) {
   if (body.grief_welcome_path === 'true') {
     const slaDate = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
     const week1Date = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-    await (admin as any).from('navigator_tasks').insert([
+    const lossType = body.grief_loss_type?.trim()
+    const lossSuffix = lossType ? ` (loss: ${lossType})` : ''
+    const { error: griefTaskError } = await (admin as any).from('navigator_tasks').insert([
       {
         member_id: member.id,
         task_type: 'buddy_assignment',
-        description: `GRIEF PATH — buddy assignment needed within 48 hours for ${member.preferred_name}`,
-        priority: 'urgent',
-        due_date: slaDate,
+        description: `GRIEF PATH — compassionate buddy assignment needed within 48 hours for ${member.preferred_name}${lossSuffix}`,
+        priority: 'critical',
+        due_by: slaDate,
       },
       {
         member_id: member.id,
         task_type: 'follow_up',
-        description: `Week 1 touchpoint — call ${member.preferred_name} (grief welcome path member)`,
+        description: `Week 1 touchpoint — call ${member.preferred_name} (grief welcome path member)${lossSuffix}`,
         priority: 'high',
-        due_date: week1Date,
+        due_by: week1Date,
       },
     ])
+    if (griefTaskError) {
+      console.error('[api/onboarding] grief navigator_tasks insert failed:', griefTaskError)
+    }
     // Stub: grief circle invitation email
     console.log(`[STUB][Email] Grief circle invitation sent to ${member.preferred_name}: "We have a Grief Support Circle that meets weekly — we'd love to invite you."`)
-    console.log(`[STUB][Navigator] GRIEF PATH member enrolled: ${member.preferred_name} (${member.id}) — buddy assignment SLA: 48 hours`)
+    console.log(`[STUB][Navigator] GRIEF PATH member enrolled: ${member.preferred_name} (${member.id})${lossSuffix} — buddy assignment SLA: 48 hours`)
   }
 
   return NextResponse.json({ success: true, preferred_name: member.preferred_name })

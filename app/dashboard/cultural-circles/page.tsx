@@ -50,6 +50,26 @@ export default async function CulturalCirclesPage() {
         </div>
       </nav>
 
+      <div style={{
+        maxWidth: '1200px', margin: '0 auto', padding: '16px 24px 0', width: '100%',
+        display: 'flex', flexWrap: 'wrap', gap: '10px',
+      }}>
+        <Link href="/dashboard/cultural-festivals" style={{
+          fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600,
+          color: 'var(--color-navy)', textDecoration: 'none',
+          border: '1.5px solid var(--color-warm-grey)', borderRadius: '999px', padding: '8px 16px',
+        }}>
+          📅 Cultural festival calendar
+        </Link>
+        <Link href="/dashboard/cultural-programming" style={{
+          fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600,
+          color: 'var(--color-navy)', textDecoration: 'none',
+          border: '1.5px solid var(--color-warm-grey)', borderRadius: '999px', padding: '8px 16px',
+        }}>
+          🎎 Classes, potlucks &amp; story circles
+        </Link>
+      </div>
+
       <CulturalCirclesClient
         circles={circles}
         joinedCircleIds={joinedIds}

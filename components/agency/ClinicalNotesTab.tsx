@@ -113,7 +113,7 @@ export default function ClinicalNotesTab({ agencyId, members, signerName }: Clin
         agency_id: agencyId,
         action: 'approve',
         plan_id: planId,
-        approver_name: 'Agency Admin',
+        approver_name: signerName || 'Agency Admin',
       }),
     })
     if (res.ok) {

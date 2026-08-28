@@ -30,6 +30,27 @@ export async function getUserRole(authUserId: string): Promise<UserRole | null> 
 }
 
 /**
+ * True if the user should be treated as a navigator or an admin.
+ *
+ * Navigator accounts are identified by their `care_navigators.supabase_auth_id`
+ * row, which is the source of truth. The `family_members.role` column is often
+ * unset for navigator logins, so a plain `getUserRole()` check wrongly returns
+ * 403 "Forbidden" for a real navigator. This helper checks both.
+ */
+export async function isNavigatorOrAdmin(authUserId: string): Promise<boolean> {
+  const role = await getUserRole(authUserId)
+  if (role === 'admin' || role === 'navigator') return true
+  const admin = createAdminClient()
+  const { data, error } = await admin
+    .from('care_navigators')
+    .select('id')
+    .eq('supabase_auth_id', authUserId)
+    .maybeSingle()
+  if (error) console.error('[auth/isNavigatorOrAdmin]', error)
+  return Boolean(data)
+}
+
+/**
  * Asserts the current user is authenticated.
  * Redirects to /login if not. Returns the auth user on success.
  */

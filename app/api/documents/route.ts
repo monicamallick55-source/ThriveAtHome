@@ -68,6 +68,12 @@ export async function POST(request: NextRequest) {
   const memberId = formData.get('memberId') as string | null
   const description = formData.get('description') as string | null
   const isAdvanceDirective = formData.get('isAdvanceDirective') === 'true'
+  const docCategoryRaw = (formData.get('docCategory') as string | null)?.trim() || 'other'
+  const expiresOnRaw = (formData.get('expiresOn') as string | null)?.trim() || null
+  const issuerRaw = (formData.get('issuer') as string | null)?.trim() || null
+  const sharedWithNavigator = formData.get('sharedWithNavigator') === 'true'
+  // Validate the optional expiry date is YYYY-MM-DD if provided.
+  const expiresOn = expiresOnRaw && /^\d{4}-\d{2}-\d{2}$/.test(expiresOnRaw) ? expiresOnRaw : null
 
   if (!file || !memberId) {
     return NextResponse.json({ error: 'file and memberId are required' }, { status: 400 })
@@ -124,6 +130,10 @@ export async function POST(request: NextRequest) {
     description: description || null,
     storagePath,
     isAdvanceDirective,
+    docCategory: docCategoryRaw.slice(0, 40),
+    expiresOn,
+    issuer: issuerRaw ? issuerRaw.slice(0, 120) : null,
+    sharedWithNavigator,
   })
 
   if (docError || !doc) {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser, getUserRole } from '@/lib/auth'
+import { getCurrentUser, isNavigatorOrAdmin } from '@/lib/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function POST(
@@ -10,8 +10,7 @@ export async function POST(
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const role = await getUserRole(user.id)
-  if (role !== 'navigator' && role !== 'admin') {
+  if (!(await isNavigatorOrAdmin(user.id))) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 

@@ -4,6 +4,7 @@ import { getMemberForAuthUser } from '@/lib/data/members'
 import { getGriefSupportRequestsForMember } from '@/lib/data/grief'
 import GriefSupportClient from '@/components/grief/GriefSupportClient'
 import { ToastProvider } from '@/components/ui/Toast'
+import CrisisResourceBar from '@/components/shared/CrisisResourceBar'
 
 export const metadata: Metadata = { title: 'Grief & Transition Support — ThriveAtHome' }
 
@@ -24,6 +25,7 @@ export default async function GriefSupportPage() {
         memberName={memberName}
         existingRequests={existingRequests ?? []}
       />
+      <CrisisResourceBar surface="grief" />
     </ToastProvider>
   )
 }

@@ -63,6 +63,39 @@ interface PanelData {
   navigatorId: string
   bookings: ServiceBooking[]
   trackedItems: TrackedItem[]
+  devices?: Array<{ id: string; device_category: string; device_type: string; device_name: string | null; status: string }>
+  fallEvents?: Array<{ id: string; source: string; detected_at: string; resolved: boolean; resolution_note: string | null }>
+  wearables?: Array<{ id: string; platform: string; status: string; last_sync_at: string | null }>
+  sharedDocuments?: Array<{ id: string; file_name: string; doc_category: string; expires_on: string | null; issuer: string | null; is_advance_directive: boolean; created_at: string }>
+  advisorConnections?: Array<{ id: string; status: string; topic: string | null; created_at: string; advisor: { full_name: string; firm_name: string | null; advisor_type: string } | null }>
+  culturalEngagement?: {
+    potluck_signups: number
+    upcoming_potlucks_hosting: number
+    story_contributions: number
+    heritage_projects: number
+    class_registrations: number
+    oral_history_recordings: number
+  } | null
+  mlInsights?: {
+    baseline: { status: string; data_points: number; window_days: number; computed_at: string } | null
+    latestAnomaly: { anomaly_score: number; severity: string; top_drivers: string[]; detected_at: string } | null
+    fallRisk: { risk_probability: number; risk_band: string; contributing_factors: unknown; computed_at: string } | null
+    isolation: { isolation_score: number; risk_band: string; drivers: string[]; sentiment_valence: number | null; engagement_trend: number | null; computed_at: string } | null
+    griefFlag: { risk_band: string; pgd_risk: boolean; months_since_loss: number | null; indicators: string[]; professional_referral_suggested: boolean; computed_at: string } | null
+    hasAnySignal: boolean
+  } | null
+  premiumAddons?: {
+    activeCount: number
+    monthlyTotalCents: number
+    activeKeys: string[]
+    pendingFulfillment: { addon_key: string; addon_name: string; status: string; created_at: string }[]
+  } | null
+  petSummary?: {
+    activePets: { name: string; species: string }[]
+    memorializedPets: { name: string; passed_away_on: string | null }[]
+    upcomingPetCelebrations: number
+    openPetLossRequests: number
+  } | null
 }
 
 function formatDate(iso: string | null | undefined): string {
@@ -1696,6 +1729,266 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                     <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)', margin: '4px 0 0', fontStyle: 'italic' }}>
                       Renewal help requests appear in the navigator task queue as &quot;renewal_assistance&quot; tasks.
                     </p>
+                  </div>
+                )}
+              </Section>
+
+              {/* Connected Devices & Fall Events (M22) */}
+              <Section title={`Connected devices (${(panelData.devices ?? []).filter(d => d.status === 'active').length} active)`}>
+                {(panelData.devices ?? []).length === 0 && (panelData.wearables ?? []).length === 0 ? (
+                  <EmptyState text="No connected devices or wearables for this member." />
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    {(panelData.devices ?? []).map(d => (
+                      <div key={d.id} style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', backgroundColor: 'white', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 'var(--radius-md)', padding: '8px 12px' }}>
+                        <span style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+                          {d.device_name || d.device_type.replace(/_/g, ' ')}
+                        </span>
+                        <span style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)' }}>
+                          {d.device_category.replace(/_/g, ' ')} · {d.status}
+                        </span>
+                      </div>
+                    ))}
+                    {(panelData.wearables ?? []).map(w => (
+                      <div key={w.id} style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', backgroundColor: 'white', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 'var(--radius-md)', padding: '8px 12px' }}>
+                        <span style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+                          ⌚ {w.platform.replace(/_/g, ' ')}
+                        </span>
+                        <span style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)' }}>
+                          {w.status}{w.last_sync_at ? ` · synced ${formatDate(w.last_sync_at)}` : ''}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {(panelData.fallEvents ?? []).length > 0 && (
+                  <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 700, color: 'var(--color-text-secondary)', margin: 0 }}>
+                      Fall events
+                    </p>
+                    {(panelData.fallEvents ?? []).map(f => (
+                      <div key={f.id} style={{ backgroundColor: f.resolved ? '#f0fdf4' : '#fef2f2', border: `1px solid ${f.resolved ? '#bbf7d0' : '#fecaca'}`, borderRadius: 'var(--radius-md)', padding: '8px 12px' }}>
+                        <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: f.resolved ? '#166534' : '#b91c1c', margin: 0 }}>
+                          {f.resolved ? '✓ Resolved' : '⚠ Open'} · {f.source.replace(/_/g, ' ')} · {formatDate(f.detected_at)}
+                        </p>
+                        {f.resolution_note && (
+                          <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)', margin: '2px 0 0' }}>
+                            {f.resolution_note}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </Section>
+
+              {/* Essential documents shared with the care team (M24 Phase 101) */}
+              <Section title={`Shared documents (${(panelData.sharedDocuments ?? []).length})`}>
+                {(panelData.sharedDocuments ?? []).length === 0 ? (
+                  <EmptyState text="The family has not shared any vault documents with the care team." />
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    {(panelData.sharedDocuments ?? []).map(d => (
+                      <div key={d.id} style={{ backgroundColor: 'white', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 'var(--radius-md)', padding: '8px 12px' }}>
+                        <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-primary)', margin: 0 }}>
+                          {d.is_advance_directive ? '🕊️ ' : '📎 '}{d.file_name}
+                        </p>
+                        <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)', margin: '2px 0 0' }}>
+                          {d.doc_category.replace(/_/g, ' ')}{d.issuer ? ` · ${d.issuer}` : ''}
+                          {d.expires_on ? ` · expires ${formatDate(d.expires_on)}` : ''} · added {formatDate(d.created_at)}
+                        </p>
+                      </div>
+                    ))}
+                    <p style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--color-text-secondary)', margin: '2px 0 0' }}>
+                      View the file itself from the member&apos;s Document Vault.
+                    </p>
+                  </div>
+                )}
+              </Section>
+
+              {/* Trusted advisor introductions (M24 Phase 98) */}
+              {(panelData.advisorConnections ?? []).length > 0 && (
+                <Section title={`Advisor introductions (${(panelData.advisorConnections ?? []).length})`}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    {(panelData.advisorConnections ?? []).map(c => (
+                      <div key={c.id} style={{ backgroundColor: 'white', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 'var(--radius-md)', padding: '8px 12px' }}>
+                        <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-primary)', margin: 0 }}>
+                          {c.advisor?.full_name ?? 'Advisor'}{c.advisor?.firm_name ? ` · ${c.advisor.firm_name}` : ''}
+                        </p>
+                        <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)', margin: '2px 0 0' }}>
+                          {(c.advisor?.advisor_type ?? '').replace(/_/g, ' ')} · {c.status}
+                          {c.topic ? ` · ${c.topic}` : ''} · {formatDate(c.created_at)}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </Section>
+              )}
+
+              {/* Cultural programming engagement (M25) */}
+              {(() => {
+                const ce = panelData.culturalEngagement
+                const total = ce
+                  ? ce.potluck_signups + ce.upcoming_potlucks_hosting + ce.story_contributions + ce.heritage_projects + ce.class_registrations + ce.oral_history_recordings
+                  : 0
+                if (!ce || total === 0) return null
+                const rows: Array<[string, number]> = [
+                  ['Class registrations', ce.class_registrations],
+                  ['Potluck sign-ups', ce.potluck_signups],
+                  ['Potlucks hosting', ce.upcoming_potlucks_hosting],
+                  ['Story circle memories', ce.story_contributions],
+                  ['Heritage projects', ce.heritage_projects],
+                  ['Oral history recordings', ce.oral_history_recordings],
+                ]
+                return (
+                  <Section title="Cultural programming">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      {rows.filter(([, n]) => n > 0).map(([lbl, n]) => (
+                        <p key={lbl} style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0 }}>
+                          {lbl}: <strong style={{ color: 'var(--color-text-primary)' }}>{n}</strong>
+                        </p>
+                      ))}
+                    </div>
+                  </Section>
+                )
+              })()}
+
+              {/* Premium add-ons (M26) */}
+              {(() => {
+                const pa = panelData.premiumAddons
+                if (!pa || (pa.activeCount === 0 && pa.pendingFulfillment.length === 0)) return null
+                return (
+                  <Section title="Premium add-ons">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      {pa.activeKeys.length > 0 && (
+                        <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0 }}>
+                          Active: <strong style={{ color: 'var(--color-text-primary)' }}>{pa.activeKeys.join(', ')}</strong>
+                          {pa.monthlyTotalCents > 0 ? ` · $${(pa.monthlyTotalCents / 100).toFixed(2)}/mo` : ''}
+                        </p>
+                      )}
+                      {pa.pendingFulfillment.map((p) => (
+                        <p key={p.addon_key + p.created_at} style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0 }}>
+                          {p.addon_name}: <strong style={{ color: 'var(--color-text-primary)' }}>{p.status}</strong>
+                          {' '}— see the task queue for the fulfilment task
+                        </p>
+                      ))}
+                    </div>
+                  </Section>
+                )
+              })()}
+
+              {/* Pets & companions (M27) */}
+              {(() => {
+                const ps = panelData.petSummary
+                if (
+                  !ps ||
+                  (ps.activePets.length === 0 &&
+                    ps.memorializedPets.length === 0 &&
+                    ps.upcomingPetCelebrations === 0 &&
+                    ps.openPetLossRequests === 0)
+                ) {
+                  return null
+                }
+                return (
+                  <Section title="Pets & companions">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      {ps.activePets.length > 0 && (
+                        <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0 }}>
+                          Companions:{' '}
+                          <strong style={{ color: 'var(--color-text-primary)' }}>
+                            {ps.activePets.map((p) => `${p.name} (${p.species})`).join(', ')}
+                          </strong>
+                        </p>
+                      )}
+                      {ps.upcomingPetCelebrations > 0 && (
+                        <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0 }}>
+                          Upcoming pet milestones: <strong style={{ color: 'var(--color-text-primary)' }}>{ps.upcomingPetCelebrations}</strong>
+                        </p>
+                      )}
+                      {ps.memorializedPets.length > 0 && (
+                        <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0 }}>
+                          Remembered: <strong style={{ color: 'var(--color-text-primary)' }}>{ps.memorializedPets.map((p) => p.name).join(', ')}</strong>
+                        </p>
+                      )}
+                      {ps.openPetLossRequests > 0 && (
+                        <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: '#b45309', margin: 0 }}>
+                          Open pet-loss support request{ps.openPetLossRequests === 1 ? '' : 's'}:{' '}
+                          <strong>{ps.openPetLossRequests}</strong> — see the task queue (pet_loss_support)
+                        </p>
+                      )}
+                    </div>
+                  </Section>
+                )
+              })()}
+
+              {/* Wellness intelligence — Advanced AI/ML Layer (M23) */}
+              <Section title="Wellness intelligence (AI/ML)">
+                {!panelData.mlInsights || (!panelData.mlInsights.baseline && !panelData.mlInsights.hasAnySignal && !panelData.mlInsights.fallRisk && !panelData.mlInsights.isolation) ? (
+                  <EmptyState text="No ML analytics yet. The nightly sweep computes a baseline once enough check-in and wearable data exists." />
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {(() => {
+                      const ml = panelData.mlInsights!
+                      const bandColor = (b: string): { bg: string; fg: string; bd: string } => {
+                        if (b === 'high' || b === 'urgent') return { bg: '#fef2f2', fg: '#b91c1c', bd: '#fecaca' }
+                        if (b === 'moderate' || b === 'elevated' || b === 'concern') return { bg: '#fffbeb', fg: '#b45309', bd: '#fde68a' }
+                        if (b === 'monitoring') return { bg: '#eff6ff', fg: '#1d4ed8', bd: '#bfdbfe' }
+                        return { bg: '#f0fdf4', fg: '#166534', bd: '#bbf7d0' }
+                      }
+                      const Row = ({ label, band, detail }: { label: string; band: string; detail: string }) => {
+                        const c = bandColor(band)
+                        return (
+                          <div style={{ backgroundColor: c.bg, border: `1px solid ${c.bd}`, borderRadius: 'var(--radius-md)', padding: '8px 12px' }}>
+                            <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 700, color: c.fg, margin: 0 }}>
+                              {label}: {band.toUpperCase()}
+                            </p>
+                            {detail && (
+                              <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)', margin: '2px 0 0' }}>{detail}</p>
+                            )}
+                          </div>
+                        )
+                      }
+                      return (
+                        <>
+                          {ml.baseline && (
+                            <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)', margin: 0 }}>
+                              Baseline: {ml.baseline.status === 'ok' ? `established (${ml.baseline.data_points} data points, ${ml.baseline.window_days}d window)` : 'insufficient data'} · updated {formatDate(ml.baseline.computed_at)}
+                            </p>
+                          )}
+                          {ml.latestAnomaly && (
+                            <Row
+                              label="Behavioral anomaly"
+                              band={ml.latestAnomaly.severity}
+                              detail={`Score ${(ml.latestAnomaly.anomaly_score * 100).toFixed(0)}%${ml.latestAnomaly.top_drivers.length ? ` · drivers: ${ml.latestAnomaly.top_drivers.join(', ')}` : ''} · ${formatDate(ml.latestAnomaly.detected_at)}`}
+                            />
+                          )}
+                          {ml.fallRisk && (
+                            <Row
+                              label="Fall risk"
+                              band={ml.fallRisk.risk_band}
+                              detail={`${(ml.fallRisk.risk_probability * 100).toFixed(0)}% · ${Array.isArray(ml.fallRisk.contributing_factors) ? (ml.fallRisk.contributing_factors as { factor: string }[]).map(f => f.factor).join('; ') : ''} · ${formatDate(ml.fallRisk.computed_at)}`}
+                            />
+                          )}
+                          {ml.isolation && (
+                            <Row
+                              label="Social isolation"
+                              band={ml.isolation.risk_band}
+                              detail={`Score ${(ml.isolation.isolation_score * 100).toFixed(0)}%${ml.isolation.drivers.length ? ` · ${ml.isolation.drivers.join('; ')}` : ''} · sentiment ${ml.isolation.sentiment_valence ?? '—'} · engagement trend ${ml.isolation.engagement_trend ?? '—'}`}
+                            />
+                          )}
+                          {ml.griefFlag && ml.griefFlag.risk_band !== 'none' && (
+                            <Row
+                              label="Grief pattern"
+                              band={ml.griefFlag.risk_band}
+                              detail={`${ml.griefFlag.months_since_loss ?? '—'} months since loss${ml.griefFlag.indicators.length ? ` · ${ml.griefFlag.indicators.join('; ')}` : ''}${ml.griefFlag.professional_referral_suggested ? ' · professional referral suggested' : ''}`}
+                            />
+                          )}
+                          <p style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--color-text-secondary)', margin: '4px 0 0', fontStyle: 'italic' }}>
+                            Decision-support only. Model outputs are heuristic estimates against this member&apos;s own history — not a diagnosis.
+                          </p>
+                        </>
+                      )
+                    })()}
                   </div>
                 )}
               </Section>

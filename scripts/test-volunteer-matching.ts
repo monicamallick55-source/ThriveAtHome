@@ -83,8 +83,11 @@ function makeMember(overrides: Partial<Member>): Member {
     buddy_intro_note: null,
     grief_welcome_path: false,
     grief_enrolled_at: null,
+    grief_loss_type: null,
     zip_code: null,
     faith_preference: null,
+    device_integration_consent: false,
+    ml_insights_opt_out: false,
     ...overrides,
   }
 }

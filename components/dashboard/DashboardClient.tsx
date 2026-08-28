@@ -5,6 +5,7 @@ import { ToastProvider } from '@/components/ui/Toast'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { SectionError } from './SectionError'
 import { DashNav } from './DashNav'
+import CrisisResourceBar from '@/components/shared/CrisisResourceBar'
 import { WellnessCard } from './WellnessCard'
 import { AlertsPanel } from './AlertsPanel'
 import { MoodChart } from './MoodChart'
@@ -188,6 +189,136 @@ function ScheduledServicesSection({ bookings, history }: { bookings: ServiceBook
   )
 }
 
+export interface DeviceSummaryForDash {
+  totalDevices: number
+  activeDevices: number
+  wearablesConnected: number
+  ehrConnected: boolean
+  fallProtectionActive: boolean
+  unresolvedFalls: number
+}
+
+function ConnectedDevicesSection({ summary }: { summary: DeviceSummaryForDash | null }) {
+  const fallActive = summary?.fallProtectionActive ?? false
+  const hasDevices = (summary?.totalDevices ?? 0) > 0
+  return (
+    <section aria-labelledby="devices-heading">
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+        <h2
+          id="devices-heading"
+          style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: 'var(--color-navy)', margin: 0 }}
+        >
+          Connected Devices
+        </h2>
+        <Link href="/dashboard/devices" style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-teal)', textDecoration: 'none', fontWeight: 500 }}>
+          {hasDevices ? 'Manage →' : 'Set up →'}
+        </Link>
+      </div>
+      <Link href="/dashboard/devices" style={{ textDecoration: 'none' }}>
+        <div style={{ backgroundColor: 'white', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-warm-grey)', padding: '16px', boxShadow: 'var(--shadow-card)', display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+          <div>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: '0 0 2px' }}>Devices active</p>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 600, color: 'var(--color-navy)', margin: 0 }}>{summary?.activeDevices ?? 0}</p>
+          </div>
+          <div>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: '0 0 2px' }}>Wearables</p>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 600, color: 'var(--color-navy)', margin: 0 }}>{summary?.wearablesConnected ?? 0}</p>
+          </div>
+          <div>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: '0 0 2px' }}>Fall protection</p>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 600, color: fallActive ? '#166534' : '#b45309', margin: '4px 0 0' }}>
+              {fallActive ? '● Active' : '● Not set up'}
+            </p>
+          </div>
+          {(summary?.unresolvedFalls ?? 0) > 0 && (
+            <div>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: '0 0 2px' }}>Open fall events</p>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 600, color: '#dc2626', margin: 0 }}>{summary?.unresolvedFalls}</p>
+            </div>
+          )}
+        </div>
+      </Link>
+    </section>
+  )
+}
+
+export interface MlSummaryForDash {
+  baseline: { status: string; data_points: number } | null
+  latestAnomaly: { anomaly_score: number; severity: string; top_drivers: string[] } | null
+  fallRisk: { risk_band: string } | null
+  isolation: { risk_band: string; drivers: string[] } | null
+  griefFlag: { risk_band: string; professional_referral_suggested: boolean } | null
+  hasAnySignal: boolean
+}
+
+function WellnessInsightsSection({ summary }: { summary: MlSummaryForDash | null }) {
+  if (!summary) return null
+
+  // Only surface something to the family when there is a supportive action to take.
+  const cards: { title: string; body: string }[] = []
+
+  if (summary.latestAnomaly && summary.latestAnomaly.severity !== 'info') {
+    const drivers = summary.latestAnomaly.top_drivers
+    cards.push({
+      title: 'A change from the usual pattern',
+      body:
+        drivers.length > 0
+          ? `We noticed a shift in ${drivers.join(', ')} compared with the last few weeks. A warm check-in call is a good next step.`
+          : 'We noticed a shift from the usual weekly pattern. A warm check-in call is a good next step.',
+    })
+  }
+  if (summary.isolation && summary.isolation.risk_band !== 'low') {
+    cards.push({
+      title: 'Connection could help right now',
+      body: 'Recent conversations and activity suggest more social connection would be welcome. A community circle, event, or buddy call can make a real difference.',
+    })
+  }
+  if (summary.fallRisk && summary.fallRisk.risk_band === 'high') {
+    cards.push({
+      title: 'Worth a home-safety review',
+      body: 'Based on health history and recent activity, a home-safety check and a chat with the care team about balance and mobility would be worthwhile.',
+    })
+  }
+  if (summary.griefFlag && summary.griefFlag.professional_referral_suggested) {
+    cards.push({
+      title: 'Extra grief support is available',
+      body: 'Grief has been weighing heavily for a while. Our care team can arrange a warm introduction to a grief counsellor whenever the time feels right.',
+    })
+  }
+
+  if (cards.length === 0) return null
+
+  return (
+    <section aria-labelledby="wellness-insights-heading">
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+        <h2
+          id="wellness-insights-heading"
+          style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: 'var(--color-navy)', margin: 0 }}
+        >
+          Wellness insights
+        </h2>
+        <Link href="/dashboard/concierge" style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-teal)', textDecoration: 'none', fontWeight: 500 }}>
+          Talk to the care team →
+        </Link>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        {cards.map((c, i) => (
+          <div
+            key={i}
+            style={{ backgroundColor: 'white', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-warm-grey)', borderLeft: '4px solid var(--color-teal)', padding: '16px', boxShadow: 'var(--shadow-card)' }}
+          >
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 600, color: 'var(--color-navy)', margin: '0 0 4px' }}>{c.title}</p>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.5 }}>{c.body}</p>
+          </div>
+        ))}
+        <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)', margin: 0, fontStyle: 'italic' }}>
+          These are gentle observations from your loved one&apos;s own patterns — not a medical assessment.
+        </p>
+      </div>
+    </section>
+  )
+}
+
 export interface DashboardClientProps {
   member: Member
   familyMemberId: string | null
@@ -206,12 +337,18 @@ export interface DashboardClientProps {
   upcomingTrackedItems?: TrackedItem[]
   serviceHistory?: ServiceBooking[]
   brandConfig?: { agency_display_name: string | null; primary_color: string; secondary_color: string; logo_url: string | null; tagline: string | null; powered_by_label: string } | null
+  deviceSummary?: DeviceSummaryForDash | null
+  mlSummary?: MlSummaryForDash | null
 }
 
 function QuickActions() {
   const actions = [
     { label: 'Concierge line', sub: 'Talk to our team', href: '/dashboard/concierge' },
     { label: 'Request a volunteer', sub: 'Coordination support', href: '/volunteer' },
+    { label: 'Trusted advisors', sub: 'Elder law, finance, benefits', href: '/dashboard/advisors' },
+    { label: 'Free tax help', sub: 'VITA & AARP Tax-Aide', href: '/dashboard/tax-help' },
+    { label: 'Add-ons & upgrades', sub: 'Optional plan extras', href: '/dashboard/add-ons' },
+    { label: 'Pets & companions', sub: 'Profiles & pet milestones', href: '/dashboard/pets' },
     { label: 'Call history', sub: 'All past conversations', href: '/dashboard/calls' },
     { label: 'Update preferences', sub: 'Call times & topics', href: '/onboarding' },
   ]
@@ -292,6 +429,9 @@ const MILESTONE_LABELS: Record<string, { emoji: string; label: string; color: st
   milestone_30_day_streak: { emoji: '🔥', label: '30-Day Streak', color: '#f77f00' },
   milestone_90_days: { emoji: '⭐', label: '90 Days Together', color: '#9d4edd' },
   anniversary: { emoji: '🌟', label: 'Anniversary', color: '#43aa8b' },
+  pet_birthday: { emoji: '🎂', label: 'Pet Birthday', color: '#f9844a' },
+  pet_adoption_anniversary: { emoji: '🏡', label: 'Adoption Anniversary', color: '#43aa8b' },
+  pet_senior_milestone: { emoji: '🌟', label: 'Senior Companion', color: '#9d4edd' },
 }
 
 function getDaysUntil(dateStr: string): number {
@@ -441,6 +581,8 @@ function DashboardInner(props: DashboardClientProps) {
     upcomingTrackedItems = [],
     serviceHistory = [],
     brandConfig = null,
+    deviceSummary = null,
+    mlSummary = null,
   } = props
 
   const [bannerVisible, setBannerVisible] = useState(showSubscribedBanner)
@@ -649,6 +791,16 @@ function DashboardInner(props: DashboardClientProps) {
           {/* Important Dates */}
           <UpcomingTrackedItemsSection items={upcomingTrackedItems} />
 
+          {/* Connected Devices (M22) */}
+          <ErrorBoundary section="connected devices">
+            <ConnectedDevicesSection summary={deviceSummary} />
+          </ErrorBoundary>
+
+          {/* Wellness Insights — Advanced AI/ML Layer (M23) */}
+          <ErrorBoundary section="wellness insights">
+            <WellnessInsightsSection summary={mlSummary} />
+          </ErrorBoundary>
+
           {/* Health timeline */}
           <section aria-labelledby="timeline-heading">
             <h2
@@ -749,6 +901,9 @@ function DashboardInner(props: DashboardClientProps) {
           <QuickActions />
         </div>
       </main>
+
+      {/* Always-available crisis support */}
+      <CrisisResourceBar surface="dashboard_footer" />
 
       {/* Footer with donate link */}
       <footer style={{ borderTop: '1px solid var(--color-warm-grey)', padding: '16px 32px', textAlign: 'center', backgroundColor: 'white' }}>

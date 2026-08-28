@@ -359,6 +359,46 @@ export function Step3Safety({ data, onChange }: Props) {
             )
           })}
         </div>
+
+        {data.grief_welcome_path === 'true' && (
+          <div
+            style={{
+              backgroundColor: 'white',
+              border: '1px solid #E9D5FF',
+              borderRadius: 'var(--radius-md)',
+              padding: '16px 18px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '14px',
+            }}
+          >
+            <p style={{ fontSize: '16px', color: '#6B21A8', fontFamily: 'var(--font-body)', margin: 0, lineHeight: 1.5 }}>
+              We&rsquo;re so sorry for your loss. We&rsquo;ll match {data.preferred_name || 'them'} with a
+              compassionate buddy within 48 hours, and a navigator will be in touch personally.
+            </p>
+            <div>
+              <label htmlFor="grief_loss_type" style={{ ...labelStyle, display: 'block', marginBottom: '8px' }}>
+                Who did {data.preferred_name || 'they'} lose? <span style={{ color: 'var(--color-text-muted)', fontWeight: 400 }}>(optional)</span>
+              </label>
+              <select
+                id="grief_loss_type"
+                value={data.grief_loss_type}
+                onChange={(e) => onChange('grief_loss_type', e.target.value)}
+                style={{ ...inputStyle, cursor: 'pointer' }}
+              >
+                <option value="">Prefer not to say</option>
+                <option value="partner_spouse">Partner or spouse</option>
+                <option value="parent">Parent</option>
+                <option value="sibling">Sibling</option>
+                <option value="close_friend">Close friend</option>
+                <option value="other">Someone else</option>
+              </select>
+              <p style={{ fontSize: '14px', color: 'var(--color-text-muted)', fontFamily: 'var(--font-body)', margin: '6px 0 0' }}>
+                This just helps us make the grief circle invitation feel personal.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

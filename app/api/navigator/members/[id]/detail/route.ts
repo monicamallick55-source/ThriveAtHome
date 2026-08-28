@@ -1,9 +1,16 @@
 import { NextResponse } from 'next/server'
-import { getCurrentUser, getUserRole } from '@/lib/auth'
+import { getCurrentUser, getUserRole, isNavigatorOrAdmin } from '@/lib/auth'
 import { getNavigatorByAuthId, getMemberRecentCalls, getMemberFamilyContacts, getMemberNavigatorNotes, isMemberAssignedToNavigator } from '@/lib/data/navigator'
 import { getMemberById } from '@/lib/data/members'
 import { getServiceBookingsForMember } from '@/lib/data/services'
 import { getTrackedItemsForMember } from '@/lib/data/tracked-items'
+import { getDevicesForMember, getFallEventsForMember, getWearableConnectionsForMember } from '@/lib/data/devices'
+import { getMlSummaryForMember } from '@/lib/data/ml'
+import { getNavigatorSharedDocuments } from '@/lib/data/documents'
+import { getAdvisorConnectionsForMember } from '@/lib/data/advisors'
+import { getMemberCulturalEngagement } from '@/lib/data/cultural'
+import { getMemberAddonSummary } from '@/lib/data/premium-addons'
+import { getMemberPetSummary } from '@/lib/data/pets'
 import { aiProvider } from '@/lib/providers'
 
 export async function GET(
@@ -17,13 +24,13 @@ export async function GET(
   const userId = user.id
 
   const role = await getUserRole(userId)
-  if (role !== 'navigator' && role !== 'admin') {
+  if (!(await isNavigatorOrAdmin(userId))) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
   const { data: navigator, error: navError } = await getNavigatorByAuthId(userId)
   if (navError || !navigator) {
-    return NextResponse.json({ error: 'Navigator not found' }, { status: 404 })
+    return NextResponse.json({ error: 'Navigator profile not found' }, { status: 404 })
   }
 
   if (role !== 'admin') {
@@ -33,13 +40,38 @@ export async function GET(
     }
   }
 
-  const [memberResult, callsResult, familyResult, notesResult, bookingsResult, trackedItemsResult] = await Promise.all([
+  const [
+    memberResult,
+    callsResult,
+    familyResult,
+    notesResult,
+    bookingsResult,
+    trackedItemsResult,
+    devicesResult,
+    fallEventsResult,
+    wearablesResult,
+    mlSummaryResult,
+    sharedDocsResult,
+    advisorConnectionsResult,
+    culturalEngagement,
+    premiumAddons,
+    petSummary,
+  ] = await Promise.all([
     getMemberById(memberId),
     getMemberRecentCalls(memberId, 5),
     getMemberFamilyContacts(memberId),
     getMemberNavigatorNotes(memberId),
     getServiceBookingsForMember(memberId),
     getTrackedItemsForMember(memberId, ['active', 'snoozed']),
+    getDevicesForMember(memberId),
+    getFallEventsForMember(memberId, 10),
+    getWearableConnectionsForMember(memberId),
+    getMlSummaryForMember(memberId),
+    getNavigatorSharedDocuments(memberId),
+    getAdvisorConnectionsForMember(memberId),
+    getMemberCulturalEngagement(memberId),
+    getMemberAddonSummary(memberId),
+    getMemberPetSummary(memberId),
   ])
 
   if (memberResult.error || !memberResult.data) {
@@ -66,5 +98,14 @@ export async function GET(
     navigatorId: navigator.id,
     bookings: bookingsResult.data ?? [],
     trackedItems: trackedItemsResult.data ?? [],
+    devices: devicesResult.data ?? [],
+    fallEvents: fallEventsResult.data ?? [],
+    wearables: wearablesResult.data ?? [],
+    mlInsights: mlSummaryResult.data ?? null,
+    sharedDocuments: sharedDocsResult.data ?? [],
+    advisorConnections: advisorConnectionsResult.data ?? [],
+    culturalEngagement,
+    premiumAddons,
+    petSummary,
   })
 }

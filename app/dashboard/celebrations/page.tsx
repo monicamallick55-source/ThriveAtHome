@@ -27,6 +27,9 @@ function CelebrationTypeLabel({ type }: { type: string }) {
     milestone_30_day_streak: { emoji: '🔥', label: '30-Day Streak', color: '#f77f00' },
     milestone_90_days: { emoji: '⭐', label: '90 Days Together', color: '#9d4edd' },
     anniversary: { emoji: '🌟', label: 'Anniversary', color: '#43aa8b' },
+    pet_birthday: { emoji: '🎂', label: 'Pet Birthday', color: '#f9844a' },
+    pet_adoption_anniversary: { emoji: '🏡', label: 'Adoption Anniversary', color: '#43aa8b' },
+    pet_senior_milestone: { emoji: '🌟', label: 'Senior Companion', color: '#9d4edd' },
   }
   const info = labels[type] ?? { emoji: '🎉', label: type.replace(/_/g, ' '), color: '#4361ee' }
   return (

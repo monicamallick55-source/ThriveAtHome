@@ -28,6 +28,7 @@ export interface OnboardingFormData {
   buddy_intro_note: string
   // Grief welcome path (Phase 75)
   grief_welcome_path: string // 'true' | '' (string to match onChange pattern)
+  grief_loss_type: string // who they lost — optional, personalises the grief circle invite
 }
 
 export const EMPTY_FORM: OnboardingFormData = {
@@ -54,6 +55,7 @@ export const EMPTY_FORM: OnboardingFormData = {
   buddy_call_length_preference: '',
   buddy_intro_note: '',
   grief_welcome_path: '',
+  grief_loss_type: '',
 }
 
 export const STORAGE_KEY = 'onboarding-form'

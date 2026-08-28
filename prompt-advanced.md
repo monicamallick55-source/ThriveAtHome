@@ -60,6 +60,24 @@ Build order is prioritised by consumer value first, then B2B enablement:
 
 ## ARCHITECTURE NOTES
 
+**Market positioning — "Senior Belonging Platform" (from Competitive Positioning v2.0):**
+ThriveAtHome creates and owns a new category: the Senior Belonging Platform. This is NOT a displacement play and NOT an add-on — it is a new category capturing underserved segments. The four acquisition modes in priority order:
+- Mode 1 (PRIMARY): New segments with no incumbent — non-English seniors (20M+), rural isolated seniors (12M+), recently bereaved/widowed (move Phase 75 Grief Welcome Path to Month 3 — highest-ROI retention play, no competitor has this), caregiver employees at 500–5,000 person companies. Lowest CAC, fastest.
+- Mode 4 (HIGHEST ROI): Distribution channels — Helpful Village 350+ orgs (Phase 73), home care agencies (Phase 78), hospital discharge (Phase 79), Mon Ami org clients. Near-zero CAC.
+- Mode 2 (AGENCY CHANNEL): Add-on alongside WellSky/Homecare Homebase — ThriveAtHome is the member wellness layer for the 4 days/week no caregiver visits. Agencies keep their existing software.
+- Mode 3 (OPPORTUNISTIC): Displacement of Caring Village users, Meela users — only pursue after 5,000+ members and proven NPS >60. High CAC; requires social proof first. DO NOT run an MA sales motion before Month 12.
+Key threats: DUOS ($130M raised Oct 2025, targeting same MA plans — Phase 76 MA Outcomes Data Package is URGENT. MA timeline constraint: the 12-month Aria data clock starts at Week 1 activation — this is why Aria being live in Week 1 is non-negotiable), Homethrive ($64M, employer channel, family-only — start employer outreach at Month 4-5, not Month 9-10, because enterprise sales cycles are long enough that closing at Month 9-10 requires starting 5-6 months earlier), Sensi.AI ($98M, courting same agencies, passive surveillance vs Aria's chosen conversation), Mon Ami (competing village org software — Phase 73 must ship before Mon Ami locks in Village orgs).
+Helpful Village is a DISTRIBUTION CHANNEL not a competitor. Turn 350+ VtVN villages into enrollment pipeline via Phase 73.
+
+**Grant/nonprofit funding channel (parallel track — do not wait for Foundation formation):**
+The Robert Wood Johnson Foundation, AARP Foundation, and federal HCBS grants are real revenue ($50K–$500K per grant) that can fund the first navigator hire without diluting equity. B Corp certification (Month 3-4) and the PBC designation unlock most of these. Run grant applications as a parallel track to B2C revenue — not a future consideration. Specific grants to pursue:
+- RWJF Health Equity Innovation Grant: $100K–$300K, targets underserved populations including non-English seniors
+- AARP Foundation: $25K–$100K, directly aligned with aging-in-place mission
+- HHS/ACL HCBS Grants: Federal home and community-based services funding
+- Local Community Foundation grants in Bay Area launch market
+- Corporate foundation grants from Cisco, Google, Genentech (whose employees are also your corporate volunteer program target)
+These grants should be treated as Month 3–9 priority alongside B2C acquisition, not Year 2–3 activity.
+
 **Launch strategy — Parallel Blitz (Strategy D from Strategy v4):**
 Launch B2C subscriptions + free cultural circles + MSW university partnerships simultaneously from Month 1. Aria calls must be live in Week 1. Delivery partner schedule: Meals on Wheels Month 3, GoGoGrandparent + Instacart Month 6, Lyft Healthcare + Angi Month 9, Teladoc Month 12. First university contract Month 4. Buddy assignments Month 5.
 
@@ -2237,6 +2255,335 @@ PHASE 72 CHECKLIST
 ## ═══ M21–M27 — FUTURE ROADMAP (build after Platform-Wide Additions Phases 67–72) ═══
 
 > **Full build sequence:** M20 (63–66) → Phases 67–72 (Platform-Wide) → M21 → M22 → M23 → M24 → M25 → M26 → M27 → Phase 55 (Multilingual, LAST)
+
+## ═══ COMPETITIVE SPEC MODIFICATIONS — Phases 73–80 (from Competitive Analysis v2.0) ═══
+
+> Build these phases after M21 unless marked PRIORITY 1 (build immediately).
+> Source: ThriveAtHome_Competitive_Analysis_v2_June2026.docx
+
+### PHASE 73 — Helpful Village Partnership API + Mon Ami Integration + Pricing Parity
+
+**Pricing parity additions (from HV pricing analysis):**
+Helpful Village charges $50/month for In-Development villages (under 50 members) and $1.50/active member/month for established villages (minimum $75/month). ThriveAtHome's proposed $299–$999/month flat fee is 6x more expensive for small villages. Add a pricing tier specifically for village orgs:
+
+- **In-Development tier: $49/month** — for villages under 50 active members, forming/new villages. Includes all core org admin features but capped at 50 members. This directly competes with HV's $50/month tier.
+- **Growth tier: $149/month** — up to 200 members. Includes + member wellness data, Aria integration.
+- **Scale tier: $349/month** — unlimited members. Full platform including AI outcomes data.
+- **30-day free trial** — must be available for all org tiers. HV offers this; ThriveAtHome must too.
+- **Data migration service: $1,500 one-time** — for villages converting from Helpful Village or other platforms. Includes member record import, service history migration, volunteer data transfer.
+
+Add these pricing tiers to the org admin settings, the /org/[slug] public page, and the pricing display in Phase 71 public landing pages.
+
+### PHASE 73 — Helpful Village Partnership API + Mon Ami Integration (Spec #1 — PRIORITY 1)
+
+**What this builds:** Village org admin portal upgrade + member sync API so Helpful Village orgs and Mon Ami orgs can push member records into ThriveAtHome. Converts the Village Movement's 350+ orgs into a distribution channel.
+
+**Checklist:**
+```
+PHASE 73 CHECKLIST
+[ ] Village org member sync API endpoint
+    VERIFY: POST /api/v1/org/members with org API key + member record
+    PASS: Member created/updated in members table, linked to org via org_memberships
+
+[ ] Mon Ami org integration stub
+    VERIFY: POST /api/v1/org/members with mon_ami source flag
+    PASS: [STUB][MonAmi] Would sync member from Mon Ami org
+
+[ ] Helpful Village org onboarding flow
+    VERIFY: Org admin in /org-admin → Settings → "Connect to Helpful Village" → enter HV org ID
+    PASS: Org linked, sync enabled, member count shown
+
+[ ] Co-branded member welcome email
+    VERIFY: New member synced from org → check email log
+    PASS: [STUB][Email] Welcome email shows org branding + ThriveAtHome powered-by
+
+[ ] Agency partner pricing shown in org admin settings
+    VERIFY: /org-admin → Settings → Plan & Billing
+    PASS: Partnership tiers visible: Starter $299/mo, Growth $599/mo, Scale $999/mo
+
+[ ] npx tsc --noEmit passes
+```
+
+---
+
+### PHASE 74 — Employer Caregiver ROI Dashboard (Spec #4 — PRIORITY 2)
+
+**What this builds:** Analytics portal for employer admins showing enrolled employees, utilization rate, anonymized aggregate wellness trends, absenteeism reduction estimates, and benchmark comparisons. Directly competes with Homethrive's 2026 Lighthouse Tech Award-winning ROI dashboard.
+
+**Checklist:**
+```
+PHASE 74 CHECKLIST
+[ ] Employer admin /employer-admin shows ROI Dashboard tab
+    VERIFY: Log in as employer_admin → click "ROI Dashboard" tab
+    PASS: Tab loads with stat cards
+
+[ ] Stat cards: enrolled employees, utilization rate, avg Aria call completion %, alerts caught
+    VERIFY: Check each card
+    PASS: All 4 cards show data (or 0 if no enrolled employees)
+
+[ ] Anonymized aggregate wellness chart
+    VERIFY: Wellness trends section
+    PASS: 30/60/90 day mood trend chart shown — no individual member identified
+
+[ ] Absenteeism reduction estimate
+    VERIFY: ROI estimate section
+    PASS: "Estimated X days of caregiver-related absence prevented" calculation shown
+          (formula: enrolled employees × industry average 6.5 absent days/year × 0.25 reduction rate)
+
+[ ] Benchmark comparison
+    VERIFY: Benchmarks section
+    PASS: "Your utilization vs ThriveAtHome employer average" bar chart shown
+
+[ ] CSV export of aggregate stats (not individual member data)
+    VERIFY: "Download ROI report" button
+    PASS: CSV downloads with aggregate stats only — no PII
+
+[ ] npx tsc --noEmit passes
+```
+
+---
+
+### PHASE 75 — Grief Welcome Path / Fast-Track Onboarding (Spec #5 — PRIORITY 2)
+
+**What this builds:** A dedicated onboarding pathway for recently bereaved seniors — triggered at signup when member indicates recent loss. 48-hour buddy assignment SLA, immediate grief circle invitation, navigator week-1 touchpoint. Differentiator vs Homethrive which supports the family through loss but not the bereaved senior directly.
+
+**Checklist:**
+```
+PHASE 75 CHECKLIST
+[ ] Onboarding "recent loss" detection
+    VERIFY: During onboarding, when member selects "I recently lost someone important to me"
+    PASS: grief_welcome_path flag set on member record; navigator immediately notified
+
+[ ] 48-hour buddy assignment SLA for grief path members
+    VERIFY: Create member with grief path flag → check navigator action feed
+    PASS: "GRIEF PATH — buddy assignment needed within 48 hours" appears as urgent task
+          SLA timer visible in navigator console
+
+[ ] Automatic grief circle invitation
+    VERIFY: Grief path member created → check org_sent_emails or notification log
+    PASS: [STUB][Email] Grief circle invitation sent within 1 hour of signup
+
+[ ] Navigator week-1 touchpoint task auto-created
+    VERIFY: Check navigator action feed 7 days after grief path member signup
+    PASS: "Week 1 touchpoint — call [member name]" task appears in navigator queue
+
+[ ] Hospice org referral partner field in admin settings
+    VERIFY: /admin/settings → Referral Partners section
+    PASS: Can add referral partner org name and contact for attribution tracking
+          (hospice orgs, hospital social workers, bereavement counselors)
+
+[ ] Grief path members shown as priority segment in navigator dashboard
+    VERIFY: Navigator console → filter by "Grief path"
+    PASS: All active grief path members listed, sorted by days since enrollment
+
+[ ] npx tsc --noEmit passes
+```
+
+---
+
+### PHASE 76 — Medicare Advantage Outcomes Data Package (Spec #6 — PRIORITY 2, URGENCY ELEVATED)
+
+**What this builds:** Structured clinical data fields in Aria summaries, aggregate outcomes report generator, ICD-10 alert mapping, HIPAA de-identification layer, anonymized cohort export for MA plan pitches. DUOS raised $130M in October 2025 targeting the same MA channel — ThriveAtHome must build outcomes data infrastructure now.
+
+**Checklist:**
+```
+PHASE 76 CHECKLIST
+[ ] ICD-10 alert mapping added to alert types
+    VERIFY: When Aria detects fall risk mention → check alert record
+    PASS: alert row has icd10_codes field populated (e.g. ['W19', 'Z91.81'] for fall risk)
+
+[ ] Structured clinical fields in check-in summaries
+    VERIFY: View a generated Aria call summary in navigator console
+    PASS: Summary includes structured fields: mood_score, pain_mentioned, medication_adherence,
+          social_isolation_signal, fall_risk_mention, cognitive_concern_signal
+
+[ ] Aggregate outcomes report generator
+    VERIFY: /admin/outcomes → "Generate MA Report" → select date range and cohort
+    PASS: Report generates with: member count, avg mood trend, alert frequency,
+          medication adherence rate, social engagement score — all anonymized
+
+[ ] HIPAA de-identification layer
+    VERIFY: Download the MA report
+    PASS: Report contains NO names, DOBs, addresses, or any PHI — only aggregate stats
+          and cohort-level trends. Includes a de-identification attestation statement.
+
+[ ] Cohort size suppression (already built in Phase 54 — verify it applies here too)
+    VERIFY: Generate report for cohort < 10 members
+    PASS: Report returns data_suppressed=true with minimum cohort size note
+
+[ ] MA pitch deck data export
+    VERIFY: "Download MA pitch data" button in /admin/outcomes
+    PASS: PDF or CSV downloads with formatted aggregate outcomes suitable for MA plan presentation
+
+[ ] npx tsc --noEmit passes
+```
+
+---
+
+### PHASE 77 — Agency Portal Companion Visit Tracking Upgrade (Spec #8 — PRIORITY 1)
+
+**What this builds:** Agency-facing member wellness layer — companion visit log, multi-client caseload view, Aria alert dashboard filtered by agency, wellness trend export. NOT replacing WellSky/Homecare Homebase scheduling/billing — complementing them with the member wellness layer agencies currently have zero of.
+
+**Checklist:**
+```
+PHASE 77 CHECKLIST
+[ ] Agency admin /agency-admin shows "Member Wellness" tab
+    VERIFY: Log in as agency_admin → click "Member Wellness" tab
+    PASS: Tab loads with client roster showing wellness status
+
+[ ] Companion visit log
+    VERIFY: Click a client → "Log Visit" → enter date, duration, visit type, notes → save
+    PASS: care_visits row created, visible in client timeline
+
+[ ] Multi-client caseload view with wellness signals
+    VERIFY: Agency admin overview
+    PASS: All agency clients listed with: last visit date, last Aria call date, alert count,
+          mood trend arrow (up/down/stable)
+
+[ ] Aria alert feed filtered to agency clients
+    VERIFY: "Alerts" tab in agency admin
+    PASS: Only alerts for members linked to this agency shown, sorted by urgency
+
+[ ] Wellness trend CSV export
+    VERIFY: "Export wellness data" button
+    PASS: CSV downloads with anonymized aggregate wellness trends for all agency clients
+          (individual member data included — agency has signed BAA)
+
+[ ] Agency-branded member welcome flow
+    VERIFY: New member referred by agency → check welcome email
+    PASS: [STUB][Email] Welcome email shows agency branding per brand_configs table
+
+[ ] npx tsc --noEmit passes
+```
+
+---
+
+### PHASE 78 — Agency Referral Partner Program (Spec #11 — PRIORITY 1)
+
+**What this builds:** Attribution-tracked referral links for agency partners, agency partner dashboard showing referred members + fee accrual, automated $25–50 referral fee payment via Stripe Connect, co-branded member welcome email. Turns agency care coordinators into ThriveAtHome's sales team.
+
+**New table (`/supabase/migrations/055_agency_referrals_program.sql`):**
+```sql
+CREATE TABLE agency_referral_links (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at timestamptz DEFAULT now() NOT NULL,
+  agency_id uuid NOT NULL REFERENCES care_agencies(id) ON DELETE CASCADE,
+  referral_code text NOT NULL UNIQUE,
+  referral_fee_cents int NOT NULL DEFAULT 3500,
+  total_referrals int NOT NULL DEFAULT 0,
+  total_fees_earned_cents int NOT NULL DEFAULT 0,
+  is_active boolean NOT NULL DEFAULT true
+);
+```
+
+**Checklist:**
+```
+PHASE 78 CHECKLIST
+[ ] Migration 055_agency_referrals_program.sql runs
+    VERIFY: agency_referral_links table in Supabase
+    PASS: Table present
+
+[ ] Agency admin can generate a referral link
+    VERIFY: /agency-admin → Partner Program tab → "Generate referral link"
+    PASS: Unique referral_code generated, shareable link shown:
+          https://thriveathome.com/join?ref=[code]
+
+[ ] Referral attribution tracked at signup
+    VERIFY: Sign up using a referral link URL
+    PASS: New member's family_members row has referring_agency_id set to correct agency
+
+[ ] Agency partner dashboard shows referred members
+    VERIFY: /agency-admin → Partner Program tab
+    PASS: Table shows: member name, join date, current plan, referral fee status (pending/paid)
+
+[ ] Referral fee auto-pay via Stripe Connect (stub)
+    VERIFY: Member upgrades from free trial to paid plan after agency referral
+    PASS: [STUB][Stripe] Would transfer $35 referral fee to agency Stripe Connect account
+
+[ ] Co-branded welcome email for referred members
+    VERIFY: Sign up via agency referral link → check email log
+    PASS: [STUB][Email] Welcome email shows "Referred by [Agency Name]" + agency branding
+
+[ ] npx tsc --noEmit passes
+```
+
+---
+
+### PHASE 79 — EHR / FHIR R4 Data Bridge for Hospital Referrals (Spec #10 — PRIORITY 2)
+
+**What this builds:** Lightweight FHIR R4 integration enabling hospital social workers to refer patients directly into ThriveAtHome at point of discharge. Accept patient demographics + diagnosis from hospital, export Aria wellness summaries in FHIR format, import medication lists from care transitions. Zero-CAC acquisition channel.
+
+**Checklist:**
+```
+PHASE 79 CHECKLIST
+[ ] FHIR R4 patient intake endpoint
+    VERIFY: POST /api/fhir/r4/Patient with a valid FHIR Patient resource (name, DOB, address, diagnoses)
+    PASS: Member created in members table, fhir_patient_id stored, diagnoses mapped to member record
+
+[ ] Hospital referral creates a navigator task
+    VERIFY: Hospital intake via FHIR → check navigator action feed
+    PASS: "Hospital discharge referral — [member name] discharged from [hospital]" appears as
+          priority task within 30 minutes of intake
+
+[ ] Medication list import from FHIR MedicationStatement
+    VERIFY: POST /api/fhir/r4/MedicationStatement for a member
+    PASS: Medications imported and visible in member profile; tracked_items rows created
+          for each active medication with 28-day refill cycle
+
+[ ] Aria wellness summary FHIR export
+    VERIFY: GET /api/fhir/r4/Observation?patient=[member_id]
+    PASS: Returns FHIR Observation resources for last 30 Aria call summaries
+          (mood score, medication adherence, social engagement — mapped to FHIR Observation codes)
+
+[ ] Hospital referral partner registration
+    VERIFY: /admin/partners → "Add hospital partner" → hospital name, FHIR endpoint, contact
+    PASS: Partner record created, API key generated for hospital system
+
+[ ] npx tsc --noEmit passes
+```
+
+---
+
+### PHASE 80 — Competitor Comparison Landing Pages (Spec #7 — PRIORITY 3)
+
+**What this builds:** SEO-optimized public landing pages targeting families searching for alternatives to specific competitors. Targets: Papa alternative, GrandPad vs ThriveAtHome, DUOS vs ThriveAtHome, Homethrive alternative, Meela alternative.
+
+**Checklist:**
+```
+PHASE 80 CHECKLIST
+[ ] /compare/papa-alternative page exists
+    VERIFY: Navigate to /compare/papa-alternative (not logged in)
+    PASS: Page loads with: "Papa only works through insurance — ThriveAtHome is available to
+          every family directly" headline, feature comparison table, CTA to start free trial
+
+[ ] /compare/grandpad-vs-thriveathome page exists
+    VERIFY: Navigate to /compare/grandpad-vs-thriveathome
+    PASS: Page loads with GrandPad vs ThriveAtHome feature comparison, pricing comparison,
+          "Why ThriveAtHome vs GrandPad for your parent?" headline
+
+[ ] /compare/duos-alternative page exists
+    VERIFY: Navigate to /compare/duos-alternative
+    PASS: "DUOS only works through your insurance — ThriveAtHome is available to every family
+          directly" headline, feature comparison showing ThriveAtHome's B2C advantage and
+          community/cultural circles that DUOS doesn't have
+
+[ ] /compare/homethrive-alternative page exists
+    VERIFY: Navigate to /compare/homethrive-alternative
+    PASS: "Unlike Homethrive, ThriveAtHome actually reaches the senior — Aria calls them daily"
+          headline, comparison showing senior-facing vs family-only distinction
+
+[ ] All pages have correct SEO meta tags
+    VERIFY: View page source on each comparison page
+    PASS: <title>, <meta description>, Open Graph tags all populated with competitor-specific content
+
+[ ] All pages accessible without login
+    VERIFY: Open all 4 pages in incognito
+    PASS: All pages load without authentication
+
+[ ] npx tsc --noEmit passes
+```
+
+---
 
 **M21 — Expanded Volunteer Ecosystem:** Retired Professionals Network, Faith Community Chaplaincy, Neighbor Volunteers, Family Volunteer Reciprocity, Member Ambassador programme, Youth K-12 curriculum (pen-pals, Life Stories project, mentorship reversal), Annual Intergenerational Showcase. (Note: Corporate Volunteer Program with Benevity/YourCause hour-matching export was moved up and built early as Phase 50l within M17 — not part of M21.)
 

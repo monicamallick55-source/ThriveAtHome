@@ -478,47 +478,44 @@ ANTHROPIC_API_KEY           # M8 + AI features
 
 ---
 
-## M20 — Community Organization Portal (Phases 63–66) 🔄 IN PROGRESS
+## M20 — Community Organization Portal (Phases 63–66) 🔄 IN PROGRESS — Testing underway
 
 M20 builds portals for four types of community organizations. Revenue model: annual license fee per org ($2,400–$15,000/year).
 
-**Phase 63 — Village / Community Organization Portal** 🔄 In progress
-- community_orgs, org_programs, org_memberships, member_needs tables
-- Member needs bulletin board with urgency levels and volunteer claiming
-- Annual membership dues with sliding-scale tiers (free / $25 / $50 per year)
-- Org programs tracking with participant and volunteer counts
-- Email broadcast to all org members (Phase 70 infrastructure)
-- Document library (Phase 72 infrastructure)
-- Donations tracking (Phase 69 infrastructure)
-- Bay Area Village Network seeded with 3 programs
-- Issues pending: member UUID input needs name dropdown, membership fee config UI needed
+**Phase 63 — Village / Community Organization Portal** 🔄 In progress — issues pending
+- community_orgs, org_programs, org_memberships, member_needs tables ✅
+- Member needs bulletin board ✅ (member name dropdown bug still pending fix)
+- Annual membership dues with sliding-scale tiers ✅
+- Org programs tracking ✅ (3 seeded programs confirmed: Friendly Visitor, Tech Help Tuesdays, Ride Share Network)
+- Email broadcast to org members 🔄 (limited recipient filtering — enhancement pending Phase 70)
+- Document library 🔄 (upload silently fails — Phase 72 bug fix pending)
+- Donations tracking 🔄 (Phase 69 — UI incomplete)
+- Bay Area Village Network seeded with 3 programs ✅
+- /org-admin portal loads and routes correctly ✅
+- Issues queued in progress.md: member UUID → name dropdown, membership fee config UI, document upload fix, email recipient filtering
 
-**Phase 64 — Area Agency on Aging Portal** ✅ Built
-- area_agencies_on_aging, aaa_service_units, oaa_client_assessments tables
-- Multi-county management with county-level breakdowns
-- Title III service category tracking (III-B Supportive, III-C1 Congregate Meals, III-C2 Home-Delivered Meals, III-D Disease Prevention, III-E Family Caregiver Support)
-- NAPIS-compliant 17-column CSV export for federal reporting
-- OAA demographic fields (age group, gender, poverty/minority/rural/disability status)
-- Bay Area AAA seeded (PSA-06, serving SF/Marin/San Mateo)
-- /aaa-admin portal with 4 tabs: Overview, Service Log, Counties, Reports
+**Phase 64 — Area Agency on Aging Portal** ✅ VERIFIED COMPLETE
+- area_agencies_on_aging, aaa_service_units, oaa_client_assessments tables ✅
+- Multi-county management (SF/Marin/San Mateo) ✅
+- Title III service category tracking (III-B/C1/C2/D/E) ✅
+- NAPIS-compliant 17-column CSV export ✅
+- OAA demographic fields ✅
+- Bay Area AAA seeded (PSA-06) ✅
+- /aaa-admin portal — all 4 tabs tested: Overview, Service Log, Counties, Reports ✅
+- signed_by_name shows "Agency Admin" instead of actual name (minor issue logged)
 
-**Phase 65 — Senior Center Portal** 🔄 In progress
-- senior_centers, center_dropins, center_activities, activity_registrations, room_bookings, congregate_meals tables
-- Drop-in attendance tracking with check-in/check-out times
-- Activity calendar with registration and capacity management
-- Room booking system with conflict detection
-- Congregate meal tracking (feeds OAA Title III-C1 reporting)
-- SF Senior Center seeded (481 O'Farrell Street, capacity 150)
-- /senior-center-admin portal
+**Phase 65 — Senior Center Portal** 🔄 In progress — testing underway
+- senior_centers, center_dropins, center_activities, activity_registrations, room_bookings, congregate_meals tables ✅
+- SF Senior Center seeded (481 O'Farrell Street, capacity 150) ✅
+- /senior-center-admin portal routes correctly ✅
+- Testing in progress: drop-ins, activities, room bookings, meals, reports
 
-**Phase 66 — Network Federation** 🔄 In progress
-- network_accounts, network_dues tables
-- Parent network accounts for umbrella organizations
-- Village to Village Network (VtVN, $750/org/yr) and n4a seeded
-- Annual dues invoicing with paid/unpaid/waived/overdue tracking
-- Aggregate reporting across all member orgs
-- Anonymized benchmarking (requires min. 10 orgs)
-- /network-admin portal with 4 tabs: Overview, Member Organizations, Dues Billing, Aggregate Reports
+**Phase 66 — Network Federation** 🔄 In progress — testing underway
+- network_accounts, network_dues tables ✅
+- Village to Village Network + n4a seeded ✅
+- Bay Area Village Network linked to VtVN network ✅
+- /network-admin portal routes correctly ✅
+- Testing in progress: Overview, Member Organizations, Dues Billing, Aggregate Reports
 
 ---
 
@@ -536,6 +533,49 @@ These six phases apply to ALL GTM streams — B2C direct, employer benefits, age
 | **Phase 70** | Email/Newsletter Broadcast — any admin sends to members/employees/clients; filtered subgroups; sent history | ⏸ Stub only | HIGH |
 | **Phase 71** | Public Landing Pages — /chapter/[slug], /org/[slug], /employer/[slug] full SEO marketing pages | 🔄 Partial | HIGH |
 | **Phase 72** | Document Library — upload/organise/share docs with role-based visibility; "platform-documents" Storage bucket | ⬜ Not built | MEDIUM |
+
+## Competitive Spec Modifications — Phases 73–80 (from Competitive Analysis v2.0, June 2026)
+
+Source: ThriveAtHome_Competitive_Analysis_v2_June2026.docx — 11 spec modifications, 8 not yet in build plan.
+
+**Build sequence:** M20 (63–66) → Platform-Wide (67–72) → Competitive Specs (73–80) → M21–M27 → Phase 55 (Multilingual, LAST)
+
+| Phase | Spec # | Feature | Priority | Competitive Reason |
+|-------|--------|---------|---------|-------------------|
+| **Phase 73** | #1 | Helpful Village Partnership API + Mon Ami Integration + Pricing Parity | 🔴 NOW | Mon Ami building competing org software — lock in Village orgs first. ALSO: add HV-competitive pricing tiers (In-Development $49/mo, Growth $149/mo, Scale $349/mo), 30-day free trial, $1,500 data migration service |
+| **Phase 74** | #4 | Employer Caregiver ROI Dashboard | 🟡 M 6–12 | Homethrive won 2026 Lighthouse Award for measurable employer ROI |
+| **Phase 75** | #5 | Grief Welcome Path / 48-hour buddy SLA + hospice referrals | 🟡 M 6–12 | Homethrive added loss support Feb 2026 — ThriveAtHome must differentiate by supporting the bereaved SENIOR directly, not just the family |
+| **Phase 76** | #6 | Medicare Advantage Outcomes Data Package | 🟡 URGENT | DUOS raised $130M Oct 2025 targeting same MA plans — ThriveAtHome needs outcomes data now |
+| **Phase 77** | #8 | Agency Portal Companion Visit Tracking Upgrade | 🔴 NOW | Sensi.AI already selling to agencies ThriveAtHome needs as partners |
+| **Phase 78** | #11 | Agency Referral Partner Program | 🔴 NOW | 10 agency partners = 500–2,000 members at near-zero CAC |
+| **Phase 79** | #10 | EHR / FHIR R4 Data Bridge for Hospital Referrals | 🟡 M 6–12 | Zero-CAC acquisition channel via hospital discharge planners |
+| **Phase 80** | #7 | Competitor Comparison Landing Pages (SEO) | 🟢 Y2 | Papa, GrandPad, DUOS, Homethrive comparison pages |
+
+**Already in build plan (no new phase needed):**
+- Spec #2 Gift subscription viral campaign — ✅ Phase 50b/50c/50d gift platform already built
+- Spec #3 Multilingual Aria voice personas — ✅ Phase 55 (Multilingual, built LAST)
+- Spec #9 Paid companion mobile app — ✅ Phase 48 (Paid Companion Marketplace) includes mobile app
+
+**Helpful Village feature parity gaps (confirmed June 2026):**
+- ✅ Parity achieved: events, volunteer matching, member management basics
+- ⚠️ Gap: 24/7 volunteer self-service claiming (Phase 68)
+- ⚠️ Gap: Document library upload (Phase 72 — upload bug needs fix)
+- ⚠️ Gap: Email recipient filtering (Phase 70 — limited groups)
+- ⚠️ Gap: Public village website (Phase 71 — not full marketing page yet)
+- ⚠️ Gap: Pricing model — HV charges $50/month for small/forming villages; ThriveAtHome needs equivalent In-Development tier (Phase 73)
+- ⚠️ Gap: 30-day free trial — HV offers this; ThriveAtHome must too (Phase 73)
+- ⚠️ Gap: Data migration service — needed for HV-to-ThriveAtHome conversions (Phase 73)
+- ⬜ Minor gap: Zoom module ($10/month in HV) — add Zoom calendar link field to events
+- ⬜ Minor gap: SMS texting ($6/month in HV) — available via Twilio once credentials added
+- ⬜ Minor gap: Maps/geocoding ($10/month in HV) — not yet built
+- 🏆 ThriveAtHome WINS: Aria daily AI check-ins, family dashboard, Human Buddy, Communities, grief support, skill exchange, life story, services marketplace — none of these exist in HV at any price
+
+**Competitive context — key threats from v2 analysis:**
+- **DUOS ($130M raised Oct 2025)** — building toward same MA channel. ThriveAtHome's response: move faster on outcomes data (Phase 76), lead with B2C moat DUOS doesn't have, compete on warmth + community vs DUOS's utilitarian benefit navigation
+- **Homethrive ($64M raised)** — most direct employer channel competitor. Differentiation: ThriveAtHome reaches the SENIOR (Aria calls daily); Homethrive is family-only
+- **Sensi.AI ($98M raised Oct 2025)** — courting same agencies ThriveAtHome needs. Pitch: "Sensi tells you what's wrong. ThriveAtHome keeps your clients engaged between visits"
+- **Mon Ami** — building competing org software for same nonprofits as M20 Village Portal. Must lock in Village orgs via Phase 73 before Mon Ami does
+- **Meela** — closest Aria analog but feature-only, no ecosystem. Potential acqui-hire candidate in Year 2
 
 ## Full Vision Roadmap — M21–M27, Then Multilingual Last (from Comprehensive Specs)
 
@@ -585,7 +625,7 @@ These are genuine features in the original platform vision, now scheduled into t
 - Caregiver Family Plan — $89/month (1 senior + up to 5 family dashboard seats + monthly coordinator call)
 - Long-Distance Caregiver Add-on — $19/month (enhanced alerts, task management, video diary)
 - Skill Exchange Premium — $9/month (priority matching)
-- Cultural Circle Premium — $5/month
+- Communities Premium — $5/month
 - Volunteer Concierge — $19/month (premium matching)
 - Annual Care Planning Session — $149/session
 - Benefits Maximizer Deep-Dive — $79 one-time
@@ -676,12 +716,12 @@ Phases 33a–33f insert between Phase 33 (Volunteer Portal) and Phase 34 (Grief 
 
 | Phase | Name | Status |
 |-------|------|--------|
-| 33a | Buddy database layer (buddy_assignments, buddy_calls tables) | ⬜ Not started |
-| 33b | Buddy assignment system + admin matching UI | ⬜ Not started |
-| 33c | Buddy portal — pre-call brief + call logging | ⬜ Not started |
-| 33d | Navigator buddy management tools | ⬜ Not started |
-| 33e | Family dashboard buddy integration | ⬜ Not started |
-| 33f | Onboarding buddy matching questions (5 questions, Connect+ only) | ⬜ Not started |
+| 33a | Buddy database layer (buddy_assignments, buddy_calls tables) | ✅ Complete — migration 054_buddy_programme.sql confirmed |
+| 33b | Buddy assignment system + admin matching UI | ✅ Complete — /admin/buddy-matching page built and tested |
+| 33c | Buddy portal — pre-call brief + call logging | ⚠️ Partial — "My Buddies" tab missing from volunteer dashboard (fix queued) |
+| 33d | Navigator buddy management tools | ⚠️ Partial — buddy panel missing from navigator member detail (fix queued) |
+| 33e | Family dashboard buddy integration | ⚠️ Partial — buddy card not showing for Connect+ plans (fix queued) |
+| 33f | Onboarding buddy matching questions (5 questions, Connect+ only) | ✅ Complete — buddy matching questions added to onboarding |
 
 **Corrected plan tiers:**
 - Connect $39: Volunteer buddy, weekly calls
@@ -691,7 +731,7 @@ Phases 33a–33f insert between Phase 33 (Volunteer Portal) and Phase 34 (Grief 
 ## Launch Strategy (from Strategy v4 doc — Parallel Blitz)
 
 **Strategy D — Parallel Blitz** is the recommended launch strategy:
-Launch B2C subscriptions + free cultural circles + MSW university partnerships simultaneously from Month 1.
+Launch B2C subscriptions + free Communities (cultural heritage + interest circles) + MSW university partnerships simultaneously from Month 1.
 Aria calls must be live Week 1 — not deferred.
 
 **Delivery partner go-live schedule:**

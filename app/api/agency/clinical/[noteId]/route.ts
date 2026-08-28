@@ -31,10 +31,20 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ no
   const action = body.action as string | undefined
 
   if (action === 'sign') {
-    // Pull signer's actual full_name from family_members
+    // Resolve the signer's real name. The logged-in admin's family_members
+    // full_name is preferred, but agency_admin rows are often created by hand
+    // with a placeholder ("Agency Admin" / "Admin"), so fall back to the
+    // signer_name the client sends (wired to the agency's contact_name).
     const admin = createAdminClient()
     const { data: fm } = await admin.from('family_members').select('full_name').eq('supabase_auth_id', user.id).maybeSingle()
-    const signerName = fm?.full_name || (body.signer_name as string) || 'Agency Admin'
+    const isPlaceholder = (s: string) => !s || /^(agency )?admin$/i.test(s.trim())
+    const fmName = (fm?.full_name ?? '').trim()
+    const bodySigner = (typeof body.signer_name === 'string' ? body.signer_name : '').trim()
+    const signerName = !isPlaceholder(fmName)
+      ? fmName
+      : !isPlaceholder(bodySigner)
+        ? bodySigner
+        : fmName || bodySigner || 'Agency Admin'
     const { data, error } = await signSoapNote(noteId, signerName)
     if (error) return NextResponse.json({ error }, { status: 500 })
     return NextResponse.json({ data })

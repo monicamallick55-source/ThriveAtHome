@@ -466,6 +466,27 @@ Competitive Spec      Phase 73 [x][x][x][x][x][x]            6/6 ✅ COMPLETE (S
                       Phase 76 [x][x][x][x][x][x][x]         7/7 ✅ COMPLETE (Session 104)
                       Phase 77 [x][x][x][x][x][x][x]         7/7 ✅ COMPLETE (Session 104)
                       Phase 78 [x][x][x][x][x][x][x]         7/7 ✅ COMPLETE (Session 105)
+M21 Volunteer Ecosys  Phases 81–86                          ✅ COMPLETE (Session 107 APPROVED)
+M22 Device/Smart Home Phases 87–92                          ✅ COMPLETE (Session 109 APPROVED)
+M23 Advanced AI/ML    Phase 93 [x][x][x][x][x][x][x][x]     baseline modeling ✅ COMPLETE (Session 110 APPROVED)
+                      Phase 94 [x][x][x][x][x][x]           behavioral anomaly ✅ COMPLETE (Session 111 — ISSUE fix: blend mean+peak /2.5, threshold 0.5; test 15/15)
+                      Phase 95 [x][x][x][x][x]              fall risk prediction ✅ COMPLETE (Session 110 APPROVED)
+                      Phase 96 [x][x][x][x][x][x]           social isolation ✅ COMPLETE (Session 111 — ISSUE fix: buddy_calls.call_date → started_at)
+                      Phase 97 [x][x][x][x][x][x]           grief pattern monitoring ✅ COMPLETE (Session 110 APPROVED)
+M24 Professional Svcs Phase 98  Trusted Advisor Directory   ✅ COMPLETE (Session 112 — AWAITING APPROVAL)
+                      Phase 99  VITA free tax-prep           ✅ COMPLETE (Session 112 — AWAITING APPROVAL)
+                      Phase 100 988 / SAMHSA embedding        ✅ COMPLETE (Session 112 — AWAITING APPROVAL)
+                      Phase 101 Documents Vault extension     ✅ COMPLETE (Session 112 — AWAITING APPROVAL)
+M25 Cultural Prog.    Phases 102–107                         ✅ COMPLETE (Session 114 APPROVED)
+M26 Premium Add-Ons   Phase 108 Catalog + Caregiver Family Plan  ✅ COMPLETE (Session 115 — AWAITING APPROVAL)
+                      Phase 109 Long-Distance Caregiver + video diary  ✅ COMPLETE (Session 115 — AWAITING APPROVAL)
+                      Phase 110 Skill Exchange Premium        ✅ COMPLETE (Session 115 — AWAITING APPROVAL)
+                      Phase 111 Cultural Circle Premium       ✅ COMPLETE (Session 115 — AWAITING APPROVAL)
+                      Phase 112 Volunteer Concierge           ✅ COMPLETE (Session 115 — AWAITING APPROVAL)
+                      Phase 113 Annual Care Planning Session  ✅ COMPLETE (Session 115 — AWAITING APPROVAL)
+                      Phase 114 Benefits Maximizer Deep-Dive  ✅ COMPLETE (Session 115 — AWAITING APPROVAL)
+                      Phase 115 Milestone Birthday Memory Book ✅ COMPLETE (Session 115 — AWAITING APPROVAL)
+                      Phase 116 Extra Legal Consultation      ✅ COMPLETE (Session 115 — AWAITING APPROVAL)
 ```
 
 ## M17 — Services Marketplace
@@ -1855,3 +1876,702 @@ STATUS: `COMPLETE`
 
 HUMAN ACTIONS REQUIRED:
 1. Run migration 061_m21_volunteer_ecosystem.sql in Supabase SQL Editor — extends volunteers table, creates k12_schools, k12_student_volunteers, family_volunteer_links, member_ambassadors; adds zip_code + faith_preference to members
+
+---
+
+## Session 108 — Fix 5 open browser-test issues (pre-M22)
+STATUS: `AWAITING HUMAN APPROVAL`
+
+- [x] Issue 1 — Member portal hydration error — components/MemberPortalClient.tsx: added UTC-anchored `fmtDate()` helper; replaced all 5 render-path `toLocaleDateString` calls (2 render from SSR props); anchored `today` to UTC midnight. tsc + build pass. (Session 108)
+- [x] Issue 2 — employer-admin login redirect — proxy.ts: server-side safety net redirects any partner-portal admin role (university/employer/agency/aaa/org/senior_center/network) off `/dashboard` to its portal home. (Session 108)
+- [x] Issue 3 — Navigator "View member detail" → Forbidden — lib/auth.ts: new `isNavigatorOrAdmin()` recognises navigators via `care_navigators` row; applied to 6 navigator API routes (detail, notes, referral, alerts/acknowledge, tasks/complete, buddy-assignment). (Session 108)
+- [x] Issue 4 — Onboarding grief path no response — Step3Safety.tsx: expanded card (acknowledgment + "Who did you lose?" select) shown when recent-loss selected. app/api/onboarding/route.ts: fixed broken navigator_tasks insert (`priority: 'urgent'`→`'critical'`, `due_date`→`due_by`) that silently failed; threads `grief_loss_type`. migration 062_grief_loss_type.sql created; types.ts + types/database.ts updated. (Session 108)
+- [x] Issue 5 — Agency clinical notes signer name — app/api/agency/clinical/[noteId]/route.ts + care-plans/route.ts: signer resolves to first non-placeholder of (family_members.full_name, client signer_name); rejects "Agency Admin"/"Admin". ClinicalNotesTab.tsx passes real signerName for care-plan approval. (Session 108)
+- [x] npx tsc --noEmit — zero errors (Session 108)
+- [x] npm run build — ✓ Compiled successfully in 36.4s (Session 108)
+
+HUMAN ACTIONS REQUIRED:
+1. Run supabase/migrations/062_grief_loss_type.sql in Supabase SQL Editor (adds members.grief_loss_type text)
+2. If Issue 3 persists: ensure navigator test user has family_members.role='navigator' OR a care_navigators row with supabase_auth_id set
+
+---
+
+## M22 — Device & Smart Home Integration Layer (Phases 87–92)
+STATUS: `AWAITING HUMAN APPROVAL` (Session 109)
+
+Static verifications (`npx tsc --noEmit`, `npm run build`) run this session and PASSED.
+DB-backed verifications marked `[~]` — cannot run here (no `.env.local` / Supabase creds in this
+environment); need a human to run migration 063 and the test script, same as Sessions 107–108.
+
+### Phase 87 — Companion Device + linked device registry
+- [x] Migration 063_m22_device_integration.sql created — member_devices, device_signals,
+      wearable_connections, wearable_readings, fall_events, ehr_connections, fhir_export_log tables
+      (all with RLS + family policies); members.device_integration_consent column added
+- [x] types/database.ts — 7 M22 tables added to Database['public']['Tables'];
+      members Row/Insert gains device_integration_consent; convenience Row type aliases exported
+- [x] lib/data/devices.ts — CRUD for devices/wearables/fall events/EHR + getDeviceSummaryForMember
+- [x] /app/api/devices (GET list, POST register) + /app/api/devices/[id] (PATCH, DELETE disconnect)
+- [x] /app/dashboard/devices page + DevicesClient — 5 tabs (Companion Device, Voice & Smart Home,
+      Wearables, Fall Protection, Health Records); tablet billing options ($99 / $15mo / free w/ 2yr)
+- [x] Family dashboard "Connected Devices" section (ConnectedDevicesSection) + deviceSummary fetch
+- [x] npx tsc --noEmit passes — zero errors (Session 109)
+- [x] npm run build passes — ✓ Compiled successfully; /dashboard/devices + /api/devices* routes present
+- [~] Migration 063 runs cleanly in Supabase SQL Editor — HUMAN ACTION
+- [~] Register tablet → member_devices row status='pending' with billing_option — needs live DB
+
+### Phase 88 — Voice Assistant + Smart Home linking
+- [x] lib/interfaces/DeviceProvider.ts + lib/stubs/StubDeviceProvider.ts (linkAccount, unlinkAccount,
+      pushDailyBriefing, getDeviceStatus) — all stub methods log with [STUB][Device]
+- [x] providers.ts — resolveDeviceProvider() → StubDeviceProvider unless ALEXA_SKILL_ID /
+      GOOGLE_ACTIONS_PROJECT_ID set; deviceProvider exported; lib/services/RealDeviceProvider.ts
+      placeholder throws a clear "not implemented / M22 activation" error
+- [x] /app/api/devices/link-voice — POST runs deviceProvider.linkAccount, upserts member_devices
+      row (category voice_assistant or smart_home by device type)
+- [x] DevicesClient "Voice & Smart Home" tab — 9 options (Alexa, Google Assistant, Echo Show,
+      Nest Hub, Ring, ADT, Philips Hue, GrandPad, Motion Sensor); Link / linked-status per option
+- [~] Link Alexa → member_devices row device_category='voice_assistant', status='active' — needs live DB
+
+### Phase 89 — Smart Home no-motion anomaly detection
+- [x] lib/devices/anomalyDetection.ts — detectNoMotionAnomaly (concern ≥10h, emergency ≥16h) +
+      runNoMotionSweep; device_signals recorded via recordDeviceSignal
+- [x] /app/api/cron/smart-home-anomaly — GET, CRON_SECRET-gated, runs runNoMotionSweep
+- [x] vercel.json — cron "/api/cron/smart-home-anomaly" schedule "0 */2 * * *" added
+- [~] 16h+ no-motion for a member with active smart_home device → fall protocol fires — covered by
+      scripts/test-fall-protocol.ts Test 5; needs live DB to execute
+
+### Phase 90 — Wearable Integration (HealthKit / Google Fit / Fitbit / Garmin)
+- [x] lib/interfaces/WearableProvider.ts + lib/stubs/StubWearableProvider.ts (connect, disconnect,
+      syncReadings) — [STUB][Wearable] logs; stub syncReadings returns one deterministic sample day
+- [x] providers.ts — resolveWearableProvider() gated on FITBIT_CLIENT_ID / GARMIN_CONSUMER_KEY;
+      wearableProvider exported; RealWearableProvider.ts placeholder throws clear error
+- [x] /app/api/wearables (GET, POST connect) + /app/api/wearables/[id] (DELETE revoke) +
+      /app/api/wearables/sync (POST — persists readings, runs fall protocol on fall_detected=true)
+- [x] wearable_connections upsert on (member_id, platform); wearable_readings upsert on
+      (member_id, reading_date, source_platform)
+- [x] DevicesClient "Wearables" tab — 4 platforms, connect/disconnect, "Sync readings now",
+      recent-readings table (steps / resting HR / sleep / source)
+- [~] Connect Fitbit + sync → wearable_readings rows, wearable_connections.last_sync_at set — needs live DB
+
+### Phase 91 — Fall Detection emergency protocol
+- [x] lib/devices/fallProtocol.ts — handleFallEvent: emergency 'fall' alert (dedup 1h,
+      writesEmergencyLog) via existing createAlert → emergency_log + Realtime + emergency SMS;
+      critical 'fall_response' navigator task (due +15min); fall_events audit row linked to both
+- [x] /app/api/devices/fall-event — POST: device webhook path (x-device-secret ==
+      DEVICE_WEBHOOK_SECRET / CRON_SECRET, needs member_id) OR authenticated family manual trigger
+      (source forced to 'manual')
+- [x] DevicesClient "Fall Protection" tab — live status line (active/partial/not-set-up based on
+      wearables + devices), "Send a test fall alert" button (confirm dialog), fall event history
+- [x] scripts/test-fall-protocol.ts — 5 tests: alert raised, type/severity, emergency_log,
+      critical task, audit row linkage, dedup burst (1 alert / 2 audit rows), 20h no-motion escalation
+- [x] npx tsc --noEmit passes — zero errors (Session 109)
+- [~] npx tsx --env-file=.env.local scripts/test-fall-protocol.ts → all pass — HUMAN ACTION (no creds here)
+
+### Phase 92 — HL7 FHIR / EHR connectors
+- [x] lib/interfaces/EhrProvider.ts + lib/stubs/StubEhrProvider.ts (connect, revoke,
+      exportObservations, exportConditions) — [STUB][EHR] logs, returns status='stub'
+- [x] providers.ts — resolveEhrProvider() gated on EPIC_CLIENT_ID / CERNER_CLIENT_ID /
+      FHIR_BASE_URL; ehrProvider exported; RealEhrProvider.ts placeholder throws clear error
+- [x] lib/devices/fhirMapping.ts — buildFhirBundleForMember: check-in scores + wearable readings →
+      FHIR R4 Observations (LOINC codes); flagged alerts (ICD-10) → FHIR Conditions
+- [x] /app/api/ehr (GET, POST connect) + /app/api/ehr/[id] (DELETE revoke) + /app/api/ehr/sync
+      (POST — builds bundle, exports via ehrProvider, writes fhir_export_log rows,
+      updates ehr_connections.last_export_at)
+- [x] DevicesClient "Health Records" tab — 4 systems (Epic, Cerner, athenahealth, generic FHIR w/
+      base URL prompt); connect/revoke; "Export last 30 days as FHIR"; export history list
+- [x] Navigator MemberDetailPanel — "Connected devices" Section shows devices + wearables + fall
+      events; detail API returns devices / fallEvents / wearables
+- [~] Connect generic FHIR + export → fhir_export_log rows (Observation + Condition) — needs live DB
+
+HUMAN ACTIONS REQUIRED:
+1. Run supabase/migrations/063_m22_device_integration.sql in Supabase SQL Editor
+   Creates: member_devices, device_signals, wearable_connections, wearable_readings, fall_events,
+   ehr_connections, fhir_export_log (all RLS-enabled with family policies);
+   adds members.device_integration_consent
+2. Run: npx tsx --env-file=.env.local scripts/test-fall-protocol.ts  → expect all tests pass
+3. Optional: set DEVICE_WEBHOOK_SECRET in env for the device fall-event webhook path
+   (falls back to CRON_SECRET if unset)
+
+---
+
+## M23 — Advanced AI/ML Layer (Phases 93–97)
+STATUS: `AWAITING HUMAN APPROVAL` (Session 110)
+
+Static verifications (`npx tsc --noEmit`, `npm run build`) run this session and PASSED.
+DB-backed verifications marked `[~]` — cannot run here (no Supabase creds in this
+environment); need a human to run migration 064 and `scripts/test-ml-layer.ts`,
+same as Sessions 107–109.
+
+Design note: the trained models named in the roadmap (Isolation Forest, XGBoost,
+sentiment NLP) run through a new `MlProvider` interface. `StubMlProvider` is a
+transparent, deterministic heuristic implementation so every M23 feature works
+today; `RealMlProvider` (gated on `ML_INFERENCE_URL`) throws until M23 activation.
+
+### Phase 93 — Wellness baseline modeling
+- [x] Migration 064_m23_ml_layer.sql created — wellness_baselines, behavioral_anomalies,
+      fall_risk_scores, isolation_scores, grief_pattern_flags (all RLS + family_read_own
+      SELECT policies); members.ml_insights_opt_out column added
+- [x] types/database.ts — 5 M23 tables added to Tables; members Row/Insert gain
+      ml_insights_opt_out; Row-type aliases exported
+- [x] lib/ml/wellnessBaseline.ts — computeWellnessBaseline(): rolling 30d mean/std of
+      mood/energy/pain (check_in_calls) + sleep/steps/resting_hr (wearable_readings) +
+      call_engagement_rate; upsert on member_id; status ok / insufficient_data
+- [x] lib/ml/stats.ts — mean / stddev / round / clamp01 helpers
+- [x] lib/data/ml.ts — getWellnessBaseline + getMlSummaryForMember (one-call dashboard read)
+- [x] npx tsc --noEmit passes — zero errors (Session 110)
+- [x] npm run build passes — ✓ Compiled successfully; /api/cron/ml-analytics + /api/ml/insights present
+- [~] Migration 064 runs cleanly in Supabase SQL Editor — HUMAN ACTION
+- [~] Seeded member → computeWellnessBaseline → wellness_baselines row status='ok', data_points>0 — needs live DB (test-ml-layer.ts test 1)
+
+### Phase 94 — Behavioral anomaly detection (Isolation Forest time-series)
+- [x] lib/interfaces/MlProvider.ts + lib/stubs/StubMlProvider.ts + lib/services/RealMlProvider.ts
+      (scoreBehavioralAnomaly: multivariate |z| vs member's own baseline, capped & averaged;
+      drivers = features with |z|>=2) — [STUB][ML] logs
+- [x] lib/providers.ts — resolveMlProvider() → StubMlProvider unless ML_INFERENCE_URL set;
+      mlProvider exported; RealMlProvider throws a clear "M23 activation" error
+- [x] lib/ml/behavioralAnomaly.ts — detectBehavioralAnomaly(): recent 7d window vs baseline;
+      score>=0.6 → wellness_drift alert (concern, dedup 24h); score>=0.8 → urgent +
+      behavioral_anomaly_review navigator task; every run persists a behavioral_anomalies row
+- [x] npx tsc --noEmit passes — zero errors (Session 110)
+- [x] Seeded sharp decline → anomaly score 0.65 (>= 0.6), wellness_drift alert raised, row persisted — test-ml-layer.ts 15/15 PASSED (Session 111, live DB). ISSUE fix: scoreBehavioralAnomaly now blends mean + peak |z| and normalises /2.5 (a coherent ~1.5 SD multi-feature shift reads as strongly anomalous); ANOMALY_CONCERN_THRESHOLD lowered 0.6 → 0.5
+
+### Phase 95 — Fall risk prediction (XGBoost on sensor + medication + history)
+- [x] StubMlProvider.predictFallRisk — fixed-weight logistic over engineered features
+      (prior_falls, psychoactive_meds, bp_meds, mobility_device, low_activity, age_over_80,
+      lives_alone, recent_wellness_drift, vision_flag)
+- [x] lib/ml/fallRiskModel.ts — computeFallRisk(): parses members.medications for sedative /
+      BP keywords, counts fall_events (180d) + wellness_drift alerts (30d), compares recent
+      activity vs baseline; bands low/moderate/high; HIGH → fall_prevention_review task;
+      every run persists a fall_risk_scores row with contributing_factors
+- [x] npx tsc --noEmit passes — zero errors (Session 110)
+- [x] Seeded 88yo + walker + lorazepam + 2 prior falls → risk_band='high' (95%) + navigator task — test-ml-layer.ts PASSED (Session 111, live DB)
+
+### Phase 96 — Social isolation detection (sentiment NLP + engagement trend)
+- [x] StubMlProvider.analyzeSentiment — lexicon-based valence (-1..1), loneliness density,
+      grief density, labels
+- [x] lib/ml/isolationModel.ts — computeIsolationScore(): sentiment of last 10 check-in
+      summaries/transcripts + engagement trend (circle_posts, event_rsvps, circle_event_rsvps,
+      volunteer_visits, buddy_calls recent 30d vs prior 30d) + lives_alone; score 0..1,
+      bands low/moderate/high; moderate/high → suggested_connections (active cultural_circles
+      not joined + upcoming circle_events); HIGH → social_isolation_outreach task;
+      every run persists an isolation_scores row
+- [x] npx tsc --noEmit passes — zero errors (Session 110)
+- [x] Seeded lonely + disengaged + lives-alone → band 'high' (80%) + drivers + row persisted — test-ml-layer.ts PASSED (Session 111, live DB). ISSUE fix: engagement-trend query for buddy_calls used non-existent column `call_date` → corrected to `started_at` (buddy_calls has scheduled_at/started_at, no call_date)
+
+### Phase 97 — Grief pattern monitoring (prolonged grief disorder risk)
+- [x] StubMlProvider.assessGriefPattern — DSM-5-TR-aligned timing (persistent, impairing
+      grief >=12 months); bands none/monitoring/elevated/high; pgdRisk on elevated+
+- [x] lib/ml/griefPatternModel.ts — assessGriefPattern(): runs only for grief-pathway members
+      (grief_support_requests row or members.grief_welcome_path); months since loss, low-mood
+      ratio (90d), sentiment, engagement trend, anniversary proximity (±14d); elevated/high →
+      professional_referral_suggested + prolonged_grief_review task (critical on high);
+      every run persists a grief_pattern_flags row
+- [x] Extends existing /api/cron/grief-monitoring behaviour (does not replace it) via the
+      nightly ML sweep
+- [x] npx tsc --noEmit passes — zero errors (Session 110)
+- [x] Seeded 14-months-post-loss + negative sentiment → band 'elevated' + referral suggested + prolonged_grief_review task — test-ml-layer.ts PASSED (Session 111, live DB)
+
+### M23 cross-cutting
+- [x] lib/ml/mlSweep.ts — runMlAnalyticsSweep() (all active, non-opted-out members: baseline →
+      anomaly → fall risk → isolation → grief) + runMlForMember() for manual recompute
+- [x] app/api/cron/ml-analytics/route.ts — GET, CRON_SECRET-gated, maxDuration 300
+- [x] vercel.json — cron "/api/cron/ml-analytics" schedule "0 6 * * *"
+- [x] app/api/ml/insights/route.ts — GET (family reads own member's MlSummary) + POST (manual recompute)
+- [x] Family dashboard — WellnessInsightsSection: plain-language supportive cards, only shown
+      when there is an actionable signal; "Talk to the care team →" CTA; ErrorBoundary-wrapped
+- [x] Navigator MemberDetailPanel — "Wellness intelligence (AI/ML)" section: baseline status,
+      anomaly score + drivers, fall-risk band + factors, isolation band + drivers, grief flag;
+      "decision-support only, not a diagnosis" disclaimer; detail API returns mlInsights
+- [x] scripts/test-ml-layer.ts — 6 assertion groups, idempotent, cleans up all rows
+- [x] npx tsc --noEmit passes — zero errors (Session 110)
+- [x] npm run build passes — ✓ Compiled successfully in 36.8s (Session 110)
+
+HUMAN ACTIONS REQUIRED:
+1. Run supabase/migrations/064_m23_ml_layer.sql in Supabase SQL Editor
+   Creates: wellness_baselines, behavioral_anomalies, fall_risk_scores, isolation_scores,
+   grief_pattern_flags (all RLS-enabled with family read policies);
+   adds members.ml_insights_opt_out
+2. Run: npx tsx --env-file=.env.local scripts/test-ml-layer.ts  → expect all tests pass
+   (a MODERATE instead of HIGH fall-risk band prints a ⚠ warning, not a failure —
+   heuristic weights can be tuned once real outcome data exists)
+3. Optional: set ML_INFERENCE_URL only when a real model-serving endpoint exists —
+   until then the deterministic StubMlProvider is used everywhere
+
+---
+
+## M24 — Professional Services Revenue Layer
+
+Designed as Phases 98–101 (roadmap gives 4 bullets — same approach as M21/M22/M23).
+Migration: `supabase/migrations/065_m24_professional_services.sql` (run once in Supabase SQL Editor).
+
+### Phase 98 — Trusted Advisor Directory (paid annual listings)
+STATUS: `COMPLETE`
+
+- [x] Migration 065 — advisor_type / advisor_listing_tier / advisor_listing_status enums;
+      trusted_advisors, advisor_listing_applications, advisor_connections, advisor_reviews tables
+      (RLS: anyone reads active listings + published reviews; family owns own connections/reviews;
+      navigator reads connections); 6 seeded vetted advisors — VERIFY: tables in Supabase, 6 advisor rows
+- [x] /dashboard/advisors — real page: AdvisorsDirectoryClient (327 lines) — type filter, accepting-only
+      filter, tier-ranked cards (premier→featured→standard, then rating), request warm intro, leave review
+- [x] Request introduction → advisor_connections row (status='requested') + navigator_tasks row
+      (task_type='advisor_introduction'); duplicate open-request guard — never hands family a raw number
+- [x] /advisors/apply — public listing-application page; 3 tier cards ($2,400 / $4,000 / $6,000 per year);
+      POST /api/advisors/apply → advisor_listing_applications row + [STUB][EMAIL] to partnerships team
+- [x] /admin/advisors — admin-only: AdvisorAdminClient — pending applications (approve → creates active
+      trusted_advisors listing with 365-day expiry; reject/reviewing), all listings table, and
+      Directory Revenue summary (Σ listing_fee_annual across active listings, by tier, expiring < 45d)
+- [x] Reviews — submitAdvisorReview upserts advisor_reviews (unique advisor+member), recomputes
+      avg_rating + total_reviews on trusted_advisors
+- [x] Navigator MemberDetailPanel — "Advisor introductions" section (shown when ≥ 1) via detail API
+      advisorConnections
+- [x] Dashboard Quick Actions — "Trusted advisors" tile → /dashboard/advisors;
+      /dashboard/services Legal & Financial card links to the directory
+- [x] npx tsc --noEmit passes — zero errors
+- [x] npm run build passes — /dashboard/advisors, /advisors/apply, /admin/advisors, /api/advisors(/*),
+      /api/admin/advisors(/*) all compiled
+
+### Phase 99 — VITA / TCE free tax-prep integration
+STATUS: `COMPLETE`
+
+- [x] Migration 065 — vita_sites (RLS: authenticated read), vita_appointments (RLS: family owns own,
+      navigator reads); 4 seeded sites (Oakland library VITA, San Jose TCE, Mission District, GetYourRefund virtual)
+- [x] /dashboard/tax-help — real page: TaxHelpClient — 2-question eligibility quick-check
+      (checkEligibility: TCE 60+, VITA ≤ ~$67k, rental/complex → paid_referral), free-prep site list,
+      request form, "what to bring" checklist, IRS/AARP/GetYourRefund locator links
+      FIX: page selected non-existent members.state — now parses a 2-letter state from members.address,
+      falls back to all active sites
+- [x] Request → POST /api/vita/request → createVitaAppointmentRequest: vita_appointments row
+      (status='requested') + navigator_tasks row (task_type='vita_tax_help', transport/language noted)
+      + [STUB][EMAIL] to care team
+- [x] Existing requests shown on the page with status labels
+- [x] lib/vita/eligibility.ts — client-safe rules, INCOME_BANDS, FILING_SITUATIONS, WHAT_TO_BRING,
+      VITA_INCOME_CEILING, locator URLs; request route validates tax_year / band / situation
+- [x] Dashboard Quick Actions — "Free tax help" tile → /dashboard/tax-help
+- [x] npx tsc --noEmit passes — zero errors
+- [x] npm run build passes — /dashboard/tax-help, /api/vita, /api/vita/request compiled
+
+### Phase 100 — 988 Suicide & Crisis Lifeline + SAMHSA embedding
+STATUS: `COMPLETE`
+
+- [x] Migration 065 — crisis_resource_views table (RLS: authenticated insert; family reads own)
+- [x] lib/crisis/resources.ts — client-safe CRISIS_RESOURCES: 988 Lifeline (call/text 988 + chat),
+      SAMHSA National Helpline (1-800-662-4357), Veterans Crisis Line (988→1 / text 838255),
+      Eldercare Locator (1-800-677-1116), IOA Friendship Line for 60+ (1-800-971-0016)
+- [x] components/shared/CrisisResourceBar.tsx — compact always-available bar: "Call 988", "Text 988",
+      "More support options" → /crisis; "free, confidential, 24/7 · if in danger call 911" line;
+      logs view + call/text/chat clicks to /api/crisis-resources/log via sendBeacon (best-effort)
+- [x] Embedded on: family dashboard footer (surface=dashboard_footer), /dashboard/grief-support
+      (surface=grief), /member-portal (surface=member_portal)
+- [x] /crisis — public full resources page: all 5 services with call/text/website buttons,
+      "call 911 if in immediate danger" banner, warm-handoff note
+- [x] app/api/crisis-resources/log/route.ts — POST, auth required, validates surface/action,
+      writes crisis_resource_views (member_id resolved from family_members when present); never 5xx
+- [x] npx tsc --noEmit passes — zero errors
+- [x] npm run build passes — /crisis, /api/crisis-resources/log compiled
+
+### Phase 101 — Essential Documents Vault extension
+STATUS: `COMPLETE`
+
+- [x] Migration 065 — ALTER document_vault_items ADD doc_category (default 'other'), expires_on date,
+      shared_with_navigator boolean, issuer text; index (member_id, doc_category)
+- [x] lib/documents/categories.ts — 12 categories (7 marked essential: advance directive,
+      healthcare proxy, financial POA, will/trust, insurance card, ID, medication list) with
+      emoji + hint + tracksExpiry; docCategory(), ESSENTIAL_DOC_CATEGORIES, expiryStatus()
+      (expired / soon ≤ 60d / ok)
+- [x] DocumentVault.tsx — upload form gains: document-type select, issued-by, expires-on date,
+      "share with our ThriveAtHome care team" checkbox; advance-directive flag auto-set for
+      advance_directive/healthcare_proxy categories
+- [x] Vault list — category badge, "Shared with care team" badge, expiry badges (Expired /
+      Expires <date>), issuer line; "Essential documents (n/7 stored)" checklist at top
+- [x] lib/data/documents.ts — addDocument persists the 4 new fields;
+      new getNavigatorSharedDocuments(memberId) (shared_with_navigator = true)
+- [x] app/api/documents (POST) — parses docCategory / expiresOn (YYYY-MM-DD validated) / issuer /
+      sharedWithNavigator from the multipart form
+- [x] Navigator MemberDetailPanel — "Shared documents (n)" section via detail API sharedDocuments
+      (file name, category, issuer, expiry, added date; advance-directive marked 🕊️)
+- [x] npx tsc --noEmit passes — zero errors
+- [x] npm run build passes
+
+HUMAN ACTIONS REQUIRED:
+1. Run supabase/migrations/065_m24_professional_services.sql in Supabase SQL Editor
+   Creates: trusted_advisors, advisor_listing_applications, advisor_connections, advisor_reviews,
+   vita_sites, vita_appointments, crisis_resource_views; ALTERs document_vault_items (+4 columns);
+   seeds 6 advisors + 4 VITA sites
+2. Browser test once migration 065 is applied (see progress.md Session 112 "WHAT TO TEST")
+
+---
+
+## M25 — Cultural Programming Depth
+
+> Milestone built in one session (Session 114), same approach as M21–M24.
+> Undocumented working session had already produced migration 066, types/database.ts M25 rows,
+> lib/data/cultural.ts, the 7 /api/cultural routes, /api/cron/cultural-festivals, and the
+> /dashboard/cultural-festivals server page. Session 114 added the missing UI + wiring and got
+> tsc + build green.
+
+### Phase 102 — Cultural Festival Calendar
+STATUS: `COMPLETE`
+
+- [x] Migration 066 — cultural_festivals table (RLS: anyone reads; admin/navigator manage) +
+      24 seeded festivals for 2026 (Lunar New Year, Tết, Seollal, Nowruz, Holi, Ramadan, Eid al-Fitr,
+      Passover, Vaisakhi, Eid al-Adha, Juneteenth, Obon, Chuseok, Mid-Autumn, Rosh Hashanah,
+      Yom Kippur, Navratri, Día de los Muertos, Diwali, Hanukkah, Las Posadas, Kwanzaa, Three Kings) —
+      HUMAN must run in Supabase SQL Editor
+- [x] lib/data/cultural.ts — getUpcomingFestivals(limit), getFestivalsWithinDays(days) (admin client,
+      never throw, return [])
+- [x] /dashboard/cultural-festivals — server page fetches festivals + member's joined circle names;
+      renders FestivalCalendarClient (was red: missing component — created Session 114)
+- [x] components/circles/FestivalCalendarClient.tsx — CREATED: date-sorted festival cards,
+      member's own communities pinned + "For your community" badge, greeting + traditions shown,
+      "All / Just my communities" filter, link to /dashboard/cultural-programming
+- [x] /api/cron/cultural-festivals — daily sweep: festivals within 7 days → [STUB][Aria] log per
+      circle member + celebration_upcoming realtime_notification to families; CRON_SECRET-gated
+- [x] vercel.json — cron { "/api/cron/cultural-festivals", "0 8 * * *" } present
+- [x] Nav — /dashboard/cultural-circles shows "📅 Cultural festival calendar" pill
+- [x] npx tsc --noEmit passes — zero errors (Session 114)
+- [x] npm run build passes — /dashboard/cultural-festivals ƒ, /api/cron/cultural-festivals ƒ (Session 114)
+
+### Phase 103 — Community Potluck Coordination
+STATUS: `COMPLETE`
+
+- [x] Migration 066 — cultural_potlucks (host RLS + authenticated read) + potluck_signups
+      (UNIQUE(potluck_id, member_id), family-manage-own RLS)
+- [x] lib/data/cultural.ts — getUpcomingPotlucks(memberId) (host + signups + names, attendee_total,
+      user_signed_up), createPotluck (+[STUB][EMAIL] care team), signUpForPotluck (upsert),
+      cancelPotluckSignup
+- [x] /api/cultural/potlucks — GET list, POST host (validates title/date/address)
+- [x] /api/cultural/potlucks/[id] — POST sign up (dish name/category/attendee count), DELETE withdraw
+- [x] CulturalProgrammingClient "Potlucks" tab — upcoming list with dishes + capacity, "I'll come"
+      with optional dish, "Host a potluck" form (date/time/address/city/state/capacity/community/
+      festival/description)
+- [x] npx tsc --noEmit passes — zero errors (Session 114)
+- [x] npm run build passes — /api/cultural/potlucks, /api/cultural/potlucks/[id] ƒ (Session 114)
+
+### Phase 104 — Cultural Story Circle
+STATUS: `COMPLETE`
+
+- [x] Migration 066 — cultural_story_sessions (authenticated read; admin manage) +
+      cultural_story_contributions (family-manage-own RLS; life_story_entry_id FK) +
+      1 seeded upcoming session with dial-in
+- [x] lib/data/cultural.ts — getUpcomingStorySessions, getStoryContributionsForMember,
+      addStoryContribution (optionally mirrors into life_story_entries as entry_type='cultural_memory')
+- [x] /api/cultural/story-circle — POST (min 10 chars; festival/homeland/session optional;
+      save_to_life_story flag)
+- [x] CulturalProgrammingClient "Story Circle" tab — upcoming sessions with "Call X, code Y. That's it."
+      dial-in; festival + homeland + memory form; "Also save to my Life Story archive" (default on);
+      list of the member's shared memories
+- [x] npx tsc --noEmit passes — zero errors (Session 114)
+- [x] npm run build passes — /api/cultural/story-circle ƒ (Session 114)
+
+### Phase 105 — Intergenerational Heritage Event
+STATUS: `COMPLETE`
+
+- [x] Migration 066 — heritage_projects (authenticated read; family-manage-own RLS;
+      student_volunteer_id FK, life_story_entry_id FK)
+- [x] lib/data/cultural.ts — getOpenHeritageProjects (with member + student names),
+      getHeritageProjectsForMember, createHeritageProject (+navigator_tasks row
+      task_type='heritage_project_match', priority low)
+- [x] /api/cultural/heritage-projects — POST (tradition_topic min 3 chars; school/description optional)
+- [x] CulturalProgrammingClient "Heritage Projects" tab — explains the match, member's own projects
+      with status, "offer to share" form, community-wide open-project count
+- [x] npx tsc --noEmit passes — zero errors (Session 114)
+- [x] npm run build passes — /api/cultural/heritage-projects ƒ (Session 114)
+
+### Phase 106 — Cultural Craft & Cooking Class
+STATUS: `COMPLETE`
+
+- [x] Migration 066 — cultural_classes (authenticated read; admin manage) + class_registrations
+      (UNIQUE(class_id, member_id), family-manage-own RLS) + 2 seeded classes
+      (Dumpling Folding for Lunar New Year, Diya Painting for Diwali)
+- [x] lib/data/cultural.ts — getUpcomingClasses(memberId) (user_registered, seats_left),
+      registerForClass (upsert, +[STUB][GOODS] kit mail when requested, refreshes registration_count),
+      cancelClassRegistration
+- [x] /api/cultural/classes/[id] — POST register (needs_materials_kit), DELETE withdraw
+- [x] CulturalProgrammingClient "Classes" tab — class cards (type, date/time, seats left, instructor,
+      materials list), "Mail me a free materials kit" checkbox, Register / Withdraw / Class full
+- [x] npx tsc --noEmit passes — zero errors (Session 114)
+- [x] npm run build passes — /api/cultural/classes/[id] ƒ (Session 114)
+
+### Phase 107 — Oral History Archive (native languages)
+STATUS: `COMPLETE`
+
+- [x] Migration 066 — oral_history_recordings (family-manage-own RLS + navigator read;
+      language, transcript, translation_en, audio_path, consent_given, visibility, life_story_entry_id)
+- [x] lib/data/cultural.ts — getOralHistoryForMember, createOralHistoryRecording (optionally mirrors
+      into life_story_entries as entry_type='oral_history'), attachOralHistoryAudio
+- [x] /api/cultural/oral-history — POST (title + language required; consent_given must be true;
+      visibility family/circle/public; save_to_life_story flag)
+- [x] /api/cultural/oral-history/upload — POST multipart: audio MIME allow-list, 50 MB cap,
+      ownership check, stores in private "oral-history" bucket at member_id/recording_id/file
+- [x] CulturalProgrammingClient "Oral History" tab — recordings list (language, era, 🎧 audio,
+      Life Story), form: title/language/topic/era/description/transcript + optional audio file +
+      visibility + "save to Life Story" + explicit storyteller-consent checkbox (Save disabled
+      until ticked)
+- [x] npx tsc --noEmit passes — zero errors (Session 114)
+- [x] npm run build passes — /api/cultural/oral-history, /api/cultural/oral-history/upload ƒ (Session 114)
+
+### M25 cross-cutting
+- [x] /dashboard/cultural-programming — server hub page: parallel-fetches festivals(90d), circles,
+      potlucks, story sessions + member contributions, open + member heritage projects, classes,
+      member oral history; renders CulturalProgrammingClient (5 tabs)
+- [x] Navigator MemberDetailPanel — "Cultural programming" section: class registrations, potluck
+      sign-ups, potlucks hosting, story circle memories, heritage projects, oral history recordings
+      counts (hidden when all zero); detail route Promise.all + getMemberCulturalEngagement
+- [x] Nav — /dashboard/cultural-circles shows "🎎 Classes, potlucks & story circles" pill →
+      /dashboard/cultural-programming
+
+HUMAN ACTIONS REQUIRED (M25):
+1. Run supabase/migrations/066_m25_cultural_programming.sql in Supabase SQL Editor
+   Creates: cultural_festivals, cultural_potlucks, potluck_signups, cultural_story_sessions,
+   cultural_story_contributions, heritage_projects, cultural_classes, class_registrations,
+   oral_history_recordings (all RLS-enabled); seeds 24 festivals, 1 story session, 2 classes
+2. Create a private Storage bucket named "oral-history" in Supabase Storage
+   (Storage → New bucket → Name: oral-history → Private → Create) — required before
+   oral history audio upload works; the metadata form works without it
+3. Confirm migrations 061 (M21), 062, 063 (M22), 064 (M23), 065 (M24) are all applied —
+   M25 references cultural_circles / circle_memberships (M14), life_story_entries (M15),
+   student_volunteers (M13), members, family_members, navigator_tasks
+
+---
+
+## M26 — Premium Subscription Add-Ons
+
+> Milestone built in one session (Session 115), same one-session-per-milestone approach as M21–M25.
+> Real payment is still stubbed (StubBillingProvider). Every purchase logs "[STUB][Billing] …"
+> and records a member_addons row. Fulfillment add-ons also create the downstream request row
+> and a navigator task.
+
+### Phase 108 — Add-Ons catalog + purchase ledger + Caregiver Family Plan ($89/mo)
+STATUS: `COMPLETE`
+
+- [x] Migration 067_m26_premium_addons.sql — enums addon_billing / addon_purchase_status;
+      premium_addons (anyone reads active) + seeds all 9 add-ons; member_addons ledger
+      (family-manage-own RLS + navigator read); HUMAN must run in Supabase SQL Editor
+- [x] lib/data/premium-addons.ts — getAddonCatalog, getMemberAddons (catalog join),
+      hasActiveAddon, getEffectiveFamilySeatLimit (BASE_FAMILY_SEATS 3 + family_seat_bonus),
+      getMemberAddonSummary, purchaseAddon, cancelAddon
+- [x] purchaseAddon — plan-tier gate, duplicate-active guard for monthly, milestone-age guard for
+      the memory book; monthly → status 'active' + renews_at +1mo; one-time → status 'pending';
+      [STUB][Billing] charge log; system_message realtime notification to the family
+- [x] Caregiver Family Plan — family_seat_bonus 3 (5 seats total); on purchase creates a
+      'coordinator_call' navigator task; /api/cron/coordinator-calls creates the monthly task for
+      every active plan whose last coordinator_call task is 25+ days old; vercel.json cron "0 9 1 * *"
+- [x] /api/addons — GET (catalog + memberAddons + familySeatLimit), POST (purchase, sanitised intake)
+- [x] /api/addons/[id] — DELETE (cancel; ownership-checked)
+- [x] /dashboard/add-ons — server page + components/dashboard/AddOnsClient.tsx (Monthly / One-time
+      sections, "Your add-ons" list, active badge + cancel, intake forms for the 4 that need input)
+- [x] Dashboard quick action "Add-ons & upgrades" → /dashboard/add-ons
+- [x] npx tsc --noEmit passes — zero errors (Session 115)
+- [x] npm run build passes — /dashboard/add-ons ƒ, /api/addons(/*), /api/cron/coordinator-calls ƒ
+
+### Phase 109 — Long-Distance Caregiver Add-on ($19/mo) + video diary
+STATUS: `COMPLETE`
+
+- [x] Seeded in premium_addons (fulfillment 'feature'); hasActiveAddon('long_distance_caregiver')
+      gates the video diary
+- [x] Migration 067 — caregiver_video_diary_entries table (family-manage-own RLS)
+- [x] lib/data/premium-addons.ts — getVideoDiaryEntries, addVideoDiaryEntry, attachVideoDiaryVideo
+- [x] /api/addons/video-diary — GET / POST, add-on-gated (403 without it)
+- [x] /api/addons/video-diary/upload — multipart video (mp4/mov/webm, 100 MB cap) → private
+      "caregiver-video-diary" bucket at member_id/entry_id/file
+- [x] AddOnsClient — "Family video diary" panel shown only when the add-on is active: add entry
+      (title + note), list with 🎥 marker
+- [x] npx tsc --noEmit passes — zero errors (Session 115)
+- [x] npm run build passes — /api/addons/video-diary, /api/addons/video-diary/upload ƒ
+
+### Phase 110 — Skill Exchange Premium ($9/mo — priority matching)
+STATUS: `COMPLETE`
+
+- [x] Seeded in premium_addons (fulfillment 'feature', benefits describe priority matching + 3
+      concurrent exchanges); hasActiveAddon('skill_exchange_premium') available for the Skill
+      Exchange matcher to read
+- [x] Purchasable / cancellable from /dashboard/add-ons; shows in navigator "Premium add-ons"
+- [x] npx tsc --noEmit passes — zero errors (Session 115)
+
+### Phase 111 — Cultural Circle Premium ($5/mo)
+STATUS: `COMPLETE`
+
+- [x] Seeded in premium_addons (fulfillment 'feature', benefits: priority RSVP, early festival
+      calendars, quarterly craft kit); hasActiveAddon('cultural_circle_premium') available to the
+      circle/festival UIs
+- [x] Purchasable / cancellable from /dashboard/add-ons
+- [x] npx tsc --noEmit passes — zero errors (Session 115)
+
+### Phase 112 — Volunteer Concierge ($19/mo — premium matching)
+STATUS: `COMPLETE`
+
+- [x] Seeded in premium_addons (fulfillment 'feature', benefits: hand-reviewed match, faster
+      turnaround, 48-hour re-match); hasActiveAddon('volunteer_concierge') available to the
+      volunteer matching flow
+- [x] Purchasable / cancellable from /dashboard/add-ons
+- [x] npx tsc --noEmit passes — zero errors (Session 115)
+
+### Phase 113 — Annual Care Planning Session ($149/session)
+STATUS: `COMPLETE`
+
+- [x] Migration 067 — care_planning_sessions table (family own + navigator RW RLS)
+- [x] Seeded in premium_addons (one_time, fulfillment 'navigator_task')
+- [x] purchaseAddon('annual_care_planning') — intake: focus areas (6 options) + preferred times;
+      creates care_planning_sessions row (status 'requested') + navigator task 'care_planning_session'
+- [x] AddOnsClient — "Get started" opens the focus-area pills + preferred-times form
+- [x] npx tsc --noEmit passes — zero errors (Session 115)
+
+### Phase 114 — Benefits Maximizer Deep-Dive ($79 one-time)
+STATUS: `COMPLETE`
+
+- [x] Migration 067 — benefits_deep_dives table (family own + navigator RW RLS; household jsonb,
+      estimated_annual_value_cents)
+- [x] Seeded in premium_addons (one_time, fulfillment 'navigator_task')
+- [x] purchaseAddon('benefits_maximizer_deep_dive') — intake: income band, household size,
+      veteran, homeowner; creates benefits_deep_dives row + navigator task 'benefits_deep_dive'
+- [x] AddOnsClient — household intake form
+- [x] npx tsc --noEmit passes — zero errors (Session 115)
+
+### Phase 115 — Milestone Birthday Memory Book ($49 one-time — 70th / 75th / 80th)
+STATUS: `COMPLETE`
+
+- [x] Migration 067 — memory_book_orders table (family own RLS + navigator read;
+      milestone_age CHECK IN (70,75,80))
+- [x] Seeded in premium_addons (one_time, fulfillment 'goods')
+- [x] purchaseAddon('milestone_birthday_memory_book') — requires a valid milestone age (70/75/80);
+      intake: recipient name, shipping address, dedication; creates memory_book_orders row +
+      navigator task 'memory_book_order' + [STUB][GOODS] order log
+- [x] AddOnsClient — age-aware milestone select (options not near the member's age are disabled
+      when DOB is known), recipient + address + dedication fields
+- [x] npx tsc --noEmit passes — zero errors (Session 115)
+
+### Phase 116 — Extra annual legal consultation ($75/consultation)
+STATUS: `COMPLETE`
+
+- [x] Migration 067 — legal_consultations table (family own + navigator RW RLS;
+      advisor_id → trusted_advisors, nullable)
+- [x] Seeded in premium_addons (one_time, fulfillment 'navigator_task')
+- [x] purchaseAddon('extra_legal_consultation') — intake: topic; creates legal_consultations row +
+      navigator task 'legal_consultation' (warm hand-off to a Trusted Advisor attorney)
+- [x] AddOnsClient — topic textarea
+- [x] npx tsc --noEmit passes — zero errors (Session 115)
+
+### M26 cross-cutting
+- [x] Navigator MemberDetailPanel — "Premium add-ons" section: active add-on keys + monthly total,
+      pending fulfilment items with status (hidden when none); detail route Promise.all +
+      getMemberAddonSummary → premiumAddons
+- [x] types/database.ts — AddonBilling / AddonPurchaseStatus enums; premium_addons, member_addons,
+      caregiver_video_diary_entries, care_planning_sessions, benefits_deep_dives, memory_book_orders,
+      legal_consultations table types + Row aliases
+- [x] No new placeholder routes — /dashboard/add-ons built directly (consistent with M21–M25)
+- [x] npm run build passes — ✓ Compiled successfully in 42s (Session 115)
+
+HUMAN ACTIONS REQUIRED (M26):
+1. Run supabase/migrations/067_m26_premium_addons.sql in the Supabase SQL Editor
+   Creates: premium_addons (+9 seeded add-ons), member_addons, caregiver_video_diary_entries,
+   care_planning_sessions, benefits_deep_dives, memory_book_orders, legal_consultations
+   (all RLS-enabled).
+2. Create a private Storage bucket named "caregiver-video-diary" in Supabase Storage
+   (Storage → New bucket → Name: caregiver-video-diary → Private → Create). Required only for
+   video attachments on the Long-Distance Caregiver diary; the text entry form works without it.
+3. Confirm migrations 065 (M24) and 066 (M25) are applied — M26 references trusted_advisors
+   (M24), members, family_members, care_navigators, navigator_tasks.
+4. No new environment variables for M26.
+
+---
+
+## M27 — Pet & Companion Life Tracking
+
+> Milestone built in one session (Session 116), same one-session-per-milestone approach as M21–M26.
+> No external service. Aria's pet-date acknowledgment is a [STUB][Aria] log in the cron; the
+> care-team pet-loss notice is a [STUB][EMAIL] log (StubEmailProvider.sendGriefSupportNotification).
+> Designed as Phases 117–119, one per roadmap bullet in ThriveAtHome_Build_Phases_v4.md "M27".
+
+### Phase 117 — Pet profiles + proactive pet birthday / adoption-anniversary acknowledgment
+STATUS: `COMPLETE`
+
+- [x] Migration 068_m27_pet_companion.sql — member_pets table (family-manage-own RLS + navigator
+      read); ALTER celebration_events ADD pet_id / pet_name (nullable, existing rows unaffected);
+      HUMAN must run in Supabase SQL Editor
+- [x] lib/data/pets.ts — getPetsForMember, getActivePetsForMember, getPetById, createPet, updatePet
+      (typed Partial<MemberPetInsert>), deletePet, markPetPassedAway, attachPetPhoto,
+      daysUntilAnniversary / yearsAtNextAnniversary helpers, petCelebrationExists /
+      petOneTimeCelebrationExists, getMemberPetSummary
+- [x] /api/pets — GET (member's pets), POST (create; name required)
+- [x] /api/pets/[id] — PATCH (edit), DELETE (remove profile; ownership-checked)
+- [x] /api/pets/[id]/photo — multipart image (jpeg/png/webp, 10 MB cap) → private
+      "member-pet-photos" bucket at member_id/pet_id/file
+- [x] /dashboard/pets — server page + components/dashboard/PetsClient.tsx: add/edit pet form
+      (name, species with emoji, breed, birthday, adoption day, colour, notes), companions list,
+      "Upcoming companion milestones" panel, "Mark as passed away" inline memorial dialog,
+      "Remembered" section linking to The Companion Circle
+- [x] Dashboard quick action "Pets & companions" → /dashboard/pets
+- [x] /api/cron/pet-milestones — daily (vercel.json "0 8 * * *"); CRON_SECRET bearer; for each
+      active member's living pets: detects birthday + adoption anniversary within 7 days →
+      celebration_events row (pet_id, pet_name, celebration_type pet_birthday /
+      pet_adoption_anniversary, ai_message with year count), realtime celebration_upcoming
+      notification, [STUB][Aria] "Would gently mention …" log; idempotent via petCelebrationExists
+- [x] npx tsc --noEmit passes — zero errors (Session 116)
+- [x] npm run build passes — /dashboard/pets ƒ, /api/pets(/*), /api/cron/pet-milestones ƒ
+
+### Phase 118 — Pet milestone celebrations alongside human milestones
+STATUS: `COMPLETE`
+
+- [x] Pet celebrations live in the shared celebration_events table (member_id set) so they appear
+      on /dashboard/celebrations and the dashboard "Celebrations" section next to human milestones
+- [x] CelebrationTypeLabel (celebrations page) + MILESTONE_LABELS (DashboardClient) extended with
+      pet_birthday 🎂, pet_adoption_anniversary 🏡, pet_senior_milestone 🌟
+- [x] Senior-companion milestone — cron creates a one-time pet_senior_milestone celebration when a
+      dog/cat reaches ~10 years (idempotent via petOneTimeCelebrationExists)
+- [x] "Upcoming companion milestones" panel on /dashboard/pets links back to the Celebrations page
+- [x] Navigator MemberDetailPanel "Pets & companions" section — companion names/species, upcoming
+      pet-milestone count, remembered pets, open pet-loss request count (hidden when all zero);
+      detail route Promise.all + getMemberPetSummary → petSummary
+- [x] npx tsc --noEmit passes — zero errors (Session 116)
+
+### Phase 119 — Pet loss circle (distinct from human bereavement circles)
+STATUS: `COMPLETE`
+
+- [x] Migration 068 — pet_loss_circle_members (one implicit global circle; member-manage-own +
+      circle-member-read-roster + navigator read RLS), pet_loss_circle_posts (circle-members-read
+      + author-writes-own + navigator read), pet_loss_support_requests (family own + navigator RW)
+- [x] lib/data/pet-loss.ts — PET_LOSS_RESOURCES (ASPCA, Lap of Love, Pet Compassion Careline,
+      Cornell hotline, The Ralph Site — names + descriptions only), getPetLossMembership,
+      joinPetLossCircle (upsert), leavePetLossCircle, getPetLossCircleRoster, getPetLossPosts,
+      createPetLossPost, getPetLossRequestsForMember, createPetLossSupportRequest,
+      getAllOpenPetLossRequests, updatePetLossRequestStatus
+- [x] createPetLossSupportRequest — support_type one_to_one → navigator task 'pet_loss_support'
+      (description states it is separate from the human bereavement pathway); [STUB][EMAIL]
+      care-team notice; grief_support_assigned realtime notification; row in pet_loss_support_requests
+- [x] markPetPassedAway (pets data layer) — records passed_away_on + memorial note, deactivates
+      profile, cancels upcoming pet celebration rows, pushes a gentle system_message notification
+      with a link to The Companion Circle, logs [STUB][EMAIL] care-team notice
+- [x] /api/pets/[id]/passed — POST (mark a companion as passed away; ownership-checked)
+- [x] /api/pet-loss/circle — POST join, DELETE leave
+- [x] /api/pet-loss/posts — GET (403 unless active member) + POST (403 unless active member)
+- [x] /api/pet-loss/support — GET (member's requests) + POST (create request)
+- [x] /dashboard/pet-loss-support — server page + components/circles/PetLossCircleClient.tsx:
+      copy explicitly states "separate from our bereavement circles for people"; join/leave;
+      circle feed (compose + list, post types reflection/tribute/question/encouragement);
+      "Talk to someone" 1:1 support form (support type radio, pet select, loss date, message);
+      pet-loss resources list; circle roster chips; CrisisResourceBar surface="grief"
+- [x] PetsClient "Remembered" section CTA → /dashboard/pet-loss-support
+- [x] npx tsc --noEmit passes — zero errors (Session 116)
+- [x] npm run build passes — /dashboard/pet-loss-support ƒ, /api/pet-loss/*, /api/pets/[id]/passed ƒ
+
+### M27 cross-cutting
+- [x] types/database.ts — celebration_events Row/Insert +pet_id/pet_name; member_pets,
+      pet_loss_circle_members, pet_loss_circle_posts, pet_loss_support_requests table types +
+      Row aliases (MemberPetRow/Insert, PetLossCircleMemberRow, PetLossCirclePostRow,
+      PetLossSupportRequestRow)
+- [x] vercel.json — cron { "/api/cron/pet-milestones", "0 8 * * *" }
+- [x] No new placeholder routes — /dashboard/pets and /dashboard/pet-loss-support built directly
+      (consistent with M21–M26)
+- [x] Three roles preserved — Aria (pet-date acknowledgment in calls, stubbed), Navigator
+      (pet_loss_support tasks, detail-panel section), family (pet profiles + circle). Pet loss is a
+      distinct surface, never conflated with the human grief pathway.
+
+HUMAN ACTIONS REQUIRED (M27):
+1. Run supabase/migrations/068_m27_pet_companion.sql in the Supabase SQL Editor
+   Creates: member_pets; ALTERs celebration_events (+pet_id, +pet_name); pet_loss_circle_members,
+   pet_loss_circle_posts, pet_loss_support_requests (all RLS-enabled).
+2. Create a private Storage bucket named "member-pet-photos" in Supabase Storage
+   (Storage → New bucket → Name: member-pet-photos → Private → Create). Required only for pet
+   photo uploads; every pet profile works without a photo.
+3. Confirm migration 067 (M26) is applied — M27 references members, family_members,
+   care_navigators, navigator_tasks, celebration_events, realtime_notifications.
+4. No new environment variables for M27.

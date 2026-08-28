@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getCurrentUser, getUserRole } from '@/lib/auth'
+import { getCurrentUser, getUserRole, isNavigatorOrAdmin } from '@/lib/auth'
 import { getNavigatorByAuthId, isMemberAssignedToNavigator } from '@/lib/data/navigator'
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { Database } from '@/types/database'
@@ -12,7 +12,7 @@ export async function POST(req: Request) {
   const userId = user.id
 
   const role = await getUserRole(userId)
-  if (role !== 'navigator' && role !== 'admin') {
+  if (!(await isNavigatorOrAdmin(userId))) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 

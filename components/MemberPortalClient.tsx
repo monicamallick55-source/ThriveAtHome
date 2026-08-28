@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import type { Member } from '@/lib/data/members'
 import type { ServiceBooking } from '@/lib/data/services'
 import type { TrackedItem } from '@/lib/data/tracked-items-types'
+import CrisisResourceBar from '@/components/shared/CrisisResourceBar'
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
@@ -96,6 +97,23 @@ interface Props {
   trackedItems: TrackedItem[]
 }
 
+// ── Helpers ────────────────────────────────────────────────────────────────
+
+/**
+ * Formats an ISO date/timestamp deterministically in UTC so the server render
+ * and the client hydration produce identical text (avoids hydration mismatch
+ * from the browser's local timezone differing from the server's).
+ */
+function fmtDate(
+  iso: string | null | undefined,
+  opts: Intl.DateTimeFormatOptions = { month: 'numeric', day: 'numeric', year: 'numeric' },
+): string {
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (isNaN(d.getTime())) return ''
+  return d.toLocaleDateString('en-US', { ...opts, timeZone: 'UTC' })
+}
+
 // ── Component ───────────────────────────────────────────────────────────────
 
 export default function MemberPortalClient({ member, upcomingServices, trackedItems }: Props) {
@@ -158,7 +176,9 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
   const [docError, setDocError] = useState('')
   const [docSuccess, setDocSuccess] = useState('')
 
-  const today = new Date()
+  // Anchor "today" to UTC midnight so day-count maths renders identically on
+  // the server and on the client (no local-timezone hydration mismatch).
+  const today = new Date(new Date().toISOString().slice(0, 10) + 'T00:00:00Z')
   const age = member.date_of_birth
     ? Math.floor((today.getTime() - new Date(member.date_of_birth).getTime()) / (365.25 * 24 * 60 * 60 * 1000))
     : null
@@ -657,7 +677,7 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
                       </div>
                       {s.requested_for && (
                         <div style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>
-                          📅 {new Date(s.requested_for).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                          📅 {fmtDate(s.requested_for, { weekday: 'short', month: 'short', day: 'numeric' })}
                         </div>
                       )}
                     </div>
@@ -833,7 +853,7 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
                           <div style={{ flex: 1 }}>
                             <div style={{ fontFamily: 'var(--font-body)', fontSize: '16px', fontWeight: 600, color: 'var(--color-navy)' }}>{item.item_name}</div>
                             <div style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>
-                              {item.category === 'appointment' ? 'Appointment' : 'Renewal'} · {new Date(item.expiration_or_appointment_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                              {item.category === 'appointment' ? 'Appointment' : 'Renewal'} · {fmtDate(item.expiration_or_appointment_date, { month: 'long', day: 'numeric', year: 'numeric' })}
                             </div>
                           </div>
                           <div style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 700, color: urgencyColor, whiteSpace: 'nowrap', flexShrink: 0 }}>
@@ -1001,7 +1021,7 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
                         </div>
                         {entry.era && <div style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>{entry.era}</div>}
                       </div>
-                      <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: '#999', flexShrink: 0 }}>{new Date(entry.created_at).toLocaleDateString()}</div>
+                      <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: '#999', flexShrink: 0 }}>{fmtDate(entry.created_at)}</div>
                     </div>
                     <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: '#333', lineHeight: 1.8, margin: 0, whiteSpace: 'pre-wrap' }}>{entry.content.length > 300 ? `${entry.content.slice(0, 300)}…` : entry.content}</p>
                   </div>
@@ -1086,7 +1106,7 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
                     {orgData.membership.payment_date && (
                       <div>
                         <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Last payment</div>
-                        <div style={{ fontFamily: 'var(--font-body)', fontSize: '16px', fontWeight: 600, color: 'var(--color-navy)' }}>{new Date(orgData.membership.payment_date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</div>
+                        <div style={{ fontFamily: 'var(--font-body)', fontSize: '16px', fontWeight: 600, color: 'var(--color-navy)' }}>{fmtDate(orgData.membership.payment_date, { month: 'long', year: 'numeric' })}</div>
                       </div>
                     )}
                   </div>
@@ -1221,7 +1241,7 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 600, color: 'var(--color-navy)', margin: '0 0 4px' }}>{doc.title}</p>
                       {doc.description && <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: '0 0 2px' }}>{doc.description}</p>}
-                      <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: '#999', margin: 0 }}>{doc.file_name} · {new Date(doc.created_at).toLocaleDateString()}</p>
+                      <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: '#999', margin: 0 }}>{doc.file_name} · {fmtDate(doc.created_at)}</p>
                     </div>
                     <button onClick={() => handlePortalDocDownload(doc.id, doc.file_name)}
                       style={{ padding: '8px 16px', backgroundColor: 'var(--color-navy)', color: 'white', border: 'none', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '13px', cursor: 'pointer', flexShrink: 0 }}>
@@ -1235,6 +1255,8 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
         )}
 
       </main>
+
+      <CrisisResourceBar surface="member_portal" />
 
       <footer style={{ textAlign: 'center', padding: '24px', fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', borderTop: '1px solid #E8E4DC' }}>
         ThriveAtHome · Your care, your way ·{' '}

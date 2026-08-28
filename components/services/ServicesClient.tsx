@@ -917,6 +917,9 @@ function LegalFinancialForm({ onSuccess }: { onSuccess: (b: ServiceBooking) => v
         <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: '#4a1d6d', margin: 0, lineHeight: 1.65 }}>
           <strong>Our navigators can connect you</strong> with vetted elder law attorneys, financial advisors, and benefits specialists. We never recommend specific firms — instead we provide a warm, personal introduction to appropriate professionals.
         </p>
+        <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', margin: '10px 0 0' }}>
+          <a href="/dashboard/advisors" style={{ color: '#4a1d6d', fontWeight: 700 }}>Browse the Trusted Advisor Directory →</a>
+        </p>
       </div>
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <div>

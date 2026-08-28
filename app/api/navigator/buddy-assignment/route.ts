@@ -1,15 +1,14 @@
 // GET /api/navigator/buddy-assignment?member_id=... — returns buddy assignment + calls for a member
 // DELETE /api/navigator/buddy-assignment — ends a buddy assignment
 import { NextResponse } from 'next/server'
-import { requireAuth, getUserRole } from '@/lib/auth'
+import { requireAuth, isNavigatorOrAdmin } from '@/lib/auth'
 import { getBuddyCalls, endBuddyAssignment } from '@/lib/data/buddies'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function GET(req: Request) {
   try {
     const user = await requireAuth()
-    const role = await getUserRole(user.id)
-    if (role !== 'admin' && role !== 'navigator') {
+    if (!(await isNavigatorOrAdmin(user.id))) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
@@ -41,8 +40,7 @@ export async function GET(req: Request) {
 export async function DELETE(req: Request) {
   try {
     const user = await requireAuth()
-    const role = await getUserRole(user.id)
-    if (role !== 'admin' && role !== 'navigator') {
+    if (!(await isNavigatorOrAdmin(user.id))) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 

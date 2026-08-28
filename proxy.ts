@@ -44,7 +44,10 @@ export async function proxy(request: NextRequest) {
       .eq('supabase_auth_id', user.id)
       .maybeSingle()
 
-    let role = (fm?.role ?? 'family') as 'family' | 'navigator' | 'admin' | 'volunteer' | 'student'
+    let role = (fm?.role ?? 'family') as
+      | 'family' | 'navigator' | 'admin' | 'volunteer' | 'student'
+      | 'university_admin' | 'employer_admin' | 'agency_admin' | 'aaa_admin'
+      | 'org_admin' | 'senior_center_admin' | 'network_admin'
 
     // If no family_members row found, check volunteers or student_volunteers table
     if (!fm) {
@@ -76,6 +79,24 @@ export async function proxy(request: NextRequest) {
     if (role === 'navigator' && path === '/dashboard') {
       const url = request.nextUrl.clone()
       url.pathname = '/navigator'
+      return NextResponse.redirect(url)
+    }
+
+    // Partner-portal admins landing on /dashboard root are sent to their own portal.
+    // This is a server-side safety net: the client login redirect can miss the
+    // right destination if the role read races the session cookie.
+    const PORTAL_HOME: Record<string, string> = {
+      university_admin: '/university-admin',
+      employer_admin: '/employer-admin',
+      agency_admin: '/agency-admin',
+      aaa_admin: '/aaa-admin',
+      org_admin: '/org-admin',
+      senior_center_admin: '/senior-center-admin',
+      network_admin: '/network-admin',
+    }
+    if (path === '/dashboard' && PORTAL_HOME[role]) {
+      const url = request.nextUrl.clone()
+      url.pathname = PORTAL_HOME[role]
       return NextResponse.redirect(url)
     }
 

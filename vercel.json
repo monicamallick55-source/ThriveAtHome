@@ -35,6 +35,26 @@
     {
       "path": "/api/cron/automations",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/smart-home-anomaly",
+      "schedule": "0 */2 * * *"
+    },
+    {
+      "path": "/api/cron/ml-analytics",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/cultural-festivals",
+      "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/coordinator-calls",
+      "schedule": "0 9 1 * *"
+    },
+    {
+      "path": "/api/cron/pet-milestones",
+      "schedule": "0 8 * * *"
     }
   ]
 }

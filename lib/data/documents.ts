@@ -26,6 +26,29 @@ export async function getDocumentsForMember(
   }
 }
 
+/** Documents the family has chosen to share with the care team (Phase 101). */
+export async function getNavigatorSharedDocuments(
+  memberId: string
+): Promise<{ data: DocumentVaultItem[] | null; error: string | null }> {
+  try {
+    const admin = createAdminClient()
+    const { data, error } = await admin
+      .from('document_vault_items')
+      .select('*')
+      .eq('member_id', memberId)
+      .eq('shared_with_navigator', true)
+      .order('created_at', { ascending: false })
+    if (error) {
+      console.error('[data/documents/getNavigatorSharedDocuments]', error)
+      return { data: null, error: error.message }
+    }
+    return { data: (data ?? []) as DocumentVaultItem[], error: null }
+  } catch (e) {
+    console.error('[data/documents/getNavigatorSharedDocuments] Unexpected error:', e)
+    return { data: null, error: e instanceof Error ? e.message : String(e) }
+  }
+}
+
 interface AddDocumentInput {
   memberId: string
   uploadedBy: string
@@ -34,6 +57,10 @@ interface AddDocumentInput {
   description?: string | null
   storagePath: string
   isAdvanceDirective?: boolean
+  docCategory?: string | null
+  expiresOn?: string | null
+  issuer?: string | null
+  sharedWithNavigator?: boolean
 }
 
 /** Delete a document record and return its storage path for cleanup. */
@@ -78,6 +105,10 @@ export async function addDocument(
         description: input.description ?? null,
         storage_path: input.storagePath,
         is_advance_directive: input.isAdvanceDirective ?? false,
+        doc_category: input.docCategory ?? 'other',
+        expires_on: input.expiresOn ?? null,
+        issuer: input.issuer ?? null,
+        shared_with_navigator: input.sharedWithNavigator ?? false,
       })
       .select('*')
       .maybeSingle()

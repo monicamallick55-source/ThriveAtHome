@@ -11,6 +11,10 @@ import { StubBillingProvider }   from './stubs/StubBillingProvider'
 import { StubTransportProvider } from './stubs/StubTransportProvider'
 import { StubMealProvider }      from './stubs/StubMealProvider'
 import { StubGoodsProvider }     from './stubs/StubGoodsProvider'
+import { StubDeviceProvider }    from './stubs/StubDeviceProvider'
+import { StubWearableProvider }  from './stubs/StubWearableProvider'
+import { StubEhrProvider }       from './stubs/StubEhrProvider'
+import { StubMlProvider }        from './stubs/StubMlProvider'
 import type { CallProvider }     from './interfaces/CallProvider'
 import type { SmsProvider }      from './interfaces/SmsProvider'
 import type { EmailProvider }    from './interfaces/EmailProvider'
@@ -19,6 +23,10 @@ import type { BillingProvider }  from './interfaces/BillingProvider'
 import type { TransportProvider } from './interfaces/TransportProvider'
 import type { MealProvider }     from './interfaces/MealProvider'
 import type { GoodsProvider }    from './interfaces/GoodsProvider'
+import type { DeviceProvider }   from './interfaces/DeviceProvider'
+import type { WearableProvider } from './interfaces/WearableProvider'
+import type { EhrProvider }      from './interfaces/EhrProvider'
+import type { MlProvider }       from './interfaces/MlProvider'
 
 function resolveAiProvider(): AiProvider {
   if (process.env.ANTHROPIC_API_KEY) {
@@ -85,6 +93,39 @@ function resolveGoodsProvider(): GoodsProvider {
   return new StubGoodsProvider()
 }
 
+function resolveDeviceProvider(): DeviceProvider {
+  if (process.env.ALEXA_SKILL_ID || process.env.GOOGLE_ACTIONS_PROJECT_ID) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { RealDeviceProvider } = require('./services/RealDeviceProvider') // Added in M22 activation
+    return new RealDeviceProvider()
+  }
+  return new StubDeviceProvider()
+}
+function resolveWearableProvider(): WearableProvider {
+  if (process.env.FITBIT_CLIENT_ID || process.env.GARMIN_CONSUMER_KEY) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { RealWearableProvider } = require('./services/RealWearableProvider') // Added in M22 activation
+    return new RealWearableProvider()
+  }
+  return new StubWearableProvider()
+}
+function resolveEhrProvider(): EhrProvider {
+  if (process.env.EPIC_CLIENT_ID || process.env.CERNER_CLIENT_ID || process.env.FHIR_BASE_URL) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { RealEhrProvider } = require('./services/RealEhrProvider') // Added in M22 activation
+    return new RealEhrProvider()
+  }
+  return new StubEhrProvider()
+}
+function resolveMlProvider(): MlProvider {
+  if (process.env.ML_INFERENCE_URL) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { RealMlProvider } = require('./services/RealMlProvider') // Added in M23 activation
+    return new RealMlProvider()
+  }
+  return new StubMlProvider()
+}
+
 export const aiProvider:        AiProvider        = resolveAiProvider()
 export const callProvider:      CallProvider      = resolveCallProvider()
 export const smsProvider:       SmsProvider       = resolveSmsProvider()
@@ -93,3 +134,7 @@ export const billingProvider:   BillingProvider   = resolveBillingProvider()
 export const transportProvider: TransportProvider = resolveTransportProvider()
 export const mealProvider:      MealProvider      = resolveMealProvider()
 export const goodsProvider:     GoodsProvider     = resolveGoodsProvider()
+export const deviceProvider:    DeviceProvider    = resolveDeviceProvider()
+export const wearableProvider:  WearableProvider  = resolveWearableProvider()
+export const ehrProvider:       EhrProvider       = resolveEhrProvider()
+export const mlProvider:        MlProvider        = resolveMlProvider()

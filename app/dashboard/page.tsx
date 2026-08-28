@@ -13,6 +13,8 @@ import { isTodayBirthday, getRecentCelebrationEvents } from '@/lib/data/celebrat
 import { getUpcomingServiceBookings, getRecentCompletedServiceBookings } from '@/lib/data/services'
 import { getUpcomingTrackedItems } from '@/lib/data/tracked-items'
 import { getBrandConfigForMember } from '@/lib/data/brandConfigs'
+import { getDeviceSummaryForMember, type DeviceSummary } from '@/lib/data/devices'
+import { getMlSummaryForMember, type MlSummary } from '@/lib/data/ml'
 import DashboardClient from '@/components/dashboard/DashboardClient'
 import type { CheckInCall } from '@/lib/data/calls'
 import type { Alert } from '@/lib/data/alerts'
@@ -85,6 +87,8 @@ export default async function DashboardPage({
     trackedItemsResult,
     serviceHistoryResult,
     brandConfigResult,
+    deviceSummaryResult,
+    mlSummaryResult,
   ] = await Promise.all([
     withTimeout<CheckInCall[]>(getCallsForMember(member.id, 90, 0, user.id)),
     withTimeout<Alert[]>(getAlertsForMember(member.id)),
@@ -96,6 +100,8 @@ export default async function DashboardPage({
     withTimeout<TrackedItem[]>(getUpcomingTrackedItems(member.id)),
     withTimeout<ServiceBooking[]>(getRecentCompletedServiceBookings(member.id, 3)),
     withTimeout<BrandConfigRow>(getBrandConfigForMember(member.id)),
+    withTimeout<DeviceSummary>(getDeviceSummaryForMember(member.id)),
+    withTimeout<MlSummary>(getMlSummaryForMember(member.id)),
   ])
 
   const memberIsBirthday = member.date_of_birth ? isTodayBirthday(member.date_of_birth) : false
@@ -119,6 +125,8 @@ export default async function DashboardPage({
       upcomingTrackedItems={trackedItemsResult.data ?? []}
       serviceHistory={serviceHistoryResult.data ?? []}
       brandConfig={brandConfigResult.data ?? null}
+      deviceSummary={deviceSummaryResult.data ?? null}
+      mlSummary={mlSummaryResult.data ?? null}
     />
   )
 }

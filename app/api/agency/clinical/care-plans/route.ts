@@ -40,9 +40,22 @@ export async function POST(req: NextRequest) {
 
   // Handle approve action
   if (body.action === 'approve' && body.plan_id) {
+    const { data: fm } = await createAdminClient()
+      .from('family_members')
+      .select('full_name')
+      .eq('supabase_auth_id', user.id)
+      .maybeSingle()
+    const isPlaceholder = (s: string) => !s || /^(agency )?admin$/i.test(s.trim())
+    const fmName = (fm?.full_name ?? '').trim()
+    const bodyApprover = (typeof body.approver_name === 'string' ? body.approver_name : '').trim()
+    const approverName = !isPlaceholder(fmName)
+      ? fmName
+      : !isPlaceholder(bodyApprover)
+        ? bodyApprover
+        : fmName || bodyApprover || 'Agency Admin'
     const { data, error } = await approveCarePlanVersion(
       body.plan_id as string,
-      (body.approver_name as string) || 'Agency Admin'
+      approverName
     )
     if (error) return NextResponse.json({ error }, { status: 500 })
     return NextResponse.json({ data })
