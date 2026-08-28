@@ -9689,3 +9689,80 @@ NEXT SESSION MUST:
   (streams 2–5 above). If the human explicitly asks for the commit, perform stream (2).
 
 AWAITING HUMAN APPROVAL
+ISSUE: Communities navigation pills still not showing on /dashboard/cultural-circles after M25 build. Cultural festival calendar and Classes/potlucks/story circles navigation pills are still missing from the Communities page. Fix: add two navigation pill buttons to the CulturalCirclesClient or cultural circles page component linking to /dashboard/cultural-festivals and /dashboard/cultural-programming.
+
+APPROVED — Pre-production issue verification complete. Results: (1) Grief welcome path toggle shows expanded content ✅; (2) Member needs name dropdown works ✅; (3) Volunteer claim flow works — claimed request removed from Open Requests, should appear in My Upcoming tab ✅; (4) Email sent history visible ✅; (5) Communities navigation pills still missing ❌ — logged as remaining ISSUE. M1-M27 platform build complete. Proceeding to production deployment streams: commit all code, Vercel deployment, activate real credentials (Retell/Twilio/SendGrid/Stripe), sign BAAs. Phase 55 Multilingual UI deferred until after launch.
+---
+SESSION: 118
+DATE: 2026-08-28 UTC
+MILESTONE: Pre-production work stream (1) — fix the one remaining queued ISSUE (Communities navigation pills)
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+RESUME CONTEXT:
+- Session 117 closed with a human APPROVED line that still flagged ISSUE #5 as unresolved:
+  "Communities navigation pills still not showing … Cultural festival calendar and
+  Classes/potlucks/story circles navigation pills are still missing from the Communities page."
+- Per prompt.md 1.1 "On ISSUE: re-enter the inner debug loop with the described issue as the
+  first hypothesis." No new milestone started; Phase 55 stays deferred by the Session 116 DECISION.
+
+ROOT CAUSE (one hypothesis, confirmed):
+- There are TWO near-identical pages that both render <CulturalCirclesClient/>:
+  * app/dashboard/communities/page.tsx      ← the CANONICAL route. The circle cards
+    (CulturalCirclesClient line ~229 href={`/dashboard/communities/${circle.id}`}), the
+    [circleId] "← Communities" back-link, and GroupsClient all point here. This is the page the
+    human reaches when they open "Communities".
+  * app/dashboard/cultural-circles/page.tsx ← a secondary/legacy route.
+- Session 117 added the two nav pills ONLY to app/dashboard/cultural-circles/page.tsx, so on the
+  page the human actually visits (/dashboard/communities) they never appeared. Session 117's
+  progress note ("app/dashboard/cultural-circles/page.tsx lines ~53–72") was accurate but on the
+  wrong route.
+
+FIX (this session):
+- Moved the two pill links INTO components/circles/CulturalCirclesClient.tsx, immediately below
+  the page <h1>Communities</h1> / subtitle block. Both /dashboard/communities and
+  /dashboard/cultural-circles now render them from the shared client — they cannot drift apart
+  again.
+  * 📅 Cultural festival calendar        → /dashboard/cultural-festivals
+  * 🎎 Classes, potlucks & story circles → /dashboard/cultural-programming
+  Both target pages exist and build as ƒ routes.
+- Removed the now-duplicate pill markup from app/dashboard/cultural-circles/page.tsx (would have
+  rendered twice on that one route otherwise). Its nav still uses <Link>, so the import stays used.
+
+FILES CHANGED THIS SESSION:
+- components/circles/CulturalCirclesClient.tsx — added the two <Link> nav pills after the header.
+- app/dashboard/cultural-circles/page.tsx — removed the duplicated pill <div> (now supplied by the
+  client component).
+- checklist.md — M25 Phase 102 "Nav" item reworded: pills now on the Communities page via the
+  shared client; note explaining the Session 117 miss.
+- progress.md — this entry.
+
+EXIT GATE — VERIFICATIONS RUN THIS SESSION:
+- npx tsc --noEmit: PASSED — exit 0, zero errors.
+- npm run build: PASSED — ✓ Compiled successfully, exit 0. Routes present: /dashboard/communities ƒ,
+  /dashboard/cultural-circles ƒ, /dashboard/cultural-festivals ƒ, /dashboard/cultural-programming ƒ.
+- Live browser verification: NOT possible in this Codespace (no running app / DB — same limitation
+  documented in Sessions 107–117). The fix is code-verified: pills are now in the shared client
+  that both Communities routes render, and both link targets are real built pages.
+
+STUB STATUS: All providers remain stubs. No migration, no new env var, no external service.
+
+UNCOMMITTED WORK: git HEAD is still af648ec (Session 107). Sessions 108–117 plus this session's
+3 code/doc files are uncommitted. Commit only on the human's explicit instruction (pre-production
+stream 2).
+
+HUMAN ACTIONS REQUIRED:
+1. Browser-verify: open Dashboard → Communities (/dashboard/communities). The two pills
+   "📅 Cultural festival calendar" and "🎎 Classes, potlucks & story circles" should appear just
+   under the "Communities" heading and route to /dashboard/cultural-festivals and
+   /dashboard/cultural-programming respectively.
+2. Pre-production streams (2)–(5) from the Session 116 DECISION remain: commit Sessions 108–118,
+   Vercel deploy, activate real credentials (Retell/Twilio/SendGrid/Stripe), sign the 5 BAAs.
+
+NEXT SESSION MUST:
+- Hold. Do NOT begin Phase 55 (deferred until after production launch + first revenue). M1–M27 is
+  the complete platform build. On APPROVAL, remaining work is human/infra/legal (streams 2–5). If
+  the human explicitly asks for the commit, perform stream (2).
+
+AWAITING HUMAN APPROVAL
+APPROVED — Communities navigation pills now visible at /dashboard/communities showing "📅 Cultural festival calendar" and "🎎 Classes, potlucks & story circles" routing correctly. All 5 pre-production issues verified fixed. M1-M27 platform build is COMPLETE. Do NOT begin Phase 55. Remaining work is production deployment only: (1) commit Sessions 108-118 on human instruction; (2) Vercel deployment; (3) activate real credentials — Retell+Twilio for Aria calls, SendGrid for email, Stripe for billing; (4) sign 5 BAAs — Supabase, Twilio, Retell AI, Anthropic, SendGrid. Hold for human instructions on production deployment.

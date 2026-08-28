@@ -325,6 +325,26 @@ export default function CulturalCirclesClient({ circles, joinedCircleIds, platfo
           </p>
         </div>
 
+        {/* Navigation pills — jump to the festival calendar and live programming */}
+        <div style={{
+          display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '32px',
+        }}>
+          <Link href="/dashboard/cultural-festivals" style={{
+            fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600,
+            color: 'var(--color-navy)', textDecoration: 'none',
+            border: '1.5px solid var(--color-warm-grey)', borderRadius: '999px', padding: '8px 16px',
+          }}>
+            📅 Cultural festival calendar
+          </Link>
+          <Link href="/dashboard/cultural-programming" style={{
+            fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600,
+            color: 'var(--color-navy)', textDecoration: 'none',
+            border: '1.5px solid var(--color-warm-grey)', borderRadius: '999px', padding: '8px 16px',
+          }}>
+            🎎 Classes, potlucks &amp; story circles
+          </Link>
+        </div>
+
         {/* Recommended for you — shown when member hasn't joined everything */}
         {hasMember && recommended.length > 0 && joinedCircles.length < circles.length && (
           <div style={{ marginBottom: '40px' }}>

@@ -2226,7 +2226,10 @@ STATUS: `COMPLETE`
 - [x] /api/cron/cultural-festivals — daily sweep: festivals within 7 days → [STUB][Aria] log per
       circle member + celebration_upcoming realtime_notification to families; CRON_SECRET-gated
 - [x] vercel.json — cron { "/api/cron/cultural-festivals", "0 8 * * *" } present
-- [x] Nav — /dashboard/cultural-circles shows "📅 Cultural festival calendar" pill
+- [x] Nav — Communities page shows "📅 Cultural festival calendar" + "🎎 Classes, potlucks & story circles" pills
+      (Session 118: moved pills into CulturalCirclesClient so BOTH /dashboard/communities — the route the
+      dashboard actually links to — and /dashboard/cultural-circles render them; Session 117 had added them
+      only to /dashboard/cultural-circles/page.tsx, which is why the human still saw them missing)
 - [x] npx tsc --noEmit passes — zero errors (Session 114)
 - [x] npm run build passes — /dashboard/cultural-festivals ƒ, /api/cron/cultural-festivals ƒ (Session 114)
 
