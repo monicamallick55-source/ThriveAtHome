@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
   // 4. Check for duplicate submission
   const { data: fm, error: fmError } = await admin
     .from('family_members')
-    .select('id, member_id')
+    .select('id, member_id, relationship')
     .eq('supabase_auth_id', user.id)
     .maybeSingle()
 
@@ -78,6 +78,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Profile already created. Visit your dashboard.' }, { status: 409 })
   }
 
+  // A senior who signed up for themselves (family_members.relationship === 'self')
+  // is linked directly to the members row too, so they can log in as the member
+  // and land on the member self-service portal.
+  const isSelfEnrolment = fm.relationship === 'self'
+
   // 5. Insert member row (plan_tier defaults to 'basics' in the database)
   const topicsEnjoyArray = body.topics_enjoy
     ? body.topics_enjoy.split(',').map((t) => t.trim()).filter(Boolean)
@@ -93,6 +98,7 @@ export async function POST(req: NextRequest) {
       preferred_name: preferred_name.trim(),
       date_of_birth,
       phone_number: phone_number.trim(),
+      supabase_auth_id: isSelfEnrolment ? user.id : null,
       emergency_contact_1_name: body.emergency_contact_1_name?.trim() || null,
       emergency_contact_1_phone: body.emergency_contact_1_phone?.trim() || null,
       emergency_contact_1_rel: body.emergency_contact_1_rel?.trim() || null,

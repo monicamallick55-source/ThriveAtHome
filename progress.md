@@ -9766,3 +9766,184 @@ NEXT SESSION MUST:
 
 AWAITING HUMAN APPROVAL
 APPROVED — Communities navigation pills now visible at /dashboard/communities showing "📅 Cultural festival calendar" and "🎎 Classes, potlucks & story circles" routing correctly. All 5 pre-production issues verified fixed. M1-M27 platform build is COMPLETE. Do NOT begin Phase 55. Remaining work is production deployment only: (1) commit Sessions 108-118 on human instruction; (2) Vercel deployment; (3) activate real credentials — Retell+Twilio for Aria calls, SendGrid for email, Stripe for billing; (4) sign 5 BAAs — Supabase, Twilio, Retell AI, Anthropic, SendGrid. Hold for human instructions on production deployment.
+
+ISSUE: Production signup flow does not allow a senior to sign up for themselves — only options presented are relationship types (son, daughter, spouse, etc.) for family members signing up on behalf of a senior. Fix: add a "I am signing up for myself" option as the first/primary choice on the relationship/account-type selection screen during onboarding. When selected: (1) the logged-in user becomes both the family_members record AND is linked directly to a members record as the senior; (2) onboarding questions should address the senior directly ("What do you enjoy talking about?" not "What does your loved one enjoy?"); (3) the dashboard should show the member-self view not the family-proxy view; (4) this directly supports the member self-service portal (Phase 67) and the member self-service strategy where seniors sign up directly. This is critical for the B2C direct acquisition strategy — the primary acquisition mode (Mode 1) requires seniors to be able to sign up themselves.
+---
+SESSION: 119
+DATE: 2026-08-28 UTC
+MILESTONE: Pre-production stream (1) — ISSUE fix: senior self-signup path
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+RESUME CONTEXT:
+- The last content in progress.md before this entry is the Session 118 APPROVED line, followed by
+  a new human-appended ISSUE: "Production signup flow does not allow a senior to sign up for
+  themselves — only relationship types (son, daughter, spouse, etc.) are presented." The ISSUE
+  asks for: (1) an "I am signing up for myself" primary choice on the account-type screen;
+  (2) on self-signup the user becomes BOTH the family_members row AND a linked members (senior)
+  row; (3) onboarding questions address the senior directly; (4) the dashboard shows the
+  member-self view, not the family-proxy view. Called out as critical for the Mode 1 B2C
+  direct-acquisition strategy and the member self-service portal (Phase 67).
+- Per prompt.md 1.1 "On ISSUE: re-enter the inner debug loop." No new milestone started;
+  Phase 55 stays deferred by the Session 116 DECISION. M1–M27 remains the complete platform build.
+
+ROOT CAUSE (one hypothesis, confirmed):
+- components/auth/SignupForm.tsx only ever offered "Your relationship to the senior"
+  (Son/Daughter/Spouse/…). There was no way to indicate the person signing up IS the senior.
+- The plumbing for a directly-authenticated senior already existed (migration 049 added
+  members.supabase_auth_id; /member-portal, getMemberByDirectAuth, and LoginForm already handle
+  it) but nothing in the signup/onboarding flow ever set members.supabase_auth_id, so a senior
+  could not self-enrol.
+
+FIX (Session 119) — no DB migration (reuses family_members.relationship + members.supabase_auth_id):
+- components/auth/SignupForm.tsx — new "Who will Aria be calling?" radio group, "I'm signing up
+  for myself" first, "Someone I care for" second. Relationship dropdown now only renders for the
+  proxy path. Selection required; proxy still requires a relationship. Subtitle adapts. Sends
+  { accountType, relationship } to the signup API (self → relationship 'self').
+- app/api/auth/signup/route.ts — accepts accountType + relationship, writes relationship onto the
+  family_members row ('self' for self-signup, the chosen relationship otherwise).
+- app/onboarding/page.tsx — loads the family_members row, passes isSelf = (relationship === 'self')
+  into <OnboardingForm/>.
+- components/onboarding/OnboardingForm.tsx — isSelf prop; first step label becomes "About you";
+  validateStep1 messages switch to first person; threads isSelf to all three steps + Confirmation.
+- components/onboarding/Step1BasicInfo.tsx / Step2Preferences.tsx / Step3Safety.tsx — isSelf prop;
+  first-person copy for the headings and the person-referring hints/labels ("Tell us a little
+  about you.", "What do you like to be called?", "This is the number Aria will call you on.",
+  "How would you like Aria to reach out?", "What do you enjoy talking about?", "Do you live
+  alone?", "Have you recently lost someone important?", grief-path copy, buddy-match labels).
+- components/onboarding/Confirmation.tsx — isSelf prop; self enrollers see "Your profile is
+  ready" / first-person body and a "Go to my portal" button → /member-portal.
+- app/api/onboarding/route.ts — selects family_members.relationship; when relationship === 'self'
+  the members insert also sets supabase_auth_id = auth user id (the senior is now BOTH records).
+  family_members.member_id is still linked as before.
+- app/dashboard/page.tsx — after loading the member, redirect to /member-portal when
+  member.supabase_auth_id === the signed-in auth user (member-self view, not family-proxy view).
+- components/auth/LoginForm.tsx — the direct-member-portal check now also runs for a 'family'-role
+  user (self enrollers have a 'family' family_members row AND a linked members row), so login
+  lands them on /member-portal in one hop.
+- types/database.ts — members Row/Insert gain supabase_auth_id (string | null), matching
+  migration 049; removes the need for `any` casts at the new call sites.
+- scripts/test-volunteer-matching.ts — makeMember() mock gains supabase_auth_id: null to satisfy
+  the widened Member type (test-only, no runtime change).
+
+FILES MODIFIED THIS SESSION:
+- components/auth/SignupForm.tsx, components/auth/LoginForm.tsx
+- app/api/auth/signup/route.ts, app/api/onboarding/route.ts
+- app/onboarding/page.tsx, app/dashboard/page.tsx
+- components/onboarding/OnboardingForm.tsx, Step1BasicInfo.tsx, Step2Preferences.tsx,
+  Step3Safety.tsx, Confirmation.tsx
+- types/database.ts
+- scripts/test-volunteer-matching.ts
+- checklist.md, progress.md (this entry)
+- next-env.d.ts / tsconfig.tsbuildinfo — regenerated by the build, not hand-edited
+
+STUB STATUS: All 12 providers remain stubs. No new external service, no new env var, no migration.
+
+EXIT GATE — VERIFICATIONS RUN THIS SESSION:
+- node --version: v24.14.0
+- npx tsc --noEmit: PASSED — exit 0, zero errors.
+- npm run build: PASSED — ✓ Compiled successfully, exit 0. /signup ƒ, /onboarding ƒ,
+  /member-portal ƒ, /dashboard ƒ all present.
+- Live browser / Supabase verification: NOT possible in this Codespace (no running app / DB — same
+  limitation documented in Sessions 107–118). The flow is code-verified end to end:
+  signup writes relationship → onboarding page reads it → form renders first-person →
+  onboarding API sets members.supabase_auth_id → dashboard + login route to /member-portal.
+
+HUMAN ACTIONS REQUIRED:
+1. Confirm migration 049_member_auth.sql is applied in Supabase (adds members.supabase_auth_id +
+   member_read_own / member_update_own RLS). Required for self-signup to reach /member-portal.
+2. Browser-verify on a running app: /signup → "I'm signing up for myself" → no relationship
+   dropdown → create account → /onboarding reads in the first person ("Tell us a little about
+   you.", "What do you enjoy talking about?") → submit → "Go to my portal" → /member-portal.
+   Then log out and back in → should land on /member-portal directly. Also re-check the proxy
+   path: "Someone I care for" still shows the relationship dropdown and still lands on /dashboard.
+3. Pre-production streams (2)–(5) from the Session 116 DECISION remain: commit the working tree,
+   Vercel deploy, activate real credentials (Retell/Twilio/SendGrid/Stripe), sign the 5 BAAs.
+
+NEXT SESSION MUST:
+- Hold. Do NOT begin Phase 55 (deferred until after production launch + first revenue). M1–M27 is
+  the complete platform build. On APPROVAL, remaining work is human/infra/legal (streams 2–5). If
+  the human explicitly asks for the commit, perform stream (2).
+
+AWAITING HUMAN APPROVAL
+ISSUE: Self-signup for seniors not yet built in code. The signup page at /signup only shows relationship options (son, daughter, spouse etc.) with no "I'm signing up for myself" option. This is blocking B2C direct acquisition (Mode 1 strategy). Build this now as a priority pre-production fix: (1) Add "I'm signing up for myself" as the first option on /signup before the relationship dropdown; (2) When selected, skip the relationship question entirely; (3) Onboarding reads in first person ("Tell us about you", "What do you enjoy talking about?"); (4) On completion, create a members row with supabase_auth_id linked to the auth user, and route to /member-portal instead of /dashboard; (5) On subsequent logins, detect members.supabase_auth_id match and route to /member-portal. This is the highest priority pre-production fix.
+---
+SESSION: 120
+DATE: 2026-08-28 UTC
+MILESTONE: Pre-production stream (1) — ISSUE re-raised: senior self-signup path
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+RESUME CONTEXT:
+- The last line of progress.md before this entry is a human-appended ISSUE on the Session 119
+  AWAITING line: "Self-signup for seniors not yet built in code. The signup page at /signup only
+  shows relationship options (son, daughter, spouse etc.) with no 'I'm signing up for myself'
+  option." It restates the same five requirements Session 119 implemented.
+- Per prompt.md 1.1 "On ISSUE: re-enter the inner debug loop with the described issue as the
+  first hypothesis." No new milestone started; Phase 55 stays deferred by the Session 116
+  DECISION; M1-M27 remains the complete platform build.
+
+HYPOTHESIS 1 (confirmed): the fix IS built (Session 119, on disk, uncommitted) but the human is
+testing against deployed production, which does not have it. git HEAD is bc2bfd0; the 13 feature
+files from Session 119 all still show as modified/uncommitted in `git status`.
+
+VERIFICATION THIS SESSION — every Session 119 file re-read and confirmed correct on disk:
+1. components/auth/SignupForm.tsx — <fieldset> "Who will Aria be calling?" radio group renders
+   FIRST in the form; "I'm signing up for myself" is option 1, "Someone I care for" option 2.
+   accountType required; the "Your relationship to the senior" <select> renders only when
+   accountType === 'proxy'. Self path POSTs relationship: 'self'.
+2. app/api/auth/signup/route.ts — accepts accountType + relationship; isSelfSignup = accountType
+   === 'self'; writes relationship ('self' | chosen | null) onto the family_members row.
+3. app/onboarding/page.tsx — reads family_members via getFamilyMemberByAuthId (helper exists in
+   lib/data/family.ts:8); isSelf = fm?.relationship === 'self'; passes <OnboardingForm isSelf/>.
+4. components/onboarding/OnboardingForm.tsx — isSelf prop threaded into step labels
+   ("About you"), validators (first-person messages), all of Step1BasicInfo / Step2Preferences /
+   Step3Safety, and <Confirmation isSelf/>. Steps confirmed to carry the prop and switch copy
+   ("Tell us a little about you.", "What do you enjoy talking about?", "Do you live alone?",
+   grief-path first-person copy).
+5. app/api/onboarding/route.ts — selects family_members.relationship; when === 'self' the members
+   insert sets supabase_auth_id = user.id (senior is BOTH records); member_id link unchanged.
+6. app/dashboard/page.tsx — redirects to /member-portal when member.supabase_auth_id === user.id.
+7. components/auth/LoginForm.tsx — direct-member-portal check now also runs for a 'family'-role
+   family_members row with a linked members row → self-enrollers land on /member-portal in one hop.
+8. components/onboarding/Confirmation.tsx — isSelf → "Your profile is ready" / first-person body /
+   "Go to my portal" → /member-portal.
+9. types/database.ts — members Row/Insert include supabase_auth_id (string | null), matches
+   migration 049.
+
+EXIT GATE — VERIFICATIONS RUN THIS SESSION:
+- node --version: v24.14.0
+- npx tsc --noEmit: PASSED — exit 0, zero errors.
+- npm run build: PASSED — exit 0. /signup ƒ, /onboarding ƒ, /member-portal ƒ, /dashboard ƒ all
+  present in the route list.
+- Live browser / Supabase verification: NOT possible in this Codespace (no running app / DB — same
+  limitation documented in Sessions 107-119).
+
+FILES CHANGED THIS SESSION:
+- checklist.md — added a Session 120 note under the "Self-signup path" section recording the
+  re-verification and the real root cause (uncommitted + undeployed).
+- progress.md — this entry. No feature code was written; Session 119's implementation was found
+  complete and correct, tsc + build green.
+
+STUB STATUS: All 12 providers remain stubs. No migration, no new env var, no external service.
+
+UNCOMMITTED WORK: git HEAD bc2bfd0. Session 119's 13 feature files + Sessions 108-119 milestone
+work + this entry are uncommitted. Commit only on the human's explicit instruction
+(pre-production stream 2).
+
+HUMAN ACTIONS REQUIRED — the self-signup fix will not appear in production until:
+1. Confirm migration 049_member_auth.sql is applied in Supabase (members.supabase_auth_id +
+   member_read_own / member_update_own RLS).
+2. Commit the working tree (pre-production stream 2) and push.
+3. Vercel production deploy (pre-production stream 3).
+4. Then browser-verify: /signup → "I'm signing up for myself" → no relationship dropdown → create
+   account → /onboarding reads first person → submit → "Go to my portal" → /member-portal;
+   log out / back in → lands on /member-portal. Proxy path unchanged: "Someone I care for" still
+   shows the relationship dropdown and still lands on /dashboard.
+
+NEXT SESSION MUST:
+- Hold. Do NOT begin Phase 55 (deferred until after production launch + first revenue). M1-M27 is
+  the complete platform build. On APPROVAL, remaining work is human/infra/legal (streams 2-5). If
+  the human explicitly asks for the commit, perform stream (2).
+
+AWAITING HUMAN APPROVAL

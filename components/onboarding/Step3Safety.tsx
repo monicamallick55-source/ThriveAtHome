@@ -6,6 +6,8 @@ interface Props {
   data: OnboardingFormData
   onChange: (field: keyof OnboardingFormData, value: string) => void
   errors: Partial<Record<keyof OnboardingFormData, string>>
+  /** True when the signed-in user is enrolling themselves — the form speaks in the first person. */
+  isSelf?: boolean
 }
 
 const labelStyle: React.CSSProperties = {
@@ -44,11 +46,13 @@ const RELATIONSHIPS = [
   'Son', 'Daughter', 'Spouse', 'Partner', 'Sibling', 'Friend', 'Neighbor', 'Caregiver', 'Other',
 ]
 
-export function Step3Safety({ data, onChange }: Props) {
+export function Step3Safety({ data, onChange, isSelf = false }: Props) {
   const [showSecondContact, setShowSecondContact] = useState(
     !!(data.emergency_contact_1_name || data.emergency_contact_1_phone)
   )
   const livesAlone = data.lives_alone
+  const subject = data.preferred_name || (isSelf ? 'you' : 'the senior')
+  const subjectThey = data.preferred_name || (isSelf ? 'you' : 'they')
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
@@ -164,7 +168,7 @@ export function Step3Safety({ data, onChange }: Props) {
       {/* Lives alone toggle */}
       <div>
         <p style={{ ...labelStyle, marginBottom: '12px' }}>
-          Does {data.preferred_name || 'the senior'} live alone?
+          {isSelf && !data.preferred_name ? 'Do you live alone?' : `Does ${subject} live alone?`}
         </p>
         <div
           style={{
@@ -176,7 +180,7 @@ export function Step3Safety({ data, onChange }: Props) {
             position: 'relative',
           }}
           role="group"
-          aria-label="Does the senior live alone?"
+          aria-label={isSelf ? 'Do you live alone?' : 'Does the senior live alone?'}
         >
           {[
             { value: 'yes', label: 'Yes, lives alone' },
@@ -313,10 +317,12 @@ export function Step3Safety({ data, onChange }: Props) {
         }}
       >
         <p style={{ ...labelStyle, margin: 0 }}>
-          Has {data.preferred_name || 'the senior'} recently lost someone important?
+          {isSelf && !data.preferred_name
+            ? 'Have you recently lost someone important?'
+            : `Has ${subject} recently lost someone important?`}
         </p>
         <p style={{ fontSize: '15px', color: 'var(--color-text-muted)', fontFamily: 'var(--font-body)', margin: 0 }}>
-          If so, we will prioritise a daily check-in from Aria and aim to connect {data.preferred_name || 'them'} with a buddy within 48 hours.
+          If so, we will prioritise a daily check-in from Aria and aim to connect {isSelf && !data.preferred_name ? 'you' : subjectThey} with a buddy within 48 hours.
         </p>
         <div
           style={{
@@ -373,12 +379,12 @@ export function Step3Safety({ data, onChange }: Props) {
             }}
           >
             <p style={{ fontSize: '16px', color: '#6B21A8', fontFamily: 'var(--font-body)', margin: 0, lineHeight: 1.5 }}>
-              We&rsquo;re so sorry for your loss. We&rsquo;ll match {data.preferred_name || 'them'} with a
+              We&rsquo;re so sorry for your loss. We&rsquo;ll match {isSelf && !data.preferred_name ? 'you' : subjectThey} with a
               compassionate buddy within 48 hours, and a navigator will be in touch personally.
             </p>
             <div>
               <label htmlFor="grief_loss_type" style={{ ...labelStyle, display: 'block', marginBottom: '8px' }}>
-                Who did {data.preferred_name || 'they'} lose? <span style={{ color: 'var(--color-text-muted)', fontWeight: 400 }}>(optional)</span>
+                {isSelf && !data.preferred_name ? 'Who did you lose?' : `Who did ${subjectThey} lose?`} <span style={{ color: 'var(--color-text-muted)', fontWeight: 400 }}>(optional)</span>
               </label>
               <select
                 id="grief_loss_type"

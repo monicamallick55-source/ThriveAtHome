@@ -69,6 +69,12 @@ export default async function DashboardPage({
     redirect('/onboarding')
   }
 
+  // A senior who enrolled themselves (members.supabase_auth_id === their auth id)
+  // sees the member self-service portal, not the family-proxy dashboard.
+  if (member.supabase_auth_id === user.id) {
+    redirect('/member-portal')
+  }
+
   // If redirected here after checkout, sync subscription from Stripe directly.
   // This is a reliable fallback in case the Stripe webhook hasn't fired yet
   // (e.g. STRIPE_WEBHOOK_SECRET not yet set in Vercel env vars).

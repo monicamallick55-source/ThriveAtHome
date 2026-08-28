@@ -84,8 +84,10 @@ export function LoginForm() {
         .eq('supabase_auth_id', user.id)
         .maybeSingle()
 
-      if (!fm) {
-        // Check if this is a direct senior member login (members.supabase_auth_id — added in migration 049)
+      if (!fm || fm.role === 'family') {
+        // Direct senior member login (members.supabase_auth_id — migration 049).
+        // Also covers seniors who signed up for themselves: they have a 'family'
+        // family_members row AND a linked members row, and belong in the portal.
         const { data: memberRow } = await (supabase as any)
           .from('members')
           .select('id')

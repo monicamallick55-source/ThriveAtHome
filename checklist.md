@@ -2578,3 +2578,41 @@ HUMAN ACTIONS REQUIRED (M27):
 3. Confirm migration 067 (M26) is applied — M27 references members, family_members,
    care_navigators, navigator_tasks, celebration_events, realtime_notifications.
 4. No new environment variables for M27.
+
+---
+
+## Pre-production stream (1) — Self-signup path (senior enrols themselves)
+
+Raised as an ISSUE on the Session 118 APPROVED line: "Production signup flow does not allow a
+senior to sign up for themselves — only relationship types (son, daughter, spouse…) are shown."
+Fixed in Session 119. No DB migration — uses existing `family_members.relationship` and
+`members.supabase_auth_id` (migration 049).
+
+- [x] Signup form shows "Who will Aria be calling?" with "I'm signing up for myself" as the first
+      option, "Someone I care for" second — components/auth/SignupForm.tsx
+- [x] Relationship dropdown only shows for "Someone I care for"; "myself" sends relationship='self'
+- [x] Selecting an option is required; proxy path still requires a relationship — client validated
+- [x] /api/auth/signup persists relationship on family_members ('self' for self-signup)
+- [x] Onboarding form speaks in the first person when family_members.relationship === 'self'
+      (step label "About you", "Tell us a little about you.", "What do you enjoy talking about?",
+      "Do you live alone?", "Have you recently lost someone important?", first-person validation
+      messages) — app/onboarding/page.tsx + OnboardingForm + Step1/2/3 + Confirmation
+- [x] /api/onboarding sets members.supabase_auth_id = auth user id for self-enrolment, and still
+      links family_members.member_id — the senior is BOTH records
+- [x] Confirmation screen routes self-enrollers to /member-portal ("Go to my portal")
+- [x] /dashboard redirects to /member-portal when member.supabase_auth_id === the auth user
+- [x] Login routes a 'family'-role user with a linked members row straight to /member-portal
+- [x] types/database.ts — members Row/Insert gain supabase_auth_id (matches migration 049)
+- [x] npx tsc --noEmit passes — zero errors (Session 119)
+- [x] npm run build passes — /signup ƒ, /onboarding ƒ, /member-portal ƒ, /dashboard ƒ (Session 119)
+
+HUMAN ACTION: browser-verify against a running app + migrated Supabase (migration 049 applied):
+sign up → choose "I'm signing up for myself" → onboarding reads in the first person → submit →
+land on /member-portal; log out and back in → still land on /member-portal.
+
+Session 120 — the ISSUE was re-raised on the Session 119 AWAITING line ("Self-signup for seniors
+not yet built in code"). Re-entered the debug loop: every file above was re-read and confirmed
+present and correct on disk, and the exit gate was re-run (tsc exit 0; build exit 0, /signup ƒ
+/onboarding ƒ /member-portal ƒ /dashboard ƒ). Root cause of the re-raise: Session 119's work is
+uncommitted (git HEAD bc2bfd0) and not deployed, so production still serves the old signup page.
+No code change needed — this is pre-production stream (2)/(3): commit + Vercel deploy.

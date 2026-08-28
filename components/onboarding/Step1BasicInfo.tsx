@@ -5,6 +5,8 @@ interface Props {
   data: OnboardingFormData
   onChange: (field: keyof OnboardingFormData, value: string) => void
   errors: Partial<Record<keyof OnboardingFormData, string>>
+  /** True when the signed-in user is enrolling themselves — the form speaks in the first person. */
+  isSelf?: boolean
 }
 
 const fieldStyle: React.CSSProperties = {
@@ -67,7 +69,7 @@ const LANGUAGES = [
   { value: 'other', label: 'Other' },
 ]
 
-export function Step1BasicInfo({ data, onChange, errors }: Props) {
+export function Step1BasicInfo({ data, onChange, errors, isSelf = false }: Props) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
       <div>
@@ -80,7 +82,7 @@ export function Step1BasicInfo({ data, onChange, errors }: Props) {
             marginBottom: '8px',
           }}
         >
-          Tell us about the person you care for.
+          {isSelf ? 'Tell us a little about you.' : 'Tell us about the person you care for.'}
         </h2>
         <p style={{ color: 'var(--color-text-muted)', fontSize: '18px', margin: 0, fontFamily: 'var(--font-body)' }}>
           This helps Aria introduce herself warmly on the first call.
@@ -113,7 +115,7 @@ export function Step1BasicInfo({ data, onChange, errors }: Props) {
         <label htmlFor="preferred_name" style={labelStyle}>
           Preferred name <span style={{ color: 'var(--color-urgent-text)' }}>*</span>
         </label>
-        <p style={hintStyle}>What do they like to be called?</p>
+        <p style={hintStyle}>{isSelf ? 'What do you like to be called?' : 'What do they like to be called?'}</p>
         <input
           id="preferred_name"
           type="text"
@@ -155,7 +157,7 @@ export function Step1BasicInfo({ data, onChange, errors }: Props) {
         <label htmlFor="phone_number" style={labelStyle}>
           Phone number <span style={{ color: 'var(--color-urgent-text)' }}>*</span>
         </label>
-        <p style={hintStyle}>We&apos;ll have Aria call them at this number.</p>
+        <p style={hintStyle}>{isSelf ? 'This is the number Aria will call you on.' : 'We’ll have Aria call them at this number.'}</p>
         <input
           id="phone_number"
           type="tel"

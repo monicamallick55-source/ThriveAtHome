@@ -8,7 +8,11 @@ import { Confirmation } from './Confirmation'
 import { type OnboardingFormData, EMPTY_FORM, STORAGE_KEY } from './types'
 
 const TOTAL_STEPS = 3
-const STEP_LABELS = ['About the senior', 'Call preferences', 'Safety']
+const stepLabels = (isSelf: boolean) => [
+  isSelf ? 'About you' : 'About the senior',
+  'Call preferences',
+  'Safety',
+]
 
 type ValidationErrors = Partial<Record<keyof OnboardingFormData, string>>
 
@@ -19,23 +23,27 @@ function isValidPhone(raw: string): boolean {
   return false
 }
 
-function validateStep1(data: OnboardingFormData): ValidationErrors {
+function validateStep1(data: OnboardingFormData, isSelf: boolean): ValidationErrors {
   const errors: ValidationErrors = {}
 
   if (!data.full_name.trim()) {
-    errors.full_name = 'Please enter the senior\'s full name.'
+    errors.full_name = isSelf ? 'Please enter your full name.' : 'Please enter the senior\'s full name.'
   }
   if (!data.preferred_name.trim()) {
-    errors.preferred_name = 'Please enter what they like to be called.'
+    errors.preferred_name = isSelf
+      ? 'Please enter what you like to be called.'
+      : 'Please enter what they like to be called.'
   }
   if (!data.date_of_birth) {
-    errors.date_of_birth = 'Please enter their date of birth.'
+    errors.date_of_birth = isSelf ? 'Please enter your date of birth.' : 'Please enter their date of birth.'
   } else {
     const dob = new Date(data.date_of_birth)
     if (isNaN(dob.getTime())) {
       errors.date_of_birth = 'Please enter a valid date.'
     } else if (differenceInYears(new Date(), dob) < 60) {
-      errors.date_of_birth = 'The person being enrolled must be at least 60 years old.'
+      errors.date_of_birth = isSelf
+        ? 'You must be at least 60 years old to enrol.'
+        : 'The person being enrolled must be at least 60 years old.'
     }
   }
   if (!data.phone_number.trim()) {
@@ -47,15 +55,11 @@ function validateStep1(data: OnboardingFormData): ValidationErrors {
   return errors
 }
 
-function validateStep2(_data: OnboardingFormData): ValidationErrors {
-  return {}
-}
-
-function validateStep3(_data: OnboardingFormData): ValidationErrors {
-  return {}
-}
-
-const validators = [validateStep1, validateStep2, validateStep3]
+const validators: Array<(data: OnboardingFormData, isSelf: boolean) => ValidationErrors> = [
+  validateStep1,
+  () => ({}),
+  () => ({}),
+]
 
 function CheckIcon() {
   return (
@@ -65,7 +69,8 @@ function CheckIcon() {
   )
 }
 
-export function OnboardingForm() {
+export function OnboardingForm({ isSelf = false }: { isSelf?: boolean }) {
+  const STEP_LABELS = stepLabels(isSelf)
   const [step, setStep] = useState(1)
   const [formData, setFormData] = useState<OnboardingFormData>(EMPTY_FORM)
   const [errors, setErrors] = useState<ValidationErrors>({})
@@ -106,7 +111,7 @@ export function OnboardingForm() {
   }, [])
 
   function handleNext() {
-    const errs = validators[step - 1](formData)
+    const errs = validators[step - 1](formData, isSelf)
     if (Object.keys(errs).length > 0) {
       setErrors(errs)
       const firstKey = Object.keys(errs)[0]
@@ -125,7 +130,7 @@ export function OnboardingForm() {
   }
 
   async function handleSubmit() {
-    const errs = validators[step - 1](formData)
+    const errs = validators[step - 1](formData, isSelf)
     if (Object.keys(errs).length > 0) {
       setErrors(errs)
       return
@@ -194,7 +199,7 @@ export function OnboardingForm() {
             padding: '48px',
           }}
         >
-          <Confirmation preferredName={confirmedName} />
+          <Confirmation preferredName={confirmedName} isSelf={isSelf} />
         </div>
       </div>
     )
@@ -305,13 +310,13 @@ export function OnboardingForm() {
           className="onboarding-card"
         >
           {step === 1 && (
-            <Step1BasicInfo data={formData} onChange={handleChange} errors={errors} />
+            <Step1BasicInfo data={formData} onChange={handleChange} errors={errors} isSelf={isSelf} />
           )}
           {step === 2 && (
-            <Step2Preferences data={formData} onChange={handleChange} errors={errors} />
+            <Step2Preferences data={formData} onChange={handleChange} errors={errors} isSelf={isSelf} />
           )}
           {step === 3 && (
-            <Step3Safety data={formData} onChange={handleChange} errors={errors} />
+            <Step3Safety data={formData} onChange={handleChange} errors={errors} isSelf={isSelf} />
           )}
 
           {submitError && (

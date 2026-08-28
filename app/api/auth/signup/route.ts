@@ -4,17 +4,29 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function POST(req: NextRequest) {
-  let body: { email?: string; password?: string; fullName?: string; referralCode?: string }
+  let body: {
+    email?: string
+    password?: string
+    fullName?: string
+    referralCode?: string
+    accountType?: 'self' | 'proxy'
+    relationship?: string
+  }
   try {
     body = await req.json()
   } catch {
     return NextResponse.json({ error: 'Invalid request body.' }, { status: 400 })
   }
 
-  const { email, password, fullName, referralCode } = body
+  const { email, password, fullName, referralCode, accountType } = body
   if (!email || !password || !fullName) {
     return NextResponse.json({ error: 'Email, password, and full name are required.' }, { status: 400 })
   }
+
+  // 'self' — the person signing up is the senior who will receive Aria's calls.
+  // 'proxy' (default) — a family member enrolling someone they care for.
+  const isSelfSignup = accountType === 'self'
+  const relationship = isSelfSignup ? 'self' : (body.relationship?.trim() || null)
 
   const admin = createAdminClient()
 
@@ -60,6 +72,7 @@ export async function POST(req: NextRequest) {
     full_name: fullName,
     email,
     role: 'family',
+    relationship,
     referring_agency_id: referringAgencyId,
   })
 

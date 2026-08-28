@@ -60,7 +60,10 @@ const RELATIONSHIP_OPTIONS = [
   'Son', 'Daughter', 'Spouse', 'Partner', 'Sibling', 'Friend', 'Caregiver', 'Other',
 ]
 
+type AccountType = '' | 'self' | 'proxy'
+
 export function SignupForm({ referralCode }: { referralCode?: string }) {
+  const [accountType, setAccountType] = useState<AccountType>('')
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -69,6 +72,8 @@ export function SignupForm({ referralCode }: { referralCode?: string }) {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+
+  const isSelf = accountType === 'self'
 
   const strength = passwordStrength(password)
   const strengthLabels = ['Too short', 'Weak', 'Fair', 'Good', 'Strong']
@@ -83,13 +88,30 @@ export function SignupForm({ referralCode }: { referralCode?: string }) {
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError(null)
+
+    if (!accountType) {
+      setError('Please tell us who this account is for.')
+      return
+    }
+    if (accountType === 'proxy' && !relationship) {
+      setError('Please choose your relationship to the person you are enrolling.')
+      return
+    }
+
     setLoading(true)
 
     try {
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, fullName, referralCode: referralCode ?? undefined }),
+        body: JSON.stringify({
+          email,
+          password,
+          fullName,
+          accountType,
+          relationship: accountType === 'self' ? 'self' : relationship,
+          referralCode: referralCode ?? undefined,
+        }),
       })
 
       const data = (await res.json()) as { error?: string; success?: boolean }
@@ -253,10 +275,57 @@ export function SignupForm({ referralCode }: { referralCode?: string }) {
               marginBottom: '40px',
             }}
           >
-            Start caring for someone you love.
+            {isSelf ? 'Set up your own daily check-ins with Aria.' : 'Start caring for someone you love.'}
           </p>
 
           <form onSubmit={handleSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            {/* Who is this account for? — primary choice */}
+            <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
+              <legend style={labelStyle}>Who will Aria be calling?</legend>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '8px' }}>
+                {([
+                  { value: 'self', title: "I'm signing up for myself", desc: "I'm the one who'll get the friendly calls" },
+                  { value: 'proxy', title: 'Someone I care for', desc: 'A parent, spouse, or another loved one' },
+                ] as const).map((opt) => {
+                  const selected = accountType === opt.value
+                  return (
+                    <label
+                      key={opt.value}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '12px',
+                        padding: '14px 16px',
+                        borderRadius: 'var(--radius-md)',
+                        border: `1.5px solid ${selected ? 'var(--color-navy)' : 'var(--color-warm-grey)'}`,
+                        backgroundColor: selected ? 'var(--color-teal-muted, #E6F4F6)' : 'white',
+                        cursor: loading ? 'not-allowed' : 'pointer',
+                        transition: 'all 0.2s',
+                      }}
+                    >
+                      <input
+                        type="radio"
+                        name="accountType"
+                        value={opt.value}
+                        checked={selected}
+                        disabled={loading}
+                        onChange={() => setAccountType(opt.value)}
+                        style={{ width: '20px', height: '20px', marginTop: '2px', accentColor: 'var(--color-navy)', flexShrink: 0 }}
+                      />
+                      <span>
+                        <span style={{ display: 'block', fontFamily: 'var(--font-body)', fontSize: '18px', fontWeight: 500, color: 'var(--color-text-primary)' }}>
+                          {opt.title}
+                        </span>
+                        <span style={{ display: 'block', fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-muted)' }}>
+                          {opt.desc}
+                        </span>
+                      </span>
+                    </label>
+                  )
+                })}
+              </div>
+            </fieldset>
+
             <div>
               <label htmlFor="fullName" style={labelStyle}>Your full name</label>
               <input
@@ -287,26 +356,28 @@ export function SignupForm({ referralCode }: { referralCode?: string }) {
               />
             </div>
 
-            <div>
-              <label htmlFor="relationship" style={labelStyle}>Your relationship to the senior</label>
-              <select
-                id="relationship"
-                value={relationship}
-                onChange={(e) => setRelationship(e.target.value)}
-                disabled={loading}
-                style={{
-                  ...inputStyle,
-                  backgroundColor: 'white',
-                  cursor: 'pointer',
-                  opacity: loading ? 0.6 : 1,
-                }}
-              >
-                <option value="">Select relationship…</option>
-                {RELATIONSHIP_OPTIONS.map((r) => (
-                  <option key={r} value={r}>{r}</option>
-                ))}
-              </select>
-            </div>
+            {accountType === 'proxy' && (
+              <div>
+                <label htmlFor="relationship" style={labelStyle}>Your relationship to the senior</label>
+                <select
+                  id="relationship"
+                  value={relationship}
+                  onChange={(e) => setRelationship(e.target.value)}
+                  disabled={loading}
+                  style={{
+                    ...inputStyle,
+                    backgroundColor: 'white',
+                    cursor: 'pointer',
+                    opacity: loading ? 0.6 : 1,
+                  }}
+                >
+                  <option value="">Select relationship…</option>
+                  {RELATIONSHIP_OPTIONS.map((r) => (
+                    <option key={r} value={r}>{r}</option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             <div>
               <label htmlFor="password" style={labelStyle}>Password</label>

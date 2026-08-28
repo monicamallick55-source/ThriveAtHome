@@ -6,6 +6,8 @@ interface Props {
   data: OnboardingFormData
   onChange: (field: keyof OnboardingFormData, value: string) => void
   errors: Partial<Record<keyof OnboardingFormData, string>>
+  /** True when the signed-in user is enrolling themselves — the form speaks in the first person. */
+  isSelf?: boolean
 }
 
 const CALL_TIMES = [
@@ -61,8 +63,10 @@ const hintStyle: React.CSSProperties = {
   margin: '0 0 16px',
 }
 
-export function Step2Preferences({ data, onChange }: Props) {
+export function Step2Preferences({ data, onChange, isSelf = false }: Props) {
   const [showBuddyQuestions, setShowBuddyQuestions] = useState(false)
+  const who = data.preferred_name || (isSelf ? 'you' : 'the senior')
+  const whoPossessive = data.preferred_name || (isSelf ? 'you' : 'they')
 
   const selectedBuddyTopics = data.buddy_match_topics
     ? data.buddy_match_topics.split(',').map((t) => t.trim()).filter(Boolean)
@@ -104,7 +108,7 @@ export function Step2Preferences({ data, onChange }: Props) {
             marginBottom: '8px',
           }}
         >
-          How would they like Aria to reach out?
+          {isSelf ? 'How would you like Aria to reach out?' : 'How would they like Aria to reach out?'}
         </h2>
         <p style={{ color: 'var(--color-text-muted)', fontSize: '18px', margin: 0, fontFamily: 'var(--font-body)' }}>
           These settings help us make every call feel perfectly timed and personal.
@@ -114,7 +118,11 @@ export function Step2Preferences({ data, onChange }: Props) {
       {/* Call time — radio cards */}
       <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
         <legend style={labelStyle}>Preferred call time</legend>
-        <p style={hintStyle}>When does {data.preferred_name || 'the senior'} like to have conversations?</p>
+        <p style={hintStyle}>
+          {isSelf && !data.preferred_name
+            ? 'When do you like to have conversations?'
+            : `When does ${who} like to have conversations?`}
+        </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {CALL_TIMES.map((option) => {
             const isSelected = data.preferred_call_time === option.value
@@ -231,7 +239,11 @@ export function Step2Preferences({ data, onChange }: Props) {
 
       {/* Topics they enjoy — pill multi-select */}
       <div>
-        <p style={labelStyle}>Topics {data.preferred_name || 'they'} enjoy talking about</p>
+        <p style={labelStyle}>
+          {isSelf && !data.preferred_name
+            ? 'What do you enjoy talking about?'
+            : `Topics ${whoPossessive} enjoy talking about`}
+        </p>
         <p style={hintStyle}>Select as many as you like — Aria will naturally bring these up.</p>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
           {TOPICS.map((topic) => {
@@ -363,7 +375,7 @@ export function Step2Preferences({ data, onChange }: Props) {
 
             {/* Era for reminiscing */}
             <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
-              <legend style={{ ...labelStyle, color: '#005f5f' }}>Era they most enjoy reminiscing about</legend>
+              <legend style={{ ...labelStyle, color: '#005f5f' }}>{isSelf ? 'Era you most enjoy reminiscing about' : 'Era they most enjoy reminiscing about'}</legend>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
                 {ERAS.map((era) => {
                   const isSel = data.buddy_match_era === era.value
@@ -443,7 +455,7 @@ export function Step2Preferences({ data, onChange }: Props) {
             {/* Intro note */}
             <div>
               <label htmlFor="buddy_intro_note" style={{ ...labelStyle, color: '#005f5f' }}>
-                Anything their buddy should know? <span style={{ fontWeight: 400, fontSize: '15px', color: '#5a9a9a' }}>(optional)</span>
+                {isSelf ? 'Anything your buddy should know?' : 'Anything their buddy should know?'} <span style={{ fontWeight: 400, fontSize: '15px', color: '#5a9a9a' }}>(optional)</span>
               </label>
               <textarea
                 id="buddy_intro_note"

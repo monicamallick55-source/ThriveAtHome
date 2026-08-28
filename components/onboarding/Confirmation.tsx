@@ -3,9 +3,12 @@
 
 interface Props {
   preferredName: string
+  /** True when the signed-in user enrolled themselves — routes them to their own portal. */
+  isSelf?: boolean
 }
 
-export function Confirmation({ preferredName }: Props) {
+export function Confirmation({ preferredName, isSelf = false }: Props) {
+  const destination = isSelf ? '/member-portal' : '/dashboard'
   return (
     <div className="flex flex-col items-center text-center gap-6 py-4">
       {/* Success icon */}
@@ -19,20 +22,21 @@ export function Confirmation({ preferredName }: Props) {
 
       <div>
         <h2 className="text-2xl font-semibold mb-2" style={{ color: '#1B3A6B' }}>
-          {preferredName}&apos;s profile is ready
+          {isSelf ? 'Your profile is ready' : `${preferredName}'s profile is ready`}
         </h2>
         <p className="text-gray-500 text-base leading-relaxed">
-          Aria will be in touch soon for {preferredName}&apos;s first check-in call.
-          You can update these details any time from the dashboard.
+          {isSelf
+            ? 'Aria will be in touch soon for your first check-in call. You can update these details any time from your portal.'
+            : `Aria will be in touch soon for ${preferredName}'s first check-in call. You can update these details any time from the dashboard.`}
         </p>
       </div>
 
       <button
-        onClick={() => { window.location.href = '/dashboard' }}
+        onClick={() => { window.location.href = destination }}
         className="w-full text-white font-semibold rounded-lg px-4 py-4 text-base text-center transition-opacity hover:opacity-90"
         style={{ backgroundColor: '#1B3A6B', minHeight: '52px', border: 'none', cursor: 'pointer' }}
       >
-        Go to dashboard
+        {isSelf ? 'Go to my portal' : 'Go to dashboard'}
       </button>
     </div>
   )

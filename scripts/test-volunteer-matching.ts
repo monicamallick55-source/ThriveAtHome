@@ -88,6 +88,7 @@ function makeMember(overrides: Partial<Member>): Member {
     faith_preference: null,
     device_integration_consent: false,
     ml_insights_opt_out: false,
+    supabase_auth_id: null,
     ...overrides,
   }
 }

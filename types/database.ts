@@ -72,6 +72,7 @@ export interface Database {
           faith_preference: string | null
           device_integration_consent: boolean
           ml_insights_opt_out: boolean
+          supabase_auth_id: string | null
         }
         Insert: {
           id?: string
@@ -80,6 +81,7 @@ export interface Database {
           preferred_name: string
           date_of_birth: string
           phone_number: string
+          supabase_auth_id?: string | null
           preferred_language?: string
           preferred_call_time?: string | null
           timezone?: string
