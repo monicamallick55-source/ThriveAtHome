@@ -10069,3 +10069,167 @@ NEXT SESSION MUST:
   yet — wait for the human to prioritise it explicitly.
 
 AWAITING HUMAN APPROVAL
+ISSUE: Onboarding flow refers to "Aria" throughout — including after the member has chosen the opt-out option ("No thank you, I prefer human contact only"). This creates a contradiction: the member just said no to AI contact but the onboarding continues to say "Aria will call you" or similar Aria-branded language. Fix across the entire onboarding flow: (1) In Step1BasicInfo.tsx — the phone number field label and hint should say "This is the number we will call you on" (not "Aria will call you on this number") for ALL members regardless of Aria opt-in choice; (2) In Step2Preferences.tsx — the call frequency question should say "How often would you like us to reach out?" not "How often would you like Aria to call you?" — this is true for all members since navigators also call; (3) In Step3Safety.tsx and Confirmation.tsx — any mention of "Aria" should be replaced with "your care team" or "we" in all cases; (4) Only AFTER onboarding is complete, AND only for members who opted IN to Aria, should the experience mention Aria by name; (5) For members who opted OUT, the Confirmation screen should say "Your care navigator will call you personally within 24 hours" — no mention of Aria at all; (6) For members who opted IN, Confirmation can say "Aria will call you [frequency] and your care navigator will also be in touch within 24 hours"; (7) Audit ALL onboarding components for any hardcoded "Aria" references and replace with context-aware language using the isSelf and aria_call_opted_in flags already available in the component props. This is a trust-critical fix — a member who chose human contact only should never see AI branding in their experience.
+FEATURE: Add pet loss option to onboarding grief/loss flow. Currently the onboarding Step 3 grief welcome path toggle asks "Have you recently lost someone important to you?" but does not offer an option for pet loss specifically. Since ThriveAtHome has a dedicated Pet Loss Circle and pet companion tracking (M27), the onboarding should capture this. Fix: (1) In the grief/loss section of onboarding Step 3, add a follow-up question when the grief toggle is selected: "Who did you lose?" with options — Partner/Spouse, Parent, Sibling, Close friend, Pet/animal companion, Other; (2) When "Pet/animal companion" is selected, set grief_loss_type='pet' on the member record AND automatically invite the member to the Pet Loss Circle (/dashboard/pet-loss-support) instead of the general bereavement circle; (3) The 48-hour buddy assignment SLA still applies for pet loss — pets are genuine grief triggers especially for seniors who live alone; (4) The navigator task created should note "Pet loss — invite to Companion Circle" so the navigator uses appropriate language and does not conflate human and pet bereavement in their outreach; (5) On the family dashboard, show a "Your parent recently lost a beloved pet" note to family members so they understand the context and can provide additional support.
+FEATURE: Two member portal UX improvements for service requests and address handling:
+
+(1) AUTO-FILL ADDRESS FROM PROFILE — When any form on the member portal requires an address (service requests, potluck hosting, class registration, heritage projects, oral history, etc.), pre-fill the address fields from the member's profile address stored in the members table. Add a "Use my home address" checkbox/button that auto-populates street, city, state, zip from the member record. Member can override if needed (e.g. requesting service at a different location). This applies to: service request forms, potluck hosting form, any location-based request. Never make the member type their own address when we already have it.
+
+(2) AI-ASSISTED SERVICE REQUESTING — Add a conversational AI helper to the service request flow in /member-portal. Instead of presenting a form with dropdowns and fields, offer two paths: (a) "Fill out the form" (existing manual flow) and (b) "Tell us what you need" — a simple text box where the member describes their need in their own words (e.g. "I need a ride to my doctor on Tuesday morning" or "I could use some help with groceries this week"). The AI (Anthropic API call) parses the natural language request and: pre-fills the service type (transport, grocery_help, etc.), suggested date/time, any special notes; shows the member what it understood before submitting; allows member to confirm or adjust before creating the service_bookings row. This is especially important for seniors who may find dropdown menus and form fields intimidating. The conversational entry lowers the barrier to requesting help significantly. Store the original natural language text in service_bookings.notes alongside the structured fields. For members who opted out of Aria AI contact, this is still appropriate — it is a form-filling assistant they actively engage with, not an outbound AI call they receive.
+
+ISSUES — Member portal and platform UX fixes (August 2026 testing session):
+
+(1) ADDRESS: Pick address is optional and not validated — make address required for service types that need a location (transport, home services, grocery help). Add client-side validation before form submission.
+
+(2) AI SERVICE REQUEST: "Tell us what you need" conversational entry was not added yet — build this as described in previous FEATURE note.
+
+(3) MY COMMUNITY TAB: Cannot join communities from the My Community section in member portal — add "Join" button that links to /dashboard/communities portal, and when posting a need, add a dropdown to select which community to post to (pulls from community_orgs the member belongs to or is near).
+
+(4) IMPORTANT DATES — CATEGORY FILTER: Add filter by category so only relevant subchoices show per type — appointment shows medical/dental/specialist/therapy subcategories; renewal shows insurance/license/registration/passport subcategories; subscription shows gym/streaming/membership subcategories. Dynamic dropdown that changes based on type selection.
+
+(5) IMPORTANT DATES — PREFERRED CONTACT METHOD: Add dropdown to "Add important date" form: "How would you like to be reminded?" with options Phone call, Text message, Email — pre-populated from member's signup preferences but overridable per item.
+
+(6) IMPORTANT DATES NOT SAVING: Important dates are not being saved or showing up after creation on the important dates page. Debug: check the POST /api/tracked-items or equivalent route — likely a missing member_id, RLS policy blocking insert, or response not triggering a UI refresh. Fix the insert and refetch after save.
+
+(7) PRICING PAGE — USER SIGNED OUT: When navigating to the pricing/upgrade page from member portal, the user appears signed out. Fix: ensure the pricing page reads the session from Supabase auth correctly and does not require re-authentication. Add a back button to return to previous page.
+
+(8) PLAN UPGRADE FLOW BROKEN: Clicking a new plan when appearing signed out on pricing page takes user to create account page instead of upgrading. Fix the full upgrade flow: (a) pricing page must detect signed-in user and show "Switch to this plan" not "Get started"; (b) clicking upgrade should go directly to Stripe checkout with the user's existing customer ID pre-filled; (c) after successful payment, update members.plan_tier and redirect back to member portal with success message. No sign-out should occur in this flow.
+
+(9) SIGNUP PAGE — ARIA LANGUAGE: "Who will Aria be calling?" question on signup is confusing since member can opt out of AI. Change to "Who are you signing up for?" with options "Myself" and "Someone I care for" — remove all Aria branding from the signup page entirely. Aria is introduced later in onboarding after relationship is established.
+
+(10) MANAGE SUBSCRIPTION / VIEW MY PLANS BUTTON ERROR: Both buttons give errors and open unsigned-in pages losing auth context. Fix: use Stripe customer portal link generated server-side with the user's Stripe customer ID — GET /api/billing/portal should return a pre-authenticated Stripe portal URL. The user should never be asked to sign in again to manage their subscription.
+
+(11) DONATION BUTTON — STATIC PAGE: "Make a donation" button goes to a static page instead of allowing payment inline. Fix: (a) add Stripe payment element inline on the donation page so member can enter amount and pay without leaving; (b) show past donations history below the payment form with date, amount, and impact statement ("Your $25 donation helped 3 seniors get grocery assistance this month"); (c) unify donation module — org admin and navigator portals should use the same donations table and UI components, not separate implementations.
+
+(12) MY COMMUNITY ORG — SELF-SERVICE LINKING: Members cannot link themselves to a community org. Add self-service org discovery: search by name or zip code, view org description and programs, click "Request to join" which creates an org_membership row with status='pending' and sends navigator/org_admin a notification to approve. Org admin approves from their portal.
+
+(13) NOTIFICATIONS AND PRIVACY: Privacy settings on the Notifications & Privacy tab should be fully functional — allow member to control: what family can see (mood data on/off, call summaries on/off, service history on/off, alert notifications on/off), Aria call frequency, preferred contact method. All toggles should save to members table and take effect immediately.
+
+ISSUE: Role-based routing is not user-friendly for production. Currently the only way to access different portals is to manually change roles in Supabase SQL Editor and use different URLs. For production, the platform needs proper role selection and routing. Fix with these approaches:
+
+(1) MULTI-ROLE ACCOUNTS: Allow a single user to have multiple roles simultaneously (e.g. someone who is both a volunteer AND an org_admin for their village). Add a family_member_roles junction table (family_member_id, role, context_id) to support multiple roles per user instead of a single role column. On login, if user has only one role, route directly. If multiple roles, show role selector.
+
+(2) ROLE SELECTOR ON LOGIN: When a user with multiple roles logs in, show a "How would you like to continue?" screen with cards for each role they have access to — e.g. "As a Volunteer", "As a Village Admin", "As a Family Member". Clicking a card routes to the correct portal.
+
+(3) ROLE SWITCHER IN NAVIGATION: Once logged in, add a role switcher in the top navigation bar (visible only to multi-role users) — a dropdown showing their available roles so they can switch portals without logging out. E.g. a village coordinator who is also a volunteer can switch between /org-admin and /volunteer/dashboard without re-authenticating.
+
+(4) SEPARATE LOGIN FLOWS PER PORTAL TYPE: For users who only ever have one role, routing should be automatic on login with no selector needed. For B2B portals (org_admin, agency_admin, aaa_admin, etc.) consider separate login URLs (/admin/login, /org/login) that pre-set the expected role context.
+
+(5) INVITATION-BASED ROLE ASSIGNMENT: Instead of manually setting roles in the database, build role invitation flows: (a) Org admin invites a coordinator by email → they receive an invite link → clicking creates their account with org_admin role pre-assigned to that org; (b) Agency admin invites care workers similarly; (c) Navigator accounts created by platform admin from /admin panel. This eliminates the need for any database manipulation to assign roles.
+
+(6) ROLE BADGE IN UI: Show the current role/context clearly in the navigation — e.g. "Bay Area Village Network — Org Admin" or "Golden Gate Home Care — Agency Admin" so users always know which portal context they are in.
+FEATURE: Build invitation-based role assignment flows for all B2B roles — this eliminates the need for any database manipulation to onboard real users. Priority order:
+
+(1) NAVIGATOR INVITATION (highest priority — needed before any real members enroll):
+Platform admin (/admin panel) enters navigator's name + email → system creates care_navigators row + family_members row with role='navigator' → sends invitation email with link to set password → navigator clicks link, sets password, lands on /navigator automatically. No SQL needed.
+
+(2) ORG ADMIN INVITATION:
+From /admin panel, create a new org admin: select which community_org, enter name + email → system creates family_members row with role='org_admin' and org_id set → sends invitation email → they set password → land on /org-admin automatically.
+
+(3) AGENCY ADMIN INVITATION:
+Same pattern as org admin but for care_agencies → lands on /agency-admin.
+
+(4) VOLUNTEER INVITATION:
+Org admin OR navigator can invite a volunteer by email from their portal → system creates volunteers + family_members row → invitation email → volunteer sets password → lands on /volunteer/dashboard.
+
+(5) MULTI-ROLE SWITCHER:
+For users with multiple roles (e.g. a person who is both a volunteer and an org admin), show a role selector card on login: "How would you like to continue today?" with cards for each role. After selecting, they land on the appropriate portal. Add a role switcher dropdown in the top navigation so they can switch without logging out.
+
+(6) AUTOMATIC ROLE ROUTING:
+On login, proxy.ts already detects role from family_members. Ensure every role routes to its correct portal without any URL tricks:
+- member (self) → /member-portal
+- family → /dashboard  
+- volunteer → /volunteer/dashboard
+- navigator → /navigator
+- org_admin → /org-admin
+- agency_admin → /agency-admin
+- aaa_admin → /aaa-admin
+- senior_center_admin → /senior-center-admin
+- network_admin → /network-admin
+- employer_admin → /employer-admin
+- admin → /admin
+
+This matches exactly how Helpful Village works — role is determined at account creation, not at login.---
+SESSION: 122
+DATE: 2026-08-31 UTC
+MILESTONE: Pre-production ISSUE — trust-first onboarding language (remove premature "Aria" branding)
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+RESUME CONTEXT:
+- Entered on the Session 121 AWAITING line. The human's reply there was an ISSUE (not APPROVED):
+  onboarding + signup name "Aria" throughout, including after the member chooses "No thank you, I
+  prefer human contact only" — a contradiction for a member who asked for human contact only.
+  Per prompt.md 1.1, re-entered the inner debug loop with the ISSUE as hypothesis 1.
+- Also still queued after this ISSUE (NOT touched this session, one thing at a time): a FEATURE for
+  a pet-loss option in the onboarding grief flow; a FEATURE for address auto-fill + AI-assisted
+  service requests; and a 13-item "Member portal / platform UX fixes (August 2026 testing)" list.
+  These remain the backlog for subsequent sessions once this ISSUE is APPROVED.
+- git HEAD 6fbdc23 (Session 121's Aria opt-in feature is already committed). Working tree on entry:
+  clean except progress.md.
+
+WHAT WAS BUILT (Session 122) — copy-only, no DB / env / dependency changes:
+- components/onboarding/Step1BasicInfo.tsx — subhead "This helps your care team make that first
+  call feel warm and personal." (was "Aria introduce herself warmly"). Phone hint now
+  "This is the number we will call you on." / "...call them on." for ALL members regardless of
+  Aria choice.
+- components/onboarding/Step2Preferences.tsx —
+  * step heading: "How would you like us to reach out?" (was "...Aria to reach out?")
+  * frequency legend: "How often should we call?" (was "How often should Aria call?")
+  * topics-enjoy hint: "we’ll bring these up naturally on your calls" (was "Aria will...")
+  * topics-avoid hint: "We’ll make sure your care team steers clear of these on calls."
+  * Human Buddy card: "a friendly face beyond our regular check-ins" (was "beyond Aria")
+  * The Aria opt-in question itself (legend + hint) still names Aria — it is the consent question
+    and the hint explains "Aria is our AI companion". Per the ISSUE sub-point 4, naming Aria is
+    correct once the member is actively choosing it.
+- components/onboarding/Step3Safety.tsx — medications hint "just helps your care team ask the
+  right questions"; grief-path copy "we will prioritise a daily check-in and aim to connect..."
+  (dropped "from Aria").
+- components/onboarding/Confirmation.tsx — REWRITTEN to be context-aware:
+  * new props ariaOptedIn?: boolean, ariaFrequency?: 'daily'|'every_other_day'|'weekly'
+  * opted OUT / never chose → "Your care navigator will call you personally within 24 hours..."
+    (self) / "A care navigator will call [name] personally within 24 hours." (proxy) — no "Aria"
+  * opted IN → "Aria will call you [each morning|every other day|once a week], and your care
+    navigator will also be in touch within 24 hours."
+- components/onboarding/OnboardingForm.tsx — passes ariaOptedIn (true when aria_call_opt_in is
+  'daily' or 'less_often') and ariaFrequency (from formData) into <Confirmation>.
+- components/auth/SignupForm.tsx — legend "Who are you signing up for?" (was "Who will Aria be
+  calling?"); self subtitle "Set up your own daily check-ins and support."; self radio desc
+  "I'll receive the check-ins and support". No "Aria" text remains on /signup.
+- checklist.md — new "Pre-production ISSUE — trust-first onboarding language" section, all items [x].
+- progress.md — this entry.
+
+Dead files NOT touched (not imported by OnboardingForm, unreachable): Step2EmergencyHealth.tsx,
+Step3Preferences.tsx. Left as-is to keep the change minimal; flagged here for a future cleanup.
+
+STUB STATUS: unchanged. All 12 providers remain stubs. No migration, no new env var, no service.
+
+EXIT GATE — VERIFICATIONS RUN THIS SESSION:
+- node --version: v24.14.0
+- npx tsc --noEmit: PASSED — exit 0, zero errors.
+- npm run build: PASSED — BUILD EXIT 0; /onboarding ƒ and /signup ƒ both present.
+- grep -n "Aria" over app/onboarding + components/onboarding + app/signup + SignupForm.tsx:
+  only remaining hits are the Step 2 opt-in consent question and a types.ts code comment — both
+  intentional and correct.
+- Live browser verification: NOT possible in this Codespace (no running app / DB — same limitation
+  documented Sessions 107-121). The flow is code-verified: Confirmation copy branches on the
+  aria_call_opt_in form value that Step 2 sets and /api/onboarding already persists.
+
+HUMAN ACTIONS REQUIRED:
+1. Browser-verify on a running app:
+   - Walk onboarding choosing "No thank you, I prefer human contact only" → confirm NO "Aria" text
+     appears anywhere through the Confirmation screen; Confirmation says the navigator will call.
+   - Repeat choosing "Yes, call me daily" → Confirmation names Aria ("each morning") + the navigator.
+   - Repeat choosing "Yes, but less often" + Weekly → Confirmation says "once a week".
+   - /signup shows "Who are you signing up for?" with no "Aria" anywhere.
+2. Pre-production streams still open (Session 116 DECISION): commit working tree, Vercel deploy,
+   activate real credentials, sign the 5 BAAs, run migration 069.
+
+NEXT SESSION MUST:
+- Hold for APPROVAL of this ISSUE fix. On APPROVED, take the next queued human directive in order:
+  (a) FEATURE — pet-loss option in the onboarding grief/loss flow; then (b) FEATURE — member
+  portal address auto-fill + AI-assisted service requests; then (c) the 13-item "Member portal /
+  platform UX fixes (August 2026 testing)" list, one coherent unit at a time.
+- Do NOT begin Phase 55 (deferred until after production launch + first revenue).
+
+AWAITING HUMAN APPROVAL

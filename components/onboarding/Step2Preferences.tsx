@@ -114,7 +114,7 @@ export function Step2Preferences({ data, onChange, isSelf = false }: Props) {
             marginBottom: '8px',
           }}
         >
-          {isSelf ? 'How would you like Aria to reach out?' : 'How would they like Aria to reach out?'}
+          {isSelf ? 'How would you like us to reach out?' : 'How would they like us to reach out?'}
         </h2>
         <p style={{ color: 'var(--color-text-muted)', fontSize: '18px', margin: 0, fontFamily: 'var(--font-body)' }}>
           These settings help us make every call feel perfectly timed and personal.
@@ -256,7 +256,7 @@ export function Step2Preferences({ data, onChange, isSelf = false }: Props) {
       {/* Check-in frequency — only relevant when Aria calls are on at a chosen cadence */}
       {data.aria_call_opt_in === 'less_often' && (
       <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
-        <legend style={labelStyle}>How often should Aria call?</legend>
+        <legend style={labelStyle}>How often should we call?</legend>
         <p style={hintStyle}>You can change this at any time from your portal.</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {FREQUENCIES.map((option) => {
@@ -321,7 +321,7 @@ export function Step2Preferences({ data, onChange, isSelf = false }: Props) {
             ? 'What do you enjoy talking about?'
             : `Topics ${whoPossessive} enjoy talking about`}
         </p>
-        <p style={hintStyle}>Select as many as you like — Aria will naturally bring these up.</p>
+        <p style={hintStyle}>Select as many as you like — we&apos;ll bring these up naturally on your calls.</p>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
           {TOPICS.map((topic) => {
             const isSelected = selectedTopics.includes(topic)
@@ -355,7 +355,7 @@ export function Step2Preferences({ data, onChange, isSelf = false }: Props) {
       {/* Topics to avoid */}
       <div>
         <label htmlFor="topics_avoid" style={labelStyle}>Topics to avoid</label>
-        <p style={hintStyle}>We&apos;ll make sure Aria steers clear of these.</p>
+        <p style={hintStyle}>We&apos;ll make sure your care team steers clear of these on calls.</p>
         <textarea
           id="topics_avoid"
           value={data.topics_avoid}
@@ -388,7 +388,7 @@ export function Step2Preferences({ data, onChange, isSelf = false }: Props) {
               Human Buddy Programme (optional)
             </p>
             <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: '#2d7a7a', margin: 0 }}>
-              On Connect, Complete, and Premier plans, we match seniors with a real volunteer who calls regularly — a friendly face beyond Aria. Answer these questions to help us find the best match.
+              On Connect, Complete, and Premier plans, we match seniors with a real volunteer who calls regularly — a friendly face beyond our regular check-ins. Answer these questions to help us find the best match.
             </p>
           </div>
         </div>

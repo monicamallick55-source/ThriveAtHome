@@ -199,7 +199,12 @@ export function OnboardingForm({ isSelf = false }: { isSelf?: boolean }) {
             padding: '48px',
           }}
         >
-          <Confirmation preferredName={confirmedName} isSelf={isSelf} />
+          <Confirmation
+            preferredName={confirmedName}
+            isSelf={isSelf}
+            ariaOptedIn={formData.aria_call_opt_in === 'daily' || formData.aria_call_opt_in === 'less_often'}
+            ariaFrequency={formData.aria_call_opt_in === 'daily' ? 'daily' : formData.check_in_frequency}
+          />
         </div>
       </div>
     )

@@ -2657,3 +2657,38 @@ afterwards with the senior's consent. Built in Session 121.
 HUMAN ACTION: run migration 069_aria_call_opt_in.sql in Supabase SQL Editor. Then browser-verify:
 onboarding shows the opt-in card and defaults to no picker; /member-portal toggle persists;
 "Request a check-in" creates a navigator task; opted-out members are skipped by /api/cron/aria-calls.
+
+---
+
+## Pre-production ISSUE — trust-first onboarding language (no premature "Aria" branding)
+
+ISSUE raised on the Session 121 AWAITING line: onboarding + signup name "Aria" throughout, even
+after a member picks "No thank you, I prefer human contact only". A member who chose human contact
+must never see AI branding. Fixed in Session 122. No DB change, no new env var — copy only, plus
+context-aware Confirmation copy driven by the existing `aria_call_opt_in` form value.
+
+- [x] Step1BasicInfo.tsx — subhead no longer says "Aria introduce herself"; phone hint is
+      "This is the number we will call you on." / "...call them on." for ALL members
+- [x] Step2Preferences.tsx — step heading "How would you like us to reach out?"; frequency legend
+      "How often should we call?"; topic hints say "we"/"your care team", not "Aria"; Human Buddy
+      card says "beyond our regular check-ins" not "beyond Aria". The opt-in question itself still
+      names Aria — that is the consent question and must (hint explains what Aria is)
+- [x] Step3Safety.tsx — medications hint "helps your care team ask the right questions"; grief
+      path says "a daily check-in" not "a daily check-in from Aria"
+- [x] Confirmation.tsx — context-aware. Opted OUT (or never chose): "Your care navigator will call
+      you personally within 24 hours" — no mention of Aria. Opted IN: "Aria will call you
+      [each morning/every other day/once a week], and your care navigator will also be in touch
+      within 24 hours." OnboardingForm passes ariaOptedIn + ariaFrequency from formData
+- [x] SignupForm.tsx — legend "Who are you signing up for?" (was "Who will Aria be calling?");
+      self subtitle "Set up your own daily check-ins and support."; self option desc "I'll receive
+      the check-ins and support". No "Aria" anywhere on /signup
+- [x] grep -n "Aria" across app/onboarding, components/onboarding, app/signup, SignupForm — only
+      remaining hits are the Step 2 opt-in consent question + a types.ts code comment (both
+      intentional). Dead files Step2EmergencyHealth.tsx / Step3Preferences.tsx are not imported by
+      OnboardingForm and were left untouched
+- [x] npx tsc --noEmit passes — zero errors (Session 122)
+- [x] npm run build passes — /onboarding ƒ, /signup ƒ; BUILD EXIT 0 (Session 122)
+
+HUMAN ACTION: browser-verify on a running app — walk onboarding choosing "No thank you, I prefer
+human contact only" and confirm no "Aria" text appears anywhere through Confirmation; repeat
+choosing "Yes, call me daily" and confirm Confirmation names Aria + the navigator.

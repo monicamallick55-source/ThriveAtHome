@@ -251,7 +251,7 @@ export function Step3Safety({ data, onChange, isSelf = false }: Props) {
           Current medications <span style={{ color: 'var(--color-text-muted)', fontWeight: 400 }}>(optional)</span>
         </label>
         <p style={{ fontSize: '15px', color: 'var(--color-text-muted)', fontFamily: 'var(--font-body)', margin: 0 }}>
-          A general list is fine — just helps Aria ask the right questions.
+          A general list is fine — just helps your care team ask the right questions.
         </p>
         <textarea
           id="medications"
@@ -322,7 +322,7 @@ export function Step3Safety({ data, onChange, isSelf = false }: Props) {
             : `Has ${subject} recently lost someone important?`}
         </p>
         <p style={{ fontSize: '15px', color: 'var(--color-text-muted)', fontFamily: 'var(--font-body)', margin: 0 }}>
-          If so, we will prioritise a daily check-in from Aria and aim to connect {isSelf && !data.preferred_name ? 'you' : subjectThey} with a buddy within 48 hours.
+          If so, we will prioritise a daily check-in and aim to connect {isSelf && !data.preferred_name ? 'you' : subjectThey} with a buddy within 48 hours.
         </p>
         <div
           style={{

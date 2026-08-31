@@ -85,7 +85,7 @@ export function Step1BasicInfo({ data, onChange, errors, isSelf = false }: Props
           {isSelf ? 'Tell us a little about you.' : 'Tell us about the person you care for.'}
         </h2>
         <p style={{ color: 'var(--color-text-muted)', fontSize: '18px', margin: 0, fontFamily: 'var(--font-body)' }}>
-          This helps Aria introduce herself warmly on the first call.
+          This helps your care team make that first call feel warm and personal.
         </p>
       </div>
 
@@ -157,7 +157,7 @@ export function Step1BasicInfo({ data, onChange, errors, isSelf = false }: Props
         <label htmlFor="phone_number" style={labelStyle}>
           Phone number <span style={{ color: 'var(--color-urgent-text)' }}>*</span>
         </label>
-        <p style={hintStyle}>{isSelf ? 'This is the number Aria will call you on.' : 'We’ll have Aria call them at this number.'}</p>
+        <p style={hintStyle}>{isSelf ? 'This is the number we will call you on.' : 'This is the number we will call them on.'}</p>
         <input
           id="phone_number"
           type="tel"

@@ -275,16 +275,16 @@ export function SignupForm({ referralCode }: { referralCode?: string }) {
               marginBottom: '40px',
             }}
           >
-            {isSelf ? 'Set up your own daily check-ins with Aria.' : 'Start caring for someone you love.'}
+            {isSelf ? 'Set up your own daily check-ins and support.' : 'Start caring for someone you love.'}
           </p>
 
           <form onSubmit={handleSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             {/* Who is this account for? — primary choice */}
             <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
-              <legend style={labelStyle}>Who will Aria be calling?</legend>
+              <legend style={labelStyle}>Who are you signing up for?</legend>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '8px' }}>
                 {([
-                  { value: 'self', title: "I'm signing up for myself", desc: "I'm the one who'll get the friendly calls" },
+                  { value: 'self', title: "I'm signing up for myself", desc: "I'll receive the check-ins and support" },
                   { value: 'proxy', title: 'Someone I care for', desc: 'A parent, spouse, or another loved one' },
                 ] as const).map((opt) => {
                   const selected = accountType === opt.value
