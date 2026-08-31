@@ -2616,3 +2616,44 @@ present and correct on disk, and the exit gate was re-run (tsc exit 0; build exi
 /onboarding ƒ /member-portal ƒ /dashboard ƒ). Root cause of the re-raise: Session 119's work is
 uncommitted (git HEAD bc2bfd0) and not deployed, so production still serves the old signup page.
 No code change needed — this is pre-production stream (2)/(3): commit + Vercel deploy.
+
+---
+
+## Pre-production FEATURE — Aria AI calls are opt-in (trust-first launch)
+
+Human-appended FEATURE on the Session 120 AWAITING line: Aria's daily check-in calls must be
+OPT-IN, not the default. Human navigator calls lead for the first 30 days; Aria is introduced
+afterwards with the senior's consent. Built in Session 121.
+
+- [x] Migration 069_aria_call_opt_in.sql — `members.aria_call_opted_in boolean NOT NULL DEFAULT false`
+      (HUMAN ACTION: run in Supabase SQL Editor)
+- [x] types/database.ts — members Row + Insert gain `aria_call_opted_in`
+- [x] Onboarding Step 2 (Preferences) shows "Would you like Aria to call you each morning…?" with
+      three choices: "Yes, call me daily" / "Yes, but less often (choose frequency)" / "No thank
+      you, I prefer human contact only". Default is unselected → treated as NO. The check-in
+      frequency picker only appears for "less often"; "daily" pins frequency to daily —
+      components/onboarding/Step2Preferences.tsx + types.ts
+- [x] /api/onboarding writes `aria_call_opted_in` (true only for 'daily' or 'less_often') and the
+      matching check_in_frequency
+- [x] /api/cron/aria-calls — new daily cron; selects `status='active' AND aria_call_opted_in=true`
+      ONLY, respects each member's check_in_frequency gap, schedules via callProvider (stub logs),
+      inserts a scheduled check_in_calls row. Added to vercel.json ("0 13 * * *")
+- [x] /member-portal → Notifications & Privacy: on/off toggle (role="switch") for Aria morning
+      calls, wired to PATCH /api/member/preferences `{ aria_call_opted_in }`. Frequency cards show
+      only when ON.
+- [x] When Aria is OFF: "Request a check-in from your navigator" button → POST
+      /api/member/request-checkin → inserts a `checkin_request` navigator_task (assigned navigator
+      if any); confirmation shown after
+- [x] First 30 days after sign-up + still opted out: gentle prompt shown on /member-portal
+      Notifications tab ("Your care navigator will call you personally this week. Would you also
+      like Aria to call you each morning?") with a one-tap enable button; matching informational
+      banner on the family /dashboard
+- [x] /api/member/preferences PATCH accepts `aria_call_opted_in`
+- [x] npx tsc --noEmit passes — zero errors (Session 121)
+- [x] npm run build passes — /api/cron/aria-calls ƒ, /api/member/request-checkin ƒ; ✓ Compiled
+      successfully in 42s (Session 121)
+- [x] scripts/test-volunteer-matching.ts still passes (mock Member gains aria_call_opted_in: false)
+
+HUMAN ACTION: run migration 069_aria_call_opt_in.sql in Supabase SQL Editor. Then browser-verify:
+onboarding shows the opt-in card and defaults to no picker; /member-portal toggle persists;
+"Request a check-in" creates a navigator task; opted-out members are skipped by /api/cron/aria-calls.

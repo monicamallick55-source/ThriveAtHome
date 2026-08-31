@@ -18,6 +18,7 @@ interface OnboardingBody {
   medications?: string
   preferred_language?: string
   preferred_call_time?: string
+  aria_call_opt_in?: '' | 'daily' | 'less_often' | 'no'
   check_in_frequency?: 'daily' | 'every_other_day' | 'weekly'
   topics_enjoy?: string
   topics_avoid?: string
@@ -92,6 +93,15 @@ export async function POST(req: NextRequest) {
     ? body.buddy_match_topics.split(',').map((t) => t.trim()).filter(Boolean)
     : []
 
+  // Aria's daily calls are opt-in. Only 'daily' or 'less_often' turn them on.
+  const ariaOptedIn = body.aria_call_opt_in === 'daily' || body.aria_call_opt_in === 'less_often'
+  const ariaFrequency: 'daily' | 'every_other_day' | 'weekly' =
+    body.aria_call_opt_in === 'daily'
+      ? 'daily'
+      : body.grief_welcome_path === 'true'
+        ? 'daily'
+        : (body.check_in_frequency || 'daily')
+
   const { data: member, error: memberError } = await (admin.from as any)('members')
     .insert({
       full_name: full_name.trim(),
@@ -108,7 +118,8 @@ export async function POST(req: NextRequest) {
       medications: body.medications?.trim() || null,
       preferred_language: body.preferred_language?.trim() || 'english',
       preferred_call_time: body.preferred_call_time?.trim() || null,
-      check_in_frequency: body.grief_welcome_path === 'true' ? 'daily' : (body.check_in_frequency || 'daily'),
+      aria_call_opted_in: ariaOptedIn,
+      check_in_frequency: ariaFrequency,
       topics_enjoy: topicsEnjoyArray,
       topics_avoid: body.topics_avoid?.trim() || null,
       doctor_name: body.doctor_name?.trim() || null,

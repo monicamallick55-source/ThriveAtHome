@@ -688,6 +688,28 @@ function DashboardInner(props: DashboardClientProps) {
         </div>
       )}
 
+      {/* Aria intro prompt — first 30 days, and only while Aria calls are still opt-out */}
+      {!member.aria_call_opted_in &&
+        (() => {
+          const days = Math.floor((Date.now() - new Date(member.created_at).getTime()) / 86400000)
+          return days >= 0 && days <= 30
+        })() && (
+          <div
+            role="status"
+            style={{
+              backgroundColor: '#F0F9F7',
+              borderBottom: '1.5px solid var(--color-teal)',
+              padding: '14px 24px',
+            }}
+          >
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '16px', color: 'var(--color-navy)', margin: 0, maxWidth: '1200px', marginInline: 'auto' }}>
+              Your care navigator will call {member.preferred_name} personally this week. Aria&apos;s
+              daily AI calls are currently off — {member.preferred_name} can turn them on any time
+              from their member portal under <strong>Notifications &amp; Privacy</strong>.
+            </p>
+          </div>
+        )}
+
       {/* Navy page header */}
       <div
         style={{

@@ -9947,3 +9947,125 @@ NEXT SESSION MUST:
   the human explicitly asks for the commit, perform stream (2).
 
 AWAITING HUMAN APPROVAL
+FEATURE: Make Aria AI daily check-in calls opt-in rather than default. Members should explicitly choose to enable Aria calls during onboarding and can change their preference anytime from /member-portal → Notifications & Privacy tab. Implementation: (1) Add a new onboarding step or card in Step 2 (Preferences) — "Would you like Aria to call you each morning for a friendly check-in?" with three options: "Yes, call me daily" / "Yes, but less often (choose frequency)" / "No thank you, I prefer human contact only" — default to NO so the senior must actively opt in; (2) Store preference as members.aria_call_opted_in (boolean, default false) and members.check_in_frequency already exists for frequency; (3) The Aria call cron job should skip members where aria_call_opted_in = false; (4) From /member-portal → Notifications tab, member can toggle Aria calls on/off and change frequency at any time; (5) For members who opt out of Aria calls, show a "Request a check-in from your navigator" button instead — this sends a navigator task; (6) During the first 30 days after signup, show a gentle prompt on the dashboard: "Your care navigator will call you personally this week. Would you also like Aria to call you each morning?" — this introduces Aria naturally after the human relationship is established. This change supports the trust-first launch strategy: human navigator calls for first 30 days, Aria introduced as an optional add-on with senior consent.
+FEATURE GAPS IDENTIFIED — Role & workflow comparison vs Helpful Village (August 2026):
+
+PRIORITY 1 (fix before launch):
+- Auto hour logging: when volunteer marks request complete, auto-log hours to service record (service_bookings.completed_at triggers hours calculation)
+- Member service history: add "My Requests" tab to /member-portal showing own service request history + status
+- Volunteer claimed request confirmation: after claiming, show in "My Upcoming" tab not just removed from Open Requests
+- Membership renewal reminders: cron job emails members 30/14/7 days before annual dues expiry
+
+PRIORITY 2 (important for village partners):
+- Waitlist management: when event/service is full, members/volunteers can join waitlist; auto-notified when spot opens
+- Recurring service scheduling: org admin creates recurring requests (weekly grocery run, bi-weekly companion visit) — generates service_bookings rows automatically on schedule
+- Statistical trend reports: 12-month trend charts in org admin for service volume, volunteer hours, member engagement, dues collected
+- Volunteer shift scheduling: volunteers set weekly availability calendar; org admin sees coverage gaps
+- Opt-in member directory: members opt-in to appear in searchable directory within their village
+
+PRIORITY 3 (activate before scale):
+- Activate Checkr background checks (credentials only — stub exists)
+- Activate Twilio SMS for volunteer reminders (credentials only — stub exists)
+- Service area/proximity matching: zip-based volunteer-to-member matching (already +30 pts in matching algo, needs geocoding layer)
+- Navigator mobile view: responsive mobile-optimized layout for /navigator
+- Navigator caseload capacity limits: max_members setting per care_navigators row---
+SESSION: 121
+DATE: 2026-08-31 UTC
+MILESTONE: Pre-production FEATURE — Aria AI calls made opt-in (trust-first launch strategy)
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+RESUME CONTEXT:
+- The content in progress.md after the Session 120 AWAITING line is a human-appended FEATURE
+  request: "Make Aria AI daily check-in calls opt-in rather than default." Six requirements:
+  (1) onboarding card in Step 2 with three choices, default NO; (2) store
+  members.aria_call_opted_in (boolean, default false); (3) the Aria call cron skips members where
+  aria_call_opted_in = false; (4) /member-portal → Notifications tab toggle + frequency; (5) an
+  opted-out member gets a "Request a check-in from your navigator" button → navigator task;
+  (6) a gentle 30-day dashboard prompt introducing Aria after the human relationship is set.
+- Also appended: a "FEATURE GAPS vs Helpful Village" backlog (P1/P2/P3). Not touched this session —
+  it is a backlog list, and the Aria opt-in FEATURE is the concrete, fully-specified directive.
+- Per prompt.md 1.1, a human-appended FEATURE is a new build instruction — entered the build loop.
+  git status on entry: clean except progress.md; git HEAD 32680cf (self-signup fix already
+  committed). M1–M27 remains the complete platform build; Phase 55 stays deferred.
+
+WHAT WAS BUILT (Session 121):
+- supabase/migrations/069_aria_call_opt_in.sql — NEW. ALTER TABLE members ADD COLUMN
+  aria_call_opted_in boolean NOT NULL DEFAULT false, plus a COMMENT. HUMAN must run it.
+- types/database.ts — members Row gains `aria_call_opted_in: boolean`; Insert gains it optional.
+- components/onboarding/types.ts — OnboardingFormData + EMPTY_FORM gain
+  `aria_call_opt_in: '' | 'daily' | 'less_often' | 'no'` (default '').
+- components/onboarding/Step2Preferences.tsx — new fieldset "Would you like Aria to call you each
+  morning for a friendly check-in?" with the three required radio cards (default unselected →
+  treated as NO). The existing check-in frequency fieldset now renders ONLY when
+  aria_call_opt_in === 'less_often'; picking "Yes, call me daily" also pins check_in_frequency to
+  'daily'. Legend adapts for the proxy (isSelf false) case.
+- app/api/onboarding/route.ts — accepts aria_call_opt_in; derives ariaOptedIn (true only for
+  'daily' | 'less_often') and ariaFrequency; writes members.aria_call_opted_in +
+  check_in_frequency. Grief welcome path still forces 'daily' frequency but no longer implies an
+  Aria opt-in (consistent with "must actively opt in").
+- app/api/cron/aria-calls/route.ts — NEW daily cron. CRON_SECRET-gated. Selects members with
+  status='active' AND aria_call_opted_in=true ONLY — opted-out members are skipped, which is the
+  whole point. Respects each member's check_in_frequency gap (daily=1d, every_other_day=2d,
+  weekly=7d) vs the most recent check_in call, schedules via callProvider (stub logs
+  "[STUB][Call] Would schedule call…"), inserts a scheduled check_in_calls row with the provider
+  call id. Returns {candidates, scheduled, skippedFrequency, errors}.
+- vercel.json — added { "path": "/api/cron/aria-calls", "schedule": "0 13 * * *" } (15th cron).
+- app/api/member/preferences/route.ts — PATCH now also accepts `aria_call_opted_in` (coerced Bool).
+- app/api/member/request-checkin/route.ts — NEW. POST, auth required. Resolves member (direct auth
+  then family_members link), finds assigned navigator, inserts a navigator_tasks row
+  (task_type='checkin_request', priority='medium', due_by +2 days). For opted-out members to ask
+  for a human call.
+- components/MemberPortalClient.tsx — Notifications & Privacy tab:
+  * new on/off toggle (button role="switch", aria-checked) for "Aria morning calls", wired to
+    handleToggleAria → PATCH /api/member/preferences { aria_call_opted_in }.
+  * frequency cards + "Save preference" now render only when the toggle is ON.
+  * when OFF: explanatory copy + "Request a check-in from your navigator" button
+    (handleRequestCheckin → POST /api/member/request-checkin), replaced by a "✓ Your navigator has
+    been asked to call you" confirmation after success.
+  * first-30-days gentle intro card (showAriaIntroPrompt = !ariaOn && daysSinceJoined 0..30) with
+    the required copy and a one-tap "Yes, start Aria's morning calls" button.
+- components/dashboard/DashboardClient.tsx — matching informational banner on the family dashboard
+  for the first 30 days while the member is still opted out, pointing them to the member portal
+  Notifications & Privacy toggle.
+- scripts/test-volunteer-matching.ts — mock Member gains aria_call_opted_in: false (test-only).
+- checklist.md, progress.md — this entry + a new "Aria AI calls are opt-in" checklist section.
+
+STUB STATUS: All 12 providers remain stubs. callProvider is StubCallProvider — the new aria-calls
+cron logs only. No new external service, no new env var. One new migration (069).
+
+EXIT GATE — VERIFICATIONS RUN THIS SESSION:
+- node --version: v24.14.0
+- npx tsc --noEmit: PASSED — exit 0, zero errors.
+- npm run build: PASSED — ✓ Compiled successfully in 42s, exit 0. New routes present:
+  /api/cron/aria-calls ƒ, /api/member/request-checkin ƒ. /onboarding ƒ, /member-portal ƒ,
+  /dashboard ƒ all still present.
+- npx tsx scripts/test-volunteer-matching.ts: PASSED — "=== All matching tests passed ===".
+- Live browser / Supabase verification: NOT possible in this Codespace (no running app / DB —
+  same limitation documented in Sessions 107–120). Flow is code-verified end to end: onboarding
+  choice → /api/onboarding writes aria_call_opted_in → aria-calls cron filters on it → member
+  portal toggle + request-checkin task path.
+
+HUMAN ACTIONS REQUIRED:
+1. Run migration 069_aria_call_opt_in.sql in Supabase SQL Editor (adds members.aria_call_opted_in).
+   Until then the member portal toggle and the aria-calls cron will error on the missing column.
+2. Browser-verify on a running app:
+   - /onboarding Step 2 shows the "Would you like Aria to call you each morning…?" card; no
+     frequency picker until "Yes, but less often" is chosen; default submit → member row has
+     aria_call_opted_in = false.
+   - /member-portal → Notifications & Privacy: toggle Aria on → frequency cards appear and save;
+     toggle off → "Request a check-in from your navigator" appears → click → a checkin_request
+     navigator_task is created and the confirmation shows.
+   - A member created < 30 days ago and opted out sees the gentle intro card on the portal and the
+     matching banner on the family /dashboard.
+   - /api/cron/aria-calls (with CRON_SECRET header): opted-out members are absent from candidates.
+3. Pre-production streams still open from the Session 116 DECISION: commit the working tree,
+   Vercel deploy, activate real credentials (Retell/Twilio/SendGrid/Stripe), sign the 5 BAAs.
+
+NEXT SESSION MUST:
+- Hold for APPROVAL of this FEATURE. Do NOT begin Phase 55 (deferred until after production launch
+  + first revenue). M1–M27 remains the complete platform build. On ISSUE, re-enter the debug loop
+  on the described problem. The "FEATURE GAPS vs Helpful Village" backlog is not a build directive
+  yet — wait for the human to prioritise it explicitly.
+
+AWAITING HUMAN APPROVAL

@@ -166,6 +166,16 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
   // Notifications
   const [callFreq, setCallFreq] = useState<'daily' | 'every_other_day' | 'weekly'>(member.check_in_frequency ?? 'daily')
   const [savingFreq, setSavingFreq] = useState(false)
+  const [ariaOn, setAriaOn] = useState<boolean>(member.aria_call_opted_in ?? false)
+  const [savingAria, setSavingAria] = useState(false)
+  const [checkinRequested, setCheckinRequested] = useState(false)
+  const [requestingCheckin, setRequestingCheckin] = useState(false)
+
+  // First 30 days after sign-up: gently introduce Aria once the human relationship is set.
+  const daysSinceJoined = Math.floor(
+    (Date.now() - new Date(member.created_at).getTime()) / (24 * 60 * 60 * 1000)
+  )
+  const showAriaIntroPrompt = !ariaOn && daysSinceJoined >= 0 && daysSinceJoined <= 30
 
   // Documents
   const [portalDocs, setPortalDocs] = useState<PortalDoc[]>([])
@@ -370,6 +380,34 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
     setSavingFreq(false)
     if (res.ok) showToast('Call frequency updated.')
     else showToast('Could not update. Please try again.')
+  }
+
+  async function handleToggleAria(next: boolean) {
+    setSavingAria(true)
+    const res = await fetch('/api/member/preferences', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ aria_call_opted_in: next }),
+    })
+    setSavingAria(false)
+    if (res.ok) {
+      setAriaOn(next)
+      showToast(next ? 'Aria will start calling you — welcome aboard.' : 'Aria calls turned off. You can turn them back on any time.')
+    } else {
+      showToast('Could not update. Please try again.')
+    }
+  }
+
+  async function handleRequestCheckin() {
+    setRequestingCheckin(true)
+    const res = await fetch('/api/member/request-checkin', { method: 'POST' })
+    setRequestingCheckin(false)
+    if (res.ok) {
+      setCheckinRequested(true)
+      showToast('Your navigator has been asked to call you.')
+    } else {
+      showToast('Could not send your request. Please try again.')
+    }
   }
 
   async function handleDocUpload() {
@@ -1142,36 +1180,102 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
           <div>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '24px' }}>Notifications &amp; Privacy</h2>
 
+            {showAriaIntroPrompt && (
+              <div style={{ ...card, backgroundColor: '#F0F9F7', border: '2px solid var(--color-teal)' }}>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '8px' }}>A gentle introduction to Aria</h3>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)', lineHeight: 1.7, marginBottom: '16px' }}>
+                  Your care navigator will call you personally this week. Would you also like Aria, our
+                  friendly AI companion, to call you each morning for a short catch-up? It&apos;s completely
+                  optional — many members add it once they&apos;ve settled in.
+                </p>
+                <button onClick={() => handleToggleAria(true)} disabled={savingAria}
+                  style={{ ...btnPrimary, opacity: savingAria ? 0.7 : 1 }}>
+                  {savingAria ? 'Saving…' : "Yes, start Aria's morning calls"}
+                </button>
+              </div>
+            )}
+
             <div style={card}>
               <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '8px' }}>Aria&apos;s Morning Catch-Up Calls</h3>
-              <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)', lineHeight: 1.7, marginBottom: '20px' }}>
-                Aria is your friendly morning companion. How often would you like her to call?
-              </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
-                {FREQUENCY_OPTIONS.map(opt => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => setCallFreq(opt.value as 'daily' | 'every_other_day' | 'weekly')}
-                    style={{
-                      display: 'flex', alignItems: 'flex-start', gap: '14px', padding: '16px 20px',
-                      border: `2px solid ${callFreq === opt.value ? 'var(--color-teal)' : '#DDD8CE'}`,
-                      borderRadius: '12px', backgroundColor: callFreq === opt.value ? '#F0F9F7' : 'white',
-                      cursor: 'pointer', textAlign: 'left',
-                    }}
-                  >
-                    <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: `2px solid ${callFreq === opt.value ? 'var(--color-teal)' : '#CCC'}`, backgroundColor: callFreq === opt.value ? 'var(--color-teal)' : 'white', flexShrink: 0, marginTop: '2px' }} />
-                    <div>
-                      <div style={{ fontFamily: 'var(--font-body)', fontSize: '16px', fontWeight: 600, color: 'var(--color-navy)' }}>{opt.label}</div>
-                      <div style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>{opt.desc}</div>
-                    </div>
-                  </button>
-                ))}
+
+              {/* On / off toggle */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', padding: '14px 0', borderBottom: '1px solid #F0EDE6', marginBottom: '20px' }}>
+                <div>
+                  <div style={{ fontFamily: 'var(--font-body)', fontSize: '16px', fontWeight: 600, color: 'var(--color-navy)' }}>Aria morning calls</div>
+                  <div style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>
+                    {ariaOn ? 'On — Aria calls you for a friendly check-in.' : 'Off — you prefer human contact only.'}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={ariaOn}
+                  aria-label="Aria morning calls"
+                  onClick={() => handleToggleAria(!ariaOn)}
+                  disabled={savingAria}
+                  style={{
+                    width: '56px', height: '32px', borderRadius: '999px', flexShrink: 0,
+                    border: 'none', cursor: savingAria ? 'wait' : 'pointer',
+                    backgroundColor: ariaOn ? 'var(--color-teal)' : '#CCC',
+                    position: 'relative', transition: 'background-color 0.2s',
+                  }}
+                >
+                  <span style={{
+                    position: 'absolute', top: '3px', left: ariaOn ? '27px' : '3px',
+                    width: '26px', height: '26px', borderRadius: '50%', backgroundColor: 'white',
+                    transition: 'left 0.2s',
+                  }} />
+                </button>
               </div>
-              <button onClick={handleSaveFreq} disabled={savingFreq}
-                style={{ ...btnPrimary, opacity: savingFreq ? 0.7 : 1 }}>
-                {savingFreq ? 'Saving…' : 'Save preference'}
-              </button>
+
+              {ariaOn ? (
+                <>
+                  <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)', lineHeight: 1.7, marginBottom: '20px' }}>
+                    How often would you like Aria to call?
+                  </p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
+                    {FREQUENCY_OPTIONS.map(opt => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => setCallFreq(opt.value as 'daily' | 'every_other_day' | 'weekly')}
+                        style={{
+                          display: 'flex', alignItems: 'flex-start', gap: '14px', padding: '16px 20px',
+                          border: `2px solid ${callFreq === opt.value ? 'var(--color-teal)' : '#DDD8CE'}`,
+                          borderRadius: '12px', backgroundColor: callFreq === opt.value ? '#F0F9F7' : 'white',
+                          cursor: 'pointer', textAlign: 'left',
+                        }}
+                      >
+                        <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: `2px solid ${callFreq === opt.value ? 'var(--color-teal)' : '#CCC'}`, backgroundColor: callFreq === opt.value ? 'var(--color-teal)' : 'white', flexShrink: 0, marginTop: '2px' }} />
+                        <div>
+                          <div style={{ fontFamily: 'var(--font-body)', fontSize: '16px', fontWeight: 600, color: 'var(--color-navy)' }}>{opt.label}</div>
+                          <div style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>{opt.desc}</div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                  <button onClick={handleSaveFreq} disabled={savingFreq}
+                    style={{ ...btnPrimary, opacity: savingFreq ? 0.7 : 1 }}>
+                    {savingFreq ? 'Saving…' : 'Save preference'}
+                  </button>
+                </>
+              ) : (
+                <div>
+                  <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)', lineHeight: 1.7, marginBottom: '16px' }}>
+                    Aria&apos;s calls are off. If you&apos;d like a personal check-in, your care navigator can call you.
+                  </p>
+                  {checkinRequested ? (
+                    <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 600, color: 'var(--color-teal)', margin: 0 }}>
+                      ✓ Your navigator has been asked to call you. They&apos;ll be in touch soon.
+                    </p>
+                  ) : (
+                    <button onClick={handleRequestCheckin} disabled={requestingCheckin}
+                      style={{ ...btnPrimary, opacity: requestingCheckin ? 0.7 : 1 }}>
+                      {requestingCheckin ? 'Sending…' : 'Request a check-in from your navigator'}
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
 
             <div style={card}>

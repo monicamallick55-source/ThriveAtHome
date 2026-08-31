@@ -89,6 +89,7 @@ function makeMember(overrides: Partial<Member>): Member {
     device_integration_consent: false,
     ml_insights_opt_out: false,
     supabase_auth_id: null,
+    aria_call_opted_in: false,
     ...overrides,
   }
 }

@@ -16,6 +16,10 @@ export interface OnboardingFormData {
   // Step 3 — optional
   preferred_language: string
   preferred_call_time: string
+  // Aria AI morning calls are opt-in. '' = not chosen (treated as "no"),
+  // 'daily' = yes every morning, 'less_often' = yes but on a chosen frequency,
+  // 'no' = prefers human contact only.
+  aria_call_opt_in: '' | 'daily' | 'less_often' | 'no'
   check_in_frequency: 'daily' | 'every_other_day' | 'weekly'
   topics_enjoy: string
   topics_avoid: string
@@ -45,6 +49,7 @@ export const EMPTY_FORM: OnboardingFormData = {
   medications: '',
   preferred_language: 'english',
   preferred_call_time: '',
+  aria_call_opt_in: '',
   check_in_frequency: 'daily',
   topics_enjoy: '',
   topics_avoid: '',

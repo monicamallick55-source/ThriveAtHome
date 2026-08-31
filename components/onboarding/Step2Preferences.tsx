@@ -24,6 +24,12 @@ const FREQUENCIES = [
   { value: 'weekly', label: 'Weekly', desc: 'Once a week on the same day' },
 ]
 
+const ARIA_OPT_IN_CHOICES = [
+  { value: 'daily', label: 'Yes, call me daily', desc: 'A friendly morning catch-up every day' },
+  { value: 'less_often', label: 'Yes, but less often', desc: 'Choose how often below' },
+  { value: 'no', label: 'No thank you, I prefer human contact only', desc: 'Your care navigator and buddy still call — you can turn Aria on any time' },
+]
+
 const TOPICS = [
   'Family', 'Gardening', 'Cooking', 'Music', 'Travel memories', 'Sports',
   'Books', 'Movies & TV', 'Faith & spirituality', 'History', 'Nature', 'Current events',
@@ -178,10 +184,80 @@ export function Step2Preferences({ data, onChange, isSelf = false }: Props) {
         </div>
       </fieldset>
 
-      {/* Check-in frequency — radio cards */}
+      {/* Aria opt-in — daily calls are opt-in, default is "no" */}
+      <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
+        <legend style={labelStyle}>
+          {isSelf
+            ? 'Would you like Aria to call you each morning for a friendly check-in?'
+            : `Would you like Aria to call ${who} each morning for a friendly check-in?`}
+        </legend>
+        <p style={hintStyle}>
+          Aria is our AI companion. Many members start with navigator and buddy calls first, then
+          add Aria later — it&apos;s entirely your choice, and you can change this any time.
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {ARIA_OPT_IN_CHOICES.map((option) => {
+            const isSelected = data.aria_call_opt_in === option.value
+            return (
+              <label
+                key={option.value}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '16px 20px',
+                  borderRadius: 'var(--radius-md)',
+                  border: `1.5px solid ${isSelected ? 'var(--color-teal)' : 'var(--color-warm-grey)'}`,
+                  backgroundColor: isSelected ? 'var(--color-teal-muted)' : 'white',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  minHeight: '56px',
+                }}
+              >
+                <div>
+                  <p
+                    style={{
+                      fontFamily: 'var(--font-body)',
+                      fontSize: '18px',
+                      fontWeight: isSelected ? 600 : 400,
+                      color: isSelected ? 'var(--color-teal)' : 'var(--color-text-primary)',
+                      margin: 0,
+                    }}
+                  >
+                    {option.label}
+                  </p>
+                  <p style={{ fontSize: '15px', color: 'var(--color-text-muted)', margin: '2px 0 0', fontFamily: 'var(--font-body)' }}>
+                    {option.desc}
+                  </p>
+                </div>
+                <input
+                  type="radio"
+                  name="aria_call_opt_in"
+                  value={option.value}
+                  checked={isSelected}
+                  onChange={() => {
+                    onChange('aria_call_opt_in', option.value)
+                    if (option.value === 'daily') onChange('check_in_frequency', 'daily')
+                  }}
+                  style={{
+                    width: '20px',
+                    height: '20px',
+                    accentColor: 'var(--color-teal)',
+                    flexShrink: 0,
+                    marginLeft: '16px',
+                  }}
+                />
+              </label>
+            )
+          })}
+        </div>
+      </fieldset>
+
+      {/* Check-in frequency — only relevant when Aria calls are on at a chosen cadence */}
+      {data.aria_call_opt_in === 'less_often' && (
       <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
         <legend style={labelStyle}>How often should Aria call?</legend>
-        <p style={hintStyle}>You can change this at any time from the dashboard.</p>
+        <p style={hintStyle}>You can change this at any time from your portal.</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {FREQUENCIES.map((option) => {
             const isSelected = data.check_in_frequency === option.value
@@ -236,6 +312,7 @@ export function Step2Preferences({ data, onChange, isSelf = false }: Props) {
           })}
         </div>
       </fieldset>
+      )}
 
       {/* Topics they enjoy — pill multi-select */}
       <div>

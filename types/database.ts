@@ -73,6 +73,7 @@ export interface Database {
           device_integration_consent: boolean
           ml_insights_opt_out: boolean
           supabase_auth_id: string | null
+          aria_call_opted_in: boolean
         }
         Insert: {
           id?: string
@@ -114,6 +115,7 @@ export interface Database {
           faith_preference?: string | null
           device_integration_consent?: boolean
           ml_insights_opt_out?: boolean
+          aria_call_opted_in?: boolean
         }
         Update: Partial<Database['public']['Tables']['members']['Insert']>
         Relationships: []
