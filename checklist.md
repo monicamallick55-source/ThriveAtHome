@@ -2692,3 +2692,48 @@ context-aware Confirmation copy driven by the existing `aria_call_opt_in` form v
 HUMAN ACTION: browser-verify on a running app — walk onboarding choosing "No thank you, I prefer
 human contact only" and confirm no "Aria" text appears anywhere through Confirmation; repeat
 choosing "Yes, call me daily" and confirm Confirmation names Aria + the navigator.
+
+---
+
+## Pre-production ISSUE — member portal Aria toggle + Day-21 re-introduction
+
+ISSUE raised on the Session 122 AWAITING line: after onboarding, members have no working way to
+change their Aria call preference; the Notifications & Privacy tab toggle is "missing or not
+functional"; and there is no Day-21 re-introduction for members who opted out. Addressed in
+Session 123. The toggle/frequency/request-checkin UI was already built in Session 121 and is
+correct on disk — the production failure mode is migration 069 not yet applied (PATCH errors on
+the missing `members.aria_call_opted_in` column). Net-new this session: the Day-21 home-tab
+re-introduction card, frequency wording, and the tab label.
+
+- [x] /member-portal tab renamed "Notifications & Privacy" (was "Notifications") so it matches the
+      spec wording and is easy to find
+- [x] Notifications & Privacy → "Aria's Morning Catch-Up Calls" card: on/off toggle
+      (button role="switch", aria-checked) wired to handleToggleAria → PATCH
+      /api/member/preferences { aria_call_opted_in }; sets members.aria_call_opted_in immediately
+      (verified in code: route.ts line 44 writes Boolean(aria_call_opted_in))
+- [x] Toggle ON → frequency cards (Daily / 3 times a week / Weekly) + "Save preference" →
+      PATCH { check_in_frequency } → members.check_in_frequency. every_other_day now labelled
+      "3 times a week (Mon / Wed / Fri)" to match the spec wording
+- [x] Toggle OFF → "Request a check-in from your navigator" button → POST
+      /api/member/request-checkin → navigator_tasks row (task_type='checkin_request'); confirms
+      inline "✓ Your navigator has been asked to call you"
+- [x] Day-21 re-introduction card on the home (profile) tab — shows only when
+      !aria_call_opted_in AND daysSinceJoined >= 21 AND not previously dismissed. Copy:
+      "Would you like to try Aria's morning check-in? Many of our members find it a warm way to
+      start the day." Buttons: "Try it" (→ handleToggleAria(true)) and "No thanks"
+      (→ dismiss, remembered in localStorage per member id so it never nags)
+- [x] The earlier first-weeks gentle-intro prompt on the Notifications tab now caps at day 20
+      (was day 30) so exactly one Aria prompt is visible at any time — days 0–20 the Notifications
+      intro, day 21+ the home-tab re-introduction
+- [x] npx tsc --noEmit passes — zero errors (Session 123)
+- [x] npm run build passes — /member-portal ƒ; BUILD EXIT 0 (Session 123)
+
+HUMAN ACTIONS:
+1. Run migration 069_aria_call_opt_in.sql in Supabase SQL Editor (adds
+   members.aria_call_opted_in). Until then the toggle's PATCH returns 500 "column does not exist"
+   and the tab looks "not functional" — this is the production symptom the ISSUE describes.
+2. Browser-verify on a running app: Notifications & Privacy → toggle Aria on → frequency cards
+   appear, "3 times a week" is an option, Save works; toggle off → "Request a check-in" button →
+   click → navigator_task created + confirmation. Create/point a member row at created_at 22+ days
+   ago with aria_call_opted_in=false → home tab shows the "Try it / No thanks" card; "No thanks"
+   dismisses it permanently for that member.

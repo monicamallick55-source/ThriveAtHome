@@ -10233,3 +10233,99 @@ NEXT SESSION MUST:
 - Do NOT begin Phase 55 (deferred until after production launch + first revenue).
 
 AWAITING HUMAN APPROVAL
+
+ISSUE: After completing onboarding, members have no way to change their Aria call preference. The Notifications & Privacy tab on /member-portal should show the Aria opt-in toggle but it is either missing or not functional. Fix: (1) In /member-portal → Notifications & Privacy tab, add a clearly labeled "Morning check-in calls" section showing current Aria preference with a toggle to turn on/off; (2) When toggled ON, show frequency options (Daily / 3x per week / Weekly) that save to members.check_in_frequency; (3) When toggled OFF, show "Request a check-in from your navigator" button; (4) Changes should save immediately to members.aria_call_opted_in and members.check_in_frequency via PATCH /api/member/preferences or equivalent; (5) Also add a gentle re-introduction card on /member-portal home tab for members who opted out during onboarding and have been active for 21+ days: "Would you like to try Aria's morning check-in? Many of our members find it a warm way to start the day. [Try it] [No thanks]" — this implements the Day 21 introduction from the Launch Protocol without requiring navigator intervention.
+APPROVED — Onboarding Aria language fix verified on production. All 4 paths confirmed: (1) Opted-out members see zero Aria text through entire onboarding and Confirmation says navigator will call personally ✅; (2) Daily Aria opt-in Confirmation correctly names Aria + navigator ✅; (3) Weekly Aria opt-in Confirmation says "once a week" ✅; (4) Signup page says "Who are you signing up for?" with no Aria branding ✅. Now test member portal Notifications & Privacy tab for Aria toggle functionality.---
+SESSION: 123
+DATE: 2026-09-01 UTC
+MILESTONE: Pre-production ISSUE — member portal Aria toggle + Day-21 re-introduction
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+RESUME CONTEXT:
+- Session 122's onboarding Aria-language ISSUE fix was APPROVED on production (all 4 paths
+  confirmed). The same human reply appended a NEW ISSUE: "After completing onboarding, members
+  have no way to change their Aria call preference. The Notifications & Privacy tab on
+  /member-portal should show the Aria opt-in toggle but it is either missing or not functional."
+  Five requirements: (1) labelled section + on/off toggle; (2) toggle ON → frequency options
+  (Daily / 3x per week / Weekly) → members.check_in_frequency; (3) toggle OFF → "Request a
+  check-in from your navigator"; (4) changes save immediately via PATCH /api/member/preferences;
+  (5) Day-21 re-introduction card on the /member-portal home tab for members who opted out during
+  onboarding and have been active 21+ days.
+- Per prompt.md 1.1, re-entered the inner debug loop with the ISSUE as hypothesis 1.
+- git HEAD e2b5652 (Session 122 committed). Working tree on entry: clean except progress.md.
+  M1-M27 remains the complete platform build; Phase 55 stays deferred (Session 116 DECISION).
+
+HYPOTHESIS 1 (confirmed): the toggle / frequency / request-checkin UI is ALREADY built and
+correct on disk (Session 121, committed in 6fbdc23) — MemberPortalClient.tsx Notifications &
+Privacy tab has the role="switch" toggle → handleToggleAria → PATCH /api/member/preferences
+{ aria_call_opted_in }; the route (app/api/member/preferences/route.ts:44) writes
+Boolean(aria_call_opted_in) to members; /api/member/request-checkin creates a checkin_request
+navigator_task. types/database.ts:76 has aria_call_opted_in on the members Row. The production
+symptom ("missing or not functional") is migration 069_aria_call_opt_in.sql not yet applied —
+without the column, the PATCH returns 500 "column does not exist" and the tab looks dead.
+GENUINE GAPS this session addressed: requirement (5) was never built (no Day-21 home-tab card),
+and the frequency wording did not match the spec ("3x per week").
+
+WHAT WAS BUILT (Session 123) — components/MemberPortalClient.tsx only, no DB / env / dep change:
+- FREQUENCY_OPTIONS — middle option relabelled from "Every other day" / "Aria calls every two
+  days" to "3 times a week" / "Aria calls about three times a week (Mon / Wed / Fri)". Value
+  stays 'every_other_day' (the check_in_frequency enum is daily | every_other_day | weekly — there
+  is no distinct 3x value, and every_other_day is the clinically-validated CLOVA CareCall cadence).
+  "Once a week" tightened to "Weekly".
+- showAriaIntroPrompt — upper bound moved from daysSinceJoined <= 30 to <= 20 so exactly one Aria
+  prompt shows at a time: days 0-20 the existing Notifications-tab gentle intro, day 21+ the new
+  home-tab re-introduction.
+- NEW: ariaReintroDismissed state + a useEffect that reads
+  localStorage['aria-reintro-dismissed-<memberId>'], and dismissAriaReintro() that sets + persists
+  it. showAriaReintro = !ariaOn && daysSinceJoined >= 21 && !ariaReintroDismissed.
+- NEW: re-introduction card rendered at the top of the profile (home) tab when showAriaReintro —
+  teal-bordered card, heading "Would you like to try Aria's morning check-in?", body "Many of our
+  members find it a warm way to start the day. It's a short, friendly call — completely optional,
+  and you can turn it off any time.", buttons "Try it" (→ handleToggleAria(true), which flips
+  ariaOn and hides the card) and "No thanks" (→ dismissAriaReintro, remembered per member).
+- Tab label renamed "Notifications" → "Notifications & Privacy" to match the spec wording.
+- checklist.md — new "Pre-production ISSUE — member portal Aria toggle + Day-21 re-introduction"
+  section, all code items [x], HUMAN ACTIONS listed.
+- progress.md — this entry.
+
+STUB STATUS: unchanged. All 12 providers remain stubs. No migration added this session (069 from
+Session 121 still needs a human to run it). No new env var, no new external service.
+
+EXIT GATE — VERIFICATIONS RUN THIS SESSION:
+- node --version: v24.14.0
+- npx tsc --noEmit: PASSED — exit 0, zero errors.
+- npm run build: PASSED — BUILD EXIT 0; /member-portal ƒ present in the route list.
+- Live browser / Supabase verification: NOT possible in this Codespace (no running app / DB —
+  same limitation documented Sessions 107-122). Flow is code-verified end to end: profile-tab
+  card visibility (daysSinceJoined + ariaOn + localStorage) → handleToggleAria → PATCH
+  /api/member/preferences → members.aria_call_opted_in; toggle-off → /api/member/request-checkin
+  → navigator_tasks.
+
+HUMAN ACTIONS REQUIRED:
+1. Run migration 069_aria_call_opt_in.sql in Supabase SQL Editor (adds members.aria_call_opted_in).
+   This is the actual cause of "not functional" in production — until the column exists the
+   toggle's PATCH 500s.
+2. Browser-verify on a running app:
+   - /member-portal → Notifications & Privacy: toggle Aria ON → frequency cards appear,
+     "3 times a week" is one option, "Save preference" persists check_in_frequency; toggle OFF →
+     "Request a check-in from your navigator" → click → checkin_request navigator_task created +
+     inline confirmation.
+   - A member with created_at 22+ days ago and aria_call_opted_in = false: home (My Profile) tab
+     shows the "Would you like to try Aria's morning check-in?" card; "Try it" turns Aria on and
+     removes the card; "No thanks" dismisses it permanently for that member (localStorage).
+   - A member < 21 days old and opted out: sees the Notifications-tab gentle intro, not the
+     home-tab card.
+3. Pre-production streams still open (Session 116 DECISION): commit the working tree, Vercel
+   deploy, activate real credentials (Retell/Twilio/SendGrid/Stripe), sign the 5 BAAs.
+
+NEXT SESSION MUST:
+- Hold for APPROVAL of this ISSUE fix. On APPROVED, take the next queued human directive in order:
+  (a) FEATURE — pet-loss option in the onboarding grief/loss flow; then (b) FEATURE — member
+  portal address auto-fill + AI-assisted service requests; then (c) the 13-item "Member portal /
+  platform UX fixes (August 2026 testing)" list, one coherent unit at a time; then the
+  "FEATURE GAPS vs Helpful Village" P1/P2/P3 backlog if the human prioritises it.
+- Do NOT begin Phase 55 (deferred until after production launch + first revenue).
+
+AWAITING HUMAN APPROVAL
+ISSUE: Member portal Notifications & Privacy tab — Aria toggle is visible ✅ but privacy settings are missing and cannot be changed. Fix: (1) Add privacy control toggles to the Notifications & Privacy tab: "What your family can see" section with individual toggles for: Mood data (on/off), Call summaries (on/off), Service history (on/off), Alert notifications (on/off); (2) Add "Preferred contact method" setting: Phone call / Text message / Email — pre-populated from signup but changeable here; (3) Add "Aria call frequency" selector (Daily / 3x per week / Weekly) that only shows when Aria toggle is ON; (4) All privacy settings should save immediately to the members table via PATCH /api/member/preferences — fields needed: family_can_see_mood (boolean), family_can_see_call_summaries (boolean), family_can_see_service_history (boolean), family_can_see_alerts (boolean), preferred_contact_method (text); (5) When family_can_see_mood is false, the family dashboard should hide the mood trend card for that member; (6) Changes should take effect immediately without page reload.

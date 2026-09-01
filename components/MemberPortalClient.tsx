@@ -42,8 +42,8 @@ const CALL_TIME_OPTIONS = [
 
 const FREQUENCY_OPTIONS = [
   { value: 'daily', label: 'Daily', desc: 'Aria calls every day (recommended for most members)' },
-  { value: 'every_other_day', label: 'Every other day', desc: 'Aria calls every two days' },
-  { value: 'weekly', label: 'Once a week', desc: 'One call per week' },
+  { value: 'every_other_day', label: '3 times a week', desc: 'Aria calls about three times a week (Mon / Wed / Fri)' },
+  { value: 'weekly', label: 'Weekly', desc: 'One call per week' },
 ]
 
 const ITEM_TYPE_ICONS: Record<string, string> = {
@@ -171,11 +171,29 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
   const [checkinRequested, setCheckinRequested] = useState(false)
   const [requestingCheckin, setRequestingCheckin] = useState(false)
 
-  // First 30 days after sign-up: gently introduce Aria once the human relationship is set.
+  // First ~3 weeks after sign-up: gently introduce Aria once the human relationship is set.
+  // From day 21 onward the home-tab re-introduction card (below) takes over.
   const daysSinceJoined = Math.floor(
     (Date.now() - new Date(member.created_at).getTime()) / (24 * 60 * 60 * 1000)
   )
-  const showAriaIntroPrompt = !ariaOn && daysSinceJoined >= 0 && daysSinceJoined <= 30
+  const showAriaIntroPrompt = !ariaOn && daysSinceJoined >= 0 && daysSinceJoined <= 20
+
+  // Day-21 re-introduction (Launch Protocol): members who opted out of Aria during
+  // onboarding and have been active 21+ days see a one-time gentle invitation on the
+  // home tab. Dismissal is remembered per member so it never nags.
+  const [ariaReintroDismissed, setAriaReintroDismissed] = useState(false)
+  useEffect(() => {
+    try {
+      setAriaReintroDismissed(
+        localStorage.getItem(`aria-reintro-dismissed-${member.id}`) === '1'
+      )
+    } catch { /* localStorage unavailable — show the card, no persistence */ }
+  }, [member.id])
+  function dismissAriaReintro() {
+    setAriaReintroDismissed(true)
+    try { localStorage.setItem(`aria-reintro-dismissed-${member.id}`, '1') } catch { /* ignore */ }
+  }
+  const showAriaReintro = !ariaOn && daysSinceJoined >= 21 && !ariaReintroDismissed
 
   // Documents
   const [portalDocs, setPortalDocs] = useState<PortalDoc[]>([])
@@ -459,7 +477,7 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
     { id: 'life-story', label: 'Life Story' },
     { id: 'billing', label: 'My Plan' },
     { id: 'org', label: 'My Org' },
-    { id: 'notifications', label: 'Notifications' },
+    { id: 'notifications', label: 'Notifications & Privacy' },
     { id: 'documents', label: '📎 Documents' },
   ]
 
@@ -544,6 +562,24 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
         {/* ─── MY PROFILE ──────────────────────────────────────────────────── */}
         {activeTab === 'profile' && (
           <div>
+            {showAriaReintro && (
+              <div style={{ ...card, backgroundColor: '#F0F9F7', border: '2px solid var(--color-teal)' }}>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '8px' }}>
+                  Would you like to try Aria&apos;s morning check-in?
+                </h3>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)', lineHeight: 1.7, marginBottom: '16px' }}>
+                  Many of our members find it a warm way to start the day. It&apos;s a short, friendly
+                  call — completely optional, and you can turn it off any time.
+                </p>
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                  <button onClick={() => handleToggleAria(true)} disabled={savingAria}
+                    style={{ ...btnPrimary, opacity: savingAria ? 0.7 : 1 }}>
+                    {savingAria ? 'Saving…' : 'Try it'}
+                  </button>
+                  <button onClick={dismissAriaReintro} style={btnSecondary}>No thanks</button>
+                </div>
+              </div>
+            )}
             <div style={card}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
                 <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: 'var(--color-navy)', margin: 0 }}>My Profile</h2>
