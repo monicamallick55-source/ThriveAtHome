@@ -74,6 +74,11 @@ export interface Database {
           ml_insights_opt_out: boolean
           supabase_auth_id: string | null
           aria_call_opted_in: boolean
+          family_can_see_mood: boolean
+          family_can_see_call_summaries: boolean
+          family_can_see_service_history: boolean
+          family_can_see_alerts: boolean
+          preferred_contact_method: string
         }
         Insert: {
           id?: string
@@ -116,6 +121,11 @@ export interface Database {
           device_integration_consent?: boolean
           ml_insights_opt_out?: boolean
           aria_call_opted_in?: boolean
+          family_can_see_mood?: boolean
+          family_can_see_call_summaries?: boolean
+          family_can_see_service_history?: boolean
+          family_can_see_alerts?: boolean
+          preferred_contact_method?: string
         }
         Update: Partial<Database['public']['Tables']['members']['Insert']>
         Relationships: []

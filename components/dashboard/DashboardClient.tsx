@@ -823,7 +823,8 @@ function DashboardInner(props: DashboardClientProps) {
             <WellnessInsightsSection summary={mlSummary} />
           </ErrorBoundary>
 
-          {/* Health timeline */}
+          {/* Health timeline — hidden when the member has turned off mood-data sharing */}
+          {member.family_can_see_mood !== false && (
           <section aria-labelledby="timeline-heading">
             <h2
               id="timeline-heading"
@@ -856,6 +857,7 @@ function DashboardInner(props: DashboardClientProps) {
               </ErrorBoundary>
             </div>
           </section>
+          )}
 
           {/* Two-column: recent calls + tasks */}
           <div

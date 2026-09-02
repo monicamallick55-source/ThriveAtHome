@@ -10329,3 +10329,126 @@ NEXT SESSION MUST:
 
 AWAITING HUMAN APPROVAL
 ISSUE: Member portal Notifications & Privacy tab — Aria toggle is visible ✅ but privacy settings are missing and cannot be changed. Fix: (1) Add privacy control toggles to the Notifications & Privacy tab: "What your family can see" section with individual toggles for: Mood data (on/off), Call summaries (on/off), Service history (on/off), Alert notifications (on/off); (2) Add "Preferred contact method" setting: Phone call / Text message / Email — pre-populated from signup but changeable here; (3) Add "Aria call frequency" selector (Daily / 3x per week / Weekly) that only shows when Aria toggle is ON; (4) All privacy settings should save immediately to the members table via PATCH /api/member/preferences — fields needed: family_can_see_mood (boolean), family_can_see_call_summaries (boolean), family_can_see_service_history (boolean), family_can_see_alerts (boolean), preferred_contact_method (text); (5) When family_can_see_mood is false, the family dashboard should hide the mood trend card for that member; (6) Changes should take effect immediately without page reload.
+---
+SESSION: 124
+DATE: 2026-09-02 UTC
+MILESTONE: Pre-production ISSUE — member portal privacy settings + preferred contact method
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+RESUME CONTEXT:
+- Session 123 ended AWAITING APPROVAL for the member-portal Aria toggle + Day-21 re-introduction.
+  The human replied with an ISSUE (partial approval): "Aria toggle is visible ✅ but privacy
+  settings are missing and cannot be changed." Six requirements:
+  (1) "What your family can see" section with individual on/off toggles: Mood data, Call summaries,
+      Service history, Alert notifications;
+  (2) "Preferred contact method": Phone call / Text message / Email — pre-populated from signup,
+      changeable here;
+  (3) "Aria call frequency" (Daily / 3x per week / Weekly) that shows only when Aria toggle is ON;
+  (4) all settings save immediately to members via PATCH /api/member/preferences — new fields:
+      family_can_see_mood, family_can_see_call_summaries, family_can_see_service_history,
+      family_can_see_alerts (boolean), preferred_contact_method (text);
+  (5) when family_can_see_mood is false, the family dashboard hides the mood trend card;
+  (6) changes take effect immediately without page reload.
+- Per prompt.md 1.1, re-entered the inner debug loop with the ISSUE as hypothesis 1.
+- git HEAD 9a95fa2 (that commit carries the Session 123 progress/checklist/MemberPortalClient
+  changes despite its "privacy settings and Aria toggle" message). Working tree on entry: clean
+  except progress.md. M1–M27 remains the complete platform; Phase 55 stays deferred (Session 116).
+
+HYPOTHESIS 1 (confirmed): before this session the "What Your Family Can See" block in
+MemberPortalClient.tsx (Notifications & Privacy tab) was purely static — a hard-coded list where
+every row rendered a green "Shared" badge and the footer said "To change which items are shared
+with your family, contact your navigator." There was no preferred-contact-method UI, no
+persistence, and no members columns to persist to. Requirement 3 (frequency selector gated on
+Aria ON) was already satisfied by the Session 123 build. So the work was: add the 5 columns,
+extend the PATCH route, replace the static block with real controls, and gate the family mood
+card.
+
+WHAT WAS BUILT (Session 124):
+- supabase/migrations/070_member_privacy_settings.sql — NEW. Adds to members:
+  family_can_see_mood, family_can_see_call_summaries, family_can_see_service_history,
+  family_can_see_alerts  (boolean NOT NULL DEFAULT true)
+  preferred_contact_method  (text NOT NULL DEFAULT 'phone')
+  All defaults keep current behaviour (family sees everything; contact by phone). COMMENTs added.
+  HUMAN must run it in Supabase SQL Editor.
+- app/api/member/preferences/route.ts — PATCH now destructures the 5 new fields. Each
+  family_can_see_* is coerced with Boolean() and written only when provided (partial-update
+  semantics kept). preferred_contact_method is validated against ['phone','sms','email'] →
+  400 "Invalid contact method" otherwise.
+- components/MemberPortalClient.tsx:
+  * New constants: CONTACT_METHOD_OPTIONS (phone/sms/email), PRIVACY_TOGGLES (the 4 family_can_see_*
+    keys with label + description), PrivacyKey type.
+  * New state: privacy (Record<PrivacyKey, boolean>, seeded from member.* ?? true),
+    savingPrivacyKey, contactMethod (member.preferred_contact_method ?? 'phone'), savingContact.
+  * New handlers: handleTogglePrivacy(key, next) — optimistic flip → PATCH { [key]: next } →
+    rollback + toast on failure; handleSaveContactMethod(next) — optimistic → PATCH
+    { preferred_contact_method } → rollback + toast on failure. Neither reloads the page.
+  * "What Your Family Can See" card rewritten: the 4 static rows are now 4 role="switch" toggles
+    (56×32, aria-checked, aria-label) bound to privacy[...] via handleTogglePrivacy. Intro copy
+    updated ("You choose what appears on their dashboard. Changes take effect right away."). The
+    "Always private" transcript/medical-details reassurance box kept and strengthened
+    ("no matter what these settings say"). Removed the "contact your navigator" footer.
+  * NEW "Preferred Contact Method" card below it — 3 selectable option cards (Phone call / Text
+    message / Email) calling handleSaveContactMethod on click, pre-selected from contactMethod.
+  * The "Aria call frequency" cards (Daily / 3 times a week / Weekly) are unchanged and still
+    render only inside the `ariaOn ?` branch (requirement 3).
+- components/dashboard/DashboardClient.tsx — the "Health timeline" <section> (heading + MoodChart /
+  SectionError) is now wrapped in `{member.family_can_see_mood !== false && ( ... )}`. `!== false`
+  so a member row without the column (pre-migration) still shows the chart. This is the only
+  family-dashboard change; the WellnessCard mood scores were left in place (requirement 5 names
+  specifically "the mood trend card") — flagged below as a possible follow-up.
+- types/database.ts — 5 fields added to members Row (required) and Insert (optional).
+- scripts/test-volunteer-matching.ts — makeMember() literal gains the 5 fields so Member stays
+  satisfied under tsc.
+- checklist.md — new "Pre-production ISSUE — member portal privacy settings + preferred contact
+  method (Session 124)" section, all code items [x], HUMAN ACTIONS listed.
+- progress.md — this entry.
+
+STUB STATUS: unchanged. All 12 providers remain stubs. One new migration (070) needs a human to
+run it. No new env var, no new external service, no new dependency.
+
+EXIT GATE — VERIFICATIONS RUN THIS SESSION:
+- node --version: v24.14.0
+- npx tsc --noEmit: PASSED — exit 0, zero errors (after adding the 5 fields to the test-script
+  Member literal).
+- npm run build: PASSED — BUILD EXIT 0; /member-portal ƒ, /api/member/preferences ƒ, /dashboard ƒ
+  all present.
+- Live browser / Supabase verification: NOT possible in this Codespace (no running app / DB —
+  same limitation documented Sessions 107–123). Code-verified end to end: switch onClick →
+  handleTogglePrivacy → PATCH /api/member/preferences → route writes members.family_can_see_*;
+  option card onClick → handleSaveContactMethod → PATCH → members.preferred_contact_method;
+  DashboardClient reads member.family_can_see_mood (full members row from getMemberByDirectAuth /
+  getMemberForAuthUser via select('*')).
+
+POSSIBLE FOLLOW-UP (not done — out of the ISSUE's literal scope):
+- WellnessCard on the family dashboard still shows the current mood/energy/comfort scores and the
+  AI summary regardless of family_can_see_mood / family_can_see_call_summaries. Requirement 5 only
+  asked to hide "the mood trend card", which is the Health timeline chart. If the human wants the
+  toggles to also gate WellnessCard fields, that is a small additional change.
+- Signup does not yet collect preferred_contact_method, so "pre-populated from signup" currently
+  means "defaults to phone". Add a contact-method choice to signup/onboarding if desired.
+
+HUMAN ACTIONS REQUIRED:
+1. Run migration 070_member_privacy_settings.sql in Supabase SQL Editor (adds the 5 columns).
+   Until then every new toggle's PATCH 500s on the missing column — the same failure mode as the
+   Session 123 Aria toggle before migration 069.
+2. Confirm migration 069_aria_call_opt_in.sql has also been run (outstanding from Session 123).
+3. Browser-verify on a running app:
+   - /member-portal → Notifications & Privacy: flip each of the 4 "What your family can see"
+     switches; reload — state holds. Set "Mood data" OFF, open the family dashboard for that
+     member — the Health timeline mood chart section is gone; set it ON — it returns.
+   - "Preferred Contact Method": choose Text message; reload — still selected.
+   - Aria toggle ON → frequency cards (Daily / 3 times a week / Weekly) appear; OFF → replaced by
+     "Request a check-in from your navigator".
+4. Pre-production streams still open (Session 116 DECISION): commit the working tree, Vercel
+   deploy, activate real credentials (Retell/Twilio/SendGrid/Stripe), sign the 5 BAAs.
+
+NEXT SESSION MUST:
+- Hold for APPROVAL of this ISSUE fix. On APPROVED, take the next queued human directive in order:
+  (a) FEATURE — pet-loss option in the onboarding grief/loss flow; then (b) FEATURE — member
+  portal address auto-fill + AI-assisted service requests; then (c) the 13-item "Member portal /
+  platform UX fixes (August 2026 testing)" list, one coherent unit at a time; then the
+  "FEATURE GAPS vs Helpful Village" P1/P2/P3 backlog if the human prioritises it.
+- Do NOT begin Phase 55 (deferred until after production launch + first revenue).
+
+AWAITING HUMAN APPROVAL

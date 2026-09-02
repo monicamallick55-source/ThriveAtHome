@@ -46,6 +46,23 @@ const FREQUENCY_OPTIONS = [
   { value: 'weekly', label: 'Weekly', desc: 'One call per week' },
 ]
 
+const CONTACT_METHOD_OPTIONS = [
+  { value: 'phone', label: 'Phone call', desc: 'We call you to talk things through.' },
+  { value: 'sms', label: 'Text message', desc: 'We send a text you can read any time.' },
+  { value: 'email', label: 'Email', desc: 'We email you the details.' },
+]
+
+// The four things a senior can choose to share with their family on the family dashboard.
+// Each maps to a boolean column on the members table.
+const PRIVACY_TOGGLES = [
+  { key: 'family_can_see_mood', label: 'Mood data', desc: 'The wellness mood trend on your family’s dashboard.' },
+  { key: 'family_can_see_call_summaries', label: 'Call summaries', desc: 'The friendly written summary after each call — never the recording or transcript.' },
+  { key: 'family_can_see_service_history', label: 'Service history', desc: 'Transport, meals, and other services you’ve booked.' },
+  { key: 'family_can_see_alerts', label: 'Alert notifications', desc: 'If a safety concern is detected, your family is notified so they can check in.' },
+] as const
+
+type PrivacyKey = typeof PRIVACY_TOGGLES[number]['key']
+
 const ITEM_TYPE_ICONS: Record<string, string> = {
   prescription: '💊', home_insurance: '🏠', car_insurance: '🚗',
   health_insurance: '🏥', drivers_license: '🪪', car_registration: '📋',
@@ -170,6 +187,20 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
   const [savingAria, setSavingAria] = useState(false)
   const [checkinRequested, setCheckinRequested] = useState(false)
   const [requestingCheckin, setRequestingCheckin] = useState(false)
+
+  // Privacy — what the family can see. Defaults to true (current behaviour) when the
+  // column is missing on older member rows.
+  const [privacy, setPrivacy] = useState<Record<PrivacyKey, boolean>>({
+    family_can_see_mood: member.family_can_see_mood ?? true,
+    family_can_see_call_summaries: member.family_can_see_call_summaries ?? true,
+    family_can_see_service_history: member.family_can_see_service_history ?? true,
+    family_can_see_alerts: member.family_can_see_alerts ?? true,
+  })
+  const [savingPrivacyKey, setSavingPrivacyKey] = useState<PrivacyKey | null>(null)
+
+  // Preferred contact method — pre-set at signup, changeable here.
+  const [contactMethod, setContactMethod] = useState<string>(member.preferred_contact_method ?? 'phone')
+  const [savingContact, setSavingContact] = useState(false)
 
   // First ~3 weeks after sign-up: gently introduce Aria once the human relationship is set.
   // From day 21 onward the home-tab re-introduction card (below) takes over.
@@ -412,6 +443,44 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
       setAriaOn(next)
       showToast(next ? 'Aria will start calling you — welcome aboard.' : 'Aria calls turned off. You can turn them back on any time.')
     } else {
+      showToast('Could not update. Please try again.')
+    }
+  }
+
+  // Toggle one "what family can see" switch. Optimistic — the UI updates immediately
+  // and rolls back only if the save fails. No page reload.
+  async function handleTogglePrivacy(key: PrivacyKey, next: boolean) {
+    const previous = privacy[key]
+    setPrivacy(p => ({ ...p, [key]: next }))
+    setSavingPrivacyKey(key)
+    const res = await fetch('/api/member/preferences', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ [key]: next }),
+    })
+    setSavingPrivacyKey(null)
+    if (res.ok) {
+      showToast(next ? 'Your family can now see this.' : 'Hidden from your family.')
+    } else {
+      setPrivacy(p => ({ ...p, [key]: previous }))
+      showToast('Could not update. Please try again.')
+    }
+  }
+
+  async function handleSaveContactMethod(next: string) {
+    const previous = contactMethod
+    setContactMethod(next)
+    setSavingContact(true)
+    const res = await fetch('/api/member/preferences', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ preferred_contact_method: next }),
+    })
+    setSavingContact(false)
+    if (res.ok) {
+      showToast('Preferred contact method updated.')
+    } else {
+      setContactMethod(previous)
       showToast('Could not update. Please try again.')
     }
   }
@@ -1317,28 +1386,71 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
             <div style={card}>
               <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '8px' }}>What Your Family Can See</h3>
               <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)', lineHeight: 1.7, marginBottom: '16px' }}>
-                Your conversations with Aria are always private. Your family only sees a friendly summary — never a recording or transcript. Here&apos;s what they can see on their dashboard:
+                Your conversations with Aria are always private. Your family only sees a friendly summary — never a recording or transcript. You choose what appears on their dashboard. Changes take effect right away.
               </p>
-              {[
-                { label: 'Wellness mood summary', desc: 'A general sense of how you\'re doing today — happy, neutral, or needing extra care.' },
-                { label: 'Upcoming appointments & services', desc: 'Scheduled transport, meal delivery, and other services you\'ve requested.' },
-                { label: 'Important Dates reminders', desc: 'Renewals and appointments you\'ve added — so they can offer help.' },
-                { label: 'Alert notifications', desc: 'If Aria detects a safety concern, your family is notified so they can check in.' },
-              ].map(item => (
-                <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '14px 0', borderBottom: '1px solid #F0EDE6', gap: '16px' }}>
-                  <div>
-                    <div style={{ fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 600, color: 'var(--color-navy)', marginBottom: '4px' }}>{item.label}</div>
-                    <div style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>{item.desc}</div>
+              {PRIVACY_TOGGLES.map(item => {
+                const on = privacy[item.key]
+                return (
+                  <div key={item.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '14px 0', borderBottom: '1px solid #F0EDE6', gap: '16px' }}>
+                    <div>
+                      <div style={{ fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 600, color: 'var(--color-navy)', marginBottom: '4px' }}>{item.label}</div>
+                      <div style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>{item.desc}</div>
+                    </div>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={on}
+                      aria-label={`Share ${item.label} with family`}
+                      onClick={() => handleTogglePrivacy(item.key, !on)}
+                      disabled={savingPrivacyKey === item.key}
+                      style={{
+                        width: '56px', height: '32px', borderRadius: '999px', flexShrink: 0,
+                        border: 'none', cursor: savingPrivacyKey === item.key ? 'wait' : 'pointer',
+                        backgroundColor: on ? 'var(--color-teal)' : '#CCC',
+                        position: 'relative', transition: 'background-color 0.2s', marginTop: '2px',
+                      }}
+                    >
+                      <span style={{
+                        position: 'absolute', top: '3px', left: on ? '27px' : '3px',
+                        width: '26px', height: '26px', borderRadius: '50%', backgroundColor: 'white',
+                        transition: 'left 0.2s',
+                      }} />
+                    </button>
                   </div>
-                  <div style={{ padding: '4px 12px', backgroundColor: '#F0FFF4', borderRadius: '20px', fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: '#15803D', flexShrink: 0 }}>Shared</div>
-                </div>
-              ))}
+                )
+              })}
               <div style={{ marginTop: '16px', padding: '14px 18px', backgroundColor: '#F9F6F0', borderRadius: '10px', fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)' }}>
-                📞 <strong>Always private:</strong> Your call transcripts, what you said word-for-word, and any medical details you share with Aria are never shown to your family. Only a warm, friendly summary is shared.
+                📞 <strong>Always private:</strong> Your call transcripts, what you said word-for-word, and any medical details you share with Aria are never shown to your family — no matter what these settings say. Only a warm, friendly summary is ever shared.
               </div>
-              <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '16px' }}>
-                To change which items are shared with your family, contact your navigator.
+            </div>
+
+            <div style={card}>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '8px' }}>Preferred Contact Method</h3>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)', lineHeight: 1.7, marginBottom: '20px' }}>
+                How would you like us to reach you with reminders and updates?
               </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {CONTACT_METHOD_OPTIONS.map(opt => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => handleSaveContactMethod(opt.value)}
+                    disabled={savingContact}
+                    style={{
+                      display: 'flex', alignItems: 'flex-start', gap: '14px', padding: '16px 20px',
+                      border: `2px solid ${contactMethod === opt.value ? 'var(--color-teal)' : '#DDD8CE'}`,
+                      borderRadius: '12px', backgroundColor: contactMethod === opt.value ? '#F0F9F7' : 'white',
+                      cursor: savingContact ? 'wait' : 'pointer', textAlign: 'left',
+                    }}
+                  >
+                    <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: `2px solid ${contactMethod === opt.value ? 'var(--color-teal)' : '#CCC'}`, backgroundColor: contactMethod === opt.value ? 'var(--color-teal)' : 'white', flexShrink: 0, marginTop: '2px' }} />
+                    <div>
+                      <div style={{ fontFamily: 'var(--font-body)', fontSize: '16px', fontWeight: 600, color: 'var(--color-navy)' }}>{opt.label}</div>
+                      <div style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>{opt.desc}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         )}

@@ -2737,3 +2737,57 @@ HUMAN ACTIONS:
    click → navigator_task created + confirmation. Create/point a member row at created_at 22+ days
    ago with aria_call_opted_in=false → home tab shows the "Try it / No thanks" card; "No thanks"
    dismisses it permanently for that member.
+
+---
+
+## Pre-production ISSUE — member portal privacy settings + preferred contact method (Session 124)
+STATUS: `COMPLETE`
+
+ISSUE raised on the Session 123 AWAITING line: the Aria toggle on Notifications & Privacy is
+visible ✅ but the "What your family can see" controls were static text (every row hard-labelled
+"Shared", "contact your navigator to change"), there was no preferred-contact-method setting, and
+nothing persisted. Addressed in Session 124.
+
+- [x] supabase/migrations/070_member_privacy_settings.sql — adds 5 columns to `members`:
+      family_can_see_mood, family_can_see_call_summaries, family_can_see_service_history,
+      family_can_see_alerts (all boolean NOT NULL DEFAULT true) and preferred_contact_method
+      (text NOT NULL DEFAULT 'phone'). Defaults preserve today's behaviour for existing members.
+      HUMAN must run this in Supabase SQL Editor.
+- [x] PATCH /api/member/preferences accepts the 5 new fields — each family_can_see_* coerced with
+      Boolean(); preferred_contact_method validated against ['phone','sms','email'] → 400 on
+      anything else; only provided keys are written (partial update preserved)
+- [x] Notifications & Privacy → "What Your Family Can See" is now 4 real switches
+      (button role="switch", aria-checked, 56×32 touch target) — one per family_can_see_* column.
+      Optimistic: the switch flips instantly, PATCHes, and rolls back + toasts on failure.
+      No page reload.
+- [x] Notifications & Privacy → new "Preferred Contact Method" card — 3 radio-style option cards
+      (Phone call / Text message / Email). Selecting one PATCHes preferred_contact_method
+      immediately; rolls back + toasts on failure. Pre-selects from members.preferred_contact_method
+      (defaults 'phone' — signup does not yet collect this; noted for a later signup change).
+- [x] "Aria call frequency" selector (Daily / 3x per week / Weekly) shows only when the Aria
+      toggle is ON — already built Session 123, confirmed still correct (requirement 3)
+- [x] Family dashboard hides the mood trend card when family_can_see_mood is false —
+      DashboardClient.tsx wraps the "Health timeline" <section> (heading + MoodChart) in
+      `{member.family_can_see_mood !== false && ( ... )}`. `!== false` so older rows / a missing
+      column still show it.
+- [x] types/database.ts — 5 new fields added to members Row (required) and Insert (optional)
+- [x] scripts/test-volunteer-matching.ts makeMember() — 5 new fields added to the literal so the
+      Member type stays satisfied
+- [x] npx tsc --noEmit passes — zero errors (Session 124)
+- [x] npm run build passes — /member-portal ƒ, /api/member/preferences ƒ, /dashboard ƒ;
+      BUILD EXIT 0 (Session 124)
+
+HUMAN ACTIONS:
+1. Run migration 070_member_privacy_settings.sql in Supabase SQL Editor. Until then the new
+   toggles' PATCH returns 500 "column does not exist" (same failure mode as the Session 123 Aria
+   toggle before migration 069).
+2. Also confirm migration 069_aria_call_opt_in.sql has been run (still outstanding from Session
+   123).
+3. Browser-verify on a running app:
+   - /member-portal → Notifications & Privacy: flip each of the 4 "What your family can see"
+     switches → each persists (reload the page, state holds).
+   - Turn "Mood data" OFF → open the family dashboard for that member → the "Health timeline"
+     mood chart section is gone; turn it back ON → it returns.
+   - "Preferred Contact Method": pick Text message → reload → still selected.
+   - Aria toggle ON → "Aria call frequency" (Daily / 3x per week / Weekly) appears; OFF → it is
+     replaced by "Request a check-in from your navigator".

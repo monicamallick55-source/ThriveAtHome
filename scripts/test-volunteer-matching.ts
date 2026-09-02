@@ -90,6 +90,11 @@ function makeMember(overrides: Partial<Member>): Member {
     ml_insights_opt_out: false,
     supabase_auth_id: null,
     aria_call_opted_in: false,
+    family_can_see_mood: true,
+    family_can_see_call_summaries: true,
+    family_can_see_service_history: true,
+    family_can_see_alerts: true,
+    preferred_contact_method: 'phone',
     ...overrides,
   }
 }

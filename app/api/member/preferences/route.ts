@@ -9,7 +9,19 @@ export async function PATCH(req: NextRequest) {
   const body = await req.json().catch(() => null)
   if (!body) return NextResponse.json({ error: 'Invalid body' }, { status: 400 })
 
-  const { preferred_call_time, topics_enjoy, preferred_language, phone_number, check_in_frequency, aria_call_opted_in } = body
+  const {
+    preferred_call_time, topics_enjoy, preferred_language, phone_number,
+    check_in_frequency, aria_call_opted_in,
+    family_can_see_mood, family_can_see_call_summaries,
+    family_can_see_service_history, family_can_see_alerts,
+    preferred_contact_method,
+  } = body
+
+  // Validate the free-text contact-method field against the allowed set.
+  const CONTACT_METHODS = ['phone', 'sms', 'email']
+  if (preferred_contact_method !== undefined && !CONTACT_METHODS.includes(preferred_contact_method)) {
+    return NextResponse.json({ error: 'Invalid contact method' }, { status: 400 })
+  }
 
   const admin = createAdminClient()
 
@@ -42,6 +54,11 @@ export async function PATCH(req: NextRequest) {
   if (phone_number !== undefined) updates.phone_number = phone_number
   if (check_in_frequency !== undefined) updates.check_in_frequency = check_in_frequency
   if (aria_call_opted_in !== undefined) updates.aria_call_opted_in = Boolean(aria_call_opted_in)
+  if (family_can_see_mood !== undefined) updates.family_can_see_mood = Boolean(family_can_see_mood)
+  if (family_can_see_call_summaries !== undefined) updates.family_can_see_call_summaries = Boolean(family_can_see_call_summaries)
+  if (family_can_see_service_history !== undefined) updates.family_can_see_service_history = Boolean(family_can_see_service_history)
+  if (family_can_see_alerts !== undefined) updates.family_can_see_alerts = Boolean(family_can_see_alerts)
+  if (preferred_contact_method !== undefined) updates.preferred_contact_method = preferred_contact_method
 
   const { error } = await (admin.from as any)('members').update(updates).eq('id', memberId)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
