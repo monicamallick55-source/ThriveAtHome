@@ -78,56 +78,20 @@ export function LoginForm() {
         return
       }
 
-      const { data: fm } = await supabase
-        .from('family_members')
-        .select('role')
-        .eq('supabase_auth_id', user.id)
-        .maybeSingle()
-
-      if (!fm || fm.role === 'family') {
-        // Direct senior member login (members.supabase_auth_id — migration 049).
-        // Also covers seniors who signed up for themselves: they have a 'family'
-        // family_members row AND a linked members row, and belong in the portal.
-        const { data: memberRow } = await (supabase as any)
-          .from('members')
-          .select('id')
-          .eq('supabase_auth_id', user.id)
-          .maybeSingle()
-        if (memberRow) {
-          router.push('/member-portal')
-          router.refresh()
-          return
+      // Central server-side resolver: routes every role type, and sends
+      // multi-role users to /select-role.
+      let landing = '/dashboard'
+      try {
+        const res = await fetch('/api/auth/resolve-landing')
+        if (res.ok) {
+          const json = await res.json()
+          if (typeof json.path === 'string') landing = json.path
         }
+      } catch (e) {
+        console.error('[LoginForm] resolve-landing failed, using default:', e)
       }
 
-      const role = fm?.role ?? 'family'
-
-      if (role === 'navigator') {
-        router.push('/navigator')
-      } else if (role === 'admin') {
-        router.push('/admin')
-      } else if (role === 'volunteer') {
-        router.push('/volunteer/dashboard')
-      } else if (role === 'student') {
-        router.push('/student')
-      } else if (role === 'university_admin') {
-        router.push('/university-admin')
-      } else if (role === 'employer_admin') {
-        router.push('/employer-admin')
-      } else if (role === 'agency_admin') {
-        router.push('/agency-admin')
-      } else if (role === 'aaa_admin') {
-        router.push('/aaa-admin')
-      } else if (role === 'org_admin') {
-        router.push('/org-admin')
-      } else if (role === 'senior_center_admin') {
-        router.push('/senior-center-admin')
-      } else if (role === 'network_admin') {
-        router.push('/network-admin')
-      } else {
-        router.push('/dashboard')
-      }
-
+      router.push(landing)
       router.refresh()
     } catch (err) {
       console.error('[LoginForm] Unexpected error:', err)

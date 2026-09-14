@@ -79,6 +79,8 @@ export interface Database {
           family_can_see_service_history: boolean
           family_can_see_alerts: boolean
           preferred_contact_method: string
+          directory_opt_in: boolean
+          directory_bio: string | null
         }
         Insert: {
           id?: string
@@ -126,6 +128,8 @@ export interface Database {
           family_can_see_service_history?: boolean
           family_can_see_alerts?: boolean
           preferred_contact_method?: string
+          directory_opt_in?: boolean
+          directory_bio?: string | null
         }
         Update: Partial<Database['public']['Tables']['members']['Insert']>
         Relationships: []
@@ -1383,6 +1387,8 @@ export interface Database {
           member_id: string
           item_type: string
           category: string
+          subcategory: string | null
+          preferred_contact_method: string | null
           item_name: string
           expiration_or_appointment_date: string
           reminder_lead_days: number
@@ -1402,6 +1408,8 @@ export interface Database {
           member_id: string
           item_type?: string
           category?: string
+          subcategory?: string | null
+          preferred_contact_method?: string | null
           item_name: string
           expiration_or_appointment_date: string
           reminder_lead_days?: number

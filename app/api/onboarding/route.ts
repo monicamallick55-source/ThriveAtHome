@@ -173,8 +173,20 @@ export async function POST(req: NextRequest) {
     console.log(`[STUB][Email] Agency-branded welcome sent to ${member.preferred_name}: "Welcome from ${agencyName}, Powered by ThriveAtHome."`)
   }
 
-  // 8. Grief Welcome Path — create navigator tasks + stub notifications
-  if (body.grief_welcome_path === 'true') {
+  // 8. Grief Welcome Path — create navigator tasks + stub notifications.
+  // Pet loss routes to The Companion Circle (a peer space distinct from human bereavement).
+  if (body.grief_welcome_path === 'true' && body.grief_loss_type === 'pet') {
+    try {
+      const { createPetLossSupportRequest } = await import('@/lib/data/pet-loss')
+      await createPetLossSupportRequest(member.id, member.preferred_name, {
+        supportType: 'one_to_one',
+        message: 'Enrolled via onboarding — recent loss of a beloved pet.',
+      })
+      console.log(`[STUB][Email] Companion Circle invitation sent to ${member.preferred_name}: "We have The Companion Circle — a gentle peer space for people missing a pet. You're welcome any time."`)
+    } catch (petErr) {
+      console.error('[api/onboarding] pet-loss support request failed:', petErr)
+    }
+  } else if (body.grief_welcome_path === 'true') {
     const slaDate = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
     const week1Date = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
     const lossType = body.grief_loss_type?.trim()

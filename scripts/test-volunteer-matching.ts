@@ -95,6 +95,8 @@ function makeMember(overrides: Partial<Member>): Member {
     family_can_see_service_history: true,
     family_can_see_alerts: true,
     preferred_contact_method: 'phone',
+    directory_opt_in: false,
+    directory_bio: null,
     ...overrides,
   }
 }

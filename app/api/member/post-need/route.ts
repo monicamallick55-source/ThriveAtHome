@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null)
   if (!body) return NextResponse.json({ error: 'Invalid body' }, { status: 400 })
 
-  const { need_type, title, description, urgency = 'normal', preferred_date } = body
+  const { need_type, title, description, urgency = 'normal', preferred_date, community_context } = body
   if (!need_type || !title || !description) {
     return NextResponse.json({ error: 'need_type, title, description required' }, { status: 400 })
   }
@@ -50,6 +50,7 @@ export async function POST(req: NextRequest) {
     description,
     urgency,
     preferred_date: preferred_date || null,
+    community_context: (typeof community_context === 'string' && community_context.trim()) ? community_context.trim() : null,
     status: 'open',
   }).select().single()
 

@@ -336,6 +336,12 @@ export function NavConsole({
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <span style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'rgba(250,250,245,0.8)' }}>{navigatorName}</span>
+            <a
+              href="/team"
+              style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-cream)', textDecoration: 'none', border: '1px solid rgba(250,250,245,0.4)', borderRadius: 'var(--radius-sm)', padding: '6px 14px' }}
+            >
+              Invite a volunteer
+            </a>
             <button
               onClick={handleSignOut}
               style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-cream)', background: 'transparent', border: '1px solid rgba(250,250,245,0.4)', borderRadius: 'var(--radius-sm)', padding: '6px 14px', cursor: 'pointer' }}

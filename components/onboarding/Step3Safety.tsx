@@ -397,10 +397,13 @@ export function Step3Safety({ data, onChange, isSelf = false }: Props) {
                 <option value="parent">Parent</option>
                 <option value="sibling">Sibling</option>
                 <option value="close_friend">Close friend</option>
+                <option value="pet">A beloved pet</option>
                 <option value="other">Someone else</option>
               </select>
               <p style={{ fontSize: '14px', color: 'var(--color-text-muted)', fontFamily: 'var(--font-body)', margin: '6px 0 0' }}>
-                This just helps us make the grief circle invitation feel personal.
+                {data.grief_loss_type === 'pet'
+                  ? 'We’ll invite you to The Companion Circle — a peer space just for pet loss, separate from the bereavement circles.'
+                  : 'This just helps us make the grief circle invitation feel personal.'}
               </p>
             </div>
           </div>

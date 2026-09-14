@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import type { Volunteer, PrivateMemberView, VolunteerVisit } from '@/lib/data/volunteers'
 import type { VisitType } from '@/types/database'
+import VolunteerAvailability from '@/components/volunteer/VolunteerAvailability'
 
 interface CorporateProgramData {
   program_name: string
@@ -227,6 +228,20 @@ export function VolunteerDashboard({ volunteer, matchedMembers, recentVisits: in
       showToast('Request claimed — it will appear in My Upcoming below.')
     } else {
       showToast(json.error ?? 'Could not claim request.')
+    }
+  }
+
+  async function handleCompleteService(bookingId: string) {
+    const res = await fetch('/api/volunteer/complete-service', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ booking_id: bookingId }),
+    })
+    const json = await res.json().catch(() => ({ error: 'Error' }))
+    if (res.ok) {
+      setClaimedBookings(prev => prev.filter(b => b.id !== bookingId))
+      if (typeof json.hours_logged === 'number') setTotalHours(prev => prev + json.hours_logged)
+      showToast(`Marked complete — ${Number(json.hours_logged ?? 0).toFixed(1)} hours added to your record.`)
+    } else {
+      showToast(json.error ?? 'Could not mark this complete.')
     }
   }
 
@@ -470,6 +485,12 @@ export function VolunteerDashboard({ volunteer, matchedMembers, recentVisits: in
                           </p>
                         )}
                       </div>
+                    </div>
+                    <div style={{ marginTop: '14px' }}>
+                      <button onClick={() => handleCompleteService(b.id)}
+                        style={{ padding: '9px 18px', backgroundColor: 'var(--color-navy)', color: 'white', border: 'none', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>
+                        Mark complete &amp; log my hours
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -814,6 +835,8 @@ export function VolunteerDashboard({ volunteer, matchedMembers, recentVisits: in
             </div>
           </div>
         </div>
+
+        <VolunteerAvailability />
         </>}
       </main>
     </div>

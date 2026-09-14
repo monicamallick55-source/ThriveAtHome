@@ -59,6 +59,14 @@
     {
       "path": "/api/cron/aria-calls",
       "schedule": "0 13 * * *"
+    },
+    {
+      "path": "/api/cron/membership-renewal-reminders",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/recurring-bookings",
+      "schedule": "0 7 * * *"
     }
   ]
 }

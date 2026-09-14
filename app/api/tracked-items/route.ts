@@ -34,7 +34,14 @@ export async function POST(req: NextRequest) {
   let body: Record<string, unknown>
   try { body = await req.json() } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }) }
 
-  const { item_type, item_name, expiration_or_appointment_date, reminder_lead_days, recurrence_cycle_days, is_recurring, renewal_contact_info, notes, category } = body as Record<string, unknown>
+  const { item_type, item_name, expiration_or_appointment_date, reminder_lead_days, recurrence_cycle_days, is_recurring, renewal_contact_info, notes, category, subcategory, preferred_contact_method } = body as Record<string, unknown>
+
+  const CONTACT_METHODS = ['phone', 'sms', 'email']
+  if (preferred_contact_method !== undefined && preferred_contact_method !== null && preferred_contact_method !== '' && !CONTACT_METHODS.includes(preferred_contact_method as string)) {
+    return NextResponse.json({ error: 'Invalid preferred_contact_method' }, { status: 400 })
+  }
+  const ALLOWED_CATEGORIES = ['renewal', 'appointment', 'subscription']
+  const resolvedCategory = typeof category === 'string' && ALLOWED_CATEGORIES.includes(category) ? category : null
 
   if (!item_type || !ALLOWED_ITEM_TYPES.includes(item_type as ItemType)) {
     return NextResponse.json({ error: 'Invalid item_type' }, { status: 400 })
@@ -49,7 +56,9 @@ export async function POST(req: NextRequest) {
   const defaults = ITEM_TYPE_DEFAULTS[item_type as ItemType]
   const { data, error } = await createTrackedItem(fm.member_id, {
     item_type: item_type as ItemType,
-    category: (typeof category === 'string' ? category : defaults.category) as 'renewal' | 'appointment',
+    category: (resolvedCategory ?? defaults.category) as 'renewal' | 'appointment' | 'subscription',
+    subcategory: typeof subcategory === 'string' ? subcategory.trim() || null : null,
+    preferred_contact_method: typeof preferred_contact_method === 'string' ? preferred_contact_method.trim() || null : null,
     item_name: (item_name as string).trim(),
     expiration_or_appointment_date: expiration_or_appointment_date as string,
     reminder_lead_days: typeof reminder_lead_days === 'number' ? reminder_lead_days : defaults.reminder_lead_days,
@@ -62,5 +71,6 @@ export async function POST(req: NextRequest) {
   })
 
   if (error) return NextResponse.json({ error }, { status: 500 })
-  return NextResponse.json({ item: data }, { status: 201 })
+  // Return under both keys — older clients read `data`, newer read `item`.
+  return NextResponse.json({ item: data, data }, { status: 201 })
 }

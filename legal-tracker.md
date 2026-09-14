@@ -227,3 +227,21 @@ Before going live, document what happens when things go wrong:
 *Owner: Monica Mallick*
 *Review: Monthly — before any new vendor is added or new state is entered*
 *Attorney review required: Before going live with real users*
+
+
+---
+
+## BAA Status — September 2026 Update
+
+| Provider | BAA Required | Status | Action |
+|----------|-------------|--------|--------|
+| **Supabase** | ✅ Yes — holds all member data | ⬜ Not started | Upgrade to HIPAA tier ($599/mo) at supabase.com/contact/enterprise |
+| **Retell AI** | ✅ Yes — processes voice call audio | ⬜ Not started | Contact Retell enterprise team — requires Enterprise plan |
+| **Twilio** | ✅ Yes — telephony layer for calls | ⬜ Not started | Instant self-service at twilio.com/legal/baa — DO THIS FIRST |
+| **Anthropic** | ✅ Yes — processes call transcripts | ⬜ Not started | Email privacy@anthropic.com requesting BAA |
+| **SendGrid** | ✅ Yes — covered under Twilio BAA | ⬜ Not started | Covered by Twilio BAA (SendGrid is a Twilio product) |
+| **Checkr** | ✅ Yes — processes volunteer PII | ⬜ Not started | Checkr dashboard → Settings → Legal → Request BAA |
+
+**Priority order:** Twilio (instant) → Anthropic (email) → Retell AI (enterprise contact) → Supabase (upgrade required) → Checkr (after account created)
+
+**Rule:** No real senior health data may enter the production system until ALL BAAs are signed.

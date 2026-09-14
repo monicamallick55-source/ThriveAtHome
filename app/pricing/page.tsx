@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { STRIPE_PLANS } from '@/lib/stripe/config'
+import { getCurrentUser } from '@/lib/auth'
 
 export const metadata: Metadata = { title: 'Pricing — ThriveAtHome' }
 
@@ -11,22 +12,32 @@ const CHECK_ICON = (
   </svg>
 )
 
-export default function PricingPage() {
+export default async function PricingPage() {
   const plans = Object.values(STRIPE_PLANS)
+  const user = await getCurrentUser()
+  const signedIn = !!user
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-cream)', display: 'flex', flexDirection: 'column' }}>
       <nav style={{ backgroundColor: 'white', borderBottom: '1px solid var(--color-warm-grey)', padding: '0 32px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Link href="/" style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--color-navy)', textDecoration: 'none', fontWeight: 500 }}>
-          ThriveAtHome
+        <Link href={signedIn ? '/member-portal' : '/'} style={{ fontFamily: 'var(--font-body)', fontSize: '18px', fontWeight: 500, color: 'var(--color-navy)', textDecoration: 'none' }}>
+          {signedIn ? '← Back to my portal' : 'ThriveAtHome'}
         </Link>
         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-          <Link href="/login" style={{ fontFamily: 'var(--font-body)', fontSize: '18px', fontWeight: 500, color: 'var(--color-navy)', textDecoration: 'none' }}>
-            Sign in
-          </Link>
-          <Link href="/signup" style={{ fontFamily: 'var(--font-body)', fontSize: '18px', fontWeight: 500, color: 'white', backgroundColor: 'var(--color-navy)', textDecoration: 'none', padding: '8px 20px', borderRadius: 'var(--radius-md)', minHeight: '44px', display: 'inline-flex', alignItems: 'center' }}>
-            Get started
-          </Link>
+          {signedIn ? (
+            <Link href="/dashboard/billing" style={{ fontFamily: 'var(--font-body)', fontSize: '18px', fontWeight: 500, color: 'white', backgroundColor: 'var(--color-navy)', textDecoration: 'none', padding: '8px 20px', borderRadius: 'var(--radius-md)', minHeight: '44px', display: 'inline-flex', alignItems: 'center' }}>
+              My plan &amp; billing
+            </Link>
+          ) : (
+            <>
+              <Link href="/login" style={{ fontFamily: 'var(--font-body)', fontSize: '18px', fontWeight: 500, color: 'var(--color-navy)', textDecoration: 'none' }}>
+                Sign in
+              </Link>
+              <Link href="/signup" style={{ fontFamily: 'var(--font-body)', fontSize: '18px', fontWeight: 500, color: 'white', backgroundColor: 'var(--color-navy)', textDecoration: 'none', padding: '8px 20px', borderRadius: 'var(--radius-md)', minHeight: '44px', display: 'inline-flex', alignItems: 'center' }}>
+                Get started
+              </Link>
+            </>
+          )}
         </div>
       </nav>
 
@@ -124,7 +135,7 @@ export default function PricingPage() {
                 </ul>
 
                 <Link
-                  href={`/signup?plan=${plan.tier}`}
+                  href={signedIn ? '/dashboard/billing' : `/signup?plan=${plan.tier}`}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -141,7 +152,7 @@ export default function PricingPage() {
                     color: plan.highlighted ? 'var(--color-navy)' : 'white',
                   }}
                 >
-                  Get started
+                  {signedIn ? 'Choose this plan' : 'Get started'}
                 </Link>
               </div>
             ))}

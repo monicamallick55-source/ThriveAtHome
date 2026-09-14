@@ -44,9 +44,29 @@ export async function getUpcomingEvents(memberId?: string): Promise<{ data: Even
   }
 }
 
-export async function rsvpToEvent(eventId: string, memberId: string): Promise<{ error: string | null }> {
+export async function rsvpToEvent(
+  eventId: string,
+  memberId: string
+): Promise<{ error: string | null; full?: boolean }> {
   try {
     const admin = createAdminClient()
+
+    // Capacity check — if the event is full, tell the caller so they can offer the waitlist.
+    const { data: evtCap } = await admin
+      .from('events')
+      .select('rsvp_count, max_capacity')
+      .eq('id', eventId)
+      .maybeSingle()
+    if (evtCap?.max_capacity && (evtCap.rsvp_count ?? 0) >= evtCap.max_capacity) {
+      // Already RSVPed? then it's fine.
+      const { data: mine } = await admin
+        .from('event_rsvps')
+        .select('id')
+        .eq('event_id', eventId)
+        .eq('member_id', memberId)
+        .maybeSingle()
+      if (!mine) return { error: 'This event is full.', full: true }
+    }
 
     const { error: insertError } = await admin
       .from('event_rsvps')
@@ -69,6 +89,70 @@ export async function rsvpToEvent(eventId: string, memberId: string): Promise<{ 
   }
 }
 
+/** Add a member to an event's waitlist. */
+export async function joinEventWaitlist(
+  eventId: string,
+  memberId: string
+): Promise<{ error: string | null }> {
+  try {
+    const admin = createAdminClient()
+    const { error } = await (admin.from as any)('event_waitlist')
+      .upsert({ event_id: eventId, member_id: memberId, status: 'waiting', notified_at: null }, { onConflict: 'event_id,member_id' })
+    return { error: error?.message ?? null }
+  } catch (err) {
+    return { error: String(err) }
+  }
+}
+
+export async function leaveEventWaitlist(
+  eventId: string,
+  memberId: string
+): Promise<{ error: string | null }> {
+  try {
+    const admin = createAdminClient()
+    const { error } = await (admin.from as any)('event_waitlist')
+      .delete().eq('event_id', eventId).eq('member_id', memberId)
+    return { error: error?.message ?? null }
+  } catch (err) {
+    return { error: String(err) }
+  }
+}
+
+/** After a cancellation frees a seat, offer it to the earliest waitlister. */
+async function promoteFromWaitlist(eventId: string): Promise<void> {
+  const admin = createAdminClient()
+  const { data: evt } = await admin
+    .from('events')
+    .select('rsvp_count, max_capacity, title')
+    .eq('id', eventId)
+    .maybeSingle()
+  if (!evt?.max_capacity || (evt.rsvp_count ?? 0) >= evt.max_capacity) return
+
+  const { data: next } = await (admin.from as any)('event_waitlist')
+    .select('id, member_id')
+    .eq('event_id', eventId)
+    .eq('status', 'waiting')
+    .order('created_at', { ascending: true })
+    .limit(1)
+    .maybeSingle()
+  if (!next) return
+
+  await (admin.from as any)('event_waitlist')
+    .update({ status: 'offered', notified_at: new Date().toISOString() })
+    .eq('id', next.id)
+
+  try {
+    await admin.from('realtime_notifications').insert({
+      member_id: next.member_id,
+      type: 'celebration_upcoming' as const,
+      severity: 'info' as const,
+      title: 'A spot opened up',
+      body: `A place is now free for "${evt.title ?? 'an event'}" you were waitlisted for. RSVP from the events page to claim it.`,
+    })
+  } catch { /* best-effort */ }
+  console.log(`[Waitlist] Offered freed seat for event ${eventId} to member ${next.member_id}`)
+}
+
 export async function cancelEventRsvp(eventId: string, memberId: string): Promise<{ error: string | null }> {
   try {
     const admin = createAdminClient()
@@ -85,6 +169,9 @@ export async function cancelEventRsvp(eventId: string, memberId: string): Promis
     if (evt && evt.rsvp_count > 0) {
       await admin.from('events').update({ rsvp_count: evt.rsvp_count - 1 }).eq('id', eventId)
     }
+
+    // A seat just freed — offer it to the next person on the waitlist.
+    await promoteFromWaitlist(eventId)
 
     return { error: null }
   } catch (err) {

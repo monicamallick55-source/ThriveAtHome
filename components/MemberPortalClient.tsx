@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import type { Member } from '@/lib/data/members'
 import type { ServiceBooking } from '@/lib/data/services'
 import type { TrackedItem } from '@/lib/data/tracked-items-types'
+import { SUBCATEGORY_OPTIONS } from '@/lib/data/tracked-items-types'
 import CrisisResourceBar from '@/components/shared/CrisisResourceBar'
 
 // ── Constants ──────────────────────────────────────────────────────────────
@@ -80,7 +81,33 @@ const NEED_TYPES = [
   { value: 'other', label: '❓ Other' },
 ]
 
-type Tab = 'profile' | 'services' | 'community' | 'dates' | 'buddy' | 'life-story' | 'billing' | 'org' | 'notifications' | 'documents'
+// Lightweight, offline keyword parser for the "Tell us what you need" box. Maps a
+// free-text sentence to one of the service types plus keeps the sentence as the
+// description. Deliberately simple + deterministic — a real AI parse can replace
+// this later behind the same shape ({ service_type, description }).
+const NEED_KEYWORDS: { type: string; words: string[] }[] = [
+  { type: 'transport', words: ['ride', 'drive', 'driver', 'lift', 'pick me up', 'appointment', 'doctor', 'dmv', 'errand', 'store', 'church', 'airport', 'bus'] },
+  { type: 'meals', words: ['meal', 'food', 'grocer', 'groceries', 'cook', 'dinner', 'lunch', 'eat', 'hungry', 'pantry'] },
+  { type: 'home_service', words: ['clean', 'repair', 'fix', 'leak', 'plumb', 'lawn', 'yard', 'gutter', 'handyman', 'lightbulb', 'furnace', 'heater', 'broken'] },
+  { type: 'tech_help', words: ['phone', 'computer', 'laptop', 'tablet', 'ipad', 'wifi', 'internet', 'tv', 'email', 'password', 'printer', 'zoom', 'facetime'] },
+  { type: 'telehealth', words: ['medication', 'medicine', 'pills', 'prescription', 'nurse', 'telehealth', 'blood pressure', 'refill', 'pharmacy'] },
+  { type: 'companionship', words: ['lonely', 'talk', 'company', 'visit', 'chat', 'someone to', 'friend', 'bored'] },
+  { type: 'legal_financial', words: ['lawyer', 'attorney', 'will', 'estate', 'power of attorney', 'money', 'finance', 'bill', 'taxes', 'benefits', 'medicaid'] },
+  { type: 'roadside', words: ['tow', 'flat tire', 'battery', 'jump start', 'locked out', 'car won', 'stranded', 'aaa'] },
+]
+
+function parseNeedText(text: string): { service_type: string; description: string } {
+  const t = text.toLowerCase()
+  let best = 'transport'
+  let bestHits = 0
+  for (const { type, words } of NEED_KEYWORDS) {
+    const hits = words.filter(w => t.includes(w)).length
+    if (hits > bestHits) { bestHits = hits; best = type }
+  }
+  return { service_type: best, description: text.trim() }
+}
+
+type Tab = 'profile' | 'services' | 'requests' | 'community' | 'dates' | 'buddy' | 'life-story' | 'billing' | 'org' | 'notifications' | 'documents'
 
 // ── Interfaces ──────────────────────────────────────────────────────────────
 
@@ -150,7 +177,7 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
   const [circleEvents, setCircleEvents] = useState<CircleEventData[]>([])
   const [circlesLoaded, setCirclesLoaded] = useState(false)
   const [showNeedForm, setShowNeedForm] = useState(false)
-  const [needForm, setNeedForm] = useState({ need_type: 'other', title: '', description: '', preferred_date: '' })
+  const [needForm, setNeedForm] = useState({ need_type: 'other', title: '', description: '', preferred_date: '', community_context: '' })
   const [submittingNeed, setSubmittingNeed] = useState(false)
   const [needSuccess, setNeedSuccess] = useState(false)
 
@@ -159,13 +186,26 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
   const [serviceType, setServiceType] = useState('transport')
   const [serviceDesc, setServiceDesc] = useState('')
   const [serviceDate, setServiceDate] = useState('')
-  const [serviceAddress, setServiceAddress] = useState('')
+  // Address auto-fills from the member's profile; they can still edit it per request.
+  const [serviceAddress, setServiceAddress] = useState(member.address ?? '')
   const [submittingService, setSubmittingService] = useState(false)
+  // "Tell us what you need" natural-language entry
+  const [needText, setNeedText] = useState('')
+  const [needParsed, setNeedParsed] = useState(false)
+
+  // My Requests — full history
+  const [historyBookings, setHistoryBookings] = useState<Array<{ id: string; created_at: string; service_type: string; status: string; requested_for: string | null; completed_at: string | null; notes: string | null }>>([])
+  const [historyNeeds, setHistoryNeeds] = useState<Array<{ id: string; created_at: string; need_type: string; title: string; description: string | null; status: string; preferred_date: string | null }>>([])
+  const [historyLoaded, setHistoryLoaded] = useState(false)
 
   // Important Dates
   const [localItems, setLocalItems] = useState<TrackedItem[]>(trackedItems)
   const [showDateForm, setShowDateForm] = useState(false)
-  const [dateForm, setDateForm] = useState({ item_type: 'appointment', item_name: '', expiration_or_appointment_date: '', category: 'appointment', reminder_lead_days: 1, notes: '' })
+  const [dateForm, setDateForm] = useState({
+    item_type: 'appointment', item_name: '', expiration_or_appointment_date: '',
+    category: 'appointment', subcategory: '', reminder_lead_days: 1, notes: '',
+    preferred_contact_method: member.preferred_contact_method ?? 'phone',
+  })
   const [submittingDate, setSubmittingDate] = useState(false)
   const [actioningItem, setActioningItem] = useState<string | null>(null)
 
@@ -179,6 +219,13 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
   // Org membership
   const [orgData, setOrgData] = useState<OrgMembershipData | null>(null)
   const [orgLoaded, setOrgLoaded] = useState(false)
+  // Self-service org discovery + join requests
+  const [orgSearch, setOrgSearch] = useState('')
+  const [orgResults, setOrgResults] = useState<Array<{ id: string; org_name: string; org_type: string; city: string | null; state: string | null; zip_code: string | null; description: string | null; member_count: number }>>([])
+  const [orgSearching, setOrgSearching] = useState(false)
+  const [orgSearched, setOrgSearched] = useState(false)
+  const [myJoinRequests, setMyJoinRequests] = useState<Array<{ id: string; org_id: string; status: string; community_orgs: { org_name: string } | null }>>([])
+  const [joiningOrgId, setJoiningOrgId] = useState<string | null>(null)
 
   // Notifications
   const [callFreq, setCallFreq] = useState<'daily' | 'every_other_day' | 'weekly'>(member.check_in_frequency ?? 'daily')
@@ -244,7 +291,7 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
 
   // Persist active tab in URL hash so refreshing or sharing a link preserves the tab
   useEffect(() => {
-    const VALID: Tab[] = ['profile','services','community','dates','buddy','life-story','billing','org','notifications','documents']
+    const VALID: Tab[] = ['profile','services','requests','community','dates','buddy','life-story','billing','org','notifications','documents']
     const hash = window.location.hash.replace('#', '') as Tab
     if (VALID.includes(hash)) setActiveTab(hash)
   }, [])
@@ -273,6 +320,19 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
     if (activeTab === 'community') loadCircles()
   }, [activeTab, loadCircles])
 
+  const loadHistory = useCallback(async () => {
+    if (historyLoaded) return
+    const res = await fetch('/api/member/service-history')
+    const json = await res.json().catch(() => ({ bookings: [], needs: [] }))
+    setHistoryBookings(json.bookings ?? [])
+    setHistoryNeeds(json.needs ?? [])
+    setHistoryLoaded(true)
+  }, [historyLoaded])
+
+  useEffect(() => {
+    if (activeTab === 'requests') loadHistory()
+  }, [activeTab, loadHistory])
+
   // Load life story when tab opens
   const loadLifeStory = useCallback(async () => {
     if (lifeLoaded) return
@@ -289,11 +349,46 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
   // Load org membership when tab opens
   const loadOrg = useCallback(async () => {
     if (orgLoaded) return
-    const res = await fetch('/api/member/org-membership')
+    const [res, reqRes] = await Promise.all([
+      fetch('/api/member/org-membership'),
+      fetch('/api/member/org-join-request'),
+    ])
     const json = await res.json().catch(() => ({ data: null }))
+    const reqJson = await reqRes.json().catch(() => ({ requests: [] }))
     setOrgData(json.data ?? null)
+    setMyJoinRequests(reqJson.requests ?? [])
     setOrgLoaded(true)
   }, [orgLoaded])
+
+  async function searchOrgs() {
+    setOrgSearching(true)
+    const res = await fetch(`/api/orgs/discover?q=${encodeURIComponent(orgSearch.trim())}`)
+    const json = await res.json().catch(() => ({ orgs: [] }))
+    setOrgResults(json.orgs ?? [])
+    setOrgSearching(false)
+    setOrgSearched(true)
+  }
+
+  async function requestJoinOrg(orgId: string) {
+    setJoiningOrgId(orgId)
+    const res = await fetch('/api/member/org-join-request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ org_id: orgId }),
+    })
+    setJoiningOrgId(null)
+    if (res.ok) {
+      const org = orgResults.find(o => o.id === orgId)
+      setMyJoinRequests(prev => [
+        ...prev.filter(r => r.org_id !== orgId),
+        { id: `local-${orgId}`, org_id: orgId, status: 'pending', community_orgs: { org_name: org?.org_name ?? 'this organization' } },
+      ])
+      showToast('Request sent — the organization will review it.')
+    } else {
+      const j = await res.json().catch(() => ({ error: 'Error' }))
+      showToast(j.error ?? 'Could not send your request.')
+    }
+  }
 
   useEffect(() => {
     if (activeTab === 'org') loadOrg()
@@ -340,8 +435,19 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
       body: JSON.stringify(needForm),
     })
     setSubmittingNeed(false)
-    if (res.ok) { setNeedSuccess(true); setShowNeedForm(false); setNeedForm({ need_type: 'other', title: '', description: '', preferred_date: '' }); showToast('Need posted to your community org.') }
+    if (res.ok) { setNeedSuccess(true); setShowNeedForm(false); setNeedForm({ need_type: 'other', title: '', description: '', preferred_date: '', community_context: '' }); showToast('Need posted to your community org.') }
     else { const j = await res.json().catch(() => ({ error: 'Error' })); showToast(j.error ?? 'Failed to post need.') }
+  }
+
+  // AI-assist: parse the free-text box, open the structured form pre-filled.
+  function parseAndFillNeed() {
+    if (!needText.trim()) return
+    const { service_type, description } = parseNeedText(needText)
+    setServiceType(service_type)
+    setServiceDesc(description)
+    setNeedParsed(true)
+    setShowServiceForm(true)
+    showToast('We filled in the form from your description — check it over and adjust if needed.')
   }
 
   async function handleRequestService(e: React.FormEvent) {
@@ -376,12 +482,20 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
     })
     setSubmittingDate(false)
     if (res.ok) {
-      const j = await res.json().catch(() => ({ data: null }))
-      if (j.data) setLocalItems(prev => [...prev, j.data])
+      const j = await res.json().catch(() => ({ item: null, data: null }))
+      const created = j.item ?? j.data
+      if (created) setLocalItems(prev => [...prev, created as TrackedItem])
       setShowDateForm(false)
-      setDateForm({ item_type: 'appointment', item_name: '', expiration_or_appointment_date: '', category: 'appointment', reminder_lead_days: 1, notes: '' })
+      setDateForm({
+        item_type: 'appointment', item_name: '', expiration_or_appointment_date: '',
+        category: 'appointment', subcategory: '', reminder_lead_days: 1, notes: '',
+        preferred_contact_method: member.preferred_contact_method ?? 'phone',
+      })
       showToast('Date added.')
-    } else showToast('Could not add date. Please try again.')
+    } else {
+      const j = await res.json().catch(() => ({ error: '' }))
+      showToast(j.error ? `Could not add date: ${j.error}` : 'Could not add date. Please try again.')
+    }
   }
 
   async function handleItemAction(itemId: string, action: string) {
@@ -540,6 +654,7 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
   const tabs: { id: Tab; label: string }[] = [
     { id: 'profile', label: 'My Profile' },
     { id: 'services', label: 'Services' },
+    { id: 'requests', label: 'My Requests' },
     { id: 'community', label: 'Community' },
     { id: 'dates', label: 'Important Dates' },
     { id: 'buddy', label: 'My Buddy' },
@@ -761,9 +876,33 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
               </button>
             </div>
 
+            {/* AI-assisted natural-language entry */}
+            <div style={card}>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '6px' }}>✨ Tell us what you need</h3>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', marginBottom: '12px' }}>
+                Describe it in your own words — for example &ldquo;I need a ride to my eye doctor next Tuesday morning&rdquo; — and we&apos;ll set up the request for you to review.
+              </p>
+              <textarea
+                value={needText}
+                onChange={e => setNeedText(e.target.value)}
+                rows={2}
+                placeholder="Type what you need help with…"
+                style={{ ...inputSty, height: 'auto', padding: '12px 14px', resize: 'vertical', marginBottom: '10px' }}
+              />
+              <button type="button" onClick={parseAndFillNeed} disabled={!needText.trim()}
+                style={{ ...btnPrimary, opacity: needText.trim() ? 1 : 0.5 }}>
+                Fill in the request for me
+              </button>
+            </div>
+
             {showServiceForm && (
               <div style={card}>
                 <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '16px' }}>Request a Service</h3>
+                {needParsed && (
+                  <div style={{ padding: '10px 14px', backgroundColor: '#F0F9F7', borderRadius: '10px', marginBottom: '14px', fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-teal)' }}>
+                    ✨ Pre-filled from your description. Please check the type, date, and details before submitting.
+                  </div>
+                )}
                 <form onSubmit={handleRequestService} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div>
                     <label style={labelSty}>Type of service <span style={{ color: '#D62828' }}>*</span></label>
@@ -778,10 +917,15 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
                       <option value="roadside">🚗🔧 Car Care &amp; Roadside</option>
                     </select>
                   </div>
-                  {serviceType === 'transport' && (
+                  {(serviceType === 'transport' || serviceType === 'home_service' || serviceType === 'roadside') && (
                     <div>
-                      <label style={labelSty}>Pickup address</label>
+                      <label style={labelSty}>{serviceType === 'transport' ? 'Pickup address' : 'Service address'}</label>
                       <input value={serviceAddress} onChange={e => setServiceAddress(e.target.value)} style={inputSty} placeholder="Your address or starting point" />
+                      {member.address && serviceAddress === member.address && (
+                        <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)', margin: '4px 0 0' }}>
+                          Filled in from your profile — edit if this request is somewhere else.
+                        </p>
+                      )}
                     </div>
                   )}
                   <div>
@@ -834,6 +978,64 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
           </div>
         )}
 
+        {/* ─── MY REQUESTS (full history) ──────────────────────────────────── */}
+        {activeTab === 'requests' && (
+          <div>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '8px' }}>My Requests</h2>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)', marginBottom: '24px' }}>
+              Every service request and community need you&apos;ve submitted, with its current status.
+            </p>
+
+            {!historyLoaded ? (
+              <div style={{ ...card, textAlign: 'center', padding: '32px' }}>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)' }}>Loading your history…</p>
+              </div>
+            ) : historyBookings.length === 0 && historyNeeds.length === 0 ? (
+              <div style={{ ...card, textAlign: 'center', padding: '48px 24px' }}>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: '18px', color: 'var(--color-text-secondary)', marginBottom: '16px' }}>You haven&apos;t made any requests yet.</p>
+                <button onClick={() => switchTab('services')} style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-teal)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>Request a service →</button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {[
+                  ...historyBookings.map(b => ({
+                    key: `b-${b.id}`, kind: 'Service', icon: SERVICE_ICONS[b.service_type] ?? '📋',
+                    title: b.service_type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+                    detail: b.notes ?? '', date: b.requested_for ?? b.created_at, status: b.status,
+                  })),
+                  ...historyNeeds.map(n => ({
+                    key: `n-${n.id}`, kind: 'Community need', icon: '🤝',
+                    title: n.title || n.need_type.replace(/_/g, ' '),
+                    detail: n.description ?? '', date: n.preferred_date ?? n.created_at, status: n.status,
+                  })),
+                ]
+                  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                  .map(row => {
+                    const done = ['completed', 'fulfilled', 'closed'].includes(row.status)
+                    const cancelled = ['cancelled', 'declined'].includes(row.status)
+                    const badgeColor = done ? '#15803D' : cancelled ? '#B91C1C' : '#92400E'
+                    const badgeBg = done ? '#F0FFF4' : cancelled ? '#FEF2F2' : '#FFF9F0'
+                    return (
+                      <div key={row.key} style={{ ...card, marginBottom: 0, padding: '18px 22px', display: 'flex', alignItems: 'center', gap: '14px' }}>
+                        <span style={{ fontSize: '24px', flexShrink: 0 }}>{row.icon}</span>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontFamily: 'var(--font-body)', fontSize: '16px', fontWeight: 600, color: 'var(--color-navy)' }}>{row.title}</div>
+                          <div style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>
+                            {row.kind} · {fmtDate(row.date, { month: 'short', day: 'numeric', year: 'numeric' })}
+                          </div>
+                          {row.detail && <div style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.detail}</div>}
+                        </div>
+                        <span style={{ padding: '4px 12px', borderRadius: '16px', backgroundColor: badgeBg, color: badgeColor, fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 700, textTransform: 'capitalize', flexShrink: 0 }}>
+                          {row.status.replace(/_/g, ' ')}
+                        </span>
+                      </div>
+                    )
+                  })}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* ─── COMMUNITY ───────────────────────────────────────────────────── */}
         {activeTab === 'community' && (
           <div>
@@ -842,13 +1044,16 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
             <div style={card}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
                 <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 500, color: 'var(--color-navy)', margin: 0 }}>My Communities</h3>
+                <a href="/dashboard/communities" style={{ padding: '9px 18px', backgroundColor: 'var(--color-teal)', color: 'white', border: 'none', borderRadius: '10px', fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>
+                  {circles.length === 0 ? '+ Join a community' : 'Find more communities'}
+                </a>
               </div>
               {!circlesLoaded ? (
                 <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)' }}>Loading…</p>
               ) : circles.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '24px' }}>
                   <p style={{ fontFamily: 'var(--font-body)', fontSize: '16px', color: 'var(--color-text-secondary)', marginBottom: '12px' }}>You haven&apos;t joined any communities yet.</p>
-                  <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)' }}>Ask your navigator to help you find a cultural circle or interest group that&apos;s right for you.</p>
+                  <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)' }}>Browse cultural circles and interest groups, or ask your navigator to help you find one that&apos;s right for you.</p>
                 </div>
               ) : (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '14px' }}>
@@ -898,6 +1103,15 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
                       {NEED_TYPES.map(n => <option key={n.value} value={n.value}>{n.label}</option>)}
                     </select>
                   </div>
+                  {circles.length > 0 && (
+                    <div>
+                      <label style={labelSty}>Related community (optional)</label>
+                      <select value={needForm.community_context} onChange={e => setNeedForm(f => ({ ...f, community_context: e.target.value }))} style={inputSty}>
+                        <option value="">— Not community-specific —</option>
+                        {circles.map(c => <option key={c.id} value={c.circle_name}>{c.circle_name}</option>)}
+                      </select>
+                    </div>
+                  )}
                   <div>
                     <label style={labelSty}>Title <span style={{ color: '#D62828' }}>*</span></label>
                     <input required value={needForm.title} onChange={e => setNeedForm(f => ({ ...f, title: e.target.value }))} style={inputSty} placeholder="e.g. Need a ride to doctor on Tuesday" />
@@ -937,16 +1151,30 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                     <div>
                       <label style={labelSty}>Category</label>
-                      <select value={dateForm.category} onChange={e => setDateForm(f => ({ ...f, category: e.target.value, item_type: e.target.value === 'appointment' ? 'appointment' : 'other' }))} style={inputSty}>
+                      <select
+                        value={dateForm.category}
+                        onChange={e => {
+                          const cat = e.target.value
+                          setDateForm(f => ({
+                            ...f,
+                            category: cat,
+                            subcategory: '',
+                            item_type: cat === 'appointment' ? 'appointment' : 'other',
+                          }))
+                        }}
+                        style={inputSty}
+                      >
                         <option value="appointment">📅 Appointment</option>
-                        <option value="renewal">🔄 Renewal / Subscription</option>
+                        <option value="renewal">🔄 Renewal</option>
+                        <option value="subscription">💳 Subscription</option>
                       </select>
                     </div>
                     <div>
-                      <label style={labelSty}>Type</label>
-                      <select value={dateForm.item_type} onChange={e => setDateForm(f => ({ ...f, item_type: e.target.value }))} style={inputSty}>
-                        {Object.entries(ITEM_TYPE_ICONS).map(([v, icon]) => (
-                          <option key={v} value={v}>{icon} {v.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</option>
+                      <label style={labelSty}>Subcategory</label>
+                      <select value={dateForm.subcategory} onChange={e => setDateForm(f => ({ ...f, subcategory: e.target.value }))} style={inputSty}>
+                        <option value="">— Choose one —</option>
+                        {(SUBCATEGORY_OPTIONS[dateForm.category as keyof typeof SUBCATEGORY_OPTIONS] ?? []).map(s => (
+                          <option key={s} value={s}>{s}</option>
                         ))}
                       </select>
                     </div>
@@ -957,13 +1185,24 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                     <div>
-                      <label style={labelSty}>{dateForm.category === 'appointment' ? 'Appointment date' : 'Expiration / renewal date'} <span style={{ color: '#D62828' }}>*</span></label>
+                      <label style={labelSty}>{dateForm.category === 'appointment' ? 'Appointment date' : dateForm.category === 'subscription' ? 'Renews / bills on' : 'Expiration / renewal date'} <span style={{ color: '#D62828' }}>*</span></label>
                       <input type="date" required value={dateForm.expiration_or_appointment_date} onChange={e => setDateForm(f => ({ ...f, expiration_or_appointment_date: e.target.value }))} style={inputSty} />
                     </div>
                     <div>
                       <label style={labelSty}>Remind me (days before)</label>
                       <input type="number" min={1} max={365} value={dateForm.reminder_lead_days} onChange={e => setDateForm(f => ({ ...f, reminder_lead_days: parseInt(e.target.value) || 1 }))} style={inputSty} />
                     </div>
+                  </div>
+                  <div>
+                    <label style={labelSty}>How should we remind you about this?</label>
+                    <select value={dateForm.preferred_contact_method} onChange={e => setDateForm(f => ({ ...f, preferred_contact_method: e.target.value }))} style={inputSty}>
+                      <option value="phone">Phone call</option>
+                      <option value="sms">Text message</option>
+                      <option value="email">Email</option>
+                    </select>
+                    <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)', margin: '4px 0 0' }}>
+                      Starts from your profile preference — change it just for this item if you like.
+                    </p>
                   </div>
                   <div>
                     <label style={labelSty}>Notes (optional)</label>
@@ -996,7 +1235,8 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
                           <div style={{ flex: 1 }}>
                             <div style={{ fontFamily: 'var(--font-body)', fontSize: '16px', fontWeight: 600, color: 'var(--color-navy)' }}>{item.item_name}</div>
                             <div style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>
-                              {item.category === 'appointment' ? 'Appointment' : 'Renewal'} · {fmtDate(item.expiration_or_appointment_date, { month: 'long', day: 'numeric', year: 'numeric' })}
+                              {item.subcategory ? item.subcategory : item.category === 'appointment' ? 'Appointment' : item.category === 'subscription' ? 'Subscription' : 'Renewal'} · {fmtDate(item.expiration_or_appointment_date, { month: 'long', day: 'numeric', year: 'numeric' })}
+                              {item.preferred_contact_method ? ` · reminders by ${item.preferred_contact_method === 'sms' ? 'text' : item.preferred_contact_method}` : ''}
                             </div>
                           </div>
                           <div style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 700, color: urgencyColor, whiteSpace: 'nowrap', flexShrink: 0 }}>
@@ -1185,7 +1425,7 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
                   <div style={{ fontFamily: 'var(--font-display)', fontSize: '28px', color: 'var(--color-navy)', fontWeight: 500 }}>{planTierLabel}</div>
                 </div>
                 <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                  <a href="/pricing" style={{ padding: '10px 20px', backgroundColor: 'var(--color-teal)', color: 'white', borderRadius: '10px', fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>
+                  <a href="/dashboard/billing" style={{ padding: '10px 20px', backgroundColor: 'var(--color-teal)', color: 'white', borderRadius: '10px', fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>
                     View all plans
                   </a>
                   <ManageSubscriptionButton />
@@ -1223,12 +1463,66 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
                 <p style={{ fontFamily: 'var(--font-body)', fontSize: '16px', color: 'var(--color-text-secondary)' }}>Loading…</p>
               </div>
             ) : !orgData ? (
-              <div style={{ ...card, textAlign: 'center', padding: '48px 24px' }}>
-                <span style={{ fontSize: '48px' }}>🏘️</span>
-                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 500, color: 'var(--color-navy)', marginTop: '16px', marginBottom: '12px' }}>Not linked to a community organization</h3>
-                <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)', lineHeight: 1.7, maxWidth: '460px', margin: '0 auto' }}>
-                  Community organizations like Village Networks, senior centers, and area agencies can connect you to local programs, volunteers, and resources. Ask your navigator to connect you to one in your area.
-                </p>
+              <div>
+                <div style={{ ...card, textAlign: 'center', padding: '40px 24px' }}>
+                  <span style={{ fontSize: '48px' }}>🏘️</span>
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 500, color: 'var(--color-navy)', marginTop: '16px', marginBottom: '12px' }}>Find a community organization</h3>
+                  <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)', lineHeight: 1.7, maxWidth: '460px', margin: '0 auto' }}>
+                    Village Networks, senior centers, and area agencies connect you to local programs, volunteers, and resources. Search by name or ZIP code and request to join — the organization approves new members.
+                  </p>
+                </div>
+
+                {myJoinRequests.filter(r => r.status === 'pending').length > 0 && (
+                  <div style={{ ...card, backgroundColor: '#FFF9F0' }}>
+                    <h4 style={{ fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 700, color: '#92400E', marginBottom: '8px' }}>Requests awaiting approval</h4>
+                    {myJoinRequests.filter(r => r.status === 'pending').map(r => (
+                      <div key={r.id} style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: '#92400E' }}>
+                        ⏳ {r.community_orgs?.org_name ?? 'Organization'} — pending
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div style={card}>
+                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                    <input
+                      value={orgSearch}
+                      onChange={e => setOrgSearch(e.target.value)}
+                      onKeyDown={e => { if (e.key === 'Enter') searchOrgs() }}
+                      placeholder="Organization name, city, or ZIP code"
+                      style={{ ...inputSty, flex: 1, minWidth: '220px' }}
+                    />
+                    <button onClick={searchOrgs} disabled={orgSearching} style={{ ...btnPrimary, opacity: orgSearching ? 0.7 : 1 }}>
+                      {orgSearching ? 'Searching…' : 'Search'}
+                    </button>
+                  </div>
+
+                  {orgSearched && orgResults.length === 0 && (
+                    <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)' }}>No organizations matched. Try a broader search, or ask your navigator.</p>
+                  )}
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {orgResults.map(o => {
+                      const pending = myJoinRequests.some(r => r.org_id === o.id && r.status === 'pending')
+                      return (
+                        <div key={o.id} style={{ padding: '16px 20px', backgroundColor: '#F9F6F0', borderRadius: '12px', border: '1px solid #E8E4DC' }}>
+                          <div style={{ fontFamily: 'var(--font-body)', fontSize: '16px', fontWeight: 600, color: 'var(--color-navy)' }}>{o.org_name}</div>
+                          <div style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>
+                            {[o.city, o.state, o.zip_code].filter(Boolean).join(', ') || 'Service area varies'} · {o.member_count} members
+                          </div>
+                          {o.description && <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: '8px 0 0', lineHeight: 1.6 }}>{o.description}</p>}
+                          <button
+                            onClick={() => requestJoinOrg(o.id)}
+                            disabled={pending || joiningOrgId === o.id}
+                            style={{ marginTop: '12px', padding: '8px 18px', backgroundColor: pending ? '#DDD8CE' : 'var(--color-teal)', color: pending ? 'var(--color-text-secondary)' : 'white', border: 'none', borderRadius: '9px', fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, cursor: pending ? 'default' : 'pointer' }}
+                          >
+                            {pending ? 'Request pending' : joiningOrgId === o.id ? 'Sending…' : 'Request to join'}
+                          </button>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
               </div>
             ) : (
               <>
@@ -1528,8 +1822,13 @@ function ManageSubscriptionButton() {
     setLoading(true)
     const res = await fetch('/api/billing/portal', { method: 'POST' })
     const json = await res.json().catch(() => ({}))
-    if (json.url) window.location.href = json.url
-    else { alert('Could not open billing portal. Please contact support.'); setLoading(false) }
+    // The portal route returns { portalUrl }. Accept a few key names defensively.
+    const url = json.portalUrl ?? json.url ?? json.checkoutUrl
+    if (url) window.location.href = url
+    else {
+      alert(json.error ?? 'Could not open billing portal. If you don’t have a paid plan yet, choose one from “View all plans”.')
+      setLoading(false)
+    }
   }
 
   return (

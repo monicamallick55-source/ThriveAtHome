@@ -15,6 +15,7 @@ export async function PATCH(req: NextRequest) {
     family_can_see_mood, family_can_see_call_summaries,
     family_can_see_service_history, family_can_see_alerts,
     preferred_contact_method,
+    directory_opt_in, directory_bio,
   } = body
 
   // Validate the free-text contact-method field against the allowed set.
@@ -59,6 +60,8 @@ export async function PATCH(req: NextRequest) {
   if (family_can_see_service_history !== undefined) updates.family_can_see_service_history = Boolean(family_can_see_service_history)
   if (family_can_see_alerts !== undefined) updates.family_can_see_alerts = Boolean(family_can_see_alerts)
   if (preferred_contact_method !== undefined) updates.preferred_contact_method = preferred_contact_method
+  if (directory_opt_in !== undefined) updates.directory_opt_in = Boolean(directory_opt_in)
+  if (directory_bio !== undefined) updates.directory_bio = typeof directory_bio === 'string' ? directory_bio.slice(0, 600) : null
 
   const { error } = await (admin.from as any)('members').update(updates).eq('id', memberId)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

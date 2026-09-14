@@ -2022,3 +2022,24 @@ When all 14 phases are APPROVED, the build continues by appending separate docum
 **Advanced Milestones** (`prompt-advanced.md`): M13–M18.
 
 To add an Add-On: start a new session, read `progress.md` + `checklist.md` + this file + the new document. All interfaces and stubs from Phase 1 are in place. Activating a real service requires only: (a) the new implementation in `/lib/services/`, (b) update `providers.ts`. Zero other changes.
+
+
+---
+
+## September 2026 Update — Platform Completion
+
+All milestones M1-M27 are complete. Key additions since last prompt update:
+
+**M22 — Device & Smart Home:** /dashboard/devices, wearables, fall detection, FHIR/Epic
+**M23 — Advanced AI/ML:** Wellness baselines, fall risk, isolation scoring, grief pattern monitoring
+**M24 — Professional Services:** Trusted advisors, VITA tax help, /crisis page, document vault
+**M25 — Cultural Programming:** Festival calendar (23 festivals), Classes/Potlucks/Story Circle/Heritage/Oral History
+**M26 — Premium Add-Ons:** 5 monthly + 4 one-time add-ons, Caregiver Family Plan, Memory Books
+**M27 — Pet & Companion:** Pet profiles, pet birthdays, Pet Loss Circle, pet milestone celebrations
+
+**12 AI voice agents built (Retell AI):** Aria, Rosa, Joy, Grace, Hope, Claire, Sam, Morgan, Nova, Alex, Quinn, Jordan.
+Each has distinct name, personality, voice. Multilingual agents deferred to Phase 55.
+
+**Aria opt-in:** Default NO. members.aria_call_opted_in = false. Human navigator calls first 21 days.
+**Privacy settings:** members.family_can_see_mood/call_summaries/service_history/alerts all implemented.
+**Migrations run:** 069_aria_call_opt_in, 070_member_privacy_settings both confirmed in Supabase.

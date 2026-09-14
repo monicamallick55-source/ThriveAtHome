@@ -177,7 +177,7 @@ function HvIntegrationSection({ orgId }: { orgId: string }) {
 }
 
 export default function OrgAdminPortal({ org, programs: initialPrograms, memberNeeds: initialNeeds, memberships: initialMemberships, stats: initialStats, initialTiers }: Props) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'programs' | 'needs' | 'members' | 'dues' | 'settings' | 'donations' | 'email' | 'documents'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'programs' | 'needs' | 'members' | 'dues' | 'settings' | 'donations' | 'email' | 'documents' | 'scheduling' | 'trends'>('overview')
   const [programs, setPrograms] = useState(initialPrograms)
   const [memberNeeds, setMemberNeeds] = useState(initialNeeds)
   const [memberships, setMemberships] = useState(initialMemberships)
@@ -345,6 +345,8 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
     { id: 'programs', label: '📋 Programs' },
     { id: 'needs', label: '🙋 Needs Board' },
     { id: 'members', label: '👥 Members' },
+    { id: 'scheduling', label: '🗓️ Scheduling' },
+    { id: 'trends', label: '📈 Trends' },
     { id: 'dues', label: '💳 Membership Dues' },
     { id: 'donations', label: '🎁 Donations' },
     { id: 'email', label: '📧 Email Members' },
@@ -794,8 +796,16 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
                 + Post a Need
               </button>
             </div>
-            <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)', marginBottom: '24px' }}>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)', marginBottom: '12px' }}>
               Post a need on behalf of a member — volunteers and staff can claim and fulfill them.
+            </p>
+            <p style={{ marginBottom: '24px', display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+              <a href="/org-admin/join-requests" style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, color: 'var(--color-teal)', textDecoration: 'none' }}>
+                → Review membership join requests
+              </a>
+              <a href="/team" style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, color: 'var(--color-teal)', textDecoration: 'none' }}>
+                → Invite a volunteer
+              </a>
             </p>
 
             {needSuccess && <div style={{ marginBottom: '16px', padding: '12px 16px', backgroundColor: '#F0FFF4', borderRadius: '8px', border: '1px solid #22C55E40', fontFamily: 'var(--font-body)', fontSize: '14px', color: '#15803D' }}>{needSuccess}</div>}
@@ -1623,7 +1633,243 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
           </div>
         )}
 
+        {activeTab === 'scheduling' && (
+          <SchedulingTab orgMembers={orgMembers} />
+        )}
+
+        {activeTab === 'trends' && (
+          <TrendsTab />
+        )}
+
       </main>
+    </div>
+  )
+}
+
+// ─── Scheduling tab: recurring service schedules + volunteer coverage ────────
+const DOW_LABELS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+
+interface RecurringSchedule {
+  id: string
+  member_id: string
+  service_type: string
+  cadence: string
+  day_of_week: number
+  time_of_day: string | null
+  notes: string | null
+  next_run_date: string
+  is_active: boolean
+  members?: { preferred_name: string | null; full_name: string } | null
+}
+
+interface DayCoverage {
+  day_of_week: number
+  day: string
+  volunteer_count: number
+  covered_hours: number[]
+  gap: boolean
+}
+
+function SchedulingTab({ orgMembers }: { orgMembers: Array<{ id: string; full_name: string; preferred_name: string | null }> }) {
+  const [schedules, setSchedules] = useState<RecurringSchedule[]>([])
+  const [coverage, setCoverage] = useState<DayCoverage[]>([])
+  const [loading, setLoading] = useState(true)
+  const [form, setForm] = useState({ member_id: '', service_type: 'transport', cadence: 'weekly', day_of_week: '1', time_of_day: '', notes: '' })
+  const [saving, setSaving] = useState(false)
+  const [msg, setMsg] = useState('')
+
+  async function load() {
+    setLoading(true)
+    const [s, c] = await Promise.all([
+      fetch('/api/org-admin/recurring-schedules').then(r => r.json()).catch(() => ({ schedules: [] })),
+      fetch('/api/org-admin/volunteer-coverage').then(r => r.json()).catch(() => ({ coverage: [] })),
+    ])
+    setSchedules(s.schedules ?? [])
+    setCoverage(c.coverage ?? [])
+    setLoading(false)
+  }
+  useEffect(() => { load() }, [])
+
+  async function handleCreate() {
+    if (!form.member_id) { setMsg('Choose a member first.'); return }
+    setSaving(true); setMsg('')
+    const res = await fetch('/api/org-admin/recurring-schedules', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...form, day_of_week: Number(form.day_of_week) }),
+    })
+    const j = await res.json().catch(() => ({ error: 'Error' }))
+    setSaving(false)
+    if (res.ok) {
+      setMsg('Recurring schedule created.')
+      setForm(f => ({ ...f, member_id: '', notes: '' }))
+      load()
+    } else {
+      setMsg(j.error ?? 'Could not create the schedule.')
+    }
+  }
+
+  async function togglePause(id: string, next: boolean) {
+    setSchedules(prev => prev.map(s => s.id === id ? { ...s, is_active: next } : s))
+    const res = await fetch('/api/org-admin/recurring-schedules', {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, is_active: next }),
+    })
+    if (!res.ok) { setSchedules(prev => prev.map(s => s.id === id ? { ...s, is_active: !next } : s)); setMsg('Could not update that schedule.') }
+  }
+
+  const inputSty = { padding: '10px 14px', border: '1px solid #DDD', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '14px', backgroundColor: 'white' } as const
+
+  return (
+    <div>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '4px' }}>Recurring Schedules</h2>
+      <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', marginBottom: '20px' }}>
+        Set a weekly or bi-weekly service and a booking is created automatically each cycle — no need to re-enter it.
+      </p>
+
+      <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '24px', border: '1px solid #E8E4DC', marginBottom: '24px' }}>
+        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '16px' }}>New recurring schedule</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+          <select value={form.member_id} onChange={e => setForm(f => ({ ...f, member_id: e.target.value }))} style={{ ...inputSty, gridColumn: '1 / -1' }}>
+            <option value="">Select a member…</option>
+            {orgMembers.map(m => <option key={m.id} value={m.id}>{m.preferred_name ?? m.full_name} ({m.full_name})</option>)}
+          </select>
+          <select value={form.service_type} onChange={e => setForm(f => ({ ...f, service_type: e.target.value }))} style={inputSty}>
+            <option value="transport">🚗 Transport</option>
+            <option value="meals">🍽️ Meal delivery</option>
+            <option value="grocery_help">🛒 Grocery help</option>
+            <option value="companionship">🤝 Companionship visit</option>
+            <option value="phone_call">📞 Phone call</option>
+            <option value="home_service">🔧 Home help</option>
+            <option value="tech_help">💻 Tech help</option>
+          </select>
+          <select value={form.cadence} onChange={e => setForm(f => ({ ...f, cadence: e.target.value }))} style={inputSty}>
+            <option value="weekly">Every week</option>
+            <option value="biweekly">Every two weeks</option>
+          </select>
+          <select value={form.day_of_week} onChange={e => setForm(f => ({ ...f, day_of_week: e.target.value }))} style={inputSty}>
+            {DOW_LABELS.map((d, i) => <option key={i} value={String(i)}>{d}</option>)}
+          </select>
+          <input type="time" value={form.time_of_day} onChange={e => setForm(f => ({ ...f, time_of_day: e.target.value }))} style={inputSty} />
+          <input value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} placeholder="Notes (optional)" style={{ ...inputSty, gridColumn: '1 / -1' }} />
+        </div>
+        {msg && <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: msg.includes('created') ? 'var(--color-teal)' : '#D62828', marginBottom: '10px' }}>{msg}</p>}
+        <button onClick={handleCreate} disabled={saving}
+          style={{ padding: '10px 20px', backgroundColor: 'var(--color-teal)', color: 'white', border: 'none', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '14px', cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.7 : 1 }}>
+          {saving ? 'Saving…' : '+ Create schedule'}
+        </button>
+      </div>
+
+      {loading ? (
+        <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)' }}>Loading…</p>
+      ) : schedules.length === 0 ? (
+        <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', marginBottom: '32px' }}>No recurring schedules yet.</p>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '32px' }}>
+          {schedules.map(s => (
+            <div key={s.id} style={{ backgroundColor: 'white', borderRadius: '10px', padding: '16px 20px', border: '1px solid #E8E4DC', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', opacity: s.is_active ? 1 : 0.55 }}>
+              <div>
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 600, color: 'var(--color-navy)' }}>
+                  {s.members?.preferred_name ?? s.members?.full_name ?? 'Member'} · {s.service_type.replace(/_/g, ' ')}
+                </div>
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '3px' }}>
+                  {s.cadence === 'biweekly' ? 'Every two weeks' : 'Weekly'} on {DOW_LABELS[s.day_of_week]}{s.time_of_day ? ` at ${s.time_of_day}` : ''} · next {s.next_run_date}
+                </div>
+                {s.notes && <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: '#999', marginTop: '3px' }}>{s.notes}</div>}
+              </div>
+              <button onClick={() => togglePause(s.id, !s.is_active)}
+                style={{ padding: '8px 14px', backgroundColor: s.is_active ? 'white' : 'var(--color-teal)', color: s.is_active ? '#D62828' : 'white', border: s.is_active ? '1px solid #D62828' : 'none', borderRadius: '6px', fontFamily: 'var(--font-body)', fontSize: '13px', cursor: 'pointer', flexShrink: 0 }}>
+                {s.is_active ? 'Pause' : 'Resume'}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '4px' }}>Volunteer Coverage</h2>
+      <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', marginBottom: '16px' }}>
+        Which days your volunteers have published availability. Days with no coverage are flagged.
+      </p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px' }}>
+        {coverage.map(d => (
+          <div key={d.day_of_week} style={{ backgroundColor: 'white', borderRadius: '10px', padding: '14px 16px', border: `1px solid ${d.gap ? '#D6282850' : '#E8E4DC'}`, borderLeft: `4px solid ${d.gap ? '#D62828' : 'var(--color-teal)'}` }}>
+            <div style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 700, color: 'var(--color-navy)' }}>{d.day}</div>
+            <div style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: d.gap ? '#D62828' : 'var(--color-text-secondary)', marginTop: '4px' }}>
+              {d.gap ? 'No coverage' : `${d.volunteer_count} volunteer${d.volunteer_count === 1 ? '' : 's'}`}
+            </div>
+            {d.covered_hours.length > 0 && (
+              <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: '#999', marginTop: '4px' }}>
+                {d.covered_hours[0]}:00–{d.covered_hours[d.covered_hours.length - 1] + 1}:00
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ─── Trends tab: 12-month org trend report ─────────────────────────────────
+interface TrendBucket {
+  month: string
+  label: string
+  service_volume: number
+  volunteer_hours: number
+  new_members: number
+  needs_posted: number
+}
+
+function TrendsTab() {
+  const [trends, setTrends] = useState<TrendBucket[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch('/api/org-admin/trends').then(r => r.json())
+      .then(j => setTrends(j.trends ?? []))
+      .catch(() => setTrends([]))
+      .finally(() => setLoading(false))
+  }, [])
+
+  const metrics: { key: keyof TrendBucket; label: string; color: string }[] = [
+    { key: 'service_volume', label: 'Service requests', color: 'var(--color-teal)' },
+    { key: 'volunteer_hours', label: 'Volunteer hours', color: '#7C3AED' },
+    { key: 'new_members', label: 'New members', color: '#2563EB' },
+    { key: 'needs_posted', label: 'Needs posted', color: '#F59E0B' },
+  ]
+
+  return (
+    <div>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '4px' }}>12-Month Trends</h2>
+      <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', marginBottom: '24px' }}>
+        Month-by-month activity for your organization.
+      </p>
+      {loading ? (
+        <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)' }}>Loading…</p>
+      ) : trends.length === 0 ? (
+        <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)' }}>No data yet.</p>
+      ) : (
+        <div style={{ display: 'grid', gap: '24px' }}>
+          {metrics.map(m => {
+            const max = Math.max(1, ...trends.map(t => Number(t[m.key]) || 0))
+            return (
+              <div key={m.key} style={{ backgroundColor: 'white', borderRadius: '12px', padding: '20px 24px', border: '1px solid #E8E4DC' }}>
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 700, color: 'var(--color-navy)', marginBottom: '16px' }}>{m.label}</div>
+                <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', height: '120px' }}>
+                  {trends.map(t => {
+                    const v = Number(t[m.key]) || 0
+                    return (
+                      <div key={t.month} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--color-text-secondary)' }}>{v || ''}</span>
+                        <div title={`${t.label}: ${v}`} style={{ width: '100%', backgroundColor: m.color, borderRadius: '4px 4px 0 0', height: `${Math.max(2, (v / max) * 90)}px` }} />
+                        <span style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: '#999', whiteSpace: 'nowrap' }}>{t.label}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }

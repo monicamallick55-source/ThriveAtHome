@@ -491,3 +491,57 @@ These test scenarios the agent does not test. Run them during your phase review.
 - Load dashboard with very long AI summary text → should not overflow
 - Set all 14 seed call mood scores to 1 → status dot should be red, timeline shows all red dots
 - Open dashboard while no calls exist at all → should show empty state gracefully, not crash
+
+
+---
+
+## M22-M27 Test Cases — September 2026
+
+### M22 — Device & Smart Home
+- [ ] /dashboard/devices loads with 5 tabs
+- [ ] Companion Device tab — Buy → member_devices row created
+- [ ] Wearables — connect Fitbit → wearable_connections row → sync readings
+- [ ] Fall Protection — send test fall alert → fall_events row + emergency alert
+- [ ] Health Records — connect Epic → ehr_connections row → FHIR export log
+
+### M23 — AI/ML Layer
+- [ ] /api/cron/ml-analytics with CRON_SECRET → { ok:true, membersChecked:4 }
+- [ ] Navigator ML section shows in member detail panel
+- [ ] Fall risk HIGH detected for test member with risk factors
+- [ ] Isolation detection fires after 7 consecutive lonely calls
+- [ ] Grief pattern flag fires at 12+ months + negative sentiment
+
+### M24 — Professional Services
+- [ ] /dashboard/advisors → 6 advisor cards, filter works
+- [ ] Request introduction → advisor_connections row + navigator task
+- [ ] /dashboard/tax-help → eligibility questions → 4 VITA sites listed
+- [ ] /crisis → 5 resources + Call 911 banner + CrisisResourceBar
+- [ ] /dashboard/documents → upload → expiry badge on past-due docs
+
+### M25 — Cultural Programming
+- [ ] /dashboard/communities → navigation pills visible
+- [ ] /dashboard/cultural-festivals → 23 festivals sorted by date
+- [ ] /dashboard/cultural-programming → 5 tabs all load
+- [ ] Register for class → class_registrations row → count increments
+- [ ] Submit Story Circle memory with Save to Life Story → appears on /dashboard/life-story
+
+### M26 — Premium Add-Ons
+- [ ] /dashboard/add-ons → 5 monthly + 4 one-time cards visible
+- [ ] Add Skill Exchange Premium → active status + [STUB][Billing] log
+- [ ] Add Caregiver Family Plan → family seats expand to 6
+- [ ] Milestone Memory Book → [STUB][GOODS] log fires
+
+### M27 — Pet & Companion
+- [ ] /dashboard/pets → Add a pet → companion card appears
+- [ ] Mark pet as passed away → memorial dialog → Remembered section
+- [ ] /api/cron/pet-milestones → birthday within 7 days → celebration_events row
+- [ ] /dashboard/pet-loss-support → Join Companion Circle → feed unlocks
+- [ ] Request pet-loss support → pet_loss_support_requests row + navigator task
+
+### AI Agents (Retell)
+- [ ] Aria call reaches real phone and sounds warm and natural
+- [ ] Rosa answers inbound Care Line and logs service request correctly
+- [ ] Hope answers crisis line — provides 988, stays on line
+- [ ] Quinn triages unknown caller to correct agent within 2 minutes
+- [ ] All agents: say crisis words → 911 protocol activates immediately
+- [ ] No agent uses banned words: monitoring, wellness check, safety call, check-up

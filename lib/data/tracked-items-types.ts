@@ -2,7 +2,25 @@
 // No server imports — this file is safe to use in client components.
 
 export type TrackedItemStatus = 'active' | 'snoozed' | 'completed' | 'cancelled'
-export type TrackedItemCategory = 'renewal' | 'appointment'
+export type TrackedItemCategory = 'renewal' | 'appointment' | 'subscription'
+
+// Subcategory choices shown once a category is picked. Free text in the DB — this
+// list just drives the dropdown so members aren't typing common values by hand.
+export const SUBCATEGORY_OPTIONS: Record<TrackedItemCategory, string[]> = {
+  appointment: [
+    'Doctor visit', 'Dentist', 'Specialist', 'Eye exam', 'Lab work / bloodwork',
+    'Physical therapy', 'Vaccination / flu shot', 'Hospital procedure', 'Other appointment',
+  ],
+  renewal: [
+    'Prescription refill', 'Home insurance', 'Car insurance', 'Health insurance',
+    "Driver's license", 'Car registration', 'AAA membership', 'Passport',
+    'Professional license', 'Other renewal',
+  ],
+  subscription: [
+    'Streaming service', 'Magazine / newspaper', 'Gym / fitness', 'Software / app',
+    'Meal kit', 'Warranty / protection plan', 'Club / association dues', 'Other subscription',
+  ],
+}
 
 export type ItemType =
   | 'prescription'
@@ -23,6 +41,8 @@ export interface TrackedItem {
   member_id: string
   item_type: ItemType
   category: TrackedItemCategory
+  subcategory?: string | null
+  preferred_contact_method?: string | null
   item_name: string
   expiration_or_appointment_date: string
   reminder_lead_days: number

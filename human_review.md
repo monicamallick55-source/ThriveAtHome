@@ -40,76 +40,69 @@ If the agent presents a BLOCKED message instead of a phase review:
 ### Phase 1 — Project Scaffold
 
 Open the Vercel deployment URL:
-- [x] "Thrive@Home" appears in large dark navy text
-- [x] A tagline appears in teal below the heading
-- [x] DevTools → Console tab → zero red errors
-- [x] Background is warm off-white (not bright white or grey)
+- [ ] "Thrive@Home" appears in large dark navy text
+- [ ] A tagline appears in teal below the heading
+- [ ] DevTools → Console tab → zero red errors
+- [ ] Background is warm off-white (not bright white or grey)
 
 Push a trivial change to GitHub:
-- [x] Vercel dashboard shows a new deployment triggered within 2 minutes
-- [x] Deployment completes with a green checkmark
+- [ ] Vercel dashboard shows a new deployment triggered within 2 minutes
+- [ ] Deployment completes with a green checkmark
 
 Terminal: `git ls-files | grep .env`
-- [x] No output at all — no `.env` file is tracked by Git
+- [ ] No output at all — no `.env` file is tracked by Git
 
 Navigate to these placeholder routes and confirm each shows "Coming soon":
-- [x] `/navigator`
-- [x] `/admin`
-- [x] `/dashboard/services`
-- [x] `/volunteer`
-- [x] `/pricing`
+- [ ] `/navigator`
+- [ ] `/admin`
+- [ ] `/dashboard/services`
+- [ ] `/volunteer`
+- [ ] `/pricing`
 
 **Agent hallucination check:** Ask the agent to show you the output of `ls lib/interfaces/ | wc -l`. Confirm it says 8.
-
-Personal Notes:
-- logo should not be Thrive@Home it should have the words ThriveAtHome. 
-- the pricing placeholder doesn't work
-
-Iteration 2 of Phase 1:
-- everything is fixed. ready for phase 2 
 
 ---
 
 ### Phase 2 — Supabase Connection
 
 Navigate to `/test`:
-- [x] Text from the database appears — matches what you inserted in Supabase
-- [x] Not "undefined", "null", or a spinning loader
+- [ ] Text from the database appears — matches what you inserted in Supabase
+- [ ] Not "undefined", "null", or a spinning loader
 
 After the agent breaks the Supabase URL:
-- [x] A readable error message appears — not a stack trace or error code
+- [ ] A readable error message appears — not a stack trace or error code
 
 After the agent restores it and deletes the test page:
-- [x] The homepage at `/` still loads correctly
+- [ ] The homepage at `/` still loads correctly
 
 ---
 
 ### Phase 3 — Database Schema
 
 Open Supabase → Table Editor:
-- [x] You can see more than 15 tables in the left sidebar
-- [x] Clicking `members` shows columns including `full_name`, `preferred_name`, `plan_tier`, `status`
-- [x] Clicking `realtime_notifications` shows columns including `type`, `title`, `body`, `severity`, `read`
+- [ ] You can see more than 15 tables in the left sidebar
+- [ ] Clicking `members` shows columns including `full_name`, `preferred_name`, `plan_tier`, `status`
+- [ ] Clicking `realtime_notifications` shows columns including `type`, `title`, `body`, `severity`, `read`
 
 Supabase → Authentication → Policies:
-- [x] All tables show "RLS enabled" — none show "disabled"
+- [ ] All tables show "RLS enabled" — none show "disabled"
 
 Supabase → Database → Replication:
-- [x] `realtime_notifications` is listed with INSERT events enabled
+- [ ] `realtime_notifications` is listed with INSERT events enabled
 
 ---
 
 ### Phase 4 — RLS Verification
 
 Agent runs the cross-user test script and shows you the terminal output:
-- [x] Output contains "Cross-user isolation: PASSED"
-- [x] Output contains "Own data access: PASSED"
-- [x] Output contains "Service role reads all: PASSED"
-- [x] Output does NOT contain "FAILED" anywhere
-- [x] Output says "All test data cleaned up"
+- [ ] Output contains "Cross-user isolation: PASSED"
+- [ ] Output contains "Own data access: PASSED"
+- [ ] Output contains "Service role reads all: PASSED"
+- [ ] Output does NOT contain "FAILED" anywhere
+- [ ] Output says "All test data cleaned up"
 
 Supabase → `members` table — confirm no test rows remain:
-- [x] No rows with test email addresses like `user-a@test.com`
+- [ ] No rows with test email addresses like `user-a@test.com`
 
 ---
 
@@ -118,22 +111,22 @@ Supabase → `members` table — confirm no test rows remain:
 ### Phase 5 — Authentication
 
 Navigate to `/signup`, fill in test details, submit:
-- [x] Redirected to `/onboarding` — no error message
+- [ ] Redirected to `/onboarding` — no error message
 
 Supabase → Authentication → Users:
-- [x] Your test email appears
+- [ ] Your test email appears
 
 Supabase → `family_members` table:
-- [x] A row exists with your email and `role = 'family'`
+- [ ] A row exists with your email and `role = 'family'`
 
 Log out, type `/dashboard` in the address bar:
-- [x] Immediately redirected to `/login` — dashboard content never visible
+- [ ] Immediately redirected to `/login` — dashboard content never visible
 
 Log out, type `/navigator` in the address bar:
-- [x] Immediately redirected to `/login`
+- [ ] Immediately redirected to `/login`
 
 **Stress test:** Sign up with an email that already exists.
-- [x] Clear error message — not a crash
+- [ ] Clear error message — not a crash
 
 **Agent hallucination check:** Ask the agent to show you the signup rollback test result. If it says "I skipped that test because it seemed straightforward," that is not acceptable — ask it to run the test explicitly and show you the output.
 
@@ -142,47 +135,47 @@ Log out, type `/navigator` in the address bar:
 ### Phase 6 — Member Onboarding Form
 
 Navigate to `/onboarding`:
-- [x] Progress bar shows "Step 1 of 3"
-- [x] All field labels visible above the fields (not as placeholder text inside)
-- [x] "Next" button is large
+- [ ] Progress bar shows "Step 1 of 3"
+- [ ] All field labels visible above the fields (not as placeholder text inside)
+- [ ] "Next" button is large
 
 Click "Next" with all fields empty:
-- [x] Error messages appear below required fields — form does NOT advance
+- [ ] Error messages appear below required fields — form does NOT advance
 
 Enter today's date as date of birth:
-- [x] Error — must be at least 60 years old
+- [ ] Error — must be at least 60 years old
 
 Enter `abc-xyz-123` as phone:
-- [x] Error — invalid format with example
+- [ ] Error — invalid format with example
 
 Complete all 3 steps and submit:
-- [x] Confirmation page shows correct preferred name — not "undefined"
+- [ ] Confirmation page shows correct preferred name — not "undefined"
 
 Supabase → `members`:
-- [x] New row with `plan_tier = 'basics'`
+- [ ] New row with `plan_tier = 'basics'`
 
 Partially fill Step 2, refresh browser:
-- [x] Your data is still there
+- [ ] Your data is still there
 
 On your actual phone at 375px:
-- [x] No horizontal scrolling, all buttons tappable
+- [ ] No horizontal scrolling, all buttons tappable
 
 ---
 
 ### Phase 7 — App Data Layer & Seed Data
 
 Agent runs seed script and shows terminal output:
-- [x] `Login: test-family@thriveathome.dev / TestPassword123!` is printed
-- [x] No red error lines
+- [ ] `Login: test-family@thriveathome.dev / TestPassword123!` is printed
+- [ ] No red error lines
 
 Log in with the seeded credentials:
-- [x] Login works
+- [ ] Login works
 
 Supabase → `check_in_calls`:
-- [x] 14 rows linked to Margaret Chen
+- [ ] 14 rows linked to Margaret Chen
 
 Agent runs seed script a second time:
-- [x] No errors; same row count (no duplicates)
+- [ ] No errors; same row count (no duplicates)
 
 ---
 
@@ -191,21 +184,21 @@ Agent runs seed script a second time:
 ### Phase 8 — Primitive UI Components
 
 Navigate to `/test-ui` (the agent will tell you when it's live):
-- [x] Buttons in 4 styles: dark navy, teal outlined, red, ghost/subtle
-- [x] Cards with different border accents: default, teal, amber, red
-- [x] Mood emojis: 😊 for high, 😐 for middle, 😔 for low, — for no score
-- [x] Coloured dots: green, amber, red
-- [x] Bell icon with "0" count
-- [x] A progress bar is visible
+- [ ] Buttons in 4 styles: dark navy, teal outlined, red, ghost/subtle
+- [ ] Cards with different border accents: default, teal, amber, red
+- [ ] Mood emojis: 😊 for high, 😐 for middle, 😔 for low, — for no score
+- [ ] Coloured dots: green, amber, red
+- [ ] Bell icon with "0" count
+- [ ] A progress bar is visible
 
 Tab through page using only the keyboard:
-- [x] Every button reachable
-- [x] Focus ring always visible (a visible outline around the focused element)
+- [ ] Every button reachable
+- [ ] Focus ring always visible (a visible outline around the focused element)
 
 Open the Modal:
-- [x] Tab key stays inside the Modal
-- [x] Pressing Escape closes it
-- [x] Focus returns to whatever opened the Modal
+- [ ] Tab key stays inside the Modal
+- [ ] Pressing Escape closes it
+- [ ] Focus returns to whatever opened the Modal
 
 ---
 
@@ -218,21 +211,21 @@ Open the Modal:
 Log in as `test-family@thriveathome.dev`. Open `/dashboard`. Watch it carefully.
 
 The agent inserts a test notification via Supabase SQL Editor:
-- [x] Within 2 seconds, a toast notification appears in the corner — WITHOUT refreshing the page
-- [x] The bell icon count shows "1"
+- [ ] Within 2 seconds, a toast notification appears in the corner — WITHOUT refreshing the page
+- [ ] The bell icon count shows "1"
 
 Click the bell:
-- [x] Dropdown shows the notification
-- [x] "Mark read" button visible
+- [ ] Dropdown shows the notification
+- [ ] "Mark read" button visible
 
 Click "Mark read":
-- [x] Bell count returns to "0"
+- [ ] Bell count returns to "0"
 
 The agent inserts a notification for a DIFFERENT member:
-- [x] You do NOT see it — only your own member's notifications appear
+- [ ] You do NOT see it — only your own member's notifications appear
 
 **Stress test:** Close your laptop lid for 30 seconds (simulates network disconnect), reopen, insert a new notification. Does it still appear?
-- [x] Realtime reconnects and the notification appears (may take 5–10 seconds)
+- [ ] Realtime reconnects and the notification appears (may take 5–10 seconds)
 
 ---
 
@@ -241,18 +234,18 @@ The agent inserts a notification for a DIFFERENT member:
 ### Phase 10 — Alert Logic
 
 Agent runs test script and shows output:
-- [x] "All alert rule tests passed" appears
-- [x] Deduplication confirmed — only 1 alert row for same type in 24h
+- [ ] "All alert rule tests passed" appears
+- [ ] Deduplication confirmed — only 1 alert row for same type in 24h
 
 While the dashboard is open, the agent creates a test alert:
-- [x] Alert card appears in Alerts Panel within 2 seconds — no page refresh
-- [x] StatusDot colour changes
+- [ ] Alert card appears in Alerts Panel within 2 seconds — no page refresh
+- [ ] StatusDot colour changes
 
 ### Phase 11 — Crisis Detection
 
 Agent runs crisis detection tests and shows output:
-- [x] All 5 escalation steps confirmed in the output
-- [x] "fell asleep watching TV" → no crisis fires (no false positive)
+- [ ] All 5 escalation steps confirmed in the output
+- [ ] "fell asleep watching TV" → no crisis fires (no false positive)
 
 **Take a moment here.** This feature protects real seniors. If a real person said something concerning during a call, does the output show it would escalate? Ask the agent to walk you through what would actually happen in M8 when real calls are connected.
 
@@ -263,21 +256,21 @@ Agent runs crisis detection tests and shows output:
 ### Phase 12 — Dashboard Shell
 
 Log in as `test-family@thriveathome.dev`. Navigate to `/dashboard`:
-- [x] Loads within 3 seconds
-- [x] "Margaret Chen" or her preferred name visible in header
-- [x] Today's Wellness Card shows a mood emoji, scores, and summary text
-- [x] Health timeline has 4 tabs — each renders when clicked
-- [x] Bell icon in header
+- [ ] Loads within 3 seconds
+- [ ] "Margaret Chen" or her preferred name visible in header
+- [ ] Today's Wellness Card shows a mood emoji, scores, and summary text
+- [ ] Health timeline has 4 tabs — each renders when clicked
+- [ ] Bell icon in header
 
 While dashboard is open, agent inserts a test alert:
-- [x] Alert card appears in Alerts Panel within 2 seconds — no page refresh
-- [x] StatusDot changes colour
+- [ ] Alert card appears in Alerts Panel within 2 seconds — no page refresh
+- [ ] StatusDot changes colour
 
 Agent breaks Supabase URL, reload:
-- [x] Friendly error message visible — no raw error code
+- [ ] Friendly error message visible — no raw error code
 
 On your actual phone at 375px:
-- [x] No horizontal scroll, text readable, buttons tappable
+- [ ] No horizontal scroll, text readable, buttons tappable
 
 **Stress test:** Open the dashboard with the timeline tab showing all 4 states (red/amber/green) by adjusting seed data mood scores. Confirm the chart colours match the scores.
 
@@ -286,41 +279,41 @@ On your actual phone at 375px:
 ### Phase 13 — Call History
 
 Navigate to `/dashboard/calls`:
-- [x] Calls listed newest-first
-- [x] Each row shows date, emoji, medication status
-- [x] Alert flags shown in plain English — not "pain_high" or "no_eating"
+- [ ] Calls listed newest-first
+- [ ] Each row shows date, emoji, medication status
+- [ ] Alert flags shown in plain English — not "pain_high" or "no_eating"
 
 Click a call row:
-- [x] Full AI summary text appears
-- [x] Flags use human-readable descriptions
+- [ ] Full AI summary text appears
+- [ ] Flags use human-readable descriptions
 
 With 25+ calls, scroll to bottom and click "Load more":
-- [x] More calls appear — page does NOT reload
+- [ ] More calls appear — page does NOT reload
 
 ---
 
 ### Phase 14 — Family Coordination Tools
 
 Two browser windows. User A creates a task:
-- [x] Task appears for User B within 2 seconds — no page refresh
+- [ ] Task appears for User B within 2 seconds — no page refresh
 
 User A sends a message:
-- [x] Message appears for User B within 2 seconds
+- [ ] Message appears for User B within 2 seconds
 
 Navigate to `/dashboard/documents`:
-- [x] Upload a PDF — it appears in the list
+- [ ] Upload a PDF — it appears in the list
 
 Click "Download":
-- [x] File downloads
+- [ ] File downloads
 
 Try to upload a large file (> 10MB):
-- [x] Clear error message — upload does not proceed
+- [ ] Clear error message — upload does not proceed
 
 Agent sets `last_login_at` to 8 days ago and triggers the nudge function:
-- [x] Terminal shows a `family_nudge` notification was inserted
+- [ ] Terminal shows a `family_nudge` notification was inserted
 
 Agent triggers nudge again immediately:
-- [x] Terminal shows the nudge was skipped (one per 7 days)
+- [ ] Terminal shows the nudge was skipped (one per 7 days)
 
 ---
 
@@ -329,20 +322,20 @@ Agent triggers nudge again immediately:
 Read every item below before replying APPROVED.
 
 **Technical:**
-- [x] Agent shows `npx tsc --noEmit` → zero errors
-- [x] Agent shows `git ls-files | grep .env` → no output
-- [x] Agent shows axe-cli runs → zero violations on dashboard, onboarding, and login
+- [ ] Agent shows `npx tsc --noEmit` → zero errors
+- [ ] Agent shows `git ls-files | grep .env` → no output
+- [ ] Agent shows axe-cli runs → zero violations on dashboard, onboarding, and login
 - [ ] All 19 placeholder routes still return "Coming soon" — none accidentally broken
 
 **Core features working:**
-- [x] Sign up → enrol Margaret Chen → dashboard loads with her data
-- [x] New alert appears on dashboard within 2 seconds without refreshing
-- [x] Family task appears for all linked family members without refresh
-- [x] Document upload and download work
-- [x] Crisis detection: agent shows 5 escalation steps logged in stub mode
+- [ ] Sign up → enrol Margaret Chen → dashboard loads with her data
+- [ ] New alert appears on dashboard within 2 seconds without refreshing
+- [ ] Family task appears for all linked family members without refresh
+- [ ] Document upload and download work
+- [ ] Crisis detection: agent shows 5 escalation steps logged in stub mode
 
 **Mobile:**
-- [x] Viewed dashboard on a real phone — no horizontal scroll, all text readable
+- [ ] Viewed dashboard on a real phone — no horizontal scroll, all text readable
 
 **What V1 is:** A fully functional product for families to stay connected with their senior — using stub implementations for any paid external service. Every alert fires, every notification is instant, and the dashboard is complete.
 
@@ -350,4 +343,32 @@ Read every item below before replying APPROVED.
 
 When every item above is ✅ → reply **APPROVED** and V1 is complete.
 
-APPROVED
+
+---
+
+## Human Review Items — September 2026
+
+### Agent Names — Verify in All UI Copy
+All UI references to "Aria" that aren't specifically about the morning call agent need to be reviewed:
+- Member portal Notifications tab: "Aria" toggle → correct (this IS Aria)
+- Care Line number in member portal: should say "Rosa — Care Line" not "Aria Care Line"
+- Crisis resources page: should say "Hope — 24/7 Support Line" alongside 988
+- Volunteer portal: should say "Sam — Volunteer Support" not "Aria"
+- Family dashboard: should say "Claire — Family Support" not "Aria"
+
+### Aria Opt-In Verification
+- [ ] Walk onboarding → "No" → confirm NO Aria text through Confirmation ✅ VERIFIED
+- [ ] Walk onboarding → "Yes daily" → confirm Aria named in Confirmation ✅ VERIFIED
+- [ ] Walk onboarding → "Less often/Weekly" → confirm "once a week" wording ✅ VERIFIED
+- [ ] /signup page says "Who are you signing up for?" not Aria branding ✅ VERIFIED
+- [ ] Member portal Notifications tab → Aria toggle on/off works ✅ VERIFIED
+- [ ] Privacy settings — 4 family visibility toggles save and persist ✅ VERIFIED
+
+### Production Activation (Pending Human Action)
+- [ ] Add 12 Retell agent IDs to Vercel (human must copy from Retell dashboard)
+- [ ] Create Twilio account and buy phone numbers (human must do)
+- [ ] Add Anthropic API key to Vercel (human must do)
+- [ ] Sign Twilio BAA at twilio.com/legal/baa (instant — human must do)
+- [ ] Email privacy@anthropic.com for Anthropic BAA (human must do)
+- [ ] Upgrade Supabase to HIPAA tier (human must approve $599/mo spend)
+- [ ] Switch Stripe to live mode when ready for real payments (human must do)

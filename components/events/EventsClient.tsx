@@ -45,13 +45,14 @@ export default function EventsClient({ initialEvents }: Props) {
   const [events, setEvents] = useState<EventWithRsvp[]>(initialEvents)
   const [loadingId, setLoadingId] = useState<string | null>(null)
   const [toastMsg, setToastMsg] = useState<string | null>(null)
+  const [waitlistedIds, setWaitlistedIds] = useState<Set<string>>(new Set())
 
   function showToast(msg: string) {
     setToastMsg(msg)
     setTimeout(() => setToastMsg(null), 4000)
   }
 
-  async function handleRsvp(eventId: string, action: 'rsvp' | 'cancel') {
+  async function handleRsvp(eventId: string, action: 'rsvp' | 'cancel' | 'join_waitlist' | 'leave_waitlist') {
     setLoadingId(eventId)
     try {
       const res = await fetch('/api/events/rsvp', {
@@ -62,7 +63,23 @@ export default function EventsClient({ initialEvents }: Props) {
       const data = await res.json().catch(() => ({}))
 
       if (!res.ok) {
-        showToast(data.error || 'Could not complete action. Please try again.')
+        // Event full — offer the waitlist instead of a dead end.
+        if (data.full && action === 'rsvp') {
+          showToast('This event is full — you can join the waitlist and we\'ll notify you if a spot opens.')
+        } else {
+          showToast(data.error || 'Could not complete action. Please try again.')
+        }
+        return
+      }
+
+      if (action === 'join_waitlist') {
+        setWaitlistedIds(prev => new Set([...prev, eventId]))
+        showToast('You\'re on the waitlist. We\'ll notify you if a spot opens up.')
+        return
+      }
+      if (action === 'leave_waitlist') {
+        setWaitlistedIds(prev => { const n = new Set(prev); n.delete(eventId); return n })
+        showToast('Removed from the waitlist.')
         return
       }
 
@@ -108,7 +125,7 @@ export default function EventsClient({ initialEvents }: Props) {
             letterSpacing: '0.06em', margin: '0 0 16px',
           }}>Happening Today</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {todayEvents.map(evt => <EventCard key={evt.id} evt={evt} isToday={true} loadingId={loadingId} onRsvp={handleRsvp} />)}
+            {todayEvents.map(evt => <EventCard key={evt.id} evt={evt} isToday={true} loadingId={loadingId} onRsvp={handleRsvp} isWaitlisted={waitlistedIds.has(evt.id)} />)}
           </div>
         </div>
       )}
@@ -122,7 +139,7 @@ export default function EventsClient({ initialEvents }: Props) {
             letterSpacing: '0.06em', margin: '0 0 16px',
           }}>Upcoming Events</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {upcomingEvents.map(evt => <EventCard key={evt.id} evt={evt} isToday={false} loadingId={loadingId} onRsvp={handleRsvp} />)}
+            {upcomingEvents.map(evt => <EventCard key={evt.id} evt={evt} isToday={false} loadingId={loadingId} onRsvp={handleRsvp} isWaitlisted={waitlistedIds.has(evt.id)} />)}
           </div>
         </div>
       )}
@@ -147,15 +164,17 @@ export default function EventsClient({ initialEvents }: Props) {
 }
 
 function EventCard({
-  evt, isToday, loadingId, onRsvp,
+  evt, isToday, loadingId, onRsvp, isWaitlisted,
 }: {
   evt: EventWithRsvp
   isToday: boolean
   loadingId: string | null
-  onRsvp: (id: string, action: 'rsvp' | 'cancel') => void
+  onRsvp: (id: string, action: 'rsvp' | 'cancel' | 'join_waitlist' | 'leave_waitlist') => void
+  isWaitlisted: boolean
 }) {
   const isLoading = loadingId === evt.id
   const formatColor = FORMAT_COLORS[evt.format] ?? '#333'
+  const isFull = !!evt.max_capacity && evt.rsvp_count >= evt.max_capacity
 
   return (
     <div style={{
@@ -208,19 +227,43 @@ function EventCard({
 
       {/* RSVP section */}
       {!evt.user_has_rsvped ? (
-        <button
-          onClick={() => onRsvp(evt.id, 'rsvp')}
-          disabled={isLoading}
-          style={{
-            backgroundColor: isToday ? 'var(--color-navy)' : 'var(--color-teal)',
-            color: 'white', border: 'none', borderRadius: '10px',
-            padding: '12px 24px', fontFamily: 'var(--font-body)', fontSize: '16px',
-            fontWeight: 600, cursor: isLoading ? 'not-allowed' : 'pointer',
-            opacity: isLoading ? 0.7 : 1, minHeight: '48px',
-          }}
-        >
-          {isLoading ? 'Please wait…' : isToday ? 'Join Now' : 'RSVP'}
-        </button>
+        isFull ? (
+          <div>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, color: '#B45309', margin: '0 0 10px' }}>
+              This event is full.
+            </p>
+            {isWaitlisted ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                <span style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-teal)', fontWeight: 600 }}>
+                  ✓ You&apos;re on the waitlist — we&apos;ll notify you if a spot opens.
+                </span>
+                <button onClick={() => onRsvp(evt.id, 'leave_waitlist')} disabled={isLoading}
+                  style={{ background: 'none', border: '1px solid var(--color-border)', borderRadius: '8px', padding: '6px 14px', fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', cursor: 'pointer' }}>
+                  Leave waitlist
+                </button>
+              </div>
+            ) : (
+              <button onClick={() => onRsvp(evt.id, 'join_waitlist')} disabled={isLoading}
+                style={{ backgroundColor: 'var(--color-navy)', color: 'white', border: 'none', borderRadius: '10px', padding: '12px 24px', fontFamily: 'var(--font-body)', fontSize: '16px', fontWeight: 600, cursor: isLoading ? 'not-allowed' : 'pointer', opacity: isLoading ? 0.7 : 1, minHeight: '48px' }}>
+                {isLoading ? 'Please wait…' : 'Join the waitlist'}
+              </button>
+            )}
+          </div>
+        ) : (
+          <button
+            onClick={() => onRsvp(evt.id, 'rsvp')}
+            disabled={isLoading}
+            style={{
+              backgroundColor: isToday ? 'var(--color-navy)' : 'var(--color-teal)',
+              color: 'white', border: 'none', borderRadius: '10px',
+              padding: '12px 24px', fontFamily: 'var(--font-body)', fontSize: '16px',
+              fontWeight: 600, cursor: isLoading ? 'not-allowed' : 'pointer',
+              opacity: isLoading ? 0.7 : 1, minHeight: '48px',
+            }}
+          >
+            {isLoading ? 'Please wait…' : isToday ? 'Join Now' : 'RSVP'}
+          </button>
+        )
       ) : (
         <div>
           {/* Confirmed banner */}

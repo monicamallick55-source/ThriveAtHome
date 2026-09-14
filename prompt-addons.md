@@ -1052,3 +1052,27 @@ STRIPE_PRICE_ID_CONNECT=
 STRIPE_PRICE_ID_COMPLETE=
 STRIPE_PRICE_ID_PREMIER=
 ```
+
+
+---
+
+## M26 Premium Add-Ons — September 2026 Update
+
+M26 is fully complete. All add-ons built and tested:
+
+**Monthly Add-Ons ($9-19/month):**
+1. Skill Exchange Premium ($9/month) — full access to skill exchange marketplace
+2. Caregiver Family Plan ($19/month) — expands family seats to 6, adds coordinator calls
+3. Long-Distance Caregiver ($14/month) — family video diary, weekly navigator report
+4. Enhanced Cultural Programming ($9/month) — unlimited class registrations, potluck hosting
+5. Priority Navigator Access ($19/month) — 48h response SLA, dedicated navigator
+
+**One-Time Services:**
+1. Annual Care Planning Session ($149) — dedicated planning session with navigator
+2. Benefits Deep-Dive ($79) — comprehensive benefits discovery and application help
+3. Extra Legal Consultation ($99) — 30-min elder law or financial advisor consultation
+4. Milestone Birthday Memory Book ($49-99) — physical printed book for 70/75/80/85 birthdays
+
+**Cron jobs:** coordinator-calls cron handles Caregiver Family Plan monthly coordinator calls.
+**Tables:** member_addons, care_planning_sessions, legal_consultation, memory_book_orders
+**Stub:** [STUB][GOODS] fires for Memory Book orders — activates with ARTIFACT_UPRISING_API_KEY

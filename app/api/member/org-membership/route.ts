@@ -33,12 +33,12 @@ export async function GET() {
 
   // Get org details + programs
   const { data: org } = await (admin.from as any)('community_orgs')
-    .select('id, name, description, dues_description')
+    .select('id, name:org_name, description, dues_description')
     .eq('id', membership.org_id)
     .maybeSingle()
 
   const { data: programs } = await (admin.from as any)('org_programs')
-    .select('id, name, program_type, description, schedule_description, contact_person')
+    .select('id, name:program_name, program_type, description, schedule_description, contact_person:contact_name')
     .eq('org_id', membership.org_id)
     .order('created_at', { ascending: true })
     .limit(10)

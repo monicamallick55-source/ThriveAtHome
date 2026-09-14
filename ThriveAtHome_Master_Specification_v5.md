@@ -97,7 +97,7 @@ ThriveAtHome is built as a modular, cloud-native platform organized into five in
 | Local Events | In-person community gatherings at vetted venues | 🔄 Partial | Libraries, cafés, parks, faith spaces | Transport coordination built in |
 | Skill Exchange | Seniors teach skills to other seniors and community members | ✅ Built (M14) | Time banking — teach 1hr, earn 1hr credit | Cooking, crafts, history, languages, gardening, life wisdom |
 | Interest Groups (Communities — Interest & Hobby) | Persistent, member-led recurring groups | ✅ Built (M14) — 8 circles seeded: Gardening, Books, Music, Cooking, Faith, Sports, Travel, Crafts | Weekly cadence; self-organizing with platform facilitation | **Vision gap:** original spec also named veterans, LGBTQ+ seniors, widows/widowers support, and professional identity groups as distinct interest groups — not yet built as named circles |
-| Cultural Circles (Communities — Cultural & Heritage) | Dedicated sub-communities by ethnic/cultural heritage | ✅ Built (M14) — 12 circles seeded | Language, content, festivals, matching | Member-led with platform support |
+| **Communities — Cultural & Heritage** (formerly "Cultural Circles") | 12 dedicated sub-communities by ethnic/cultural heritage — Latino/Hispanic, Chinese-American, Vietnamese, Korean, South Asian, Filipino, African-American, Jewish, Arab/Middle Eastern, Caribbean, Eastern European, Native American | ✅ Built (M14) — all 12 seeded | Language, content, festivals, matching | Member-led with platform support |
 | **Communities** (unified name) | Combines Cultural + Interest circles under one feature | ✅ Built | 20 total communities at launch | Admin can add more via /admin/communities |
 | Geographic Chapters | Hybrid national + soft local chapter model | 🔄 In progress (Phase 50f) | metro_areas table, 10 US metros seeded | Bay Area first chapter; auto-activates at 50+ members |
 
@@ -172,7 +172,7 @@ A single flexible system replaces the original narrow Prescription Refill Manage
 - Dial-In Access: Twilio-powered phone number — ⏸ Built, deferred until Twilio credentials added
 - Volunteer / Companion / Buddy Portal: Web dashboard — ✅ Built
 - Care Coordinator (Navigator) Console: Unified action feed — ✅ Built, redesigned from original caseload-table concept
-- Cultural Circle Platform: Community spaces — ✅ Built (English UI; full i18n is Phase 55, builds LAST after M27)
+- Communities Platform (formerly Cultural Circles): 20 community spaces at /dashboard/communities — ✅ Built (English UI; full i18n is Phase 55, builds LAST after M27)
 
 ## 3.2 AI & Intelligence Engine
 
@@ -399,11 +399,11 @@ See Sections 5, 6, 7 for full detail on each component.
 
 ---
 
-# 6. CULTURAL & ETHNIC COMMUNITY CIRCLES
+# 6. COMMUNITIES (CULTURAL & INTEREST CIRCLES)
 
-✅ **Built (M14)** — All 12 cultural circles seeded and live at /dashboard/communities, renamed from "Cultural Circles" to "Communities" (URL redirects in place).
+✅ **Built (M14)** — 20 Communities live at /dashboard/communities. Two types: 12 Cultural & Heritage circles (Latino/Hispanic, Chinese-American, etc.) and 8 Interest & Hobby circles (Gardening, Books, Music, Cooking, Faith, Sports, Travel, Crafts). The feature was renamed from "Cultural Circles" to "Communities" — URL /dashboard/cultural-circles redirects to /dashboard/communities. Database table name remains cultural_circles internally.
 
-## 6.1 Cultural Circle Framework — Built Today
+## 6.1 Communities Framework — Built Today
 
 | Circle Feature | Description | Status |
 |---|---|---|
@@ -414,9 +414,9 @@ See Sections 5, 6, 7 for full detail on each component.
 | Cultural Companion Matching | Volunteer/buddy matching by cultural compatibility | 🔄 Language match scored (+20); specific cultural-heritage matching not yet built |
 | Intergenerational Cultural Bridge | Student matched by cultural heritage | ⬜ Not yet built |
 
-## 6.2 Launch Cultural Circles — All 12 Seeded ✅
+## 6.2 Launch Communities — All 12 Cultural & Heritage Circles Seeded ✅
 
-| Cultural Circle | Primary Languages | Key Festivals & Observances |
+| Cultural Community | Primary Languages | Key Festivals & Observances |
 |---|---|---|
 | Latino/Hispanic Community | Spanish, Portuguese | Día de los Muertos, Three Kings Day, Posadas, Fiestas Patrias |
 | Chinese-American Community | Mandarin, Cantonese | Lunar New Year, Mid-Autumn Festival, Qingming, Dragon Boat, Chongyang |
@@ -433,7 +433,7 @@ See Sections 5, 6, 7 for full detail on each component.
 
 **At launch, M14 build prioritized Latino/Hispanic and Chinese-American circles to go live FREE in Month 1 per Parallel Blitz strategy — the other 10 follow per the build queue.**
 
-## 6.3 Cultural Festival Programming — Vision, Not Yet Built
+## 6.3 Cultural & Interest Programming — Vision, Not Yet Built
 - Virtual Festival Gathering, Community Potluck Coordination, Cultural Story Circle (recorded to life story archive), Intergenerational Heritage Event, Cultural Craft & Cooking Class — all ⬜ roadmap (M25, in normal build sequence after M24)
 
 ## 6.4 Language Access Across the Platform — Vision, Not Yet Built
@@ -498,7 +498,7 @@ The vision calls for **8 distinct volunteer categories.** Status today:
 | Veteran Volunteers | 🔄 Partial (Phase 57) | Veterans + VSO members | Peer support, benefits navigation, flag ceremonies |
 | Youth in Schools (K-12) | 🔄 Partial (Phase 56) | K-12 students | School Partner Portal built; specific curriculum programs (pen-pal, Life Stories project, mentorship reversal) not yet built |
 | Retired Professionals | ⬜ Not built | Retired doctors, lawyers, CPAs, teachers, engineers | Health literacy circles, legal clinics, VITA tax help, tutoring, tech help |
-| Faith Community Volunteers | 🔄 Partial | Congregation members | Cultural circles built; chaplaincy referral network not yet built |
+| Faith Community Volunteers | 🔄 Partial | Congregation members | Faith community circle built within Communities; chaplaincy referral network not yet built |
 | Corporate Volunteer Teams | ⬜ Not built | Employee groups | 3-tier programme (Partner/Champion/Leader) not yet built |
 | Neighbor Volunteers | ⬜ Not built | Same zip code members | Informal check-ins, light coordination |
 | **Family Volunteers (Reciprocity)** | ⬜ Not built | Other members' family caring for unrelated seniors | Earn time credits helping other families |
@@ -678,7 +678,7 @@ $99 one-time or $15/month, included free with 2+ year plan — ⬜ Roadmap M22
 | University Partnerships | $5K–$20K/campus/yr | ⬜ Portal not built; first contract targeted Month 4 |
 | Gift Sending Commission | 15% per order | 🔄 In progress (Phase 50b) |
 | Celebration Add-Ons | $25/$75 coordination fees | 🔄 In progress (Phase 50c) |
-| Skill Exchange / Cultural Circle Premium | $5–9/month add-ons | ⬜ Not built |
+| Skill Exchange / Communities Premium | $5–9/month add-ons | ⬜ Not built |
 
 ### Premium Add-On Services Catalog (Full Vision — Mostly Not Built)
 
@@ -694,7 +694,7 @@ $99 one-time or $15/month, included free with 2+ year plan — ⬜ Roadmap M22
 | Milestone Birthday Memory Book (70th/75th/80th specifically) | $49 one-time | 🔄 General Memory Book built; age-milestone-triggered version not built |
 | Physical Birthday Card (family co-signed) | $9.99 one-time | 🔄 Senior-to-family card built ($4.99); family-co-signed-to-senior version not built |
 | Skill Exchange Premium | $9/month | ⬜ Not built |
-| Cultural Circle Premium | $5/month | ⬜ Not built |
+| Communities Premium | $5/month | ⬜ Not built |
 | Volunteer Concierge (premium matching) | $19/month | ⬜ Not built |
 | Extra annual legal consultation | $75/consultation | ⬜ Not built |
 
@@ -802,13 +802,13 @@ The original vision's Phase 0–4 roadmap and the actual build's M1–M27 milest
 
 | Mo | Subs | B2C MRR | Univ. ARR | Mktpl. | Employer | Total | Key Milestone |
 |---|---|---|---|---|---|---|---|
-| 1 | 5 | $220 | $0 | $0 | $0 | $220 | Week 1: Aria live. Cultural circles launched free. |
+| 1 | 5 | $220 | $0 | $0 | $0 | $220 | Week 1: Aria live. Cultural & Heritage Communities launched free. |
 | 2 | 12 | $528 | $0 | $0 | $0 | $528 | MSW recruitment. Buddy matching added to onboarding. |
-| 3 | 20 | $880 | $0 | $0 | $0 | $880 | First real alert caught and acted on. |
-| 4 | 35 | $1,540 | $5K | $0 | $0 | $2,957 | Real prices. First university contract. |
-| 5 | 55 | $2,420 | $5K | $0 | $0 | $3,837 | First buddy assignments made. |
+| 3 | 20 | $880 | $0 | $0 | $0 | $880 | First real alert caught and acted on. **Grief Welcome Path live** — hospice + hospital social worker referral partnerships. |
+| 4 | 35 | $1,540 | $5K | $0 | $0 | $2,957 | Real prices. First university contract. **Begin employer outreach** — target HR directors at Bay Area 500–5,000 person companies. Enterprise sales cycles are 5–6 months so start now to close at Month 9–10. |
+| 5 | 55 | $2,420 | $5K | $0 | $0 | $3,837 | First buddy assignments made. **Grant applications submitted** — RWJF Health Equity, AARP Foundation, local community foundation. |
 | 6 | 80 | $3,520 | $10K | $500 | $0 | $5,853 | GoGo + Instacart live. Second university. |
-| 7 | 110 | $4,840 | $10K | $1,100 | $0 | $7,773 | All 12 cultural circles live. |
+| 7 | 110 | $4,840 | $10K | $1,100 | $0 | $7,773 | All 20 Communities live (12 cultural + 8 interest). |
 | 8 | 150 | $6,600 | $15K | $2,000 | $0 | $10,850 | 30+ buddies active. |
 | 9 | 200 | $8,800 | $15K | $3,500 | $0 | $14,550 | First employer signed. Lyft + Angi live. |
 | 10 | 260 | $11,440 | $20K | $5,200 | $7,500 | $30,307 | 3–4 universities. Employer PEPM begins. |
@@ -847,7 +847,75 @@ The original vision's Phase 0–4 roadmap and the actual build's M1–M27 milest
 
 *(Original vision's Phase 0–4 roadmap was generic by quarter. Strategy v4's Parallel Blitz is the specific, actionable near-term execution sequence.)*
 
-**Strategy D — Parallel Blitz:** Launch B2C subscriptions + free cultural circles + university/MSW partnerships simultaneously from Month 1 — not sequentially. Aria calls must be live Week 1.
+## Formal Launch Protocol — Human-First, AI-Optional
+
+### Core Principle
+Trust is earned before technology is introduced. The first 30 days are human-only. Aria AI calls are **opt-in** — seniors choose if, when, and how often Aria calls them. Default is NO.
+
+### The Four Roles
+
+| Role | Who | Notes |
+|------|-----|-------|
+| Daily wellness pulse | Aria AI (opt-in only) | Only when senior explicitly consents |
+| Weekly meaningful conversation | Human buddy/volunteer | Always — regardless of Aria choice |
+| Crisis response | Human navigator (always) | Never AI — immediate human callback |
+| First 30 days | Human navigator exclusively | Do not automate this period |
+| Navigator operations | AI-assisted | Task routing, alert triage, documentation |
+| Data intelligence | AI (M23 ML layer) | Pattern detection, fall risk, isolation signals |
+| Family reporting | AI-drafted, human-reviewed | Navigator adds personal note before sending |
+
+### 30-Day Launch Sequence
+
+- **Days 1–7:** Navigator personally calls within 24 hours. Builds relationship. Does NOT mention Aria.
+- **Days 8–20:** Navigator calls 1–2x/week. Buddy introduced and matched. Human rhythm established.
+- **Day 21:** Navigator gently introduces Aria option. Plays sample call if member wants to hear it. Member decides — no pressure. Default is NO.
+- **Day 30+:** Aria calls begin ONLY for members who opted in. Human buddy continues weekly regardless.
+
+### Aria Opt-In Design
+- Onboarding default: **NO** — senior must actively choose yes
+- Options: "Yes daily" / "Yes less often" / "No thank you"
+- Changeable anytime from /member-portal → Notifications tab
+- "Request a check-in from my navigator" button always visible for opt-out members
+
+### Navigator Role — AI-Augmented, Human-Led
+- AI drafts family digests → navigator personalizes before sending
+- AI triages alerts → navigator acts immediately on HIGH urgency
+- AI detects patterns → navigator follows up with human contact
+- Target: 60% relationship/crisis, 25% AI insight review, 15% admin
+
+### Competitive Differentiation
+Unlike DUOS (AI only, payer-locked), Papa (human only, payer-locked), or Homethrive (family-facing only): **ThriveAtHome is the only platform where the senior controls if AI contacts them, AND always has a real navigator and real buddy — regardless of their AI choice.**
+
+---
+
+## AI Voice Agent Architecture — 12 Named Agents (September 2026)
+
+| # | Name | Role | Voice | Vercel Env Var |
+|---|------|------|-------|---------------|
+| 1 | **Aria** | Daily morning companion (outbound) | Warm F, 60s, unhurried | RETELL_AGENT_ID |
+| 2 | **Rosa** | Care Line — service requests (inbound) | Warm F, 45, efficient | RETELL_ROSA_AGENT_ID |
+| 3 | **Joy** | Celebration calls — birthdays/milestones (outbound) | Joyful F, celebratory | RETELL_JOY_AGENT_ID |
+| 4 | **Grace** | Reminder calls — appointments/welfare (outbound) | Clear warm F, purposeful | RETELL_GRACE_AGENT_ID |
+| 5 | **Hope** | Crisis support line — 24/7 (inbound) | Calm grounded F | RETELL_HOPE_AGENT_ID |
+| 6 | **Claire** | Family support line (inbound) | Professional warm F | RETELL_CLAIRE_AGENT_ID |
+| 7 | **Sam** | Volunteer support line (inbound) | Friendly gender-neutral | RETELL_SAM_AGENT_ID |
+| 8 | **Morgan** | Buddy support line (inbound) | Warm supportive F | RETELL_MORGAN_AGENT_ID |
+| 9 | **Nova** | Navigator assistant — internal only (inbound) | Clear professional | RETELL_NOVA_AGENT_ID |
+| 10 | **Alex** | Staff support line (inbound) | Professional gender-neutral | RETELL_ALEX_AGENT_ID |
+| 11 | **Quinn** | Concierge — 24/7 + Language Line bridge (inbound) | Warm capable F | RETELL_QUINN_AGENT_ID |
+| 12 | **Jordan** | Partner support line — B2B (inbound) | Business professional | RETELL_JORDAN_AGENT_ID |
+
+**Deferred (Phase 55):** Ming (Mandarin), Devi (Hindi), Luna (Spanish) — launch with multilingual UI in order: Mandarin → Hindi → Spanish.
+**Aria opt-in:** Default is NO. Senior must actively choose Aria calls. Human navigator calls first 21 days. See Launch Protocol document.
+**New database columns (September 2026):** members.aria_call_opted_in (bool), members.check_in_frequency (text), members.grief_loss_type (text), members.preferred_contact_method (text), members.family_can_see_mood (bool), members.family_can_see_call_summaries (bool), members.family_can_see_service_history (bool), members.family_can_see_alerts (bool).
+
+**Strategy D — Parallel Blitz (updated June 2026):** Launch B2C subscriptions + free Communities (12 cultural heritage circles + 8 interest groups) + university/MSW partnerships + **Grief Welcome Path** simultaneously from Month 1 — not sequentially. Aria calls must be live Week 1. **The 12-month Aria data clock for Medicare Advantage starts at Week 1 — this is why Week 1 activation is non-negotiable.**
+
+**Updated timing (three strategic changes from Competitive Positioning v2.0):**
+1. **Grief Welcome Path moves to Month 3** (was Month 6) — highest-LTV retention segment, bereaved/widowed seniors stay 3+ years, no competitor has this pathway, requires no unbuilt technology
+2. **Employer outreach starts Month 4–5** (was Month 9–10) — enterprise sales cycles are 5–6 months; starting at Month 4–5 means first contracts close at Month 9–10, not starting then
+3. **Grant applications submit Month 3** (RWJF Health Equity, AARP Foundation, local community foundations) — parallel revenue track that funds first navigator without equity dilution; B Corp certification (Month 3–4) unlocks most grants
+4. **No MA sales motion before Month 12** — DUOS has $130M and is pitching the same MA plans; ThriveAtHome needs 12 months of outcomes data (Phase 76) before any MA conversation is credible
 
 ## First 30 Days — Daily Action Plan
 
@@ -858,7 +926,7 @@ The original vision's Phase 0–4 roadmap and the actual build's M1–M27 milest
 | 3–5 | APIs + Aria test | All credentials in Vercel. Aria calls your own phone. |
 | 5–7 | Legal | Attorney engaged. BAAs submitted. Volunteer Agreement covers buddy role. |
 | 8–10 | First enrollments | 5 seniors enrolled. Buddy matching questions visible in onboarding. |
-| 10–11 | Cultural circles | Latino/Hispanic + Chinese-American live. |
+| 10–11 | Communities | Latino/Hispanic + Chinese-American Communities live. |
 | 12–13 | University outreach | 3 social work chairs contacted. |
 | 14 | End-to-end test | Aria call → alert → family SMS → navigator action → buddy concern flag tested. |
 | 15–21 | Validate + expand | Interview 5 families. 65+ usability test. Enroll seniors 6–12. |
@@ -871,7 +939,7 @@ The original vision's Phase 0–4 roadmap and the actual build's M1–M27 milest
 | Month | Partners Activated |
 |---|---|
 | Month 1 | Retell AI, Twilio, Anthropic, SendGrid (Week 1) |
-| Month 3 | Meals on Wheels (free) |
+| Month 3 | Meals on Wheels (free) · **Launch Grief Welcome Path** · Submit RWJF + AARP Foundation grants |
 | Month 4 | First university contract signed |
 | Month 6 | GoGoGrandparent, Instacart Business, Language Line, Artifact Uprising |
 | Month 9 | Lyft Healthcare, Angi/TaskRabbit |
@@ -882,7 +950,7 @@ The original vision's Phase 0–4 roadmap and the actual build's M1–M27 milest
 
 | Moat | Build Time | How It Compounds | Action Now |
 |---|---|---|---|
-| Cultural circles | 3–6 months | Each member recruits 2–3 more from same community | Launch Latino + Chinese-American Month 1, free |
+| Communities (cultural + interest) | 3–6 months | Each member recruits 2–3 more from same community | Launch Latino + Chinese-American Month 1, free |
 | Buddy relationships | 6–12 months | Named buddy who calls weekly = will not cancel | First assignments Month 5 |
 | Aria call data | 12–18 months | Every call adds to MA outcomes story | Activate Retell + Anthropic Week 1 |
 | Life story archive | Immediate | Families with life story data never cancel | Promote in onboarding for every member |
@@ -912,7 +980,7 @@ The original vision's Phase 0–4 roadmap and the actual build's M1–M27 milest
 ## 16.3 Celebrations & Cultural Metrics
 - Birthday engagement: >85% of connected members
 - Family coordination rate: >60% of birthdays
-- Cultural circle participation: >40% of non-English-primary members within 60 days
+- Communities participation: >40% of non-English-primary members within 60 days
 - Cultural event attendance: >50% monthly
 - Language accessibility: >90% task completion in native language
 
@@ -969,7 +1037,7 @@ The original vision's Phase 0–4 roadmap and the actual build's M1–M27 milest
 | VP Product | Roadmap, UX, accessibility | Consumer health product | After Series A |
 | VP Sales — Enterprise | Employer + insurance + government BD | Healthcare enterprise SaaS | When first MA conversation begins |
 | VP Marketing / Growth | Brand, B2C acquisition | Consumer health marketing | After Series A |
-| Head of Community Programs | Volunteer, student, skill exchange, cultural circles | Community organizing | When 500+ members |
+| Head of Community Programs | Volunteer, student, skill exchange, Communities (cultural + interest circles) | Community organizing | When 500+ members |
 | Head of Cultural Engagement | Cultural strategy, language access | Multicultural community organizing | When 1,000+ members |
 | Head of Grief & Transition Services | Grief pathways, professional network | Clinical social work, palliative care | When 1,000+ members |
 | Head of Volunteer Ecosystem | All volunteer categories | Volunteer management | When volunteer count exceeds navigator capacity |
@@ -983,18 +1051,94 @@ The original vision's Phase 0–4 roadmap and the actual build's M1–M27 milest
 
 # 18. COMPETITIVE LANDSCAPE & DIFFERENTIATION
 
-| Competitor | Focus | Missing Piece | ThriveAtHome Advantage |
-|---|---|---|---|
-| Best Buy Health / Current Health | Remote patient monitoring | No community, no AI calls, not senior-first UX | Full social + cognitive layer + concierge + cultural circles + celebrations |
-| GrandPad | Simplified tablet | Device only — no care coordination | AI engine + human navigators + community built-in |
-| Papa Inc. | Companion/volunteer visits | Reactive only — no monitoring, no AI | AI proactive check-ins + skill exchange + events + grief support + Buddy |
-| LifeStation / Medical Alert | Emergency SOS wearables | Emergency only — no wellness/community | Wellness baseline + community + family reporting |
-| Carely / Well | Family communication apps | Family-only — no senior experience | Senior-facing platform + navigator + community |
-| AARP / SilverSneakers | Benefits + fitness | Fragmented — no monitoring, no navigation | Integrated full-stack |
-| Home Instead / Visiting Angels | In-home professional care | Very high cost, no tech, no community | 10x lower cost + tech layer + community |
-| Local Senior Centers | In-person programming | Geographic limitation; no AI, no family reporting | Everything local centers offer plus 24/7 AI + anywhere access |
+**Updated Competitive Intelligence — v2.0 (June 2026)**
 
-**ThriveAtHome is the only platform that integrates:** (1) proactive AI voice check-ins, (2) 24/7 concierge phone line, (3) paid companion marketplace, (4) volunteer + student networks, (5) skill exchange time banking, (6) persistent interest groups, (7) virtual + local events, (8) full services marketplace including meals, (9) family proactive reporting, (10) human care navigation, (11) personalized celebrations, (12) 12+ cultural community circles with language support, (13) grief and life transition support pathways, (14) an 8-category volunteer ecosystem, **(15) a dedicated Human Buddy relationship programme — distinct from AI and admin layers**, and **(16) geographic chapter communities** — all in a single platform, across multiple funding models, owned end-to-end by one trusted consumer brand.
+**New high-priority threats identified:**
+- **DUOS** — $130M raised Oct 2025, targeting same MA plans ThriveAtHome plans for Year 2. Response: Phase 76 MA Outcomes Data Package now URGENT.
+- **Homethrive** — $64M raised, won 2026 Lighthouse Tech Award for employer ROI. Direct employer channel competitor. Response: Phase 74 Employer ROI Dashboard.
+- **Sensi.AI** — $98M raised Oct 2025, courting same agencies ThriveAtHome needs as partners. Response: Phase 77 Agency Visit Tracking Upgrade.
+- **Mon Ami** — building competing org software for same Village nonprofits as M20. Response: Phase 73 HV Partnership API must ship before Mon Ami locks in these orgs.
+
+**Strategic verdict:** Helpful Village is a distribution channel, not a competitor. DUOS is the most urgent competitive threat.
+
+| Competitor | Type | Threat | Key Gap ThriveAtHome Fills |
+|---|---|---|---|
+| **DUOS** | AI benefit navigation (MA/Medicaid payer-only) | 🔴 HIGH — MA channel | Payer-locked, no B2C, no daily voice, no community, no cultural circles |
+| **Homethrive** | Employer caregiver benefit (family-facing only) | 🔴 HIGH — employer | Family-only — no senior-facing product, no Aria, no community |
+| **Sensi.AI** | Ambient audio monitoring for agencies | 🟡 MEDIUM — agency mindshare | Passive surveillance vs ThriveAtHome's chosen daily conversation |
+| **Mon Ami** | Org operations SaaS for nonprofits | 🟡 MEDIUM — org software | Org ops only — no consumer product, no AI, no family dashboard |
+| **Meela** | AI voice companion (conversation only) | 🟡 MEDIUM — Aria analog | Feature only, no ecosystem — potential acqui-hire Year 2 |
+| Papa Inc. | Companion visits via MA/employer payer | 🟡 MEDIUM — MA channel | Payer-locked, no AI check-ins, no community, no B2C path |
+| Best Buy Health / Current Health | Remote patient monitoring | 🟢 LOW — complement | No community, no AI conversation, no cultural layer |
+| GrandPad | Simplified tablet device | 🟢 LOW | Device only — no care, no community, no AI |
+| Helpful Village | B2B org ops for Village networks | 🟢 LOW — DISTRIBUTION PARTNER | No AI, no family dashboard — turn into channel via Phase 73 |
+| Carely / Well | Family coordination apps | 🟢 LOW — complement | Senior absent from product — complement, not replacement |
+| Home Instead / Visiting Angels | Professional in-home care | 🟢 LOW — complement | 10x ThriveAtHome's cost, no tech layer — referral source |
+| Local Senior Centers | In-person programming | 🟢 LOW — distribution | Geographic limitation — turn into channel via M20 |
+
+### Category Strategy: Own "Senior Belonging Platform"
+
+ThriveAtHome must own and name a new category before any competitor does: **"Senior Belonging Platform."** Every press mention, investor deck, brand asset, and sales pitch should use this language. Category creation lets ThriveAtHome define the rules competitors must compete on.
+
+### Four Acquisition Modes (revised strategy)
+
+| Mode | CAC | Best Targets |
+|------|-----|-------------|
+| **Mode 1: New segments** | Lowest | Non-English seniors (20M+), rural isolated (12M+), recently bereaved/widowed, caregiver employees at 500–5,000-person companies |
+| **Mode 2: Complement** | Low-Medium | Medical alert subscribers, GrandPad families, agency client referrals |
+| **Mode 3: Displacement** | High | Caring Village users, Meela users |
+| **Mode 4: Distribution channel** | Near zero | Helpful Village 350+ orgs, home care agencies (Phase 78), hospital discharge planners (Phase 79), Mon Ami orgs |
+
+Start with Modes 1 and 4 before investing in Mode 3 displacement.
+
+### B2B Provider Software — Partners, Not Competitors
+
+WellSky, Homecare Homebase, AlayaCare, and AxisCare run 11,000+ home care agencies. They are integration partners, not competitors. ThriveAtHome slots in alongside them as the **member wellness layer** agencies currently have zero of.
+
+| Platform | Market Position | What It Does | What ThriveAtHome Adds |
+|---------|----------------|-------------|----------------------|
+| **WellSky Personal Care** | Market leader, non-medical home care | Scheduling, billing, EVV, caregiver app, family portal (schedule only) | Member wellness between visits — Aria daily check-ins, mood trends, alert detection, family wellness summary |
+| **Homecare Homebase** | Default for large agencies | Clinical documentation, scheduling, billing, OASIS | Zero member engagement — client disappears after visit. ThriveAtHome fills this gap. |
+| **AlayaCare** | Mid-large agencies | Scheduling, telehealth, Layla AI (caregiver-facing only), route optimization | Layla is caregiver workflow only — no member wellness, no community, no daily check-ins |
+| **AxisCare / CareSmartz360** | SMB agencies | Scheduling, EVV, billing | Pure operational tool — zero member experience |
+| **Sensi.AI** | AI monitoring add-on | 24/7 ambient audio, care alerts, agency automation | Passive surveillance vs ThriveAtHome's chosen daily conversation |
+
+**Agency channel pitch:** "Your caregivers visit 3×/week. ThriveAtHome is there the other 4 days. You keep WellSky for scheduling and billing. We complete the member experience."
+
+**What ThriveAtHome explicitly does NOT do** (leave to WellSky/Homecare Homebase):
+- EVV (Electronic Visit Verification) — federally mandated, state-by-state, licensed agency territory
+- Medicare/Medicaid billing and claims
+- Full EHR / OASIS assessments, physician order management
+- Ambient audio surveillance (Sensi.AI model) — conflicts with dignity-first principles
+
+### Senior Care Facility Platforms — Out of Scope
+
+PointClickCare, MatrixCare, Yardi Senior Living run assisted living, nursing homes, and memory care facilities. **ThriveAtHome serves only independent aging-at-home seniors.** When a member transitions to a facility, ThriveAtHome provides transition support (Phase 43) and maintains the family dashboard connection, but does not manage facility operations.
+
+### Helpful Village Feature Parity — Gap Tracker (June 2026)
+
+| HV Feature | ThriveAtHome | Phase to Fix |
+|-----------|-------------|-------------|
+| Member management + renewals | 🔄 Partial | Phase 63 fixes |
+| Volunteer 24/7 self-service | 🔄 Partial | Phase 68 |
+| Member service request posting | 🔄 Partial (name dropdown bug) | Phase 63 fix |
+| Events management + RSVP | ✅ Complete | — |
+| Email + newsletters with filtering | 🔄 Partial | Phase 70 enhancement |
+| Donations management | 🔄 Partial | Phase 69 |
+| Document library | 🔄 Partial (upload bug) | Phase 72 fix |
+| Public village website | 🔄 Partial | Phase 71 |
+| Wellness check-ins | ✅ SUPERIOR (Aria > HV's $10/mo add-on) | — |
+| SMS texting | ⏸ Deferred | Twilio credentials |
+| Zoom module ($10/mo in HV) | ⬜ Add Zoom link field to events | Minor |
+| Maps/geocoding ($10/mo in HV) | ⬜ Not built | Low priority |
+| Pricing ($50/mo for small villages) | ✅ Now spec'd | Phase 73: $49/$149/$349/mo |
+| 30-day free trial | ✅ Now spec'd | Phase 73 |
+| Data migration from HV | ✅ Now spec'd | Phase 73: $1,500 service |
+
+**ThriveAtHome features with zero Helpful Village equivalent:**
+Aria daily AI check-ins · Family proactive wellness dashboard · Human Buddy programme · Care navigator coordination · 20 Communities (cultural + interest circles) · Grief & life transition support · Life story archive · Memory Books · Skill exchange/time banking · Full services marketplace · Personalized celebrations · Geographic chapters · B2C subscription path · Employer PEPM · Medicare Advantage pathway · Corporate volunteer with Benevity/YourCause export
+
+**ThriveAtHome is the only platform that integrates:** (1) proactive AI voice check-ins, (2) 24/7 concierge phone line, (3) paid companion marketplace, (4) volunteer + student networks, (5) skill exchange time banking, (6) persistent interest groups, (7) virtual + local events, (8) full services marketplace including meals, (9) family proactive reporting, (10) human care navigation, (11) personalized celebrations, (12) 20 Communities (12 cultural heritage circles + 8 interest/hobby groups) with language support for cultural heritage circles, (13) grief and life transition support pathways, (14) an 8-category volunteer ecosystem, **(15) a dedicated Human Buddy relationship programme — distinct from AI and admin layers**, and **(16) geographic chapter communities** — all in a single platform, across multiple funding models, owned end-to-end by one trusted consumer brand.
 
 ---
 
@@ -1012,7 +1156,7 @@ The original vision's Phase 0–4 roadmap and the actual build's M1–M27 milest
 | Chapter | Soft geographic grouping of members by metro area; activates as official chapter at 50+ members |
 | CMMI | Center for Medicare and Medicaid Innovation |
 | Communities | Unified feature combining Cultural Circles + Interest Groups (20 total at launch) |
-| Cultural Circle | Dedicated community sub-space for a specific ethnic/cultural community (12 built) |
+| Communities | The unified feature name for all 20 community circles — 12 Cultural & Heritage (formerly "Cultural Circles") + 8 Interest & Hobby groups. Found at /dashboard/communities. |
 | DAV | Disabled American Veterans |
 | ERG | Employee Resource Group |
 | HCBS | Home and Community-Based Services |

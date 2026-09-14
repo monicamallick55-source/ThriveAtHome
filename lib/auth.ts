@@ -59,3 +59,39 @@ export async function requireAuth() {
   if (!user) redirect('/login')
   return user
 }
+
+/**
+ * Returns every role a Supabase auth user holds. Most people have exactly one.
+ * A user can legitimately hold several — e.g. a navigator who is also a volunteer,
+ * or a staff member who also has a family dashboard. Checks each role's source of
+ * truth table so nothing is missed.
+ */
+export async function getAllRolesForAuth(authUserId: string): Promise<UserRole[]> {
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const from = admin.from as any
+  const roles = new Set<UserRole>()
+
+  const { data: fm } = await from('family_members')
+    .select('role').eq('supabase_auth_id', authUserId).maybeSingle()
+  if (fm?.role) roles.add(fm.role as UserRole)
+
+  // Direct senior login (members.supabase_auth_id) → treated as a family portal user.
+  const { data: memberRow } = await from('members')
+    .select('id').eq('supabase_auth_id', authUserId).maybeSingle()
+  if (memberRow) roles.add('family')
+
+  const { data: nav } = await from('care_navigators')
+    .select('id').eq('supabase_auth_id', authUserId).maybeSingle()
+  if (nav) roles.add('navigator')
+
+  const { data: vol } = await from('volunteers')
+    .select('id').eq('supabase_auth_id', authUserId).maybeSingle()
+  if (vol) roles.add('volunteer')
+
+  const { data: stu } = await from('student_volunteers')
+    .select('id').eq('supabase_auth_id', authUserId).maybeSingle()
+  if (stu) roles.add('student')
+
+  return [...roles]
+}

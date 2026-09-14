@@ -30,7 +30,7 @@ Your entire development environment runs in a GitHub Codespace — a full Linux 
 1. Go to [github.com](https://github.com)
 2. Click "Sign up" → create a personal account → verify your email
 
-- [x] GitHub account created and email verified
+- [ ] GitHub account created and email verified
 
 ### 1.2 — Create the repository
 
@@ -41,7 +41,7 @@ Your entire development environment runs in a GitHub Codespace — a full Linux 
 5. Check "Add a README file"
 6. Click "Create repository"
 
-- [x] Repository `thrive-at-home` created as **Private**
+- [ ] Repository `thrive-at-home` created as **Private**
 
 ### 1.3 — Launch a Codespace
 
@@ -56,9 +56,9 @@ git --version    # Must print a version number
 openssl version  # Must print OpenSSL version
 ```
 
-- [x] Codespace launched — VS Code open in your browser
-- [x] `node --version` prints v18 or higher ← **stop if lower; install Node 18 LTS from nodejs.org**
-- [x] `git --version` and `openssl version` both print versions
+- [ ] Codespace launched — VS Code open in your browser
+- [ ] `node --version` prints v18 or higher ← **stop if lower; install Node 18 LTS from nodejs.org**
+- [ ] `git --version` and `openssl version` both print versions
 
 ### 1.4 — Understanding the Codespace
 
@@ -68,9 +68,9 @@ openssl version  # Must print OpenSSL version
 - **Free tier:** 60 hours/month — more than enough.
 - **Port forwarding:** When the dev server runs on port 3000, Codespaces creates a public URL. Find it: VS Code → "Ports" tab (next to Terminal) → port 3000 → right-click → "Set Port Visibility" → "Public". You'll need this for webhook testing in M8+.
 
-- [x] You know how to use the terminal inside the Codespace
-- [x] You know how to find the Ports tab
-- [x] You know how to resume a paused Codespace
+- [ ] You know how to use the terminal inside the Codespace
+- [ ] You know how to find the Ports tab
+- [ ] You know how to resume a paused Codespace
 
 ---
 
@@ -79,7 +79,7 @@ openssl version  # Must print OpenSSL version
 1. Go to [vercel.com](https://vercel.com)
 2. Click "Sign up" → **Sign up with your GitHub account** (this links them automatically)
 
-- [x] Vercel account created and connected to GitHub
+- [ ] Vercel account created and connected to GitHub
 
 ---
 
@@ -94,7 +94,7 @@ openssl version  # Must print OpenSSL version
 5. Set a strong database password → save it in a password manager
 6. Click "Create new project" → wait ~2 minutes
 
-- [x] Supabase project created and fully initialized (green status indicator)
+- [ ] Supabase project created and fully initialized (green status indicator)
 
 ### 3.2 — Collect credentials
 
@@ -108,7 +108,7 @@ Go to your Supabase project → Settings → API:
 
 ⚠️ The service_role key bypasses all security. Treat it exactly like a password. Never put it in a GitHub file.
 
-- [x] All three Supabase values saved securely
+- [ ] All three Supabase values saved securely
 
 ---
 
@@ -127,7 +127,7 @@ openssl rand -base64 32
 
 These look like: `K7mPx9QzR2nWvL4sYjA8bNcD1eF6gH0iJ3kM5oP=`
 
-- [x] `CRON_SECRET` generated and saved
+- [ ] `CRON_SECRET` generated and saved
 
 ---
 
@@ -172,7 +172,7 @@ LANGUAGE_LINE_ACCOUNT_NUMBER= [M9 — takes 1-2 weeks to provision]
 LANGUAGE_LINE_SIP_ENDPOINT=   [M9]
 ```
 
-- [x] Supabase + core variables assembled in a secure place
+- [ ] Supabase + core variables assembled in a secure place
 
 ---
 
@@ -184,11 +184,11 @@ These protect your credentials if your Codespace is ever deleted.
 2. Add each credential with the exact variable name from Section 5
 
 Add these now (the ones you have values for):
-- [x] `NEXT_PUBLIC_SUPABASE_URL`
-- [x] `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- [x] `SUPABASE_SERVICE_ROLE_KEY`
-- [x] `CRON_SECRET`
-- [x] `CARE_TEAM_EMAIL`
+- [ ] `NEXT_PUBLIC_SUPABASE_URL`
+- [ ] `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- [ ] `SUPABASE_SERVICE_ROLE_KEY`
+- [ ] `CRON_SECRET`
+- [ ] `CARE_TEAM_EMAIL`
 
 ---
 

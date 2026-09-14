@@ -9,20 +9,32 @@ export async function POST() {
 
   const admin = createAdminClient()
 
+  // Resolve the member either via a family_members link or a direct senior login.
+  let memberId: string | null = null
   const { data: fm } = await admin
     .from('family_members')
     .select('member_id')
     .eq('supabase_auth_id', user.id)
     .maybeSingle()
+  memberId = fm?.member_id ?? null
 
-  if (!fm?.member_id) {
+  if (!memberId) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: directMember } = await (admin.from as any)('members')
+      .select('id')
+      .eq('supabase_auth_id', user.id)
+      .maybeSingle()
+    memberId = directMember?.id ?? null
+  }
+
+  if (!memberId) {
     return NextResponse.json({ error: 'No member found' }, { status: 404 })
   }
 
   const { data: sub } = await admin
     .from('subscriptions')
     .select('stripe_customer_id')
-    .eq('member_id', fm.member_id)
+    .eq('member_id', memberId)
     .maybeSingle()
 
   if (!sub?.stripe_customer_id) {

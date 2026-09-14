@@ -60,6 +60,40 @@ Build order is prioritised by consumer value first, then B2B enablement:
 
 ## ARCHITECTURE NOTES
 
+**AI Voice Agent Names (September 2026 — FINAL):**
+12 named agents built in Retell AI. When referencing agents in UI copy, code comments, or platform text use these exact names:
+- Daily check-in calls = **Aria** (outbound, RETELL_AGENT_ID)
+- Service requests inbound = **Rosa** (RETELL_ROSA_AGENT_ID)
+- Celebration calls = **Joy** (RETELL_JOY_AGENT_ID)
+- Reminder calls = **Grace** (RETELL_GRACE_AGENT_ID)
+- Crisis line = **Hope** (RETELL_HOPE_AGENT_ID)
+- Family support = **Claire** (RETELL_CLAIRE_AGENT_ID)
+- Volunteer support = **Sam** (RETELL_SAM_AGENT_ID)
+- Buddy support = **Morgan** (RETELL_MORGAN_AGENT_ID)
+- Navigator assist (internal) = **Nova** (RETELL_NOVA_AGENT_ID)
+- Staff support = **Alex** (RETELL_ALEX_AGENT_ID)
+- Concierge 24/7 = **Quinn** (RETELL_QUINN_AGENT_ID)
+- Partner/B2B support = **Jordan** (RETELL_JORDAN_AGENT_ID)
+Multilingual agents deferred to Phase 55: Ming (Mandarin), Devi (Hindi), Luna (Spanish).
+
+**Aria opt-in strategy (September 2026 DECISION):**
+Aria daily calls are OPT-IN ONLY. Default is NO. members.aria_call_opted_in = false by default.
+Seniors choose during onboarding Step 2 or from member portal Notifications tab.
+Human navigator calls first 21 days. Aria introduced gently at Day 21. See Launch Protocol doc.
+New DB columns: aria_call_opted_in, check_in_frequency, grief_loss_type, preferred_contact_method,
+family_can_see_mood, family_can_see_call_summaries, family_can_see_service_history, family_can_see_alerts.
+Migrations 069 (aria_call_opted_in) and 070 (member_privacy_settings) confirmed in Supabase.
+
+**Stub activation status (September 2026):**
+- Retell AI: 12 agent IDs need adding to Vercel (RETELL_AGENT_ID through RETELL_JORDAN_AGENT_ID)
+- Twilio: account not yet created — needed for all voice calls and SMS
+- Anthropic: API key needed in Vercel for all Claude text AI features
+- SendGrid: already configured ✅ — verify domain authentication
+- Stripe: test mode active — switch to sk_live_ when ready for real payments
+- Checkr: not started — needed before first volunteer assignment
+- Language Line: not started — needed before first non-English caller
+- Full stub guide: ThriveAtHome_Stub_Activation_Guide_v1.docx
+
 **Market positioning — "Senior Belonging Platform" (from Competitive Positioning v2.0):**
 ThriveAtHome creates and owns a new category: the Senior Belonging Platform. This is NOT a displacement play and NOT an add-on — it is a new category capturing underserved segments. The four acquisition modes in priority order:
 - Mode 1 (PRIMARY): New segments with no incumbent — non-English seniors (20M+), rural isolated seniors (12M+), recently bereaved/widowed (move Phase 75 Grief Welcome Path to Month 3 — highest-ROI retention play, no competitor has this), caregiver employees at 500–5,000 person companies. Lowest CAC, fastest.
