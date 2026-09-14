@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
     .maybeSingle()
 
   // Reject an active duplicate.
-  const { data: dupe } = await admin.from('role_invitations')
+  const { data: dupe } = await (admin.from('role_invitations') as any)
     .select('id, expires_at')
     .eq('email', email)
     .eq('role', targetRole)
