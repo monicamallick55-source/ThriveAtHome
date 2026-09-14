@@ -24,7 +24,7 @@ export async function GET() {
   const admin = createAdminClient()
   const role = await getUserRole(user.id)
 
-  let query = admin.from('role_invitations')
+  let query = (admin.from('role_invitations') as any)
     .select('id, email, role, status, created_at, expires_at, accepted_at, invited_by_name, note, org_id')
     .order('created_at', { ascending: false })
     .limit(200)
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
   const admin = createAdminClient()
 
   // Copy the caller's scope links so the new account is correctly attached.
-  const { data: callerFm } = await admin.from('family_members')
+  const { data: callerFm } = await (admin.from('family_members') as any)
     .select('full_name, org_id, agency_id, employer_account_id, senior_center_id, aaa_id, network_id, university_name')
     .eq('supabase_auth_id', user.id)
     .maybeSingle()
@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const { data: inv, error } = await admin.from('role_invitations').insert({
+  const { data: inv, error } = await (admin.from('role_invitations') as any).insert({
     email,
     role: targetRole,
     invited_by_auth: user.id,
