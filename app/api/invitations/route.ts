@@ -22,17 +22,15 @@ export async function GET() {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const admin = createAdminClient()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const from = admin.from as any
   const role = await getUserRole(user.id)
 
-  let query = from('role_invitations')
+  let query = admin.from('role_invitations')
     .select('id, email, role, status, created_at, expires_at, accepted_at, invited_by_name, note, org_id')
     .order('created_at', { ascending: false })
     .limit(200)
 
   // Admins see everything; everyone else sees only what they sent.
-  if (role !== 'admin') query = query.eq('invited_by_auth', user.id)
+  if (role !== 'admin') query = (query as any).eq('invited_by_auth', user.id)
 
   const { data, error } = await query
   if (error) {
@@ -65,17 +63,15 @@ export async function POST(req: NextRequest) {
   }
 
   const admin = createAdminClient()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const from = admin.from as any
 
   // Copy the caller's scope links so the new account is correctly attached.
-  const { data: callerFm } = await from('family_members')
+  const { data: callerFm } = await admin.from('family_members')
     .select('full_name, org_id, agency_id, employer_account_id, senior_center_id, aaa_id, network_id, university_name')
     .eq('supabase_auth_id', user.id)
     .maybeSingle()
 
   // Reject an active duplicate.
-  const { data: dupe } = await from('role_invitations')
+  const { data: dupe } = await admin.from('role_invitations')
     .select('id, expires_at')
     .eq('email', email)
     .eq('role', targetRole)
@@ -101,7 +97,7 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const { data: inv, error } = await from('role_invitations').insert({
+  const { data: inv, error } = await admin.from('role_invitations').insert({
     email,
     role: targetRole,
     invited_by_auth: user.id,
