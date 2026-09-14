@@ -12,9 +12,9 @@ export async function DELETE(_req: Request, { params }: Params) {
 
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const from = admin.from as any
+  const db = admin as any
 
-  const { data: inv } = await from('role_invitations')
+  const { data: inv } = await db.from('role_invitations')
     .select('id, invited_by_auth, status')
     .eq('id', id)
     .maybeSingle()
@@ -28,7 +28,7 @@ export async function DELETE(_req: Request, { params }: Params) {
     return NextResponse.json({ error: 'Only pending invitations can be revoked.' }, { status: 409 })
   }
 
-  const { error } = await from('role_invitations').update({ status: 'revoked' }).eq('id', id)
+  const { error } = await db.from('role_invitations').update({ status: 'revoked' }).eq('id', id)
   if (error) return NextResponse.json({ error: 'Could not revoke.' }, { status: 500 })
   return NextResponse.json({ ok: true })
 }

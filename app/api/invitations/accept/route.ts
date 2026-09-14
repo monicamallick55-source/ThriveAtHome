@@ -20,10 +20,9 @@ export async function POST(req: NextRequest) {
   }
 
   const admin = createAdminClient()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const from = admin.from as any
+  const db = admin as any
 
-  const { data: inv } = await from('role_invitations')
+  const { data: inv } = await db.from('role_invitations')
     .select('*')
     .eq('token', token)
     .maybeSingle()
@@ -33,7 +32,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'This invitation has already been used or was revoked.' }, { status: 410 })
   }
   if (new Date(inv.expires_at) < new Date()) {
-    await from('role_invitations').update({ status: 'expired' }).eq('id', inv.id)
+    await db.from('role_invitations').update({ status: 'expired' }).eq('id', inv.id)
     return NextResponse.json({ error: 'This invitation link has expired. Ask for a new one.' }, { status: 410 })
   }
 
@@ -63,7 +62,7 @@ export async function POST(req: NextRequest) {
     if (inv[k]) fmRow[k] = inv[k]
   }
 
-  const { error: fmErr } = await from('family_members').insert(fmRow)
+  const { error: fmErr } = await db.from('family_members').insert(fmRow)
   if (fmErr) {
     await admin.auth.admin.deleteUser(authId)
     console.error('[api/invitations/accept] family_members insert failed:', fmErr)
@@ -72,7 +71,7 @@ export async function POST(req: NextRequest) {
 
   // Navigators also need a care_navigators row (source of truth for the console).
   if (role === 'navigator') {
-    const { error: navErr } = await from('care_navigators').insert({
+    const { error: navErr } = await db.from('care_navigators').insert({
       supabase_auth_id: authId,
       full_name: fullName,
       email,
@@ -81,7 +80,7 @@ export async function POST(req: NextRequest) {
     if (navErr) console.error('[api/invitations/accept] care_navigators insert failed:', navErr)
   }
 
-  await from('role_invitations').update({
+  await db.from('role_invitations').update({
     status: 'accepted',
     accepted_at: new Date().toISOString(),
     accepted_by_auth: authId,
