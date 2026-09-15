@@ -80,6 +80,17 @@ export async function POST(req: NextRequest) {
     if (navErr) console.error('[api/invitations/accept] care_navigators insert failed:', navErr)
   }
 
+  // Volunteers need a volunteers row (source of truth for the volunteer dashboard).
+  if (role === 'volunteer') {
+    const { error: volErr } = await db.from('volunteers').insert({
+      supabase_auth_id: authId,
+      full_name: fullName,
+      email,
+      status: 'active',
+    })
+    if (volErr) console.error('[api/invitations/accept] volunteers insert failed:', volErr)
+  }
+
   await db.from('role_invitations').update({
     status: 'accepted',
     accepted_at: new Date().toISOString(),
