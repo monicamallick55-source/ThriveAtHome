@@ -68,28 +68,27 @@ export async function requireAuth() {
  */
 export async function getAllRolesForAuth(authUserId: string): Promise<UserRole[]> {
   const admin = createAdminClient()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const from = admin.from as any
+  const db = admin as any
   const roles = new Set<UserRole>()
 
-  const { data: fm } = await from('family_members')
+  const { data: fm } = await db.from('family_members')
     .select('role').eq('supabase_auth_id', authUserId).maybeSingle()
   if (fm?.role) roles.add(fm.role as UserRole)
 
   // Direct senior login (members.supabase_auth_id) → treated as a family portal user.
-  const { data: memberRow } = await from('members')
+  const { data: memberRow } = await db.from('members')
     .select('id').eq('supabase_auth_id', authUserId).maybeSingle()
   if (memberRow) roles.add('family')
 
-  const { data: nav } = await from('care_navigators')
+  const { data: nav } = await db.from('care_navigators')
     .select('id').eq('supabase_auth_id', authUserId).maybeSingle()
   if (nav) roles.add('navigator')
 
-  const { data: vol } = await from('volunteers')
+  const { data: vol } = await db.from('volunteers')
     .select('id').eq('supabase_auth_id', authUserId).maybeSingle()
   if (vol) roles.add('volunteer')
 
-  const { data: stu } = await from('student_volunteers')
+  const { data: stu } = await db.from('student_volunteers')
     .select('id').eq('supabase_auth_id', authUserId).maybeSingle()
   if (stu) roles.add('student')
 

@@ -189,3 +189,5 @@ PENDING ACTIVATIONS (in order):
 8. Create Checkr account for volunteer background checks
 9. Contact Meals on Wheels Bay Area chapter (free, no API)
 10. Switch Stripe to live mode when ready for real payments
+
+ISSUE: Pattern 'admin.from as any' assigned to a variable named 'from' causes TypeError at runtime in Vercel production. Search the entire codebase for this pattern: 'const from = admin.from as any' and replace ALL occurrences with 'const db = admin as any' and update all subsequent 'from(' calls to 'db.from('. Files already fixed: app/api/invitations/route.ts, app/api/invitations/accept/route.ts, lib/auth.ts. Search for remaining instances in all other API routes and lib files.
