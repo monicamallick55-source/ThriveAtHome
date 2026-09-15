@@ -30,8 +30,21 @@ export default function AcceptInviteForm({ token }: { token: string }) {
       })
       const data = await res.json().catch(() => ({ error: 'Something went wrong' }))
       if (!res.ok) { setError(data.error ?? 'Something went wrong'); return }
-      setLanding(data.landing ?? '/login')
-      setTimeout(() => router.push('/login'), 2600)
+      // Auto sign-in with the credentials just used to create the account
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { error: signInErr } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password,
+      })
+      if (signInErr) {
+        // Fall back to manual login if auto sign-in fails
+        setLanding(data.landing ?? '/dashboard')
+        setTimeout(() => router.push('/login'), 2600)
+        return
+      }
+      setLanding(data.landing ?? '/dashboard')
+      setTimeout(() => router.push(data.landing ?? '/dashboard'), 800)
     } catch {
       setError('Network error — please try again.')
     } finally {
@@ -47,7 +60,7 @@ export default function AcceptInviteForm({ token }: { token: string }) {
           Your account is ready
         </h1>
         <p style={{ fontFamily: 'var(--font-body)', fontSize: '17px', color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
-          Taking you to sign in…
+          Setting up your workspace…
         </p>
       </div>
     )
