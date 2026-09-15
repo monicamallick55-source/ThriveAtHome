@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
 
 const inputStyle: React.CSSProperties = {
   width: '100%', boxSizing: 'border-box', padding: '12px 14px',
@@ -31,7 +32,6 @@ export default function AcceptInviteForm({ token }: { token: string }) {
       const data = await res.json().catch(() => ({ error: 'Something went wrong' }))
       if (!res.ok) { setError(data.error ?? 'Something went wrong'); return }
       // Auto sign-in with the credentials just used to create the account
-      const { createClient } = await import('@/lib/supabase/client')
       const supabase = createClient()
       const { error: signInErr } = await supabase.auth.signInWithPassword({
         email: data.email,
