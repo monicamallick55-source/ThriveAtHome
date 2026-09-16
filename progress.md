@@ -236,5 +236,6 @@ DECISIONS MADE:
 
 NEXT SESSION MUST:
 - Manually smoke-test the two live-only-verifiable fixes above once deployed (direct-auth senior + Important Dates; signed-in user + /pricing).
+- Vercel deployment status could NOT be verified from this session — no `vercel` CLI available in this Codespace. Check the Vercel dashboard directly for commit 0c258a5 (pushed to main) to confirm the build is green.
 - No other open issues from this list remain — the September 2026 issue log above is now fully addressed.
 ---
