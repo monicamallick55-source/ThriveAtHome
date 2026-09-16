@@ -239,3 +239,39 @@ NEXT SESSION MUST:
 - Vercel deployment status could NOT be verified from this session — no `vercel` CLI available in this Codespace. Check the Vercel dashboard directly for commit 0c258a5 (pushed to main) to confirm the build is green.
 - No other open issues from this list remain — the September 2026 issue log above is now fully addressed.
 ---
+
+---
+SESSION: (continuation — resumed from NEXT SESSION MUST above)
+DATE: 2026-09-16
+STATUS: Session ended normally
+
+WHAT WAS DONE THIS SESSION:
+- Re-read prompt.md / progress.md / checklist.md per session-start protocol.
+- Re-verified the repo is still green: `npx tsc --noEmit` → zero output; `npm run build` → succeeds, `/pricing` still lists as ƒ (dynamic).
+- Confirmed via `git status`/`git log` that main is up to date with origin (HEAD = b86b343), working tree clean except a routine `tsconfig.tsbuildinfo` diff (a generated build-cache file, not gitignored — recommend adding it to `.gitignore` in a future housekeeping pass since it churns every `tsc` run and adds no real signal to diffs).
+- Checked the September 2026 issue log in this file: all six logged issues (admin.from pattern, signed_by_name, buddy_calls count, hydration error, Important Dates, pricing sign-out) are already fixed and committed (commits a83323e, 0c258a5, and prior). No new issues have been reported since.
+- Cross-referenced checklist.md: it is the original M1–M6 scaffold-era template and was never updated past Phase 1 — it does not reflect real state. Actual milestone status lives in this file's DECISION LOG and git history: git log shows `b4c26b1 Connect Vercel auto-deploy M1-M27 complete`, i.e. M1–M27 are already built. The only documented remaining roadmap item is Phase 55 (Full Multilingual UI), which the DECISION LOG explicitly defers until after production launch + first revenue — not to be started speculatively.
+
+TESTS AND VERIFICATIONS RUN:
+- `npx tsc --noEmit`: PASSED — zero output.
+- `npm run build`: PASSED — zero errors, full route manifest printed, `/pricing` dynamic.
+- Live smoke tests (direct-auth senior + Important Dates; signed-in user + /pricing) and Vercel dashboard build status: NOT RUN — this Codespace has no browser, no live Supabase session, and no `vercel` CLI, as already established in prior sessions. Unchanged limitation, not a new blocker.
+
+ERRORS ENCOUNTERED:
+- None.
+
+DECISIONS MADE:
+- Did not start Phase 55 — explicit prior human decision defers it until post-launch/revenue, and no APPROVED milestone-start instruction is present for it.
+- Did not touch the ~40-table direct-senior-auth RLS gap beyond the tracked_items fix already applied — flagged again below since it remains the highest-value known gap if it resurfaces as a bug report.
+- Left `tsconfig.tsbuildinfo` as-is (only reverted/staged files without being asked would be out of scope) — flagged as a suggestion, not actioned.
+
+HUMAN APPROVAL:
+- Review presented: NO — no new phase or fix was built this session; this was a verify-and-status-check session with nothing new to approve.
+- User response: N/A
+
+NEXT SESSION MUST:
+- There is no autonomously-actionable next milestone right now: M1–M27 are complete and green, the September issue log is fully resolved, and Phase 55 is intentionally deferred pending a human go-ahead tied to launch/revenue.
+- If the human wants forward progress, the two live options are: (a) work through the "Pre-Launch Checklist — September 2026" section of checklist.md (Retell agent IDs, Twilio account/numbers, Anthropic key, BAAs, Stripe live mode, Supabase HIPAA tier) — these are almost entirely external account/credential actions outside this agent's reach, not code; or (b) explicitly approve starting Phase 55 early.
+- Otherwise: awaiting the human to run the two live smoke tests noted above and confirm the Vercel build for commit 0c258a5/b86b343 is green.
+QUESTION FOR HUMAN
+---
