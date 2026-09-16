@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
 import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { getMemberByDirectAuth } from '@/lib/data/members'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp', 'application/pdf'])
@@ -11,8 +12,10 @@ export async function POST(request: Request) {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const directMember = await getMemberByDirectAuth(user.id)
   const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) return NextResponse.json({ error: 'No member linked' }, { status: 403 })
+  const memberId = directMember.data?.id ?? fm?.member_id
+  if (!memberId) return NextResponse.json({ error: 'No member linked' }, { status: 403 })
 
   let formData: FormData
   try {
@@ -40,14 +43,14 @@ export async function POST(request: Request) {
     .from('tracked_items')
     .select('id, member_id')
     .eq('id', itemId)
-    .single()
-  if (!item || item.member_id !== fm.member_id) {
+    .maybeSingle()
+  if (!item || item.member_id !== memberId) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
 
   const ext = file.name.split('.').pop()?.toLowerCase() ?? 'bin'
   const safeName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-  const storagePath = `${fm.member_id}/${itemId}/${safeName}`
+  const storagePath = `${memberId}/${itemId}/${safeName}`
 
   const buffer = await file.arrayBuffer()
   const { error: uploadErr } = await admin.storage
@@ -60,7 +63,7 @@ export async function POST(request: Request) {
   }
 
   // Append path to item's attachments array
-  const { data: existing } = await admin.from('tracked_items').select('attachments').eq('id', itemId).single()
+  const { data: existing } = await admin.from('tracked_items').select('attachments').eq('id', itemId).maybeSingle()
   const currentAttachments: string[] = existing?.attachments ?? []
   await admin.from('tracked_items').update({ attachments: [...currentAttachments, storagePath] }).eq('id', itemId)
 

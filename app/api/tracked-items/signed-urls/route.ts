@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
 import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { getMemberByDirectAuth } from '@/lib/data/members'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 const BUCKET = 'tracked-item-attachments'
@@ -11,8 +12,10 @@ export async function POST(request: Request) {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const directMember = await getMemberByDirectAuth(user.id)
   const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) return NextResponse.json({ error: 'No member linked' }, { status: 403 })
+  const memberId = directMember.data?.id ?? fm?.member_id
+  if (!memberId) return NextResponse.json({ error: 'No member linked' }, { status: 403 })
 
   let body: { paths?: string[] }
   try {
@@ -27,7 +30,7 @@ export async function POST(request: Request) {
   }
 
   // Security: all paths must start with this member's ID
-  const unauthorized = paths.filter(p => !p.startsWith(fm.member_id + '/'))
+  const unauthorized = paths.filter(p => !p.startsWith(memberId + '/'))
   if (unauthorized.length > 0) {
     return NextResponse.json({ error: 'Unauthorized path' }, { status: 403 })
   }

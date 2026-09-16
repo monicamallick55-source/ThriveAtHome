@@ -1,21 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { getMemberByDirectAuth } from '@/lib/data/members'
 import { updateTrackedItem, deleteTrackedItem } from '@/lib/data/tracked-items'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 type Params = { params: Promise<{ id: string }> }
 
+/**
+ * Resolves ownership for either auth path: a senior logged in directly
+ * (members.supabase_auth_id) or a family member linked via family_members.
+ */
 async function verifyOwnership(userId: string, itemId: string) {
+  const directMember = await getMemberByDirectAuth(userId)
   const { data: fm } = await getFamilyMemberByAuthId(userId)
-  if (!fm?.member_id) return null
+  const memberId = directMember.data?.id ?? fm?.member_id
+  if (!memberId) return null
+
   const admin = createAdminClient()
   const { data } = await admin
     .from('tracked_items')
     .select('id, member_id, is_recurring, recurrence_cycle_days, expiration_or_appointment_date')
     .eq('id', itemId)
-    .single()
-  if (!data || data.member_id !== fm.member_id) return null
+    .maybeSingle()
+  if (!data || data.member_id !== memberId) return null
   return { fm, item: data }
 }
 
@@ -88,14 +96,12 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     })
     if (error) return NextResponse.json({ error }, { status: 500 })
     // Navigator notification for reschedule
-    if (owned.fm.member_id) {
-      await createAdminClient().from('navigator_tasks').insert({
-        member_id: owned.fm.member_id,
-        task_type: 'appointment_rescheduled',
-        description: `Member rescheduled an appointment to ${rest.new_date}.`,
-        priority: 'low',
-      }).then(() => null, () => null)
-    }
+    await createAdminClient().from('navigator_tasks').insert({
+      member_id: owned.item.member_id,
+      task_type: 'appointment_rescheduled',
+      description: `Member rescheduled an appointment to ${rest.new_date}.`,
+      priority: 'low',
+    }).then(() => null, () => null)
     return NextResponse.json({ item: data })
   }
 
@@ -106,18 +112,16 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       .from('tracked_items')
       .select('item_name, expiration_or_appointment_date, renewal_contact_info')
       .eq('id', id)
-      .single()
+      .maybeSingle()
     const desc = item2
       ? `Member needs help renewing: ${item2.item_name}. Due: ${item2.expiration_or_appointment_date}.${item2.renewal_contact_info ? ` Contact: ${item2.renewal_contact_info}` : ''}`
       : 'Member requested renewal help.'
-    if (owned.fm.member_id) {
-      await admin.from('navigator_tasks').insert({
-        member_id: owned.fm.member_id,
-        task_type: 'renewal_assistance',
-        description: desc,
-        priority: 'medium',
-      }).then(() => null, () => null)
-    }
+    await admin.from('navigator_tasks').insert({
+      member_id: owned.item.member_id,
+      task_type: 'renewal_assistance',
+      description: desc,
+      priority: 'medium',
+    }).then(() => null, () => null)
     return NextResponse.json({ success: true })
   }
 

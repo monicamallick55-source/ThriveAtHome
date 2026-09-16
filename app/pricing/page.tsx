@@ -4,6 +4,8 @@ import { STRIPE_PLANS } from '@/lib/stripe/config'
 import { getCurrentUser } from '@/lib/auth'
 
 export const metadata: Metadata = { title: 'Pricing — ThriveAtHome' }
+// Reads the session on every request — must never be served from a cached/static render.
+export const dynamic = 'force-dynamic'
 
 const CHECK_ICON = (
   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true" style={{ flexShrink: 0, marginTop: '2px' }}>

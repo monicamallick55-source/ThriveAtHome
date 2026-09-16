@@ -253,10 +253,14 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
   const [contactMethod, setContactMethod] = useState<string>(member.preferred_contact_method ?? 'phone')
   const [savingContact, setSavingContact] = useState(false)
 
+  // Anchor "today" to UTC midnight so day-count maths renders identically on
+  // the server and on the client (no local-timezone hydration mismatch).
+  const today = new Date(new Date().toISOString().slice(0, 10) + 'T00:00:00Z')
+
   // First ~3 weeks after sign-up: gently introduce Aria once the human relationship is set.
   // From day 21 onward the home-tab re-introduction card (below) takes over.
   const daysSinceJoined = Math.floor(
-    (Date.now() - new Date(member.created_at).getTime()) / (24 * 60 * 60 * 1000)
+    (today.getTime() - new Date(member.created_at).getTime()) / (24 * 60 * 60 * 1000)
   )
   const showAriaIntroPrompt = !ariaOn && daysSinceJoined >= 0 && daysSinceJoined <= 20
 
@@ -286,9 +290,6 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
   const [docError, setDocError] = useState('')
   const [docSuccess, setDocSuccess] = useState('')
 
-  // Anchor "today" to UTC midnight so day-count maths renders identically on
-  // the server and on the client (no local-timezone hydration mismatch).
-  const today = new Date(new Date().toISOString().slice(0, 10) + 'T00:00:00Z')
   const age = member.date_of_birth
     ? Math.floor((today.getTime() - new Date(member.date_of_birth).getTime()) / (365.25 * 24 * 60 * 60 * 1000))
     : null

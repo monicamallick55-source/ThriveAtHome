@@ -1,8 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { getMemberByDirectAuth } from '@/lib/data/members'
 import { createTrackedItem, getTrackedItemsForMember, ITEM_TYPE_DEFAULTS } from '@/lib/data/tracked-items'
 import type { ItemType } from '@/lib/data/tracked-items'
+
+/**
+ * Resolves the member_id for the calling user, whether they are a senior who
+ * signed up directly (members.supabase_auth_id) or a family member linked via
+ * family_members. Also returns the family_members row when one exists, since
+ * only family members have a `created_by` row to attribute the item to.
+ */
+async function resolveMemberContext(authUserId: string) {
+  const directMember = await getMemberByDirectAuth(authUserId)
+  if (directMember.data) return { memberId: directMember.data.id, familyMemberId: null as string | null }
+
+  const { data: fm } = await getFamilyMemberByAuthId(authUserId)
+  if (fm?.member_id) return { memberId: fm.member_id, familyMemberId: fm.id }
+
+  return { memberId: null as string | null, familyMemberId: null as string | null }
+}
 
 const ALLOWED_ITEM_TYPES: ItemType[] = [
   'prescription', 'home_insurance', 'car_insurance', 'health_insurance',
@@ -15,10 +32,10 @@ export async function GET() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) return NextResponse.json({ error: 'No member found' }, { status: 404 })
+  const { memberId } = await resolveMemberContext(user.id)
+  if (!memberId) return NextResponse.json({ error: 'No member found' }, { status: 404 })
 
-  const { data, error } = await getTrackedItemsForMember(fm.member_id)
+  const { data, error } = await getTrackedItemsForMember(memberId)
   if (error) return NextResponse.json({ error }, { status: 500 })
   return NextResponse.json({ items: data })
 }
@@ -28,8 +45,8 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) return NextResponse.json({ error: 'No member found' }, { status: 404 })
+  const { memberId, familyMemberId } = await resolveMemberContext(user.id)
+  if (!memberId) return NextResponse.json({ error: 'No member found' }, { status: 404 })
 
   let body: Record<string, unknown>
   try { body = await req.json() } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }) }
@@ -54,7 +71,7 @@ export async function POST(req: NextRequest) {
   }
 
   const defaults = ITEM_TYPE_DEFAULTS[item_type as ItemType]
-  const { data, error } = await createTrackedItem(fm.member_id, {
+  const { data, error } = await createTrackedItem(memberId, {
     item_type: item_type as ItemType,
     category: (resolvedCategory ?? defaults.category) as 'renewal' | 'appointment' | 'subscription',
     subcategory: typeof subcategory === 'string' ? subcategory.trim() || null : null,
@@ -67,7 +84,7 @@ export async function POST(req: NextRequest) {
     renewal_contact_info: typeof renewal_contact_info === 'string' ? renewal_contact_info.trim() || null : null,
     notes: typeof notes === 'string' ? notes.trim() || null : null,
     status: 'active',
-    created_by: fm.id,
+    created_by: familyMemberId,
   })
 
   if (error) return NextResponse.json({ error }, { status: 500 })
