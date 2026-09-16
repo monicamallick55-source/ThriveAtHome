@@ -27,6 +27,36 @@ export async function getActiveBuddyAssignment(memberId: string): Promise<{ data
   return { data, error: null }
 }
 
+// Returns a compact buddy summary for a member: active assignment + completed call count.
+// Used by the navigator console member detail panel — a single call instead of wiring
+// three separate fetches for one summary card.
+export async function getBuddySummaryForMember(memberId: string): Promise<{
+  data: { assignmentId: string; status: string; callFrequency: string; volunteerName: string | null; completedCallCount: number } | null
+  error: string | null
+}> {
+  const { data: assignment, error } = await getActiveBuddyAssignment(memberId)
+  if (error) return { data: null, error }
+  if (!assignment) return { data: null, error: null }
+
+  const admin = createAdminClient()
+  const [{ data: volunteer }, { data: count, error: countError }] = await Promise.all([
+    (admin.from as any)('volunteers').select('full_name').eq('id', assignment.volunteer_id).maybeSingle(),
+    getCompletedBuddyCallCount(assignment.id),
+  ])
+  if (countError) return { data: null, error: countError }
+
+  return {
+    data: {
+      assignmentId: assignment.id,
+      status: assignment.status,
+      callFrequency: assignment.call_frequency,
+      volunteerName: volunteer?.full_name ?? null,
+      completedCallCount: count,
+    },
+    error: null,
+  }
+}
+
 // Returns all buddy assignments for a member (all statuses).
 export async function getBuddyAssignments(memberId: string): Promise<{ data: BuddyAssignmentRow[] | null; error: string | null }> {
   const admin = createAdminClient()
@@ -124,6 +154,19 @@ export async function getBuddyCalls(assignmentId: string): Promise<{ data: Buddy
     .order('created_at', { ascending: false })
   if (error) return { data: null, error: error.message }
   return { data: data ?? [], error: null }
+}
+
+// Returns the number of buddy calls that actually took place (started_at set) for an assignment.
+// A separate count query is used instead of calls.length so this stays accurate even where only
+// a summary is needed (e.g. dashboard tiles) without pulling every call row.
+export async function getCompletedBuddyCallCount(assignmentId: string): Promise<{ data: number; error: string | null }> {
+  const admin = createAdminClient()
+  const { count, error } = await (admin.from as any)('buddy_calls')
+    .select('id', { count: 'exact', head: true })
+    .eq('assignment_id', assignmentId)
+    .not('started_at', 'is', null)
+  if (error) return { data: 0, error: error.message }
+  return { data: count ?? 0, error: null }
 }
 
 // Creates a buddy call record.

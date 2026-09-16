@@ -11,6 +11,7 @@ import { getAdvisorConnectionsForMember } from '@/lib/data/advisors'
 import { getMemberCulturalEngagement } from '@/lib/data/cultural'
 import { getMemberAddonSummary } from '@/lib/data/premium-addons'
 import { getMemberPetSummary } from '@/lib/data/pets'
+import { getBuddySummaryForMember } from '@/lib/data/buddies'
 import { aiProvider } from '@/lib/providers'
 
 export async function GET(
@@ -56,6 +57,7 @@ export async function GET(
     culturalEngagement,
     premiumAddons,
     petSummary,
+    buddySummary,
   ] = await Promise.all([
     getMemberById(memberId),
     getMemberRecentCalls(memberId, 5),
@@ -72,6 +74,7 @@ export async function GET(
     getMemberCulturalEngagement(memberId),
     getMemberAddonSummary(memberId),
     getMemberPetSummary(memberId),
+    getBuddySummaryForMember(memberId),
   ])
 
   if (memberResult.error || !memberResult.data) {
@@ -107,5 +110,6 @@ export async function GET(
     culturalEngagement,
     premiumAddons,
     petSummary,
+    buddySummary: buddySummary.data,
   })
 }

@@ -96,6 +96,13 @@ interface PanelData {
     upcomingPetCelebrations: number
     openPetLossRequests: number
   } | null
+  buddySummary?: {
+    assignmentId: string
+    status: string
+    callFrequency: string
+    volunteerName: string | null
+    completedCallCount: number
+  } | null
 }
 
 function formatDate(iso: string | null | undefined): string {
@@ -1916,6 +1923,25 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                           <strong>{ps.openPetLossRequests}</strong> — see the task queue (pet_loss_support)
                         </p>
                       )}
+                    </div>
+                  </Section>
+                )
+              })()}
+
+              {/* Human Buddy programme */}
+              {(() => {
+                const bs = panelData.buddySummary
+                if (!bs) return null
+                return (
+                  <Section title="Human Buddy">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0 }}>
+                        Buddy: <strong style={{ color: 'var(--color-text-primary)' }}>{bs.volunteerName ?? 'Unassigned'}</strong>
+                        {' '}({bs.status}, {bs.callFrequency})
+                      </p>
+                      <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0 }}>
+                        Completed calls: <strong style={{ color: 'var(--color-text-primary)' }}>{bs.completedCallCount}</strong>
+                      </p>
                     </div>
                   </Section>
                 )

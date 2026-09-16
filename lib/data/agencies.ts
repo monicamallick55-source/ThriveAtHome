@@ -33,6 +33,22 @@ export async function getAgencyForAdmin(authUserId: string): Promise<{ data: Car
   return { data, error: null }
 }
 
+/**
+ * Get the real full name of the logged-in agency admin, for use as the
+ * "signed by" / "approved by" name on clinical documents. Falls back to
+ * null rather than a placeholder — callers decide what to show if absent.
+ */
+export async function getAgencyAdminName(authUserId: string): Promise<{ data: string | null; error: string | null }> {
+  const admin = createAdminClient()
+  const { data: fm, error } = await (admin
+    .from('family_members')
+    .select('full_name')
+    .eq('supabase_auth_id', authUserId)
+    .maybeSingle() as unknown as SupabaseResult<{ full_name: string | null }>)
+  if (error) return { data: null, error: error.message }
+  return { data: fm?.full_name?.trim() || null, error: null }
+}
+
 /** Get all care workers for an agency. */
 export async function getCareWorkersForAgency(agencyId: string): Promise<{ data: CareWorkerRow[] | null; error: string | null }> {
   const admin = createAdminClient()

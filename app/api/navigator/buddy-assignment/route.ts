@@ -2,7 +2,7 @@
 // DELETE /api/navigator/buddy-assignment — ends a buddy assignment
 import { NextResponse } from 'next/server'
 import { requireAuth, isNavigatorOrAdmin } from '@/lib/auth'
-import { getBuddyCalls, endBuddyAssignment } from '@/lib/data/buddies'
+import { getBuddyCalls, getCompletedBuddyCallCount, endBuddyAssignment } from '@/lib/data/buddies'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function GET(req: Request) {
@@ -26,12 +26,17 @@ export async function GET(req: Request) {
       .maybeSingle()
 
     let calls: unknown[] = []
+    let completedCallCount = 0
     if (assignment) {
-      const { data } = await getBuddyCalls(assignment.id)
+      const [{ data }, { data: count }] = await Promise.all([
+        getBuddyCalls(assignment.id),
+        getCompletedBuddyCallCount(assignment.id),
+      ])
       calls = data ?? []
+      completedCallCount = count
     }
 
-    return NextResponse.json({ assignment, calls })
+    return NextResponse.json({ assignment, calls, completedCallCount })
   } catch (err) {
     return NextResponse.json({ error: String(err) }, { status: 500 })
   }

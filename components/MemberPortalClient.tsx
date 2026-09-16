@@ -176,6 +176,10 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
   const [circles, setCircles] = useState<CircleData[]>([])
   const [circleEvents, setCircleEvents] = useState<CircleEventData[]>([])
   const [circlesLoaded, setCirclesLoaded] = useState(false)
+
+  const [buddyAssignment, setBuddyAssignment] = useState<{ id: string; status: string; volunteers: { full_name: string } | null } | null>(null)
+  const [buddyCallCount, setBuddyCallCount] = useState(0)
+  const [buddyLoaded, setBuddyLoaded] = useState(false)
   const [showNeedForm, setShowNeedForm] = useState(false)
   const [needForm, setNeedForm] = useState({ need_type: 'other', title: '', description: '', preferred_date: '', community_context: '' })
   const [submittingNeed, setSubmittingNeed] = useState(false)
@@ -319,6 +323,21 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
   useEffect(() => {
     if (activeTab === 'community') loadCircles()
   }, [activeTab, loadCircles])
+
+  // Load the real buddy assignment + completed call count when the buddy tab opens
+  const loadBuddy = useCallback(async () => {
+    if (buddyLoaded) return
+    const res = await fetch(`/api/family/buddy-assignment?member_id=${member.id}`)
+    const json = await res.json().catch(() => ({ assignment: null, completedCallCount: 0 }))
+    setBuddyAssignment(json.assignment ?? null)
+    setBuddyCallCount(json.completedCallCount ?? 0)
+    setBuddyLoaded(true)
+  }, [buddyLoaded, member.id])
+
+  const memberHasBuddyPlan = member.plan_tier === 'connect' || member.plan_tier === 'complete' || member.plan_tier === 'premier'
+  useEffect(() => {
+    if (activeTab === 'buddy' && memberHasBuddyPlan) loadBuddy()
+  }, [activeTab, memberHasBuddyPlan, loadBuddy])
 
   const loadHistory = useCallback(async () => {
     if (historyLoaded) return
@@ -1289,19 +1308,39 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
             ) : (
               <>
                 <div style={card}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
-                    <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: '#F0F9F7', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', flexShrink: 0 }}>
-                      🤝
+                  {!buddyLoaded ? (
+                    <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)' }}>Loading your buddy match…</p>
+                  ) : buddyAssignment ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+                      <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: '#F0F9F7', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', flexShrink: 0 }}>
+                        🤝
+                      </div>
+                      <div>
+                        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 500, color: 'var(--color-navy)', margin: '0 0 4px' }}>
+                          {buddyAssignment.volunteers?.full_name ?? 'Your buddy'}
+                        </h3>
+                        <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)', margin: 0 }}>
+                          {buddyCallCount === 0
+                            ? "You haven't had your first call yet — it's coming soon."
+                            : `${buddyCallCount} completed call${buddyCallCount === 1 ? '' : 's'} so far.`}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 500, color: 'var(--color-navy)', margin: '0 0 4px' }}>
-                        Your buddy is being matched
-                      </h3>
-                      <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)', margin: 0 }}>
-                        We&apos;re finding the right match based on your interests, language, and availability. You&apos;ll hear from us soon.
-                      </p>
+                  ) : (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+                      <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: '#F0F9F7', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', flexShrink: 0 }}>
+                        🤝
+                      </div>
+                      <div>
+                        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 500, color: 'var(--color-navy)', margin: '0 0 4px' }}>
+                          Your buddy is being matched
+                        </h3>
+                        <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)', margin: 0 }}>
+                          We&apos;re finding the right match based on your interests, language, and availability. You&apos;ll hear from us soon.
+                        </p>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 <div style={card}>

@@ -1,7 +1,7 @@
 // GET /api/family/buddy-assignment?member_id=... — returns buddy assignment + recent calls for a member (family view: no concern_description)
 import { NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
-import { getBuddyCallsForFamily } from '@/lib/data/buddies'
+import { getBuddyCallsForFamily, getCompletedBuddyCallCount } from '@/lib/data/buddies'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function GET(req: Request) {
@@ -29,12 +29,17 @@ export async function GET(req: Request) {
       .maybeSingle()
 
     let calls: unknown[] = []
+    let completedCallCount = 0
     if (assignment) {
-      const { data } = await getBuddyCallsForFamily(assignment.id)
+      const [{ data }, { data: count }] = await Promise.all([
+        getBuddyCallsForFamily(assignment.id),
+        getCompletedBuddyCallCount(assignment.id),
+      ])
       calls = data ?? []
+      completedCallCount = count
     }
 
-    return NextResponse.json({ assignment, calls })
+    return NextResponse.json({ assignment, calls, completedCallCount })
   } catch (err) {
     return NextResponse.json({ error: String(err) }, { status: 500 })
   }

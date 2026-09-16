@@ -36,6 +36,8 @@ interface AgencyDashboardClientProps {
   members: MemberSummary[]
   pendingReferrals: AgencyReferralRow[]
   initialLocations?: AgencyLocationRow[]
+  /** Real full name of the logged-in agency admin, used to sign/approve clinical documents. */
+  signerName?: string
 }
 
 const WORKER_ROLES = [
@@ -80,6 +82,7 @@ export default function AgencyDashboardClient({
   members,
   pendingReferrals,
   initialLocations = [],
+  signerName,
 }: AgencyDashboardClientProps) {
   const [activeTab, setActiveTab] = useState<Tab>('overview')
   const [emailSubject, setEmailSubject] = useState('')
@@ -1046,7 +1049,7 @@ export default function AgencyDashboardClient({
           <ClinicalNotesTab
             agencyId={agency.id}
             members={members.map(m => ({ id: m.id, preferred_name: m.preferred_name, full_name: m.full_name }))}
-            signerName={agency.contact_name}
+            signerName={signerName || agency.contact_name}
           />
         )}
 

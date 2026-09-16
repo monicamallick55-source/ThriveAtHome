@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { requireAuth, getUserRole } from '@/lib/auth'
 import {
   getAgencyForAdmin,
+  getAgencyAdminName,
   getCareWorkersForAgency,
   getUpcomingVisitsForAgency,
   getRecentVisitsForAgency,
@@ -48,13 +49,14 @@ export default async function AgencyAdminPage() {
     )
   }
 
-  const [workersRes, upcomingRes, recentRes, membersRes, referralsRes, locationsRes] = await Promise.all([
+  const [workersRes, upcomingRes, recentRes, membersRes, referralsRes, locationsRes, adminNameRes] = await Promise.all([
     getCareWorkersForAgency(agency.id),
     getUpcomingVisitsForAgency(agency.id),
     getRecentVisitsForAgency(agency.id),
     getMembersForAgency(agency.id),
     getPendingReferralsForAgency(agency.id),
     getLocationsForAgency(agency.id),
+    getAgencyAdminName(user.id),
   ])
 
   return (
@@ -66,6 +68,7 @@ export default async function AgencyAdminPage() {
       members={membersRes.data ?? []}
       pendingReferrals={referralsRes.data ?? []}
       initialLocations={locationsRes.data ?? []}
+      signerName={adminNameRes.data ?? undefined}
     />
   )
 }
