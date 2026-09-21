@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
-import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { resolveMemberContext } from '@/lib/data/members'
 import { createServiceBooking } from '@/lib/data/services'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { transportProvider } from '@/lib/providers'
@@ -14,8 +14,8 @@ export async function POST(req: NextRequest) {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) {
+  const { memberId } = await resolveMemberContext(user.id)
+  if (!memberId) {
     return NextResponse.json(
       { error: 'No member linked to this account. Please complete onboarding first.' },
       { status: 400 }
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
   }
 
   const { data: booking, error } = await createServiceBooking(
-    fm.member_id,
+    memberId,
     service_type as AllowedServiceType,
     booking_details,
     requested_for ?? null,
@@ -64,13 +64,13 @@ export async function POST(req: NextRequest) {
   // Stub provider integration
   if (service_type === 'transport') {
     const { pickup_address, destination, date_time } = booking_details as Record<string, string>
-    console.log(`[STUB][Transport] Would book ride for member ${fm.member_id}: ${pickup_address ?? '?'} → ${destination ?? '?'} at ${date_time ?? '?'}`)
+    console.log(`[STUB][Transport] Would book ride for member ${memberId}: ${pickup_address ?? '?'} → ${destination ?? '?'} at ${date_time ?? '?'}`)
     void transportProvider
   }
 
   if (service_type === 'companion') {
     const { companion_id, companion_name } = booking_details as Record<string, string>
-    console.log(`[STUB][Billing] Would process companion payout for companion ${companion_id ?? '?'} (${companion_name ?? '?'}) — session for member ${fm.member_id}. Stripe Connect required.`)
+    console.log(`[STUB][Billing] Would process companion payout for companion ${companion_id ?? '?'} (${companion_name ?? '?'}) — session for member ${memberId}. Stripe Connect required.`)
   }
 
   // Auto-create navigator tasks for high-priority service types
@@ -80,14 +80,14 @@ export async function POST(req: NextRequest) {
 
     if (service_type === 'tech_help') {
       await admin.from('navigator_tasks').insert({
-        member_id: fm.member_id,
+        member_id: memberId,
         task_type: 'tech_help_request',
         description: `New tech help request — subtype: ${subtype || 'unspecified'}. Coordinate volunteer or in-home visit.`,
         priority: 'medium',
       })
     } else if (service_type === 'telehealth' && subtype === 'mental_health_companion') {
       await admin.from('navigator_tasks').insert({
-        member_id: fm.member_id,
+        member_id: memberId,
         task_type: 'mental_health_referral',
         description: 'Member requested mental health support. Review and provide a warm referral to appropriate professional.',
         priority: 'high',
@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
         ? `Member needs a travel companion. Match with volunteers or paid companions willing to travel — subtype: ${subtype}.`
         : `Member requested travel assistance — subtype: ${subtype || 'general'}. Connect with vetted travel agent or help family book directly.`
       await admin.from('navigator_tasks').insert({
-        member_id: fm.member_id,
+        member_id: memberId,
         task_type: 'travel_assistance',
         description: travelDesc,
         priority: subtype === 'travel_companion' ? 'medium' : 'low',
@@ -115,17 +115,17 @@ export async function POST(req: NextRequest) {
         ? `Member needs car repair: ${subtype?.replace(/_/g, ' ') || 'type unspecified'}. Connect with a vetted local repair shop and coordinate appointment.`
         : `Member needs roadside help — ${subtype?.replace(/_/g, ' ') || 'type unspecified'}.${prefillNote} Coordinate using member's AAA or insurance coverage.`
       await admin.from('navigator_tasks').insert({
-        member_id: fm.member_id,
+        member_id: memberId,
         task_type: isCarRepair ? 'car_repair_coordination' : 'roadside_assistance',
         description: taskDesc,
         priority: isEmergency ? 'critical' : isCarRepair ? 'low' : 'high',
       })
       if (isEmergency) {
-        console.log(`[STUB][Roadside][URGENT] Emergency roadside request for member ${fm.member_id} — navigator notified immediately`)
+        console.log(`[STUB][Roadside][URGENT] Emergency roadside request for member ${memberId} — navigator notified immediately`)
       } else if (isCarRepair) {
-        console.log(`[STUB][CarRepair] Car repair request for member ${fm.member_id} — subtype: ${subtype} — navigator will find vetted shop`)
+        console.log(`[STUB][CarRepair] Car repair request for member ${memberId} — subtype: ${subtype} — navigator will find vetted shop`)
       } else {
-        console.log(`[STUB][Roadside] Roadside assistance request for member ${fm.member_id} — subtype: ${subtype}`)
+        console.log(`[STUB][Roadside] Roadside assistance request for member ${memberId} — subtype: ${subtype}`)
       }
     }
   }

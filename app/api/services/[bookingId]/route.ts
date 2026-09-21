@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser, getUserRole } from '@/lib/auth'
 import { updateBookingStatus, getServiceBookingsForMember } from '@/lib/data/services'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { resolveMemberContext } from '@/lib/data/members'
 import { pushRealtimeNotification } from '@/lib/realtime/notifications'
 import type { BookingStatus } from '@/types/database'
 
@@ -212,8 +212,8 @@ export async function DELETE(
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) return NextResponse.json({ error: 'No member linked' }, { status: 400 })
+  const { memberId } = await resolveMemberContext(user.id)
+  if (!memberId) return NextResponse.json({ error: 'No member linked' }, { status: 400 })
 
   const body = await req.json().catch(() => ({}))
   const { cancel_reason } = body as { cancel_reason?: string }
@@ -224,7 +224,7 @@ export async function DELETE(
     .from('service_bookings')
     .select('*')
     .eq('id', bookingId)
-    .eq('member_id', fm.member_id)
+    .eq('member_id', memberId)
     .maybeSingle()
 
   if (fetchErr || !booking) {
