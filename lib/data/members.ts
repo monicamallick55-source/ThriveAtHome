@@ -80,3 +80,26 @@ export async function getMemberForAuthUser(
     return { data: null, error: e instanceof Error ? e.message : String(e) }
   }
 }
+
+/**
+ * Resolves the member_id for the calling user, whether they are a senior who signed
+ * up directly (members.supabase_auth_id) or a family member linked via family_members.
+ * Also returns the family_members row id when one exists, since only family members
+ * have a row to attribute member-initiated actions (created_by / purchased_by) to.
+ */
+export async function resolveMemberContext(
+  authUserId: string
+): Promise<{ memberId: string | null; familyMemberId: string | null }> {
+  const directMember = await getMemberByDirectAuth(authUserId)
+  if (directMember.data) return { memberId: directMember.data.id, familyMemberId: null }
+
+  const admin = createAdminClient()
+  const { data: fm } = await admin
+    .from('family_members')
+    .select('id, member_id')
+    .eq('supabase_auth_id', authUserId)
+    .maybeSingle()
+  if (fm?.member_id) return { memberId: fm.member_id, familyMemberId: fm.id }
+
+  return { memberId: null, familyMemberId: null }
+}

@@ -5,7 +5,8 @@ import type { Metadata } from 'next'
 import { requireAuth } from '@/lib/auth'
 import { getMemberForAuthUser, getMemberByDirectAuth } from '@/lib/data/members'
 import { getUpcomingServiceBookings } from '@/lib/data/services'
-import { getUpcomingTrackedItems, ensureBirthdayTrackedItem } from '@/lib/data/tracked-items'
+import { getUpcomingTrackedItems, getSuggestedDates } from '@/lib/data/tracked-items'
+import { getAddonCatalog, getMemberAddons, getEffectiveFamilySeatLimit, hasActiveAddon, getVideoDiaryEntries } from '@/lib/data/premium-addons'
 import MemberPortalClient from '@/components/MemberPortalClient'
 
 export const metadata: Metadata = { title: 'My Portal — ThriveAtHome' }
@@ -28,18 +29,32 @@ export default async function MemberPortalPage() {
     redirect('/onboarding')
   }
 
-  await ensureBirthdayTrackedItem(member.id, member.date_of_birth)
-
-  const [servicesRes, trackedRes] = await Promise.all([
+  const [servicesRes, trackedRes, addonCatalogRes, memberAddonsRes, familySeatLimit, hasLongDistance] = await Promise.all([
     getUpcomingServiceBookings(member.id),
     getUpcomingTrackedItems(member.id),
+    getAddonCatalog(),
+    getMemberAddons(member.id),
+    getEffectiveFamilySeatLimit(member.id),
+    hasActiveAddon(member.id, 'long_distance_caregiver'),
   ])
+
+  const { data: videoDiary } = hasLongDistance
+    ? await getVideoDiaryEntries(member.id)
+    : { data: [] }
+
+  const suggestedDates = getSuggestedDates(member.date_of_birth, trackedRes.data ?? [])
 
   return (
     <MemberPortalClient
       member={member}
       upcomingServices={servicesRes.data ?? []}
       trackedItems={trackedRes.data ?? []}
+      suggestedDates={suggestedDates}
+      addonCatalog={addonCatalogRes.data}
+      memberAddons={memberAddonsRes.data}
+      familySeatLimit={familySeatLimit}
+      hasLongDistanceAddon={hasLongDistance}
+      initialVideoDiary={videoDiary ?? []}
     />
   )
 }

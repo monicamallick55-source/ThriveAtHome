@@ -223,6 +223,7 @@ export default function MemberPortalClient({
 
   // Important Dates
   const [localItems, setLocalItems] = useState<TrackedItem[]>(trackedItems)
+  const [addingSuggestion, setAddingSuggestion] = useState<string | null>(null)
   const [showDateForm, setShowDateForm] = useState(false)
   const [dateForm, setDateForm] = useState({
     item_type: 'appointment', item_name: '', expiration_or_appointment_date: '',
@@ -576,6 +577,35 @@ export default function MemberPortalClient({
     }
   }
 
+  async function addSuggestedDate(s: SuggestedDate) {
+    setAddingSuggestion(s.key)
+    const res = await fetch('/api/tracked-items', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        item_type: s.item_type,
+        category: s.category,
+        subcategory: s.subcategory,
+        item_name: s.item_name,
+        expiration_or_appointment_date: s.expiration_or_appointment_date,
+        reminder_lead_days: s.reminder_lead_days,
+        recurrence_cycle_days: s.recurrence_cycle_days,
+        is_recurring: s.is_recurring,
+      }),
+    })
+    setAddingSuggestion(null)
+    if (res.ok) {
+      const j = await res.json().catch(() => ({ item: null, data: null }))
+      const created = j.item ?? j.data
+      if (created) setLocalItems(prev => [...prev, created as TrackedItem])
+      setSuggestions(prev => prev.filter(x => x.key !== s.key))
+      showToast('Date added.')
+    } else {
+      const j = await res.json().catch(() => ({ error: '' }))
+      showToast(j.error ? `Could not add date: ${j.error}` : 'Could not add date. Please try again.')
+    }
+  }
+
   async function handleItemAction(itemId: string, action: string) {
     setActioningItem(itemId)
     await fetch(`/api/tracked-items/${itemId}`, {
@@ -738,6 +768,7 @@ export default function MemberPortalClient({
     { id: 'buddy', label: 'My Buddy' },
     { id: 'life-story', label: 'Life Story' },
     { id: 'billing', label: 'My Plan' },
+    { id: 'add-ons', label: 'Add-Ons' },
     { id: 'org', label: 'My Org' },
     { id: 'notifications', label: 'Notifications & Privacy' },
     { id: 'documents', label: '📎 Documents' },
@@ -1228,6 +1259,38 @@ export default function MemberPortalClient({
               </button>
             </div>
 
+            {suggestions.length > 0 && (
+              <div style={{ marginBottom: '24px' }}>
+                <h3 style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-text-secondary)', margin: '0 0 12px' }}>
+                  Suggested for you
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {suggestions.map(s => {
+                    const daysUntil = Math.ceil((new Date(s.expiration_or_appointment_date).getTime() - today.getTime()) / (24 * 60 * 60 * 1000))
+                    const icon = ITEM_TYPE_ICONS[s.item_type] ?? '📅'
+                    return (
+                      <div key={s.key} style={{ backgroundColor: 'white', borderRadius: 'var(--radius-lg)', border: '1.5px dashed var(--color-teal)', padding: '16px', display: 'flex', alignItems: 'center', gap: '14px' }}>
+                        <span style={{ fontSize: '22px', flexShrink: 0 }}>{icon}</span>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <p style={{ fontFamily: 'var(--font-body)', fontSize: '16px', fontWeight: 600, color: 'var(--color-navy)', margin: '0 0 2px' }}>{s.item_name}</p>
+                          <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0 }}>
+                            Suggested from your profile · {daysUntil <= 0 ? 'Today/Past' : daysUntil === 1 ? 'Tomorrow' : `In ${daysUntil} days`}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => addSuggestedDate(s)}
+                          disabled={addingSuggestion === s.key}
+                          style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, padding: '8px 16px', borderRadius: '100px', border: '1.5px solid var(--color-teal)', backgroundColor: '#F0F9F7', color: 'var(--color-teal)', cursor: addingSuggestion === s.key ? 'default' : 'pointer', flexShrink: 0, opacity: addingSuggestion === s.key ? 0.6 : 1 }}
+                        >
+                          {addingSuggestion === s.key ? 'Adding…' : '+ Add to my dates'}
+                        </button>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
             {showDateForm && (
               <div style={card}>
                 <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '16px' }}>Add an Important Date</h3>
@@ -1300,7 +1363,7 @@ export default function MemberPortalClient({
               </div>
             )}
 
-            {upcomingDates.length === 0 && !showDateForm ? (
+            {upcomingDates.length === 0 && !showDateForm && suggestions.length === 0 ? (
               <div style={{ ...card, textAlign: 'center', padding: '48px 24px' }}>
                 <p style={{ fontFamily: 'var(--font-body)', fontSize: '18px', color: 'var(--color-text-secondary)', marginBottom: '16px' }}>No upcoming dates tracked.</p>
                 <button onClick={() => setShowDateForm(true)} style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-teal)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>Add prescriptions, insurance renewals, appointments →</button>
@@ -1606,6 +1669,24 @@ export default function MemberPortalClient({
               <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'rgba(250,250,245,0.75)', lineHeight: 1.6, marginBottom: '20px' }}>Your contribution helps us provide subsidized care to seniors who need it most.</p>
               <a href="/donate" style={{ display: 'inline-block', padding: '12px 28px', backgroundColor: 'var(--color-cream)', color: 'var(--color-navy)', borderRadius: '10px', fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 700, textDecoration: 'none' }}>Make a donation →</a>
             </div>
+          </div>
+        )}
+
+        {/* ─── ADD-ONS ─────────────────────────────────────────────────────── */}
+        {activeTab === 'add-ons' && (
+          <div>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '8px' }}>Add-Ons &amp; Upgrades</h2>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)', marginBottom: '24px', maxWidth: '640px' }}>
+              Optional extras on top of your plan. Monthly add-ons can be cancelled any time. One-time services are arranged by your Navigator after purchase.
+            </p>
+            <AddOnsClient
+              catalog={addonCatalog}
+              memberAddons={memberAddons}
+              memberAge={member.date_of_birth ? Math.floor((Date.now() - new Date(member.date_of_birth).getTime()) / (365.25 * 24 * 3600 * 1000)) : null}
+              planTier={member.plan_tier}
+              hasLongDistance={hasLongDistanceAddon}
+              initialVideoDiary={initialVideoDiary}
+            />
           </div>
         )}
 

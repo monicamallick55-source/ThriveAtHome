@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import type { TrackedItem, ItemType, TrackedItemStatus } from '@/lib/data/tracked-items-types'
 import { ITEM_TYPE_DEFAULTS } from '@/lib/data/tracked-items-types'
+import type { SuggestedDate } from '@/lib/data/tracked-items'
 
 interface AttachmentUrl { path: string; url: string; original_name: string; mime: string }
 
@@ -570,14 +571,72 @@ function ActionPill({ label, onClick, disabled, color }: { label: string; onClic
   )
 }
 
+// ── Suggested date card ──────────────────────────────────────────────────────
+
+function SuggestedDateCard({ suggestion, onAdded }: { suggestion: SuggestedDate; onAdded: (item: TrackedItem) => void }) {
+  const [adding, setAdding] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const days = getDaysUntil(suggestion.expiration_or_appointment_date)
+  const emoji = ITEM_TYPE_DEFAULTS[suggestion.item_type]?.emoji ?? '📅'
+
+  async function addToMyDates() {
+    setAdding(true); setError(null)
+    try {
+      const res = await fetch('/api/tracked-items', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          item_type: suggestion.item_type,
+          category: suggestion.category,
+          subcategory: suggestion.subcategory,
+          item_name: suggestion.item_name,
+          expiration_or_appointment_date: suggestion.expiration_or_appointment_date,
+          reminder_lead_days: suggestion.reminder_lead_days,
+          recurrence_cycle_days: suggestion.recurrence_cycle_days,
+          is_recurring: suggestion.is_recurring,
+        }),
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) { setError(json.error ?? 'Could not add this date.'); return }
+      onAdded(json.item)
+    } catch { setError('Network error. Please try again.') } finally { setAdding(false) }
+  }
+
+  return (
+    <div style={{ backgroundColor: 'white', borderRadius: 'var(--radius-lg)', border: '1.5px dashed var(--color-teal)', padding: '16px', display: 'flex', alignItems: 'center', gap: '14px' }}>
+      <div style={{ width: '44px', height: '44px', borderRadius: '50%', backgroundColor: '#f0fdfa', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', flexShrink: 0 }}>
+        {emoji}
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{ fontFamily: 'var(--font-body)', fontSize: '16px', fontWeight: 600, color: 'var(--color-text-primary)', margin: '0 0 2px' }}>
+          {suggestion.item_name}
+        </p>
+        <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0 }}>
+          Suggested from your profile · {countdownLabel(days)}
+        </p>
+        {error && <p role="alert" style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: '#dc2626', margin: '4px 0 0' }}>⚠️ {error}</p>}
+      </div>
+      <button
+        onClick={addToMyDates}
+        disabled={adding}
+        style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, padding: '8px 16px', borderRadius: '100px', border: '1.5px solid var(--color-teal)', backgroundColor: '#f0fdfa', color: 'var(--color-teal)', cursor: adding ? 'default' : 'pointer', flexShrink: 0, opacity: adding ? 0.6 : 1 }}
+      >
+        {adding ? 'Adding…' : '+ Add to my dates'}
+      </button>
+    </div>
+  )
+}
+
 // ── Main component ─────────────────────────────────────────────────────────
 
 interface Props {
   initialItems: TrackedItem[]
+  suggestedDates?: SuggestedDate[]
 }
 
-export default function ImportantDatesClient({ initialItems }: Props) {
+export default function ImportantDatesClient({ initialItems, suggestedDates = [] }: Props) {
   const [items, setItems] = useState<TrackedItem[]>(initialItems)
+  const [suggestions, setSuggestions] = useState<SuggestedDate[]>(suggestedDates)
   const [showForm, setShowForm] = useState(false)
 
   const renewals = items.filter(i => i.category === 'renewal').sort((a, b) => getDaysUntil(a.expiration_or_appointment_date) - getDaysUntil(b.expiration_or_appointment_date))
@@ -627,7 +686,27 @@ export default function ImportantDatesClient({ initialItems }: Props) {
         </button>
       )}
 
-      {items.length === 0 && !showForm && (
+      {suggestions.length > 0 && (
+        <section style={{ marginBottom: '32px' }}>
+          <h2 style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-text-secondary)', margin: '0 0 12px' }}>
+            Suggested for you
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {suggestions.map(s => (
+              <SuggestedDateCard
+                key={s.key}
+                suggestion={s}
+                onAdded={item => {
+                  setItems(prev => [item, ...prev])
+                  setSuggestions(prev => prev.filter(x => x.key !== s.key))
+                }}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {items.length === 0 && !showForm && suggestions.length === 0 && (
         <div style={{ textAlign: 'center', padding: '48px 24px', backgroundColor: 'white', borderRadius: 'var(--radius-lg)', border: '1.5px dashed var(--color-warm-grey)' }}>
           <p style={{ fontSize: '36px', margin: '0 0 12px' }}>📅</p>
           <p style={{ fontFamily: 'var(--font-display)', fontSize: '20px', color: 'var(--color-navy)', margin: '0 0 8px' }}>No important dates yet</p>

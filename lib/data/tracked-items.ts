@@ -18,57 +18,47 @@ function nextBirthdayDate(dateOfBirth: string): string {
   return next.toISOString().slice(0, 10)
 }
 
+export interface SuggestedDate {
+  key: string
+  item_type: TrackedItem['item_type']
+  item_name: string
+  category: TrackedItem['category']
+  subcategory: string
+  expiration_or_appointment_date: string
+  reminder_lead_days: number
+  recurrence_cycle_days: number | null
+  is_recurring: boolean
+}
+
 /**
- * Pre-populates the member's Important Dates with a recurring Birthday entry
- * derived from their profile date of birth, if one doesn't already exist.
- * Called on page load — idempotent, never throws.
+ * Read-only suggestions for the member's Important Dates, derived from their
+ * profile (currently: date of birth). Never writes to the database — the
+ * member adds a suggestion to their real list via "Add to my dates", which
+ * posts it through the normal create-tracked-item flow. A suggestion already
+ * present in `existingItems` (any status) is not suggested again.
  */
-export async function ensureBirthdayTrackedItem(
-  memberId: string,
-  dateOfBirth: string | null | undefined
-): Promise<void> {
-  if (!dateOfBirth) return
-  const admin = createAdminClient()
+export function getSuggestedDates(
+  dateOfBirth: string | null | undefined,
+  existingItems: TrackedItem[]
+): SuggestedDate[] {
+  const suggestions: SuggestedDate[] = []
 
-  const { data: existing, error: findError } = await admin
-    .from('tracked_items')
-    .select('id, expiration_or_appointment_date')
-    .eq('member_id', memberId)
-    .eq('item_type', 'birthday')
-    .maybeSingle()
-
-  if (findError) { console.error('[tracked-items/ensureBirthdayTrackedItem] lookup failed:', findError); return }
-
-  const nextDate = nextBirthdayDate(dateOfBirth)
-
-  if (!existing) {
+  if (dateOfBirth && !existingItems.some(i => i.item_type === 'birthday')) {
     const defaults = ITEM_TYPE_DEFAULTS.birthday
-    const { error: insertError } = await admin.from('tracked_items').insert({
-      member_id: memberId,
+    suggestions.push({
+      key: 'birthday',
       item_type: 'birthday',
+      item_name: 'Birthday',
       category: defaults.category,
       subcategory: 'Birthday',
-      item_name: 'Birthday',
-      expiration_or_appointment_date: nextDate,
+      expiration_or_appointment_date: nextBirthdayDate(dateOfBirth),
       reminder_lead_days: defaults.reminder_lead_days,
       recurrence_cycle_days: defaults.recurrence_cycle_days,
       is_recurring: defaults.is_recurring,
-      status: 'active',
-      attachments: [],
-      created_by: null,
     })
-    if (insertError) console.error('[tracked-items/ensureBirthdayTrackedItem] insert failed:', insertError)
-    return
   }
 
-  // Roll last year's date forward once it has passed.
-  if (existing.expiration_or_appointment_date < nextDate) {
-    const { error: updateError } = await admin
-      .from('tracked_items')
-      .update({ expiration_or_appointment_date: nextDate, status: 'active' })
-      .eq('id', existing.id)
-    if (updateError) console.error('[tracked-items/ensureBirthdayTrackedItem] roll-forward failed:', updateError)
-  }
+  return suggestions
 }
 
 export async function getTrackedItemsForMember(

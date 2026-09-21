@@ -1,7 +1,7 @@
 // M26 — Premium Subscription Add-Ons: list the catalog + the member's add-ons, and purchase one.
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
-import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { resolveMemberContext } from '@/lib/data/members'
 import { createAdminClient } from '@/lib/supabase/admin'
 import {
   getAddonCatalog,
@@ -18,15 +18,15 @@ export async function GET() {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
+  const { memberId } = await resolveMemberContext(user.id)
   const { data: catalog } = await getAddonCatalog()
 
-  if (!fm?.member_id) {
+  if (!memberId) {
     return NextResponse.json({ catalog, memberAddons: [], familySeatLimit: 3 })
   }
   const [{ data: memberAddons }, familySeatLimit] = await Promise.all([
-    getMemberAddons(fm.member_id),
-    getEffectiveFamilySeatLimit(fm.member_id),
+    getMemberAddons(memberId),
+    getEffectiveFamilySeatLimit(memberId),
   ])
   return NextResponse.json({ catalog, memberAddons, familySeatLimit })
 }
@@ -35,8 +35,8 @@ export async function POST(req: NextRequest) {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) {
+  const { memberId, familyMemberId } = await resolveMemberContext(user.id)
+  if (!memberId) {
     return NextResponse.json({ error: 'Please complete onboarding first.' }, { status: 400 })
   }
 
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
   const { data: member } = await admin
     .from('members')
     .select('preferred_name, plan_tier')
-    .eq('id', fm.member_id)
+    .eq('id', memberId)
     .maybeSingle()
 
   // Sanitise the optional intake payload
@@ -82,9 +82,9 @@ export async function POST(req: NextRequest) {
   }
 
   const { data, error } = await purchaseAddon({
-    memberId: fm.member_id,
+    memberId,
     addonKey: addon_key.trim(),
-    purchasedBy: fm.id,
+    purchasedBy: familyMemberId,
     memberPreferredName: member?.preferred_name ?? 'The member',
     memberPlanTier: (member?.plan_tier as PlanTier) ?? 'basics',
     intake: cleanIntake,

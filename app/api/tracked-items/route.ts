@@ -24,7 +24,7 @@ async function resolveMemberContext(authUserId: string) {
 const ALLOWED_ITEM_TYPES: ItemType[] = [
   'prescription', 'home_insurance', 'car_insurance', 'health_insurance',
   'drivers_license', 'car_registration', 'aaa_membership', 'passport',
-  'gym_membership', 'appointment', 'other',
+  'gym_membership', 'appointment', 'birthday', 'other',
 ]
 
 export async function GET() {
