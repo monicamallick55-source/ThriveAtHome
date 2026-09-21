@@ -275,3 +275,76 @@ NEXT SESSION MUST:
 - Otherwise: awaiting the human to run the two live smoke tests noted above and confirm the Vercel build for commit 0c258a5/b86b343 is green.
 QUESTION FOR HUMAN
 ---
+
+## TESTING SESSION — September 21 2026
+## Member Portal Test Results
+
+BUG-001: Community page allows posting a need without joining a community first. 
+Fix: Check if member has joined at least one community before showing the post-a-need form. 
+If not joined, show message "Join a community first to post a need here."
+
+BUG-002: No back navigation from donation pledge confirmation page. 
+Fix: Add "Back to Dashboard" button on /donate confirmation page.
+
+BUG-003: No back navigation from donation pledge page itself. 
+Fix: Add "Back" or "Cancel" link on the donation pledge form page.
+
+BUG-004: Org search by area code not working on My Org page. 
+Fix: Check the /api/orgs/discover route — area code search query not returning results. 
+Verify org_id, zip_code or area fields in orgs table are populated with test data. 
+Also check the search query is actually filtering by area code correctly.
+
+FEATURE-001: Services flow is entirely manual. 
+Add: AI-assisted service request flow where Rosa (via platform) helps suggest options, 
+confirms details, and schedules automatically. For now: pre-fill service type options, 
+show estimated availability, auto-notify navigator on submission.
+
+FEATURE-002: Cultural programming shows no real local events. 
+Add: Events should filter by member's location/zip code. 
+Show classes, potlucks, story circles happening near the member.
+Allow member to choose area radius (5mi, 10mi, 25mi).
+
+FEATURE-003: Festival calendar does not show local events. 
+Add: For each festival show: local events near member, paid/free indicator, 
+location, number of ThriveAtHome members attending, total community attendance.
+Allow member to select area to see events.
+
+FEATURE-004: Important Dates page is blank/manual. 
+Add: AI pre-populate important dates on first load from member profile:
+- Birthday (from date_of_birth)
+- Prescription renewals (from tracked_items)
+- Insurance renewal dates (from tracked_items)
+- Any dates entered during onboarding
+Show these pre-populated, allow member to add more.
+
+FEATURE-005: Buddy page missing profile preferences and special requests. 
+Add to buddy page:
+- Show language preference from member profile
+- Show topics of interest from member profile  
+- Allow member to make special requests (language match, similar background, topics)
+- Show matching criteria being used
+- Add "Request an update" button to follow up on match status
+- AI should auto-match based on profile — not purely manual navigator task
+
+FEATURE-006: Life Story page is basic and manual. 
+Add: AI-assisted prompts to help member tell their story:
+- "What was your career?" prompt with AI follow-up questions
+- "Tell us about your family" with guided prompts
+- Voice-to-text option for seniors who prefer speaking
+- AI organises entries into chapters automatically
+- Show progress "Your life story is X% complete"
+
+FEATURE-007: Donation page missing impact and receipt. 
+Add: 
+- "Your donation helped [X seniors] this month" impact statement
+- "Request tax receipt" button that emails a PDF receipt
+- Show previous donations and their impact
+
+NEXT SESSION MUST:
+- Fix BUG-001 through BUG-004 first (these are blocking bugs)
+- Then implement FEATURE-004 (Important Dates pre-population) — highest member value
+- Then FEATURE-005 (Buddy page improvements)
+- Then FEATURE-007 (Donation receipt)
+- Leave FEATURE-001, 002, 003, 006 for after launch — they require significant work
+- After fixing bugs: commit, push, verify Vercel green
+- Then continue member portal testing: Life Story, Billing, Add-Ons, Notifications tabs
