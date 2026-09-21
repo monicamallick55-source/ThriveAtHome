@@ -471,3 +471,20 @@ NEXT SESSION MUST:
   decision on scope/priority before starting.
 Session ended normally
 ---
+
+DECISION: My Org tab strategy — Option C Hybrid adopted September 21 2026.
+- Members with a village on ThriveAtHome: full integrated experience
+- Members with village NOT on ThriveAtHome: show invite button
+- Members with no village: show ThriveAtHome communities as their community layer
+
+FEATURE-008: My Org tab — add "My village isn't listed" option
+Fix: Below the org search results add:
+"Don't see your village or community org? [Add it] or [Invite them to ThriveAtHome]"
+"Add it" → simple form: org name, city, zip, contact email → creates pending org_suggestion record
+"Invite them" → sends email to org contact introducing ThriveAtHome
+
+FEATURE-009: My Org empty state improvement
+Fix: When member has no org membership show:
+"You don't belong to a village network yet — and that's okay.
+ThriveAtHome is your community. Explore your [communities →]
+Or [find a village near you ↓]"
