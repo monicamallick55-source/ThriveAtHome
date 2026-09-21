@@ -1628,7 +1628,7 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
                       placeholder="Organization name, city, or ZIP code"
                       style={{ ...inputSty, flex: 1, minWidth: '220px' }}
                     />
-                    <button onClick={searchOrgs} disabled={orgSearching} style={{ ...btnPrimary, opacity: orgSearching ? 0.7 : 1 }}>
+                    <button onClick={() => searchOrgs()} disabled={orgSearching} style={{ ...btnPrimary, opacity: orgSearching ? 0.7 : 1 }}>
                       {orgSearching ? 'Searching…' : 'Search'}
                     </button>
                   </div>
