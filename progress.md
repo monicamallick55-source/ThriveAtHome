@@ -491,3 +491,91 @@ Or [find a village near you ↓]"
 
 BUG-007: Family dashboard — "Aria is scheduled to call margsoon" missing space between preferred name and "soon". 
 Fix: Find where this string is constructed in the family dashboard component and add a space: "Aria is scheduled to call [name] soon."
+
+---
+SESSION: (continuation — resumed from NEXT SESSION MUST above)
+DATE: 2026-09-21
+STATUS: Session ended normally
+
+WHAT WAS DONE THIS SESSION:
+- Read prompt.md / progress.md / checklist.md per session-start protocol.
+  Confirmed M1–M27 are already shipped and the original 14-phase gate is
+  long complete; live work continues as the bug/feature backlog tracked
+  directly in this file (established pattern since 2026-09-16).
+- BUG-007 (missing space in "Aria is scheduled to call [name] soon."):
+  investigated in components/dashboard/WellnessCard.tsx:233 — the JSX
+  already renders `Aria is scheduled to call {member.preferred_name} soon.`
+  with a real space on both sides of the expression, and `git log -p -L`
+  on that line shows the space has been present since the line was created
+  (commit 4708703, May 2026). Grepped the whole codebase for any other
+  "scheduled to call" construction — WellnessCard.tsx is the only one.
+  No code defect found; treating BUG-007 as already correct in source
+  (the "margsoon" report was most likely a stale screenshot/build).
+- Continued the direct-auth-senior RLS/resolution gap audit (the systemic
+  issue flagged repeatedly since 2026-09-16 and being fixed incrementally
+  file-by-file). Confirmed all API routes previously flagged as fixed
+  (tracked-items, addons, life-story, pet-loss, video-diary, pets,
+  services, circles, devices, ehr, wearables, ml/insights, skill-exchange,
+  advisors, cultural, events, VITA, member/buddy-request) now correctly
+  resolve both direct-auth seniors (members.supabase_auth_id) and
+  family-linked users. Widened the search beyond getFamilyMemberByAuthId
+  call sites to any app/api/member/** route querying family_members
+  directly, and found two still gapped:
+  - app/api/member/documents/route.ts — GET only resolved the caller via
+    family_members; a direct-auth senior (no family_members row) silently
+    got `{ data: [] }` instead of their org-shared + member-specific
+    documents. FIXED: now also checks members.supabase_auth_id and uses
+    whichever resolves, same pattern as sibling routes (org-id still comes
+    from family_members.org_id only, matching the established org-linkage
+    convention used by member/post-need and member/org-membership).
+  - app/api/member/documents/[id]/route.ts — same gap in the signed-URL
+    download route; a direct-auth senior would get 403 Forbidden on every
+    document, even ones they own. FIXED the same way.
+  - Verified the remaining app/api/member/** routes (upload-document,
+    circles, org-join-request, preferences, service-history,
+    org-membership, post-need, request-checkin) already have correct
+    dual-path resolution — no changes needed.
+  - Did not audit non-member-portal routes (app/api/documents,
+    app/api/calls, app/api/messages, app/api/tasks, org-admin/*, agency/*,
+    employer-admin/*, cron/*, admin/*) — these are family-dashboard or
+    staff-only surfaces by design, not reachable from the member portal
+    that direct-auth seniors use, so they are out of scope for this gap.
+
+TESTS AND VERIFICATIONS RUN:
+- `npx tsc --noEmit`: PASSED — zero output.
+- `npm run build`: PASSED — zero errors, full route manifest printed.
+- BUG-007: verified by direct code + git-blame read — no defect present.
+- documents/route.ts and documents/[id]/route.ts fixes: verified by code
+  read only (dual-path resolution now matches the pattern already proven
+  correct in ~15 sibling routes fixed in prior sessions). NOT verified
+  live — no browser or live Supabase session available in this Codespace
+  (established limitation). Recommend a manual smoke test after deploy:
+  log in as a direct-auth senior with no family_members row and confirm
+  the member portal's Documents view lists their member-specific uploads
+  and a signed download link works.
+
+ERRORS ENCOUNTERED:
+- None.
+
+DECISIONS MADE:
+- Scoped the direct-auth-senior gap audit to app/api/member/** only
+  (the member-portal-facing namespace), not the full ~40-table systemic
+  gap noted in the 2026-09-16 session — that remains a known gap for
+  family-dashboard/admin/staff routes, which are not senior-facing and
+  lower priority.
+
+HUMAN APPROVAL:
+- Review presented: NO — bug-fix work outside the original 14-phase gate,
+  per established pattern.
+- User response: N/A
+
+NEXT SESSION MUST:
+- Push this commit and confirm Vercel build is green.
+- Run the live smoke test above (direct-auth senior → member portal →
+  Documents tab) once deployed.
+- No other open items remain in the bug/feature backlog above except the
+  four explicitly-deferred FEATURE items (001, 002, 003, 006) and the two
+  not-yet-built FEATURE-008/009 (My Org "not listed" flow + empty-state
+  copy) — all require a human go/no-go on scope before starting.
+Session ended normally
+---

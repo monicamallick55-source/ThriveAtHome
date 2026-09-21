@@ -11,14 +11,23 @@ export async function GET() {
 
   const admin = createAdminClient()
 
-  // Get member and org_id from family_members or direct member auth
+  // Get member and org_id — direct-auth senior first, then family_members linkage
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: directMember } = await (admin.from as any)('members')
+    .select('id')
+    .eq('supabase_auth_id', user.id)
+    .maybeSingle()
+
   const { data: fm } = await admin
     .from('family_members')
     .select('member_id, org_id, role')
     .eq('supabase_auth_id', user.id)
     .maybeSingle()
 
-  if (!fm?.member_id) {
+  const memberId: string | null = directMember?.id ?? fm?.member_id ?? null
+  const orgId: string | null = fm?.org_id ?? null
+
+  if (!memberId) {
     return NextResponse.json({ data: [] })
   }
 
@@ -28,11 +37,11 @@ export async function GET() {
   const queries: Promise<{ data: unknown[] | null; error: unknown }>[] = []
 
   // Org-shared documents (visibility='members')
-  if (fm.org_id) {
+  if (orgId) {
     queries.push(
       (admin.from as any)('platform_documents')
         .select(selectCols)
-        .eq('org_id', fm.org_id)
+        .eq('org_id', orgId)
         .eq('visibility', 'members')
         .order('created_at', { ascending: false })
     )
@@ -42,7 +51,7 @@ export async function GET() {
   queries.push(
     (admin.from as any)('platform_documents')
       .select(selectCols)
-      .eq('member_id', fm.member_id)
+      .eq('member_id', memberId)
       .eq('scope', 'member')
       .in('visibility', ['members', 'care_team'])
       .order('created_at', { ascending: false })

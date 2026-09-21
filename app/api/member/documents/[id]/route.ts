@@ -15,13 +15,22 @@ export async function GET(
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: directMember } = await (admin.from as any)('members')
+    .select('id')
+    .eq('supabase_auth_id', user.id)
+    .maybeSingle()
+
   const { data: fm } = await admin
     .from('family_members')
     .select('member_id, org_id')
     .eq('supabase_auth_id', user.id)
     .maybeSingle()
 
-  if (!fm?.member_id) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  const memberId: string | null = directMember?.id ?? fm?.member_id ?? null
+  const orgId: string | null = fm?.org_id ?? null
+
+  if (!memberId) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const { data: doc } = await (admin.from as any)('platform_documents')
     .select('storage_path, file_name, org_id, member_id, visibility, scope')
@@ -32,8 +41,8 @@ export async function GET(
 
   // Check access: org-shared or member-specific
   const canAccess =
-    (doc.scope === 'org' && doc.org_id === fm.org_id && doc.visibility === 'members') ||
-    (doc.scope === 'member' && doc.member_id === fm.member_id && ['members', 'care_team'].includes(doc.visibility))
+    (doc.scope === 'org' && doc.org_id === orgId && doc.visibility === 'members') ||
+    (doc.scope === 'member' && doc.member_id === memberId && ['members', 'care_team'].includes(doc.visibility))
 
   if (!canAccess) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
