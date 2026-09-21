@@ -1,7 +1,7 @@
 // M27 Phase 119 — request one-to-one pet-loss support (distinct from the human bereavement path).
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
-import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { resolveMemberContext } from '@/lib/data/members'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createPetLossSupportRequest, getPetLossRequestsForMember } from '@/lib/data/pet-loss'
 
@@ -10,9 +10,9 @@ export const runtime = 'nodejs'
 export async function GET() {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) return NextResponse.json({ requests: [] })
-  const { data, error } = await getPetLossRequestsForMember(fm.member_id)
+  const { memberId } = await resolveMemberContext(user.id)
+  if (!memberId) return NextResponse.json({ requests: [] })
+  const { data, error } = await getPetLossRequestsForMember(memberId)
   if (error) return NextResponse.json({ error }, { status: 500 })
   return NextResponse.json({ requests: data })
 }
@@ -20,8 +20,8 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) return NextResponse.json({ error: 'Please complete onboarding first.' }, { status: 400 })
+  const { memberId } = await resolveMemberContext(user.id)
+  if (!memberId) return NextResponse.json({ error: 'Please complete onboarding first.' }, { status: 400 })
 
   const body = await req.json().catch(() => null)
   if (!body || typeof body !== 'object') {
@@ -33,11 +33,11 @@ export async function POST(req: NextRequest) {
   const { data: member } = await admin
     .from('members')
     .select('preferred_name')
-    .eq('id', fm.member_id)
+    .eq('id', memberId)
     .maybeSingle()
 
   const { data, error } = await createPetLossSupportRequest(
-    fm.member_id,
+    memberId,
     member?.preferred_name ?? 'The member',
     {
       petId: typeof b.pet_id === 'string' ? b.pet_id : null,

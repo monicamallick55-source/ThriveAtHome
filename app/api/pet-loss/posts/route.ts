@@ -1,7 +1,7 @@
 // M27 Phase 119 — The Companion Circle feed: read recent posts, add a post.
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
-import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { resolveMemberContext } from '@/lib/data/members'
 import { getPetLossPosts, createPetLossPost, getPetLossMembership } from '@/lib/data/pet-loss'
 
 export const runtime = 'nodejs'
@@ -9,10 +9,10 @@ export const runtime = 'nodejs'
 export async function GET() {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) return NextResponse.json({ posts: [] })
+  const { memberId } = await resolveMemberContext(user.id)
+  if (!memberId) return NextResponse.json({ posts: [] })
 
-  const { data: membership } = await getPetLossMembership(fm.member_id)
+  const { data: membership } = await getPetLossMembership(memberId)
   if (!membership?.is_active) {
     return NextResponse.json({ error: 'Join the circle to see the feed.', posts: [] }, { status: 403 })
   }
@@ -24,10 +24,10 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) return NextResponse.json({ error: 'No member linked' }, { status: 400 })
+  const { memberId } = await resolveMemberContext(user.id)
+  if (!memberId) return NextResponse.json({ error: 'No member linked' }, { status: 400 })
 
-  const { data: membership } = await getPetLossMembership(fm.member_id)
+  const { data: membership } = await getPetLossMembership(memberId)
   if (!membership?.is_active) {
     return NextResponse.json({ error: 'Join the circle before posting.' }, { status: 403 })
   }
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
   }
 
   const { data, error } = await createPetLossPost(
-    fm.member_id,
+    memberId,
     membership.display_name,
     b.content,
     typeof b.post_type === 'string' ? b.post_type : 'reflection'

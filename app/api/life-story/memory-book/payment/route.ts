@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
-import { getFamilyMemberByAuthId } from '@/lib/data/family'
-import { getMemberById } from '@/lib/data/members'
+import { resolveMemberContext, getMemberById } from '@/lib/data/members'
 import { getLatestPurchasedBook, incrementRegenCount } from '@/lib/data/life-story'
 
 // Pricing in cents: [connect_price, basics_price, memorial_price]
@@ -29,10 +28,10 @@ export async function POST(req: Request) {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) return NextResponse.json({ error: 'No member linked' }, { status: 404 })
+  const { memberId } = await resolveMemberContext(user.id)
+  if (!memberId) return NextResponse.json({ error: 'No member linked' }, { status: 404 })
 
-  const { data: member } = await getMemberById(fm.member_id)
+  const { data: member } = await getMemberById(memberId)
   const planTier = member?.plan_tier ?? 'basics'
   const isMemorial = member?.status === 'inactive'
   const isFree = planTier === 'complete' || planTier === 'premier'
@@ -53,14 +52,14 @@ export async function POST(req: Request) {
 
   // If user confirmed regen, increment count and allow
   if (body.regenBookId) {
-    await incrementRegenCount({ id: body.regenBookId, memberId: fm.member_id })
+    await incrementRegenCount({ id: body.regenBookId, memberId: memberId })
     return NextResponse.json({ alreadyFree: true, regen: true })
   }
 
   if (isFree) return NextResponse.json({ alreadyFree: true })
 
   // Check for purchase within 30 days (regeneration logic)
-  const { data: latestBook } = await getLatestPurchasedBook({ memberId: fm.member_id, formatType })
+  const { data: latestBook } = await getLatestPurchasedBook({ memberId: memberId, formatType })
   if (latestBook) {
     const regenRemaining = Math.max(0, 3 - (latestBook.regeneration_count ?? 0))
     const purchaseDate = new Date(latestBook.created_at)
@@ -121,7 +120,7 @@ export async function POST(req: Request) {
       success_url: successUrl,
       cancel_url: cancelUrl,
       metadata: {
-        member_id: fm.member_id,
+        member_id: memberId,
         family_member_id: user.id,
         product: formatType,
         format_type: formatType,
@@ -144,10 +143,10 @@ export async function GET(req: Request) {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) return NextResponse.json({ error: 'No member linked' }, { status: 404 })
+  const { memberId } = await resolveMemberContext(user.id)
+  if (!memberId) return NextResponse.json({ error: 'No member linked' }, { status: 404 })
 
-  const { data: member } = await getMemberById(fm.member_id)
+  const { data: member } = await getMemberById(memberId)
   const planTier = member?.plan_tier ?? 'basics'
   const isMemorial = member?.status === 'inactive'
   const isFree = planTier === 'complete' || planTier === 'premier'

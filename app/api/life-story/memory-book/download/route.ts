@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
-import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { resolveMemberContext } from '@/lib/data/members'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 // POST {storagePath} — returns a fresh 1-hour signed URL for a Memory Book PDF
@@ -8,8 +8,8 @@ export async function POST(req: Request) {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) return NextResponse.json({ error: 'No member linked' }, { status: 404 })
+  const { memberId } = await resolveMemberContext(user.id)
+  if (!memberId) return NextResponse.json({ error: 'No member linked' }, { status: 404 })
 
   let body: { storagePath?: string }
   try {
@@ -23,7 +23,7 @@ export async function POST(req: Request) {
   }
 
   // Validate path prefix belongs to this member (security check)
-  if (!body.storagePath.startsWith(`${fm.member_id}/`)) {
+  if (!body.storagePath.startsWith(`${memberId}/`)) {
     return NextResponse.json({ error: 'Access denied' }, { status: 403 })
   }
 

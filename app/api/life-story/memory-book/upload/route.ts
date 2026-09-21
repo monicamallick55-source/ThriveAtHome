@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
-import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { resolveMemberContext } from '@/lib/data/members'
 import { updateMemoryBookStoragePath, updateCollageStoragePath } from '@/lib/data/life-story'
 import { createAdminClient } from '@/lib/supabase/admin'
 
@@ -13,8 +13,8 @@ export async function POST(req: Request) {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) return NextResponse.json({ error: 'No member linked' }, { status: 404 })
+  const { memberId } = await resolveMemberContext(user.id)
+  if (!memberId) return NextResponse.json({ error: 'No member linked' }, { status: 404 })
 
   let formData: FormData
   try {
@@ -38,7 +38,7 @@ export async function POST(req: Request) {
   }
 
   const filename = fileType === 'collage' ? 'memory-collage.pdf' : 'memory-book.pdf'
-  const storagePath = `${fm.member_id}/${bookId}/${filename}`
+  const storagePath = `${memberId}/${bookId}/${filename}`
   const arrayBuffer = await pdf.arrayBuffer()
 
   const supabase = createAdminClient()
@@ -54,14 +54,14 @@ export async function POST(req: Request) {
   if (fileType === 'collage') {
     const { error: updateError } = await updateCollageStoragePath({
       id: bookId,
-      memberId: fm.member_id,
+      memberId: memberId,
       collageStoragePath: storagePath,
     })
     if (updateError) console.warn('[memory-book/upload] Collage DB update failed:', updateError)
   } else {
     const { error: updateError } = await updateMemoryBookStoragePath({
       id: bookId,
-      memberId: fm.member_id,
+      memberId: memberId,
       storagePath,
       pageCount: isNaN(pageCount) ? undefined : pageCount,
       purchaseDate,

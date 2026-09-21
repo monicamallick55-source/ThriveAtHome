@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
-import { getFamilyMemberByAuthId } from '@/lib/data/family'
-import { getMemberById } from '@/lib/data/members'
+import { resolveMemberContext, getMemberById } from '@/lib/data/members'
 import { createMemoryBook, upsertDraft, getMemoryBooks } from '@/lib/data/life-story'
 
 // GET — list all memory books (including drafts) for the auth user's member
@@ -9,10 +8,10 @@ export async function GET() {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) return NextResponse.json({ error: 'No member linked' }, { status: 404 })
+  const { memberId } = await resolveMemberContext(user.id)
+  if (!memberId) return NextResponse.json({ error: 'No member linked' }, { status: 404 })
 
-  const { data: books, error } = await getMemoryBooks(fm.member_id)
+  const { data: books, error } = await getMemoryBooks(memberId)
   if (error) return NextResponse.json({ error }, { status: 500 })
   return NextResponse.json({ books: books ?? [] })
 }
@@ -22,10 +21,10 @@ export async function POST(req: Request) {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) return NextResponse.json({ error: 'No member linked' }, { status: 404 })
+  const { memberId } = await resolveMemberContext(user.id)
+  if (!memberId) return NextResponse.json({ error: 'No member linked' }, { status: 404 })
 
-  const { data: member } = await getMemberById(fm.member_id)
+  const { data: member } = await getMemberById(memberId)
   const planTier = member?.plan_tier ?? 'basics'
   const isFree = planTier === 'complete' || planTier === 'premier'
 
@@ -51,7 +50,7 @@ export async function POST(req: Request) {
   // Draft: upsert (create or update existing draft)
   if (isDraft) {
     const { data: book, error } = await upsertDraft({
-      memberId: fm.member_id,
+      memberId: memberId,
       title: body.title || `${member?.preferred_name ?? 'My'}'s Memory Book`,
       dedication: body.dedication || null,
       formatType: body.formatType || 'memory_book',
@@ -60,7 +59,7 @@ export async function POST(req: Request) {
       coverPhotoPath: body.coverPhotoPath || null,
     })
     if (error) return NextResponse.json({ error }, { status: 500 })
-    return NextResponse.json({ book, memberId: fm.member_id, isDraft: true })
+    return NextResponse.json({ book, memberId: memberId, isDraft: true })
   }
 
   // For paid plans, require a payment token unless bypassed in dev
@@ -69,7 +68,7 @@ export async function POST(req: Request) {
   }
 
   const { data: book, error } = await createMemoryBook({
-    memberId: fm.member_id,
+    memberId: memberId,
     title: body.title || `${member?.preferred_name ?? 'My'}'s Memory Book`,
     dedication: body.dedication || null,
     layoutStyle: body.layoutStyle || 'classic',
@@ -84,7 +83,7 @@ export async function POST(req: Request) {
 
   return NextResponse.json({
     book,
-    memberId: fm.member_id,
+    memberId: memberId,
     isFree,
     planTier,
   })

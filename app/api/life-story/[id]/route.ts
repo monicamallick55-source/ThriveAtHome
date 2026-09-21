@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
-import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { resolveMemberContext } from '@/lib/data/members'
 import { updateLifeStoryEntry, deleteLifeStoryEntry } from '@/lib/data/life-story'
 
 export async function PUT(
@@ -10,8 +10,8 @@ export async function PUT(
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) return NextResponse.json({ error: 'No member linked' }, { status: 403 })
+  const { memberId } = await resolveMemberContext(user.id)
+  if (!memberId) return NextResponse.json({ error: 'No member linked' }, { status: 403 })
 
   const { id } = await params
 
@@ -29,7 +29,7 @@ export async function PUT(
 
   const { data, error } = await updateLifeStoryEntry({
     id,
-    memberId: fm.member_id,
+    memberId,
     title: title.trim(),
     content: content.trim(),
     era: era?.trim() || null,
@@ -48,12 +48,12 @@ export async function DELETE(
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) return NextResponse.json({ error: 'No member linked' }, { status: 403 })
+  const { memberId } = await resolveMemberContext(user.id)
+  if (!memberId) return NextResponse.json({ error: 'No member linked' }, { status: 403 })
 
   const { id } = await params
 
-  const { error } = await deleteLifeStoryEntry({ id, memberId: fm.member_id })
+  const { error } = await deleteLifeStoryEntry({ id, memberId })
   if (error) return NextResponse.json({ error }, { status: 500 })
 
   return NextResponse.json({ success: true })
