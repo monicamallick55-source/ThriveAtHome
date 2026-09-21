@@ -348,3 +348,13 @@ NEXT SESSION MUST:
 - Leave FEATURE-001, 002, 003, 006 for after launch — they require significant work
 - After fixing bugs: commit, push, verify Vercel green
 - Then continue member portal testing: Life Story, Billing, Add-Ons, Notifications tabs
+
+BUG-005: Add-Ons tab is missing from member portal entirely.
+Fix: Add Add-Ons tab to MemberPortalClient.tsx tab list. 
+The tab should show 5 monthly add-ons and 4 one-time purchases from M26.
+Check components/MemberPortalClient.tsx for the tabs array and add Add-Ons tab.
+
+BUG-006: Important Dates tab does not pre-populate dates from member profile.
+Fix: On load, query member's date_of_birth, tracked_items (prescriptions, renewals),
+and any dates from onboarding. Pre-populate these as read-only suggested dates
+with an "Add to my dates" button next to each one.
