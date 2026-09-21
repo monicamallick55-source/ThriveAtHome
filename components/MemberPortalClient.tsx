@@ -388,7 +388,7 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
   // Auto-load all orgs when My Org tab opens
   useEffect(() => {
     if (activeTab === 'org' && !orgSearched) {
-      searchOrgs('')
+      searchOrgs()
     }
   }, [activeTab])
 
