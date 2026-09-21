@@ -1,7 +1,7 @@
 // M22 Phase 90 — list and connect wearable / health-data platforms.
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
-import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { resolveMemberContext } from '@/lib/data/members'
 import { wearableProvider } from '@/lib/providers'
 import {
   getWearableConnectionsForMember,
@@ -16,10 +16,10 @@ const DEFAULT_SCOPES = ['activity', 'heartrate', 'sleep']
 export async function GET() {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) return NextResponse.json({ error: 'Complete onboarding first.' }, { status: 400 })
+  const { memberId } = await resolveMemberContext(user.id)
+  if (!memberId) return NextResponse.json({ error: 'Complete onboarding first.' }, { status: 400 })
 
-  const { data, error } = await getWearableConnectionsForMember(fm.member_id)
+  const { data, error } = await getWearableConnectionsForMember(memberId)
   if (error) return NextResponse.json({ error }, { status: 500 })
   return NextResponse.json({ connections: data })
 }
@@ -27,8 +27,8 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) return NextResponse.json({ error: 'Complete onboarding first.' }, { status: 400 })
+  const { memberId } = await resolveMemberContext(user.id)
+  if (!memberId) return NextResponse.json({ error: 'Complete onboarding first.' }, { status: 400 })
 
   const body = await req.json().catch(() => null)
   const platform = body?.platform
@@ -39,14 +39,14 @@ export async function POST(req: NextRequest) {
 
   let connectResult
   try {
-    connectResult = await wearableProvider.connect({ memberId: fm.member_id, platform, scopes })
+    connectResult = await wearableProvider.connect({ memberId, platform, scopes })
   } catch (e) {
     console.error('[api/wearables] connect failed:', e)
     return NextResponse.json({ error: 'Could not connect this wearable. Please try again.' }, { status: 502 })
   }
 
   const { data, error } = await upsertWearableConnection({
-    memberId: fm.member_id,
+    memberId,
     platform,
     externalUserId: connectResult.externalUserId,
     scopes,

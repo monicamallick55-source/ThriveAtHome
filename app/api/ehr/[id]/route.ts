@@ -1,7 +1,7 @@
 // M22 Phase 92 — revoke an EHR / FHIR connection.
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
-import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { resolveMemberContext } from '@/lib/data/members'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revokeEhrConnection } from '@/lib/data/devices'
 import { ehrProvider } from '@/lib/providers'
@@ -14,8 +14,8 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
   const { id } = await params
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) return NextResponse.json({ error: 'Complete onboarding first.' }, { status: 400 })
+  const { memberId } = await resolveMemberContext(user.id)
+  if (!memberId) return NextResponse.json({ error: 'Complete onboarding first.' }, { status: 400 })
 
   const admin = createAdminClient()
   const { data: conn } = await admin
@@ -23,7 +23,7 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
     .select('id, member_id, patient_fhir_id')
     .eq('id', id)
     .maybeSingle()
-  if (!conn || conn.member_id !== fm.member_id) {
+  if (!conn || conn.member_id !== memberId) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
 

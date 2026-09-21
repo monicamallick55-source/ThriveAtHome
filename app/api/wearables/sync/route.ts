@@ -3,7 +3,7 @@
 // and runs the fall protocol for any reading that carries fall_detected=true.
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
-import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { resolveMemberContext } from '@/lib/data/members'
 import { wearableProvider } from '@/lib/providers'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { saveWearableReadings } from '@/lib/data/devices'
@@ -14,8 +14,8 @@ export const runtime = 'nodejs'
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) return NextResponse.json({ error: 'Complete onboarding first.' }, { status: 400 })
+  const { memberId } = await resolveMemberContext(user.id)
+  if (!memberId) return NextResponse.json({ error: 'Complete onboarding first.' }, { status: 400 })
 
   const body = await req.json().catch(() => ({}))
   const platform = typeof body?.platform === 'string' ? body.platform : null
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
   let q = admin
     .from('wearable_connections')
     .select('id, platform, external_user_id, status')
-    .eq('member_id', fm.member_id)
+    .eq('member_id', memberId)
     .eq('status', 'active')
   if (platform) q = q.eq('platform', platform)
   const { data: connections } = await q
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
       continue
     }
     const { saved } = await saveWearableReadings({
-      memberId: fm.member_id,
+      memberId,
       connectionId: conn.id,
       platform: conn.platform,
       readings,
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
     for (const r of readings) {
       if (r.fallDetected) {
         await handleFallEvent({
-          memberId: fm.member_id,
+          memberId,
           source: 'wearable',
           raw: { platform: conn.platform, readingDate: r.readingDate },
         })

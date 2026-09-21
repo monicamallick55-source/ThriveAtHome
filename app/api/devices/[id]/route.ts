@@ -1,7 +1,7 @@
 // M22 Phase 87 — update or disconnect one connected device.
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
-import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { resolveMemberContext } from '@/lib/data/members'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { updateDevice, disconnectDevice } from '@/lib/data/devices'
 
@@ -10,15 +10,15 @@ export const runtime = 'nodejs'
 type Params = { params: Promise<{ id: string }> }
 
 async function ownedDevice(userId: string, deviceId: string) {
-  const { data: fm } = await getFamilyMemberByAuthId(userId)
-  if (!fm?.member_id) return null
+  const { memberId } = await resolveMemberContext(userId)
+  if (!memberId) return null
   const admin = createAdminClient()
   const { data } = await admin
     .from('member_devices')
     .select('id, member_id')
     .eq('id', deviceId)
     .maybeSingle()
-  if (!data || data.member_id !== fm.member_id) return null
+  if (!data || data.member_id !== memberId) return null
   return data
 }
 

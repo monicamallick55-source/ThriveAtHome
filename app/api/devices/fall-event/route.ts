@@ -10,7 +10,7 @@
 // opens a critical navigator task, and writes the fall_events audit row.
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
-import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { resolveMemberContext } from '@/lib/data/members'
 import { handleFallEvent, type FallSource } from '@/lib/devices/fallProtocol'
 
 export const runtime = 'nodejs'
@@ -51,15 +51,15 @@ export async function POST(req: NextRequest) {
   // Path 2 — authenticated family member manual trigger
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) {
+  const { memberId, familyMemberId } = await resolveMemberContext(user.id)
+  if (!memberId) {
     return NextResponse.json({ error: 'Complete onboarding first.' }, { status: 400 })
   }
 
   const result = await handleFallEvent({
-    memberId: fm.member_id,
+    memberId,
     source: 'manual',
-    raw: { reportedBy: fm.id },
+    raw: { reportedBy: familyMemberId },
   })
   if (result.error && !result.alertId) {
     return NextResponse.json({ error: result.error }, { status: 500 })
