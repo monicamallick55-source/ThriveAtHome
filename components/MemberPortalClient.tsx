@@ -68,7 +68,7 @@ const ITEM_TYPE_ICONS: Record<string, string> = {
   prescription: '💊', home_insurance: '🏠', car_insurance: '🚗',
   health_insurance: '🏥', drivers_license: '🪪', car_registration: '📋',
   aaa_membership: '🛣️', passport: '✈️', gym_membership: '🏋️',
-  appointment: '📅', other: '➕',
+  appointment: '📅', birthday: '🎂', other: '➕',
 }
 
 const NEED_TYPES = [
@@ -180,6 +180,11 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
   const [buddyAssignment, setBuddyAssignment] = useState<{ id: string; status: string; volunteers: { full_name: string } | null } | null>(null)
   const [buddyCallCount, setBuddyCallCount] = useState(0)
   const [buddyLoaded, setBuddyLoaded] = useState(false)
+  const [showBuddyRequestForm, setShowBuddyRequestForm] = useState(false)
+  const [buddyRequestMessage, setBuddyRequestMessage] = useState('')
+  const [submittingBuddyRequest, setSubmittingBuddyRequest] = useState(false)
+  const [buddyRequestSent, setBuddyRequestSent] = useState(false)
+  const [requestingBuddyUpdate, setRequestingBuddyUpdate] = useState(false)
   const [showNeedForm, setShowNeedForm] = useState(false)
   const [needForm, setNeedForm] = useState({ need_type: 'other', title: '', description: '', preferred_date: '', community_context: '' })
   const [submittingNeed, setSubmittingNeed] = useState(false)
@@ -380,6 +385,13 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
     setOrgLoaded(true)
   }, [orgLoaded])
 
+  // Auto-load all orgs when My Org tab opens
+  useEffect(() => {
+    if (activeTab === 'org' && !orgSearched) {
+      searchOrgs('')
+    }
+  }, [activeTab])
+
   async function searchOrgs() {
     setOrgSearching(true)
     const res = await fetch(`/api/orgs/discover?q=${encodeURIComponent(orgSearch.trim())}`)
@@ -457,6 +469,32 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
     setSubmittingNeed(false)
     if (res.ok) { setNeedSuccess(true); setShowNeedForm(false); setNeedForm({ need_type: 'other', title: '', description: '', preferred_date: '', community_context: '' }); showToast('Need posted to your community org.') }
     else { const j = await res.json().catch(() => ({ error: 'Error' })); showToast(j.error ?? 'Failed to post need.') }
+  }
+
+  async function handleBuddyRequest(e: React.FormEvent) {
+    e.preventDefault()
+    if (!buddyRequestMessage.trim()) return
+    setSubmittingBuddyRequest(true)
+    const res = await fetch('/api/member/buddy-request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ kind: 'special_request', message: buddyRequestMessage }),
+    })
+    setSubmittingBuddyRequest(false)
+    if (res.ok) { setBuddyRequestSent(true); setShowBuddyRequestForm(false); setBuddyRequestMessage(''); showToast('Your request has been sent to your navigator.') }
+    else { const j = await res.json().catch(() => ({ error: 'Error' })); showToast(j.error ?? 'Failed to send request.') }
+  }
+
+  async function handleBuddyUpdateRequest() {
+    setRequestingBuddyUpdate(true)
+    const res = await fetch('/api/member/buddy-request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ kind: 'update_request' }),
+    })
+    setRequestingBuddyUpdate(false)
+    if (res.ok) showToast('Your navigator has been notified — you\'ll hear back soon.')
+    else { const j = await res.json().catch(() => ({ error: 'Error' })); showToast(j.error ?? 'Failed to send request.') }
   }
 
   // AI-assist: parse the free-text box, open the structured form pre-filled.
@@ -1112,6 +1150,10 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
             <div style={card}>
               <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '8px' }}>Post a Need</h3>
               <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)', marginBottom: '16px' }}>Let your community org know if you need help with something.</p>
+              {circlesLoaded && circles.length === 0 ? (
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)' }}>Join a community first to post a need here.</p>
+              ) : (
+              <>
               {needSuccess && <div style={{ padding: '12px 16px', backgroundColor: '#F0FFF4', border: '1px solid #86EFAC', borderRadius: '10px', marginBottom: '16px', fontFamily: 'var(--font-body)', fontSize: '15px', color: '#15803D' }}>✓ Your need has been posted.</div>}
               {!showNeedForm ? (
                 <button onClick={() => { setShowNeedForm(true); setNeedSuccess(false) }} style={{ padding: '10px 24px', backgroundColor: 'var(--color-teal)', color: 'white', border: 'none', borderRadius: '10px', fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 600, cursor: 'pointer' }}>+ Post a need</button>
@@ -1149,6 +1191,8 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
                     <button type="button" onClick={() => setShowNeedForm(false)} style={btnSecondary}>Cancel</button>
                   </div>
                 </form>
+              )}
+              </>
               )}
             </div>
           </div>
@@ -1341,6 +1385,57 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
                         </p>
                       </div>
                     </div>
+                  )}
+                  {buddyLoaded && (
+                    <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid #F0EDE6' }}>
+                      <button onClick={handleBuddyUpdateRequest} disabled={requestingBuddyUpdate}
+                        style={{ padding: '9px 18px', backgroundColor: 'white', color: 'var(--color-navy)', border: '1.5px solid #DDD8CE', borderRadius: '10px', fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, cursor: requestingBuddyUpdate ? 'wait' : 'pointer' }}>
+                        {requestingBuddyUpdate ? 'Sending…' : 'Request an update'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div style={card}>
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '8px' }}>Your Matching Profile</h3>
+                  <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', marginBottom: '16px' }}>
+                    This is what we use to find your Human Buddy match — language, shared interests, and availability.
+                  </p>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '14px', marginBottom: '20px' }}>
+                    <div style={{ padding: '14px 18px', backgroundColor: '#F9F6F0', borderRadius: '10px' }}>
+                      <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Language</div>
+                      <div style={{ fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 600, color: 'var(--color-navy)' }}>
+                        {member.preferred_language ? member.preferred_language.charAt(0).toUpperCase() + member.preferred_language.slice(1) : 'English'}
+                      </div>
+                    </div>
+                    <div style={{ padding: '14px 18px', backgroundColor: '#F9F6F0', borderRadius: '10px' }}>
+                      <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Topics of interest</div>
+                      <div style={{ fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 600, color: 'var(--color-navy)' }}>
+                        {member.topics_enjoy && member.topics_enjoy.length > 0 ? member.topics_enjoy.join(', ') : 'Not specified yet'}
+                      </div>
+                    </div>
+                  </div>
+
+                  {buddyRequestSent && !showBuddyRequestForm && (
+                    <div style={{ padding: '12px 16px', backgroundColor: '#F0FFF4', border: '1px solid #86EFAC', borderRadius: '10px', marginBottom: '16px', fontFamily: 'var(--font-body)', fontSize: '15px', color: '#15803D' }}>✓ Your request has been sent.</div>
+                  )}
+                  {!showBuddyRequestForm ? (
+                    <button onClick={() => { setShowBuddyRequestForm(true); setBuddyRequestSent(false) }} style={{ padding: '9px 18px', backgroundColor: 'var(--color-teal)', color: 'white', border: 'none', borderRadius: '10px', fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>
+                      + Make a special request
+                    </button>
+                  ) : (
+                    <form onSubmit={handleBuddyRequest} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <div>
+                        <label style={labelSty}>What would you like your buddy match to consider?</label>
+                        <textarea required value={buddyRequestMessage} onChange={e => setBuddyRequestMessage(e.target.value)} rows={3}
+                          style={{ ...inputSty, height: 'auto', padding: '12px 14px', resize: 'vertical' }}
+                          placeholder="e.g. I'd love a buddy who speaks Mandarin, or who also loves gardening" />
+                      </div>
+                      <div style={{ display: 'flex', gap: '12px' }}>
+                        <button type="submit" disabled={submittingBuddyRequest} style={{ ...btnPrimary, opacity: submittingBuddyRequest ? 0.7 : 1 }}>{submittingBuddyRequest ? 'Sending…' : 'Send request'}</button>
+                        <button type="button" onClick={() => setShowBuddyRequestForm(false)} style={btnSecondary}>Cancel</button>
+                      </div>
+                    </form>
                   )}
                 </div>
 
