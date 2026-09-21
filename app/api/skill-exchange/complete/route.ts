@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
-import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { resolveMemberContext } from '@/lib/data/members'
 import { completeExchange } from '@/lib/data/skill-exchange'
 import { createAdminClient } from '@/lib/supabase/admin'
 
@@ -8,8 +8,8 @@ export async function POST(request: Request) {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) return NextResponse.json({ error: 'No member linked' }, { status: 403 })
+  const { memberId } = await resolveMemberContext(user.id)
+  if (!memberId) return NextResponse.json({ error: 'No member linked' }, { status: 403 })
 
   const { exchange_id } = await request.json()
   if (!exchange_id) return NextResponse.json({ error: 'exchange_id required' }, { status: 400 })
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     .maybeSingle()
 
   if (!exchange) return NextResponse.json({ error: 'Exchange not found' }, { status: 404 })
-  if (exchange.teacher_member_id !== fm.member_id && exchange.learner_member_id !== fm.member_id) {
+  if (exchange.teacher_member_id !== memberId && exchange.learner_member_id !== memberId) {
     return NextResponse.json({ error: 'Not your exchange' }, { status: 403 })
   }
   if (exchange.status === 'completed') {

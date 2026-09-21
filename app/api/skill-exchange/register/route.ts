@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
-import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { resolveMemberContext } from '@/lib/data/members'
 import { registerSkill } from '@/lib/data/skill-exchange'
 
 export async function POST(request: Request) {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) return NextResponse.json({ error: 'No member linked' }, { status: 403 })
+  const { memberId } = await resolveMemberContext(user.id)
+  if (!memberId) return NextResponse.json({ error: 'No member linked' }, { status: 403 })
 
   const body = await request.json()
   const { skill_name, skill_category, description, delivery_method, max_group_size } = body
@@ -18,7 +18,7 @@ export async function POST(request: Request) {
   }
 
   const { data, error } = await registerSkill({
-    member_id: fm.member_id,
+    member_id: memberId,
     skill_name,
     skill_category: skill_category ?? 'other',
     description,
