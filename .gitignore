@@ -21,3 +21,4 @@ coverage/
 supabase/.temp/
 supabase/config.toml
 .vercel/
+tsconfig.tsbuildinfo
