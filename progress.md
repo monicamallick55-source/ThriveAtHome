@@ -488,3 +488,6 @@ Fix: When member has no org membership show:
 "You don't belong to a village network yet — and that's okay.
 ThriveAtHome is your community. Explore your [communities →]
 Or [find a village near you ↓]"
+
+BUG-007: Family dashboard — "Aria is scheduled to call margsoon" missing space between preferred name and "soon". 
+Fix: Find where this string is constructed in the family dashboard component and add a space: "Aria is scheduled to call [name] soon."
