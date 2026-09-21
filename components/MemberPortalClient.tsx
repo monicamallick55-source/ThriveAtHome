@@ -392,9 +392,10 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
     }
   }, [activeTab])
 
-  async function searchOrgs() {
+  async function searchOrgs(overrideQ?: string) {
     setOrgSearching(true)
-    const res = await fetch(`/api/orgs/discover?q=${encodeURIComponent(orgSearch.trim())}`)
+    const q = overrideQ !== undefined ? overrideQ : orgSearch.trim()
+    const res = await fetch(`/api/orgs/discover?q=${encodeURIComponent(q)}`)
     const json = await res.json().catch(() => ({ orgs: [] }))
     setOrgResults(json.orgs ?? [])
     setOrgSearching(false)
