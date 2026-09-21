@@ -358,3 +358,116 @@ BUG-006: Important Dates tab does not pre-populate dates from member profile.
 Fix: On load, query member's date_of_birth, tracked_items (prescriptions, renewals),
 and any dates from onboarding. Pre-populate these as read-only suggested dates
 with an "Add to my dates" button next to each one.
+
+---
+SESSION: (continuation — resumed from NEXT SESSION MUST above)
+DATE: 2026-09-21
+STATUS: Session ended normally
+
+WHAT WAS DONE THIS SESSION:
+- Found substantial uncommitted work already in the working tree at session start
+  (BUG-005 Add-Ons tab, BUG-006/FEATURE-004 Important Dates pre-population, and a
+  resolveMemberContext refactor for direct-senior-auth support in addon routes).
+  Reviewed it file-by-file rather than redoing it.
+- lib/data/members.ts — CREATED resolveMemberContext(authUserId), shared helper
+  resolving memberId (+ familyMemberId when applicable) for both direct-auth
+  seniors and family-linked users.
+- app/api/addons/route.ts, app/api/addons/[id]/route.ts — MODIFIED to use
+  resolveMemberContext instead of getFamilyMemberByAuthId-only lookup (was 400ing
+  for direct-auth seniors with no family_members row).
+- lib/data/tracked-items.ts — MODIFIED: replaced the write-on-page-load
+  ensureBirthdayTrackedItem (mutated DB on every GET) with a pure, read-only
+  getSuggestedDates(dateOfBirth, existingItems) that returns suggestions without
+  touching the database. Exported new SuggestedDate type.
+- app/api/tracked-items/route.ts — MODIFIED: added 'birthday' to ALLOWED_ITEM_TYPES
+  so a suggested birthday can actually be POSTed and saved.
+- app/dashboard/important-dates/page.tsx, components/important-dates/ImportantDatesClient.tsx
+  — MODIFIED: wired getSuggestedDates() output into a "Suggested for you" section
+  with per-suggestion "+ Add to my dates" button (family dashboard view).
+- app/member-portal/page.tsx — MODIFIED: fetches suggestedDates plus the full
+  add-ons data (catalog, memberAddons, familySeatLimit, hasLongDistanceAddon,
+  videoDiary) and passes them into MemberPortalClient.
+- components/MemberPortalClient.tsx — MODIFIED:
+  - Added "Add-Ons" tab wired to the existing AddOnsClient component (BUG-005).
+  - FOUND AND FIXED A BUG IN THE IN-PROGRESS WORK: the member-portal Important
+    Dates tab received `suggestedDates`/`suggestions` state but never rendered
+    it anywhere — the pre-populated suggestions were invisible to members using
+    the member portal (only the separate /dashboard/important-dates family page
+    had the UI wired). Added a matching "Suggested for you" card section with
+    an addSuggestedDate() handler (POSTs to /api/tracked-items, moves the item
+    from `suggestions` into `localItems` on success) directly in the 'dates' tab,
+    and updated the empty-state condition so it doesn't show "No upcoming dates
+    tracked" while there are still unaddressed suggestions.
+- Audited the rest of the September 21 backlog against current main and found it
+  already resolved, with no further code changes needed:
+  - BUG-001 (post-a-need without joining a community) — the exact gate and
+    message ("Join a community first to post a need here.") already exists at
+    components/MemberPortalClient.tsx:1204-1205.
+  - BUG-002/BUG-003 (donation page back navigation) — app/donate/page.tsx already
+    has a top-of-page "← Back to Dashboard" link, and DonationModule
+    (components/shared/DonationModule.tsx) already renders a backHref/backLabel
+    button on the post-pledge confirmation screen.
+  - FEATURE-005 (Buddy page preferences/requests) — language, topics of interest,
+    a "Make a special request" form, and a "Request an update" button all already
+    exist in the 'buddy' tab (components/MemberPortalClient.tsx:1482-1523).
+  - FEATURE-007 (donation impact + receipt) — "seniors helped this month" impact
+    banner, past-gifts history, and a working "Request tax receipt" button
+    (POST /api/donations/[id]/receipt) all already exist in DonationModule.
+- BUG-004 (org search by area code) — investigated directly against live Supabase
+  data (admin client, using .env.local credentials already present in this
+  Codespace). Ran the exact discover-route query logic for q="415" against the
+  real community_orgs table: it correctly matched "Bay Area Village Network"
+  (contact_phone "(415) 555-0191") via the existing contact_phone.ilike.%digits%
+  OR-clause. No code defect found — the route's OR-filter construction
+  (org_name/city/zip_code/contact_phone) is correct as written. Concluded this
+  was very likely a test-data gap at the time BUG-004 was filed (one of the two
+  seed orgs has contact_phone = null) rather than a live code bug; area-code
+  search works correctly against current data. Left the route unchanged.
+
+TESTS AND VERIFICATIONS RUN:
+- `npx tsc --noEmit`: PASSED — zero output, after both the pre-existing diff and
+  my additional MemberPortalClient fix.
+- `npm run build`: PASSED — zero errors, full route manifest printed.
+- BUG-004: PASSED — live query against community_orgs (admin client) for q="415"
+  returned the expected org via the existing route logic; verified the exact
+  .or() clause the route builds reproduces this result.
+- BUG-001, BUG-002, BUG-003, FEATURE-005, FEATURE-007: verified by direct code
+  read (not live/browser) — confirmed the required UI and API endpoints exist
+  and are wired correctly. NOT verified live in a browser (no browser/live
+  session available in this Codespace, per prior sessions' established
+  limitation).
+- BUG-005, BUG-006: verified by code read + tsc + build only. NOT verified live
+  (same Codespace limitation) — recommend a manual smoke test after deploy:
+  (1) member portal → Add-Ons tab renders catalog and existing add-ons; (2)
+  member portal → Important Dates tab shows a "Suggested for you" birthday card
+  for a member with date_of_birth set and no existing birthday tracked item,
+  and "+ Add to my dates" successfully creates it and removes the suggestion.
+
+ERRORS ENCOUNTERED:
+- None.
+
+DECISIONS MADE:
+- Did not touch FEATURE-001, FEATURE-002, FEATURE-003, FEATURE-006 — explicitly
+  deferred by the prior session's own NEXT SESSION MUST ("Leave for after
+  launch — they require significant work").
+- Did not modify test data for BUG-004 (e.g. backfilling contact_phone for
+  "Peninsula Senior Network") since the search logic is correct and this is
+  cosmetic test-data completeness, not a functional gap.
+
+HUMAN APPROVAL:
+- Review presented: NO — this remains outside the original 14-phase gated
+  structure (M1–M27 already shipped; this is bug-fix/feature-request work from
+  live user testing, tracked directly in this file per the established pattern
+  from the 2026-09-16 sessions).
+- User response: N/A
+
+NEXT SESSION MUST:
+- Commit db4e7d8 is pushed to origin/main — confirm the Vercel build is green
+  for this commit.
+- Run the live smoke tests listed above (Add-Ons tab, Important Dates
+  suggestions) once deployed.
+- The September 21 testing backlog is now fully resolved except the four
+  explicitly-deferred FEATURE items (001, 002, 003, 006), which require a human
+  decision on scope/priority before starting.
+Session ended normally
+---
