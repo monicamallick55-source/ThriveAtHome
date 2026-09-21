@@ -1,7 +1,7 @@
 // VITA / TCE — request help arranging free tax preparation (Phase 99, M24).
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
-import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { resolveMemberContext } from '@/lib/data/members'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createVitaAppointmentRequest } from '@/lib/data/vita'
 import { INCOME_BANDS, FILING_SITUATIONS } from '@/lib/vita/eligibility'
@@ -15,8 +15,8 @@ export async function POST(req: NextRequest) {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) {
+  const { memberId, familyMemberId } = await resolveMemberContext(user.id)
+  if (!memberId) {
     return NextResponse.json({ error: 'Please complete onboarding first.' }, { status: 400 })
   }
 
@@ -45,12 +45,12 @@ export async function POST(req: NextRequest) {
   const { data: member } = await admin
     .from('members')
     .select('preferred_name')
-    .eq('id', fm.member_id)
+    .eq('id', memberId)
     .maybeSingle()
 
   const { data, error } = await createVitaAppointmentRequest({
-    memberId: fm.member_id,
-    requestedBy: fm.id,
+    memberId,
+    requestedBy: familyMemberId,
     vitaSiteId: typeof vita_site_id === 'string' && vita_site_id ? vita_site_id : null,
     taxYear: year,
     filingSituation: filing_situation ? String(filing_situation) : null,

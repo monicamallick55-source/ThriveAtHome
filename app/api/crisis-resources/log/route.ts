@@ -2,7 +2,7 @@
 // Best-effort analytics only — never blocks the user reaching help.
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
-import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { resolveMemberContext } from '@/lib/data/members'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 export const runtime = 'nodejs'
@@ -28,9 +28,9 @@ export async function POST(req: NextRequest) {
 
   try {
     const admin = createAdminClient()
-    const { data: fm } = await getFamilyMemberByAuthId(user.id)
+    const { memberId } = await resolveMemberContext(user.id)
     const { error } = await admin.from('crisis_resource_views').insert({
-      member_id: fm?.member_id ?? null,
+      member_id: memberId,
       viewer_auth_id: user.id,
       resource_key: resource_key.slice(0, 80),
       surface: surfaceVal,

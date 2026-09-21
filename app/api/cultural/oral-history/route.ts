@@ -2,7 +2,7 @@
 // optional transcript), optionally mirrored into the Life Story archive.
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
-import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { resolveMemberContext } from '@/lib/data/members'
 import { createOralHistoryRecording } from '@/lib/data/cultural'
 
 export const runtime = 'nodejs'
@@ -12,8 +12,8 @@ const VISIBILITIES = new Set(['family', 'circle', 'public'])
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) return NextResponse.json({ error: 'Please complete onboarding first.' }, { status: 400 })
+  const { memberId, familyMemberId } = await resolveMemberContext(user.id)
+  if (!memberId) return NextResponse.json({ error: 'Please complete onboarding first.' }, { status: 400 })
 
   const body = await req.json().catch(() => null)
   if (!body || typeof body !== 'object') return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
@@ -29,8 +29,8 @@ export async function POST(req: NextRequest) {
   const visibility = typeof b.visibility === 'string' && VISIBILITIES.has(b.visibility) ? b.visibility : 'family'
 
   const { data, error } = await createOralHistoryRecording({
-    memberId: fm.member_id,
-    recordedByFamilyId: fm.id,
+    memberId,
+    recordedByFamilyId: familyMemberId,
     title: title.slice(0, 200),
     language: language.slice(0, 60),
     topic: typeof b.topic === 'string' ? b.topic.slice(0, 120) || null : null,

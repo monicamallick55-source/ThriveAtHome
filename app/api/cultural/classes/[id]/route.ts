@@ -2,7 +2,7 @@
 // withdraw (DELETE).
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
-import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { resolveMemberContext } from '@/lib/data/members'
 import { registerForClass, cancelClassRegistration } from '@/lib/data/cultural'
 
 export const runtime = 'nodejs'
@@ -11,15 +11,15 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const { id } = await params
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) return NextResponse.json({ error: 'Please complete onboarding first.' }, { status: 400 })
+  const { memberId } = await resolveMemberContext(user.id)
+  if (!memberId) return NextResponse.json({ error: 'Please complete onboarding first.' }, { status: 400 })
 
   const body = await req.json().catch(() => ({}))
   const b = (body ?? {}) as Record<string, unknown>
 
   const { error } = await registerForClass({
     classId: id,
-    memberId: fm.member_id,
+    memberId,
     needsMaterialsKit: b.needs_materials_kit === true,
     notes: typeof b.notes === 'string' ? b.notes.slice(0, 500) || null : null,
   })
@@ -31,10 +31,10 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
   const { id } = await params
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) return NextResponse.json({ error: 'Please complete onboarding first.' }, { status: 400 })
+  const { memberId } = await resolveMemberContext(user.id)
+  if (!memberId) return NextResponse.json({ error: 'Please complete onboarding first.' }, { status: 400 })
 
-  const { error } = await cancelClassRegistration(id, fm.member_id)
+  const { error } = await cancelClassRegistration(id, memberId)
   if (error) return NextResponse.json({ error }, { status: 500 })
   return NextResponse.json({ ok: true })
 }

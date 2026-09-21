@@ -1,7 +1,7 @@
 // M25 Phase 103 — Potluck signup: join (POST) or withdraw (DELETE).
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
-import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { resolveMemberContext } from '@/lib/data/members'
 import { signUpForPotluck, cancelPotluckSignup } from '@/lib/data/cultural'
 
 export const runtime = 'nodejs'
@@ -12,8 +12,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const { id } = await params
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) return NextResponse.json({ error: 'Please complete onboarding first.' }, { status: 400 })
+  const { memberId } = await resolveMemberContext(user.id)
+  if (!memberId) return NextResponse.json({ error: 'Please complete onboarding first.' }, { status: 400 })
 
   const body = await req.json().catch(() => ({}))
   const b = (body ?? {}) as Record<string, unknown>
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   const { error } = await signUpForPotluck({
     potluckId: id,
-    memberId: fm.member_id,
+    memberId,
     dishName: typeof b.dish_name === 'string' ? b.dish_name.slice(0, 160) || null : null,
     dishCategory,
     attendeeCount,
@@ -36,10 +36,10 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
   const { id } = await params
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) return NextResponse.json({ error: 'Please complete onboarding first.' }, { status: 400 })
+  const { memberId } = await resolveMemberContext(user.id)
+  if (!memberId) return NextResponse.json({ error: 'Please complete onboarding first.' }, { status: 400 })
 
-  const { error } = await cancelPotluckSignup(id, fm.member_id)
+  const { error } = await cancelPotluckSignup(id, memberId)
   if (error) return NextResponse.json({ error }, { status: 500 })
   return NextResponse.json({ ok: true })
 }

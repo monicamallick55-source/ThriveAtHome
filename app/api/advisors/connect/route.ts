@@ -3,7 +3,7 @@
 // phone number — a navigator makes the personal introduction.
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
-import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { resolveMemberContext } from '@/lib/data/members'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getAdvisorById, requestAdvisorIntroduction } from '@/lib/data/advisors'
 
@@ -13,8 +13,8 @@ export async function POST(req: NextRequest) {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) {
+  const { memberId, familyMemberId } = await resolveMemberContext(user.id)
+  if (!memberId) {
     return NextResponse.json(
       { error: 'No member linked to this account. Please complete onboarding first.' },
       { status: 400 }
@@ -46,13 +46,13 @@ export async function POST(req: NextRequest) {
   const { data: member } = await admin
     .from('members')
     .select('preferred_name')
-    .eq('id', fm.member_id)
+    .eq('id', memberId)
     .maybeSingle()
 
   const { data, error } = await requestAdvisorIntroduction({
-    memberId: fm.member_id,
+    memberId,
     advisorId: advisor_id,
-    requestedBy: fm.id,
+    requestedBy: familyMemberId,
     topic: typeof topic === 'string' ? topic.trim().slice(0, 300) || null : null,
     memberNote: typeof member_note === 'string' ? member_note.trim().slice(0, 1000) || null : null,
     memberPreferredName: member?.preferred_name ?? 'The member',

@@ -2,7 +2,7 @@
 // Audio is stored in the private "oral-history" Storage bucket.
 import { NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
-import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { resolveMemberContext } from '@/lib/data/members'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { attachOralHistoryAudio } from '@/lib/data/cultural'
 
@@ -18,8 +18,8 @@ const BUCKET = 'oral-history'
 export async function POST(request: Request) {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) return NextResponse.json({ error: 'No member linked' }, { status: 403 })
+  const { memberId } = await resolveMemberContext(user.id)
+  if (!memberId) return NextResponse.json({ error: 'No member linked' }, { status: 403 })
 
   let formData: FormData
   try {
@@ -45,13 +45,13 @@ export async function POST(request: Request) {
     .select('id, member_id')
     .eq('id', recordingId)
     .maybeSingle()
-  if (!rec || rec.member_id !== fm.member_id) {
+  if (!rec || rec.member_id !== memberId) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
 
   const ext = file.name.split('.').pop()?.toLowerCase() ?? 'audio'
   const safeName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-  const storagePath = `${fm.member_id}/${recordingId}/${safeName}`
+  const storagePath = `${memberId}/${recordingId}/${safeName}`
 
   const buffer = await file.arrayBuffer()
   const { error: uploadErr } = await admin.storage
@@ -62,7 +62,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Upload failed: ' + uploadErr.message }, { status: 500 })
   }
 
-  const { error } = await attachOralHistoryAudio(recordingId, fm.member_id, storagePath)
+  const { error } = await attachOralHistoryAudio(recordingId, memberId, storagePath)
   if (error) return NextResponse.json({ error }, { status: 500 })
 
   return NextResponse.json({ path: storagePath }, { status: 201 })

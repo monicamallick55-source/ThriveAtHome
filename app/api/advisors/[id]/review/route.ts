@@ -1,7 +1,7 @@
 // Leave a private review for an advisor after a first meeting (Phase 98, M24).
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
-import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { resolveMemberContext } from '@/lib/data/members'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { submitAdvisorReview } from '@/lib/data/advisors'
 
@@ -12,8 +12,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) return NextResponse.json({ error: 'No member linked to this account.' }, { status: 400 })
+  const { memberId } = await resolveMemberContext(user.id)
+  if (!memberId) return NextResponse.json({ error: 'No member linked to this account.' }, { status: 400 })
 
   const body = await req.json().catch(() => null)
   const rating = Number((body as Record<string, unknown> | null)?.rating)
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const { data: conn } = await admin
     .from('advisor_connections')
     .select('id')
-    .eq('member_id', fm.member_id)
+    .eq('member_id', memberId)
     .eq('advisor_id', advisorId)
     .maybeSingle()
   if (!conn) {
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   const { error } = await submitAdvisorReview({
     advisorId,
-    memberId: fm.member_id,
+    memberId: memberId,
     connectionId: conn.id,
     rating,
     reviewText: typeof reviewText === 'string' ? reviewText.trim().slice(0, 2000) || null : null,
