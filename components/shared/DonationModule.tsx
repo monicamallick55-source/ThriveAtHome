@@ -7,7 +7,7 @@
 // to Stripe Checkout in donation mode; otherwise it records a pledge and the team
 // follows up. Past gifts for the entered email are listed with their impact.
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const PRESET_AMOUNTS = [25, 75, 150, 300]
 
@@ -28,6 +28,9 @@ interface Props {
   donorEmailDefault?: string
   /** Compact styling for embedding inside an admin/navigator panel. */
   compact?: boolean
+  /** Optional "back" link shown on the confirmation screen (e.g. "/dashboard"). */
+  backHref?: string
+  backLabel?: string
 }
 
 export default function DonationModule({
@@ -35,6 +38,8 @@ export default function DonationModule({
   donorNameDefault = '',
   donorEmailDefault = '',
   compact = false,
+  backHref,
+  backLabel = '← Back to Dashboard',
 }: Props) {
   const [amount, setAmount] = useState<number>(75)
   const [customAmount, setCustomAmount] = useState('')
@@ -47,8 +52,16 @@ export default function DonationModule({
   const [error, setError] = useState('')
   const [history, setHistory] = useState<PastDonation[] | null>(null)
   const [loadingHistory, setLoadingHistory] = useState(false)
+  const [seniorsHelpedThisMonth, setSeniorsHelpedThisMonth] = useState<number | null>(null)
 
   const effectiveAmount = customAmount ? Math.max(0, Math.round(Number(customAmount))) : amount
+
+  useEffect(() => {
+    fetch('/api/donations')
+      .then(res => res.json())
+      .then(json => setSeniorsHelpedThisMonth(typeof json.seniorsHelpedThisMonth === 'number' ? json.seniorsHelpedThisMonth : 0))
+      .catch(() => setSeniorsHelpedThisMonth(0))
+  }, [])
 
   async function loadHistory(forEmail: string) {
     if (!forEmail.trim()) return
@@ -57,6 +70,7 @@ export default function DonationModule({
       const res = await fetch(`/api/donations?email=${encodeURIComponent(forEmail.trim())}`)
       const json = await res.json().catch(() => ({ donations: [] }))
       setHistory(json.donations ?? [])
+      if (typeof json.seniorsHelpedThisMonth === 'number') setSeniorsHelpedThisMonth(json.seniorsHelpedThisMonth)
     } catch {
       setHistory([])
     } finally {
@@ -128,9 +142,16 @@ export default function DonationModule({
     color: 'var(--color-navy)', boxSizing: 'border-box', backgroundColor: 'white',
   }
 
+  const impactBanner = seniorsHelpedThisMonth !== null && seniorsHelpedThisMonth > 0 && (
+    <div style={{ padding: '14px 20px', backgroundColor: '#F0F9F7', border: '1px solid #2A9D8F30', borderRadius: '10px', marginBottom: '20px', fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-navy)', fontWeight: 500 }}>
+      🎉 Donations this month have helped {seniorsHelpedThisMonth} senior{seniorsHelpedThisMonth === 1 ? '' : 's'} stay connected at home.
+    </div>
+  )
+
   if (result) {
     return (
       <div style={card}>
+        {impactBanner}
         <div style={{ fontSize: '40px', marginBottom: '12px' }}>💚</div>
         <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '8px' }}>
           Thank you{name ? `, ${name.split(' ')[0]}` : ''}!
@@ -139,12 +160,22 @@ export default function DonationModule({
           Your ${result.amount}{recurring ? '/month' : ''} gift {result.impact ? `— ${result.impact.charAt(0).toLowerCase()}${result.impact.slice(1)}` : 'makes a real difference.'}
           {' '}A receipt is on its way to your email.
         </p>
-        <button
-          onClick={() => { setResult(null); setCustomAmount(''); }}
-          style={{ padding: '10px 20px', backgroundColor: 'var(--color-teal)', color: 'white', border: 'none', borderRadius: '10px', fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 600, cursor: 'pointer' }}
-        >
-          Make another gift
-        </button>
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          <button
+            onClick={() => { setResult(null); setCustomAmount(''); }}
+            style={{ padding: '10px 20px', backgroundColor: 'var(--color-teal)', color: 'white', border: 'none', borderRadius: '10px', fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 600, cursor: 'pointer' }}
+          >
+            Make another gift
+          </button>
+          {backHref && (
+            <a
+              href={backHref}
+              style={{ padding: '10px 20px', backgroundColor: 'white', color: 'var(--color-navy)', border: '1.5px solid #DDD8CE', borderRadius: '10px', fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
+            >
+              {backLabel}
+            </a>
+          )}
+        </div>
         {history && history.length > 0 && <PastGifts history={history} />}
       </div>
     )
@@ -152,6 +183,7 @@ export default function DonationModule({
 
   return (
     <div style={card}>
+      {impactBanner}
       {!compact && (
         <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '26px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '24px' }}>Make a Donation</h2>
       )}
@@ -249,6 +281,18 @@ export default function DonationModule({
 
 function PastGifts({ history }: { history: PastDonation[] }) {
   const total = history.reduce((s, d) => s + (d.amount_cents ?? 0), 0)
+  const [receiptState, setReceiptState] = useState<Record<string, 'sending' | 'sent' | 'error'>>({})
+
+  async function requestReceipt(id: string) {
+    setReceiptState(s => ({ ...s, [id]: 'sending' }))
+    try {
+      const res = await fetch(`/api/donations/${id}/receipt`, { method: 'POST' })
+      setReceiptState(s => ({ ...s, [id]: res.ok ? 'sent' : 'error' }))
+    } catch {
+      setReceiptState(s => ({ ...s, [id]: 'error' }))
+    }
+  }
+
   return (
     <div style={{ marginTop: '28px', paddingTop: '20px', borderTop: '1px solid #E8E4DC' }}>
       <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '4px' }}>Your giving history</h3>
@@ -267,6 +311,20 @@ function PastGifts({ history }: { history: PastDonation[] }) {
               </span>
             </div>
             <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: '4px 0 0', lineHeight: 1.5 }}>{d.impact}</p>
+            <div style={{ marginTop: '8px' }}>
+              {receiptState[d.id] === 'sent' ? (
+                <span style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: '#15803D', fontWeight: 600 }}>✓ Receipt emailed</span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => requestReceipt(d.id)}
+                  disabled={receiptState[d.id] === 'sending'}
+                  style={{ padding: '4px 10px', fontSize: '12px', border: '1px solid #DDD8CE', borderRadius: '6px', backgroundColor: 'white', cursor: receiptState[d.id] === 'sending' ? 'wait' : 'pointer', fontFamily: 'var(--font-body)', color: 'var(--color-navy)' }}
+                >
+                  {receiptState[d.id] === 'sending' ? 'Sending…' : receiptState[d.id] === 'error' ? 'Failed — retry' : 'Request tax receipt'}
+                </button>
+              )}
+            </div>
           </div>
         ))}
       </div>

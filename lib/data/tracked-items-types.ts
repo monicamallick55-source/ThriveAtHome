@@ -33,6 +33,7 @@ export type ItemType =
   | 'passport'
   | 'gym_membership'
   | 'appointment'
+  | 'birthday'
   | 'other'
 
 export interface TrackedItem {
@@ -75,5 +76,6 @@ export const ITEM_TYPE_DEFAULTS: Record<ItemType, {
   passport:         { reminder_lead_days: 90, recurrence_cycle_days: null, is_recurring: false, category: 'renewal',      emoji: '✈️', label: 'Passport' },
   gym_membership:   { reminder_lead_days: 14, recurrence_cycle_days: 365, is_recurring: true,  category: 'renewal',      emoji: '🏋️', label: 'Gym Membership' },
   appointment:      { reminder_lead_days: 1,  recurrence_cycle_days: null, is_recurring: false, category: 'appointment',  emoji: '📅', label: 'Appointment' },
+  birthday:         { reminder_lead_days: 7,  recurrence_cycle_days: 365, is_recurring: true,  category: 'renewal',      emoji: '🎂', label: 'Birthday' },
   other:            { reminder_lead_days: 30, recurrence_cycle_days: null, is_recurring: false, category: 'renewal',      emoji: '➕', label: 'Other' },
 }

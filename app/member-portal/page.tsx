@@ -5,7 +5,7 @@ import type { Metadata } from 'next'
 import { requireAuth } from '@/lib/auth'
 import { getMemberForAuthUser, getMemberByDirectAuth } from '@/lib/data/members'
 import { getUpcomingServiceBookings } from '@/lib/data/services'
-import { getUpcomingTrackedItems } from '@/lib/data/tracked-items'
+import { getUpcomingTrackedItems, ensureBirthdayTrackedItem } from '@/lib/data/tracked-items'
 import MemberPortalClient from '@/components/MemberPortalClient'
 
 export const metadata: Metadata = { title: 'My Portal — ThriveAtHome' }
@@ -27,6 +27,8 @@ export default async function MemberPortalPage() {
     // No member found — direct them to set up or onboard
     redirect('/onboarding')
   }
+
+  await ensureBirthdayTrackedItem(member.id, member.date_of_birth)
 
   const [servicesRes, trackedRes] = await Promise.all([
     getUpcomingServiceBookings(member.id),

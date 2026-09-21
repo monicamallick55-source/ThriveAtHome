@@ -15,6 +15,9 @@ export default function DonatePage() {
       </nav>
 
       <main style={{ maxWidth: '720px', margin: '0 auto', padding: '64px 24px' }}>
+        <a href="/dashboard" style={{ display: 'inline-block', marginBottom: '24px', fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', textDecoration: 'none' }}>
+          ← Back to Dashboard
+        </a>
         <div style={{ textAlign: 'center', marginBottom: '48px' }}>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '42px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '16px', lineHeight: 1.2 }}>
             Help a Senior Thrive at Home
@@ -37,7 +40,7 @@ export default function DonatePage() {
           ))}
         </div>
 
-        <DonationModule />
+        <DonationModule backHref="/dashboard" backLabel="← Back to Dashboard" />
 
         <div style={{ marginTop: '48px', padding: '32px 40px', backgroundColor: 'var(--color-navy)', borderRadius: '20px', textAlign: 'center' }}>
           <blockquote style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontStyle: 'italic', color: 'var(--color-cream)', lineHeight: 1.6, margin: '0 0 16px' }}>

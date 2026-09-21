@@ -3,7 +3,8 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { requireAuth } from '@/lib/auth'
 import { getFamilyMemberByAuthId } from '@/lib/data/family'
-import { getTrackedItemsForMember } from '@/lib/data/tracked-items'
+import { getMemberById } from '@/lib/data/members'
+import { getTrackedItemsForMember, ensureBirthdayTrackedItem } from '@/lib/data/tracked-items'
 import ImportantDatesClient from '@/components/important-dates/ImportantDatesClient'
 
 export const metadata: Metadata = { title: 'Important Dates — ThriveAtHome' }
@@ -12,6 +13,9 @@ export default async function ImportantDatesPage() {
   const user = await requireAuth()
   const { data: fm } = await getFamilyMemberByAuthId(user.id)
   if (!fm?.member_id) redirect('/dashboard')
+
+  const { data: member } = await getMemberById(fm.member_id)
+  await ensureBirthdayTrackedItem(fm.member_id, member?.date_of_birth)
 
   const { data: items } = await getTrackedItemsForMember(fm.member_id, ['active', 'snoozed'])
 

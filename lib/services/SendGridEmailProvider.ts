@@ -271,4 +271,43 @@ ${ctaButton('Accept invitation & create account', acceptUrl)}`
     })
     console.log(`[SendGrid] Org newsletter "${subject}" sent to ${to.substring(0, 6)}xxx`)
   }
+
+  async sendDonationReceipt(to: string, donorName: string, amountCents: number, donationDate: string, isRecurring: boolean): Promise<void> {
+    this.init()
+    const amount = (amountCents / 100).toFixed(2)
+    const dateLabel = new Date(donationDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
+
+    const { jsPDF } = await import('jspdf')
+    const doc = new jsPDF({ unit: 'pt', format: 'letter' })
+    doc.setFontSize(20)
+    doc.text('ThriveAtHome', 56, 72)
+    doc.setFontSize(13)
+    doc.text('Donation Receipt', 56, 96)
+    doc.setFontSize(11)
+    doc.text(`Date: ${dateLabel}`, 56, 140)
+    doc.text(`Donor: ${donorName}`, 56, 160)
+    doc.text(`Amount: $${amount}${isRecurring ? ' (monthly gift)' : ''}`, 56, 180)
+    doc.text('Payment method: On file with ThriveAtHome', 56, 200)
+    doc.setFontSize(10)
+    doc.text('ThriveAtHome is a mission-driven company; tax-deductibility varies by', 56, 240)
+    doc.text('program — please consult your tax advisor. Keep this receipt for your records.', 56, 254)
+    const pdfBase64 = Buffer.from(doc.output('arraybuffer')).toString('base64')
+
+    const body = `<p style="margin:0 0 16px;font-size:18px;line-height:1.6;">Dear ${donorName},</p>
+<p style="margin:0 0 16px;font-size:18px;line-height:1.6;">Thank you for your ${isRecurring ? 'monthly ' : ''}gift of <strong>$${amount}</strong> on ${dateLabel}. Your tax receipt is attached as a PDF.</p>
+<p style="margin:0 0 24px;font-size:16px;color:#5E5852;line-height:1.6;">ThriveAtHome is a mission-driven company; tax-deductibility varies by program — please consult your tax advisor.</p>`
+    await sgMail.send({
+      to,
+      from: getFrom(),
+      subject: 'Your ThriveAtHome donation receipt',
+      html: baseTemplate('Donation Receipt', body),
+      attachments: [{
+        content: pdfBase64,
+        filename: `ThriveAtHome-Receipt-${donationDate}.pdf`,
+        type: 'application/pdf',
+        disposition: 'attachment',
+      }],
+    })
+    console.log(`[SendGrid] Donation receipt PDF sent to ${to.substring(0, 6)}xxx`)
+  }
 }

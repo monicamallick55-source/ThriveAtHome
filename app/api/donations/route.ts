@@ -15,12 +15,30 @@ export function impactFor(amountCents: number): string {
   return (DONATION_IMPACT_TIERS.find(t => dollars >= t.min) ?? DONATION_IMPACT_TIERS[DONATION_IMPACT_TIERS.length - 1]).statement
 }
 
-/** GET /api/donations?email=foo@bar.com — a donor's own giving history with impact statements. */
+// Roughly $25 funds one month of daily check-in calls for one senior — used to translate
+// this month's total gifts into a plain-English "helped N seniors" impact statement.
+const DOLLARS_PER_SENIOR_MONTH = 25
+
+/** GET /api/donations?email=foo@bar.com — a donor's own giving history with impact statements.
+ *  Always includes this month's aggregate impact statement, regardless of email. */
 export async function GET(req: NextRequest) {
   const email = req.nextUrl.searchParams.get('email')?.trim().toLowerCase()
-  if (!email) return NextResponse.json({ donations: [] })
-
   const admin = createAdminClient()
+
+  const startOfMonth = new Date()
+  startOfMonth.setUTCDate(1)
+  const startOfMonthStr = startOfMonth.toISOString().slice(0, 10)
+
+  const { data: monthRows, error: monthError } = await (admin.from as any)('donations')
+    .select('amount_cents')
+    .gte('donation_date', startOfMonthStr) as unknown as { data: Array<{ amount_cents: number }> | null; error: unknown }
+
+  if (monthError) console.error('[api/donations GET] month aggregate failed:', monthError)
+  const totalThisMonthCents = (monthRows ?? []).reduce((sum, r) => sum + Number(r.amount_cents ?? 0), 0)
+  const seniorsHelpedThisMonth = Math.max(0, Math.floor(totalThisMonthCents / 100 / DOLLARS_PER_SENIOR_MONTH))
+
+  if (!email) return NextResponse.json({ donations: [], seniorsHelpedThisMonth, totalThisMonthCents })
+
   const { data, error } = await (admin.from as any)('donations')
     .select('id, amount_cents, donation_date, payment_method, is_recurring, campaign, created_at')
     .eq('donor_email', email)
@@ -29,14 +47,14 @@ export async function GET(req: NextRequest) {
 
   if (error) {
     console.error('[api/donations GET]', error)
-    return NextResponse.json({ donations: [] })
+    return NextResponse.json({ donations: [], seniorsHelpedThisMonth, totalThisMonthCents })
   }
 
   const donations = (data ?? []).map(d => ({
     ...d,
     impact: impactFor(Number(d.amount_cents ?? 0)),
   }))
-  return NextResponse.json({ donations })
+  return NextResponse.json({ donations, seniorsHelpedThisMonth, totalThisMonthCents })
 }
 
 export async function POST(req: NextRequest) {

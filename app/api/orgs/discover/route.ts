@@ -12,14 +12,17 @@ export async function GET(req: NextRequest) {
   const admin = createAdminClient()
 
   let query = (admin.from as any)('community_orgs')
-    .select('id, org_name, org_type, city, state, zip_code, description, service_area_description, member_count')
+    .select('id, org_name, org_type, city, state, zip_code, contact_phone, description, service_area_description, member_count')
     .eq('is_active', true)
     .order('member_count', { ascending: false })
     .limit(25)
 
   if (q) {
-    // name OR city OR zip prefix
-    query = query.or(`org_name.ilike.%${q}%,city.ilike.%${q}%,zip_code.ilike.${q}%`)
+    // name OR city OR zip prefix OR phone area code (digits only, e.g. "415")
+    const digits = q.replace(/\D/g, '')
+    const orParts = [`org_name.ilike.%${q}%`, `city.ilike.%${q}%`, `zip_code.ilike.${q}%`]
+    if (digits) orParts.push(`contact_phone.ilike.%${digits}%`)
+    query = query.or(orParts.join(','))
   }
 
   const { data, error } = await query

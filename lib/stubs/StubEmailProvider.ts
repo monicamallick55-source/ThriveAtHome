@@ -32,4 +32,7 @@ export class StubEmailProvider implements EmailProvider {
   async sendOrgNewsletter(to: string, recipientName: string, orgName: string, subject: string, body: string): Promise<void> {
     console.log(`[STUB][Email] Org newsletter "${subject}" from ${orgName} → ${recipientName} <${to}>: ${body.substring(0, 80)}...`)
   }
+  async sendDonationReceipt(to: string, donorName: string, amountCents: number, donationDate: string, isRecurring: boolean): Promise<void> {
+    console.log(`[STUB][Email] Tax receipt (PDF) for $${(amountCents / 100).toFixed(2)}${isRecurring ? '/mo' : ''} gift from ${donorName} on ${donationDate} → ${to}`)
+  }
 }
