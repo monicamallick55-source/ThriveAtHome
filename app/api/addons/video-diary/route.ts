@@ -2,7 +2,7 @@
 // List and create entries. Gated on an active long_distance_caregiver add-on.
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
-import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { resolveMemberContext } from '@/lib/data/members'
 import {
   getVideoDiaryEntries,
   addVideoDiaryEntry,
@@ -13,14 +13,14 @@ export const runtime = 'nodejs'
 
 type Gate =
   | { ok: false; response: NextResponse }
-  | { ok: true; memberId: string; familyMemberId: string }
+  | { ok: true; memberId: string; familyMemberId: string | null }
 
 async function requireLongDistance(authId: string): Promise<Gate> {
-  const { data: fm } = await getFamilyMemberByAuthId(authId)
-  if (!fm?.member_id) {
+  const { memberId, familyMemberId } = await resolveMemberContext(authId)
+  if (!memberId) {
     return { ok: false, response: NextResponse.json({ error: 'Please complete onboarding first.' }, { status: 400 }) }
   }
-  const active = await hasActiveAddon(fm.member_id, 'long_distance_caregiver')
+  const active = await hasActiveAddon(memberId, 'long_distance_caregiver')
   if (!active) {
     return {
       ok: false,
@@ -30,7 +30,7 @@ async function requireLongDistance(authId: string): Promise<Gate> {
       ),
     }
   }
-  return { ok: true, memberId: fm.member_id, familyMemberId: fm.id }
+  return { ok: true, memberId, familyMemberId }
 }
 
 export async function GET() {

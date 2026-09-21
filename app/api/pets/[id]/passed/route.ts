@@ -2,7 +2,7 @@
 // Deactivates the profile, notifies the family gently, logs a [STUB][EMAIL] care-team notice.
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
-import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { resolveMemberContext } from '@/lib/data/members'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { markPetPassedAway } from '@/lib/data/pets'
 
@@ -12,8 +12,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const { id } = await params
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) return NextResponse.json({ error: 'No member linked' }, { status: 400 })
+  const { memberId } = await resolveMemberContext(user.id)
+  if (!memberId) return NextResponse.json({ error: 'No member linked' }, { status: 400 })
 
   const body = await req.json().catch(() => ({}))
   const b = (body && typeof body === 'object' ? body : {}) as Record<string, unknown>
@@ -25,12 +25,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const { data: member } = await admin
     .from('members')
     .select('preferred_name')
-    .eq('id', fm.member_id)
+    .eq('id', memberId)
     .maybeSingle()
 
   const { data, error } = await markPetPassedAway(
     id,
-    fm.member_id,
+    memberId,
     passedAwayOn,
     memorialNote,
     member?.preferred_name ?? 'your loved one'

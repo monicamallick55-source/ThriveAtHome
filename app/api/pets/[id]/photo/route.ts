@@ -1,7 +1,7 @@
 // M27 Phase 117 — attach a photo to a pet profile (private "member-pet-photos" bucket).
 import { NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
-import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { resolveMemberContext } from '@/lib/data/members'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { attachPetPhoto } from '@/lib/data/pets'
 
@@ -15,8 +15,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const { id } = await params
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) return NextResponse.json({ error: 'No member linked' }, { status: 403 })
+  const { memberId } = await resolveMemberContext(user.id)
+  if (!memberId) return NextResponse.json({ error: 'No member linked' }, { status: 403 })
 
   let formData: FormData
   try {
@@ -35,11 +35,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   const admin = createAdminClient()
   const { data: row } = await admin.from('member_pets').select('id, member_id').eq('id', id).maybeSingle()
-  if (!row || row.member_id !== fm.member_id) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  if (!row || row.member_id !== memberId) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg'
   const safeName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-  const storagePath = `${fm.member_id}/${id}/${safeName}`
+  const storagePath = `${memberId}/${id}/${safeName}`
   const buffer = await file.arrayBuffer()
   const { error: uploadErr } = await admin.storage
     .from(BUCKET)
@@ -49,7 +49,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: 'Upload failed: ' + uploadErr.message }, { status: 500 })
   }
 
-  const { error } = await attachPetPhoto(id, fm.member_id, storagePath)
+  const { error } = await attachPetPhoto(id, memberId, storagePath)
   if (error) return NextResponse.json({ error }, { status: 500 })
   return NextResponse.json({ path: storagePath }, { status: 201 })
 }

@@ -2,7 +2,7 @@
 // Video is stored in the private "caregiver-video-diary" Storage bucket.
 import { NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
-import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { resolveMemberContext } from '@/lib/data/members'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { attachVideoDiaryVideo, hasActiveAddon } from '@/lib/data/premium-addons'
 
@@ -18,9 +18,9 @@ export async function POST(request: Request) {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  if (!fm?.member_id) return NextResponse.json({ error: 'No member linked' }, { status: 403 })
-  if (!(await hasActiveAddon(fm.member_id, 'long_distance_caregiver'))) {
+  const { memberId } = await resolveMemberContext(user.id)
+  if (!memberId) return NextResponse.json({ error: 'No member linked' }, { status: 403 })
+  if (!(await hasActiveAddon(memberId, 'long_distance_caregiver'))) {
     return NextResponse.json({ error: 'The Long-Distance Caregiver add-on is required.' }, { status: 403 })
   }
 
@@ -50,13 +50,13 @@ export async function POST(request: Request) {
     .select('id, member_id')
     .eq('id', entryId)
     .maybeSingle()
-  if (!row || row.member_id !== fm.member_id) {
+  if (!row || row.member_id !== memberId) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
 
   const ext = file.name.split('.').pop()?.toLowerCase() ?? 'mp4'
   const safeName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-  const storagePath = `${fm.member_id}/${entryId}/${safeName}`
+  const storagePath = `${memberId}/${entryId}/${safeName}`
 
   const buffer = await file.arrayBuffer()
   const { error: uploadErr } = await admin.storage
@@ -67,7 +67,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Upload failed: ' + uploadErr.message }, { status: 500 })
   }
 
-  const { error } = await attachVideoDiaryVideo(entryId, fm.member_id, storagePath)
+  const { error } = await attachVideoDiaryVideo(entryId, memberId, storagePath)
   if (error) return NextResponse.json({ error }, { status: 500 })
 
   return NextResponse.json({ path: storagePath }, { status: 201 })
