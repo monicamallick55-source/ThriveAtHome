@@ -5,7 +5,11 @@ import type { Member } from '@/lib/data/members'
 import type { ServiceBooking } from '@/lib/data/services'
 import type { TrackedItem } from '@/lib/data/tracked-items-types'
 import { SUBCATEGORY_OPTIONS } from '@/lib/data/tracked-items-types'
+import type { SuggestedDate } from '@/lib/data/tracked-items'
+import type { MemberAddonWithCatalog } from '@/lib/data/premium-addons'
+import type { PremiumAddonRow, CaregiverVideoDiaryEntryRow } from '@/types/database'
 import CrisisResourceBar from '@/components/shared/CrisisResourceBar'
+import AddOnsClient from '@/components/dashboard/AddOnsClient'
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
@@ -107,7 +111,7 @@ function parseNeedText(text: string): { service_type: string; description: strin
   return { service_type: best, description: text.trim() }
 }
 
-type Tab = 'profile' | 'services' | 'requests' | 'community' | 'dates' | 'buddy' | 'life-story' | 'billing' | 'org' | 'notifications' | 'documents'
+type Tab = 'profile' | 'services' | 'requests' | 'community' | 'dates' | 'buddy' | 'life-story' | 'billing' | 'add-ons' | 'org' | 'notifications' | 'documents'
 
 // ── Interfaces ──────────────────────────────────────────────────────────────
 
@@ -139,6 +143,12 @@ interface Props {
   member: Member
   upcomingServices: ServiceBooking[]
   trackedItems: TrackedItem[]
+  suggestedDates: SuggestedDate[]
+  addonCatalog: PremiumAddonRow[]
+  memberAddons: MemberAddonWithCatalog[]
+  familySeatLimit: number
+  hasLongDistanceAddon: boolean
+  initialVideoDiary: CaregiverVideoDiaryEntryRow[]
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -160,9 +170,13 @@ function fmtDate(
 
 // ── Component ───────────────────────────────────────────────────────────────
 
-export default function MemberPortalClient({ member, upcomingServices, trackedItems }: Props) {
+export default function MemberPortalClient({
+  member, upcomingServices, trackedItems, suggestedDates,
+  addonCatalog, memberAddons, familySeatLimit, hasLongDistanceAddon, initialVideoDiary,
+}: Props) {
   const [activeTab, setActiveTab] = useState<Tab>('profile')
   const [toast, setToast] = useState<string | null>(null)
+  const [suggestions, setSuggestions] = useState<SuggestedDate[]>(suggestedDates)
 
   // Profile edit
   const [editingPrefs, setEditingPrefs] = useState(false)
@@ -301,7 +315,7 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
 
   // Persist active tab in URL hash so refreshing or sharing a link preserves the tab
   useEffect(() => {
-    const VALID: Tab[] = ['profile','services','requests','community','dates','buddy','life-story','billing','org','notifications','documents']
+    const VALID: Tab[] = ['profile','services','requests','community','dates','buddy','life-story','billing','add-ons','org','notifications','documents']
     const hash = window.location.hash.replace('#', '') as Tab
     if (VALID.includes(hash)) setActiveTab(hash)
   }, [])
@@ -397,7 +411,12 @@ export default function MemberPortalClient({ member, upcomingServices, trackedIt
     const q = overrideQ !== undefined ? overrideQ : orgSearch.trim()
     const res = await fetch(`/api/orgs/discover?q=${encodeURIComponent(q)}`)
     const json = await res.json().catch(() => ({ orgs: [] }))
-    setOrgResults(json.orgs ?? [])
+    if ((json.orgs ?? []).length > 0) {
+      setOrgResults(json.orgs)
+    } else if (orgSearch.trim()) {
+      // Keep existing results but mark as searched with no new results
+      setOrgResults([])
+    }
     setOrgSearching(false)
     setOrgSearched(true)
   }
