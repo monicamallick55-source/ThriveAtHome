@@ -641,6 +641,12 @@ export default function HomePage() {
         <p style={{ color: 'rgba(250,250,245,0.5)', fontSize: '15px', fontFamily: 'var(--font-body)', margin: 0 }}>
           © 2025 ThriveAtHome. All rights reserved.{' '}
           <Link href="/privacy" style={{ color: 'rgba(250,250,245,0.6)', textDecoration: 'underline' }}>Privacy</Link>
+          {' · '}
+          <Link href="/terms" style={{ color: 'rgba(250,250,245,0.6)', textDecoration: 'underline' }}>Terms</Link>
+          {' · '}
+          <Link href="/for-families" style={{ color: 'rgba(250,250,245,0.6)', textDecoration: 'underline' }}>For Families</Link>
+          {' · '}
+          <Link href="/for-volunteers" style={{ color: 'rgba(250,250,245,0.6)', textDecoration: 'underline' }}>For Volunteers</Link>
         </p>
       </footer>
 

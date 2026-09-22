@@ -285,6 +285,21 @@ export default function PrivacyPage() {
           }}>
             ← Back to home
           </Link>
+          <Link href="/terms" style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            fontFamily: 'var(--font-body)',
+            fontSize: '18px',
+            fontWeight: 500,
+            color: 'var(--color-navy)',
+            textDecoration: 'underline',
+            padding: '12px 8px',
+            minHeight: '48px',
+            marginLeft: '16px',
+          }}>
+            Terms of Service
+          </Link>
         </div>
       </main>
     </div>
