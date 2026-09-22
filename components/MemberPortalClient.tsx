@@ -57,6 +57,42 @@ const CONTACT_METHOD_OPTIONS = [
   { value: 'email', label: 'Email', desc: 'We email you the details.' },
 ]
 
+// FEATURE-006: guided prompts shown when a member's life story is just getting started.
+const LIFE_STORY_PROMPTS: Array<{ prompt: string; era: string; entry_type: string }> = [
+  { prompt: 'Tell us about your career — what did you do for work?', era: 'Career', entry_type: 'career' },
+  { prompt: 'Tell us about your family — who are the most important people in your life?', era: 'Family', entry_type: 'family_story' },
+  { prompt: 'Where did you grow up? What was your childhood like?', era: 'Childhood', entry_type: 'first_memory' },
+  { prompt: 'What are you most proud of in your life?', era: 'Later years', entry_type: 'wisdom' },
+  { prompt: 'What hobbies or passions have shaped who you are?', era: 'Recent memories', entry_type: 'memory' },
+]
+
+// FEATURE-006: entries are auto-organised into one of 10 life chapters, based on
+// the era/entry_type already captured on the entry — no extra AI call needed.
+const LIFE_STORY_CHAPTERS = [
+  'Childhood', 'Family', 'Love & Marriage', 'Career', 'Travel & Adventure',
+  'Traditions & Recipes', 'Challenges Overcome', 'Achievements', 'Wisdom & Advice', 'Legacy & Hopes',
+] as const
+
+function chapterForEntry(entry: { era: string | null; entry_type: string }): string {
+  switch (entry.entry_type) {
+    case 'first_memory': return 'Childhood'
+    case 'family_story': return 'Family'
+    case 'career': return 'Career'
+    case 'travel': return 'Travel & Adventure'
+    case 'recipe_tradition': return 'Traditions & Recipes'
+    case 'wisdom': return 'Wisdom & Advice'
+  }
+  switch (entry.era) {
+    case 'Childhood': return 'Childhood'
+    case 'Family': return 'Family'
+    case 'Career': return 'Career'
+    case 'Young adult': return 'Love & Marriage'
+    case 'Later years': return 'Achievements'
+    case 'Recent memories': return 'Legacy & Hopes'
+  }
+  return 'Legacy & Hopes'
+}
+
 // The four things a senior can choose to share with their family on the family dashboard.
 // Each maps to a boolean column on the members table.
 const PRIVACY_TOGGLES = [
@@ -239,6 +275,10 @@ export default function MemberPortalClient({
   const [showLifeForm, setShowLifeForm] = useState(false)
   const [lifeForm, setLifeForm] = useState({ title: '', content: '', era: '', entry_type: 'memory' })
   const [submittingLife, setSubmittingLife] = useState(false)
+  // FEATURE-006: guided prompts + AI follow-up questions
+  const [activePrompt, setActivePrompt] = useState<string | null>(null)
+  const [followupQuestions, setFollowupQuestions] = useState<string[]>([])
+  const [loadingFollowups, setLoadingFollowups] = useState(false)
 
   // Org membership
   const [orgData, setOrgData] = useState<OrgMembershipData | null>(null)
@@ -688,11 +728,32 @@ export default function MemberPortalClient({
     })
     setSubmittingLife(false)
     if (res.ok) {
-      const j = await res.json().catch(() => ({ data: null }))
-      if (j.data) setLifeEntries(prev => [j.data, ...prev])
+      const j = await res.json().catch(() => ({ entry: null }))
+      if (j.entry) setLifeEntries(prev => [j.entry, ...prev])
+      const savedTitle = lifeForm.title
+      const savedContent = lifeForm.content
       setShowLifeForm(false); setLifeForm({ title: '', content: '', era: '', entry_type: 'memory' })
+      setActivePrompt(null)
       showToast('Memory added to your life story.')
+      setFollowupQuestions([])
+      setLoadingFollowups(true)
+      fetch('/api/life-story/prompts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: savedTitle, entry: savedContent }),
+      })
+        .then(r => r.json())
+        .then(j2 => setFollowupQuestions(Array.isArray(j2.followups) ? j2.followups : []))
+        .catch(() => setFollowupQuestions([]))
+        .finally(() => setLoadingFollowups(false))
     } else showToast('Could not save memory. Please try again.')
+  }
+
+  function startPrompt(p: { prompt: string; era: string; entry_type: string }) {
+    setActivePrompt(p.prompt)
+    setFollowupQuestions([])
+    setLifeForm({ title: '', content: '', era: p.era, entry_type: p.entry_type })
+    setShowLifeForm(true)
   }
 
   async function handleSaveFreq() {
@@ -1601,16 +1662,80 @@ export default function MemberPortalClient({
         {/* ─── LIFE STORY ──────────────────────────────────────────────────── */}
         {activeTab === 'life-story' && (
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 500, color: 'var(--color-navy)', margin: 0 }}>Life Story</h2>
-              <button onClick={() => setShowLifeForm(f => !f)} style={{ padding: '10px 22px', backgroundColor: 'var(--color-teal)', color: 'white', border: 'none', borderRadius: '10px', fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 600, cursor: 'pointer' }}>
+              <button onClick={() => { setShowLifeForm(f => !f); setActivePrompt(null) }} style={{ padding: '10px 22px', backgroundColor: 'var(--color-teal)', color: 'white', border: 'none', borderRadius: '10px', fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 600, cursor: 'pointer' }}>
                 {showLifeForm ? 'Cancel' : '+ Add a memory'}
               </button>
             </div>
 
+            {lifeLoaded && (() => {
+              const chaptersCovered = new Set(lifeEntries.map(e => chapterForEntry(e))).size
+              const pct = Math.round((chaptersCovered / LIFE_STORY_CHAPTERS.length) * 100)
+              return (
+                <div style={{ ...card, padding: '20px 24px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '8px' }}>
+                    <span style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, color: 'var(--color-navy)' }}>
+                      Your life story is {pct}% complete
+                    </span>
+                    <span style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)' }}>
+                      {chaptersCovered} of {LIFE_STORY_CHAPTERS.length} chapters
+                    </span>
+                  </div>
+                  <div style={{ height: '8px', borderRadius: '999px', backgroundColor: '#EFEAE0', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${pct}%`, backgroundColor: 'var(--color-teal)', borderRadius: '999px', transition: 'width 0.3s' }} />
+                  </div>
+                </div>
+              )
+            })()}
+
+            {lifeLoaded && lifeEntries.length < 3 && !showLifeForm && (
+              <div style={card}>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '4px' }}>Not sure where to start?</h3>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', marginBottom: '16px' }}>Pick a prompt below — we&apos;ll ask follow-up questions once you&apos;ve written the first one.</p>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '12px' }}>
+                  {LIFE_STORY_PROMPTS.map(p => (
+                    <button
+                      key={p.prompt}
+                      onClick={() => startPrompt(p)}
+                      style={{ textAlign: 'left', padding: '16px 18px', backgroundColor: '#F9F6F0', border: '1px solid #E8E4DC', borderRadius: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-navy)', lineHeight: 1.5 }}
+                    >
+                      {p.prompt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {(followupQuestions.length > 0 || loadingFollowups) && !showLifeForm && (
+              <div style={{ ...card, backgroundColor: '#F0F9F7', border: '1.5px solid var(--color-teal)' }}>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '8px' }}>Great memory! Keep going?</h3>
+                {loadingFollowups ? (
+                  <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)' }}>Thinking of a good follow-up question…</p>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {followupQuestions.map(q => (
+                      <button
+                        key={q}
+                        onClick={() => startPrompt({ prompt: q, era: lifeForm.era, entry_type: 'memory' })}
+                        style={{ textAlign: 'left', padding: '14px 16px', backgroundColor: 'white', border: '1px solid #C7E8E3', borderRadius: '10px', cursor: 'pointer', fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-navy)' }}
+                      >
+                        {q}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             {showLifeForm && (
               <div style={card}>
-                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '16px' }}>Add a Memory</h3>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '8px' }}>Add a Memory</h3>
+                {activePrompt && (
+                  <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontStyle: 'italic', color: 'var(--color-teal)', marginBottom: '16px' }}>
+                    Answering: &ldquo;{activePrompt}&rdquo;
+                  </p>
+                )}
                 <form onSubmit={handleAddLifeEntry} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                     <div style={{ gridColumn: '1 / -1' }}>
@@ -1644,11 +1769,11 @@ export default function MemberPortalClient({
                   </div>
                   <div>
                     <label style={labelSty}>Your memory <span style={{ color: '#D62828' }}>*</span></label>
-                    <textarea required value={lifeForm.content} onChange={e => setLifeForm(f => ({ ...f, content: e.target.value }))} rows={5} placeholder="Write your memory here — as much or as little as you&apos;d like…" style={{ ...inputSty, height: 'auto', padding: '12px 14px', resize: 'vertical', lineHeight: 1.7 }} />
+                    <textarea required value={lifeForm.content} onChange={e => setLifeForm(f => ({ ...f, content: e.target.value }))} rows={5} placeholder={activePrompt ?? 'Write your memory here — as much or as little as you&apos;d like…'} style={{ ...inputSty, height: 'auto', padding: '12px 14px', resize: 'vertical', lineHeight: 1.7 }} />
                   </div>
                   <div style={{ display: 'flex', gap: '12px' }}>
                     <button type="submit" disabled={submittingLife} style={{ ...btnPrimary, opacity: submittingLife ? 0.7 : 1 }}>{submittingLife ? 'Saving…' : 'Save memory'}</button>
-                    <button type="button" onClick={() => setShowLifeForm(false)} style={btnSecondary}>Cancel</button>
+                    <button type="button" onClick={() => { setShowLifeForm(false); setActivePrompt(null) }} style={btnSecondary}>Cancel</button>
                   </div>
                 </form>
               </div>
@@ -1673,6 +1798,9 @@ export default function MemberPortalClient({
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                           <span style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 500, color: 'var(--color-navy)' }}>{entry.title}</span>
                           {entry.entry_type === 'first_memory' && <span style={{ fontSize: '16px' }}>⭐</span>}
+                          <span style={{ fontFamily: 'var(--font-body)', fontSize: '11px', fontWeight: 600, color: 'var(--color-teal)', backgroundColor: '#E8F5F3', padding: '2px 10px', borderRadius: '999px' }}>
+                            {chapterForEntry(entry)}
+                          </span>
                         </div>
                         {entry.era && <div style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>{entry.era}</div>}
                       </div>

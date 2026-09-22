@@ -63,4 +63,5 @@ export interface AiProvider {
   generateConciergeTriage(transcript: string): Promise<ConciergeTriage>
   generateFamilyNudgeTopic(member: Member, recentCalls: CheckInCall[]): Promise<string>
   suggestLocalEvents(city: string, state: string, interests: string[]): Promise<LocalEventSuggestion[]>
+  generateLifeStoryFollowups(entryTitle: string, entryContent: string): Promise<string[]>
 }

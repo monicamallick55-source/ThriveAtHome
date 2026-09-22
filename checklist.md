@@ -254,6 +254,7 @@ When a phase reaches BLOCKED state, record it here.
 | `date-fns` | 6 | DOB validation |
 | `focus-trap-react` | 8 | Accessible Modal |
 | `recharts` | 12 | Mood trend charts |
+| `@anthropic-ai/sdk` | FEATURE-006 (2026-09-22) | Life Story AI follow-up questions (AnthropicAiProvider) |
 
 ---
 

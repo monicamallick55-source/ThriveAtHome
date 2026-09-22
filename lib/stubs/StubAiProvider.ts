@@ -77,4 +77,11 @@ export class StubAiProvider implements AiProvider {
       },
     ]
   }
+  async generateLifeStoryFollowups(_entryTitle: string, _entryContent: string): Promise<string[]> {
+    console.log('[STUB][AI] generateLifeStoryFollowups called')
+    return [
+      'What else do you remember about that time?',
+      'Who else was there with you?',
+    ]
+  }
 }
