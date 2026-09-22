@@ -5,6 +5,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { requireAuth } from '@/lib/auth'
 import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { getMemberById } from '@/lib/data/members'
 import { getAllCircles } from '@/lib/data/circles'
 import {
   getUpcomingFestivals,
@@ -17,6 +18,7 @@ import {
   getOralHistoryForMember,
 } from '@/lib/data/cultural'
 import CulturalProgrammingClient from '@/components/circles/CulturalProgrammingClient'
+import LiveEventSearch from '@/components/circles/LiveEventSearch'
 
 export const metadata: Metadata = { title: 'Cultural Programming — ThriveAtHome' }
 
@@ -24,6 +26,8 @@ export default async function CulturalProgrammingPage() {
   const user = await requireAuth()
   const { data: fm } = await getFamilyMemberByAuthId(user.id)
   const memberId = fm?.member_id ?? undefined
+  const { data: memberForZip } = memberId ? await getMemberById(memberId) : { data: null }
+  const zip = memberForZip?.zip_code ?? null
 
   const [
     festivals,
@@ -70,6 +74,17 @@ export default async function CulturalProgrammingPage() {
             See the festival calendar →
           </Link>
         </p>
+
+        <section style={{ margin: '0 0 32px' }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 600, color: 'var(--color-navy)', margin: '0 0 4px' }}>
+            Live Events Near You
+          </h2>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)', margin: '0 0 16px' }}>
+            Classes, workshops, and community events happening right now, found across Meetup,
+            Eventbrite, and local listings.
+          </p>
+          <LiveEventSearch category="cultural" initialZip={zip} />
+        </section>
 
         <CulturalProgrammingClient
           hasMember={!!memberId}

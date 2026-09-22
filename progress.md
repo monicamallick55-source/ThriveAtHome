@@ -1187,3 +1187,159 @@ NEXT SESSION MUST BUILD:
    - "I'm going" → increments member_festival_attendees count in Supabase
 
 5. After building each: npx tsc --noEmit → npm run build → commit → push
+
+---
+SESSION: (continuation — resumed from NEXT SESSION MUST above)
+DATE: 2026-09-22
+MILESTONE: Post-M6 feature work (FEATURE-002/003)
+PHASE: N/A — event discovery, outside the original 14-phase gate
+STATUS: AWAITING_APPROVAL
+HUMAN_APPROVAL: PENDING
+
+INNER LOOP STATE AT END OF SESSION:
+- Built all 4 items from the prior session's "NEXT SESSION MUST BUILD" list.
+- Loop state: TESTING complete (tsc + build), live smoke test not possible in this Codespace.
+
+STUB STATUS: unchanged (aiProvider: AnthropicAiProvider when ANTHROPIC_API_KEY set, else Stub; all others unchanged).
+
+WHAT WAS DONE THIS SESSION:
+- lib/data/eventSearch.ts — CREATED. searchLiveEvents(category, zip, radius):
+  builds a Google-Custom-Search query ("within {radius} miles of {zip} {month
+  year}"), checks event_search_cache (24h TTL) before calling Google, sends
+  the top 10 Google results to Claude (model claude-sonnet-5) for 1-10 senior
+  relevance scoring, keeps only score >= 7, writes the result to the cache.
+  Also added joinLiveEvent/leaveLiveEvent/getLiveEventAttendance for the
+  "I'm going" feature on live-searched festivals (event_url is the join key
+  since these results have no stable DB id). event_search_cache and
+  live_event_rsvps predate the generated Supabase types, so table access
+  uses the same `(admin.from as any)('table')` cast already established in
+  lib/data/buddies.ts for this situation.
+- app/api/events/search/route.ts — CREATED. POST, requires auth (401 if not
+  signed in). Body: { category: 'cultural'|'festival', zip?, radius? }. Falls
+  back to the caller's member.zip_code when no zip is given in the request;
+  400 with a readable message if neither is available. 400 on invalid zip
+  format or invalid radius (only 5/10/25/50 accepted, else defaults to 25).
+  500 with a readable message (not a stack trace) if GOOGLE_SEARCH_API_KEY /
+  GOOGLE_SEARCH_ENGINE_ID / ANTHROPIC_API_KEY are missing, or if the search
+  pipeline throws. For category='festival', also attaches current attendance
+  counts (via getLiveEventAttendance) for each returned event so the client
+  doesn't need a second round trip.
+- app/api/events/live-rsvp/route.ts — CREATED. POST, requires auth + a
+  resolvable member_id. Body: { url, title, date, action: 'join'|'leave' }.
+  Returns the updated {count, going} for that event_url.
+- supabase/migrations/081_event_search_cache.sql — kept as written by the
+  prior session (untracked until now); reviewed, matches schema standards
+  (IF NOT EXISTS, index on zip_code+query+expires_at, no user RLS since it's
+  service-role-only — same convention as audit_log in 001_initial_schema.sql).
+  NOT YET APPLIED to the live Supabase project — needs to be run in the SQL
+  Editor before /api/events/search will work end-to-end (cache reads/writes
+  are wrapped in try/catch and log-only on failure, so a missing table would
+  degrade to "always miss cache, always call Google" rather than crash the
+  request, but this has not been exercised against a real Postgres instance).
+- supabase/migrations/082_live_event_rsvps.sql — CREATED. live_event_rsvps
+  table (member_id, event_url, event_title, event_date, UNIQUE(member_id,
+  event_url)). RLS enabled: "anyone_can_read_live_event_rsvps" (SELECT, for
+  aggregate counts), plus family_members- and direct-member-auth (members.
+  supabase_auth_id, migration 049) manage-own policies, mirroring the pattern
+  from circle_event_rsvps (010_cultural_circles.sql) and the 076-080 direct-
+  auth-gap fixes. Also NOT YET APPLIED to the live Supabase project.
+- components/circles/LiveEventSearch.tsx — CREATED. Client component: shows
+  "📍 Showing events near {zip}, within {radius} miles" + a "Change location"
+  toggle that reveals a zip input and a 5/10/25/50-mile radius <select>
+  (session-only override — never writes to the member's profile). Runs the
+  initial search automatically on mount when a profile zip is available.
+  Renders event cards (title, date, location, 2-sentence description, "Learn
+  more" link). For category="festival", adds an "I'm going (N)" toggle button
+  that calls /api/events/live-rsvp and updates the count optimistically from
+  the response.
+- app/dashboard/cultural-programming/page.tsx — MODIFIED: fetches the
+  member's zip_code server-side (getMemberById), added a "Live Events Near
+  You" section rendering <LiveEventSearch category="cultural" .../> above the
+  existing database-backed CulturalProgrammingClient content (potlucks,
+  story circles, heritage projects, classes — all unchanged).
+- app/dashboard/cultural-festivals/page.tsx — MODIFIED: same zip fetch, added
+  a "Festivals Happening Near You" section with <LiveEventSearch
+  category="festival" .../> above the existing "Our Community Calendar"
+  (FestivalCalendarClient, backed by the cultural_circles/cultural_festivals
+  tables — unchanged, just relabeled with a heading to distinguish it from
+  the new live-search section above it).
+- .env.local.example — MODIFIED: added GOOGLE_SEARCH_API_KEY and
+  GOOGLE_SEARCH_ENGINE_ID next to ANTHROPIC_API_KEY (values empty, per Rule
+  4/5.2 — real values are already in Vercel per the prior session's
+  "INTEGRATION READY" note, and now also stubbed empty in local .env.local
+  for discoverability; this Codespace cannot exercise the live APIs either
+  way, matching the existing ANTHROPIC_API_KEY situation here).
+
+TESTS AND VERIFICATIONS RUN:
+- `npx tsc --noEmit`: PASSED — zero output (after switching the two new
+  tables to the established `(admin.from as any)('table')` cast; without it,
+  tsc failed with 6 "does not exist on type 'never'" errors because
+  event_search_cache/live_event_rsvps aren't in the generated
+  types/database.ts yet).
+- `npm run build`: PASSED — zero errors, full route manifest printed,
+  including the two new routes: /api/events/search, /api/events/live-rsvp.
+- `git ls-files | grep -E "^\.env"`: only `.env.local.example` — `.env.local`
+  correctly untracked.
+- Secret-literal scan (`grep -E "sk_live|sk_test|pk_live|pk_test|SG\.|AC[a-z0-9]
+  {32}|whsec_|retell-|sk-ant-|eyJ"` over the staged diff): no matches.
+- Live smoke test (search near a real zip, confirm cache hit on second call,
+  confirm "I'm going" persists and increments): NOT RUN — no browser, no live
+  Supabase session, and GOOGLE_SEARCH_API_KEY/ANTHROPIC_API_KEY are empty in
+  this Codespace's .env.local (established limitation, unchanged). This is
+  the required first manual test after deploy, and it additionally requires
+  running migrations 081 and 082 in the Supabase SQL Editor first.
+
+ERRORS ENCOUNTERED:
+- `npx tsc --noEmit` initially failed with 6 errors ("Property 'results' does
+  not exist on type 'never'", etc.) — root cause: event_search_cache and
+  live_event_rsvps are not in the generated types/database.ts, so the typed
+  Supabase client treats `.from('event_search_cache')` as `never`. Resolved
+  by using the same `(admin.from as any)('table')` cast already used
+  elsewhere in this codebase for tables added after the last types
+  regeneration (lib/data/buddies.ts).
+
+DECISIONS MADE:
+- Used a Next.js API route (app/api/events/search, app/api/events/live-rsvp)
+  rather than a Supabase Edge Function, matching the pattern already
+  established by every other feature built since M7 (e.g. app/api/events/
+  rsvp, app/api/volunteer/*) rather than prompt.md's original Rule 13 —
+  Edge Functions were the rule for the first 14 phases but the project has
+  not followed that split for any add-on feature since.
+- Radius is folded into the Google query text itself ("within {radius} miles
+  of {zip}") rather than a separate geocoding step, since Google Custom
+  Search has no native radius parameter for arbitrary web search (only Places
+  API does) and geocoding was out of scope for this feature.
+- "I'm going" attendance is keyed by event_url rather than a new synthetic
+  festival id, since live-search results have no stable identity across
+  searches beyond their URL — a title/date match seemed more fragile.
+- Did not implement the existing (separate, already-stubbed)
+  `aiProvider.suggestLocalEvents()` using this same Google+Claude pipeline —
+  it's called from app/dashboard/communities and cultural-circles pages with
+  a different signature (city/state/interests, no caching) and wasn't part
+  of the FEATURE-002/003 decision log. Flagging as a possible follow-up to
+  avoid maintaining two separate "find local events" implementations.
+- Did not attempt to apply migrations 081/082 to the live Supabase project —
+  no direct Postgres connection string or Supabase CLI link is available in
+  this Codespace (checked: no DATABASE_URL/POSTGRES_URL in .env.local, no
+  `supabase` CLI installed, no supabase/config.toml project ref). Matches
+  the established pattern of this build: the agent writes migration files,
+  the human applies them via the Supabase SQL Editor.
+
+HUMAN APPROVAL:
+- Review presented: NO — feature work outside the original 14-phase gate,
+  per established pattern since 2026-09-16.
+- User response: N/A
+
+NEXT SESSION MUST:
+- Human: run supabase/migrations/081_event_search_cache.sql and
+  082_live_event_rsvps.sql in the Supabase SQL Editor (in that order).
+- Human: confirm GOOGLE_SEARCH_API_KEY, GOOGLE_SEARCH_ENGINE_ID, and
+  ANTHROPIC_API_KEY are set in Vercel (first two were per the prior
+  session's "INTEGRATION READY" note — reconfirm ANTHROPIC_API_KEY too,
+  since it's empty in this Codespace's local .env.local).
+- Once migrations are applied and deployed: run the live smoke test above —
+  search Cultural Programming and Cultural Festivals from a real zip,
+  confirm a second search within 24h returns cached: true, and confirm
+  "I'm going" toggles and persists across a page reload.
+- Confirm Vercel build is green for this commit.
+Session ended normally
