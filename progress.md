@@ -1031,3 +1031,86 @@ NEXT SESSION MUST:
   blocked on tooling not available in this Codespace.
 Session ended normally
 ---
+
+---
+SESSION: (continuation — resumed from NEXT SESSION MUST above)
+DATE: 2026-09-22
+STATUS: Session ended normally
+
+WHAT WAS DONE THIS SESSION:
+- Read prompt.md / progress.md / checklist.md per session-start protocol.
+  git status was clean at HEAD = 75f5de5. Noticed the prior several sessions
+  had logged BUG-009 and UX-001 (via log-only commits de2a11f, c077fb2) but
+  never actually fixed them -- the repeating "verify build health, no code
+  changes" sessions since had glossed over this open work. Investigated and
+  fixed it instead of running an eighth verify-only cycle.
+- Root-caused BUG-009/UX-001 as the same bug: components/volunteer/
+  VolunteerDashboard.tsx's handleClaim() removed the claimed item from
+  openRequests and marked it in claimedIds, but never added it to
+  claimedBookings (the state backing the "My Upcoming" list under the Open
+  Requests tab). That list only repopulates on initial tab load or a manual
+  "Refresh" click, so a freshly claimed request was genuinely invisible
+  until a manual refresh -- matching UX-001's own note ("works correctly
+  after refresh") and explaining BUG-009 as the same gap reported by a
+  tester who didn't manually refresh.
+  Checked the backend hypothesis in BUG-009 ("claim saves with auth_id but
+  My Work queries by volunteer.id") directly: app/api/volunteer/
+  claim-service/route.ts writes volunteer_id: volunteer.id (the volunteers.id
+  UUID, not the auth id), and app/api/volunteer/open-requests/route.ts's
+  claimedBookings query filters .eq('volunteer_id', volunteer.id) using the
+  same resolved UUID -- backend was already consistent, the bug was
+  entirely client-side state.
+- components/volunteer/VolunteerDashboard.tsx — MODIFIED: handleClaim() now
+  optimistically prepends the newly claimed service booking into
+  claimedBookings (using data already present on the OpenRequest object)
+  when req.type === 'service', so it appears in "My Upcoming" immediately
+  with no refresh needed. (Claimed 'need' claims still have no dedicated
+  display section -- unchanged from prior behavior; flagging below, not in
+  scope of the reported bug.)
+- app/api/volunteer/claim-need/route.ts — MODIFIED: fixed a Rule 3
+  violation found while reading this route -- `.select().single()` on the
+  update-and-verify query was replaced with `.select().maybeSingle()` plus
+  an explicit `{ data: null }` → 404 check, matching the project's
+  "never use .single()" standard (it throws on zero rows, a reachable state
+  here if the need was claimed by someone else between the existence check
+  and the update).
+
+TESTS AND VERIFICATIONS RUN:
+- `npx tsc --noEmit`: PASSED -- zero output.
+- `npm run build`: PASSED -- zero errors, full route manifest printed.
+- Live smoke test (claim an open service request in the volunteer
+  dashboard, confirm it appears in My Upcoming without a refresh): NOT RUN
+  -- no browser, no live Supabase session available in this Codespace
+  (established limitation, unchanged). Recommend this as the first manual
+  smoke test after deploy.
+
+ERRORS ENCOUNTERED:
+- None.
+
+DECISIONS MADE:
+- Did not build a "My Upcoming"-equivalent display for claimed member_needs
+  -- out of scope for BUG-009/UX-001 as reported (both were specifically
+  about service_bookings claims), and no UI section exists today to receive
+  it. Flagging as a possible FEATURE follow-up if claimed needs should also
+  be visible somewhere.
+- Did not rename or restructure the "My Work" vs "Open Requests" tabs even
+  though BUG-009's title says "My Work tab" -- the claimed-item display has
+  always lived in the "My Upcoming" section of the "Open Requests" tab, not
+  the "My Work" tab (which is for logging/viewing volunteer visit hours).
+  Treated this as a naming mismatch in the bug report, not a request to move
+  the section, since the fix restores the described behavior ("it appears
+  after claiming") in its existing location.
+
+HUMAN APPROVAL:
+- Review presented: NO -- bug-fix work outside the original 14-phase gate,
+  per established pattern since 2026-09-16.
+- User response: N/A
+
+NEXT SESSION MUST:
+- Confirm Vercel build is green for this commit.
+- Run the live smoke test above (claim an open service request, confirm
+  immediate "My Upcoming" appearance with no refresh) once deployed.
+- If the human has given a go/no-go on FEATURE-001/002/003: start with
+  whichever was approved. Otherwise keep re-asking rather than assuming.
+Session ended normally
+---

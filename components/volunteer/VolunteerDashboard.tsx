@@ -225,6 +225,12 @@ export function VolunteerDashboard({ volunteer, matchedMembers, recentVisits: in
     if (res.ok) {
       setClaimedIds(prev => new Set([...prev, req.id]))
       setOpenRequests(prev => prev.filter(r => r.id !== req.id))
+      if (req.type === 'service') {
+        setClaimedBookings(prev => [
+          { id: req.id, created_at: req.created_at, type: 'service', service_type: req.service_type, requested_for: req.requested_for, status: 'confirmed' },
+          ...prev,
+        ])
+      }
       showToast('Request claimed — it will appear in My Upcoming below.')
     } else {
       showToast(json.error ?? 'Could not claim request.')

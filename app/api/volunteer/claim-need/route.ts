@@ -35,8 +35,9 @@ export async function POST(req: NextRequest) {
     .eq('id', body.need_id)
     .eq('status', 'open')
     .select()
-    .single()
+    .maybeSingle()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (!data) return NextResponse.json({ error: 'Need not found or already claimed' }, { status: 404 })
   return NextResponse.json({ data })
 }
