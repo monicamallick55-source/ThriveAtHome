@@ -639,3 +639,6 @@ Add AI-assisted prompts using ANTHROPIC_API_KEY:
    Build this API route using Anthropic SDK
 4. Show progress bar: "Your life story is X% complete (Y of 10 chapters)"
 5. AI organises entries into chapters automatically (Career, Family, Childhood, Achievements, Passions)
+
+BUG-008: Navigator member detail — "Mohini Test as memeber" typo in family contacts section.
+Fix: Search codebase for "memeber" and replace with "member".
