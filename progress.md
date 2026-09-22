@@ -842,6 +842,52 @@ STATUS: Session ended normally
 
 WHAT WAS DONE THIS SESSION:
 - Read prompt.md / progress.md / checklist.md per session-start protocol.
+  git status was clean at HEAD = 17fc9cc, matching the prior session's own
+  logged commit exactly -- no undocumented work on disk this time.
+- Ran the two locally-runnable verifications from the prior NEXT SESSION
+  MUST: `npx tsc --noEmit` and `npm run build`. No code changes made.
+
+TESTS AND VERIFICATIONS RUN:
+- `npx tsc --noEmit`: PASSED -- zero output.
+- `npm run build`: PASSED -- zero errors; full route manifest printed,
+  including /for-families, /for-volunteers, /terms, /volunteer/dashboard,
+  /select-role, /api/orgs/suggest, /api/orgs/invite, /api/life-story/prompts.
+- Vercel deploy status for 17fc9cc and prior commits: NOT CHECKED -- no
+  `vercel` CLI in this Codespace (established limitation).
+- Live smoke tests (org suggest/invite forms, marketing pages rendering,
+  Life Story AI follow-ups, volunteer /select-role redirect): NOT RUN -- no
+  browser, no live Supabase session (established limitation, unchanged).
+
+ERRORS ENCOUNTERED:
+- None.
+
+DECISIONS MADE:
+- No code changes made -- this was a verify-only session. No open bugs or
+  ready-to-build features exist; asking the human directly for a go/no-go on
+  FEATURE-001/002/003 scope rather than assuming, per every prior session
+  since 2026-09-21.
+
+HUMAN APPROVAL:
+- Review presented: NO -- no new phase or fix was built this session.
+- User response: N/A
+
+NEXT SESSION MUST:
+- If the human has given a go/no-go on FEATURE-001 (AI-assisted services
+  flow), FEATURE-002 (cultural programming local events), or FEATURE-003
+  (festival calendar local events): start with whichever was approved.
+- Otherwise: re-ask before building anything from that backlog.
+- Continue treating Vercel deploy confirmation and live smoke tests as
+  blocked on tooling not available in this Codespace.
+Session ended normally
+---
+
+---
+SESSION: (continuation — resumed from NEXT SESSION MUST above)
+DATE: 2026-09-22
+STATUS: Session ended normally
+
+WHAT WAS DONE THIS SESSION:
+- Read prompt.md / progress.md / checklist.md per session-start protocol.
   git status was clean at HEAD = a1c8d23, matching the prior session's own
   logged commit -- no undocumented work on disk this time.
 - Ran the two locally-runnable items from the prior NEXT SESSION MUST:
