@@ -768,3 +768,69 @@ should become a constrained dropdown instead of free text, that is a
 product decision (and a larger change than a typo fix) — flagging for the
 human rather than assuming it.
 ---
+
+---
+SESSION: (continuation — resumed from NEXT SESSION MUST above)
+DATE: 2026-09-22
+STATUS: Session ended normally
+
+WHAT WAS DONE THIS SESSION:
+- Read prompt.md / progress.md / checklist.md per session-start protocol.
+- Found commit 4e453fa ("Fix: volunteer dashboard redirects to /select-role
+  instead of /login for multi-role users") already on main, working tree
+  clean, but with no matching progress.md session entry -- the recurring
+  "undocumented work already on disk" pattern noted in memory
+  session-resume-pattern.md. Reviewed rather than redoing it:
+  app/volunteer/dashboard/page.tsx:14 now redirects a user with no
+  volunteer record to /select-role instead of /login, so a multi-role user
+  (e.g. family member + volunteer) who lands on /volunteer/dashboard
+  without an active volunteer record is sent to role selection rather than
+  being bounced to the login screen while already authenticated. Confirmed
+  /select-role exists and getVolunteerByAuthId is the correct lookup being
+  guarded. Change is correct and minimal -- adopted as-is, no rework.
+- No other undocumented changes found in the working tree (git status was
+  already clean at session start).
+
+TESTS AND VERIFICATIONS RUN:
+- `npx tsc --noEmit`: PASSED -- zero output.
+- `npm run build`: PASSED -- zero errors; full route manifest printed,
+  including /for-families, /for-volunteers, /terms, /volunteer/dashboard,
+  /select-role, /api/orgs/suggest, /api/orgs/invite, /api/life-story/prompts
+  from prior sessions' work.
+- `git status`: clean, up to date with origin/main (HEAD = 4e453fa).
+- Live smoke tests (Vercel deploy status, org suggest/invite forms, Life
+  Story AI follow-ups, volunteer /select-role redirect in a real multi-role
+  session): NOT RUN -- no browser, no live Supabase session, no `vercel` CLI
+  in this Codespace (established limitation, unchanged).
+
+ERRORS ENCOUNTERED:
+- None.
+
+DECISIONS MADE:
+- Did not start FEATURE-001/002/003 (AI-assisted services flow, cultural
+  programming local events, festival calendar local events) -- still
+  explicitly deferred pending a human scope decision, per every prior
+  session since 2026-09-21.
+- checklist.md remains the original M1-M6/Phase-1-14 template and does not
+  reflect real state (M1-M27+ shipped, tracked instead via this file's
+  session log and DECISION LOG) -- unchanged assessment from prior sessions,
+  not re-actioned here since no instruction to reconcile it has been given.
+
+HUMAN APPROVAL:
+- Review presented: NO -- no new phase or fix was built this session; this
+  was a verify-and-log session for already-committed work.
+- User response: N/A
+
+NEXT SESSION MUST:
+- Confirm the Vercel build is green for commit 4e453fa (and c87546b,
+  d3f9d22, 7e5ab5c before it).
+- Run the accumulated live smoke tests once deployed: (1) volunteer with no
+  active record hitting /volunteer/dashboard lands on /select-role not
+  /login; (2) My Org "Add it"/"Invite them" forms; (3) /for-families,
+  /for-volunteers, /terms render correctly; (4) Life Story AI follow-ups
+  with ANTHROPIC_API_KEY set in Vercel.
+- No open bugs or ready-to-build features remain. The only backlog items
+  (FEATURE-001, FEATURE-002, FEATURE-003) require a human go/no-go on scope
+  before starting -- ask the human directly rather than assuming.
+Session ended normally
+---
