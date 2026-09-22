@@ -1149,3 +1149,41 @@ NEXT SESSION MUST:
   - Returns filtered, scored, summarized events
   Then wire into cultural-programming and cultural-festivals pages
   with location picker UI (default zip from profile, override per session)
+
+INTEGRATION READY September 22 2026 — Google Custom Search + Claude AI for events:
+GOOGLE_SEARCH_API_KEY and GOOGLE_SEARCH_ENGINE_ID added to Vercel.
+Search engine covers: Meetup, Eventbrite, SF Rec & Parks, 211.org, seniorsf.org
+
+NEXT SESSION MUST BUILD:
+
+1. /api/events/search route (NEW FILE):
+   - Takes: query (string), zip (string), radius (number), month (string)
+   - Calls Google Custom Search API:
+     URL: https://www.googleapis.com/customsearch/v1
+     params: key=GOOGLE_SEARCH_API_KEY, cx=GOOGLE_SEARCH_ENGINE_ID, q=query, num=10
+   - Sends results to Claude (ANTHROPIC_API_KEY) for senior relevance scoring:
+     Prompt: "Score each of these events 1-10 for relevance to a senior aged 65-85.
+     Return only events scoring 7 or higher. For each event return:
+     title, date, location, description (max 2 sentences), url, score, category
+     (one of: cultural, fitness, social, educational, festival)"
+   - Cache results in Supabase event_search_cache table (cache for 24 hours by zip+query)
+   - Returns: { events: EventResult[], cached: boolean }
+
+2. Create Supabase table event_search_cache:
+   id, query, zip_code, results (jsonb), created_at, expires_at
+
+3. Update cultural-programming page:
+   - Add location picker at top: "📍 Events near [zip] [Change]" + radius selector
+   - Replace static content with live API call to /api/events/search
+   - Query: "senior cultural classes workshops near [zip] [current month year]"
+   - Show loading state while fetching
+   - Show event cards: title, date, location, free/paid badge, description, "Learn more" link
+   - Allow member to change location (session only, don't save to profile)
+
+4. Update cultural-festivals page:
+   - Same location picker
+   - Query: "cultural festival celebration near [zip] [current month year]"
+   - Show festival cards with: name, date, venue, free/paid, "I'm going" button
+   - "I'm going" → increments member_festival_attendees count in Supabase
+
+5. After building each: npx tsc --noEmit → npm run build → commit → push
