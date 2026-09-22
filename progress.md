@@ -926,3 +926,8 @@ NEXT SESSION MUST:
   blocked on tooling not available in this Codespace.
 Session ended normally
 ---
+
+BUG-009: Volunteer dashboard — claiming an open request shows success message but request doesn't appear in My Work tab afterwards.
+Fix: Check what table the claim creates a record in (likely service_bookings or volunteer_assignments).
+Then check what query the My Work tab uses to fetch upcoming visits — ensure it queries the same table with the correct volunteer_id filter.
+Likely the claim saves with auth_id but My Work queries by volunteer.id (UUID from volunteers table).
