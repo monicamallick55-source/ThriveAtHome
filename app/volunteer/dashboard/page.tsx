@@ -11,7 +11,7 @@ export default async function VolunteerDashboardPage() {
   if (!user) redirect('/login')
 
   const { data: volunteer, error: volError } = await getVolunteerByAuthId(user.id)
-  if (volError || !volunteer) redirect('/login')
+  if (volError || !volunteer) redirect('/select-role')
   if (volunteer.status !== 'active') {
     // Volunteer exists but is not yet active — show pending message
     return (
