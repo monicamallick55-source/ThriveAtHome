@@ -35,4 +35,7 @@ export class StubEmailProvider implements EmailProvider {
   async sendDonationReceipt(to: string, donorName: string, amountCents: number, donationDate: string, isRecurring: boolean): Promise<void> {
     console.log(`[STUB][Email] Tax receipt (PDF) for $${(amountCents / 100).toFixed(2)}${isRecurring ? '/mo' : ''} gift from ${donorName} on ${donationDate} → ${to}`)
   }
+  async sendOrgInvite(to: string, orgName: string, inviterName: string): Promise<void> {
+    console.log(`[STUB][Email] Org invite → ${to}: "${orgName}" invited by ${inviterName}`)
+  }
 }

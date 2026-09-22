@@ -310,4 +310,20 @@ ${ctaButton('Accept invitation & create account', acceptUrl)}`
     })
     console.log(`[SendGrid] Donation receipt PDF sent to ${to.substring(0, 6)}xxx`)
   }
+
+  async sendOrgInvite(to: string, orgName: string, inviterName: string): Promise<void> {
+    this.init()
+    const body = `<p style="margin:0 0 16px;font-family:Georgia,serif;font-size:22px;line-height:1.4;">A ThriveAtHome member thinks you two should meet.</p>
+<p style="margin:0 0 16px;font-size:18px;line-height:1.6;"><strong>${inviterName}</strong> is a member of ThriveAtHome and let us know that <strong>${orgName}</strong> is a community organization they care about — but you're not on ThriveAtHome yet.</p>
+<p style="margin:0 0 16px;font-size:18px;line-height:1.6;">ThriveAtHome is a care platform for seniors aging at home. Organizations like village networks and senior centers can list their programs, connect with members, and coordinate volunteers — all in one place, at no cost to join.</p>
+<p style="margin:0 0 24px;font-size:18px;line-height:1.6;">We'd love to tell you more about how ${orgName} could fit in.</p>
+${ctaButton('Learn more about ThriveAtHome', dashboardUrl().replace('/dashboard', '/for-families'))}`
+    await sgMail.send({
+      to,
+      from: getFrom(),
+      subject: `${inviterName} thinks ${orgName} should join ThriveAtHome`,
+      html: baseTemplate('An invitation from a ThriveAtHome member', body),
+    })
+    console.log(`[SendGrid] Org invite sent to ${to.substring(0, 6)}xxx for ${orgName}`)
+  }
 }

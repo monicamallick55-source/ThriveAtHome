@@ -250,6 +250,15 @@ export default function MemberPortalClient({
   const [orgSearched, setOrgSearched] = useState(false)
   const [myJoinRequests, setMyJoinRequests] = useState<Array<{ id: string; org_id: string; status: string; community_orgs: { org_name: string } | null }>>([])
   const [joiningOrgId, setJoiningOrgId] = useState<string | null>(null)
+  // FEATURE-008: "My village isn't listed" — suggest adding it, or invite it directly
+  const [orgAddForm, setOrgAddForm] = useState({ org_name: '', city: '', zip_code: '', contact_email: '' })
+  const [orgInviteForm, setOrgInviteForm] = useState({ org_name: '', contact_email: '' })
+  const [showOrgAddForm, setShowOrgAddForm] = useState(false)
+  const [showOrgInviteForm, setShowOrgInviteForm] = useState(false)
+  const [submittingOrgAdd, setSubmittingOrgAdd] = useState(false)
+  const [submittingOrgInvite, setSubmittingOrgInvite] = useState(false)
+  const [orgAddSubmitted, setOrgAddSubmitted] = useState(false)
+  const [orgInviteSubmitted, setOrgInviteSubmitted] = useState(false)
 
   // Notifications
   const [callFreq, setCallFreq] = useState<'daily' | 'every_other_day' | 'weekly'>(member.check_in_frequency ?? 'daily')
@@ -440,6 +449,51 @@ export default function MemberPortalClient({
     } else {
       const j = await res.json().catch(() => ({ error: 'Error' }))
       showToast(j.error ?? 'Could not send your request.')
+    }
+  }
+
+  async function handleSubmitOrgAdd(e: React.FormEvent) {
+    e.preventDefault()
+    if (!orgAddForm.org_name.trim()) { showToast('Organization name is required.'); return }
+    setSubmittingOrgAdd(true)
+    const res = await fetch('/api/orgs/suggest', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(orgAddForm),
+    })
+    setSubmittingOrgAdd(false)
+    if (res.ok) {
+      setOrgAddSubmitted(true)
+      setShowOrgAddForm(false)
+      setOrgAddForm({ org_name: '', city: '', zip_code: '', contact_email: '' })
+      showToast('Thanks! We’ll look into adding it.')
+    } else {
+      const j = await res.json().catch(() => ({ error: 'Error' }))
+      showToast(j.error ?? 'Could not submit your suggestion.')
+    }
+  }
+
+  async function handleSubmitOrgInvite(e: React.FormEvent) {
+    e.preventDefault()
+    if (!orgInviteForm.org_name.trim() || !orgInviteForm.contact_email.trim()) {
+      showToast('Organization name and contact email are required.')
+      return
+    }
+    setSubmittingOrgInvite(true)
+    const res = await fetch('/api/orgs/invite', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(orgInviteForm),
+    })
+    setSubmittingOrgInvite(false)
+    if (res.ok) {
+      setOrgInviteSubmitted(true)
+      setShowOrgInviteForm(false)
+      setOrgInviteForm({ org_name: '', contact_email: '' })
+      showToast('Invitation sent!')
+    } else {
+      const j = await res.json().catch(() => ({ error: 'Error' }))
+      showToast(j.error ?? 'Could not send the invitation.')
     }
   }
 
@@ -1702,10 +1756,16 @@ export default function MemberPortalClient({
               <div>
                 <div style={{ ...card, textAlign: 'center', padding: '40px 24px' }}>
                   <span style={{ fontSize: '48px' }}>🏘️</span>
-                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 500, color: 'var(--color-navy)', marginTop: '16px', marginBottom: '12px' }}>Find a community organization</h3>
-                  <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)', lineHeight: 1.7, maxWidth: '460px', margin: '0 auto' }}>
-                    Village Networks, senior centers, and area agencies connect you to local programs, volunteers, and resources. Search by name or ZIP code and request to join — the organization approves new members.
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 500, color: 'var(--color-navy)', marginTop: '16px', marginBottom: '12px' }}>
+                    You don&apos;t belong to a village network yet — and that&apos;s okay.
+                  </h3>
+                  <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)', lineHeight: 1.7, maxWidth: '460px', margin: '0 auto 20px' }}>
+                    ThriveAtHome is your community. Village Networks, senior centers, and area agencies connect you to local programs, volunteers, and resources — search below and request to join, or explore what&apos;s already here.
                   </p>
+                  <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                    <button onClick={() => setActiveTab('community')} style={btnSecondary}>Explore your communities →</button>
+                    <a href="#org-search-box" style={{ ...btnPrimary, textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>Find a village near you ↓</a>
+                  </div>
                 </div>
 
                 {myJoinRequests.filter(r => r.status === 'pending').length > 0 && (
@@ -1719,7 +1779,7 @@ export default function MemberPortalClient({
                   </div>
                 )}
 
-                <div style={card}>
+                <div id="org-search-box" style={card}>
                   <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '16px' }}>
                     <input
                       value={orgSearch}
@@ -1758,6 +1818,80 @@ export default function MemberPortalClient({
                       )
                     })}
                   </div>
+                </div>
+
+                <div style={card}>
+                  <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '8px' }}>
+                    Don&apos;t see your village or community org?
+                  </h4>
+                  <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', marginBottom: '16px', lineHeight: 1.6 }}>
+                    Tell us about it — we&apos;ll follow up, or reach out to them directly on your behalf.
+                  </p>
+                  {orgAddSubmitted && !showOrgAddForm && (
+                    <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-teal)', fontWeight: 600, marginBottom: '12px' }}>✓ Thanks — we&apos;ll look into adding it.</p>
+                  )}
+                  {orgInviteSubmitted && !showOrgInviteForm && (
+                    <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-teal)', fontWeight: 600, marginBottom: '12px' }}>✓ Invitation sent.</p>
+                  )}
+                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: showOrgAddForm || showOrgInviteForm ? '20px' : 0 }}>
+                    <button
+                      onClick={() => { setShowOrgAddForm(v => !v); setShowOrgInviteForm(false) }}
+                      style={showOrgAddForm ? btnPrimary : btnSecondary}
+                    >
+                      {showOrgAddForm ? 'Cancel' : 'Add it'}
+                    </button>
+                    <button
+                      onClick={() => { setShowOrgInviteForm(v => !v); setShowOrgAddForm(false) }}
+                      style={showOrgInviteForm ? btnPrimary : btnSecondary}
+                    >
+                      {showOrgInviteForm ? 'Cancel' : 'Invite them to ThriveAtHome'}
+                    </button>
+                  </div>
+
+                  {showOrgAddForm && (
+                    <form onSubmit={handleSubmitOrgAdd} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                      <div>
+                        <label style={labelSty}>Organization name <span style={{ color: '#D62828' }}>*</span></label>
+                        <input required value={orgAddForm.org_name} onChange={e => setOrgAddForm(f => ({ ...f, org_name: e.target.value }))} style={inputSty} placeholder="e.g. Sunset Village Network" />
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                        <div>
+                          <label style={labelSty}>City</label>
+                          <input value={orgAddForm.city} onChange={e => setOrgAddForm(f => ({ ...f, city: e.target.value }))} style={inputSty} placeholder="City" />
+                        </div>
+                        <div>
+                          <label style={labelSty}>ZIP code</label>
+                          <input value={orgAddForm.zip_code} onChange={e => setOrgAddForm(f => ({ ...f, zip_code: e.target.value }))} style={inputSty} placeholder="94102" maxLength={10} />
+                        </div>
+                      </div>
+                      <div>
+                        <label style={labelSty}>Their contact email <span style={{ fontWeight: 400, color: 'var(--color-text-secondary)' }}>(optional)</span></label>
+                        <input type="email" value={orgAddForm.contact_email} onChange={e => setOrgAddForm(f => ({ ...f, contact_email: e.target.value }))} style={inputSty} placeholder="contact@theirorg.org" />
+                      </div>
+                      <button type="submit" disabled={submittingOrgAdd} style={{ ...btnPrimary, opacity: submittingOrgAdd ? 0.7 : 1, alignSelf: 'flex-start' }}>
+                        {submittingOrgAdd ? 'Submitting…' : 'Submit suggestion'}
+                      </button>
+                    </form>
+                  )}
+
+                  {showOrgInviteForm && (
+                    <form onSubmit={handleSubmitOrgInvite} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                      <div>
+                        <label style={labelSty}>Organization name <span style={{ color: '#D62828' }}>*</span></label>
+                        <input required value={orgInviteForm.org_name} onChange={e => setOrgInviteForm(f => ({ ...f, org_name: e.target.value }))} style={inputSty} placeholder="e.g. Sunset Village Network" />
+                      </div>
+                      <div>
+                        <label style={labelSty}>Their contact email <span style={{ color: '#D62828' }}>*</span></label>
+                        <input required type="email" value={orgInviteForm.contact_email} onChange={e => setOrgInviteForm(f => ({ ...f, contact_email: e.target.value }))} style={inputSty} placeholder="contact@theirorg.org" />
+                      </div>
+                      <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0 }}>
+                        We&apos;ll send them a short email introducing ThriveAtHome, with your name attached.
+                      </p>
+                      <button type="submit" disabled={submittingOrgInvite} style={{ ...btnPrimary, opacity: submittingOrgInvite ? 0.7 : 1, alignSelf: 'flex-start' }}>
+                        {submittingOrgInvite ? 'Sending…' : 'Send invitation'}
+                      </button>
+                    </form>
+                  )}
                 </div>
               </div>
             ) : (

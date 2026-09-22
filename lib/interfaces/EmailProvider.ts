@@ -29,4 +29,5 @@ export interface EmailProvider {
   sendEmployeeInvitation(to: string, companyName: string, acceptUrl: string): Promise<void>
   sendOrgNewsletter(to: string, recipientName: string, orgName: string, subject: string, body: string): Promise<void>
   sendDonationReceipt(to: string, donorName: string, amountCents: number, donationDate: string, isRecurring: boolean): Promise<void>
+  sendOrgInvite(to: string, orgName: string, inviterName: string): Promise<void>
 }
