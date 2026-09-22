@@ -579,3 +579,47 @@ NEXT SESSION MUST:
   copy) — all require a human go/no-go on scope before starting.
 Session ended normally
 ---
+
+NEXT SESSION MUST:
+- Build FEATURE-008: My Org tab "My village isn't listed" option
+  Add below org search results:
+  "Don't see your village? [Add it] or [Invite them to ThriveAtHome]"
+  "Add it" → form: org name, city, zip, contact email → INSERT into org_suggestions table (create if not exists)
+  "Invite them" → POST /api/orgs/invite → sends email via SendGrid to org contact
+
+- Build FEATURE-009: My Org empty state improvement
+  When member has no org membership show warm message:
+  "You don't belong to a village network yet — and that's okay.
+  ThriveAtHome is your community. Explore your communities → 
+  Or find a village near you ↓"
+  
+- Build marketing home page at app/page.tsx (currently shows login redirect)
+  Home page sections:
+  1. Hero — "Your parent deserves a morning call, not a medical alert"
+  2. How it works — 3 steps: sign up, navigator calls, Aria begins
+  3. What members get — Aria, buddy, communities, services, family dashboard
+  4. Who it's for — seniors aging at home, adult children, village networks
+  5. Pricing preview — 4 plans with CTA
+  6. Social proof placeholder — "Join [X] seniors living independently"
+  7. Footer — Privacy, Terms, Crisis line, Contact
+
+- Build /for-families page
+  Target: adult children worried about aging parents
+  Sections: what families see, family dashboard preview, peace of mind, how to enroll a parent
+  CTA: "Enroll your parent" → /signup
+
+- Build /for-volunteers page  
+  Target: volunteers wanting to make a difference
+  Sections: what volunteers do, buddy programme, time commitment, what you get
+  CTA: "Apply to volunteer" → /volunteer/apply (build this too)
+  /volunteer/apply: simple form: name, email, zip, availability, interests → creates pending volunteer record → sends invitation email
+
+- Build /privacy page (HIPAA-aware Privacy Policy)
+  Must cover: what data we collect, how Aria calls are used, family dashboard data sharing,
+  AI processing of call transcripts, member rights, HIPAA notice, contact information
+  
+- Build /terms page (Terms of Service)
+  Must cover: subscription terms, cancellation policy, AI call consent, family access consent,
+  limitation of liability, governing law (California)
+
+- After each page: npx tsc --noEmit → npm run build → confirm green → git commit → git push
