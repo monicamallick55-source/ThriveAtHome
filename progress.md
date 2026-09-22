@@ -623,3 +623,19 @@ NEXT SESSION MUST:
   limitation of liability, governing law (California)
 
 - After each page: npx tsc --noEmit → npm run build → confirm green → git commit → git push
+
+FEATURE-006: AI-assisted Life Story page — BUILD NOW (Anthropic API is live)
+Location: components/MemberPortalClient.tsx — life-story tab
+Add AI-assisted prompts using ANTHROPIC_API_KEY:
+1. Show 5 guided prompt cards when life story is empty or has fewer than 3 entries:
+   - "Tell us about your career — what did you do for work?"
+   - "Tell us about your family — who are the most important people in your life?"
+   - "Where did you grow up? What was your childhood like?"
+   - "What are you most proud of in your life?"
+   - "What hobbies or passions have shaped who you are?"
+2. When member clicks a prompt → text area opens with that prompt as placeholder
+3. After member submits entry → Claude generates 2 follow-up questions based on what they wrote
+   POST /api/life-story/prompts → { entry: string } → returns { followups: string[] }
+   Build this API route using Anthropic SDK
+4. Show progress bar: "Your life story is X% complete (Y of 10 chapters)"
+5. AI organises entries into chapters automatically (Career, Family, Childhood, Achievements, Passions)
