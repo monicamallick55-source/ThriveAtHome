@@ -931,3 +931,8 @@ BUG-009: Volunteer dashboard — claiming an open request shows success message 
 Fix: Check what table the claim creates a record in (likely service_bookings or volunteer_assignments).
 Then check what query the My Work tab uses to fetch upcoming visits — ensure it queries the same table with the correct volunteer_id filter.
 Likely the claim saves with auth_id but My Work queries by volunteer.id (UUID from volunteers table).
+
+UX-001: Volunteer dashboard — after claiming a request, My Work tab should auto-refresh 
+without requiring manual refresh. Currently works correctly after refresh.
+Fix: After successful claim API call, trigger a re-fetch of the My Work data automatically.
+This is a minor UX improvement, not a blocking bug.
