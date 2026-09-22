@@ -936,3 +936,98 @@ UX-001: Volunteer dashboard — after claiming a request, My Work tab should aut
 without requiring manual refresh. Currently works correctly after refresh.
 Fix: After successful claim API call, trigger a re-fetch of the My Work data automatically.
 This is a minor UX improvement, not a blocking bug.
+
+---
+SESSION: (continuation — resumed from NEXT SESSION MUST above)
+DATE: 2026-09-22
+STATUS: Session ended normally
+
+WHAT WAS DONE THIS SESSION:
+- Read prompt.md / progress.md / checklist.md per session-start protocol.
+  git status was clean at HEAD = 0fd3838, matching the prior session's own
+  logged commit -- no undocumented work on disk this time.
+- Ran the two locally-runnable items from the prior NEXT SESSION MUST:
+  `npx tsc --noEmit` and `npm run build`.
+
+TESTS AND VERIFICATIONS RUN:
+- `npx tsc --noEmit`: PASSED -- zero output.
+- `npm run build`: PASSED -- exit 0, full route manifest printed (all
+  /dashboard/*, /volunteer/*, marketing pages, admin portals). A
+  Google Fonts (cormorant_garamond) module-not-found trace appeared mid-log
+  from lack of network access in this Codespace but did not affect the
+  final exit code or output -- transient sandbox artifact, not a code
+  defect.
+- Vercel deploy status: NOT CHECKED -- no `vercel` CLI in this Codespace
+  (established limitation).
+- Live smoke tests: NOT RUN -- no browser, no live Supabase session
+  (established limitation, unchanged).
+
+ERRORS ENCOUNTERED:
+- None (font trace noted above was cosmetic, build still exited 0).
+
+DECISIONS MADE:
+- No code changes made -- this was a verify-only session, the sixth in a
+  row with identical outcome. Asked the human directly for a go/no-go on
+  FEATURE-001/002/003 scope rather than continuing to re-ask silently in
+  the log only.
+
+HUMAN APPROVAL:
+- Review presented: NO -- no new phase or fix was built this session.
+- User response: N/A
+
+NEXT SESSION MUST:
+- If the human has given a go/no-go on FEATURE-001 (AI-assisted services
+  flow), FEATURE-002 (cultural programming local events), or FEATURE-003
+  (festival calendar local events): start with whichever was approved.
+- Otherwise: re-ask before building anything from that backlog.
+- Continue treating Vercel deploy confirmation and live smoke tests as
+  blocked on tooling not available in this Codespace.
+Session ended normally
+---
+
+---
+SESSION: (continuation — resumed from NEXT SESSION MUST above)
+DATE: 2026-09-22
+STATUS: Session ended normally
+
+WHAT WAS DONE THIS SESSION:
+- Read prompt.md / progress.md / checklist.md per session-start protocol.
+- Found the prior session's own "verify build health" log entry had been
+  written to progress.md but never committed (git status showed
+  `modified: progress.md` at session start, HEAD = c077fb2, containing only
+  that dangling entry -- no other code changes on disk). Left the entry's
+  content as-is and committed it rather than rewriting it, per the
+  "adopt on-disk work, don't redo it" pattern.
+- Ran the two locally-runnable verifications: `npx tsc --noEmit` and
+  `npm run build`.
+
+TESTS AND VERIFICATIONS RUN:
+- `npx tsc --noEmit`: PASSED -- zero output.
+- `npm run build`: PASSED -- exit 0, full route manifest printed, no
+  error/fail lines in build output.
+- Vercel deploy status: NOT CHECKED -- no `vercel` CLI in this Codespace
+  (established limitation).
+- Live smoke tests: NOT RUN -- no browser, no live Supabase session
+  (established limitation, unchanged).
+
+ERRORS ENCOUNTERED:
+- None.
+
+DECISIONS MADE:
+- No code changes made -- this was a verify-only session, the seventh in a
+  row with identical outcome. Still no human go/no-go on FEATURE-001/002/003
+  scope; not assuming an answer.
+
+HUMAN APPROVAL:
+- Review presented: NO -- no new phase or fix was built this session.
+- User response: N/A
+
+NEXT SESSION MUST:
+- If the human has given a go/no-go on FEATURE-001 (AI-assisted services
+  flow), FEATURE-002 (cultural programming local events), or FEATURE-003
+  (festival calendar local events): start with whichever was approved.
+- Otherwise: re-ask before building anything from that backlog.
+- Continue treating Vercel deploy confirmation and live smoke tests as
+  blocked on tooling not available in this Codespace.
+Session ended normally
+---
