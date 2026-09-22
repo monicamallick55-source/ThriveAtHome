@@ -640,5 +640,131 @@ Add AI-assisted prompts using ANTHROPIC_API_KEY:
 4. Show progress bar: "Your life story is X% complete (Y of 10 chapters)"
 5. AI organises entries into chapters automatically (Career, Family, Childhood, Achievements, Passions)
 
+---
+SESSION: (continuation — resumed from NEXT SESSION MUST above)
+DATE: 2026-09-22
+STATUS: Session ended normally
+
+WHAT WAS DONE THIS SESSION:
+- Confirmed the two prior "Queue" commits (33bdfc1, 2df3f98) only appended
+  text to this file and built no code — treated the whole backlog as still
+  open and worked it in the order NEXT SESSION MUST specified.
+- FEATURE-008 (My Org "isn't listed" flow) + FEATURE-009 (warmer empty state):
+  - supabase/migrations/077_org_suggestions.sql — CREATED. org_suggestions
+    table (add_request / invite_sent), RLS for family + direct-auth member +
+    admin.
+  - lib/interfaces/EmailProvider.ts, lib/stubs/StubEmailProvider.ts,
+    lib/services/SendGridEmailProvider.ts — added sendOrgInvite(to, orgName,
+    inviterName).
+  - app/api/orgs/suggest/route.ts, app/api/orgs/invite/route.ts — CREATED.
+  - components/MemberPortalClient.tsx — My Org empty state now leads with
+    the FEATURE-009 copy + "Explore your communities" / "Find a village near
+    you" CTAs; search panel gained a "Don't see your village?" section with
+    Add it / Invite them forms wired to the two new routes.
+- Marketing pages:
+  - app/for-families/page.tsx, app/for-volunteers/page.tsx — CREATED, full
+    pages (not placeholders) matching the existing site's visual system.
+  - app/terms/page.tsx — CREATED. Covers subscriptions, cancellation, AI
+    call consent, family dashboard consent, liability limits, CA governing
+    law, matching the /privacy page's structure.
+  - Did NOT rebuild the home page (app/page.tsx) or /privacy — both already
+    exist as complete, polished pages (not the "coming soon" placeholder the
+    backlog note assumed), so rewriting them would have been unrequested
+    scope. Cross-linked the new pages from the home/privacy footers instead.
+- FEATURE-006 (AI Life Story prompts):
+  - Per this session's own instructions, read the `claude-api` skill before
+    touching any Anthropic-related file (model IDs / API shape were untrusted
+    from training). Installed `@anthropic-ai/sdk`; no Anthropic integration
+    existed anywhere in the codebase before this (AnthropicAiProvider was
+    100% throw-stubs).
+  - lib/interfaces/AiProvider.ts, lib/stubs/StubAiProvider.ts,
+    lib/services/AnthropicAiProvider.ts — added generateLifeStoryFollowups,
+    real implementation calls claude-opus-5 (skill default — no model was
+    named), asks for exactly 2 follow-up questions as a JSON array, fails
+    closed (logs + returns []) rather than throwing.
+  - app/api/life-story/prompts/route.ts — CREATED. POST { entry, title? } →
+    { followups }.
+  - components/MemberPortalClient.tsx Life Story tab: 5 guided prompt cards
+    (shown when <3 entries), clicking one opens the entry form with that
+    prompt as context/placeholder; after save, fetches + offers 2 AI
+    follow-ups as further prompts; progress bar "X% complete (Y of 10
+    chapters)" — chapters derived deterministically from each entry's
+    era/entry_type (no extra AI call needed for this) and shown as a pill on
+    every entry card.
+  - Found and fixed a pre-existing bug while wiring this up: the POST
+    /api/life-story response field is `entry`, but the client read `data` —
+    newly saved entries never appeared in the list until the tab reloaded.
+
+TESTS AND VERIFICATIONS RUN:
+- `npx tsc --noEmit`: PASSED — zero output, re-run after each of the three
+  batches above.
+- `npm run build`: PASSED after each batch — zero errors; confirmed new
+  routes in the manifest: /for-families, /for-volunteers, /terms,
+  /api/orgs/suggest, /api/orgs/invite, /api/life-story/prompts.
+- NOT verified live: org suggest/invite forms, the marketing pages' visual
+  rendering, and the Life Story AI follow-up flow have not been exercised in
+  a browser or against a live ANTHROPIC_API_KEY — no browser/live session
+  available in this Codespace (established limitation). Recommend after
+  deploy: (1) member portal → My Org tab with no org joined → submit both
+  "Add it" and "Invite them" forms; (2) visit /for-families, /for-volunteers,
+  /terms directly; (3) member portal → Life Story tab with <3 entries →
+  click a prompt card → save → confirm 2 AI follow-ups appear (requires
+  ANTHROPIC_API_KEY set in Vercel — if unset, resolveAiProvider() falls back
+  to StubAiProvider and canned follow-ups appear instead, which is correct
+  fallback behavior, not a bug).
+
+ERRORS ENCOUNTERED:
+- None.
+
+DECISIONS MADE:
+- Used a deterministic era/entry_type → chapter heuristic instead of an AI
+  call for "organise entries into chapters" — avoids a Claude call on every
+  page load for a progress-bar label, matches the existing data already
+  captured on each entry, and keeps the feature dependency-free if
+  ANTHROPIC_API_KEY is ever unset.
+- Chapter list has 10 entries (Childhood, Family, Love & Marriage, Career,
+  Travel & Adventure, Traditions & Recipes, Challenges Overcome,
+  Achievements, Wisdom & Advice, Legacy & Hopes) to match the literal "Y of
+  10 chapters" copy specified in the backlog, rather than the 5-category
+  list mentioned earlier in the same note — the two were inconsistent in
+  the original spec; picked the one with an explicit number.
+- Did not rebuild the home page's section structure (hero / how-it-works /
+  who-it's-for / social proof) — the existing app/page.tsx is a complete,
+  production-quality page already covering hero/features/pricing/CTA: not
+  a placeholder needing replacement. Flagging in case the human specifically
+  wants the 7-section structure from the old queue note.
+
+HUMAN APPROVAL:
+- Review presented: NO — this is backlog bug/feature work outside the
+  original 14-phase gate, per the pattern established since 2026-09-16.
+- User response: N/A
+
+NEXT SESSION MUST:
+- Confirm the Vercel build is green for commit c87546b (and the two before
+  it, d3f9d22 and 7e5ab5c).
+- Run the three live smoke tests listed above once deployed.
+- Remaining backlog: FEATURE-001, FEATURE-002, FEATURE-003 (AI-assisted
+  services flow, cultural programming local events, festival calendar local
+  events) are still explicitly deferred — "leave for after launch, they
+  require significant work." No other open items.
+Session ended normally
+---
+
 BUG-008: Navigator member detail — "Mohini Test as memeber" typo in family contacts section.
 Fix: Search codebase for "memeber" and replace with "member".
+
+---
+BUG-008 investigation (2026-09-22, same session as above): grepped the
+entire repo (case-insensitive, all .ts/.tsx/.sql) for "memeber" — zero
+matches anywhere in code. Traced the display to
+components/navigator/MemberDetailPanel.tsx:618-624, which renders
+`fm.full_name (fm.relationship)` for each family contact.
+`family_members.relationship` is free text, not an enum — set from
+`body.relationship?.trim()` in app/api/auth/signup/route.ts:29, with no
+fixed option list anywhere in the signup form. "memeber" is data a human
+typed into that field while testing, not a code defect — the display code
+is correctly rendering whatever was stored. No code change made. If this
+should become a constrained dropdown instead of free text, that is a
+product decision (and a larger change than a typo fix) — flagging for the
+human rather than assuming it.
+---
