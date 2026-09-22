@@ -1114,3 +1114,38 @@ NEXT SESSION MUST:
   whichever was approved. Otherwise keep re-asking rather than assuming.
 Session ended normally
 ---
+
+DECISION September 22 2026 — Event location strategy:
+
+FEATURE-002 and FEATURE-003 will use Google Custom Search API + Claude AI filtering.
+One Google search finds events across Eventbrite, Meetup, SF Rec & Parks, and city sites.
+Claude API (already live) filters results for senior relevance (score 7+/10 only).
+
+Location logic:
+- Default: member's zip code from profile (members.zip_code or address field)
+- Override: member can change location per session (different city/zip, different radius)
+- UI: "📍 Showing events near [city, zip] [Change location]" + radius selector (5/10/25/50 mi)
+- Session override does NOT change member's profile address
+
+Google Custom Search setup needed:
+1. Google Cloud Console project: ThriveAtHome
+2. Enable Custom Search API
+3. Create Custom Search Engine at cse.google.com scoped to search the whole web
+4. Add to Vercel: GOOGLE_SEARCH_API_KEY and GOOGLE_SEARCH_ENGINE_ID
+
+Search query pattern:
+- Cultural events: "senior cultural events [festival type] near [zip] [month year]"
+- Festival calendar: "[festival name] events near [zip] [year]"
+- Claude filters: score each result 1-10 for senior relevance, return only 7+
+- Cache results for 24 hours to stay within free tier (100 searches/day)
+
+NEXT SESSION MUST:
+- Human is setting up Google Cloud Console project right now
+- Once GOOGLE_SEARCH_API_KEY and GOOGLE_SEARCH_ENGINE_ID are added to Vercel:
+  Build /api/events/search route:
+  - Takes: query, zip, radius, month
+  - Calls Google Custom Search API
+  - Sends results to Claude for senior relevance scoring
+  - Returns filtered, scored, summarized events
+  Then wire into cultural-programming and cultural-festivals pages
+  with location picker UI (default zip from profile, override per session)
