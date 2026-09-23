@@ -2,35 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'ThriveAtHome — Peace of mind for the people you love',
-  description: 'Daily AI check-ins, real-time family updates, and a care network that treats your senior like family.',
-}
-
-function PhoneIcon() {
-  return (
-    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <circle cx="20" cy="20" r="20" fill="var(--color-teal-muted)" />
-      <path d="M15 14h2l2 5-1.5 1.5a11 11 0 005 5L24 24l5 2v2a2 2 0 01-2 2A16 16 0 0113 14a2 2 0 012-2z" fill="var(--color-teal)" strokeWidth="0" />
-    </svg>
-  )
-}
-
-function BellIcon() {
-  return (
-    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <circle cx="20" cy="20" r="20" fill="var(--color-teal-muted)" />
-      <path d="M20 12a6 6 0 00-6 6v4l-1.5 2h15L26 22v-4a6 6 0 00-6-6zm0 16a2 2 0 004 0h-4z" fill="var(--color-teal)" />
-    </svg>
-  )
-}
-
-function HandsIcon() {
-  return (
-    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <circle cx="20" cy="20" r="20" fill="var(--color-teal-muted)" />
-      <path d="M14 20c0-1 .9-2 2-2s2 .9 2 2v-6a2 2 0 114 0v6a2 2 0 114 0v2c0 3.3-2.7 6-6 6s-6-2.7-6-6v-2z" fill="var(--color-teal)" />
-    </svg>
-  )
+  title: 'ThriveAtHome — Your parent deserves a morning call, not a medical alert',
+  description: 'ThriveAtHome combines daily AI companion calls, human buddies, and real care navigation so seniors can age at home with dignity.',
 }
 
 function CheckIcon() {
@@ -40,6 +13,60 @@ function CheckIcon() {
     </svg>
   )
 }
+
+function FeatureIcon({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      style={{
+        width: '48px',
+        height: '48px',
+        borderRadius: '50%',
+        backgroundColor: 'var(--color-teal-muted)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '22px',
+        flexShrink: 0,
+      }}
+      aria-hidden="true"
+    >
+      {children}
+    </div>
+  )
+}
+
+const sectionHeading: React.CSSProperties = {
+  fontFamily: 'var(--font-display)',
+  fontSize: '34px',
+  fontWeight: 500,
+  color: 'var(--color-navy)',
+  letterSpacing: '-0.01em',
+  marginBottom: '16px',
+}
+
+const cardStyle: React.CSSProperties = {
+  backgroundColor: 'var(--color-warm-white)',
+  border: '1px solid var(--color-warm-grey)',
+  borderRadius: 'var(--radius-xl)',
+  padding: '32px',
+  boxShadow: 'var(--shadow-card)',
+}
+
+const featureCards = [
+  { icon: '📞', title: 'Aria morning calls', desc: 'A warm daily AI companion call that checks in on mood, sleep, medications, and wellbeing.' },
+  { icon: '🤝', title: 'Human buddy programme', desc: 'Real volunteers matched by interests and era — a friendly voice, not just a check-in.' },
+  { icon: '🧭', title: 'Care navigation', desc: 'A dedicated navigator coordinates support and steps in whenever something needs a human touch.' },
+  { icon: '🌍', title: '20 communities', desc: 'Cultural circles, hobby groups, and faith communities that welcome your loved one in.' },
+  { icon: '🛒', title: 'Services marketplace', desc: 'Trusted help for transportation, meals, errands, and home tasks — all in one place.' },
+  { icon: '📊', title: 'Family dashboard', desc: 'Real-time updates after every call so your family always knows how they’re doing.' },
+]
+
+const plans = [
+  { name: 'Basics', price: '$29' },
+  { name: 'Connect', price: '$49' },
+  { name: 'Complete', price: '$89' },
+  { name: 'Concierge', price: 'Custom' },
+]
 
 export default function HomePage() {
   return (
@@ -70,7 +97,6 @@ export default function HomePage() {
                 padding: '8px 20px',
                 borderRadius: 'var(--radius-md)',
                 textDecoration: 'none',
-                transition: 'all 0.2s',
                 display: 'inline-flex',
                 alignItems: 'center',
                 minHeight: '44px',
@@ -89,7 +115,6 @@ export default function HomePage() {
                 padding: '10px 24px',
                 borderRadius: 'var(--radius-md)',
                 textDecoration: 'none',
-                transition: 'all 0.2s',
                 display: 'inline-flex',
                 alignItems: 'center',
                 minHeight: '44px',
@@ -102,267 +127,162 @@ export default function HomePage() {
       </header>
 
       <main style={{ flex: 1 }}>
-        {/* Hero section */}
+        {/* 1. Hero */}
         <section
           style={{
-            minHeight: 'calc(100vh - 72px)',
             display: 'flex',
             alignItems: 'center',
             background: 'radial-gradient(ellipse at 15% 15%, rgba(232,245,244,0.7) 0%, transparent 50%), radial-gradient(ellipse at 85% 85%, rgba(27,58,107,0.06) 0%, transparent 50%), var(--color-cream)',
-            padding: '64px 32px',
+            padding: '96px 32px 80px',
           }}
         >
-          <div style={{ maxWidth: '1200px', margin: '0 auto', width: '100%', display: 'grid', gridTemplateColumns: '1fr', gap: '64px', alignItems: 'center' }}>
-            {/* Left column */}
-            <div style={{ maxWidth: '600px' }}>
-              <p
-                style={{
-                  fontFamily: 'var(--font-body)',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  letterSpacing: '0.12em',
-                  textTransform: 'uppercase',
-                  color: 'var(--color-teal)',
-                  marginBottom: '20px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                }}
-              >
-                <CheckIcon /> Trusted by families across America
-              </p>
-
-              <h1
-                style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: 'clamp(36px, 6vw, 52px)',
-                  fontWeight: 500,
-                  color: 'var(--color-navy)',
-                  lineHeight: 1.1,
-                  letterSpacing: '-0.02em',
-                  marginBottom: '24px',
-                }}
-              >
-                Peace of mind.<br />
-                Independence for those<br />
-                you love.
-              </h1>
-
-              <p
-                style={{
-                  fontFamily: 'var(--font-body)',
-                  fontSize: '20px',
-                  lineHeight: 1.65,
-                  color: 'var(--color-text-secondary)',
-                  maxWidth: '520px',
-                  marginBottom: '40px',
-                }}
-              >
-                Daily AI check-ins, real-time family updates, and a care network
-                that treats your senior like family — not a patient.
-              </p>
-
-              <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginBottom: '32px' }}>
-                <Link
-                  href="/signup"
-                  style={{
-                    backgroundColor: 'var(--color-navy)',
-                    color: 'var(--color-cream)',
-                    fontFamily: 'var(--font-body)',
-                    fontSize: '18px',
-                    fontWeight: 500,
-                    padding: '16px 32px',
-                    borderRadius: 'var(--radius-md)',
-                    textDecoration: 'none',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    minHeight: '56px',
-                    transition: 'all 0.2s',
-                  }}
-                >
-                  Start free trial
-                </Link>
-                <Link
-                  href="#features"
-                  style={{
-                    backgroundColor: 'transparent',
-                    color: 'var(--color-navy)',
-                    fontFamily: 'var(--font-body)',
-                    fontSize: '18px',
-                    fontWeight: 500,
-                    padding: '16px 32px',
-                    borderRadius: 'var(--radius-md)',
-                    textDecoration: 'none',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    minHeight: '56px',
-                    transition: 'all 0.2s',
-                  }}
-                >
-                  See how it works
-                </Link>
-              </div>
-
-              <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
-                {['No contracts', 'Cancel anytime', 'HIPAA compliant'].map((item) => (
-                  <span
-                    key={item}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      color: 'var(--color-text-muted)',
-                      fontSize: '15px',
-                      fontFamily: 'var(--font-body)',
-                    }}
-                  >
-                    <CheckIcon /> {item}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Right column — mock wellness card */}
-            <div
+          <div style={{ maxWidth: '780px', margin: '0 auto', width: '100%', textAlign: 'center' }}>
+            <h1
               style={{
-                display: 'none',
-                justifyContent: 'center',
-                alignItems: 'flex-start',
+                fontFamily: 'var(--font-display)',
+                fontSize: 'clamp(32px, 5.5vw, 50px)',
+                fontWeight: 500,
+                color: 'var(--color-navy)',
+                lineHeight: 1.15,
+                letterSpacing: '-0.02em',
+                marginBottom: '24px',
               }}
-              className="hero-card-col"
-              aria-hidden="true"
             >
-              <div
+              Your parent deserves a morning call, not a medical alert.
+            </h1>
+
+            <p
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: '20px',
+                lineHeight: 1.65,
+                color: 'var(--color-text-secondary)',
+                maxWidth: '620px',
+                margin: '0 auto 40px',
+              }}
+            >
+              ThriveAtHome combines daily AI companion calls, human buddies, and real
+              care navigation so seniors can age at home with dignity.
+            </p>
+
+            <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
+              <Link
+                href="/signup"
                 style={{
-                  backgroundColor: 'var(--color-warm-white)',
-                  borderRadius: 'var(--radius-xl)',
-                  padding: '28px',
-                  boxShadow: 'var(--shadow-lg)',
-                  border: '1px solid var(--color-warm-grey)',
-                  transform: 'rotate(1deg)',
-                  maxWidth: '360px',
-                  width: '100%',
+                  backgroundColor: 'var(--color-navy)',
+                  color: 'var(--color-cream)',
+                  fontFamily: 'var(--font-body)',
+                  fontSize: '18px',
+                  fontWeight: 500,
+                  padding: '16px 32px',
+                  borderRadius: 'var(--radius-md)',
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  minHeight: '56px',
                 }}
               >
-                <div style={{ marginBottom: '16px' }}>
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: '11px',
-                      letterSpacing: '0.1em',
-                      textTransform: 'uppercase',
-                      color: 'var(--color-text-muted)',
-                    }}
-                  >
-                    Today&apos;s check-in
-                  </span>
-                  <h3
-                    style={{
-                      fontFamily: 'var(--font-display)',
-                      fontSize: '24px',
-                      fontWeight: 500,
-                      color: 'var(--color-navy)',
-                      margin: '4px 0 0',
-                    }}
-                  >
-                    Margaret Chen
-                  </h3>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-                  <span style={{ fontSize: '36px', lineHeight: 1 }}>😊</span>
-                  <div>
-                    <span
-                      style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: '28px',
-                        fontWeight: 600,
-                        color: 'var(--color-mood-high)',
-                        lineHeight: 1,
-                      }}
-                    >
-                      8/10
-                    </span>
-                    <p style={{ color: 'var(--color-text-secondary)', fontSize: '15px', margin: '2px 0 0' }}>
-                      Feeling great
-                    </p>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '20px' }}>
-                  <span
-                    style={{
-                      backgroundColor: 'var(--color-teal-muted)',
-                      color: 'var(--color-teal)',
-                      padding: '4px 12px',
-                      borderRadius: 'var(--radius-full)',
-                      fontSize: '13px',
-                      fontFamily: 'var(--font-body)',
-                      fontWeight: 500,
-                    }}
-                  >
-                    ✓ Medication taken
-                  </span>
-                  <span
-                    style={{
-                      backgroundColor: 'var(--color-warm-grey)',
-                      color: 'var(--color-text-secondary)',
-                      padding: '4px 12px',
-                      borderRadius: 'var(--radius-full)',
-                      fontSize: '13px',
-                      fontFamily: 'var(--font-body)',
-                    }}
-                  >
-                    Energy 7/10
-                  </span>
-                </div>
-
-                <div
-                  style={{
-                    borderTop: '1px solid var(--color-warm-grey)',
-                    paddingTop: '16px',
-                  }}
-                >
-                  <p
-                    style={{
-                      fontFamily: 'var(--font-display)',
-                      fontSize: '17px',
-                      fontStyle: 'italic',
-                      color: 'var(--color-text-primary)',
-                      lineHeight: 1.65,
-                      margin: 0,
-                    }}
-                  >
-                    &ldquo;Margaret had a wonderful morning. She mentioned her roses are blooming early this year.&rdquo;
-                  </p>
-                </div>
-              </div>
+                Get started
+              </Link>
+              <Link
+                href="#how-it-works"
+                style={{
+                  backgroundColor: 'transparent',
+                  color: 'var(--color-navy)',
+                  fontFamily: 'var(--font-body)',
+                  fontSize: '18px',
+                  fontWeight: 500,
+                  padding: '16px 32px',
+                  borderRadius: 'var(--radius-md)',
+                  textDecoration: 'none',
+                  border: '1.5px solid var(--color-navy)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  minHeight: '56px',
+                }}
+              >
+                See how it works
+              </Link>
             </div>
           </div>
         </section>
 
-        {/* Features section */}
-        <section
-          id="features"
-          style={{
-            backgroundColor: '#FFFFFF',
-            padding: '80px 32px',
-          }}
-        >
+        {/* 2. Social proof bar */}
+        <section style={{ backgroundColor: 'var(--color-navy)', padding: '20px 32px' }}>
+          <p
+            style={{
+              maxWidth: '1200px',
+              margin: '0 auto',
+              textAlign: 'center',
+              fontFamily: 'var(--font-body)',
+              fontSize: '15px',
+              fontWeight: 500,
+              letterSpacing: '0.04em',
+              textTransform: 'uppercase',
+              color: 'rgba(250,250,245,0.7)',
+            }}
+          >
+            Trusted by families across the Bay Area
+          </p>
+        </section>
+
+        {/* 3. How it works */}
+        <section id="how-it-works" style={{ backgroundColor: '#FFFFFF', padding: '80px 32px' }}>
           <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-            <div style={{ textAlign: 'center', marginBottom: '64px' }}>
-              <h2
-                style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: '34px',
-                  fontWeight: 500,
-                  color: 'var(--color-navy)',
-                  letterSpacing: '-0.01em',
-                  marginBottom: '16px',
-                }}
-              >
-                A complete care companion
-              </h2>
+            <div style={{ textAlign: 'center', marginBottom: '56px' }}>
+              <h2 style={sectionHeading}>How it works</h2>
+              <p style={{ color: 'var(--color-text-secondary)', fontSize: '20px', maxWidth: '560px', margin: '0 auto' }}>
+                From first call to daily connection — here&apos;s the path.
+              </p>
+            </div>
+
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+                gap: '40px',
+              }}
+            >
+              {[
+                { step: '1', title: 'Sign up in minutes', desc: 'A family member or the senior themselves signs up, and a navigator calls within 24 hours.' },
+                { step: '2', title: 'Your navigator builds the relationship', desc: '21 days of human-first care — getting to know them before anything is automated.' },
+                { step: '3', title: 'Aria calls every morning', desc: 'A daily AI companion call keeps the connection going, with the family seeing updates in real time.' },
+              ].map((item) => (
+                <div key={item.step} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div
+                    style={{
+                      width: '48px',
+                      height: '48px',
+                      borderRadius: '50%',
+                      backgroundColor: 'var(--color-navy)',
+                      color: 'var(--color-cream)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: '20px',
+                      fontWeight: 600,
+                    }}
+                  >
+                    {item.step}
+                  </div>
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: 'var(--color-navy)', margin: 0 }}>
+                    {item.title}
+                  </h3>
+                  <p style={{ color: 'var(--color-text-secondary)', fontSize: '18px', lineHeight: 1.65, margin: 0 }}>
+                    {item.desc}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* 4. What members get */}
+        <section style={{ backgroundColor: 'var(--color-cream)', padding: '80px 32px' }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+            <div style={{ textAlign: 'center', marginBottom: '56px' }}>
+              <h2 style={sectionHeading}>What members get</h2>
               <p style={{ color: 'var(--color-text-secondary)', fontSize: '20px', maxWidth: '560px', margin: '0 auto' }}>
                 Everything your family needs, quietly working in the background.
               </p>
@@ -372,219 +292,117 @@ export default function HomePage() {
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                gap: '48px',
+                gap: '24px',
               }}
             >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <PhoneIcon />
-                <h3
-                  style={{
-                    fontFamily: 'var(--font-display)',
-                    fontSize: '28px',
-                    fontWeight: 500,
-                    color: 'var(--color-navy)',
-                    letterSpacing: '-0.01em',
-                    margin: 0,
-                  }}
-                >
-                  Aria calls every morning.
-                </h3>
-                <p style={{ color: 'var(--color-text-secondary)', fontSize: '18px', lineHeight: 1.65, margin: 0 }}>
-                  Our AI care companion calls your senior daily — a warm, natural conversation
-                  that checks in on mood, sleep, medications, and wellbeing. Not a checklist. A connection.
-                </p>
-              </div>
+              {featureCards.map((f) => (
+                <div key={f.title} style={cardStyle}>
+                  <FeatureIcon>{f.icon}</FeatureIcon>
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 500, color: 'var(--color-navy)', margin: '16px 0 8px' }}>
+                    {f.title}
+                  </h3>
+                  <p style={{ color: 'var(--color-text-secondary)', fontSize: '17px', lineHeight: 1.6, margin: 0 }}>
+                    {f.desc}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <BellIcon />
-                <h3
-                  style={{
-                    fontFamily: 'var(--font-display)',
-                    fontSize: '28px',
-                    fontWeight: 500,
-                    color: 'var(--color-navy)',
-                    letterSpacing: '-0.01em',
-                    margin: 0,
-                  }}
-                >
-                  You know within minutes.
+        {/* 5. Who it's for */}
+        <section style={{ backgroundColor: '#FFFFFF', padding: '80px 32px' }}>
+          <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+            <div style={{ textAlign: 'center', marginBottom: '56px' }}>
+              <h2 style={sectionHeading}>Who it&apos;s for</h2>
+            </div>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                gap: '32px',
+              }}
+            >
+              <div style={cardStyle}>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '16px' }}>
+                  For seniors
                 </h3>
-                <p style={{ color: 'var(--color-text-secondary)', fontSize: '18px', lineHeight: 1.65, margin: 0 }}>
-                  After every call, your family gets an instant update — what was discussed,
-                  how they&apos;re feeling, anything that needs attention. No more wondering.
-                </p>
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {['Age at home with independence', 'A daily voice that checks in and listens', 'Real human connection, not just technology'].map((item) => (
+                    <li key={item} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', fontSize: '18px', color: 'var(--color-text-secondary)' }}>
+                      <CheckIcon /> {item}
+                    </li>
+                  ))}
+                </ul>
               </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <HandsIcon />
-                <h3
-                  style={{
-                    fontFamily: 'var(--font-display)',
-                    fontSize: '28px',
-                    fontWeight: 500,
-                    color: 'var(--color-navy)',
-                    letterSpacing: '-0.01em',
-                    margin: 0,
-                  }}
-                >
-                  People, not just technology.
+              <div style={cardStyle}>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '16px' }}>
+                  For families
                 </h3>
-                <p style={{ color: 'var(--color-text-secondary)', fontSize: '18px', lineHeight: 1.65, margin: 0 }}>
-                  When something needs a human touch, our care navigators step in —
-                  coordinating volunteers, connecting families, and making sure no one falls through the cracks.
-                </p>
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {['Peace of mind between visits', 'Real-time updates after every call', 'Coordinate care with navigators and volunteers'].map((item) => (
+                    <li key={item} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', fontSize: '18px', color: 'var(--color-text-secondary)' }}>
+                      <CheckIcon /> {item}
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Pricing section */}
-        <section
-          style={{
-            backgroundColor: 'var(--color-cream)',
-            padding: '80px 32px',
-          }}
-        >
-          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-            <div style={{ textAlign: 'center', marginBottom: '64px' }}>
-              <h2
-                style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: '34px',
-                  fontWeight: 500,
-                  color: 'var(--color-navy)',
-                  letterSpacing: '-0.01em',
-                  marginBottom: '16px',
-                }}
-              >
-                Simple, honest pricing
-              </h2>
-              <p style={{ color: 'var(--color-text-secondary)', fontSize: '20px' }}>
-                No hidden fees. No long-term contracts. Start for free.
-              </p>
-            </div>
+        {/* 6. Pricing preview */}
+        <section style={{ backgroundColor: 'var(--color-cream)', padding: '80px 32px' }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
+            <h2 style={sectionHeading}>Simple, honest pricing</h2>
+            <p style={{ color: 'var(--color-text-secondary)', fontSize: '20px', marginBottom: '48px' }}>
+              No hidden fees. No long-term contracts.
+            </p>
 
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-                gap: '24px',
-                alignItems: 'start',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                gap: '20px',
+                marginBottom: '40px',
               }}
             >
-              {/* Basics */}
-              <div
-                style={{
-                  backgroundColor: 'var(--color-warm-white)',
-                  border: '1px solid var(--color-warm-grey)',
-                  borderRadius: 'var(--radius-xl)',
-                  padding: '32px',
-                  boxShadow: 'var(--shadow-card)',
-                }}
-              >
-                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', color: 'var(--color-navy)', marginBottom: '8px' }}>Basics</h3>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '24px' }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '34px', fontWeight: 600, color: 'var(--color-navy)' }}>$29</span>
-                  <span style={{ color: 'var(--color-text-muted)', fontSize: '18px' }}>/month</span>
+              {plans.map((plan) => (
+                <div key={plan.name} style={cardStyle}>
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--color-navy)', marginBottom: '8px' }}>
+                    {plan.name}
+                  </h3>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '28px', fontWeight: 600, color: 'var(--color-navy)' }}>
+                    {plan.price}
+                    {plan.price !== 'Custom' && <span style={{ fontSize: '15px', fontWeight: 400, color: 'var(--color-text-muted)' }}>/mo</span>}
+                  </div>
                 </div>
-                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {['Daily AI check-in call', 'Family dashboard', 'Mood & wellness tracking', 'Email alerts'].map((f) => (
-                    <li key={f} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '18px', color: 'var(--color-text-secondary)' }}>
-                      <CheckIcon /> {f}
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/signup" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '56px', backgroundColor: 'transparent', border: '1.5px solid var(--color-navy)', color: 'var(--color-navy)', borderRadius: 'var(--radius-md)', fontSize: '18px', fontWeight: 500, textDecoration: 'none', transition: 'all 0.2s' }}>
-                  Get started
-                </Link>
-              </div>
-
-              {/* Connect — Most popular */}
-              <div
-                style={{
-                  backgroundColor: 'var(--color-warm-white)',
-                  border: '2px solid var(--color-teal)',
-                  borderRadius: 'var(--radius-xl)',
-                  padding: '32px',
-                  boxShadow: 'var(--shadow-lg)',
-                  position: 'relative',
-                }}
-              >
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: '-14px',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    backgroundColor: 'var(--color-teal)',
-                    color: 'white',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    letterSpacing: '0.06em',
-                    textTransform: 'uppercase',
-                    padding: '4px 16px',
-                    borderRadius: 'var(--radius-full)',
-                    fontFamily: 'var(--font-body)',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  Most popular
-                </div>
-                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', color: 'var(--color-navy)', marginBottom: '8px' }}>Connect</h3>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '24px' }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '34px', fontWeight: 600, color: 'var(--color-navy)' }}>$49</span>
-                  <span style={{ color: 'var(--color-text-muted)', fontSize: '18px' }}>/month</span>
-                </div>
-                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {['Everything in Basics', 'Family task coordination', 'Document vault', 'SMS & push alerts', 'Family messaging'].map((f) => (
-                    <li key={f} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '18px', color: 'var(--color-text-secondary)' }}>
-                      <CheckIcon /> {f}
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/signup" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '56px', backgroundColor: 'var(--color-teal)', color: 'white', borderRadius: 'var(--radius-md)', fontSize: '18px', fontWeight: 500, textDecoration: 'none', transition: 'all 0.2s' }}>
-                  Start free trial
-                </Link>
-              </div>
-
-              {/* Complete */}
-              <div
-                style={{
-                  backgroundColor: 'var(--color-warm-white)',
-                  border: '1px solid var(--color-warm-grey)',
-                  borderRadius: 'var(--radius-xl)',
-                  padding: '32px',
-                  boxShadow: 'var(--shadow-card)',
-                }}
-              >
-                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', color: 'var(--color-navy)', marginBottom: '8px' }}>Complete</h3>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '24px' }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '34px', fontWeight: 600, color: 'var(--color-navy)' }}>$89</span>
-                  <span style={{ color: 'var(--color-text-muted)', fontSize: '18px' }}>/month</span>
-                </div>
-                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {['Everything in Connect', 'Dedicated care navigator', 'Volunteer coordination', 'Priority crisis response', 'Monthly care reports'].map((f) => (
-                    <li key={f} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '18px', color: 'var(--color-text-secondary)' }}>
-                      <CheckIcon /> {f}
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/signup" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '56px', backgroundColor: 'transparent', border: '1.5px solid var(--color-navy)', color: 'var(--color-navy)', borderRadius: 'var(--radius-md)', fontSize: '18px', fontWeight: 500, textDecoration: 'none', transition: 'all 0.2s' }}>
-                  Get started
-                </Link>
-              </div>
+              ))}
             </div>
+
+            <Link
+              href="/pricing"
+              style={{
+                backgroundColor: 'var(--color-navy)',
+                color: 'var(--color-cream)',
+                fontFamily: 'var(--font-body)',
+                fontSize: '18px',
+                fontWeight: 500,
+                padding: '16px 32px',
+                borderRadius: 'var(--radius-md)',
+                textDecoration: 'none',
+                display: 'inline-flex',
+                alignItems: 'center',
+                minHeight: '56px',
+              }}
+            >
+              See full pricing
+            </Link>
           </div>
         </section>
 
         {/* Final CTA */}
-        <section
-          style={{
-            backgroundColor: 'var(--color-navy)',
-            padding: '80px 32px',
-            textAlign: 'center',
-          }}
-        >
+        <section style={{ backgroundColor: 'var(--color-navy)', padding: '80px 32px', textAlign: 'center' }}>
           <div style={{ maxWidth: '720px', margin: '0 auto' }}>
             <h2
               style={{
@@ -598,15 +416,8 @@ export default function HomePage() {
             >
               Your parent deserves to feel remembered.
             </h2>
-            <p
-              style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: '20px',
-                color: 'rgba(250,250,245,0.75)',
-                marginBottom: '40px',
-              }}
-            >
-              Join thousands of families who&apos;ve found peace of mind.
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '20px', color: 'rgba(250,250,245,0.75)', marginBottom: '40px' }}>
+              Join families who&apos;ve found peace of mind with ThriveAtHome.
             </p>
             <Link
               href="/signup"
@@ -622,7 +433,6 @@ export default function HomePage() {
                 display: 'inline-flex',
                 alignItems: 'center',
                 minHeight: '56px',
-                transition: 'all 0.2s',
               }}
             >
               Start caring now
@@ -631,35 +441,23 @@ export default function HomePage() {
         </section>
       </main>
 
-      <footer
-        style={{
-          backgroundColor: 'var(--color-navy-dark)',
-          padding: '32px',
-          textAlign: 'center',
-        }}
-      >
+      {/* 7. Footer */}
+      <footer style={{ backgroundColor: 'var(--color-navy-dark)', padding: '32px', textAlign: 'center' }}>
         <p style={{ color: 'rgba(250,250,245,0.5)', fontSize: '15px', fontFamily: 'var(--font-body)', margin: 0 }}>
-          © 2025 ThriveAtHome. All rights reserved.{' '}
+          © 2026 ThriveAtHome. All rights reserved.{' '}
           <Link href="/privacy" style={{ color: 'rgba(250,250,245,0.6)', textDecoration: 'underline' }}>Privacy</Link>
           {' · '}
           <Link href="/terms" style={{ color: 'rgba(250,250,245,0.6)', textDecoration: 'underline' }}>Terms</Link>
+          {' · '}
+          <Link href="/crisis" style={{ color: 'rgba(250,250,245,0.6)', textDecoration: 'underline' }}>Crisis</Link>
+          {' · '}
+          <a href="mailto:support@thriveathome.com" style={{ color: 'rgba(250,250,245,0.6)', textDecoration: 'underline' }}>Contact</a>
           {' · '}
           <Link href="/for-families" style={{ color: 'rgba(250,250,245,0.6)', textDecoration: 'underline' }}>For Families</Link>
           {' · '}
           <Link href="/for-volunteers" style={{ color: 'rgba(250,250,245,0.6)', textDecoration: 'underline' }}>For Volunteers</Link>
         </p>
       </footer>
-
-      <style>{`
-        @media (min-width: 900px) {
-          .hero-card-col {
-            display: flex !important;
-          }
-          section:first-of-type > div {
-            grid-template-columns: 3fr 2fr !important;
-          }
-        }
-      `}</style>
     </div>
   )
 }
