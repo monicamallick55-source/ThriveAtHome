@@ -120,6 +120,8 @@ export async function POST(req: NextRequest) {
       preferred_call_time: body.preferred_call_time?.trim() || null,
       aria_call_opted_in: ariaOptedIn,
       check_in_frequency: ariaFrequency,
+      checkin_preference: body.aria_call_opt_in === 'no' ? 'buddy' : 'aria',
+      call_frequency_preference: ariaFrequency,
       topics_enjoy: topicsEnjoyArray,
       topics_avoid: body.topics_avoid?.trim() || null,
       doctor_name: body.doctor_name?.trim() || null,

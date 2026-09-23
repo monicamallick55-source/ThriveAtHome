@@ -5,6 +5,7 @@ import { requireAuth } from '@/lib/auth'
 import { getMemberForAuthUser } from '@/lib/data/members'
 import { getCallsForMember, getCallCountForMember } from '@/lib/data/calls'
 import CallHistoryClient from '@/components/dashboard/CallHistoryClient'
+import { CallRequestPanel } from '@/components/dashboard/CallRequestPanel'
 import { ToastProvider } from '@/components/ui/Toast'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 
@@ -118,6 +119,8 @@ export default async function CallsPage() {
               Unable to load call history. Please refresh the page.
             </div>
           )}
+
+          <CallRequestPanel preferredName={member.preferred_name} />
 
           <ErrorBoundary section="call history">
             <CallHistoryClient
