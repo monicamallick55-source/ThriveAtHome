@@ -1343,3 +1343,124 @@ NEXT SESSION MUST:
   "I'm going" toggles and persists across a page reload.
 - Confirm Vercel build is green for this commit.
 Session ended normally
+
+---
+SESSION: (continuation — resumed from NEXT SESSION MUST above)
+DATE: 2026-09-22
+MILESTONE: Post-M6 feature work
+PHASE: N/A
+STATUS: IN_PROGRESS
+HUMAN_APPROVAL: N/A
+
+INNER LOOP STATE AT END OF SESSION:
+- Read prompt.md, progress.md, checklist.md per session-start protocol.
+- Confirmed working tree clean, HEAD = 9eb2bb4 (FEATURE-002/003 event search),
+  matching the last progress.md entry exactly — no undocumented work this time.
+- Every item in the prior session's NEXT SESSION MUST is a human-side action
+  (run migrations 081/082 in Supabase SQL Editor, confirm 3 Vercel env vars,
+  run a live smoke test that needs a browser + live Supabase session, confirm
+  Vercel build status) — none of which are executable from this Codespace
+  (no Supabase CLI/DB connection, no browser, no Vercel API access; same
+  limitation logged every session since Session 107).
+- Re-checked the backlog in this file (Member Portal Test Results section):
+  BUG-001 through BUG-009/UX-001 and FEATURE-002/003/004/005/006/007 are all
+  built and verified. The only open backlog item is FEATURE-001 (AI-assisted
+  services flow), which every session since it was logged has flagged as
+  needing an explicit human go/no-go on scope before starting — still not
+  given. There is no other buildable item that isn't gated on human input.
+- Ran the two checks that are executable here as a build-health sanity check:
+  `npx tsc --noEmit` → zero output. `npm run build` → completed, full route
+  manifest printed, no errors. No code changes were needed or made.
+
+STUB STATUS: unchanged from last entry.
+
+WHAT WAS DONE THIS SESSION:
+- No files created or modified — this was a verification-only session.
+
+TESTS AND VERIFICATIONS RUN:
+- `npx tsc --noEmit`: PASSED — zero output.
+- `npm run build`: PASSED — zero errors, full route manifest printed.
+- `git status`: PASSED — working tree clean, nothing to commit.
+
+ERRORS ENCOUNTERED:
+- None.
+
+DECISIONS MADE:
+- Did not start FEATURE-001 — still no human go/no-go on scope, consistent
+  with every prior session's note on this item.
+- Did not attempt to apply migrations 081/082 or touch Vercel/Supabase
+  dashboards — outside what this Codespace can do; these remain the human's
+  next actions, unchanged from the last entry.
+
+HUMAN APPROVAL:
+- Review presented: NO — no new code to review this session.
+- User response: N/A
+
+NEXT SESSION MUST:
+- Human: run supabase/migrations/081_event_search_cache.sql and
+  082_live_event_rsvps.sql in the Supabase SQL Editor (in that order), then
+  confirm GOOGLE_SEARCH_API_KEY, GOOGLE_SEARCH_ENGINE_ID, and
+  ANTHROPIC_API_KEY are set in Vercel, then run the FEATURE-002/003 live
+  smoke test described two entries up.
+- Human: give a go/no-go on FEATURE-001 (AI-assisted services flow) scope —
+  this is the only remaining backlog item and it cannot proceed without that
+  decision.
+- If neither has moved: there is no further autonomous code work available;
+  a future session should re-check this file's backlog section for any new
+  bug/feature entries the human has added before concluding the same again.
+QUESTION FOR HUMAN
+
+OVERNIGHT BUILD QUEUE — September 22 2026
+
+FEATURE-010: Aria tool calls (already queued — build if not already done)
+
+FEATURE-011: Onboarding improvements
+The signup flow is missing the "I'm signing up for myself" vs "for someone else" choice.
+Currently ALL signups go to "Tell us about the person you care for" family flow.
+Fix:
+- app/signup/page.tsx or onboarding Step 1 — add a first screen:
+  "Who are you signing up for?"
+  Option A: "Myself — I want to stay connected and independent" → senior self-signup flow
+  Option B: "A parent or loved one — I want to help them thrive" → family signup flow
+- Senior self-signup: "Tell us about yourself" heading, fields for their own info
+- Family signup: "Tell us about the person you care for" heading (current flow)
+- This determines whether a members row or family_members row is created as primary
+
+FEATURE-012: Home page / marketing site
+Build app/page.tsx as a proper marketing home page (currently redirects to login).
+Sections:
+1. Hero — "Your parent deserves a morning call, not a medical alert"
+   Subheading: "ThriveAtHome combines daily AI companion calls, human buddies, and real care navigation so seniors can age at home with dignity."
+   CTA buttons: "Get started" → /signup, "See how it works" → scrolls to section 3
+2. Social proof bar — "Trusted by families across the Bay Area"
+3. How it works — 3 steps:
+   Step 1: "Sign up in minutes" — family or senior signs up, navigator calls within 24 hours
+   Step 2: "Your navigator builds the relationship" — 21 days of human-first care
+   Step 3: "Aria calls every morning" — daily AI companion call, family sees updates
+4. What members get — 6 feature cards:
+   - Aria morning calls (AI companion)
+   - Human buddy programme
+   - Care navigation
+   - 20 communities
+   - Services marketplace
+   - Family dashboard
+5. Who it's for — 2 columns:
+   Left: "For seniors" — aging at home, daily connection, independence
+   Right: "For families" — peace of mind, real-time updates, coordinate care
+6. Pricing preview — show 4 plan names and prices, "See full pricing" → /pricing
+7. Footer — Privacy, Terms, /crisis, Contact, © 2026 ThriveAtHome
+
+FEATURE-013: Navigator job description page
+Build /careers/navigator page:
+- Title: "Care Navigator — Part-time, Remote (Bay Area)"
+- About the role: calling members, dispatching volunteers, monitoring wellness
+- Requirements: MSW student or graduate, compassionate, organized
+- Time commitment: 10-15 hours/week
+- Compensation: $20-25/hour
+- Apply button → simple form: name, email, LinkedIn, why interested
+- Form submission → creates pending navigator application in DB → emails monica
+
+BUG-008: Fix "memeber" typo in navigator member detail panel
+Search for "memeber" in all .tsx and .ts files and replace with "member"
+
+After each feature: npx tsc --noEmit → npm run build → commit → push
