@@ -1464,3 +1464,141 @@ BUG-008: Fix "memeber" typo in navigator member detail panel
 Search for "memeber" in all .tsx and .ts files and replace with "member"
 
 After each feature: npx tsc --noEmit → npm run build → commit → push
+
+---
+SESSION: 2
+DATE: 2026-09-23
+MILESTONE: Post-M6 feature work
+PHASE: N/A
+STATUS: IN_PROGRESS
+HUMAN_APPROVAL: N/A
+
+INNER LOOP STATE AT END OF SESSION:
+- Read prompt.md/progress.md/checklist.md per session-start protocol, then
+  the "OVERNIGHT BUILD QUEUE — September 22 2026" appended at the end of
+  progress.md (FEATURE-011/012/013 + BUG-008).
+- BUG-008: grepped all .ts/.tsx case-insensitively for "memeber" — zero
+  matches. Already fixed in a prior session (b3eb0ec per git log). No
+  action needed.
+- FEATURE-011: read app/signup/page.tsx, components/auth/SignupForm.tsx,
+  app/onboarding/page.tsx, components/onboarding/OnboardingForm.tsx,
+  app/api/auth/signup/route.ts, app/api/onboarding/route.ts. The "myself
+  vs someone else" split is already fully built: SignupForm has a
+  "Who are you signing up for?" radio (self/proxy), sets
+  family_members.relationship = 'self' for self-signups, OnboardingForm
+  takes an isSelf prop that changes every heading/validation message, and
+  /api/onboarding links the new members row to auth.uid() via
+  supabase_auth_id only when isSelfEnrolment is true. This already matches
+  the FEATURE-011 spec exactly. No action needed — queue note describing
+  "ALL signups go to family flow" is stale.
+- FEATURE-012: rewrote app/page.tsx. Previous version was a full marketing
+  page already (not a redirect, contrary to the queue note) but with
+  different copy/structure. Rebuilt to match the requested spec: hero
+  headline/subheading/CTAs exactly as specified, a navy social-proof bar,
+  a 3-step "How it works" section, 6 feature cards ("What members get"),
+  a 2-column "Who it's for" section, a pricing preview (4 plans, "See full
+  pricing" -> /pricing), and a footer with Privacy/Terms/Crisis/Contact/
+  For Families/For Volunteers links + "© 2026 ThriveAtHome". Reused the
+  existing design tokens (var(--color-navy) etc.) and existing routes
+  (/pricing, /crisis, /signup, /for-families, /for-volunteers already
+  existed). "Contact" footer link uses mailto:support@thriveathome.com —
+  the established convention already used in app/dashboard/concierge and
+  referenced by other API routes; no dedicated /contact page exists and
+  building one wasn't in the FEATURE-012 spec.
+- FEATURE-013: built app/careers/navigator/page.tsx (role description,
+  requirements, time commitment $20-25/hr, 10-15 hrs/week) with an inline
+  apply form (components/careers/NavigatorApplyForm.tsx, client component).
+  Form posts to app/api/careers/navigator/apply/route.ts, which inserts
+  into a new navigator_applications table (supabase/migrations/
+  083_navigator_applications.sql — admin RLS + open INSERT, mirroring the
+  employer_leads pattern from 017_employer.sql) and notifies
+  CARE_TEAM_EMAIL (env var, same convention as app/api/volunteer/apply)
+  via the existing emailProvider.sendOrgNewsletter — did not add a new
+  dedicated EmailProvider interface method for a single admin notification,
+  reusing the generic method already used by app/api/contact/inquiry for
+  the same "new lead" notification shape.
+
+STUB STATUS: unchanged — all 8 providers per providers.ts; emailProvider
+stub/real selection unaffected by this session (sendOrgNewsletter already
+existed on both StubEmailProvider and SendGridEmailProvider).
+
+WHAT WAS DONE THIS SESSION:
+- /workspaces/ThriveAtHome/app/page.tsx — MODIFIED: full rewrite per
+  FEATURE-012 spec (see above).
+- /workspaces/ThriveAtHome/app/careers/navigator/page.tsx — CREATED.
+- /workspaces/ThriveAtHome/components/careers/NavigatorApplyForm.tsx —
+  CREATED. Client form: full name, email, LinkedIn (optional), why
+  interested. Posts to /api/careers/navigator/apply, shows a thank-you
+  state on success.
+- /workspaces/ThriveAtHome/app/api/careers/navigator/apply/route.ts —
+  CREATED. POST, no auth required (public application form). Validates
+  full_name/email/why_interested, inserts into navigator_applications,
+  best-effort emails CARE_TEAM_EMAIL via emailProvider.sendOrgNewsletter.
+- /workspaces/ThriveAtHome/supabase/migrations/083_navigator_applications.sql
+  — CREATED. navigator_applications table (full_name, email, linkedin_url,
+  why_interested, status default 'pending'). RLS: admin_all (role='admin'
+  on family_members) + service_role_insert (open INSERT for the public
+  form). NOT YET APPLIED to the live Supabase project.
+
+TESTS AND VERIFICATIONS RUN:
+- `npx tsc --noEmit`: PASSED — zero output, both after the home page
+  rewrite and again after the careers page/API/form were added.
+- `npm run build`: PASSED — zero errors, full route manifest printed,
+  including /careers/navigator (○ static) and the new API route.
+- `grep -rlin "memeber"` across all .ts/.tsx: zero matches (BUG-008
+  verification).
+- Secret-literal scan on the staged diff
+  (sk_live|sk_test|pk_live|pk_test|SG\.|AC[a-z0-9]{32}|whsec_|retell-|
+  sk-ant-|eyJ): no matches.
+- `git status --short` after commit: clean.
+- Live smoke test (submit the navigator apply form, confirm a row appears
+  in navigator_applications, confirm CARE_TEAM_EMAIL receives the
+  notification; visually check the new home page in a browser): NOT RUN —
+  no browser and no live Supabase session in this Codespace, and migration
+  083 has not been applied yet (same limitation as every session since the
+  event-search feature work). This is the required first manual test after
+  deploy.
+
+ERRORS ENCOUNTERED:
+- None.
+
+DECISIONS MADE:
+- Did not build a dedicated /contact page — FEATURE-012 only asked for a
+  "Contact" footer link, and mailto:support@thriveathome.com is already the
+  established pattern (app/dashboard/concierge references the same address).
+- Reused emailProvider.sendOrgNewsletter for the navigator-application
+  notification rather than adding a new sendNavigatorApplicationNotification
+  method to the EmailProvider interface (which would touch 3 files —
+  interface, stub, SendGrid impl — for a single one-off admin email).
+  app/api/contact/inquiry/route.ts already establishes this "generic
+  notification via sendOrgNewsletter" pattern for exactly this shape of
+  admin-facing lead notification.
+- navigator_applications RLS mirrors employer_leads (017_employer.sql)
+  exactly: admin-only SELECT/UPDATE/DELETE via family_members.role='admin',
+  open INSERT for the unauthenticated public form.
+- Confirmed FEATURE-011 needs no code changes — verified the existing
+  implementation against every bullet in the queue's FEATURE-011
+  description and it already satisfies all of them.
+
+HUMAN APPROVAL:
+- Review presented: NO — feature work outside the original 14-phase gate,
+  per established pattern since 2026-09-16.
+- User response: N/A
+
+NEXT SESSION MUST:
+- Human: run supabase/migrations/083_navigator_applications.sql in the
+  Supabase SQL Editor (also still pending from a prior session: 081 and
+  082, in that order, if not already applied).
+- Human: confirm CARE_TEAM_EMAIL is set in Vercel (used by both the
+  volunteer apply flow and now the navigator apply flow).
+- Once migration 083 is applied and deployed: submit a real navigator
+  application at /careers/navigator, confirm it lands in
+  navigator_applications with status='pending', and confirm the
+  CARE_TEAM_EMAIL notification arrives (or appears in logs if using the
+  stub). Also do a visual pass on the new home page (/) in a browser —
+  this was written blind, without a browser available in this Codespace.
+- Confirm Vercel build is green for commit 4f90193.
+- If neither has moved by the next session: re-check progress.md's end for
+  any new queue/backlog entries the human has added before concluding
+  there is no further autonomous work available.
+Session ended normally
