@@ -1602,3 +1602,52 @@ NEXT SESSION MUST:
   any new queue/backlog entries the human has added before concluding
   there is no further autonomous work available.
 Session ended normally
+---
+
+---
+SESSION: 3
+DATE: 2026-09-23
+MILESTONE: Post-M6 feature work
+PHASE: N/A
+STATUS: IN_PROGRESS
+HUMAN_APPROVAL: N/A
+
+INNER LOOP STATE AT END OF SESSION:
+- Read prompt.md/progress.md/checklist.md per session-start protocol.
+- git status clean at HEAD = 2b56fd1, matching the prior session's own
+  logged commit exactly -- no undocumented work on disk.
+- Re-checked the full end of progress.md for any new queue/backlog entries
+  appended since session 2 -- none found. FEATURE-001 still has no human
+  go/no-go. Migrations 081/082/083 still unconfirmed as applied.
+- Ran the two locally-runnable verifications.
+
+STUB STATUS: unchanged.
+
+WHAT WAS DONE THIS SESSION:
+- No files created or modified -- verification-only session.
+
+TESTS AND VERIFICATIONS RUN:
+- `npx tsc --noEmit`: PASSED -- zero output.
+- `npm run build`: PASSED -- zero errors, full route manifest printed,
+  including /careers/navigator, /for-families, /for-volunteers, /terms.
+
+ERRORS ENCOUNTERED:
+- None.
+
+DECISIONS MADE:
+- No code changes made. Did not start FEATURE-001 -- no human go/no-go yet.
+
+HUMAN APPROVAL:
+- Review presented: NO -- no new code this session.
+- User response: N/A
+
+NEXT SESSION MUST:
+- Human: apply migrations 081, 082, 083 in the Supabase SQL Editor (in that
+  order) if not already done; confirm GOOGLE_SEARCH_API_KEY,
+  GOOGLE_SEARCH_ENGINE_ID, ANTHROPIC_API_KEY, CARE_TEAM_EMAIL are set in
+  Vercel; give a go/no-go on FEATURE-001 scope.
+- Once deployed: smoke-test the new home page (/), the navigator careers
+  apply form, and live event search on Cultural Programming/Festivals.
+- If nothing has moved by the next session: keep re-checking progress.md's
+  end for new queue/backlog entries before concluding no work is available.
+Session ended normally
