@@ -1806,3 +1806,61 @@ NEXT SESSION MUST:
 - If nothing has moved by the next session: keep re-checking progress.md's
   end for new queue/backlog entries before concluding no work is available.
 QUESTION FOR HUMAN
+
+---
+SESSION: 7
+DATE: 2026-09-23
+MILESTONE: Post-M6 feature work
+PHASE: N/A
+STATUS: IN_PROGRESS
+HUMAN_APPROVAL: N/A
+
+INNER LOOP STATE AT END OF SESSION:
+- Read prompt.md/progress.md/checklist.md per session-start protocol.
+- git status clean at HEAD = 24c41f5, matching session 6's logged commit
+  exactly -- no undocumented work on disk.
+- Re-checked the full end of progress.md for any new queue/backlog entries
+  appended since session 6 -- none found. FEATURE-001 still has no human
+  go/no-go (unanswered across 9+ sessions now). Migrations 081/082/083
+  still unconfirmed as applied.
+- Re-checked for any new tooling that would unblock the standing human-side
+  items: `which vercel supabase` -- neither installed; no DATABASE_URL/
+  POSTGRES_URL/SUPABASE_ACCESS_TOKEN in .env.local -- still no direct DB or
+  Vercel access from this Codespace. Unchanged limitation.
+- Ran the two locally-runnable verifications.
+
+STUB STATUS: unchanged.
+
+WHAT WAS DONE THIS SESSION:
+- No files created or modified -- verification-only session (9th
+  consecutive session with this outcome).
+
+TESTS AND VERIFICATIONS RUN:
+- `npx tsc --noEmit`: PASSED -- zero output.
+- `npm run build`: PASSED -- zero errors, full route manifest printed.
+- `git status`: PASSED -- working tree clean, nothing to commit.
+
+ERRORS ENCOUNTERED:
+- None.
+
+DECISIONS MADE:
+- No code changes made. Did not start FEATURE-001 -- no human go/no-go yet.
+- Confirmed (again) that Supabase migration application and Vercel env/
+  deploy confirmation remain outside this Codespace's reach -- no CLI, no
+  DB connection string, no browser. Not re-attempting workarounds for this;
+  flagged clearly instead so the human sees exactly what is needed.
+
+HUMAN APPROVAL:
+- Review presented: NO -- no new code this session.
+- User response: N/A
+
+NEXT SESSION MUST:
+- Human: apply migrations 081, 082, 083 in the Supabase SQL Editor (in that
+  order) if not already done; confirm GOOGLE_SEARCH_API_KEY,
+  GOOGLE_SEARCH_ENGINE_ID, ANTHROPIC_API_KEY, CARE_TEAM_EMAIL are set in
+  Vercel; give a go/no-go on FEATURE-001 scope.
+- Once deployed: smoke-test the new home page (/), the navigator careers
+  apply form, and live event search on Cultural Programming/Festivals.
+- If nothing has moved by the next session: keep re-checking progress.md's
+  end for new queue/backlog entries before concluding no work is available.
+QUESTION FOR HUMAN
