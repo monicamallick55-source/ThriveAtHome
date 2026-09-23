@@ -4,6 +4,7 @@
 // Nothing else in the codebase changes.
 
 import { StubCallProvider }      from './stubs/StubCallProvider'
+import { RetellCallProvider }    from './services/RetellCallProvider'
 import { StubSmsProvider }       from './stubs/StubSmsProvider'
 import { StubEmailProvider }     from './stubs/StubEmailProvider'
 import { StubAiProvider }        from './stubs/StubAiProvider'
@@ -38,8 +39,6 @@ function resolveAiProvider(): AiProvider {
 }
 function resolveCallProvider(): CallProvider {
   if (process.env.RETELL_API_KEY && process.env.TWILIO_ACCOUNT_SID) {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { RetellCallProvider } = require('./services/RetellCallProvider') // Added in M8
     return new RetellCallProvider()
   }
   return new StubCallProvider()
