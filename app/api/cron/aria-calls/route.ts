@@ -82,6 +82,7 @@ export async function GET(req: NextRequest) {
   }
 
   // ── 2. ONBOARDING CALLS ─────────────────────────────────────────────────────
+  // callType: 'onboarding' is passed so Aria uses the welcome script branch
   const cutoff = new Date(now.getTime() - 20 * 60 * 60 * 1000).toISOString()
 
   const { data: onboardingMembers } = await (admin.from as any)('members')
@@ -102,6 +103,7 @@ export async function GET(req: NextRequest) {
         interests: m.topics_enjoy ?? [],
         priorCallSummaries: [],
         preferredLanguage: m.preferred_language ?? 'english',
+        callType: 'onboarding',
       }
 
       const callId = await callProvider.scheduleCall(m.id, m.phone_number, ctx)
@@ -116,7 +118,7 @@ export async function GET(req: NextRequest) {
 
       await admin.from('check_in_calls').insert({
         member_id: m.id,
-        call_type: 'check_in',
+        call_type: 'onboarding',
         status: 'scheduled',
         scheduled_at: now.toISOString(),
         retell_call_id: callId,

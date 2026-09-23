@@ -24,6 +24,7 @@ export class RetellCallProvider implements CallProvider {
         interests: ctx.interests,
         preferred_language: ctx.preferredLanguage,
         prior_call_summaries: ctx.priorCallSummaries,
+        call_type: ctx.callType ?? 'check_in',
       },
     }
 

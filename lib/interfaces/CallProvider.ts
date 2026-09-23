@@ -5,6 +5,7 @@ export interface CallContext {
   interests: string[]
   priorCallSummaries: string[]
   preferredLanguage: string
+  callType?: 'onboarding' | 'check_in' | 'callback'
 }
 
 export interface CallProvider {

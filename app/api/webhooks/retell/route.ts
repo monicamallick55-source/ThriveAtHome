@@ -69,6 +69,8 @@ export async function POST(req: NextRequest) {
         'create_service_request': `${baseUrl}/api/retell/tools/service-request`,
         'flag_welfare_concern': `${baseUrl}/api/retell/tools/welfare-check`,
         'request_callback': `${baseUrl}/api/retell/tools/request-callback`,
+        'log_mood_score': `${baseUrl}/api/retell/tools/log-mood-score`,
+        'create_navigator_alert': `${baseUrl}/api/retell/tools/navigator-alert`,
       }
 
       const routeUrl = toolRoutes[toolName]
