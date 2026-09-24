@@ -19,6 +19,7 @@ export class RetellCallProvider implements CallProvider {
       to_number: phone,
       agent_id: agentId,
       retell_llm_dynamic_variables: {
+        member_id: memberId,
         preferred_name: ctx.preferredName,
         call_type: ctx.callType ?? 'check_in',
         interests: ctx.interests.join(', '),
@@ -54,4 +55,4 @@ export class RetellCallProvider implements CallProvider {
     return data.call_id
   }
 }
-// force redeploy Wed Sep 23 03:34:23 UTC 2026
+// force redeploy Thu Sep 24 19:07:00 UTC 2026
