@@ -18,6 +18,13 @@ export class RetellCallProvider implements CallProvider {
       from_number: this.fromNumber,
       to_number: phone,
       agent_id: agentId,
+      retell_llm_dynamic_variables: {
+        preferred_name: ctx.preferredName,
+        call_type: ctx.callType ?? 'check_in',
+        interests: ctx.interests.join(', '),
+        preferred_language: ctx.preferredLanguage,
+        prior_call_summaries: ctx.priorCallSummaries.join('\n'),
+      },
       metadata: {
         member_id: memberId,
         preferred_name: ctx.preferredName,
