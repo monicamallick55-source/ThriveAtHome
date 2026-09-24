@@ -35,14 +35,17 @@ export async function POST(req: NextRequest) {
     }
 
     const { data: booking, error: bookingErr } = await (admin.from as any)('service_bookings').insert({
-      member_id,
-      service_type,
-      description,
-      preferred_date: preferred_date ?? null,
-      status: 'pending',
-      source: 'aria_call',
-      notes: `Created by Aria during call. Urgency: ${urgency}.`,
-    }).select('id').single()
+  member_id,
+  service_type,
+  booking_details: {
+    description,
+    urgency,
+    source: 'aria_call',
+  },
+  requested_for: preferred_date ?? null,
+  status: 'requested',
+  notes: `Created by Aria during call. Urgency: ${urgency}. ${description}`,
+}).select('id').single()
 
     if (bookingErr) {
       console.error('[Retell Tool] service-request insert error:', bookingErr)
