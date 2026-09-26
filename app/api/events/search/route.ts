@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  if (!process.env.GOOGLE_SEARCH_API_KEY || !process.env.GOOGLE_SEARCH_ENGINE_ID || !process.env.ANTHROPIC_API_KEY) {
+  if (!process.env.SEARCHAPI_API_KEY || !process.env.ANTHROPIC_API_KEY) {
     console.error('[api/events/search] Missing GOOGLE_SEARCH_API_KEY, GOOGLE_SEARCH_ENGINE_ID, or ANTHROPIC_API_KEY')
     return NextResponse.json(
       { error: 'Event search is not configured yet. Please try again later.' },

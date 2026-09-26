@@ -80,26 +80,43 @@ interface GoogleSearchItem {
   snippet?: string
 }
 
-async function runGoogleSearch(query: string): Promise<GoogleSearchItem[]> {
-  const apiKey = requireServerEnv('GOOGLE_SEARCH_API_KEY')
-  const engineId = requireServerEnv('GOOGLE_SEARCH_ENGINE_ID')
-  const url = new URL('https://www.googleapis.com/customsearch/v1')
-  url.searchParams.set('key', apiKey)
-  url.searchParams.set('cx', engineId)
+async function runSearchApiEvents(query: string): Promise<GoogleSearchItem[]> {
+  const apiKey = requireServerEnv('SEARCHAPI_API_KEY')
+  
+  const url = new URL('https://www.searchapi.io/api/v1/search')
+  url.searchParams.set('engine', 'google_events')
+  url.searchParams.set('api_key', apiKey)
   url.searchParams.set('q', query)
-  url.searchParams.set('num', '10')
-
+  url.searchParams.set('hl', 'en')
+  url.searchParams.set('gl', 'us')
+  
   const res = await fetch(url.toString())
   if (!res.ok) {
-    const body = await res.text().catch(() => '')
-    throw new Error(`Google Custom Search request failed (${res.status}): ${body.slice(0, 300)}`)
+    const error = await res.text()
+    throw new Error(`SearchApi failed: ${res.status} ${error}`)
   }
-  const json: unknown = await res.json()
-  if (typeof json !== 'object' || json === null || !('items' in json)) return []
-  const items = (json as { items?: unknown }).items
-  if (!Array.isArray(items)) return []
-  return items as GoogleSearchItem[]
+  
+  const data = await res.json()
+  
+  return (data.events_results ?? []).map((e: {
+    title: string
+    link?: string
+    description?: string
+    date?: { start_date?: string; when?: string }
+    address?: string[]
+    venue?: { name?: string }
+  }) => ({
+    title: e.title,
+    link: e.link ?? '',
+    snippet: [
+      e.date?.when ?? e.date?.start_date ?? '',
+      e.venue?.name ?? '',
+      (e.address ?? []).join(', '),
+      e.description ?? ''
+    ].filter(Boolean).join(' | '),
+  }))
 }
+
 
 async function scoreForSeniorRelevance(
   items: GoogleSearchItem[],
@@ -159,7 +176,7 @@ export async function searchLiveEvents(
   if (cached) return { data: cached, error: null, cached: true }
 
   try {
-    const items = await runGoogleSearch(query)
+    const items = await runSearchApiEvents(query)
     const events = await scoreForSeniorRelevance(items, category)
     await writeCache(query, zip, events)
     return { data: events, error: null, cached: false }
