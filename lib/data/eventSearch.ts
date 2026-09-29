@@ -26,9 +26,9 @@ function getAnthropicClient(): Anthropic {
   return anthropicClient
 }
 
-function buildQuery(category: LiveEventCategory, zip: string, radius: number): string {
-  if (category === 'festival') return `cultural festival events near ${zip}`
-  return `community events classes near ${zip}`
+function buildQuery(category: LiveEventCategory, zip: string, _radius: number): string {
+  if (category === 'festival') return `cultural festival seniors near ${zip} site:eventbrite.com OR site:meetup.com`
+  return `senior adults 55+ cultural arts classes community near ${zip} site:eventbrite.com OR site:meetup.com`
 }
 
 // event_search_cache and live_event_rsvps (migrations 081/082) predate the
