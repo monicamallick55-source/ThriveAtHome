@@ -27,7 +27,6 @@ async function readCache(query: string, zip: string): Promise<LiveEventResult[] 
       .limit(1)
       .maybeSingle()
     if (error) { console.error('[eventSearch/readCache]', error); return null }
-    if (!data) return null
     return (data as { results: LiveEventResult[] }).results
   } catch (e) {
     console.error('[eventSearch/readCache]', e); return null
@@ -56,25 +55,22 @@ interface ApifyPlace {
 }
 
 async function findSeniorCentersNearZip(zip: string, apiKey: string): Promise<ApifyPlace[]> {
-  const res = await fetch(
-    \`https://api.apify.com/v2/acts/compass~crawler-google-places/run-sync-get-dataset-items?token=\${apiKey}&memory=256\`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        searchStringsArray: [
-          \`senior center near \${zip}\`,
-          \`community center classes seniors near \${zip}\`,
-          \`adult education 55+ near \${zip}\`,
-        ],
-        maxCrawledPlacesPerSearch: 5,
-        language: 'en',
-        countryCode: 'us',
-      }),
-      signal: AbortSignal.timeout(28000),
-    }
-  )
-  if (!res.ok) throw new Error(\`Apify Places failed: \${res.status}\`)
+  const url = 'https://api.apify.com/v2/acts/compass~crawler-google-places/run-sync-get-dataset-items?token=' + apiKey + '&memory=256'
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      searchStringsArray: [
+        'senior center near ' + zip,
+        'community center classes seniors near ' + zip,
+        'adult education 55+ near ' + zip,
+      ],
+      maxCrawledPlacesPerSearch: 5,
+      language: 'en',
+      countryCode: 'us',
+    }),
+    signal: AbortSignal.timeout(28000),
+  })
   const data = await res.json()
   return (Array.isArray(data) ? data : []) as ApifyPlace[]
 }
@@ -86,21 +82,18 @@ interface PageContent {
 
 async function crawlEventPages(websites: string[], apiKey: string): Promise<PageContent[]> {
   const startUrls = websites.slice(0, 5).map(url => ({ url }))
-  const res = await fetch(
-    \`https://api.apify.com/v2/acts/apify~website-content-crawler/run-sync-get-dataset-items?token=\${apiKey}&memory=512\`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        startUrls,
-        maxCrawlPages: 2,
-        crawlerType: 'cheerio',
-        includeUrlGlobs: ['*event*', '*class*', '*program*', '*activit*', '*calendar*', '*recreation*'],
-      }),
-      signal: AbortSignal.timeout(28000),
-    }
-  )
-  if (!res.ok) throw new Error(\`Apify Crawler failed: \${res.status}\`)
+  const crawlUrl = 'https://api.apify.com/v2/acts/apify~website-content-crawler/run-sync-get-dataset-items?token=' + apiKey + '&memory=512'
+  const res = await fetch(crawlUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      startUrls,
+      maxCrawlPages: 2,
+      crawlerType: 'cheerio',
+      includeUrlGlobs: ['*event*', '*class*', '*program*', '*activit*', '*calendar*', '*recreation*'],
+    }),
+    signal: AbortSignal.timeout(28000),
+  })
   const data = await res.json()
   return (Array.isArray(data) ? data : []).map((item: { url?: string; text?: string }) => ({
     url: item.url ?? '',
@@ -112,19 +105,17 @@ function extractEventsFromText(pages: PageContent[], category: LiveEventCategory
   const results: LiveEventResult[] = []
   const seniorKeywords = ['senior', 'adult', '55+', '60+', 'elder', 'fitness', 'yoga', 'art', 'music', 'dance', 'craft', 'class', 'workshop', 'program', 'activity', 'club', 'social', 'lecture', 'trip', 'volunteer', 'garden', 'bingo', 'lunch', 'nutrition', 'health', 'wellness']
   const festivalKeywords = ['festival', 'fair', 'cultural', 'heritage', 'celebration', 'parade', 'concert', 'performance', 'exhibit']
-  const datePattern = /(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+\d{1,2}(?:,\s*\d{4})?|\d{1,2}\/\d{1,2}(?:\/\d{2,4})?/gi
+  const datePattern = /(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?) d{1,2}(?:, ?d{4})?|d{1,2}/d{1,2}(?:/d{2,4})?/gi
 
   for (const page of pages) {
-    if (!page.text || !page.url) continue
-    const lines = page.text.split(/\n+/).map((l: string) => l.trim()).filter((l: string) => l.length > 10)
+    const lines = page.text.split(/
++/).map((l: string) => l.trim()).filter((l: string) => l.length > 10)
     const activeKeywords = category === 'festival' ? festivalKeywords : seniorKeywords
     let pageCount = 0
-
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i]
       const lowerLine = line.toLowerCase()
       const hasKeyword = activeKeywords.some((kw: string) => lowerLine.includes(kw))
-      if (!hasKeyword || line.length > 200) continue
       const context = lines.slice(Math.max(0, i - 1), Math.min(lines.length, i + 3)).join(' ')
       const dateMatch = context.match(datePattern)
       const date = dateMatch ? dateMatch[0] : 'See website for dates'
@@ -132,7 +123,7 @@ function extractEventsFromText(pages: PageContent[], category: LiveEventCategory
       results.push({
         title: line.slice(0, 80),
         date,
-        location: page.url.replace(/^https?:\/\//, '').split('/')[0],
+        location: page.url.replace(/^https?:///, '').split('/')[0],
         description,
         url: page.url,
         score: 8,
@@ -154,17 +145,16 @@ function extractEventsFromText(pages: PageContent[], category: LiveEventCategory
 
 async function runApifyPipeline(category: LiveEventCategory, zip: string): Promise<LiveEventResult[]> {
   const apiKey = process.env.APIFY_API_TOKEN
-  if (!apiKey) throw new Error('APIFY_API_TOKEN not configured')
   const places = await findSeniorCentersNearZip(zip, apiKey)
-  console.log(\`[eventSearch] Found \${places.length} places near \${zip}\`)
+  console.log('[eventSearch] Found ' + places.length + ' places near ' + zip)
   const websites = places
     .map((p: ApifyPlace) => p.website)
-    .filter((w: string | undefined): w is string => !!w && w.startsWith('http'))
+    .filter((w: string | undefined): w is string => git statusw && w.startsWith('http'))
   if (websites.length === 0) throw new Error('No senior center websites found near ' + zip)
   const pages = await crawlEventPages(websites, apiKey)
-  console.log(\`[eventSearch] Crawled \${pages.length} pages\`)
+  console.log('[eventSearch] Crawled ' + pages.length + ' pages')
   const events = extractEventsFromText(pages, category)
-  console.log(\`[eventSearch] Extracted \${events.length} events\`)
+  console.log('[eventSearch] Extracted ' + events.length + ' events')
   return events
 }
 
@@ -173,7 +163,7 @@ export async function searchLiveEvents(
   zip: string,
   radius: number
 ): Promise<{ data: LiveEventResult[] | null; error: string | null; cached: boolean }> {
-  const cacheKey = \`apify:\${category}:\${zip}:\${radius}\`
+  const cacheKey = 'apify:' + category + ':' + zip + ':' + radius
   const cached = await readCache(cacheKey, zip)
   if (cached) return { data: cached, error: null, cached: true }
   try {
