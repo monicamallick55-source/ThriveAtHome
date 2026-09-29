@@ -1,4 +1,3 @@
-import { requireServerEnv } from '../env'
 import { createAdminClient } from '../supabase/admin'
 
 export type LiveEventCategory = 'cultural' | 'festival'
@@ -15,11 +14,6 @@ export interface LiveEventResult {
 
 const CACHE_HOURS = 24
 
-function buildQuery(category: LiveEventCategory, zip: string, _radius: number): string {
-  if (category === 'festival') return `cultural festival seniors near ${zip} site:eventbrite.com OR site:meetup.com`
-  return `senior adults 55+ cultural arts classes community near ${zip} site:eventbrite.com OR site:meetup.com`
-}
-
 async function readCache(query: string, zip: string): Promise<LiveEventResult[] | null> {
   try {
     const admin = createAdminClient()
@@ -32,12 +26,11 @@ async function readCache(query: string, zip: string): Promise<LiveEventResult[] 
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle()
-    if (error) { console.error('[data/eventSearch/readCache]', error); return null }
+    if (error) { console.error('[eventSearch/readCache]', error); return null }
     if (!data) return null
     return (data as { results: LiveEventResult[] }).results
   } catch (e) {
-    console.error('[data/eventSearch/readCache] Unexpected error:', e)
-    return null
+    console.error('[eventSearch/readCache]', e); return null
   }
 }
 
@@ -49,52 +42,130 @@ async function writeCache(query: string, zip: string, results: LiveEventResult[]
     const { error } = await (admin.from as any)('event_search_cache').insert({
       query, zip_code: zip, results, expires_at: expiresAt,
     })
-    if (error) console.error('[data/eventSearch/writeCache]', error)
+    if (error) console.error('[eventSearch/writeCache]', error)
   } catch (e) {
-    console.error('[data/eventSearch/writeCache] Unexpected error:', e)
+    console.error('[eventSearch/writeCache]', e)
   }
 }
 
-interface GoogleSearchItem {
+interface ApifyPlace {
   title?: string
-  link?: string
-  snippet?: string
+  website?: string
+  address?: string
+  categoryName?: string
 }
 
-async function runSearchApiEvents(query: string): Promise<GoogleSearchItem[]> {
-  const apiKey = requireServerEnv('SEARCHAPI_API_KEY')
-  const url = new URL('https://www.searchapi.io/api/v1/search')
-  url.searchParams.set('engine', 'google')
-  url.searchParams.set('api_key', apiKey)
-  url.searchParams.set('q', query)
-  url.searchParams.set('hl', 'en')
-  url.searchParams.set('gl', 'us')
-  const res = await fetch(url.toString())
-  if (!res.ok) {
-    const error = await res.text()
-    throw new Error(`SearchApi failed: ${res.status} ${error}`)
-  }
+async function findSeniorCentersNearZip(zip: string, apiKey: string): Promise<ApifyPlace[]> {
+  const res = await fetch(
+    \`https://api.apify.com/v2/acts/compass~crawler-google-places/run-sync-get-dataset-items?token=\${apiKey}&memory=256\`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        searchStringsArray: [
+          \`senior center near \${zip}\`,
+          \`community center classes seniors near \${zip}\`,
+          \`adult education 55+ near \${zip}\`,
+        ],
+        maxCrawledPlacesPerSearch: 5,
+        language: 'en',
+        countryCode: 'us',
+      }),
+      signal: AbortSignal.timeout(28000),
+    }
+  )
+  if (!res.ok) throw new Error(\`Apify Places failed: \${res.status}\`)
   const data = await res.json()
-  return (data.organic_results ?? []).map((e: { title?: string; link?: string; snippet?: string }) => ({
-    title: e.title ?? '',
-    link: e.link ?? '',
-    snippet: e.snippet ?? '',
+  return (Array.isArray(data) ? data : []) as ApifyPlace[]
+}
+
+interface PageContent {
+  url: string
+  text: string
+}
+
+async function crawlEventPages(websites: string[], apiKey: string): Promise<PageContent[]> {
+  const startUrls = websites.slice(0, 5).map(url => ({ url }))
+  const res = await fetch(
+    \`https://api.apify.com/v2/acts/apify~website-content-crawler/run-sync-get-dataset-items?token=\${apiKey}&memory=512\`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        startUrls,
+        maxCrawlPages: 2,
+        crawlerType: 'cheerio',
+        includeUrlGlobs: ['*event*', '*class*', '*program*', '*activit*', '*calendar*', '*recreation*'],
+      }),
+      signal: AbortSignal.timeout(28000),
+    }
+  )
+  if (!res.ok) throw new Error(\`Apify Crawler failed: \${res.status}\`)
+  const data = await res.json()
+  return (Array.isArray(data) ? data : []).map((item: { url?: string; text?: string }) => ({
+    url: item.url ?? '',
+    text: item.text ?? '',
   }))
 }
 
-async function scoreForSeniorRelevance(
-  items: GoogleSearchItem[],
-  _category: LiveEventCategory
-): Promise<LiveEventResult[]> {
-  return items.slice(0, 10).map(it => ({
-    title: it.title ?? 'Untitled',
-    date: 'Check listing',
-    location: 'Check listing',
-    description: it.snippet ?? '',
-    url: it.link ?? '',
-    score: 8,
-    category: 'cultural',
-  }))
+function extractEventsFromText(pages: PageContent[], category: LiveEventCategory): LiveEventResult[] {
+  const results: LiveEventResult[] = []
+  const seniorKeywords = ['senior', 'adult', '55+', '60+', 'elder', 'fitness', 'yoga', 'art', 'music', 'dance', 'craft', 'class', 'workshop', 'program', 'activity', 'club', 'social', 'lecture', 'trip', 'volunteer', 'garden', 'bingo', 'lunch', 'nutrition', 'health', 'wellness']
+  const festivalKeywords = ['festival', 'fair', 'cultural', 'heritage', 'celebration', 'parade', 'concert', 'performance', 'exhibit']
+  const datePattern = /(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+\d{1,2}(?:,\s*\d{4})?|\d{1,2}\/\d{1,2}(?:\/\d{2,4})?/gi
+
+  for (const page of pages) {
+    if (!page.text || !page.url) continue
+    const lines = page.text.split(/\n+/).map((l: string) => l.trim()).filter((l: string) => l.length > 10)
+    const activeKeywords = category === 'festival' ? festivalKeywords : seniorKeywords
+    let pageCount = 0
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i]
+      const lowerLine = line.toLowerCase()
+      const hasKeyword = activeKeywords.some((kw: string) => lowerLine.includes(kw))
+      if (!hasKeyword || line.length > 200) continue
+      const context = lines.slice(Math.max(0, i - 1), Math.min(lines.length, i + 3)).join(' ')
+      const dateMatch = context.match(datePattern)
+      const date = dateMatch ? dateMatch[0] : 'See website for dates'
+      const description = lines.slice(i, Math.min(lines.length, i + 2)).join(' ').slice(0, 200)
+      results.push({
+        title: line.slice(0, 80),
+        date,
+        location: page.url.replace(/^https?:\/\//, '').split('/')[0],
+        description,
+        url: page.url,
+        score: 8,
+        category,
+      })
+      pageCount++
+      if (pageCount >= 4) break
+    }
+  }
+
+  const seen = new Set<string>()
+  return results.filter(r => {
+    const key = r.title.toLowerCase().slice(0, 40)
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  }).slice(0, 12)
+}
+
+async function runApifyPipeline(category: LiveEventCategory, zip: string): Promise<LiveEventResult[]> {
+  const apiKey = process.env.APIFY_API_TOKEN
+  if (!apiKey) throw new Error('APIFY_API_TOKEN not configured')
+  const places = await findSeniorCentersNearZip(zip, apiKey)
+  console.log(\`[eventSearch] Found \${places.length} places near \${zip}\`)
+  const websites = places
+    .map((p: ApifyPlace) => p.website)
+    .filter((w: string | undefined): w is string => !!w && w.startsWith('http'))
+  if (websites.length === 0) throw new Error('No senior center websites found near ' + zip)
+  const pages = await crawlEventPages(websites, apiKey)
+  console.log(\`[eventSearch] Crawled \${pages.length} pages\`)
+  const events = extractEventsFromText(pages, category)
+  console.log(\`[eventSearch] Extracted \${events.length} events\`)
+  return events
 }
 
 export async function searchLiveEvents(
@@ -102,16 +173,15 @@ export async function searchLiveEvents(
   zip: string,
   radius: number
 ): Promise<{ data: LiveEventResult[] | null; error: string | null; cached: boolean }> {
-  const query = buildQuery(category, zip, radius)
-  const cached = await readCache(query, zip)
+  const cacheKey = \`apify:\${category}:\${zip}:\${radius}\`
+  const cached = await readCache(cacheKey, zip)
   if (cached) return { data: cached, error: null, cached: true }
   try {
-    const items = await runSearchApiEvents(query)
-    const events = await scoreForSeniorRelevance(items, category)
-    await writeCache(query, zip, events)
+    const events = await runApifyPipeline(category, zip)
+    if (events.length > 0) await writeCache(cacheKey, zip, events)
     return { data: events, error: null, cached: false }
   } catch (e) {
-    console.error('[data/eventSearch/searchLiveEvents] Failed:', e)
+    console.error('[eventSearch/searchLiveEvents]', e)
     return { data: null, error: e instanceof Error ? e.message : String(e), cached: false }
   }
 }
@@ -130,10 +200,9 @@ export async function joinLiveEvent(
         { member_id: memberId, event_url: eventUrl, event_title: eventTitle, event_date: eventDate },
         { onConflict: 'member_id,event_url', ignoreDuplicates: true }
       )
-    if (error) { console.error('[data/eventSearch/joinLiveEvent]', error); return { error: error.message } }
+    if (error) { console.error('[eventSearch/joinLiveEvent]', error); return { error: error.message } }
     return { error: null }
   } catch (e) {
-    console.error('[data/eventSearch/joinLiveEvent] Unexpected error:', e)
     return { error: e instanceof Error ? e.message : String(e) }
   }
 }
@@ -146,10 +215,9 @@ export async function leaveLiveEvent(memberId: string, eventUrl: string): Promis
       .delete()
       .eq('member_id', memberId)
       .eq('event_url', eventUrl)
-    if (error) { console.error('[data/eventSearch/leaveLiveEvent]', error); return { error: error.message } }
+    if (error) { console.error('[eventSearch/leaveLiveEvent]', error); return { error: error.message } }
     return { error: null }
   } catch (e) {
-    console.error('[data/eventSearch/leaveLiveEvent] Unexpected error:', e)
     return { error: e instanceof Error ? e.message : String(e) }
   }
 }
@@ -165,7 +233,7 @@ export async function getLiveEventAttendance(
     const { data, error } = await (admin.from as any)('live_event_rsvps')
       .select('event_url, member_id')
       .in('event_url', eventUrls)
-    if (error) { console.error('[data/eventSearch/getLiveEventAttendance]', error); return { data: {}, error: error.message } }
+    if (error) return { data: {}, error: error.message }
     const rows = (data ?? []) as Array<{ event_url: string; member_id: string }>
     const result: Record<string, { count: number; going: boolean }> = {}
     for (const url of eventUrls) result[url] = { count: 0, going: false }
@@ -177,7 +245,6 @@ export async function getLiveEventAttendance(
     }
     return { data: result, error: null }
   } catch (e) {
-    console.error('[data/eventSearch/getLiveEventAttendance] Unexpected error:', e)
     return { data: {}, error: e instanceof Error ? e.message : String(e) }
   }
 }
