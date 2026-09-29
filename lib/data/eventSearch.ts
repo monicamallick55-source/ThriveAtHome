@@ -82,7 +82,7 @@ async function runSearchApiEvents(query: string): Promise<GoogleSearchItem[]> {
   const apiKey = requireServerEnv('SEARCHAPI_API_KEY')
   
   const url = new URL('https://www.searchapi.io/api/v1/search')
-  url.searchParams.set('engine', 'google_events')
+  url.searchParams.set('engine', 'google')
   url.searchParams.set('api_key', apiKey)
   url.searchParams.set('q', query)
   url.searchParams.set('hl', 'en')
@@ -96,7 +96,7 @@ async function runSearchApiEvents(query: string): Promise<GoogleSearchItem[]> {
   
   const data = await res.json()
   
-  return (data.events_results ?? []).map((e: {
+  return (data.organic_results ?? []).map((e: {
     title: string
     link?: string
     description?: string
@@ -104,14 +104,9 @@ async function runSearchApiEvents(query: string): Promise<GoogleSearchItem[]> {
     address?: string[]
     venue?: { name?: string }
   }) => ({
-    title: e.title,
+    title: e.title ?? '',
     link: e.link ?? '',
-    snippet: [
-      e.date?.when ?? e.date?.start_date ?? '',
-      e.venue?.name ?? '',
-      (e.address ?? []).join(', '),
-      e.description ?? ''
-    ].filter(Boolean).join(' | '),
+    snippet: e.snippet ?? '',
   }))
 }
 
