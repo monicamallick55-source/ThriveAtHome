@@ -61,6 +61,7 @@ export default function EventsClient({ initialEvents }: Props) {
       const res = await fetch('/api/events/search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ category: 'cultural', zip: z, radius: 25 }),
       })
       if (res.ok === false) throw new Error('Search failed (' + res.status + ')')
