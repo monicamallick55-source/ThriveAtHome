@@ -4,7 +4,7 @@ export async function GET() {
   const apiKey = process.env.SEARCHAPI_API_KEY
   if (!apiKey) return NextResponse.json({ error: 'SEARCHAPI_API_KEY not set' })
 
-  const query = 'senior cultural classes workshops within 25 miles of 94404 October 2026'
+  const query = 'community events classes near 94404'
   const url = new URL('https://www.searchapi.io/api/v1/search')
   url.searchParams.set('engine', 'google_events')
   url.searchParams.set('api_key', apiKey)

@@ -27,10 +27,8 @@ function getAnthropicClient(): Anthropic {
 }
 
 function buildQuery(category: LiveEventCategory, zip: string, radius: number): string {
-  const monthYear = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-  const within = `within ${radius} miles of`
-  if (category === 'festival') return `cultural festival celebration ${within} ${zip} ${monthYear}`
-  return `senior cultural classes workshops ${within} ${zip} ${monthYear}`
+  if (category === 'festival') return `cultural festival events near ${zip}`
+  return `community events classes near ${zip}`
 }
 
 // event_search_cache and live_event_rsvps (migrations 081/082) predate the
