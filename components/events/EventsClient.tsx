@@ -46,6 +46,38 @@ export default function EventsClient({ initialEvents }: Props) {
   const [loadingId, setLoadingId] = useState<string | null>(null)
   const [toastMsg, setToastMsg] = useState<string | null>(null)
   const [waitlistedIds, setWaitlistedIds] = useState<Set<string>>(new Set())
+  const [liveZip, setLiveZip] = useState('')
+  const [liveEvents, setLiveEvents] = useState([])
+  const [liveLoading, setLiveLoading] = useState(false)
+  const [liveError, setLiveError] = useState(null)
+  const [liveCached, setLiveCached] = useState(false)
+  const [liveZip, setLiveZip] = useState('')
+  const [liveEvents, setLiveEvents] = useState<Array<{title:string;date:string;location:string;description:string;url:string;score:number;category:string}>>([])  
+  const [liveLoading, setLiveLoading] = useState(false)
+  const [liveError, setLiveError] = useState<string|null>(null)
+  const [liveCached, setLiveCached] = useState(false)
+
+  async function handleSearchEvents() {
+    const z = liveZip.trim()
+    if (z.length === 0) return
+    setLiveLoading(true)
+    setLiveError(null)
+    try {
+      const res = await fetch('/api/events/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category: 'cultural', zip: z, radius: 25 }),
+      })
+      if (res.ok === false) throw new Error('Search failed (' + res.status + ')')
+      const json = await res.json()
+      setLiveEvents(json.events ?? [])
+      setLiveCached(json.cached ?? false)
+    } catch(e) {
+      setLiveError(e instanceof Error ? e.message : String(e))
+    } finally {
+      setLiveLoading(false)
+    }
+  }
 
   function showToast(msg: string) {
     setToastMsg(msg)
@@ -159,6 +191,73 @@ export default function EventsClient({ initialEvents }: Props) {
           }}>Check back soon — new events are added regularly by your care team.</p>
         </div>
       )}
+
+      {/* Live community event search */}
+      <div style={{ marginTop: '48px' }}>
+        <h2 style={{
+          fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600,
+          color: 'var(--color-text-secondary)', textTransform: 'uppercase',
+          letterSpacing: '0.06em', margin: '0 0 16px',
+        }}>Find Events Near You</h2>
+        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
+          <input
+            type="text"
+            placeholder="Enter zip code"
+            value={liveZip}
+            onChange={e => setLiveZip(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') handleSearchEvents() }}
+            maxLength={10}
+            style={{
+              padding: '10px 14px', borderRadius: '8px',
+              border: '1px solid var(--color-border)',
+              fontFamily: 'var(--font-body)', fontSize: '15px', width: '140px',
+            }}
+          />
+          <button
+            onClick={handleSearchEvents}
+            disabled={liveLoading}
+            style={{
+              backgroundColor: 'var(--color-teal)', color: 'white',
+              border: 'none', borderRadius: '8px', padding: '10px 20px',
+              fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 600,
+              cursor: liveLoading ? 'not-allowed' : 'pointer',
+              opacity: liveLoading ? 0.6 : 1,
+            }}
+          >{liveLoading ? 'Searching…' : 'Search'}</button>
+        </div>
+        {liveError && (
+          <p style={{ color: '#c0392b', fontFamily: 'var(--font-body)', fontSize: '14px' }}>{liveError}</p>
+        )}
+        {liveCached && liveEvents.length > 0 && (
+          <p style={{ color: 'var(--color-text-secondary)', fontFamily: 'var(--font-body)', fontSize: '12px', marginBottom: '12px' }}>Showing cached results</p>
+        )}
+        {liveEvents.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {liveEvents.map((evt, i) => (
+              <div key={i} style={{
+                backgroundColor: 'white', borderRadius: '16px', padding: '20px 24px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+              }}>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--color-navy)', margin: '0 0 6px', fontWeight: 600 }}>{evt.title}</p>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', margin: '0 0 4px' }}>{'📅'} {evt.date}</p>
+                {evt.location && <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', margin: '0 0 8px' }}>{'📍'} {evt.location}</p>}
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-primary)', margin: '0 0 12px' }}>{evt.description}</p>
+                {evt.url && (
+                  <a href={evt.url} target="_blank" rel="noopener noreferrer" style={{
+                    display: 'inline-block', backgroundColor: 'var(--color-teal)', color: 'white',
+                    borderRadius: '8px', padding: '8px 16px',
+                    fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600,
+                    textDecoration: 'none',
+                  }}>View Event</a>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+        {liveLoading === false && liveEvents.length === 0 && liveZip.length > 0 && liveError === null && (
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)' }}>No events found near {liveZip}. Try a nearby zip code.</p>
+        )}
+      </div>
     </div>
   )
 }
