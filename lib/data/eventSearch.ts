@@ -14,6 +14,38 @@ export interface LiveEventResult {
 
 const CACHE_HOURS = 24
 
+// Bay Area senior/community center event pages by zip prefix
+const BAY_AREA_SENIOR_SITES: Record<string, string[]> = {
+  '940': [
+    'https://www.cityofsanmateo.org/638/Senior-Center',
+    'https://www.cityofsancarlos.org/government/departments/recreation/adult-community-center',
+    'https://www.fostercity.org/parks-recreation/recreation-programs/senior-programs',
+    'https://www.redwoodcity.org/departments/parks-recreation-and-community-services/senior-center',
+    'https://www.burlingame.org/departments/parks_recreation/senior_center/index.php',
+    'https://www.ssf.net/departments/parks-recreation-community-services/senior-services',
+    'https://www.cityofpaloalto.org/gov/depts/csd/seniors/default.asp',
+    'https://www.menlopark.gov/Government/Departments/Library-Community-Services/Senior-Programs',
+  ],
+  '941': [
+    'https://www.sfrecpark.org/facilities/facility/details/Mission-Senior-Center-273',
+    'https://www.sfrecpark.org/senior-services',
+    'https://www.oewd.org/seniors',
+  ],
+  '945': [
+    'https://www.oaklandca.gov/topics/senior-services',
+    'https://www.berkeleyside.org/category/seniors',
+  ],
+  '946': [
+    'https://www.cityoffremont.org/government/departments/human-services/senior-services',
+    'https://www.hayward-ca.gov/services/senior-services',
+  ],
+}
+
+function getSitesForZip(zip: string): string[] {
+  const prefix = zip.slice(0, 3)
+  return BAY_AREA_SENIOR_SITES[prefix] ?? BAY_AREA_SENIOR_SITES['940']
+}
+
 async function readCache(query: string, zip: string): Promise<LiveEventResult[] | null> {
   try {
     const admin = createAdminClient()
@@ -48,55 +80,27 @@ async function writeCache(query: string, zip: string, results: LiveEventResult[]
   }
 }
 
-interface ApifyPlace {
-  title?: string
-  website?: string
-  address?: string
-  categoryName?: string
-}
-
-async function findSeniorCentersNearZip(zip: string, apiKey: string): Promise<ApifyPlace[]> {
-  const url = 'https://api.apify.com/v2/acts/compass~crawler-google-places/run-sync-get-dataset-items?token=' + apiKey + '&memory=256'
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      searchStringsArray: [
-        'senior center near ' + zip,
-        'community center classes seniors near ' + zip,
-        'adult education 55+ near ' + zip,
-      ],
-      maxCrawledPlacesPerSearch: 5,
-      language: 'en',
-      countryCode: 'us',
-    }),
-    signal: AbortSignal.timeout(28000),
-  })
-  if (!res.ok) throw new Error('Apify Places failed: ' + res.status)
-  const data = await res.json()
-  return (Array.isArray(data) ? data : []) as ApifyPlace[]
-}
-
 interface PageContent {
   url: string
   text: string
 }
 
-async function crawlEventPages(websites: string[], apiKey: string): Promise<PageContent[]> {
-  const startUrls = websites.slice(0, 5).map(url => ({ url }))
-  const crawlUrl = 'https://api.apify.com/v2/acts/apify~website-content-crawler/run-sync-get-dataset-items?token=' + apiKey + '&memory=512'
-  const res = await fetch(crawlUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      startUrls,
-      maxCrawlPages: 2,
-      crawlerType: 'cheerio',
-      includeUrlGlobs: ['*event*', '*class*', '*program*', '*activit*', '*calendar*', '*recreation*'],
-    }),
-    signal: AbortSignal.timeout(28000),
-  })
-  if (!res.ok) throw new Error('Apify Crawler failed: ' + res.status)
+async function crawlWithApify(urls: string[], apiKey: string): Promise<PageContent[]> {
+  const startUrls = urls.map(url => ({ url }))
+  const res = await fetch(
+    'https://api.apify.com/v2/acts/apify~website-content-crawler/run-sync-get-dataset-items?token=' + apiKey + '&memory=512',
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        startUrls,
+        maxCrawlPages: 1,
+        crawlerType: 'cheerio',
+      }),
+      signal: AbortSignal.timeout(50000),
+    }
+  )
+  if (!res.ok) throw new Error('Apify crawl failed: ' + res.status)
   const data = await res.json()
   return (Array.isArray(data) ? data : []).map((item: { url?: string; text?: string }) => ({
     url: item.url ?? '',
@@ -104,63 +108,42 @@ async function crawlEventPages(websites: string[], apiKey: string): Promise<Page
   }))
 }
 
-function extractEventsFromText(pages: PageContent[], category: LiveEventCategory): LiveEventResult[] {
+function extractEvents(pages: PageContent[], category: LiveEventCategory): LiveEventResult[] {
   const results: LiveEventResult[] = []
-  const seniorKeywords = ['senior', 'adult', '55+', '60+', 'elder', 'fitness', 'yoga', 'art', 'music', 'dance', 'craft', 'class', 'workshop', 'program', 'activity', 'club', 'social', 'lecture', 'trip', 'volunteer', 'garden', 'bingo', 'lunch', 'nutrition', 'health', 'wellness']
-  const festivalKeywords = ['festival', 'fair', 'cultural', 'heritage', 'celebration', 'parade', 'concert', 'performance', 'exhibit']
-  const datePattern = /(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]* \d{1,2}(?:,? \d{4})?|\d{1,2}\/\d{1,2}(?:\/\d{2,4})?/gi
+  const seniorKw = ['senior', 'adult', '55+', '60+', 'fitness', 'yoga', 'art', 'music', 'dance', 'craft', 'class', 'workshop', 'program', 'activity', 'club', 'social', 'lecture', 'trip', 'volunteer', 'garden', 'bingo', 'lunch', 'nutrition', 'health', 'wellness', 'exercise', 'swim', 'hike', 'movie', 'game']
+  const festivalKw = ['festival', 'fair', 'cultural', 'heritage', 'celebration', 'parade', 'concert', 'performance', 'exhibit', 'show']
+  const dateRe = /(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]* \d{1,2}(?:,? \d{4})?|\d{1,2}\/\d{1,2}(?:\/\d{2,4})?/i
+  const activeKw = category === 'festival' ? festivalKw : seniorKw
 
   for (const page of pages) {
     if (!page.text || !page.url) continue
-    const lines = page.text.split('\n').map((l: string) => l.trim()).filter((l: string) => l.length > 10)
-    const activeKeywords = category === 'festival' ? festivalKeywords : seniorKeywords
+    const lines = page.text.split('\n').map((l: string) => l.trim()).filter((l: string) => l.length > 8 && l.length < 180)
     let pageCount = 0
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i]
-      const lowerLine = line.toLowerCase()
-      const hasKeyword = activeKeywords.some((kw: string) => lowerLine.includes(kw))
-      if (!hasKeyword || line.length > 200) continue
-      const context = lines.slice(Math.max(0, i - 1), Math.min(lines.length, i + 3)).join(' ')
-      const dateMatch = context.match(datePattern)
-      const date = dateMatch ? dateMatch[0] : 'See website for dates'
-      const description = lines.slice(i, Math.min(lines.length, i + 2)).join(' ').slice(0, 200)
+      if (!activeKw.some((kw: string) => line.toLowerCase().includes(kw))) continue
+      const ctx = lines.slice(Math.max(0, i - 1), i + 3).join(' ')
+      const dm = ctx.match(dateRe)
       results.push({
         title: line.slice(0, 80),
-        date,
+        date: dm ? dm[0] : 'See website for dates',
         location: page.url.replace(/^https?:\/\//, '').split('/')[0],
-        description,
+        description: lines.slice(i, i + 2).join(' ').slice(0, 200),
         url: page.url,
         score: 8,
         category,
       })
-      pageCount++
-      if (pageCount >= 4) break
+      if (++pageCount >= 4) break
     }
   }
 
   const seen = new Set<string>()
   return results.filter(r => {
-    const key = r.title.toLowerCase().slice(0, 40)
-    if (seen.has(key)) return false
-    seen.add(key)
+    const k = r.title.toLowerCase().slice(0, 40)
+    if (seen.has(k)) return false
+    seen.add(k)
     return true
   }).slice(0, 12)
-}
-
-async function runApifyPipeline(category: LiveEventCategory, zip: string): Promise<LiveEventResult[]> {
-  const apiKey = process.env.APIFY_API_TOKEN
-  if (!apiKey) throw new Error('APIFY_API_TOKEN not configured')
-  const places = await findSeniorCentersNearZip(zip, apiKey)
-  console.log('[eventSearch] Found ' + places.length + ' places near ' + zip)
-  const websites = places
-    .map((p: ApifyPlace) => p.website)
-    .filter((w: string | undefined): w is string => !!w && w.startsWith('http'))
-  if (websites.length === 0) throw new Error('No senior center websites found near ' + zip)
-  const pages = await crawlEventPages(websites, apiKey)
-  console.log('[eventSearch] Crawled ' + pages.length + ' pages')
-  const events = extractEventsFromText(pages, category)
-  console.log('[eventSearch] Extracted ' + events.length + ' events')
-  return events
 }
 
 export async function searchLiveEvents(
@@ -172,7 +155,13 @@ export async function searchLiveEvents(
   const cached = await readCache(cacheKey, zip)
   if (cached) return { data: cached, error: null, cached: true }
   try {
-    const events = await runApifyPipeline(category, zip)
+    const apiKey = process.env.APIFY_API_TOKEN
+    if (!apiKey) throw new Error('APIFY_API_TOKEN not configured')
+    const sites = getSitesForZip(zip)
+    const pages = await crawlWithApify(sites.slice(0, 4), apiKey)
+    console.log('[eventSearch] Crawled ' + pages.length + ' pages for zip ' + zip)
+    const events = extractEvents(pages, category)
+    console.log('[eventSearch] Extracted ' + events.length + ' events')
     if (events.length > 0) await writeCache(cacheKey, zip, events)
     return { data: events, error: null, cached: false }
   } catch (e) {
