@@ -47,7 +47,6 @@ export default function EventsClient({ initialEvents }: Props) {
   const [toastMsg, setToastMsg] = useState<string | null>(null)
   const [waitlistedIds, setWaitlistedIds] = useState<Set<string>>(new Set())
   const [liveZip, setLiveZip] = useState('')
-  const [liveZip, setLiveZip] = useState('')
   const [liveEvents, setLiveEvents] = useState<Array<{title:string;date:string;location:string;description:string;url:string;score:number;category:string}>>([])
   const [liveLoading, setLiveLoading] = useState(false)
   const [liveError, setLiveError] = useState<string|null>(null)
