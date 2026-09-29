@@ -14,7 +14,6 @@ export interface LiveEventResult {
 
 const CACHE_HOURS = 24
 
-// Bay Area senior/community center event pages by zip prefix
 const BAY_AREA_SENIOR_SITES: Record<string, string[]> = {
   '940': [
     'https://www.cityofsanmateo.org/638/Senior-Center',
@@ -22,22 +21,15 @@ const BAY_AREA_SENIOR_SITES: Record<string, string[]> = {
     'https://www.fostercity.org/parks-recreation/recreation-programs/senior-programs',
     'https://www.redwoodcity.org/departments/parks-recreation-and-community-services/senior-center',
     'https://www.burlingame.org/departments/parks_recreation/senior_center/index.php',
-    'https://www.ssf.net/departments/parks-recreation-community-services/senior-services',
-    'https://www.cityofpaloalto.org/gov/depts/csd/seniors/default.asp',
-    'https://www.menlopark.gov/Government/Departments/Library-Community-Services/Senior-Programs',
   ],
   '941': [
-    'https://www.sfrecpark.org/facilities/facility/details/Mission-Senior-Center-273',
     'https://www.sfrecpark.org/senior-services',
-    'https://www.oewd.org/seniors',
   ],
   '945': [
     'https://www.oaklandca.gov/topics/senior-services',
-    'https://www.berkeleyside.org/category/seniors',
   ],
   '946': [
     'https://www.cityoffremont.org/government/departments/human-services/senior-services',
-    'https://www.hayward-ca.gov/services/senior-services',
   ],
 }
 
@@ -92,11 +84,7 @@ async function crawlWithApify(urls: string[], apiKey: string): Promise<PageConte
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        startUrls,
-        maxCrawlPages: 1,
-        crawlerType: 'cheerio',
-      }),
+      body: JSON.stringify({ startUrls, maxCrawlPages: 1, crawlerType: 'cheerio' }),
       signal: AbortSignal.timeout(50000),
     }
   )
@@ -110,33 +98,32 @@ async function crawlWithApify(urls: string[], apiKey: string): Promise<PageConte
 
 function extractEvents(pages: PageContent[], category: LiveEventCategory): LiveEventResult[] {
   const results: LiveEventResult[] = []
-  const seniorKw = ['senior', 'adult', '55+', '60+', 'fitness', 'yoga', 'art', 'music', 'dance', 'craft', 'class', 'workshop', 'program', 'activity', 'club', 'social', 'lecture', 'trip', 'volunteer', 'garden', 'bingo', 'lunch', 'nutrition', 'health', 'wellness', 'exercise', 'swim', 'hike', 'movie', 'game']
-  const festivalKw = ['festival', 'fair', 'cultural', 'heritage', 'celebration', 'parade', 'concert', 'performance', 'exhibit', 'show']
+  const seniorKw = ['senior', 'yoga', 'art', 'music', 'dance', 'craft', 'class', 'workshop', 'program', 'activity', 'club', 'social', 'lecture', 'volunteer', 'garden', 'bingo', 'lunch', 'nutrition', 'health', 'wellness', 'exercise', 'swim', 'movie', 'game', 'billiard', 'mahjong', 'bridge', 'pilates', 'zumba', 'pottery', 'painting', 'knitting', 'book', 'computer', 'excursion', 'fitness', 'tai chi']
+  const festivalKw = ['festival', 'fair', 'cultural', 'heritage', 'celebration', 'parade', 'concert', 'performance', 'exhibit']
   const dateRe = /(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]* \d{1,2}(?:,? \d{4})?|\d{1,2}\/\d{1,2}(?:\/\d{2,4})?/i
   const activeKw = category === 'festival' ? festivalKw : seniorKw
-
   for (const page of pages) {
     if (!page.text || !page.url) continue
-    const lines = page.text.split('\n').map((l: string) => l.trim()).filter((l: string) => l.length > 8 && l.length < 180)
+    const flat = page.text.replace(/\n+/g, ' ').replace(/\s{2,}/g, ' ')
+    const chunks = flat.split(/(?<=[.!?]) +/).map((s: string) => s.trim()).filter((s: string) => s.length > 10 && s.length < 250)
     let pageCount = 0
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i]
-      if (!activeKw.some((kw: string) => line.toLowerCase().includes(kw))) continue
-      const ctx = lines.slice(Math.max(0, i - 1), i + 3).join(' ')
+    for (let i = 0; i < chunks.length; i++) {
+      const chunk = chunks[i]
+      if (!activeKw.some((kw: string) => chunk.toLowerCase().includes(kw))) continue
+      const ctx = chunks.slice(Math.max(0, i - 1), i + 3).join(' ')
       const dm = ctx.match(dateRe)
       results.push({
-        title: line.slice(0, 80),
+        title: chunk.slice(0, 80),
         date: dm ? dm[0] : 'See website for dates',
         location: page.url.replace(/^https?:\/\//, '').split('/')[0],
-        description: lines.slice(i, i + 2).join(' ').slice(0, 200),
+        description: chunks.slice(i, i + 2).join(' ').slice(0, 200),
         url: page.url,
         score: 8,
         category,
       })
-      if (++pageCount >= 4) break
+      if (++pageCount >= 5) break
     }
   }
-
   const seen = new Set<string>()
   return results.filter(r => {
     const k = r.title.toLowerCase().slice(0, 40)
@@ -158,7 +145,7 @@ export async function searchLiveEvents(
     const apiKey = process.env.APIFY_API_TOKEN
     if (!apiKey) throw new Error('APIFY_API_TOKEN not configured')
     const sites = getSitesForZip(zip)
-    const pages = await crawlWithApify(sites.slice(0, 4), apiKey)
+    const pages = await crawlWithApify(sites.slice(0, 3), apiKey)
     console.log('[eventSearch] Crawled ' + pages.length + ' pages for zip ' + zip)
     const events = extractEvents(pages, category)
     console.log('[eventSearch] Extracted ' + events.length + ' events')
@@ -170,53 +157,33 @@ export async function searchLiveEvents(
   }
 }
 
-export async function joinLiveEvent(
-  memberId: string,
-  eventUrl: string,
-  eventTitle: string,
-  eventDate: string
-): Promise<{ error: string | null }> {
+export async function joinLiveEvent(memberId: string, eventUrl: string, eventTitle: string, eventDate: string): Promise<{ error: string | null }> {
   try {
     const admin = createAdminClient()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (admin.from as any)('live_event_rsvps')
-      .upsert(
-        { member_id: memberId, event_url: eventUrl, event_title: eventTitle, event_date: eventDate },
-        { onConflict: 'member_id,event_url', ignoreDuplicates: true }
-      )
+      .upsert({ member_id: memberId, event_url: eventUrl, event_title: eventTitle, event_date: eventDate }, { onConflict: 'member_id,event_url', ignoreDuplicates: true })
     if (error) { console.error('[eventSearch/joinLiveEvent]', error); return { error: error.message } }
     return { error: null }
-  } catch (e) {
-    return { error: e instanceof Error ? e.message : String(e) }
-  }
+  } catch (e) { return { error: e instanceof Error ? e.message : String(e) } }
 }
 
 export async function leaveLiveEvent(memberId: string, eventUrl: string): Promise<{ error: string | null }> {
   try {
     const admin = createAdminClient()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (admin.from as any)('live_event_rsvps')
-      .delete()
-      .eq('member_id', memberId)
-      .eq('event_url', eventUrl)
+    const { error } = await (admin.from as any)('live_event_rsvps').delete().eq('member_id', memberId).eq('event_url', eventUrl)
     if (error) { console.error('[eventSearch/leaveLiveEvent]', error); return { error: error.message } }
     return { error: null }
-  } catch (e) {
-    return { error: e instanceof Error ? e.message : String(e) }
-  }
+  } catch (e) { return { error: e instanceof Error ? e.message : String(e) } }
 }
 
-export async function getLiveEventAttendance(
-  eventUrls: string[],
-  memberId: string | null
-): Promise<{ data: Record<string, { count: number; going: boolean }>; error: string | null }> {
+export async function getLiveEventAttendance(eventUrls: string[], memberId: string | null): Promise<{ data: Record<string, { count: number; going: boolean }>; error: string | null }> {
   if (eventUrls.length === 0) return { data: {}, error: null }
   try {
     const admin = createAdminClient()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (admin.from as any)('live_event_rsvps')
-      .select('event_url, member_id')
-      .in('event_url', eventUrls)
+    const { data, error } = await (admin.from as any)('live_event_rsvps').select('event_url, member_id').in('event_url', eventUrls)
     if (error) return { data: {}, error: error.message }
     const rows = (data ?? []) as Array<{ event_url: string; member_id: string }>
     const result: Record<string, { count: number; going: boolean }> = {}
@@ -228,7 +195,5 @@ export async function getLiveEventAttendance(
       result[row.event_url] = entry
     }
     return { data: result, error: null }
-  } catch (e) {
-    return { data: {}, error: e instanceof Error ? e.message : String(e) }
-  }
+  } catch (e) { return { data: {}, error: e instanceof Error ? e.message : String(e) } }
 }
