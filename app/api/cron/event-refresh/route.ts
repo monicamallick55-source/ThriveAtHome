@@ -2,14 +2,14 @@ import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 const SOURCES = [
-  { zip: '94403', url: 'https://www.cityofsanmateo.org/638/Senior-Center' },
-  { zip: '94070', url: 'https://www.cityofsancarlos.org/government/departments/recreation/adult-community-center' },
-  { zip: '94404', url: 'https://www.fostercity.org/parks-recreation/recreation-programs/senior-programs' },
-  { zip: '94063', url: 'https://www.redwoodcity.org/departments/parks-recreation-and-community-services/senior-center' },
-  { zip: '94010', url: 'https://www.burlingame.org/departments/parks_recreation/senior_center/index.php' },
-  { zip: '94404', url: 'https://www.pjcc.org/programs/' },
+  { zip: '94403', url: 'https://www.cityofsanmateo.org/640/Senior-Center-Programming' },
+  { zip: '94403', url: 'https://www.cityofsanmateo.org/Archive.aspx?AMID=37' },
+  { zip: '94404', url: 'https://www.pjcc.org/programs/fitness/' },
+  { zip: '94404', url: 'https://www.pjcc.org/programs/arts-culture/' },
   { zip: '94025', url: 'https://ageup.org/events/' },
-  { zip: '94402', url: 'https://www.smcgov.org/aging-adult-services' },
+  { zip: '94063', url: 'https://www.redwoodcity.org/departments/parks-recreation-and-community-services/senior-center/senior-center-programs' },
+  { zip: '94402', url: 'https://www.smcgov.org/hsa/senior-nutrition-program' },
+  { zip: '94070', url: 'https://www.cityofsancarlos.org/government/departments/recreation/adult-community-center/adult-community-center-classes' },
 ]
 
 const CACHE_HOURS = 25
