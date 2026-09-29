@@ -4,14 +4,12 @@ export async function GET() {
   const apiKey = process.env.SEARCHAPI_API_KEY
   if (!apiKey) return NextResponse.json({ error: 'no key' })
 
-  // SearchApi google_events supports 'location' as a separate param
   const url = new URL('https://www.searchapi.io/api/v1/search')
   url.searchParams.set('engine', 'google_events')
   url.searchParams.set('api_key', apiKey)
   url.searchParams.set('q', 'senior community events classes')
   url.searchParams.set('location', 'San Mateo, California, United States')
   url.searchParams.set('hl', 'en')
-  url.searchParams.set('gl', 'us')
 
   const res = await fetch(url.toString())
   const data = await res.json()
