@@ -110,6 +110,131 @@ async function runSearchApiEvents(query: string): Promise<GoogleSearchItem[]> {
 
 async function scoreForSeniorRelevance(
   items: GoogleSearchItem[],
+  _category: LiveEventCategory
+): Promise<LiveEventResult[]> {
+  return items.slice(0, 10).map(it => ({
+    title: it.title ?? 'Untitled',
+    date: 'Check listing',
+    location: 'Check listing',
+    description: it.snippet ?? '',
+    url: it.link ?? '',
+    score: 8,
+    category: 'cultural',
+  }))
+}
+
+// FEATURE-002/003 — location-aware live event search: one Google Custom Search
+// covering Meetup/Eventbrite/Rec & Parks/city sites, filtered for senior
+// relevance by Claude, cached 24h per zip+query to stay within the Google
+// Custom Search free tier (100 searches/day).
+import Anthropic from '@anthropic-ai/sdk'
+import { requireServerEnv } from '../env'
+import { createAdminClient } from '../supabase/admin'
+
+export type LiveEventCategory = 'cultural' | 'festival'
+
+export interface LiveEventResult {
+  title: string
+  date: string
+  location: string
+  description: string
+  url: string
+  score: number
+  category: string
+}
+
+const CACHE_HOURS = 24
+
+let anthropicClient: Anthropic | null = null
+function getAnthropicClient(): Anthropic {
+  if (!anthropicClient) anthropicClient = new Anthropic({ apiKey: requireServerEnv('ANTHROPIC_API_KEY') })
+  return anthropicClient
+}
+
+function buildQuery(category: LiveEventCategory, zip: string, _radius: number): string {
+  if (category === 'festival') return `cultural festival seniors near ${zip} site:eventbrite.com OR site:meetup.com`
+  return `senior adults 55+ cultural arts classes community near ${zip} site:eventbrite.com OR site:meetup.com`
+}
+
+// event_search_cache and live_event_rsvps (migrations 081/082) predate the
+// generated Supabase types, so table access is cast the same way as other
+// not-yet-regenerated tables in this codebase (e.g. lib/data/buddies.ts).
+async function readCache(query: string, zip: string): Promise<LiveEventResult[] | null> {
+  try {
+    const admin = createAdminClient()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (admin.from as any)('event_search_cache')
+      .select('results, expires_at')
+      .eq('zip_code', zip)
+      .eq('query', query)
+      .gt('expires_at', new Date().toISOString())
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (error) {
+      console.error('[data/eventSearch/readCache]', error)
+      return null
+    }
+    if (!data) return null
+    return (data as { results: LiveEventResult[] }).results
+  } catch (e) {
+    console.error('[data/eventSearch/readCache] Unexpected error:', e)
+    return null
+  }
+}
+
+async function writeCache(query: string, zip: string, results: LiveEventResult[]): Promise<void> {
+  try {
+    const admin = createAdminClient()
+    const expiresAt = new Date(Date.now() + CACHE_HOURS * 60 * 60 * 1000).toISOString()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (admin.from as any)('event_search_cache').insert({
+      query, zip_code: zip, results, expires_at: expiresAt,
+    })
+    if (error) console.error('[data/eventSearch/writeCache]', error)
+  } catch (e) {
+    console.error('[data/eventSearch/writeCache] Unexpected error:', e)
+  }
+}
+
+interface GoogleSearchItem {
+  title?: string
+  link?: string
+  snippet?: string
+}
+
+async function runSearchApiEvents(query: string): Promise<GoogleSearchItem[]> {
+  const apiKey = requireServerEnv('SEARCHAPI_API_KEY')
+  
+  const url = new URL('https://www.searchapi.io/api/v1/search')
+  url.searchParams.set('engine', 'google')
+  url.searchParams.set('api_key', apiKey)
+  url.searchParams.set('q', query)
+  url.searchParams.set('hl', 'en')
+  url.searchParams.set('gl', 'us')
+  
+  const res = await fetch(url.toString())
+  if (!res.ok) {
+    const error = await res.text()
+    throw new Error(`SearchApi failed: ${res.status} ${error}`)
+  }
+  
+  const data = await res.json()
+  
+  return (data.organic_results ?? []).map((e: {
+    title: string
+    link?: string
+    snippet?: string
+  }) => ({
+    title: e.title ?? '',
+    link: e.link ?? '',
+    snippet: e.snippet ?? '',
+  }))
+}
+
+
+async function scoreForSeniorRelevance(
+  items: GoogleSearchItem[],
   category: LiveEventCategory
 ): Promise<LiveEventResult[]> {
   if (items.length === 0) return []
