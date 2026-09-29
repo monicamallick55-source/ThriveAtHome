@@ -99,10 +99,7 @@ async function runSearchApiEvents(query: string): Promise<GoogleSearchItem[]> {
   return (data.organic_results ?? []).map((e: {
     title: string
     link?: string
-    description?: string
-    date?: { start_date?: string; when?: string }
-    address?: string[]
-    venue?: { name?: string }
+    snippet?: string
   }) => ({
     title: e.title ?? '',
     link: e.link ?? '',
