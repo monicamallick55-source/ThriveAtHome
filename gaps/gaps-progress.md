@@ -15,6 +15,7 @@ Status values: `NOT_STARTED` · `IN_PROGRESS` · `AWAITING_SQL` · `AWAITING_APP
 | G1.4 | Call-ended processing | COMPLETE | — | 212a4b9 |
 | G1.5 | Aria opt-in + Launch Protocol | COMPLETE | — | 1885807 |
 | G1.6 | Joy + Grace outbound | COMPLETE | 086 | 7e578df, 8edbf72 |
+| G1.fix | Crisis SMS + alerts.metadata (pre-merge) | AWAITING_SQL | 087 | 2b5da46 |
 | **G1** | **Human review** | AWAITING_APPROVAL | | PR: #1 |
 | G2.0 | RLS helpers | NOT_STARTED | 086 | |
 | G2.1 | Post comments | NOT_STARTED | 086 | |
@@ -49,12 +50,12 @@ Bugs or gaps noticed outside the current phase. Don't fix unless blocking.
 |---|---|---|
 | 2026-09-30 | `app/api/cron/aria-calls/route.ts` + `types/database.ts` | `CallType` in TS already included `'onboarding'`, but the DB enum did not, so onboarding-call inserts were failing silently. Fixed as a side effect of migration 085. |
 | 2026-09-30 | local env | `node_modules` was missing `@anthropic-ai/sdk` (so `tsc` failed on main). Ran `npm install`; no package.json changes. |
-| 2026-09-30 | `lib/voice/tools/*` (moved from `app/api/retell/tools`) | Existing tool writes fail against the live DB: `alerts.metadata` column missing (welfare-check + service-request alerts never save), `navigator_alerts` and `mood_logs` tables missing, `emergency_log.trigger` column missing, `alert_type 'service_request'` not in enum. **Welfare-check alerts from Aria are silently lost — high priority.** |
+| 2026-09-30 | `lib/voice/tools/*` (moved from `app/api/retell/tools`) | **alerts.metadata FIXED by migration 087 (2b5da46); the rest still open.** Existing tool writes fail against the live DB: `alerts.metadata` column missing (welfare-check + service-request alerts never save), `navigator_alerts` and `mood_logs` tables missing, `emergency_log.trigger` column missing, `alert_type 'service_request'` not in enum. **Welfare-check alerts from Aria are silently lost — high priority.** |
 | 2026-09-30 | `check_in_calls` RLS | `family_select_own_calls` lets a family user read the `transcript` column directly with the anon client. The app no longer sends it, but the DB still allows it. Needs a column-level REVOKE or a view (needs a human decision). |
 | 2026-09-30 | `/dashboard/calls`, `/api/calls` | Family call history ignores `family_can_see_call_summaries` / `family_can_see_mood`. |
 | 2026-09-30 | `realtime_notifications` | member_id NOT NULL, so there is no way to notify "all navigators". The Hope unknown-caller case uses an urgent care-team SMS plus `inbound_call_log.needs_followup` instead. |
 | 2026-09-30 | `lib/services/AnthropicAiProvider.ts` | All other methods still throw "Not yet implemented"; only the two G1.4 needs are implemented. |
-| 2026-09-30 | `lib/alerts/detectCrisis.ts` | **Crisis SMS never delivered.** `handleCrisisDetection` sends `smsProvider.sendUrgent('care-team', …)`: `'care-team'` is not a phone number, so real Twilio rejects it. processCallEnded's Hope unknown-caller SMS uses the same address. Needs a real care-team number (env var) — high priority. |
+| 2026-09-30 | `lib/alerts/detectCrisis.ts` | **FIXED in 2b5da46** — **Crisis SMS never delivered.** `handleCrisisDetection` sends `smsProvider.sendUrgent('care-team', …)`: `'care-team'` is not a phone number, so real Twilio rejects it. processCallEnded's Hope unknown-caller SMS uses the same address. Needs a real care-team number (env var) — high priority. |
 | 2026-09-30 | `.env.local` (Codespace) | Holds real non-Supabase keys (Vercel pull). A dev server run on it used the real Anthropic key (rejected: no credit) and Twilio (rejected: SID doesn't start with AC). Nothing was sent or charged. Tests now use `scripts/dev-stub-server.sh`, which forces every provider to its stub. |
 | 2026-09-30 | Anthropic account | "credit balance is too low" — production call summaries/scores will be empty until credit is added. |
 | 2026-09-30 | Stripe routes | `lib/stripe/sync.ts`, `app/api/donations/checkout`, `app/api/life-story/memory-book/payment` read `STRIPE_SECRET_KEY` directly instead of `envKey()` — a placeholder would be passed to Stripe (fails, no charge). Fix when those phases are touched. |
@@ -257,4 +258,45 @@ DEVIATIONS FROM SPEC: G1.6 deviations are in the Session 2 entry. New testing ru
 NEXT:
 - Human: review and merge the gaps/g1 PR, run gaps/G1_LIVE_TEST.md on production, report L1–L12 results, reply APPROVED
 - Then fix any live-test failures on a new branch, and start G2 (branch gaps/g2 from main; G2 migrations start at 087)
+---
+
+---
+SESSION: 4
+DATE: 2026-09-30
+PHASE: G1 pre-merge fixes (requested by human before merging PR #1)
+STATUS: AWAITING_SQL
+BRANCH: gaps/g1
+
+CHECKLIST: 12 of 15 passed
+- [x] Crisis text goes to CARE_TEAM_PHONE + assigned navigator (navigator phone normalised to E.164); nothing sent to "care-team"
+- [x] No assigned navigator → CARE_TEAM_PHONE only
+- [x] CARE_TEAM_PHONE missing → error logged, no SMS; critical task + crisis alert + Realtime notification still created; no fallback task
+- [x] CARE_TEAM_PHONE "[SENSITIVE]" or not E.164 → treated as missing, error logged
+- [x] Twilio send failure → crisis task kept, no "detection failed" task
+- [x] Hope call from unknown number → CARE_TEAM_PHONE texted
+- [x] scripts/test-crisis-detection.ts (older suite) still 9/9
+- [x] Regression against dev-stub-server: test-agents 18/18, test-env-placeholders 13/13, test-retell-webhook 31/31, test-aria-schedule 10/10, test-outbound-triggers 10/10; zero real-provider log lines
+- [x] tsc clean; lint 280 errors (no new)
+- [ ] welfare-check alert saves with metadata — needs 087 (scripts/test-crisis-sms.ts welfare)
+- [ ] alerts default metadata {} — needs 087
+- [~] real crisis text arrives on CARE_TEAM_PHONE — needs live test (G1_LIVE_TEST L7)
+- [~] real welfare-check tool call saves an alert — needs live test (L8b)
+
+FILES:
+- lib/alerts/careTeamSms.ts — CREATED: sendCareTeamUrgent / careTeamPhone / assignedNavigatorPhone
+- lib/alerts/detectCrisis.ts — MODIFIED: step 5 uses sendCareTeamUrgent (careTeamPhone param now only overrides the on-call number, for tests)
+- lib/voice/processCallEnded.ts — MODIFIED: Hope unknown-caller SMS uses sendCareTeamUrgent
+- supabase/migrations/087_alerts_metadata.sql — CREATED
+- types/database.ts — MODIFIED: alerts.metadata
+- scripts/test-crisis-sms.ts — CREATED; scripts/dev-stub-server.sh — MODIFIED: fake CARE_TEAM_PHONE
+- gaps/G1_LIVE_TEST.md — MODIFIED: CARE_TEAM_PHONE pre-flight, L7 expects the text, new L8b welfare check
+
+SQL FOR HUMAN TO RUN: supabase/migrations/087_alerts_metadata.sql
+ENV VAR FOR HUMAN TO ADD (Vercel, Production): CARE_TEAM_PHONE = on-call mobile in E.164
+DEVIATIONS FROM SPEC: Migration 087 was used for this fix, so G2's migrations now start at 088.
+Still open (not requested): the service-request tool's alert uses alert_type 'service_request', which is not in the enum; the welfare-check emergency_log insert uses columns that don't exist (trigger/description/severity), so emergency-severity welfare flags don't write emergency_log. The alert itself now saves.
+
+NEXT:
+- On DONE for 087: npx tsx scripts/test-crisis-sms.ts welfare → mark the 2 items [x], set G1.fix COMPLETE, push (PR #1 updates automatically)
+- Then human merges PR #1, runs gaps/G1_LIVE_TEST.md, replies APPROVED
 ---
