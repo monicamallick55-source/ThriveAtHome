@@ -77,6 +77,9 @@ export interface Database {
           ml_insights_opt_out: boolean
           supabase_auth_id: string | null
           aria_call_opted_in: boolean
+          call_frequency_preference: 'daily' | 'few_times_week' | 'weekly'
+          onboarding_call_completed: boolean
+          last_aria_call_at: string | null
           family_can_see_mood: boolean
           family_can_see_call_summaries: boolean
           family_can_see_service_history: boolean
@@ -126,6 +129,9 @@ export interface Database {
           device_integration_consent?: boolean
           ml_insights_opt_out?: boolean
           aria_call_opted_in?: boolean
+          call_frequency_preference?: 'daily' | 'few_times_week' | 'weekly'
+          onboarding_call_completed?: boolean
+          last_aria_call_at?: string | null
           family_can_see_mood?: boolean
           family_can_see_call_summaries?: boolean
           family_can_see_service_history?: boolean

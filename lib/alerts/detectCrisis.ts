@@ -7,7 +7,7 @@ import { ALERT_RULES } from './rules'
 import { smsProvider } from '../providers'
 
 /**
- * 15 crisis phrases that trigger immediate escalation.
+ * Crisis phrases (medical emergencies + suicidal ideation) that trigger immediate escalation.
  * Matched case-insensitively against the call transcript.
  * Specific enough that benign phrases like "fell asleep" do not match.
  */
@@ -27,6 +27,17 @@ export const CRISIS_PHRASES: readonly string[] = [
   "i think i'm having a stroke",
   "i'm bleeding badly",
   "i can't move",
+  // Suicidal ideation — always escalate to a human
+  "don't want to be here anymore",
+  "do not want to be here anymore",
+  "don't want to live anymore",
+  "don't want to be alive",
+  "want to kill myself",
+  "going to kill myself",
+  "want to end my life",
+  "end it all",
+  "better off without me",
+  "i want to die",
 ]
 
 /**

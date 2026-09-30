@@ -9,7 +9,7 @@ import {
   ReferenceLine,
 } from 'recharts'
 import { Tabs } from '@/components/ui/Tabs'
-import type { CheckInCall } from '@/lib/data/calls'
+import type { FamilyCall as CheckInCall } from '@/lib/data/calls'
 
 type Days = 7 | 30 | 60 | 90
 

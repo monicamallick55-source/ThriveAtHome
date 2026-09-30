@@ -7,9 +7,13 @@ export class StubAiProvider implements AiProvider {
     console.log('[STUB][AI] generateCallSummary called')
     return 'Call completed. Member seemed well.'
   }
-  async extractCallScores(_seniorSpeechOnly: string): Promise<CallScores> {
+  async extractCallScores(seniorSpeechOnly: string): Promise<CallScores> {
     console.log('[STUB][AI] extractCallScores called')
-    return { mood_score: null, energy_score: null, pain_score: null, medication_taken: null, alert_flags: [] }
+    // Neutral fixed scores when the member said anything, so the pipeline can be tested end to end
+    if (!seniorSpeechOnly.trim()) {
+      return { mood_score: null, energy_score: null, pain_score: null, medication_taken: null, alert_flags: [] }
+    }
+    return { mood_score: 7, energy_score: 7, pain_score: null, medication_taken: null, alert_flags: [] }
   }
   async disambiguateCrisisContext(_phrase: string, _context: string): Promise<boolean> {
     console.log('[STUB][AI] disambiguateCrisisContext called — returning false (safe default)')

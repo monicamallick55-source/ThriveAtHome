@@ -5,18 +5,27 @@ import type { Database } from '../../types/database'
 
 export type CheckInCall = Database['public']['Tables']['check_in_calls']['Row']
 
-/** Fetch paginated calls for a member, newest first. Pass callerUserId to emit an audit log entry. */
+// Family-facing view of a call. Family never sees transcripts, recordings or phone numbers.
+export const FAMILY_CALL_COLUMNS = [
+  'id', 'created_at', 'member_id', 'call_type', 'scheduled_at', 'started_at', 'ended_at',
+  'duration_seconds', 'status', 'mood_score', 'energy_score', 'pain_score', 'medication_taken',
+  'ai_summary', 'alert_flags', 'pain_mentioned', 'medication_adherence', 'social_isolation_signal',
+  'fall_risk_mention', 'cognitive_concern_signal', 'agent_name', 'direction',
+] as const
+export type FamilyCall = Pick<CheckInCall, typeof FAMILY_CALL_COLUMNS[number]>
+
+/** Fetch paginated calls for a member (family-safe columns), newest first. Pass callerUserId to emit an audit log entry. */
 export async function getCallsForMember(
   memberId: string,
   limit = 20,
   offset = 0,
   callerUserId?: string
-): Promise<{ data: CheckInCall[] | null; error: string | null }> {
+): Promise<{ data: FamilyCall[] | null; error: string | null }> {
   try {
     const admin = createAdminClient()
     const { data, error } = await admin
       .from('check_in_calls')
-      .select('*')
+      .select(FAMILY_CALL_COLUMNS.join(', '))
       .eq('member_id', memberId)
       .order('scheduled_at', { ascending: false, nullsFirst: false })
       .order('created_at', { ascending: false })
@@ -28,7 +37,7 @@ export async function getCallsForMember(
     if (callerUserId) {
       void writeAuditLog('calls_viewed', 'check_in_calls', memberId, callerUserId)
     }
-    return { data: (data ?? []) as CheckInCall[], error: null }
+    return { data: (data ?? []) as unknown as FamilyCall[], error: null }
   } catch (e) {
     console.error('[data/calls/getCallsForMember] Unexpected error:', e)
     return { data: null, error: e instanceof Error ? e.message : String(e) }

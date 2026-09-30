@@ -1,6 +1,6 @@
 import { MoodEmoji } from '@/components/ui/MoodEmoji'
 import { SectionError } from './SectionError'
-import type { CheckInCall } from '@/lib/data/calls'
+import type { FamilyCall as CheckInCall } from '@/lib/data/calls'
 import Link from 'next/link'
 
 const statusLabel: Record<string, string> = {
