@@ -1,9 +1,11 @@
 // Stub implementation — logs calls, no real scheduling. Replaced in M8 with RetellCallProvider.
 import type { CallProvider, CallContext } from '../interfaces/CallProvider'
+import { AGENTS } from '../voice/agents'
 
 export class StubCallProvider implements CallProvider {
   async scheduleCall(memberId: string, phone: string, ctx: CallContext): Promise<string> {
-    console.log(`[STUB][Call] Would schedule call for ${ctx.preferredName} (member: ${memberId}) at ${phone.substring(0, 6)}xxx`)
+    const agent = ctx.agent ?? 'aria'
+    console.log(`[STUB][Call] ${agent} → ${phone.substring(0, 6)}xxx (${AGENTS[agent].envVar}, ${ctx.callType ?? 'check_in'}, member: ${memberId})`)
     return `stub-call-id-${Date.now()}`
   }
 }

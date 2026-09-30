@@ -1,5 +1,6 @@
 // Real Retell AI call provider — makes outbound calls via Retell API + Twilio numbers
 import type { CallProvider, CallContext } from '../interfaces/CallProvider'
+import { AGENTS, agentIdFor } from '../voice/agents'
 
 export class RetellCallProvider implements CallProvider {
   private apiKey: string
@@ -11,8 +12,9 @@ export class RetellCallProvider implements CallProvider {
   }
 
   async scheduleCall(memberId: string, phone: string, ctx: CallContext): Promise<string> {
-    const agentId = process.env.RETELL_AGENT_ID
-    if (!agentId) throw new Error('[RetellCallProvider] RETELL_AGENT_ID not set')
+    const agentName = ctx.agent ?? 'aria'
+    const agentId = agentIdFor(agentName)
+    if (!agentId) throw new Error(`[RetellCallProvider] ${AGENTS[agentName].envVar} is not set`)
 
     const body = {
       from_number: this.fromNumber,
@@ -33,6 +35,7 @@ export class RetellCallProvider implements CallProvider {
         preferred_language: ctx.preferredLanguage,
         prior_call_summaries: ctx.priorCallSummaries,
         call_type: ctx.callType ?? 'check_in',
+        agent_name: agentName,
       },
     }
 
@@ -51,7 +54,7 @@ export class RetellCallProvider implements CallProvider {
     }
 
     const data = await response.json()
-    console.log(`[RetellCallProvider] Call scheduled for member ${memberId}: call_id=${data.call_id}`)
+    console.log(`[RetellCallProvider] ${agentName} call scheduled for member ${memberId}: call_id=${data.call_id}`)
     return data.call_id
   }
 }
