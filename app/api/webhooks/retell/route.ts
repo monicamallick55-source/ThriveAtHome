@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { verifyRetellRequest } from '@/lib/voice/verifyRetell'
+import { TOOLS, type ToolArgs } from '@/lib/voice/tools'
 
 const admin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -7,8 +9,14 @@ const admin = createClient(
 )
 
 export async function POST(req: NextRequest) {
+  const { ok, rawBody } = await verifyRetellRequest(req)
+  if (!ok) {
+    console.warn('[Retell Webhook] Rejected request with missing/invalid signature')
+    return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
+  }
+
   try {
-    const body = await req.json()
+    const body = JSON.parse(rawBody)
     const { event, call } = body
 
     console.log('[Retell Webhook] Event:', event, 'Call ID:', call?.call_id)
@@ -63,30 +71,17 @@ export async function POST(req: NextRequest) {
 
       console.log(`[Retell Webhook] Tool call: ${toolName}`, args)
 
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://thrive-at-home-pied.vercel.app'
-
-      const toolRoutes: Record<string, string> = {
-        'create_service_request': `${baseUrl}/api/retell/tools/service-request`,
-        'flag_welfare_concern': `${baseUrl}/api/retell/tools/welfare-check`,
-        'request_callback': `${baseUrl}/api/retell/tools/request-callback`,
-        'log_mood_score': `${baseUrl}/api/retell/tools/log-mood-score`,
-        'create_navigator_alert': `${baseUrl}/api/retell/tools/navigator-alert`,
-      }
-
-      const routeUrl = toolRoutes[toolName]
-      if (!routeUrl) {
+      const tool = TOOLS[toolName]
+      if (!tool) {
         console.warn(`[Retell Webhook] Unknown tool: ${toolName}`)
         return NextResponse.json({ result: 'I can help with that. Let me make a note for your care team.' })
       }
 
-      const toolRes = await fetch(routeUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ args }),
+      const outcome = await tool(args as ToolArgs, {
+        callId: call?.call_id ?? null,
+        memberId: call?.metadata?.member_id ?? null,
       })
-
-      const toolData = await toolRes.json()
-      return NextResponse.json({ result: toolData.result ?? 'Done. Your care team has been notified.' })
+      return NextResponse.json({ result: outcome.body.result ?? 'Done. Your care team has been notified.' })
     }
 
     return NextResponse.json({ received: true })
