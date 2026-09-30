@@ -14,8 +14,8 @@ Status values: `NOT_STARTED` · `IN_PROGRESS` · `AWAITING_SQL` · `AWAITING_APP
 | G1.3 | Webhook security | COMPLETE | — | 724032d |
 | G1.4 | Call-ended processing | COMPLETE | — | 212a4b9 |
 | G1.5 | Aria opt-in + Launch Protocol | COMPLETE | — | 1885807 |
-| G1.6 | Joy + Grace outbound | AWAITING_SQL | 086 | 7e578df |
-| **G1** | **Human review** | NOT_STARTED | | PR: |
+| G1.6 | Joy + Grace outbound | COMPLETE | 086 | 7e578df, 8edbf72 |
+| **G1** | **Human review** | AWAITING_APPROVAL | | PR: (see below) |
 | G2.0 | RLS helpers | NOT_STARTED | 086 | |
 | G2.1 | Post comments | NOT_STARTED | 086 | |
 | G2.2 | Report & moderation | NOT_STARTED | 086 | |
@@ -54,6 +54,10 @@ Bugs or gaps noticed outside the current phase. Don't fix unless blocking.
 | 2026-09-30 | `/dashboard/calls`, `/api/calls` | Family call history ignores `family_can_see_call_summaries` / `family_can_see_mood`. |
 | 2026-09-30 | `realtime_notifications` | member_id NOT NULL, so there is no way to notify "all navigators". The Hope unknown-caller case uses an urgent care-team SMS plus `inbound_call_log.needs_followup` instead. |
 | 2026-09-30 | `lib/services/AnthropicAiProvider.ts` | All other methods still throw "Not yet implemented"; only the two G1.4 needs are implemented. |
+| 2026-09-30 | `lib/alerts/detectCrisis.ts` | **Crisis SMS never delivered.** `handleCrisisDetection` sends `smsProvider.sendUrgent('care-team', …)`: `'care-team'` is not a phone number, so real Twilio rejects it. processCallEnded's Hope unknown-caller SMS uses the same address. Needs a real care-team number (env var) — high priority. |
+| 2026-09-30 | `.env.local` (Codespace) | Holds real non-Supabase keys (Vercel pull). A dev server run on it used the real Anthropic key (rejected: no credit) and Twilio (rejected: SID doesn't start with AC). Nothing was sent or charged. Tests now use `scripts/dev-stub-server.sh`, which forces every provider to its stub. |
+| 2026-09-30 | Anthropic account | "credit balance is too low" — production call summaries/scores will be empty until credit is added. |
+| 2026-09-30 | Stripe routes | `lib/stripe/sync.ts`, `app/api/donations/checkout`, `app/api/life-story/memory-book/payment` read `STRIPE_SECRET_KEY` directly instead of `envKey()` — a placeholder would be passed to Stripe (fails, no charge). Fix when those phases are touched. |
 | 2026-09-30 | lint baseline | `npm run lint` on main: 285 errors, 109 warnings. "No new errors" is measured against this. |
 
 ## Entry format
@@ -215,4 +219,42 @@ DEVIATIONS FROM SPEC:
 NEXT:
 - Wait for DONE on 086, then run: npx tsx scripts/test-outbound-triggers.ts
 - If it passes: mark G1.6 COMPLETE, run the G1 human review steps, open PR gaps/g1 → main, set AWAITING_APPROVAL and stop
+---
+
+---
+SESSION: 3
+DATE: 2026-09-30
+PHASE: G1.6 — Joy + Grace outbound; G1 checkpoint
+STATUS: AWAITING_APPROVAL
+BRANCH: gaps/g1 (origin/main merged in)
+
+CHECKLIST (stub mode, Codespace): all items [x]; live items [~]
+- [x] G1.6 birthday member (opted in) → Joy call — stub log: joy, RETELL_JOY_AGENT_ID, vars celebration_type,personal_line
+- [x] G1.6 recent grief request → no Joy call, skip logged
+- [x] G1.6 appointment tomorrow + call_reminder → Grace call (vars item_name,due_date)
+- [x] G1.6 non-opted-in → no Joy/Grace; call_reminder=false → no Grace; Joy twice → one call
+- [x] G1.6 tsc clean; lint 280 errors (no new)
+- [x] Regression, all suites against scripts/dev-stub-server.sh: verify-085 8/8, test-agents 18/18, test-env-placeholders 13/13, test-retell-webhook 31/31, test-aria-schedule 10/10, test-outbound-triggers 10/10; zero real-provider log lines
+- [~] G1.2 real call placed with each agent's ID — needs live test (G1_LIVE_TEST L7, L10, L11)
+- [~] G1.3 real Retell signature accepted; which key Retell signs with (RETELL_WEBHOOK_SECRET vs RETELL_API_KEY) — needs live test (L3)
+- [~] G1.4 real inbound Rosa call saved with AI summary + mood — needs live test (L4); unknown caller (L5); Hope (L6); crisis on a real call (L7); family view on production (L12)
+- [~] G1.3/G1.4 real custom-function tool call from Retell — needs live test (L8)
+- [~] G1.5 non-opted-in member gets no real call + welcome task — needs live test (L9)
+- [~] G1.6 real Joy and Grace calls — needs live test (L10, L11)
+
+FILES:
+- lib/env.ts — MODIFIED: envKey() treats empty / "[…]" values as missing
+- lib/providers.ts — MODIFIED: every resolver uses envKey()
+- lib/voice/verifyRetell.ts — MODIFIED: RETELL_WEBHOOK_SECRET first, then RETELL_API_KEY (spec change on main)
+- lib/voice/agents.ts, lib/services/RetellCallProvider.ts — MODIFIED: envKey()
+- scripts/dev-stub-server.sh — CREATED: next dev with every real provider blanked (wins over .env.local)
+- scripts/test-env-placeholders.ts — CREATED
+- gaps/G1_LIVE_TEST.md — CREATED: live test script for production after merge
+
+SQL FOR HUMAN TO RUN: none
+DEVIATIONS FROM SPEC: G1.6 deviations are in the Session 2 entry. New testing rules from main applied (stubs only in the Codespace; live items marked [~]).
+
+NEXT:
+- Human: review and merge the gaps/g1 PR, run gaps/G1_LIVE_TEST.md on production, report L1–L12 results, reply APPROVED
+- Then fix any live-test failures on a new branch, and start G2 (branch gaps/g2 from main; G2 migrations start at 087)
 ---
