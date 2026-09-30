@@ -145,7 +145,7 @@ PHASE G1.2 CHECKLIST
 
 ## PHASE G1.3 — Webhook security
 
-**Create `lib/voice/verifyRetell.ts`:** verify the `x-retell-signature` header against the raw body using `RETELL_API_KEY` (Retell signs webhooks with the API key; use the `retell-sdk` `Retell.verify(body, apiKey, signature)` helper — install `retell-sdk`). Read the body with `await request.text()` BEFORE `JSON.parse`.
+**Create `lib/voice/verifyRetell.ts`:** verify the `x-retell-signature` header against the raw body using the `retell-sdk` `Retell.verify(body, key, signature)` helper (install `retell-sdk`). Key: use `RETELL_WEBHOOK_SECRET` if it is set, otherwise `RETELL_API_KEY`. Check the current Retell docs for which key your account signs with, and confirm by verifying one real webhook from a test call — if the signature fails with one key and passes with the other, use the one that passes and note it in the log. Read the body with `await request.text()` BEFORE `JSON.parse`.
 
 - If `RETELL_API_KEY` is unset (stub mode) → allow, log `[STUB][Retell] signature check skipped`.
 - Invalid signature → `401`, no DB writes.
@@ -267,7 +267,7 @@ PHASE G1.6 CHECKLIST
 Already listed in progress.md; this spec now reads all of them:
 `RETELL_API_KEY`, `RETELL_AGENT_ID`, `RETELL_ROSA_AGENT_ID`, `RETELL_JOY_AGENT_ID`, `RETELL_GRACE_AGENT_ID`, `RETELL_HOPE_AGENT_ID`, `RETELL_CLAIRE_AGENT_ID`, `RETELL_SAM_AGENT_ID`, `RETELL_MORGAN_AGENT_ID`, `RETELL_NOVA_AGENT_ID`, `RETELL_ALEX_AGENT_ID`, `RETELL_QUINN_AGENT_ID`, `RETELL_JORDAN_AGENT_ID`, `TWILIO_PHONE_NUMBER`, `ANTHROPIC_API_KEY`.
 
-`RETELL_WEBHOOK_SECRET` is **not** needed — Retell signs with the API key. Remove it from checklist.md.
+`RETELL_WEBHOOK_SECRET` — used for signature checks when set (see G1.3); otherwise `RETELL_API_KEY` is used.
 
 ## Human review (G1 exit gate)
 
