@@ -106,7 +106,7 @@ export async function getNavigatorCaseload(
     // Keep only the most recent call per member
     const callsByMember = new Map<string, CheckInCall>()
     for (const call of (callsResult.data ?? [])) {
-      if (!callsByMember.has(call.member_id)) {
+      if (call.member_id && !callsByMember.has(call.member_id)) {
         callsByMember.set(call.member_id, call as CheckInCall)
       }
     }
