@@ -23,3 +23,14 @@ export function requireServerEnv(name: string): string {
   }
   return requireEnv(name)
 }
+
+/**
+ * Returns an env var's value, or null when it is missing, empty, or a placeholder
+ * such as "[SENSITIVE]" (anything starting with "["). Use for every provider key so a
+ * placeholder is never treated as a real credential.
+ */
+export function envKey(name: string): string | null {
+  const value = process.env[name]?.trim()
+  if (!value || value.startsWith('[')) return null
+  return value
+}

@@ -1,14 +1,15 @@
 // Real Retell AI call provider — makes outbound calls via Retell API + Twilio numbers
 import type { CallProvider, CallContext } from '../interfaces/CallProvider'
 import { AGENTS, agentIdFor } from '../voice/agents'
+import { envKey } from '../env'
 
 export class RetellCallProvider implements CallProvider {
   private apiKey: string
   private fromNumber: string
 
   constructor() {
-    this.apiKey = process.env.RETELL_API_KEY!
-    this.fromNumber = process.env.TWILIO_PHONE_NUMBER!
+    this.apiKey = envKey('RETELL_API_KEY') ?? ''
+    this.fromNumber = envKey('TWILIO_PHONE_NUMBER') ?? ''
   }
 
   async scheduleCall(memberId: string, phone: string, ctx: CallContext): Promise<string> {

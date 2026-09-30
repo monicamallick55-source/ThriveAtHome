@@ -1,6 +1,7 @@
 // Single source of truth for the 12 Retell voice agents.
 // Each agent's Retell agent_id comes from its own env var; nothing else in the app
 // should read RETELL_*_AGENT_ID directly.
+import { envKey } from '../env'
 
 export type AgentName =
   | 'aria' | 'rosa' | 'joy' | 'grace' | 'hope' | 'claire'
@@ -41,7 +42,7 @@ export const AGENT_NAMES = Object.keys(AGENTS) as AgentName[]
 
 /** The Retell agent_id for an agent, or null when its env var is unset. */
 export function agentIdFor(name: AgentName): string | null {
-  return process.env[AGENTS[name].envVar] || null
+  return envKey(AGENTS[name].envVar)
 }
 
 /** Reverse lookup: which of our agents a Retell agent_id belongs to. */

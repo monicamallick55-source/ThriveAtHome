@@ -1,7 +1,9 @@
 // Verifies Retell's x-retell-signature header against the raw request body.
-// Retell signs webhooks and custom-function calls with the account API key.
-// Stub mode (no RETELL_API_KEY): every request is allowed so local testing works.
+// Key: RETELL_WEBHOOK_SECRET when set, otherwise RETELL_API_KEY (confirm which one the
+// account signs with on a real webhook — see G1 live test).
+// Stub mode (neither key set, or placeholders): every request is allowed so local testing works.
 import Retell from 'retell-sdk'
+import { envKey } from '../env'
 
 export interface VerifiedRetellRequest {
   ok: boolean
@@ -11,7 +13,7 @@ export interface VerifiedRetellRequest {
 /** Reads the body as text (must happen before any JSON parsing) and checks the signature. */
 export async function verifyRetellRequest(request: Request): Promise<VerifiedRetellRequest> {
   const rawBody = await request.text()
-  const apiKey = process.env.RETELL_API_KEY
+  const apiKey = envKey('RETELL_WEBHOOK_SECRET') ?? envKey('RETELL_API_KEY')
 
   if (!apiKey) {
     console.log('[STUB][Retell] signature check skipped')
