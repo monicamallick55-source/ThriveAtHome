@@ -5,7 +5,8 @@
 import { createAdminClient } from '../supabase/admin'
 import { handleCrisisDetection, scanForCrisisPhrase, detectAlertsForCall, detectWellnessDrift } from '../alerts'
 import { pushRealtimeNotification } from '../realtime/notifications'
-import { aiProvider, smsProvider } from '../providers'
+import { aiProvider } from '../providers'
+import { sendCareTeamUrgent } from '../alerts/careTeamSms'
 import { AGENTS, agentNameFromId, type AgentName } from './agents'
 import { phoneVariants, toE164 } from './phone'
 import type { CallType, CallStatus, CallDirection } from '@/types/database'
@@ -284,8 +285,8 @@ export async function processCallEnded(call: RetellCall, opts: ProcessCallOption
           await admin.from('inbound_call_log').update({ needs_followup: true }).eq('id', result.inboundLogId)
         }
         // No member to attach a realtime notification to — page the care team directly.
-        await smsProvider.sendUrgent(
-          'care-team',
+        await sendCareTeamUrgent(
+          null,
           `${def.label} call from ${caller.role} caller ${toE164(call.from_number) ?? 'unknown number'}` +
             `${phrase ? ` — crisis phrase "${phrase}"` : ''}. Human follow-up required.`,
         )

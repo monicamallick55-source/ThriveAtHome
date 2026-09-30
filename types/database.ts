@@ -335,6 +335,7 @@ export interface Database {
           acknowledged_by: string | null
           acknowledged_at: string | null
           icd10_codes: string[]
+          metadata: Record<string, unknown>
         }
         Insert: {
           id?: string
@@ -347,6 +348,7 @@ export interface Database {
           acknowledged_by?: string | null
           acknowledged_at?: string | null
           icd10_codes?: string[]
+          metadata?: Record<string, unknown>
         }
         Update: Partial<Database['public']['Tables']['alerts']['Insert']>
         Relationships: []

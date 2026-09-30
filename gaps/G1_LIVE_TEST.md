@@ -19,6 +19,7 @@ Report results as `L1 PASS`, `L4 FAIL: <what you saw>`, and so on. I'll fix any 
 - `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE_NUMBER`, `CRON_SECRET`
 - `ANTHROPIC_API_KEY`. **The Anthropic account needs credit.** In the Codespace every request came back "credit balance is too low", which means every call summary would be empty. Check console.anthropic.com → Billing.
 - `RETELL_WEBHOOK_SECRET` is optional. If it is set, it is used for signature checks instead of `RETELL_API_KEY` (see L3).
+- **`CARE_TEAM_PHONE` (new, required)**: the on-call mobile that receives urgent crisis texts, in E.164 format (e.g. `+14155550100`). Use your own mobile for this test. If it is missing, crisis texts are skipped and an error is logged, but the navigator task and alert are still created.
 
 **P2. Retell dashboard.** For **every** agent:
 - Webhook URL = `https://thrive-at-home-pied.vercel.app/api/webhooks/retell`
@@ -116,14 +117,26 @@ UNION ALL SELECT 'emergency_log', alert_type::text, triggered_phrase FROM emerge
 Expect:
 - a **critical task**, a **crisis alert** and an **emergency_log** row
 - the call row saved with `agent_name = aria`
-
-⚠️ **Known bug, not fixed in G1:** the urgent crisis SMS is addressed to the literal text `care-team`, not a phone number, so Vercel logs will show a Twilio send failure. Crisis texts can't reach anyone until this is fixed; tell me if you want it fixed next. The navigator task and the alert still work.
+- **a text on the `CARE_TEAM_PHONE` mobile** within a minute, starting `🚨 URGENT — CRISIS ALERT for member …`
+- if the `[TEST]` member has an assigned navigator with a phone, that navigator gets the same text. To test this, assign one:
+  ```sql
+  INSERT INTO navigator_assignments (member_id, navigator_id, is_primary)
+  SELECT '<TEST_ID>', id, true FROM care_navigators WHERE email = '<a navigator whose phone is your 2nd number>';
+  ```
+- Vercel logs: no `CARE_TEAM_PHONE is not set` line
 
 **L8. Tool call during a live call.** On any Aria call, say **"Please call me every day."**
 ```sql
 SELECT call_frequency_preference FROM members WHERE id = '<TEST_ID>';
 ```
 Expect: `daily`. Also check Vercel logs for a `200` on `/api/retell/tools/update-call-preferences` or a `Tool call: update_call_preferences` line.
+
+**L8b. Welfare concern during a call saves an alert.** On any Aria call, say **"I had a fall in the kitchen yesterday."** Aria should use the `flag_welfare_concern` tool.
+```sql
+SELECT alert_type, severity, message, metadata FROM alerts
+WHERE member_id = '<TEST_ID>' AND metadata->>'source' = 'aria_call' ORDER BY created_at DESC LIMIT 1;
+```
+Expect: `alert_type = fall`, with `metadata` like `{"source":"aria_call","concern_type":"fall",...}`. Before migration 087 this insert failed silently.
 
 **L9. Launch Protocol: Aria off means no call** (human review #3)
 ```sql
@@ -178,6 +191,7 @@ Note its old `member_id` first if you want to restore it.
 ## Cleanup (run after reporting results)
 
 ```sql
+DELETE FROM navigator_assignments  WHERE member_id IN (SELECT id FROM members WHERE full_name LIKE '[TEST] G1%');
 DELETE FROM navigator_tasks        WHERE member_id IN (SELECT id FROM members WHERE full_name LIKE '[TEST] G1%');
 DELETE FROM alerts                 WHERE member_id IN (SELECT id FROM members WHERE full_name LIKE '[TEST] G1%');
 DELETE FROM emergency_log          WHERE member_id IN (SELECT id FROM members WHERE full_name LIKE '[TEST] G1%');

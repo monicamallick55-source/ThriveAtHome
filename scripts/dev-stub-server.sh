@@ -16,6 +16,7 @@ for v in RETELL_WEBHOOK_SECRET ANTHROPIC_API_KEY TWILIO_ACCOUNT_SID TWILIO_AUTH_
 done
 
 export RETELL_API_KEY=test_retell_key_g13
+export CARE_TEAM_PHONE=+15550000000
 export RETELL_AGENT_ID=agent_test_aria
 for a in ROSA JOY GRACE HOPE CLAIRE SAM MORGAN NOVA ALEX QUINN JORDAN; do
   export "RETELL_${a}_AGENT_ID=agent_test_$(echo "$a" | tr '[:upper:]' '[:lower:]')"
