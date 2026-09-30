@@ -14,7 +14,7 @@ Status values: `NOT_STARTED` · `IN_PROGRESS` · `AWAITING_SQL` · `AWAITING_APP
 | G1.3 | Webhook security | COMPLETE | — | 724032d |
 | G1.4 | Call-ended processing | COMPLETE | — | 212a4b9 |
 | G1.5 | Aria opt-in + Launch Protocol | COMPLETE | — | 1885807 |
-| G1.6 | Joy + Grace outbound | NOT_STARTED | 086 (tracked_items col, planned — own file per phase rule) | |
+| G1.6 | Joy + Grace outbound | AWAITING_SQL | 086 | 7e578df |
 | **G1** | **Human review** | NOT_STARTED | | PR: |
 | G2.0 | RLS helpers | NOT_STARTED | 086 | |
 | G2.1 | Post comments | NOT_STARTED | 086 | |
@@ -158,4 +158,39 @@ NEXT:
 - G1.6: create migration 086_tracked_items_call_reminder.sql (tracked_items.call_reminder boolean), commit, ask the human to run it
 - Then Joy in app/api/cron/celebrations/route.ts and Grace in app/api/cron/tracked-item-reminders/route.ts. CallContext needs a dynamicVariables field for celebration_type/item_name/due_date.
 - Then G1 human review + PR gaps/g1 → main, set AWAITING_APPROVAL
+---
+
+---
+SESSION: 2
+DATE: 2026-09-30
+PHASE: G1.6 — Joy + Grace outbound
+STATUS: AWAITING_SQL
+BRANCH: gaps/g1
+
+CHECKLIST: 1 of 5 passed
+- [ ] Birthday member (opted in) → joy call — needs 086 (script: scripts/test-outbound-triggers.ts)
+- [ ] Birthday member with recent grief request → no Joy call, skip logged — needs 086
+- [ ] Appointment tomorrow with call_reminder=true → grace call — needs 086
+- [ ] Non-opted-in member → no Joy/Grace call — needs 086
+- [x] npx tsc --noEmit passes — clean; lint 280 errors (no new)
+
+FILES:
+- supabase/migrations/086_tracked_items_call_reminder.sql — CREATED: tracked_items.call_reminder boolean NOT NULL DEFAULT false
+- lib/voice/outboundTriggers.ts — CREATED: runJoyCalls / runGraceCalls (opt-in, grief skip, one call per member per day, scheduled check_in_calls row, optional memberIds scope for tests)
+- app/api/cron/celebrations/route.ts, app/api/cron/milestones/route.ts — MODIFIED: call runJoyCalls after creating events
+- app/api/cron/tracked-item-reminders/route.ts — MODIFIED: calls runGraceCalls
+- lib/interfaces/CallProvider.ts, lib/services/RetellCallProvider.ts, lib/stubs/StubCallProvider.ts — MODIFIED: CallContext.dynamicVariables (spread first, so it can never override member_id/call_type)
+- types/database.ts — MODIFIED: tracked_items.call_reminder
+- scripts/test-outbound-triggers.ts — CREATED
+
+SQL FOR HUMAN TO RUN: supabase/migrations/086_tracked_items_call_reminder.sql
+DEVIATIONS FROM SPEC:
+- Joy runs as its own pass over today's celebration_events (birthdays + milestones). The existing cron creates birthday rows up to 7 days early and skips existing rows, so hooking into that loop would never fire on D-0. Milestones are created by the 09:00 milestones cron, after the 08:00 celebrations cron, so that cron calls runJoyCalls too. One Joy call per member per day.
+- Grief skip covers any grief_support_request created in the last 90 days, whatever its status (statuses are free text: pending/matched/completed).
+- Grace calls when an item is due tomorrow AND call_reminder=true (the checklist's reading). Several items for one member become one call.
+- Migration is 086, not part of 085 (one file per phase), so G2's migrations start at 087.
+
+NEXT:
+- Wait for DONE on 086, then run: npx tsx scripts/test-outbound-triggers.ts
+- If it passes: mark G1.6 COMPLETE, run the G1 human review steps, open PR gaps/g1 → main, set AWAITING_APPROVAL and stop
 ---
