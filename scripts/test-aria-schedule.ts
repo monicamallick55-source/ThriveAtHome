@@ -1,6 +1,6 @@
 // G1.5 verification — Aria opt-in gating + Launch Protocol navigator tasks.
 // Usage:
-//   1. Dev server running (for the portal-toggle check): npx next dev -p 3055
+//   1. Dev server with stubs (for the portal-toggle check): bash scripts/dev-stub-server.sh 3055
 //   2. BASE_URL=http://localhost:3055 npx tsx scripts/test-aria-schedule.ts
 // runAriaSchedule is scoped to the test members only, so no real member is touched.
 // Stub call provider only — no real calls. Deletes every row it creates.

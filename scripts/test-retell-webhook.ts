@@ -1,8 +1,6 @@
 // Retell webhook + tool route tests (G1.3 security, G1.4 call processing).
 // Usage:
-//   1. Start the app with a TEST key and fake agent ids:
-//      RETELL_API_KEY=test_retell_key_g13 RETELL_AGENT_ID=agent_test_aria RETELL_ROSA_AGENT_ID=agent_test_rosa \
-//      RETELL_HOPE_AGENT_ID=agent_test_hope npx next dev -p 3055
+//   1. Start the app with every provider stubbed:  bash scripts/dev-stub-server.sh 3055
 //   2. RETELL_TEST_KEY=test_retell_key_g13 BASE_URL=http://localhost:3055 npx tsx scripts/test-retell-webhook.ts [g13|g14|all]
 // Never uses a real Retell key or places a call. Deletes every row it creates.
 import Retell from 'retell-sdk'
