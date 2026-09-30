@@ -15,7 +15,7 @@ Status values: `NOT_STARTED` · `IN_PROGRESS` · `AWAITING_SQL` · `AWAITING_APP
 | G1.4 | Call-ended processing | COMPLETE | — | 212a4b9 |
 | G1.5 | Aria opt-in + Launch Protocol | COMPLETE | — | 1885807 |
 | G1.6 | Joy + Grace outbound | COMPLETE | 086 | 7e578df, 8edbf72 |
-| **G1** | **Human review** | AWAITING_APPROVAL | | PR: (see below) |
+| **G1** | **Human review** | AWAITING_APPROVAL | | PR: #1 |
 | G2.0 | RLS helpers | NOT_STARTED | 086 | |
 | G2.1 | Post comments | NOT_STARTED | 086 | |
 | G2.2 | Report & moderation | NOT_STARTED | 086 | |
