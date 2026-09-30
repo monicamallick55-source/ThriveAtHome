@@ -1456,6 +1456,7 @@ export interface Database {
           snoozed_until: string | null
           notes: string | null
           created_by: string | null
+          call_reminder: boolean
         }
         Insert: {
           id?: string
@@ -1477,6 +1478,7 @@ export interface Database {
           snoozed_until?: string | null
           notes?: string | null
           created_by?: string | null
+          call_reminder?: boolean
         }
         Update: Partial<Database['public']['Tables']['tracked_items']['Insert']>
         Relationships: [

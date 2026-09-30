@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { aiProvider } from '@/lib/providers'
+import { runJoyCalls } from '@/lib/voice/outboundTriggers'
 import {
   getExistingBirthdayCelebration,
   createCelebrationEvent,
@@ -274,8 +275,16 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  // 6 — Joy celebration calls for today's events (opted-in members, grief-aware)
+  let joy: Awaited<ReturnType<typeof runJoyCalls>> | null = null
+  try {
+    joy = await runJoyCalls()
+  } catch (e) {
+    console.error('[celebrations-cron] Joy calls failed:', e)
+  }
+
   const elapsed = Date.now() - startTime
-  const summary = { success: true, elapsed_ms: elapsed, ...results }
+  const summary = { success: true, elapsed_ms: elapsed, ...results, joy }
   console.log('[celebrations-cron] Complete:', JSON.stringify(summary))
   return NextResponse.json(summary)
 }

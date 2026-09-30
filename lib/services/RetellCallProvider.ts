@@ -20,7 +20,9 @@ export class RetellCallProvider implements CallProvider {
       from_number: this.fromNumber,
       to_number: phone,
       agent_id: agentId,
+      // Custom variables first so they can never overwrite member_id / call_type / agent_name
       retell_llm_dynamic_variables: {
+        ...ctx.dynamicVariables,
         member_id: memberId,
         preferred_name: ctx.preferredName,
         call_type: ctx.callType ?? 'check_in',
@@ -29,6 +31,7 @@ export class RetellCallProvider implements CallProvider {
         prior_call_summaries: ctx.priorCallSummaries.join('\n'),
       },
       metadata: {
+        ...ctx.dynamicVariables,
         member_id: memberId,
         preferred_name: ctx.preferredName,
         interests: ctx.interests,

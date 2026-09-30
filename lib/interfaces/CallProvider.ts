@@ -8,6 +8,8 @@ export interface CallContext {
   preferredLanguage: string
   callType?: 'onboarding' | 'check_in' | 'callback' | 'celebration' | 'reminder'
   agent?: AgentName // defaults to 'aria'
+  /** Extra Retell dynamic variables for the agent's prompt (e.g. celebration_type, item_name) */
+  dynamicVariables?: Record<string, string>
 }
 
 export interface CallProvider {
