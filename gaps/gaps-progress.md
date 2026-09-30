@@ -75,6 +75,28 @@ NEXT:
 ---
 ```
 
+## Phase status — G5 & G6 (added Sept 30, 2026)
+
+| Phase | Name | Status | Migration | Commit |
+|---|---|---|---|---|
+| G5.1 | Medicare: MA data + member Medicare help | NOT_STARTED | 091+ | |
+| G5.2 | Paid companion payouts + credits | NOT_STARTED | | |
+| G5.3 | Geographic chapters | NOT_STARTED | | |
+| G5.4 | Celebrations depth | NOT_STARTED | | |
+| G5.5 | Life transitions depth | NOT_STARTED | | |
+| G5.6 | Named interest circles + cultural content | NOT_STARTED | | |
+| G5.7 | Plan entitlements + missing SKUs | NOT_STARTED | | |
+| G5.8 | Family daily summary text + event rides | NOT_STARTED | | |
+| G5.9 | FHIR R4 referrals + compare pages | NOT_STARTED | | |
+| G5.10 | Volunteer ecosystem completion | NOT_STARTED | | |
+| **G5** | **Human review** | NOT_STARTED | | PR: |
+| G6.0 | Referral partners | NOT_STARTED | | |
+| G6.1 | Home Safety Program | NOT_STARTED | | |
+| G6.2 | Home Sharing (HIP Housing referral) | NOT_STARTED | | |
+| G6.3 | Encore Careers | NOT_STARTED | | |
+| G6.4 | Member-in-Need Campaigns | NOT_STARTED | | |
+| **G6** | **Human review** | NOT_STARTED | | PR: |
+
 ## Session log
 
 ---

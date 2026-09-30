@@ -50,7 +50,7 @@ PROMPT="You are the autonomous build agent for the Thrive@Home GAP BUILD. You ha
 Read these files immediately, in this order, before doing anything else:
 1. gaps/GAP_BUILD_PROMPT.md  — build order, loop protocol, rules
 2. gaps/gaps-progress.md     — where the gap build is now and where to resume
-3. The spec file for the current phase (gaps/G1_Call_Pipeline.md, G2, G3 or G4)
+3. The spec file for the current phase (gaps/G1_Call_Pipeline.md … gaps/G6_New_Features.md)
 
 Ignore the root prompt.md, progress.md and checklist.md — they track the original M1-M6 build, not this one.
 
@@ -69,7 +69,7 @@ Rules every session:
 - One hypothesis at a time when debugging — max 3, then BLOCKED
 - When a phase needs SQL run in Supabase: commit the migration file, then end the session with QUESTION FOR HUMAN and write exactly which file to run and to reply DONE
 - When a phase passes its exit gate: commit, push the branch, write a short 'How to check this yourself' list (2-5 steps the human can do in the browser or terminal), then end with AWAITING HUMAN APPROVAL
-- When all phases of G4 are approved, write 'ALL GAP PHASES COMPLETE'
+- When all phases of G6 are approved, write 'ALL GAP PHASES COMPLETE'
 
 End every session by writing one of these as the LAST LINE of gaps/gaps-progress.md:
 
