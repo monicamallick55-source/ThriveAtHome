@@ -72,6 +72,7 @@ CREATE POLICY "pr_own_or_staff" ON partner_referrals FOR ALL
 
 | Name | Category | County | Phone | Note |
 |---|---|---|---|---|
+| Hassett Hardware — Handyman Program | home_repair | San Mateo (Foster City area) | (confirm) | Licensed contractor partner used by Foster City Village's home safety programme; discounted work |
 | HIP Housing — Home Sharing Program | home_sharing | San Mateo | 650-348-6660 | Interviews, references, income check and photo ID; matches home providers and seekers; Living Together Agreement; ongoing follow-up; home visits for homebound seniors. Rent exchange or service exchange. www.hiphousing.org |
 | Rebuilding Together Peninsula — Safe at Home | home_repair | San Mateo; north Santa Clara | 650-366-6597 | Free safety/health repairs and modifications for low-income homeowners |
 | Center for Independence of Individuals with Disabilities (CID) | home_modification | San Mateo | 650-645-1780 | Grab bars, railings, ramps for people with disabilities |
@@ -89,33 +90,82 @@ PHASE G6.0 CHECKLIST
 
 ---
 
-## PHASE G6.1 — Home Safety Program
+## PHASE G6.1 — Home Safety & Earthquake Preparedness Program
 
-**What:** Helpful Village villages commonly run home-safety programmes (volunteer home safety checks and small fixes). I could not confirm the exact scope of Helpful Village's own module, so this is designed from village practice and the platform's existing fall-risk data. Ask the human to compare with a Helpful Village demo account and note any gap.
+**Modelled on Foster City Village's 2025–2026 programme (run on Helpful Village)**, which the founder shared on Sept 30, 2026. It must work both for ThriveAtHome members directly and for village orgs running it for their own members from `/org-admin`. That second use is the Helpful Village parity piece.
 
-**Flow:**
-1. **Request** — member, family, navigator, or automatically suggested when: Aria/Grace hears a fall mention, `fall_risk_scores` is MEDIUM/HIGH, the member returns home from hospital (G5.4), or a yearly re-check is due. Suggestion = a card + navigator task, never an automatic visit.
-2. **Visit** — a trained volunteer (requires the G4.7 module "Home safety check") or a navigator does an in-home or **virtual (video) walkthrough** using the checklist. The $49 **Home Safety Assessment (virtual)** premium add-on is this virtual walkthrough by a navigator; in-person volunteer checks stay free.
-3. **Checklist** — room by room (entrances/steps, living areas, kitchen, bathroom, bedroom, stairs, lighting, emergency). Each item: ok / concern / not applicable, photo optional, note. Include: loose rugs and cords, night lighting path bedroom→bathroom, grab bars at toilet and shower, non-slip mats, stair rails both sides, reachable storage, smoke and CO alarms tested, fire extinguisher, emergency numbers posted, medication storage, working phone within reach of the floor, entrance lighting and house number visible. Store the checklist items in a config file so the programme can edit them without code changes.
-4. **Report** — plain-language PDF for member and family (if allowed): what's fine, what to fix, why it matters. No scores that sound like grades.
-5. **Fixes** — each concern becomes a fix item routed to: a volunteer handyman (existing `home_service` sub-types: `minor_repairs`, `safety_assessment`), a paid provider (`service_providers`), or a partner referral via G6.0 (Rebuilding Together Peninsula for low-income homeowners; CID for grab bars/ramps). Track each fix to done.
-6. **Follow-up** — Grace reminder call 30 days later ("Were the grab bars installed?"); annual re-check item in Important Dates.
+### How the real programme works (build to this)
 
-**Tables:** `home_safety_checks` (member_id, requested_by, trigger, mode `in_person|virtual`, assessor_volunteer_id, assessor_family_member_id, scheduled_at, completed_at, status, report_pdf_path) · `home_safety_items` (check_id, room, item_key, result, note, photo_path) · `home_safety_fixes` (check_id, item_id, route `volunteer|provider|partner|member`, service_booking_id, partner_referral_id, status, completed_at).
+| Element | Foster City Village today | What ThriveAtHome builds |
+|---|---|---|
+| Who can enrol | Full Members only; free to participate | Eligibility rule per programme: org membership tier (e.g. Full only), or ThriveAtHome plan, or open |
+| Programme year | Runs as a 2025–2026 cohort; "spaces still available" | Programme with a year, capacity and open/closed enrolment |
+| Volunteers | Home Safety Volunteers, open to anyone (non-members, outside Foster City); each oversees 3–5 households | Volunteer role `home_safety_volunteer`; caseload 3–5 homes |
+| Training | One session with partner contractors **and** the assigned homeowners; contractor explains the checklist | Training session = event with volunteer + homeowner RSVPs; completion gates inspections |
+| Inspection | Volunteer schedules a brief visit, observes and documents concerns (checklist + photos) | Mobile-friendly checklist with photo capture |
+| Decision | Org reviews checklist, photos and contractor advice, and picks one of two repair options per home | Coordinator selects a work tier per home (see below) |
+| Proposal | Homeowner gets a written proposal and chooses all, some or none of the work | Itemised proposal the member (or family, with member consent) accepts per line item |
+| Work | Done only by licensed contractors (Hassett Hardware Handyman Program); volunteer guides completion to the homeowner's satisfaction | Work orders to a contractor partner; volunteer confirms completion with the homeowner |
+| Cost | Free basics (grab bars, smoke alarms, bulbs and batteries, installed) plus modest upgrades; beyond contractor discount + village subsidy, the homeowner is quoted the remaining cost | Per line: free / subsidised / member-pays with the amount shown before acceptance |
+| Income-qualified | Bigger repairs referred to Rebuilding Together Peninsula | Route line items to a G6.0 community partner (`home_repair`) |
+| Extras | Emergency-contact fridge magnet; household Go-Bag; 2026 presentation series (in person or Zoom) on home safety, planning and evacuation | Printable magnet, Go-Bag tracking, presentation series as events |
+| Funding | New partnerships and grant funding; sponsor thank-yous | Sponsors/grants recorded per programme; totals reported |
+| Sign-up | Name, email, phone, cell, address, membership option, Full Member vs Volunteer, home type (Full Members), comments, consent to terms | Same fields; home type list; consent checkbox |
 
-**Privacy:** photos stored in a private bucket; family sees the report only when `family_can_see_service_history`; volunteers see only the checks assigned to them.
+### Data model (new migration)
 
-**Org admins:** villages can run the programme for their members from `/org-admin` (list of checks, fixes outstanding, volunteer hours) — this is the Helpful Village parity piece.
+- `safety_programs` (id, org_id nullable = ThriveAtHome-run, name, program_year, description, eligibility jsonb e.g. `{"org_tiers":["full"]}`, capacity_households, enrollment_open boolean, starts_on, ends_on, free_item_budget_cents, subsidy_per_home_cents, contractor_partner_id → community_partners, income_referral_partner_id → community_partners, sponsors jsonb [{name, logo_url, amount_cents}], created_by)
+- `safety_program_enrollments` (program_id, member_id, home_type `single_family|condo|townhouse|apartment|mobile_home|other`, comments, status `applied|waitlisted|enrolled|training_scheduled|inspected|proposal_sent|work_in_progress|complete|declined|withdrawn`, volunteer_id, income_qualified boolean — self-attested, verified by partner, consent_terms_at)
+- `safety_program_volunteers` (program_id, volunteer_id, max_households default 5, trained_at)
+- `home_safety_checks` (enrollment_id, member_id, mode `in_person|virtual`, scheduled_at, completed_at, assessor_volunteer_id, assessor_family_member_id, status, report_pdf_path)
+- `home_safety_items` (check_id, room, item_key, result `ok|concern|na`, note, photo_path)
+- `safety_work_tiers` (program_id, tier_key `basic|enhanced`, label, description) — the "one of two options" the coordinator picks per home
+- `safety_proposals` (enrollment_id, tier_key, sent_at, responded_at, status `draft|sent|accepted_all|accepted_some|declined`, total_free_cents, total_subsidy_cents, total_member_cents)
+- `safety_proposal_lines` (proposal_id, item_key, description, route `contractor|partner_referral|volunteer|member_diy`, est_cost_cents, contractor_discount_cents, subsidy_cents, member_cost_cents, accepted boolean, work_order_status `not_started|scheduled|done|verified`, completed_at, verified_by_volunteer_at, community_partner_referral_id)
+- `go_bags` (enrollment_id, delivered_at, contents_checklist jsonb, next_refresh_due) · `emergency_magnets` (enrollment_id, generated_pdf_path, printed boolean, delivered_at)
+
+All tables have RLS: member/family (via `acting_member_ids()`) see their own; the assigned volunteer sees their 3–5 homes only; org admin sees their programme; staff see all.
+
+### Screens
+
+1. **Programme page + sign-up** (`/dashboard/home-safety`, and public `/org/[slug]/home-safety` for villages): what's included, eligibility, spaces left, sponsors. Sign-up form with the fields above. "Full Member" path checks eligibility; "Volunteer" path is open to anyone and creates a volunteer application with the `home_safety_volunteer` role. Over capacity → waitlist.
+2. **Coordinator view** (`/org-admin/home-safety` and `/admin/home-safety`): enrolments; assign volunteers (enforce max 3–5 each); schedule the training session (creates an event, with volunteers and their homeowners invited); review inspections; pick the work tier; build proposals from line items with cost split; track work orders; sponsor/grant totals; export CSV for grant reports (homes served, items installed, dollars by source).
+3. **Volunteer view** (`/volunteer/dashboard` → "My Safety Homes"): 3–5 households, training status, schedule inspection, checklist with photo capture, "Work done — confirm with homeowner" per line.
+4. **Member view** (member portal + family dashboard if allowed): status timeline, proposal with per-line Accept/Decline and clear cost ("Free", "Covered by the village", "Your cost: $85"), work progress, printable fridge magnet, Go-Bag checklist, upcoming presentations.
+5. **Presentation series:** events tagged `home_safety_series` with dial-in/Zoom links (G2.3 external RSVP), shown on the programme page.
+
+### Checklist content (config file, editable without code)
+
+Room by room, including earthquake items: loose rugs and cords · night lighting from bedroom to bathroom · grab bars at toilet and shower · non-slip mats · stair rails both sides · reachable storage · smoke and CO alarms present, tested, batteries · light bulbs working (entrances, stairs) · fire extinguisher · emergency numbers posted · medication storage · phone reachable from the floor · house number visible · **earthquake:** water heater strapped, tall furniture and bookcases anchored, heavy items stored low, gas shut-off location known and wrench present, cabinet latches, emergency water and food supply, flashlight by the bed, evacuation route and meeting place agreed.
+
+### Emergency fridge magnet
+
+A printable PDF sized for a 3.5″ × 2″ magnet sheet: member name, address, emergency contacts (from `members.emergency_contact_1/2_*`), doctor (`doctor_phone`), 911, ThriveAtHome Care Line (Rosa) and Crisis Line (Hope) numbers. Generated from the profile. The member confirms the contents before printing. Nothing clinical is printed beyond what they approve.
+
+### Automatic suggestions (never automatic enrolment)
+
+A suggestion card + navigator task appears when Aria/Grace hears a fall mention, `fall_risk_scores` is MEDIUM/HIGH, the member returns home from hospital (G5.4), or the annual re-check is due. Add the $49 **virtual home safety assessment** add-on (`home_safety_assessment` in `premium_addons`) here; it stays available for members outside a village programme. A navigator does it over video using the same checklist.
+
+### Follow-up
+
+Grace reminder call 30 days after the proposal if accepted work isn't done. Go-Bag refresh reminder yearly (water and batteries). Annual re-check item in Important Dates.
 
 ```
 PHASE G6.1 CHECKLIST
-[ ] Fall mention in a real test call → home-safety suggestion card + navigator task (no automatic booking)
-[ ] Volunteer without the training module cannot claim a check
-[ ] Completed checklist → PDF report generated; family sees it only when allowed
-[ ] "Grab bars needed" → fix item; route to CID partner creates partner_referral with consent
-[ ] $49 virtual assessment purchasable in Stripe test mode → navigator task
-[ ] 30-day Grace follow-up scheduled; annual re-check item created
-[ ] Org admin sees their members' checks and open fixes only
+[ ] Org admin creates a 2026 programme: capacity 20, Full-tier only, contractor partner + Rebuilding Together Peninsula as income referral partner
+[ ] Social-tier test member cannot enrol (clear message); Full-tier member can; 21st applicant waitlisted
+[ ] Non-member signs up as volunteer → volunteer application with home_safety_volunteer role
+[ ] Coordinator assigns 6th home to a volunteer → blocked (max 5)
+[ ] Training session event created; inspection can't be scheduled until volunteer + homeowner marked trained
+[ ] Volunteer completes checklist with 2 photos on a phone-width screen
+[ ] Coordinator picks "basic" tier, builds proposal: grab bar (free), water-heater strap (subsidised), new railing (member pays $85)
+[ ] Member accepts 2 of 3 lines → proposal status accepted_some; declined line never becomes a work order
+[ ] Income-qualified member's large repair line routes to Rebuilding Together Peninsula referral with consent
+[ ] Volunteer marks work done → homeowner confirms → line verified
+[ ] Fridge magnet PDF shows the member's contacts and Rosa/Hope numbers; member approves before print
+[ ] Grant report CSV totals: homes served, items installed, $ free / subsidised / member-paid, by sponsor
+[ ] Fall mention in a real test call → suggestion card + navigator task only
+[ ] Volunteer sees only their assigned homes (RLS test)
 ```
 
 ---
