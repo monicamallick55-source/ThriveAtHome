@@ -9,6 +9,7 @@ import Retell from 'retell-sdk'
 import { createClient } from '@supabase/supabase-js'
 import { processCallEnded, type RetellCall } from '../lib/voice/processCallEnded'
 import { getCallsForMember } from '../lib/data/calls'
+import { createTestSession } from './lib/testSession'
 
 const BASE_URL = process.env.BASE_URL ?? 'http://localhost:3055'
 const KEY = process.env.RETELL_TEST_KEY ?? 'test_retell_key_g13'
@@ -273,6 +274,30 @@ async function g14(memberIds: string[]) {
   check('family call data has ai_summary but no transcript/recording/phone fields',
     !!first && typeof first.ai_summary === 'string' && !('transcript' in first) && !('recording_url' in first) && !('from_number' in first),
     first ? Object.keys(first).join(',') : 'no rows')
+
+  // Family over HTTP: /api/calls JSON and the /dashboard/calls page never carry the transcript
+  const session = await createTestSession('g14-family')
+  try {
+    const { error: fmErr } = await admin.from('family_members').insert({
+      member_id: m1, supabase_auth_id: session.userId, full_name: 'G1 Family Test', email: 'g1-family@example.invalid', role: 'family',
+    })
+    if (fmErr) throw new Error(`family insert: ${fmErr.message}`)
+    const apiRes = await fetch(`${BASE_URL}/api/calls?memberId=${m1}`, { headers: { Cookie: session.cookieHeader } })
+    const apiText = await apiRes.text()
+    const apiJson = JSON.parse(apiText) as { calls?: Record<string, unknown>[] }
+    const apiCall = apiJson.calls?.[0]
+    check('family GET /api/calls → ai_summary present, no transcript field',
+      apiRes.status === 200 && !!apiCall?.ai_summary && !apiText.includes('"transcript"') && !apiText.includes('I am doing fine today'),
+      `${apiRes.status} keys=${apiCall ? Object.keys(apiCall).length : 0}`)
+    const pageRes = await fetch(`${BASE_URL}/dashboard/calls`, { headers: { Cookie: session.cookieHeader } })
+    const pageText = await pageRes.text()
+    check('family /dashboard/calls page payload has summary, no transcript text',
+      pageRes.status === 200 && pageText.includes('Call completed. Member seemed well.') && !pageText.includes('I am doing fine today') && !pageText.includes('"transcript"'),
+      `${pageRes.status} len=${pageText.length}`)
+  } finally {
+    await admin.from('family_members').delete().eq('supabase_auth_id', session.userId)
+    await session.cleanup()
+  }
 
   await admin.from('inbound_call_log').delete().like('retell_call_id', `${RUN}%`)
 }
