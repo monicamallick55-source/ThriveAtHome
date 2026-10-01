@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { ITEM_TYPE_DEFAULTS } from '@/lib/data/tracked-items-types'
+import { runGraceCalls } from '@/lib/voice/outboundTriggers'
 
 export const runtime = 'nodejs'
 
@@ -117,6 +118,14 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  // Grace reminder calls for items due tomorrow with call_reminder = true
+  let grace: Awaited<ReturnType<typeof runGraceCalls>> | null = null
+  try {
+    grace = await runGraceCalls()
+  } catch (e) {
+    console.error('[tracked-item-reminders] Grace calls failed:', e)
+  }
+
   console.log('[tracked-item-reminders] Done:', results)
-  return NextResponse.json({ success: true, today: todayStr, ...results })
+  return NextResponse.json({ success: true, today: todayStr, ...results, grace })
 }

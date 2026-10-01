@@ -2,7 +2,7 @@
 import { useState, useCallback } from 'react'
 import { MoodEmoji } from '@/components/ui/MoodEmoji'
 import { Button } from '@/components/ui/Button'
-import type { CheckInCall } from '@/lib/data/calls'
+import type { FamilyCall as CheckInCall } from '@/lib/data/calls'
 
 const FLAG_LABELS: Record<string, string> = {
   low_mood:        'Aria noted a mood concern this call',

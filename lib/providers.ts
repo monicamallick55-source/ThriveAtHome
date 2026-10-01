@@ -28,9 +28,10 @@ import type { DeviceProvider }   from './interfaces/DeviceProvider'
 import type { WearableProvider } from './interfaces/WearableProvider'
 import type { EhrProvider }      from './interfaces/EhrProvider'
 import type { MlProvider }       from './interfaces/MlProvider'
+import { envKey }                from './env'
 
 function resolveAiProvider(): AiProvider {
-  if (process.env.ANTHROPIC_API_KEY) {
+  if (envKey('ANTHROPIC_API_KEY')) {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { AnthropicAiProvider } = require('./services/AnthropicAiProvider') // Added in M8
     return new AnthropicAiProvider()
@@ -38,13 +39,13 @@ function resolveAiProvider(): AiProvider {
   return new StubAiProvider()
 }
 function resolveCallProvider(): CallProvider {
-  if (process.env.RETELL_API_KEY && process.env.TWILIO_ACCOUNT_SID) {
+  if (envKey('RETELL_API_KEY') && envKey('TWILIO_ACCOUNT_SID')) {
     return new RetellCallProvider()
   }
   return new StubCallProvider()
 }
 function resolveSmsProvider(): SmsProvider {
-  if (process.env.TWILIO_ACCOUNT_SID) {
+  if (envKey('TWILIO_ACCOUNT_SID')) {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { TwilioSmsProvider } = require('./services/TwilioSmsProvider') // Added in M10
     return new TwilioSmsProvider()
@@ -52,7 +53,7 @@ function resolveSmsProvider(): SmsProvider {
   return new StubSmsProvider()
 }
 function resolveEmailProvider(): EmailProvider {
-  if (process.env.SENDGRID_API_KEY) {
+  if (envKey('SENDGRID_API_KEY')) {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { SendGridEmailProvider } = require('./services/SendGridEmailProvider') // Added in M10
     return new SendGridEmailProvider()
@@ -60,7 +61,7 @@ function resolveEmailProvider(): EmailProvider {
   return new StubEmailProvider()
 }
 function resolveBillingProvider(): BillingProvider {
-  if (process.env.STRIPE_SECRET_KEY) {
+  if (envKey('STRIPE_SECRET_KEY')) {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { StripeBillingProvider } = require('./services/StripeBillingProvider') // Added in M11
     return new StripeBillingProvider()
@@ -68,7 +69,7 @@ function resolveBillingProvider(): BillingProvider {
   return new StubBillingProvider()
 }
 function resolveTransportProvider(): TransportProvider {
-  if (process.env.LYFT_HEALTHCARE_API_KEY) {
+  if (envKey('LYFT_HEALTHCARE_API_KEY')) {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { LyftTransportProvider } = require('./services/LyftTransportProvider') // Added in M17
     return new LyftTransportProvider()
@@ -76,7 +77,7 @@ function resolveTransportProvider(): TransportProvider {
   return new StubTransportProvider()
 }
 function resolveMealProvider(): MealProvider {
-  if (process.env.INSTACART_API_KEY) {
+  if (envKey('INSTACART_API_KEY')) {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { InstacartMealProvider } = require('./services/InstacartMealProvider') // Added in M17
     return new InstacartMealProvider()
@@ -84,7 +85,7 @@ function resolveMealProvider(): MealProvider {
   return new StubMealProvider()
 }
 function resolveGoodsProvider(): GoodsProvider {
-  if (process.env.ONE800FLOWERS_API_KEY || process.env.ARTIFACT_UPRISING_API_KEY) {
+  if (envKey('ONE800FLOWERS_API_KEY') || envKey('ARTIFACT_UPRISING_API_KEY')) {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { RealGoodsProvider } = require('./services/RealGoodsProvider') // Added in M16
     return new RealGoodsProvider()
@@ -93,7 +94,7 @@ function resolveGoodsProvider(): GoodsProvider {
 }
 
 function resolveDeviceProvider(): DeviceProvider {
-  if (process.env.ALEXA_SKILL_ID || process.env.GOOGLE_ACTIONS_PROJECT_ID) {
+  if (envKey('ALEXA_SKILL_ID') || envKey('GOOGLE_ACTIONS_PROJECT_ID')) {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { RealDeviceProvider } = require('./services/RealDeviceProvider') // Added in M22 activation
     return new RealDeviceProvider()
@@ -101,7 +102,7 @@ function resolveDeviceProvider(): DeviceProvider {
   return new StubDeviceProvider()
 }
 function resolveWearableProvider(): WearableProvider {
-  if (process.env.FITBIT_CLIENT_ID || process.env.GARMIN_CONSUMER_KEY) {
+  if (envKey('FITBIT_CLIENT_ID') || envKey('GARMIN_CONSUMER_KEY')) {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { RealWearableProvider } = require('./services/RealWearableProvider') // Added in M22 activation
     return new RealWearableProvider()
@@ -109,7 +110,7 @@ function resolveWearableProvider(): WearableProvider {
   return new StubWearableProvider()
 }
 function resolveEhrProvider(): EhrProvider {
-  if (process.env.EPIC_CLIENT_ID || process.env.CERNER_CLIENT_ID || process.env.FHIR_BASE_URL) {
+  if (envKey('EPIC_CLIENT_ID') || envKey('CERNER_CLIENT_ID') || envKey('FHIR_BASE_URL')) {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { RealEhrProvider } = require('./services/RealEhrProvider') // Added in M22 activation
     return new RealEhrProvider()
@@ -117,7 +118,7 @@ function resolveEhrProvider(): EhrProvider {
   return new StubEhrProvider()
 }
 function resolveMlProvider(): MlProvider {
-  if (process.env.ML_INFERENCE_URL) {
+  if (envKey('ML_INFERENCE_URL')) {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { RealMlProvider } = require('./services/RealMlProvider') // Added in M23 activation
     return new RealMlProvider()

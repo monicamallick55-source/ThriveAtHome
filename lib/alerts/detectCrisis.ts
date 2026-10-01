@@ -4,10 +4,10 @@
 import { createAdminClient } from '../supabase/admin'
 import { createAlert } from './createAlert'
 import { ALERT_RULES } from './rules'
-import { smsProvider } from '../providers'
+import { sendCareTeamUrgent } from './careTeamSms'
 
 /**
- * 15 crisis phrases that trigger immediate escalation.
+ * Crisis phrases (medical emergencies + suicidal ideation) that trigger immediate escalation.
  * Matched case-insensitively against the call transcript.
  * Specific enough that benign phrases like "fell asleep" do not match.
  */
@@ -27,6 +27,17 @@ export const CRISIS_PHRASES: readonly string[] = [
   "i think i'm having a stroke",
   "i'm bleeding badly",
   "i can't move",
+  // Suicidal ideation — always escalate to a human
+  "don't want to be here anymore",
+  "do not want to be here anymore",
+  "don't want to live anymore",
+  "don't want to be alive",
+  "want to kill myself",
+  "going to kill myself",
+  "want to end my life",
+  "end it all",
+  "better off without me",
+  "i want to die",
 ]
 
 /**
@@ -45,7 +56,7 @@ export interface CrisisDetectionParams {
   memberId: string
   callId?: string
   transcript: string
-  /** Phone number to receive the urgent SMS alert (stub logs [STUB][SMS][URGENT]) */
+  /** Overrides the CARE_TEAM_PHONE on-call number (tests only). The assigned navigator is always texted too. */
   careTeamPhone?: string
   /** Injected scanner — overrides scanForCrisisPhrase for testing the error-fallback path */
   _scanner?: (transcript: string) => string | null
@@ -59,14 +70,14 @@ export interface CrisisDetectionParams {
  *   2. emergency alert row
  *   3. critical navigator task
  *   4. Realtime notification (via createAlert)
- *   5. Urgent SMS to care team
+ *   5. Urgent SMS to the CARE_TEAM_PHONE on-call number and the assigned navigator
  *
  * Wrapped in its own try/catch — any exception creates a
  * "Crisis detection failed — manual review required" navigator task.
  * Call processing always continues regardless of outcome.
  */
 export async function handleCrisisDetection(params: CrisisDetectionParams): Promise<void> {
-  const { memberId, callId, transcript, careTeamPhone = 'care-team' } = params
+  const { memberId, callId, transcript, careTeamPhone } = params
   const scanner = params._scanner ?? scanForCrisisPhrase
   const admin = createAdminClient()
 
@@ -95,10 +106,12 @@ export async function handleCrisisDetection(params: CrisisDetectionParams): Prom
       console.error('[alerts/crisis] Navigator task insert failed:', taskError)
     }
 
-    // Step 5 — urgent SMS to care team
-    await smsProvider.sendUrgent(
+    // Step 5 — urgent SMS to the on-call number + assigned navigator.
+    // Never throws: a missing CARE_TEAM_PHONE is logged and the task + alert above still stand.
+    await sendCareTeamUrgent(
+      memberId,
+      `CRISIS ALERT for member ${memberId.substring(0, 8)}: "${triggeredPhrase}" detected in a check-in call. Open the navigator console now.`,
       careTeamPhone,
-      `CRISIS ALERT for member ${memberId.substring(0, 8)}: "${triggeredPhrase}" detected in check-in call.`,
     )
 
   } catch (e) {

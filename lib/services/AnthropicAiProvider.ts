@@ -12,12 +12,81 @@ function getClient(): Anthropic {
   return client
 }
 
+const CALL_MODEL = 'claude-opus-5-5'
+
 export class AnthropicAiProvider implements AiProvider {
-  async generateCallSummary(_transcript: string): Promise<string | null> {
-    throw new Error('[AnthropicAiProvider] Not yet implemented — add in M8')
+  // Post-call summary shown to navigators and (when the member allows it) family.
+  // Must never quote the transcript at length — family never sees transcripts.
+  async generateCallSummary(transcript: string): Promise<string | null> {
+    if (!transcript.trim()) return null
+    const response = await getClient().beta.messages.create({
+      model: CALL_MODEL,
+      max_tokens: 1000,
+      betas: ['server-side-fallback-2026-07-01'],
+      fallbacks: 'default',
+      output_config: { effort: 'low' },
+      system: 'You summarise phone check-in calls between an AI companion and an older adult for their care team. ' +
+        'Write 2–4 plain sentences: how they seemed, anything they need, and anything the care team should follow up on. ' +
+        'Paraphrase — do not quote the conversation verbatim. Respond with only the summary.',
+      messages: [{ role: 'user', content: transcript }],
+    })
+    if (response.stop_reason === 'refusal') return null
+    const text = response.content
+      .filter((b): b is Anthropic.Beta.BetaTextBlock => b.type === 'text')
+      .map(b => b.text)
+      .join('')
+      .trim()
+    return text || null
   }
-  async extractCallScores(_seniorSpeechOnly: string): Promise<CallScores> {
-    throw new Error('[AnthropicAiProvider] Not yet implemented — add in M8')
+
+  // Scores come from the member's own words only (caller passes member speech).
+  async extractCallScores(seniorSpeechOnly: string): Promise<CallScores> {
+    const empty: CallScores = { mood_score: null, energy_score: null, pain_score: null, medication_taken: null, alert_flags: [] }
+    if (!seniorSpeechOnly.trim()) return empty
+    const nullableScore = { anyOf: [{ type: 'integer', minimum: 1, maximum: 10 }, { type: 'null' }] }
+    const response = await getClient().beta.messages.create({
+      model: CALL_MODEL,
+      max_tokens: 1000,
+      betas: ['server-side-fallback-2026-07-01'],
+      fallbacks: 'default',
+      output_config: {
+        effort: 'low',
+        format: {
+          type: 'json_schema',
+          schema: {
+            type: 'object',
+            properties: {
+              mood_score: nullableScore,
+              energy_score: nullableScore,
+              pain_score: nullableScore,
+              medication_taken: { anyOf: [{ type: 'boolean' }, { type: 'null' }] },
+              alert_flags: { type: 'array', items: { type: 'string' } },
+            },
+            required: ['mood_score', 'energy_score', 'pain_score', 'medication_taken', 'alert_flags'],
+            additionalProperties: false,
+          },
+        },
+      },
+      system: 'You read what an older adult said during a wellness check-in call and rate it. ' +
+        'mood_score and energy_score: 1 (very low) to 10 (excellent). pain_score: 1 (none) to 10 (severe). ' +
+        'medication_taken: true/false only if they said so, otherwise null. Use null for any score the words give no evidence for. ' +
+        'alert_flags: short snake_case labels for concerns (e.g. "fall_mentioned", "lonely", "missed_meals"), or an empty array.',
+      messages: [{ role: 'user', content: seniorSpeechOnly }],
+    })
+    if (response.stop_reason === 'refusal') return empty
+    const text = response.content
+      .filter((b): b is Anthropic.Beta.BetaTextBlock => b.type === 'text')
+      .map(b => b.text)
+      .join('')
+    const parsed = JSON.parse(text) as Partial<CallScores>
+    const clamp = (n: unknown) => (typeof n === 'number' && n >= 1 && n <= 10 ? Math.round(n) : null)
+    return {
+      mood_score: clamp(parsed.mood_score),
+      energy_score: clamp(parsed.energy_score),
+      pain_score: clamp(parsed.pain_score),
+      medication_taken: typeof parsed.medication_taken === 'boolean' ? parsed.medication_taken : null,
+      alert_flags: Array.isArray(parsed.alert_flags) ? parsed.alert_flags.filter((f): f is string => typeof f === 'string') : [],
+    }
   }
   async disambiguateCrisisContext(_phrase: string, _context: string): Promise<boolean> {
     throw new Error('[AnthropicAiProvider] Not yet implemented — add in M8')

@@ -1,4 +1,4 @@
-import type { CheckInCall } from '@/lib/data/calls'
+import type { FamilyCall as CheckInCall } from '@/lib/data/calls'
 import type { Member } from '@/lib/data/members'
 
 interface WellnessCardProps {

@@ -5,7 +5,10 @@ export type PlanTier = 'basics' | 'connect' | 'complete' | 'premier'
 export type MemberStatus = 'active' | 'inactive' | 'paused'
 export type UserRole = 'family' | 'navigator' | 'admin' | 'volunteer' | 'student' | 'university_admin' | 'employer_admin' | 'agency_admin' | 'aaa_admin' | 'org_admin' | 'senior_center_admin' | 'network_admin'
 export type CallStatus = 'scheduled' | 'in_progress' | 'completed' | 'missed' | 'failed'
-export type CallType = 'check_in' | 'concierge' | 'navigator' | 'onboarding'
+export type CallType =
+  | 'check_in' | 'concierge' | 'navigator' | 'onboarding'
+  | 'callback' | 'celebration' | 'reminder' | 'crisis' | 'care_line'
+export type CallDirection = 'inbound' | 'outbound'
 export type AlertType = 'missed_call' | 'mood_drop' | 'medication_miss' | 'wellness_drift' | 'fall' | 'crisis' | 'emergency'
 export type AlertSeverity = 'informational' | 'concern' | 'urgent' | 'emergency'
 export type TaskPriority = 'low' | 'medium' | 'high' | 'critical'
@@ -74,6 +77,9 @@ export interface Database {
           ml_insights_opt_out: boolean
           supabase_auth_id: string | null
           aria_call_opted_in: boolean
+          call_frequency_preference: 'daily' | 'few_times_week' | 'weekly'
+          onboarding_call_completed: boolean
+          last_aria_call_at: string | null
           family_can_see_mood: boolean
           family_can_see_call_summaries: boolean
           family_can_see_service_history: boolean
@@ -123,6 +129,9 @@ export interface Database {
           device_integration_consent?: boolean
           ml_insights_opt_out?: boolean
           aria_call_opted_in?: boolean
+          call_frequency_preference?: 'daily' | 'few_times_week' | 'weekly'
+          onboarding_call_completed?: boolean
+          last_aria_call_at?: string | null
           family_can_see_mood?: boolean
           family_can_see_call_summaries?: boolean
           family_can_see_service_history?: boolean
@@ -218,7 +227,7 @@ export interface Database {
         Row: {
           id: string
           created_at: string
-          member_id: string
+          member_id: string | null
           call_type: CallType
           scheduled_at: string | null
           started_at: string | null
@@ -239,11 +248,18 @@ export interface Database {
           social_isolation_signal: boolean | null
           fall_risk_mention: boolean | null
           cognitive_concern_signal: boolean | null
+          agent_id: string | null
+          agent_name: string | null
+          direction: CallDirection | null
+          from_number: string | null
+          to_number: string | null
+          caller_role: string | null
+          processed_at: string | null
         }
         Insert: {
           id?: string
           created_at?: string
-          member_id: string
+          member_id?: string | null
           call_type?: CallType
           scheduled_at?: string | null
           started_at?: string | null
@@ -264,8 +280,47 @@ export interface Database {
           social_isolation_signal?: boolean | null
           fall_risk_mention?: boolean | null
           cognitive_concern_signal?: boolean | null
+          agent_id?: string | null
+          agent_name?: string | null
+          direction?: CallDirection | null
+          from_number?: string | null
+          to_number?: string | null
+          caller_role?: string | null
+          processed_at?: string | null
         }
         Update: Partial<Database['public']['Tables']['check_in_calls']['Insert']>
+        Relationships: []
+      }
+      inbound_call_log: {
+        Row: {
+          id: string
+          created_at: string
+          retell_call_id: string | null
+          agent_name: string
+          from_number: string | null
+          caller_role: string
+          family_member_id: string | null
+          volunteer_id: string | null
+          duration_seconds: number | null
+          ai_summary: string | null
+          transcript: string | null
+          needs_followup: boolean
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          retell_call_id?: string | null
+          agent_name: string
+          from_number?: string | null
+          caller_role?: string
+          family_member_id?: string | null
+          volunteer_id?: string | null
+          duration_seconds?: number | null
+          ai_summary?: string | null
+          transcript?: string | null
+          needs_followup?: boolean
+        }
+        Update: Partial<Database['public']['Tables']['inbound_call_log']['Insert']>
         Relationships: []
       }
       alerts: {
@@ -280,6 +335,7 @@ export interface Database {
           acknowledged_by: string | null
           acknowledged_at: string | null
           icd10_codes: string[]
+          metadata: Record<string, unknown>
         }
         Insert: {
           id?: string
@@ -292,6 +348,7 @@ export interface Database {
           acknowledged_by?: string | null
           acknowledged_at?: string | null
           icd10_codes?: string[]
+          metadata?: Record<string, unknown>
         }
         Update: Partial<Database['public']['Tables']['alerts']['Insert']>
         Relationships: []
@@ -1401,6 +1458,7 @@ export interface Database {
           snoozed_until: string | null
           notes: string | null
           created_by: string | null
+          call_reminder: boolean
         }
         Insert: {
           id?: string
@@ -1422,6 +1480,7 @@ export interface Database {
           snoozed_until?: string | null
           notes?: string | null
           created_by?: string | null
+          call_reminder?: boolean
         }
         Update: Partial<Database['public']['Tables']['tracked_items']['Insert']>
         Relationships: [

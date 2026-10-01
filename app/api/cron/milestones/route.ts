@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { runJoyCalls } from '@/lib/voice/outboundTriggers'
 import {
   getMilestoneExists,
   createCelebrationEvent,
@@ -132,7 +133,14 @@ export async function GET(req: NextRequest) {
   }
 
   const elapsed = Date.now() - startTime
-  const summary = { success: true, elapsed_ms: elapsed, ...results }
+  // Milestones created above are dated today — give Joy a chance to call (dedupes per member per day)
+  let joy: Awaited<ReturnType<typeof runJoyCalls>> | null = null
+  try {
+    joy = await runJoyCalls()
+  } catch (e) {
+    console.error('[milestones-cron] Joy calls failed:', e)
+  }
+  const summary = { success: true, elapsed_ms: elapsed, ...results, joy }
   console.log('[milestones-cron] Complete:', JSON.stringify(summary))
   return NextResponse.json(summary)
 }

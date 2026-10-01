@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { FAMILY_CALL_COLUMNS } from '@/lib/data/calls'
 
 export async function GET(request: NextRequest) {
   // 1. Authenticate
@@ -38,10 +39,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  // 4. Fetch paginated calls, newest first
+  // 4. Fetch paginated calls, newest first — family-safe columns only (never the transcript)
   const { data: calls, error: callsError } = await admin
     .from('check_in_calls')
-    .select('*')
+    .select(FAMILY_CALL_COLUMNS.join(', '))
     .eq('member_id', memberId)
     .order('scheduled_at', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false })

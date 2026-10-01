@@ -136,6 +136,7 @@ export async function detectProlongedGriefMembers(): Promise<{
   // Group by member_id
   const byMember: Record<string, number[]> = {}
   for (const row of data ?? []) {
+    if (!row.member_id) continue
     if (!byMember[row.member_id]) byMember[row.member_id] = []
     if (row.mood_score !== null) byMember[row.member_id].push(row.mood_score)
   }
