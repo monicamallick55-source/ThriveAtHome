@@ -6,9 +6,11 @@
 //   unit     — transfer detection on replayed payloads, no DB or server
 //   transfer — replayed Quinn→Rosa / Quinn→Hope / Quinn→Claire call_ended webhooks (needs migration 088)
 //   tools    — every tool via Quinn's inbound number, members and non-members (needs migration 088)
+//   retell   — Retell's standard argument names, no member_id (needs migration 088)
 // Never uses a real Retell key or places a call. Deletes every row it creates.
 import Retell from 'retell-sdk'
 import { createClient } from '@supabase/supabase-js'
+import { createTestSession } from './lib/testSession'
 
 // Same fake agent ids as scripts/dev-stub-server.sh, so in-process detection matches the server
 process.env.RETELL_AGENT_ID = 'agent_test_aria'
@@ -137,6 +139,7 @@ async function post(path: string, payload: unknown) {
 const memberIds: string[] = []
 const familyIds: string[] = []
 const phones: string[] = []
+const sessionCleanups: (() => Promise<void>)[] = []
 
 async function createMember(phone: string): Promise<string> {
   const { data, error } = await admin.from('members').insert({
@@ -149,8 +152,10 @@ async function createMember(phone: string): Promise<string> {
 }
 
 async function createFamily(memberId: string, phone: string): Promise<string> {
+  const session = await createTestSession(`${RUN}-family`)
+  sessionCleanups.push(session.cleanup)
   const { data, error } = await admin.from('family_members').insert({
-    member_id: memberId, full_name: '[TEST] G1 Transfer Family', email: `${RUN}@example.invalid`, role: 'family', phone,
+    member_id: memberId, supabase_auth_id: session.userId, full_name: '[TEST] G1 Transfer Family', email: `${RUN}@example.invalid`, role: 'family', phone,
   }).select('id').maybeSingle()
   if (error || !data) throw new Error(`family insert: ${error?.message}`)
   familyIds.push(data.id); phones.push(phone)
@@ -166,6 +171,7 @@ async function cleanup() {
   await admin.from('navigator_tasks').delete().like('description', `%[call ${RUN}%`)
   await admin.from('inbound_call_log').delete().like('retell_call_id', `${RUN}%`)
   for (const id of familyIds) await admin.from('family_members').delete().eq('id', id)
+  for (const c of sessionCleanups.splice(0)) await c()
   for (const id of memberIds) await admin.from('members').delete().eq('id', id)
 }
 
@@ -319,11 +325,58 @@ async function tools() {
   await admin.from('navigator_tasks').delete().in('caller_phone', [unk, famPhone])
 }
 
+// ── retell: Retell's standard argument names, never a member_id ─────────────
+async function retellNames() {
+  console.log('\n── Retell argument names (no member_id) ──\n')
+  const phone = '+15555550181'
+  const m = await createMember(phone)
+  const callId = `${RUN}-retell`
+  const unk = '+15555550987'
+
+  const na = await post('/api/retell/tools/navigator-alert', routePayload('create_navigator_alert', { alert_type: 'housing', description: '[TEST] heating broken', priority: 'medium' }, callId, phone))
+  const { data: naRow } = await admin.from('navigator_tasks').select('description').eq('member_id', m).eq('task_type', 'navigator_alert').maybeSingle()
+  check('create_navigator_alert with `description` → navigator task saved', na.status === 200 && !!naRow?.description?.includes('heating broken'), `${na.status} ${naRow?.description}`)
+
+  const cb = await post('/api/retell/tools/request-callback', routePayload('request_callback', { requested_time: 'after lunch', reason: '[TEST] pharmacy question' }, callId, phone))
+  const { data: cbRow } = await admin.from('callback_requests').select('notes').eq('member_id', m).maybeSingle()
+  check('request_callback with `requested_time` + `reason` → callback_requests notes keep both', cb.status === 200 && !!cbRow?.notes?.includes('after lunch') && !!cbRow?.notes?.includes('pharmacy question'), `${cb.status} ${cbRow?.notes}`)
+
+  const ucb = await post('/api/retell/tools/request-callback', routePayload('request_callback', { requested_time: 'tomorrow', reason: '[TEST] neighbour asking for help' }, `${RUN}-retell-unk`, unk))
+  const { data: ucbTask } = await admin.from('navigator_tasks').select('description, caller_role').eq('caller_phone', unk).eq('task_type', 'callback_request').maybeSingle()
+  check('request_callback Retell names, unknown caller → task with reason + time', ucb.status === 200 && ucbTask?.caller_role === 'unknown' &&
+    !!ucbTask?.description?.includes('neighbour asking for help') && !!ucbTask?.description?.includes('tomorrow'), `${ucb.status} ${ucbTask?.description}`)
+  await admin.from('navigator_tasks').delete().eq('caller_phone', unk)
+
+  const pr = await post('/api/retell/tools/update-call-preferences', routePayload('update_call_preferences', { call_frequency: 'few_times_week' }, callId, phone))
+  const { data: pRow } = await admin.from('members').select('call_frequency_preference').eq('id', m).maybeSingle()
+  check('update_call_preferences exact `few_times_week` → saved', pr.status === 200 && pRow?.call_frequency_preference === 'few_times_week', `${pr.status} ${pRow?.call_frequency_preference}`)
+  await post('/api/retell/tools/update-call-preferences', routePayload('update_call_preferences', { call_frequency: 'daily' }, callId, phone))
+  const { data: pRow2 } = await admin.from('members').select('call_frequency_preference').eq('id', m).maybeSingle()
+  check('update_call_preferences exact `daily` → saved', pRow2?.call_frequency_preference === 'daily', String(pRow2?.call_frequency_preference))
+
+  const conf = await post('/api/retell/tools/welfare-check', routePayload('flag_welfare_concern', { concern_type: 'confusion', description: '[TEST] unsure what day it is' }, callId, phone))
+  const { data: confTask } = await admin.from('navigator_tasks').select('priority').eq('member_id', m).eq('task_type', 'behavioral_concern').maybeSingle()
+  const { count: confCrisis } = await admin.from('alerts').select('id', { count: 'exact', head: true }).eq('member_id', m).eq('alert_type', 'crisis')
+  check('flag_welfare_concern confusion → behavioral_concern task, no crisis alert', conf.status === 200 && !!confTask && (confCrisis ?? 0) === 0, `${conf.status} ${JSON.stringify(confTask)} crisis=${confCrisis}`)
+
+  const dis = await post('/api/retell/tools/welfare-check', routePayload('flag_welfare_concern', { concern_type: 'distress', description: '[TEST] very upset about the move' }, callId, phone))
+  const { data: disTask } = await admin.from('navigator_tasks').select('priority').eq('member_id', m).eq('task_type', 'navigator_alert').ilike('description', '%distress%').maybeSingle()
+  const { count: disCrisis } = await admin.from('alerts').select('id', { count: 'exact', head: true }).eq('member_id', m).eq('alert_type', 'crisis')
+  check('flag_welfare_concern distress → high-priority navigator alert, no crisis alert', dis.status === 200 && disTask?.priority === 'high' && (disCrisis ?? 0) === 0, `${dis.status} ${JSON.stringify(disTask)} crisis=${disCrisis}`)
+
+  for (const [concern, expected] of [['fall', 'fall'], ['medication', 'medication_miss'], ['emergency', 'emergency']] as const) {
+    const r = await post('/api/retell/tools/welfare-check', routePayload('flag_welfare_concern', { concern_type: concern, description: `[TEST] ${concern}` }, callId, phone))
+    const { count } = await admin.from('alerts').select('id', { count: 'exact', head: true }).eq('member_id', m).eq('alert_type', expected)
+    check(`flag_welfare_concern ${concern} → ${expected} alert (unchanged)`, r.status === 200 && (count ?? 0) === 1, `${r.status} count=${count}`)
+  }
+}
+
 async function main() {
   try {
     if (only === 'unit' || only === 'all') unit()
     if (only === 'transfer' || only === 'all') await transfer()
     if (only === 'tools' || only === 'all') await tools()
+    if (only === 'retell' || only === 'all') await retellNames()
   } finally {
     if (only !== 'unit') await cleanup()
   }

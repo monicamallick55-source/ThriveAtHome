@@ -6,8 +6,9 @@ import { toolAdmin, resolveToolCaller, createToolTask, str, type ToolArgs, type 
 export async function run(args: ToolArgs, ctx: ToolContext): Promise<ToolOutcome> {
   const caller = await resolveToolCaller(args, ctx)
   const memberId = caller.memberId
-  const preferredTime = str(args.preferred_time) // ISO string or natural language like "3pm today"
-  const notes = str(args.notes)
+  // Retell's standard names (requested_time, reason) and ours (preferred_time, notes) are both accepted
+  const preferredTime = str(args.preferred_time) ?? str(args.requested_time) // ISO string or natural language like "3pm today"
+  const notes = str(args.notes) ?? str(args.reason)
 
   if (!memberId) {
     const message = [notes, preferredTime ? `preferred time: ${preferredTime}` : null].filter(Boolean).join(' — ') || 'Asked for a callback'

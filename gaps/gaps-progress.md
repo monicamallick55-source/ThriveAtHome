@@ -16,7 +16,7 @@ Status values: `NOT_STARTED` · `IN_PROGRESS` · `AWAITING_SQL` · `AWAITING_APP
 | G1.5 | Aria opt-in + Launch Protocol | COMPLETE | — | 1885807 |
 | G1.6 | Joy + Grace outbound | COMPLETE | 086 | 7e578df, 8edbf72 |
 | G1.fix | Crisis SMS + alerts.metadata (pre-merge) | AWAITING_SQL | 087 | 2b5da46 |
-| G1.xfer | Quinn front door: agent transfers, tool caller lookup, tool writes | AWAITING_SQL | 088 | branch gaps/g1-transfer |
+| G1.xfer | Quinn front door: agent transfers, tool caller lookup, tool writes | AWAITING_APPROVAL | 088 | PR: #2 |
 | **G1** | **Human review** | AWAITING_APPROVAL | | PR: #1 |
 | G2.0 | RLS helpers | NOT_STARTED | 086 | |
 | G2.1 | Post comments | NOT_STARTED | 086 | |
@@ -332,4 +332,25 @@ DEVIATIONS FROM SPEC: 088 used here, so G2 starts at 089. Retell's transcript ha
 NEXT:
 - On DONE for 088: run test-agent-transfer.ts all, test-retell-webhook.ts all, test-crisis-sms.ts all against dev-stub-server → mark items [x]
 - Human merges the PR, runs G1_LIVE_TEST L4–L6, L13, L14
+---
+
+---
+SESSION: 5 (continued)
+DATE: 2026-10-01
+PHASE: G1.xfer — 088 run by human; Retell standard tool argument names
+STATUS: AWAITING_APPROVAL
+BRANCH: gaps/g1-transfer (PR #2)
+
+CHECKLIST: 6 of 6 passed (+ Retell argument names)
+- [x] 088 applied by human
+- [x] scripts/test-agent-transfer.ts all: 41/41 (unit 9, transfer 8, tools 13, Retell names 11)
+- [x] Retell names: create_navigator_alert description; request_callback requested_time/reason; update_call_preferences exact daily/few_times_week/weekly; welfare confusion → behavioral_concern navigator task, distress → high-priority navigator alert, fall/medication/emergency unchanged
+- [x] Regression against dev-stub-server, all pass: test-retell-webhook all, test-crisis-sms all, test-crisis-detection, test-agents, test-env-placeholders, test-aria-schedule, test-outbound-triggers; zero real-provider log lines
+- [x] tsc clean
+- [~] live calls through Quinn — G1_LIVE_TEST L4–L6, L13, L14
+
+DEVIATIONS FROM SPEC: There is no 'behavioral' alert_type, so confusion goes to a navigator_tasks row (task_type behavioral_concern, high if severity urgent). Family members don't see it as an alert. Confusion or distress with severity 'emergency' still takes the emergency alert path.
+
+NEXT:
+- Human merges PR #2, runs G1_LIVE_TEST L4–L6, L13, L14, replies APPROVED
 ---

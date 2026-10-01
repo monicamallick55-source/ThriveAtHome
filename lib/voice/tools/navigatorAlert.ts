@@ -1,12 +1,12 @@
 // Retell tool: create_navigator_alert.
-// Args: { alert_type: string, message: string, priority?: string }
+// Args: { alert_type: string, message | description: string, priority?: string }
 // Saved as a navigator_tasks row (there is no navigator_alerts table). Non-member callers
 // (family, volunteer, staff, unknown) get a task with their number, role and message.
 import { resolveToolCaller, createToolTask, str, type ToolArgs, type ToolContext, type ToolOutcome } from './types'
 
 export async function run(args: ToolArgs, ctx: ToolContext): Promise<ToolOutcome> {
   const caller = await resolveToolCaller(args, ctx)
-  const message = str(args.message)
+  const message = str(args.message) ?? str(args.description)
   const alertType = str(args.alert_type) ?? 'general'
   const priority = str(args.priority)
 

@@ -17,7 +17,8 @@ export async function run(args: ToolArgs, ctx: ToolContext): Promise<ToolOutcome
   let freq = 'weekly'
   if (callFrequency) {
     const f = callFrequency.toLowerCase().trim()
-    if (f.includes('daily') || f.includes('every day')) freq = 'daily'
+    if (f === 'daily' || f === 'few_times_week' || f === 'weekly') freq = f
+    else if (f.includes('daily') || f.includes('every day')) freq = 'daily'
     else if (f.includes('few') || f.includes('twice') || f.includes('other day')) freq = 'few_times_week'
     else if (f.includes('week')) freq = 'weekly'
   }

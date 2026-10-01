@@ -1,5 +1,8 @@
 // Retell tool: flag_welfare_concern.
 // Args: { concern_type, description, severity? }
+// concern_type: fall → fall alert, medication → medication_miss, emergency → emergency;
+// confusion → behavioral-concern navigator task (not crisis); distress → high-priority navigator alert;
+// anything else → crisis alert. An `emergency` severity always takes the emergency alert path.
 // Saves an alert (and an emergency_log row for emergencies) on the member. A family caller's
 // concern is saved on the member they are family of; other non-members get a navigator task.
 import { toolAdmin, resolveToolCaller, createToolTask, str, type ToolArgs, type ToolContext, type ToolOutcome } from './types'
@@ -36,6 +39,17 @@ export async function run(args: ToolArgs, ctx: ToolContext): Promise<ToolOutcome
         result: severity === 'emergency' ? emergencyLine : `Thank you for telling me. I've passed that to our care team and someone will follow up.`,
       },
     }
+  }
+
+  // Confusion and distress go to a navigator, not the crisis path (unless the agent says it's an emergency)
+  const navigatorRoute = severity === 'emergency' ? null
+    : concernType === 'confusion' ? { taskType: 'behavioral_concern', heading: 'Behavioral concern (confusion) raised on a call', priority: severity === 'urgent' ? 'high' : 'medium' }
+    : concernType === 'distress' ? { taskType: 'navigator_alert', heading: 'Navigator alert (distress) raised on a call', priority: 'high' }
+    : null
+  if (navigatorRoute) {
+    const { ok } = await createToolTask({ ...caller, memberId }, { ...navigatorRoute, message: description, callId: ctx.callId })
+    if (!ok) return { status: 500, body: { error: 'Failed to save welfare concern' } }
+    return { status: 200, body: { success: true, result: `I've let your care team know. Someone will be in touch with you soon. Is there anything else I can do for you right now?` } }
   }
 
   const admin = toolAdmin()
