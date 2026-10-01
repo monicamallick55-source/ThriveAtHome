@@ -1,13 +1,28 @@
-// Retell tool: request_callback — member asks to be called back.
-// Saves a callback_requests row; cron picks it up and places the outbound call.
-import { toolAdmin, memberIdFrom, str, type ToolArgs, type ToolContext, type ToolOutcome } from './types'
+// Retell tool: request_callback — caller asks to be called back.
+// Members: saves a callback_requests row; cron picks it up and places the outbound call.
+// Anyone else (family, volunteer, staff, unknown): a navigator task with their number, role and message.
+import { toolAdmin, resolveToolCaller, createToolTask, str, type ToolArgs, type ToolContext, type ToolOutcome } from './types'
 
 export async function run(args: ToolArgs, ctx: ToolContext): Promise<ToolOutcome> {
-  const memberId = memberIdFrom(args, ctx)
+  const caller = await resolveToolCaller(args, ctx)
+  const memberId = caller.memberId
   const preferredTime = str(args.preferred_time) // ISO string or natural language like "3pm today"
   const notes = str(args.notes)
 
-  if (!memberId) return { status: 400, body: { error: 'member_id is required' } }
+  if (!memberId) {
+    const message = [notes, preferredTime ? `preferred time: ${preferredTime}` : null].filter(Boolean).join(' — ') || 'Asked for a callback'
+    const { ok } = await createToolTask(caller, { taskType: 'callback_request', heading: 'Callback requested', message, callId: ctx.callId })
+    if (!ok) return { status: 500, body: { error: 'Failed to save callback request' } }
+    return {
+      status: 200,
+      body: {
+        success: true,
+        result: caller.phone
+          ? `Thank you. I've passed your message to our care team, and someone will call you back at this number${preferredTime ? ` around ${preferredTime}` : ''}. Is there anything else before we hang up?`
+          : `Thank you. I've passed your message to our care team so they can follow up with you.`,
+      },
+    }
+  }
 
   const admin = toolAdmin()
   const { data: member, error: memberErr } = await admin

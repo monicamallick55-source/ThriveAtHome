@@ -1,13 +1,18 @@
 // Retell tool: update_call_preferences — member tells the agent how often to call.
-// Args: { call_frequency?: string, preferred_time?: string }
-import { toolAdmin, memberIdFrom, str, type ToolArgs, type ToolContext, type ToolOutcome } from './types'
+// Args: { call_frequency?: string, preferred_time?: string }. Members only — anyone else gets a polite spoken reply.
+import { toolAdmin, resolveToolCaller, str, type ToolArgs, type ToolContext, type ToolOutcome } from './types'
 
 export async function run(args: ToolArgs, ctx: ToolContext): Promise<ToolOutcome> {
-  const memberId = memberIdFrom(args, ctx)
+  const memberId = (await resolveToolCaller(args, ctx)).memberId
   const callFrequency = str(args.call_frequency)
   const preferredTime = str(args.preferred_time)
 
-  if (!memberId) return { status: 400, body: { error: 'member_id is required' } }
+  if (!memberId) {
+    return {
+      status: 200,
+      body: { result: 'I can only change call times for members calling from their own phone. A care navigator can help with that — would you like me to ask one to call you back?' },
+    }
+  }
 
   let freq = 'weekly'
   if (callFrequency) {

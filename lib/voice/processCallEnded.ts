@@ -8,7 +8,9 @@ import { pushRealtimeNotification } from '../realtime/notifications'
 import { aiProvider } from '../providers'
 import { sendCareTeamUrgent } from '../alerts/careTeamSms'
 import { AGENTS, agentNameFromId, type AgentName } from './agents'
-import { phoneVariants, toE164 } from './phone'
+import { toE164 } from './phone'
+import { lookupCallerByPhone, NO_CALLER, type CallerMatch, type CallerRole } from './caller'
+import { detectAgentsInvolved, type RetellTranscriptEvent } from './transfers'
 import type { CallType, CallStatus, CallDirection } from '@/types/database'
 
 // ── Retell payload shape (only the fields we read) ───────────────────────────
@@ -28,22 +30,18 @@ export interface RetellCall {
   duration_ms?: number | null
   transcript?: string | null
   transcript_object?: RetellTranscriptTurn[] | null
+  transcript_with_tool_calls?: RetellTranscriptEvent[] | null
   disconnection_reason?: string | null
   metadata?: { member_id?: string; call_type?: string; [key: string]: unknown } | null
 }
 
-export type CallerRole = 'member' | 'family' | 'volunteer' | 'staff' | 'unknown'
-
-export interface CallerMatch {
-  role: CallerRole
-  memberId: string | null
-  familyMemberId: string | null
-  volunteerId: string | null
-}
+export type { CallerMatch, CallerRole }
 
 export interface ProcessCallResult {
   skipped: boolean
+  /** Final agent on the call (after any Agent Transfers) */
   agent: AgentName
+  agentsInvolved: AgentName[]
   callerRole: CallerRole
   memberId: string | null
   callRowId: string | null
@@ -78,42 +76,31 @@ export function callDirection(call: RetellCall, agent: AgentName): CallDirection
   return call.direction === 'inbound' || call.direction === 'outbound' ? call.direction : AGENTS[agent].direction
 }
 
-/** Member-speech-only text from transcript_object (role 'user'). Falls back to the full transcript. */
+/** Agents on the call: the webhook's agent first, then every Agent Transfer target, in order. */
+export function callAgents(call: RetellCall): { first: AgentName; final: AgentName; involved: AgentName[] } {
+  const first = resolveAgent(call.agent_id)
+  const involved = detectAgentsInvolved(first, call.transcript_with_tool_calls)
+  return { first, final: involved[involved.length - 1], involved }
+}
+
+/**
+ * Member-speech-only text for the whole call, across every agent after a transfer
+ * (role 'user' in transcript_object, else transcript_with_tool_calls). Falls back to the full transcript.
+ */
 export function memberSpeech(call: RetellCall): string {
-  const turns = call.transcript_object
+  const turns = call.transcript_object?.length ? call.transcript_object : call.transcript_with_tool_calls
   if (Array.isArray(turns) && turns.length > 0) {
-    return turns.filter(t => t.role === 'user').map(t => t.content).join('\n')
+    return turns.filter(t => t.role === 'user' && typeof t.content === 'string').map(t => t.content).join('\n')
   }
   return call.transcript ?? ''
 }
 
 /** Outbound → metadata.member_id. Inbound → phone lookup: members, then family, then volunteers. */
 export async function identifyCaller(call: RetellCall, direction: CallDirection): Promise<CallerMatch> {
-  const none: CallerMatch = { role: 'unknown', memberId: null, familyMemberId: null, volunteerId: null }
   const metaMember = call.metadata?.member_id
-  if (metaMember) return { ...none, role: 'member', memberId: metaMember }
-  if (direction !== 'inbound') return none
-
-  const variants = phoneVariants(call.from_number)
-  if (variants.length === 0) return none
-  const admin = createAdminClient()
-
-  const { data: member } = await admin
-    .from('members').select('id').in('phone_number', variants).limit(1).maybeSingle()
-  if (member) return { ...none, role: 'member', memberId: member.id }
-
-  const { data: fm } = await admin
-    .from('family_members').select('id, role').in('phone', variants).limit(1).maybeSingle()
-  if (fm) {
-    const staff = fm.role === 'admin' || fm.role === 'navigator'
-    return { ...none, role: staff ? 'staff' : 'family', familyMemberId: fm.id }
-  }
-
-  const { data: vol } = await admin
-    .from('volunteers').select('id').in('phone', variants).limit(1).maybeSingle()
-  if (vol) return { ...none, role: 'volunteer', volunteerId: vol.id }
-
-  return none
+  if (metaMember) return { ...NO_CALLER, role: 'member', memberId: metaMember }
+  if (direction !== 'inbound') return NO_CALLER
+  return lookupCallerByPhone(call.from_number)
 }
 
 function isoOrNull(ms: number | null | undefined): string | null {
@@ -130,8 +117,8 @@ function durationSeconds(call: RetellCall): number {
 
 /** Upserts an in_progress row for a member call. Never overwrites a processed call. */
 export async function recordCallStarted(call: RetellCall): Promise<void> {
-  const agent = resolveAgent(call.agent_id)
-  const direction = callDirection(call, agent)
+  const { first, final: agent, involved } = callAgents(call)
+  const direction = callDirection(call, first)
   const caller = await identifyCaller(call, direction)
   if (!caller.memberId) return
 
@@ -146,6 +133,7 @@ export async function recordCallStarted(call: RetellCall): Promise<void> {
     member_id: caller.memberId,
     agent_id: call.agent_id ?? null,
     agent_name: agent,
+    agents_involved: involved,
     direction,
     from_number: toE164(call.from_number) ?? call.from_number ?? null,
     to_number: toE164(call.to_number) ?? call.to_number ?? null,
@@ -168,17 +156,19 @@ export async function processCallEnded(call: RetellCall, opts: ProcessCallOption
     errors.push(msg)
   }
 
-  // 1. Identify agent
-  const agent = resolveAgent(call.agent_id)
+  // 1. Identify agents — the webhook's agent (Quinn for every inbound call) plus any Agent Transfers.
+  // agent_name / call_type / labels follow the final agent; direction follows the answering agent.
+  const { first, final: agent, involved } = callAgents(call)
   const def = AGENTS[agent]
-  const direction = callDirection(call, agent)
+  const direction = callDirection(call, first)
+  const hopeInvolved = involved.includes('hope')
   const status: CallStatus = call.disconnection_reason && MISSED_REASONS.has(call.disconnection_reason) ? 'missed' : 'completed'
   const transcript = call.transcript ?? ''
   const speech = memberSpeech(call)
   const duration = durationSeconds(call)
 
   const result: ProcessCallResult = {
-    skipped: false, agent, callerRole: 'unknown', memberId: null, callRowId: null, inboundLogId: null, status, errors,
+    skipped: false, agent, agentsInvolved: involved, callerRole: 'unknown', memberId: null, callRowId: null, inboundLogId: null, status, errors,
   }
 
   // Idempotency pre-check — already processed?
@@ -190,7 +180,7 @@ export async function processCallEnded(call: RetellCall, opts: ProcessCallOption
   if (existingLog) return { ...result, skipped: true, inboundLogId: existingLog.id }
 
   // 2. Identify caller
-  let caller: CallerMatch = { role: 'unknown', memberId: null, familyMemberId: null, volunteerId: null }
+  let caller: CallerMatch = NO_CALLER
   try {
     caller = await identifyCaller(call, direction)
   } catch (e) {
@@ -208,6 +198,7 @@ export async function processCallEnded(call: RetellCall, opts: ProcessCallOption
         member_id: caller.memberId,
         agent_id: call.agent_id ?? null,
         agent_name: agent,
+        agents_involved: involved,
         direction,
         from_number: toE164(call.from_number) ?? call.from_number ?? null,
         to_number: toE164(call.to_number) ?? call.to_number ?? null,
@@ -241,6 +232,7 @@ export async function processCallEnded(call: RetellCall, opts: ProcessCallOption
         .upsert({
           retell_call_id: call.call_id,
           agent_name: agent,
+          agents_involved: involved,
           from_number: toE164(call.from_number) ?? call.from_number ?? null,
           caller_role: caller.role,
           family_member_id: caller.familyMemberId,
@@ -258,18 +250,18 @@ export async function processCallEnded(call: RetellCall, opts: ProcessCallOption
     }
   }
 
-  // 4. Crisis scan — on member speech so the agent's own safety lines ("call 911 if…") can't trigger it
+  // 4. Crisis scan — every call, whichever agents were on it, over the caller's speech for the whole
+  // call (so the agents' own safety lines, "call 911 if…", can't trigger it).
+  // Hope always escalates if she was on the call at any point, even when Quinn's webhook fired.
   try {
     if (caller.memberId) {
-      if (def.crisisScan) {
-        await handleCrisisDetection({
-          memberId: caller.memberId,
-          callId: result.callRowId ?? undefined,
-          transcript: speech,
-          _scanner: opts._crisisScanner,
-        })
-      }
-      if (agent === 'hope') {
+      await handleCrisisDetection({
+        memberId: caller.memberId,
+        callId: result.callRowId ?? undefined,
+        transcript: speech,
+        _scanner: opts._crisisScanner,
+      })
+      if (hopeInvolved) {
         const { error: hopeErr } = await admin.from('navigator_tasks').insert({
           member_id: caller.memberId,
           task_type: 'crisis',
@@ -279,15 +271,15 @@ export async function processCallEnded(call: RetellCall, opts: ProcessCallOption
         if (hopeErr) throw new Error(`Hope task insert failed: ${hopeErr.message}`)
       }
     } else {
-      const phrase = def.crisisScan ? scanForCrisisPhrase(speech) : null
-      if (agent === 'hope' || phrase) {
+      const phrase = scanForCrisisPhrase(speech)
+      if (hopeInvolved || phrase) {
         if (result.inboundLogId) {
           await admin.from('inbound_call_log').update({ needs_followup: true }).eq('id', result.inboundLogId)
         }
         // No member to attach a realtime notification to — page the care team directly.
         await sendCareTeamUrgent(
           null,
-          `${def.label} call from ${caller.role} caller ${toE164(call.from_number) ?? 'unknown number'}` +
+          `${hopeInvolved ? AGENTS.hope.label : def.label} call from ${caller.role} caller ${toE164(call.from_number) ?? 'unknown number'}` +
             `${phrase ? ` — crisis phrase "${phrase}"` : ''}. Human follow-up required.`,
         )
       }
@@ -306,10 +298,12 @@ export async function processCallEnded(call: RetellCall, opts: ProcessCallOption
   try {
     if (caller.memberId && result.callRowId) {
       const scores = speech.trim() ? await aiProvider.extractCallScores(speech) : null
+      // A score the member gave mid-call (log_mood_score tool) wins over the AI-extracted one
+      const { data: current } = await admin.from('check_in_calls').select('mood_score').eq('id', result.callRowId).maybeSingle()
       const { error } = await admin.from('check_in_calls').update({
         ai_summary: summary,
         ...(scores ? {
-          mood_score: scores.mood_score,
+          mood_score: current?.mood_score ?? scores.mood_score,
           energy_score: scores.energy_score,
           pain_score: scores.pain_score,
           medication_taken: scores.medication_taken,

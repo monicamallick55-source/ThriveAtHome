@@ -16,6 +16,7 @@ Status values: `NOT_STARTED` · `IN_PROGRESS` · `AWAITING_SQL` · `AWAITING_APP
 | G1.5 | Aria opt-in + Launch Protocol | COMPLETE | — | 1885807 |
 | G1.6 | Joy + Grace outbound | COMPLETE | 086 | 7e578df, 8edbf72 |
 | G1.fix | Crisis SMS + alerts.metadata (pre-merge) | AWAITING_SQL | 087 | 2b5da46 |
+| G1.xfer | Quinn front door: agent transfers, tool caller lookup, tool writes | AWAITING_SQL | 088 | branch gaps/g1-transfer |
 | **G1** | **Human review** | AWAITING_APPROVAL | | PR: #1 |
 | G2.0 | RLS helpers | NOT_STARTED | 086 | |
 | G2.1 | Post comments | NOT_STARTED | 086 | |
@@ -50,7 +51,7 @@ Bugs or gaps noticed outside the current phase. Don't fix unless blocking.
 |---|---|---|
 | 2026-09-30 | `app/api/cron/aria-calls/route.ts` + `types/database.ts` | `CallType` in TS already included `'onboarding'`, but the DB enum did not, so onboarding-call inserts were failing silently. Fixed as a side effect of migration 085. |
 | 2026-09-30 | local env | `node_modules` was missing `@anthropic-ai/sdk` (so `tsc` failed on main). Ran `npm install`; no package.json changes. |
-| 2026-09-30 | `lib/voice/tools/*` (moved from `app/api/retell/tools`) | **alerts.metadata FIXED by migration 087 (2b5da46); the rest still open.** Existing tool writes fail against the live DB: `alerts.metadata` column missing (welfare-check + service-request alerts never save), `navigator_alerts` and `mood_logs` tables missing, `emergency_log.trigger` column missing, `alert_type 'service_request'` not in enum. **Welfare-check alerts from Aria are silently lost — high priority.** |
+| 2026-09-30 | `lib/voice/tools/*` (moved from `app/api/retell/tools`) | **ALL FIXED: alerts.metadata by migration 087 (2b5da46); the rest on gaps/g1-transfer, all writing to existing tables. Mood goes to check_in_calls.mood_score, navigator alerts and service-request follow-ups go to navigator_tasks, and emergency_log uses its real columns.** Existing tool writes fail against the live DB: `alerts.metadata` column missing (welfare-check + service-request alerts never save), `navigator_alerts` and `mood_logs` tables missing, `emergency_log.trigger` column missing, `alert_type 'service_request'` not in enum. **Welfare-check alerts from Aria are silently lost — high priority.** |
 | 2026-09-30 | `check_in_calls` RLS | `family_select_own_calls` lets a family user read the `transcript` column directly with the anon client. The app no longer sends it, but the DB still allows it. Needs a column-level REVOKE or a view (needs a human decision). |
 | 2026-09-30 | `/dashboard/calls`, `/api/calls` | Family call history ignores `family_can_see_call_summaries` / `family_can_see_mood`. |
 | 2026-09-30 | `realtime_notifications` | member_id NOT NULL, so there is no way to notify "all navigators". The Hope unknown-caller case uses an urgent care-team SMS plus `inbound_call_log.needs_followup` instead. |
@@ -299,4 +300,36 @@ Still open (not requested): the service-request tool's alert uses alert_type 'se
 NEXT:
 - On DONE for 087: npx tsx scripts/test-crisis-sms.ts welfare → mark the 2 items [x], set G1.fix COMPLETE, push (PR #1 updates automatically)
 - Then human merges PR #1, runs gaps/G1_LIVE_TEST.md, replies APPROVED
+---
+
+---
+SESSION: 5
+DATE: 2026-10-01
+PHASE: G1.xfer — Quinn front door + tool writes (requested by human)
+STATUS: AWAITING_SQL
+BRANCH: gaps/g1-transfer
+
+CHECKLIST: 4 of 6 passed
+- [x] Transfer detection on replayed payloads: Quinn→Rosa (tool name), Quinn→Hope (agent_id in args), Quinn→Claire (flow node), chains, failed transfers ignored, agent_id only in result, agent_swap event (scripts/test-agent-transfer.ts unit 9/9)
+- [x] tsc clean; lint: no new errors (6 pre-existing in ariaSchedule.ts)
+- [x] Regression against dev-stub-server: test-agents, test-env-placeholders, test-retell-webhook g13 all pass
+- [x] G1_LIVE_TEST.md: every inbound test goes through Quinn's number; P1b runs 088; new L13 (tools via Quinn) and L14 (non-member tools)
+- [ ] scripts/test-agent-transfer.ts transfer + tools (one saved-row check per tool) — needs 088
+- [ ] test-retell-webhook g14 + test-crisis-sms — need 088 (every call save writes agents_involved)
+
+FILES:
+- lib/voice/transfers.ts — CREATED: detectAgentsInvolved
+- lib/voice/caller.ts — CREATED: lookupCallerByPhone (members → family_members → volunteers), shared by processCallEnded and tools
+- lib/voice/processCallEnded.ts — MODIFIED: agents_involved + final agent as agent_name; Hope rule if Hope was on the call at any point; crisis scan on every call over all caller speech; tool-logged mood_score kept
+- lib/voice/agents.ts — MODIFIED: crisisScan flag removed (every call is scanned); phone-setup comment
+- lib/voice/tools/* — MODIFIED: resolveToolCaller (metadata → from_number lookup); non-member tasks; every tool writes to existing tables
+- supabase/migrations/088_agent_transfers.sql — CREATED; types/database.ts — MODIFIED
+- scripts/test-agent-transfer.ts — CREATED; scripts/test-crisis-sms.ts — welfare source now 'voice_call'
+
+SQL FOR HUMAN TO RUN: supabase/migrations/088_agent_transfers.sql — BEFORE deploying this branch
+DEVIATIONS FROM SPEC: 088 used here, so G2 starts at 089. Retell's transcript has no dedicated agent-transfer event type, so transfers are recognised from the transfer tool's name or arguments (or a flow node name). Quinn's transfer tools must be named like transfer_to_rosa (documented in G1_LIVE_TEST P2). welfare-check and service-request also accept non-member callers (navigator task) instead of returning 400. Alert/booking metadata source is now 'voice_call', since tools run for every agent.
+
+NEXT:
+- On DONE for 088: run test-agent-transfer.ts all, test-retell-webhook.ts all, test-crisis-sms.ts all against dev-stub-server → mark items [x]
+- Human merges the PR, runs G1_LIVE_TEST L4–L6, L13, L14
 ---

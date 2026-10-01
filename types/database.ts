@@ -255,6 +255,7 @@ export interface Database {
           to_number: string | null
           caller_role: string | null
           processed_at: string | null
+          agents_involved: string[]
         }
         Insert: {
           id?: string
@@ -287,6 +288,7 @@ export interface Database {
           to_number?: string | null
           caller_role?: string | null
           processed_at?: string | null
+          agents_involved?: string[]
         }
         Update: Partial<Database['public']['Tables']['check_in_calls']['Insert']>
         Relationships: []
@@ -305,6 +307,7 @@ export interface Database {
           ai_summary: string | null
           transcript: string | null
           needs_followup: boolean
+          agents_involved: string[]
         }
         Insert: {
           id?: string
@@ -319,6 +322,7 @@ export interface Database {
           ai_summary?: string | null
           transcript?: string | null
           needs_followup?: boolean
+          agents_involved?: string[]
         }
         Update: Partial<Database['public']['Tables']['inbound_call_log']['Insert']>
         Relationships: []
@@ -403,7 +407,7 @@ export interface Database {
         Row: {
           id: string
           created_at: string
-          member_id: string
+          member_id: string | null
           navigator_id: string | null
           task_type: string
           description: string
@@ -411,11 +415,13 @@ export interface Database {
           due_by: string | null
           completed: boolean
           completed_at: string | null
+          caller_phone: string | null
+          caller_role: string | null
         }
         Insert: {
           id?: string
           created_at?: string
-          member_id: string
+          member_id?: string | null
           navigator_id?: string | null
           task_type: string
           description: string
@@ -423,6 +429,8 @@ export interface Database {
           due_by?: string | null
           completed?: boolean
           completed_at?: string | null
+          caller_phone?: string | null
+          caller_role?: string | null
         }
         Update: Partial<Database['public']['Tables']['navigator_tasks']['Insert']>
         Relationships: []
