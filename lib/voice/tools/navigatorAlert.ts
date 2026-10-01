@@ -1,31 +1,33 @@
 // Retell tool: create_navigator_alert.
-// Args: { alert_type: string, message: string, priority?: string }
-import { toolAdmin, memberIdFrom, str, type ToolArgs, type ToolContext, type ToolOutcome } from './types'
+// Args: { alert_type: string, message | description: string, priority?: string }
+// Saved as a navigator_tasks row (there is no navigator_alerts table). Non-member callers
+// (family, volunteer, staff, unknown) get a task with their number, role and message.
+import { resolveToolCaller, createToolTask, str, type ToolArgs, type ToolContext, type ToolOutcome } from './types'
 
 export async function run(args: ToolArgs, ctx: ToolContext): Promise<ToolOutcome> {
-  const memberId = memberIdFrom(args, ctx)
-  const message = str(args.message)
-  const alertType = str(args.alert_type)
+  const caller = await resolveToolCaller(args, ctx)
+  const message = str(args.message) ?? str(args.description)
+  const alertType = str(args.alert_type) ?? 'general'
   const priority = str(args.priority)
 
-  if (!memberId || !message) {
-    return { status: 200, body: { result: 'Noted.' } }
-  }
+  if (!message) return { status: 200, body: { result: 'Noted.' } }
 
-  const { error } = await toolAdmin().from('navigator_alerts').insert({
-    member_id: memberId,
-    alert_type: alertType ?? 'general',
+  const { ok } = await createToolTask(caller, {
+    taskType: 'navigator_alert',
+    heading: `Navigator alert (${alertType}) raised on a call`,
     message,
-    priority: priority ?? 'medium',
-    source: 'aria_call',
-    acknowledged: false,
+    priority,
+    callId: ctx.callId,
   })
+  if (!ok) return { status: 200, body: { result: 'Noted — our care team will follow up.' } }
 
-  if (error) {
-    console.error('[navigator-alert] insert failed:', error)
-    return { status: 200, body: { result: 'Noted — your care team will follow up.' } }
+  console.log(`[navigator-alert] role=${caller.role} member=${caller.memberId ?? '-'} type=${alertType} priority=${priority ?? 'medium'}`)
+  return {
+    status: 200,
+    body: {
+      result: caller.memberId
+        ? 'I\'ve let your care team know. Someone will be in touch with you soon.'
+        : 'Thank you. I\'ve passed that to our care team and someone will follow up with you.',
+    },
   }
-
-  console.log(`[navigator-alert] member=${memberId} type=${alertType} priority=${priority}`)
-  return { status: 200, body: { result: 'I\'ve let your care team know. Someone will be in touch with you soon.' } }
 }

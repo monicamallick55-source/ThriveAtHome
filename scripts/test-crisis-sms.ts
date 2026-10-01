@@ -144,7 +144,7 @@ async function welfareTests() {
     .eq('member_id', m).eq('alert_type', 'fall').maybeSingle()
   const meta = (alert?.metadata ?? {}) as Record<string, unknown>
   check('welfare-check tool returns 200', out.status === 200, JSON.stringify(out.body))
-  check('welfare-check alert saved with metadata', !error && !!alert && meta.source === 'aria_call' && meta.concern_type === 'fall',
+  check('welfare-check alert saved with metadata', !error && !!alert && meta.source === 'voice_call' && meta.concern_type === 'fall',
     error?.message ?? JSON.stringify(alert))
   const { data: def } = await admin.from('alerts').select('metadata').eq('member_id', members[0] ?? m).limit(1).maybeSingle()
   check('alerts without metadata default to {}', def === null || (typeof def.metadata === 'object' && def.metadata !== null))

@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyRetellRequest } from '@/lib/voice/verifyRetell'
 import { TOOLS, type ToolArgs } from '@/lib/voice/tools'
+import { toolContextFromCall } from '@/lib/voice/tools/types'
 import { processCallEnded, recordCallStarted, type RetellCall } from '@/lib/voice/processCallEnded'
 
 export const runtime = 'nodejs'
@@ -52,10 +53,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ result: 'I can help with that. Let me make a note for your care team.' })
       }
 
-      const outcome = await tool(args, {
-        callId: call?.call_id ?? null,
-        memberId: call?.metadata?.member_id ?? null,
-      })
+      const outcome = await tool(args, toolContextFromCall(call))
       return NextResponse.json({ result: outcome.body.result ?? 'Done. Your care team has been notified.' })
     }
 
