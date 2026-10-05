@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
   await supabase.from('navigator_tasks').insert({
     task_type: 'community_report',
     priority,
-    title: `Community report: ${reason}`,
+    description: `Community report: ${reason}`,
     related_id: report.id,
   })
 
