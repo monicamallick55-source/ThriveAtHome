@@ -1121,6 +1121,66 @@ export type Database = {
           },
         ]
       }
+      campaign_contributions: {
+        Row: {
+          amount_cents: number | null
+          anonymous: boolean
+          campaign_id: string
+          contribution_type: string
+          contributor_member_id: string | null
+          created_at: string
+          id: string
+          in_kind_description: string | null
+          message: string | null
+          status: string
+          stripe_payment_intent_id: string | null
+          volunteer_date: string | null
+        }
+        Insert: {
+          amount_cents?: number | null
+          anonymous?: boolean
+          campaign_id: string
+          contribution_type: string
+          contributor_member_id?: string | null
+          created_at?: string
+          id?: string
+          in_kind_description?: string | null
+          message?: string | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+          volunteer_date?: string | null
+        }
+        Update: {
+          amount_cents?: number | null
+          anonymous?: boolean
+          campaign_id?: string
+          contribution_type?: string
+          contributor_member_id?: string | null
+          created_at?: string
+          id?: string
+          in_kind_description?: string | null
+          message?: string | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+          volunteer_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_contributions_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "member_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_contributions_contributor_member_id_fkey"
+            columns: ["contributor_member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       care_agencies: {
         Row: {
           address: string | null
@@ -2288,6 +2348,69 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      community_partners: {
+        Row: {
+          active: boolean
+          address: string | null
+          city: string | null
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          description: string | null
+          id: string
+          notes: string | null
+          org_name: string
+          org_type: string
+          partner_since: string | null
+          service_area_zips: string[] | null
+          state: string | null
+          updated_at: string
+          website: string | null
+          zip: string | null
+        }
+        Insert: {
+          active?: boolean
+          address?: string | null
+          city?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          notes?: string | null
+          org_name: string
+          org_type: string
+          partner_since?: string | null
+          service_area_zips?: string[] | null
+          state?: string | null
+          updated_at?: string
+          website?: string | null
+          zip?: string | null
+        }
+        Update: {
+          active?: boolean
+          address?: string | null
+          city?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          notes?: string | null
+          org_name?: string
+          org_type?: string
+          partner_since?: string | null
+          service_area_zips?: string[] | null
+          state?: string | null
+          updated_at?: string
+          website?: string | null
+          zip?: string | null
+        }
+        Relationships: []
       }
       community_reports: {
         Row: {
@@ -3476,6 +3599,212 @@ export type Database = {
         }
         Relationships: []
       }
+      encore_applications: {
+        Row: {
+          cover_note: string | null
+          created_at: string
+          encore_profile_id: string
+          id: string
+          navigator_notes: string | null
+          opportunity_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          cover_note?: string | null
+          created_at?: string
+          encore_profile_id: string
+          id?: string
+          navigator_notes?: string | null
+          opportunity_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          cover_note?: string | null
+          created_at?: string
+          encore_profile_id?: string
+          id?: string
+          navigator_notes?: string | null
+          opportunity_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "encore_applications_encore_profile_id_fkey"
+            columns: ["encore_profile_id"]
+            isOneToOne: false
+            referencedRelation: "encore_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "encore_applications_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "encore_opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      encore_opportunities: {
+        Row: {
+          apply_email: string | null
+          apply_url: string | null
+          city: string | null
+          compensation: string | null
+          created_at: string
+          description: string | null
+          expires_at: string | null
+          hours_per_week: number | null
+          id: string
+          opportunity_type: string
+          org_name: string
+          partner_id: string | null
+          posted_by: string | null
+          remote: boolean | null
+          skills_needed: string[] | null
+          state: string | null
+          status: string
+          title: string
+          updated_at: string
+          zip: string | null
+        }
+        Insert: {
+          apply_email?: string | null
+          apply_url?: string | null
+          city?: string | null
+          compensation?: string | null
+          created_at?: string
+          description?: string | null
+          expires_at?: string | null
+          hours_per_week?: number | null
+          id?: string
+          opportunity_type: string
+          org_name: string
+          partner_id?: string | null
+          posted_by?: string | null
+          remote?: boolean | null
+          skills_needed?: string[] | null
+          state?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          zip?: string | null
+        }
+        Update: {
+          apply_email?: string | null
+          apply_url?: string | null
+          city?: string | null
+          compensation?: string | null
+          created_at?: string
+          description?: string | null
+          expires_at?: string | null
+          hours_per_week?: number | null
+          id?: string
+          opportunity_type?: string
+          org_name?: string
+          partner_id?: string | null
+          posted_by?: string | null
+          remote?: boolean | null
+          skills_needed?: string[] | null
+          state?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          zip?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "encore_opportunities_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "community_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "encore_opportunities_posted_by_fkey"
+            columns: ["posted_by"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      encore_profiles: {
+        Row: {
+          bio: string | null
+          created_at: string
+          education: string | null
+          goal: string | null
+          hours_per_week: number | null
+          id: string
+          in_person_ok: boolean | null
+          interests: string[] | null
+          languages: string[] | null
+          max_commute_miles: number | null
+          member_id: string
+          open_to_training: boolean | null
+          previous_career: string | null
+          remote_ok: boolean | null
+          resume_url: string | null
+          skills: string[] | null
+          status: string
+          updated_at: string
+          zip: string | null
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          education?: string | null
+          goal?: string | null
+          hours_per_week?: number | null
+          id?: string
+          in_person_ok?: boolean | null
+          interests?: string[] | null
+          languages?: string[] | null
+          max_commute_miles?: number | null
+          member_id: string
+          open_to_training?: boolean | null
+          previous_career?: string | null
+          remote_ok?: boolean | null
+          resume_url?: string | null
+          skills?: string[] | null
+          status?: string
+          updated_at?: string
+          zip?: string | null
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          education?: string | null
+          goal?: string | null
+          hours_per_week?: number | null
+          id?: string
+          in_person_ok?: boolean | null
+          interests?: string[] | null
+          languages?: string[] | null
+          max_commute_miles?: number | null
+          member_id?: string
+          open_to_training?: boolean | null
+          previous_career?: string | null
+          remote_ok?: boolean | null
+          resume_url?: string | null
+          skills?: string[] | null
+          status?: string
+          updated_at?: string
+          zip?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "encore_profiles_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: true
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_rsvps: {
         Row: {
           attended: boolean
@@ -4342,6 +4671,255 @@ export type Database = {
           },
         ]
       }
+      home_safety_assessments: {
+        Row: {
+          adequate_lighting: boolean | null
+          assessed_by: string | null
+          assessment_date: string
+          carbon_monoxide_detector: boolean | null
+          clear_pathways: boolean | null
+          created_at: string
+          emergency_contacts_posted: boolean | null
+          fall_risk_score: number | null
+          fire_extinguisher_accessible: boolean | null
+          follow_up_date: string | null
+          food_supply_adequate: boolean | null
+          grab_bars_installed: boolean | null
+          id: string
+          kitchen_accessible: boolean | null
+          medical_alert_device: boolean | null
+          medication_reminders_set: boolean | null
+          medications_organized: boolean | null
+          member_id: string
+          non_slip_mats: boolean | null
+          notes: string | null
+          partner_id: string | null
+          recommendations: string[] | null
+          smoke_detectors_working: boolean | null
+          stair_handrails: boolean | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          adequate_lighting?: boolean | null
+          assessed_by?: string | null
+          assessment_date?: string
+          carbon_monoxide_detector?: boolean | null
+          clear_pathways?: boolean | null
+          created_at?: string
+          emergency_contacts_posted?: boolean | null
+          fall_risk_score?: number | null
+          fire_extinguisher_accessible?: boolean | null
+          follow_up_date?: string | null
+          food_supply_adequate?: boolean | null
+          grab_bars_installed?: boolean | null
+          id?: string
+          kitchen_accessible?: boolean | null
+          medical_alert_device?: boolean | null
+          medication_reminders_set?: boolean | null
+          medications_organized?: boolean | null
+          member_id: string
+          non_slip_mats?: boolean | null
+          notes?: string | null
+          partner_id?: string | null
+          recommendations?: string[] | null
+          smoke_detectors_working?: boolean | null
+          stair_handrails?: boolean | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          adequate_lighting?: boolean | null
+          assessed_by?: string | null
+          assessment_date?: string
+          carbon_monoxide_detector?: boolean | null
+          clear_pathways?: boolean | null
+          created_at?: string
+          emergency_contacts_posted?: boolean | null
+          fall_risk_score?: number | null
+          fire_extinguisher_accessible?: boolean | null
+          follow_up_date?: string | null
+          food_supply_adequate?: boolean | null
+          grab_bars_installed?: boolean | null
+          id?: string
+          kitchen_accessible?: boolean | null
+          medical_alert_device?: boolean | null
+          medication_reminders_set?: boolean | null
+          medications_organized?: boolean | null
+          member_id?: string
+          non_slip_mats?: boolean | null
+          notes?: string | null
+          partner_id?: string | null
+          recommendations?: string[] | null
+          smoke_detectors_working?: boolean | null
+          stair_handrails?: boolean | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "home_safety_assessments_assessed_by_fkey"
+            columns: ["assessed_by"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "home_safety_assessments_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "home_safety_assessments_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "community_partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      home_sharing_listings: {
+        Row: {
+          accessibility_features: string[] | null
+          accessibility_needed: boolean | null
+          age_range_max: number | null
+          age_range_min: number | null
+          budget_max: number | null
+          city: string | null
+          created_at: string
+          description: string | null
+          gender_preference: string | null
+          id: string
+          listing_type: string
+          member_id: string
+          move_in_date: string | null
+          pets_allowed: boolean | null
+          private_bathroom: boolean | null
+          quiet_household: boolean | null
+          rent_amount: number | null
+          rooms_available: number | null
+          shared_meals: boolean | null
+          smoking_allowed: boolean | null
+          state: string | null
+          status: string
+          updated_at: string
+          utilities_included: boolean | null
+          zip: string | null
+        }
+        Insert: {
+          accessibility_features?: string[] | null
+          accessibility_needed?: boolean | null
+          age_range_max?: number | null
+          age_range_min?: number | null
+          budget_max?: number | null
+          city?: string | null
+          created_at?: string
+          description?: string | null
+          gender_preference?: string | null
+          id?: string
+          listing_type: string
+          member_id: string
+          move_in_date?: string | null
+          pets_allowed?: boolean | null
+          private_bathroom?: boolean | null
+          quiet_household?: boolean | null
+          rent_amount?: number | null
+          rooms_available?: number | null
+          shared_meals?: boolean | null
+          smoking_allowed?: boolean | null
+          state?: string | null
+          status?: string
+          updated_at?: string
+          utilities_included?: boolean | null
+          zip?: string | null
+        }
+        Update: {
+          accessibility_features?: string[] | null
+          accessibility_needed?: boolean | null
+          age_range_max?: number | null
+          age_range_min?: number | null
+          budget_max?: number | null
+          city?: string | null
+          created_at?: string
+          description?: string | null
+          gender_preference?: string | null
+          id?: string
+          listing_type?: string
+          member_id?: string
+          move_in_date?: string | null
+          pets_allowed?: boolean | null
+          private_bathroom?: boolean | null
+          quiet_household?: boolean | null
+          rent_amount?: number | null
+          rooms_available?: number | null
+          shared_meals?: boolean | null
+          smoking_allowed?: boolean | null
+          state?: string | null
+          status?: string
+          updated_at?: string
+          utilities_included?: boolean | null
+          zip?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "home_sharing_listings_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      home_sharing_matches: {
+        Row: {
+          created_at: string
+          host_listing_id: string
+          id: string
+          match_score: number | null
+          navigator_notes: string | null
+          seeker_listing_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          host_listing_id: string
+          id?: string
+          match_score?: number | null
+          navigator_notes?: string | null
+          seeker_listing_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          host_listing_id?: string
+          id?: string
+          match_score?: number | null
+          navigator_notes?: string | null
+          seeker_listing_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "home_sharing_matches_host_listing_id_fkey"
+            columns: ["host_listing_id"]
+            isOneToOne: false
+            referencedRelation: "home_sharing_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "home_sharing_matches_seeker_listing_id_fkey"
+            columns: ["seeker_listing_id"]
+            isOneToOne: false
+            referencedRelation: "home_sharing_listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inbound_call_log: {
         Row: {
           agent_name: string
@@ -4950,6 +5528,88 @@ export type Database = {
           },
         ]
       }
+      member_campaigns: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          featured: boolean
+          goal_amount: number | null
+          id: string
+          member_id: string
+          navigator_notes: string | null
+          need_type: string
+          partner_id: string | null
+          raised_amount: number
+          status: string
+          story: string
+          title: string
+          updated_at: string
+          volunteer_slots: number | null
+          volunteers_filled: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          featured?: boolean
+          goal_amount?: number | null
+          id?: string
+          member_id: string
+          navigator_notes?: string | null
+          need_type: string
+          partner_id?: string | null
+          raised_amount?: number
+          status?: string
+          story: string
+          title: string
+          updated_at?: string
+          volunteer_slots?: number | null
+          volunteers_filled?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          featured?: boolean
+          goal_amount?: number | null
+          id?: string
+          member_id?: string
+          navigator_notes?: string | null
+          need_type?: string
+          partner_id?: string | null
+          raised_amount?: number
+          status?: string
+          story?: string
+          title?: string
+          updated_at?: string
+          volunteer_slots?: number | null
+          volunteers_filled?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_campaigns_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_campaigns_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_campaigns_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "community_partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       member_connections: {
         Row: {
           addressee_id: string
@@ -5123,6 +5783,48 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "community_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      member_partners: {
+        Row: {
+          created_at: string
+          id: string
+          member_id: string
+          notes: string | null
+          partner_id: string
+          relationship: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          member_id: string
+          notes?: string | null
+          partner_id: string
+          relationship?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          member_id?: string
+          notes?: string | null
+          partner_id?: string
+          relationship?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_partners_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_partners_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "community_partners"
             referencedColumns: ["id"]
           },
         ]
