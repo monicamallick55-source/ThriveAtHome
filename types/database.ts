@@ -816,6 +816,56 @@ export type Database = {
           },
         ]
       }
+      birthday_call_arc: {
+        Row: {
+          arc_year: number
+          birth_year: number
+          created_at: string
+          d_minus_7: string | null
+          d_plus_1: string | null
+          d_zero: string | null
+          id: string
+          member_id: string
+          skip_reason: string | null
+          skipped: boolean
+          wishes_count: number
+        }
+        Insert: {
+          arc_year: number
+          birth_year: number
+          created_at?: string
+          d_minus_7?: string | null
+          d_plus_1?: string | null
+          d_zero?: string | null
+          id?: string
+          member_id: string
+          skip_reason?: string | null
+          skipped?: boolean
+          wishes_count?: number
+        }
+        Update: {
+          arc_year?: number
+          birth_year?: number
+          created_at?: string
+          d_minus_7?: string | null
+          d_plus_1?: string | null
+          d_zero?: string | null
+          id?: string
+          member_id?: string
+          skip_reason?: string | null
+          skipped?: boolean
+          wishes_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "birthday_call_arc_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       brand_configs: {
         Row: {
           agency_display_name: string | null
@@ -1812,6 +1862,57 @@ export type Database = {
           },
         ]
       }
+      circle_content: {
+        Row: {
+          author_id: string | null
+          body: string | null
+          circle_id: string
+          content_type: string
+          created_at: string
+          id: string
+          pinned: boolean
+          title: string
+          url: string | null
+        }
+        Insert: {
+          author_id?: string | null
+          body?: string | null
+          circle_id: string
+          content_type: string
+          created_at?: string
+          id?: string
+          pinned?: boolean
+          title: string
+          url?: string | null
+        }
+        Update: {
+          author_id?: string | null
+          body?: string | null
+          circle_id?: string
+          content_type?: string
+          created_at?: string
+          id?: string
+          pinned?: boolean
+          title?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "circle_content_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "family_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "circle_content_circle_id_fkey"
+            columns: ["circle_id"]
+            isOneToOne: false
+            referencedRelation: "cultural_circles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       circle_event_rsvps: {
         Row: {
           created_at: string
@@ -2366,6 +2467,51 @@ export type Database = {
         }
         Relationships: []
       }
+      corporate_accounts: {
+        Row: {
+          active: boolean
+          active_seats: number
+          company_name: string
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          employee_seats: number
+          id: string
+          notes: string | null
+          plan: string
+          stripe_customer_id: string | null
+        }
+        Insert: {
+          active?: boolean
+          active_seats?: number
+          company_name: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          employee_seats?: number
+          id?: string
+          notes?: string | null
+          plan?: string
+          stripe_customer_id?: string | null
+        }
+        Update: {
+          active?: boolean
+          active_seats?: number
+          company_name?: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          employee_seats?: number
+          id?: string
+          notes?: string | null
+          plan?: string
+          stripe_customer_id?: string | null
+        }
+        Relationships: []
+      }
       corporate_volunteer_hours: {
         Row: {
           corporate_program_id: string
@@ -2536,6 +2682,7 @@ export type Database = {
           interest_tag: string | null
           is_active: boolean
           member_count: number
+          membership_visibility: string
           primary_language: string
         }
         Insert: {
@@ -2548,6 +2695,7 @@ export type Database = {
           interest_tag?: string | null
           is_active?: boolean
           member_count?: number
+          membership_visibility?: string
           primary_language?: string
         }
         Update: {
@@ -2560,6 +2708,7 @@ export type Database = {
           interest_tag?: string | null
           is_active?: boolean
           member_count?: number
+          membership_visibility?: string
           primary_language?: string
         }
         Relationships: []
@@ -3800,6 +3949,57 @@ export type Database = {
           },
         ]
       }
+      family_sms_preferences: {
+        Row: {
+          appointment_reminders: boolean
+          created_at: string
+          crisis_alerts: boolean
+          daily_summary: boolean
+          family_member_id: string
+          id: string
+          member_id: string
+          phone: string
+          summary_time_local: string
+        }
+        Insert: {
+          appointment_reminders?: boolean
+          created_at?: string
+          crisis_alerts?: boolean
+          daily_summary?: boolean
+          family_member_id: string
+          id?: string
+          member_id: string
+          phone: string
+          summary_time_local?: string
+        }
+        Update: {
+          appointment_reminders?: boolean
+          created_at?: string
+          crisis_alerts?: boolean
+          daily_summary?: boolean
+          family_member_id?: string
+          id?: string
+          member_id?: string
+          phone?: string
+          summary_time_local?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "family_sms_preferences_family_member_id_fkey"
+            columns: ["family_member_id"]
+            isOneToOne: false
+            referencedRelation: "family_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "family_sms_preferences_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       family_task_items: {
         Row: {
           assigned_to: string | null
@@ -4569,6 +4769,44 @@ export type Database = {
           },
         ]
       }
+      member_achievements: {
+        Row: {
+          created_at: string
+          id: string
+          member_id: string
+          metadata: Json | null
+          occurred_at: string
+          shared_with_family: boolean
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          member_id: string
+          metadata?: Json | null
+          occurred_at?: string
+          shared_with_family?: boolean
+          type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          member_id?: string
+          metadata?: Json | null
+          occurred_at?: string
+          shared_with_family?: boolean
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_achievements_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       member_addons: {
         Row: {
           addon_id: string
@@ -4969,6 +5207,7 @@ export type Database = {
           call_frequency_preference: string
           check_in_frequency: Database["public"]["Enums"]["check_in_frequency"]
           checkin_preference: string
+          corporate_account_id: string | null
           created_at: string
           date_of_birth: string
           device_integration_consent: boolean
@@ -4997,6 +5236,7 @@ export type Database = {
           last_aria_call_at: string | null
           lives_alone: boolean | null
           medications: string | null
+          metro_area_id: string | null
           ml_insights_opt_out: boolean
           mobility_devices: string[] | null
           onboarding_call_attempts: number
@@ -5026,6 +5266,7 @@ export type Database = {
           call_frequency_preference?: string
           check_in_frequency?: Database["public"]["Enums"]["check_in_frequency"]
           checkin_preference?: string
+          corporate_account_id?: string | null
           created_at?: string
           date_of_birth: string
           device_integration_consent?: boolean
@@ -5054,6 +5295,7 @@ export type Database = {
           last_aria_call_at?: string | null
           lives_alone?: boolean | null
           medications?: string | null
+          metro_area_id?: string | null
           ml_insights_opt_out?: boolean
           mobility_devices?: string[] | null
           onboarding_call_attempts?: number
@@ -5083,6 +5325,7 @@ export type Database = {
           call_frequency_preference?: string
           check_in_frequency?: Database["public"]["Enums"]["check_in_frequency"]
           checkin_preference?: string
+          corporate_account_id?: string | null
           created_at?: string
           date_of_birth?: string
           device_integration_consent?: boolean
@@ -5111,6 +5354,7 @@ export type Database = {
           last_aria_call_at?: string | null
           lives_alone?: boolean | null
           medications?: string | null
+          metro_area_id?: string | null
           ml_insights_opt_out?: boolean
           mobility_devices?: string[] | null
           onboarding_call_attempts?: number
@@ -5130,7 +5374,22 @@ export type Database = {
           topics_enjoy?: string[] | null
           zip_code?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "members_corporate_account_id_fkey"
+            columns: ["corporate_account_id"]
+            isOneToOne: false
+            referencedRelation: "corporate_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "members_metro_area_id_fkey"
+            columns: ["metro_area_id"]
+            isOneToOne: false
+            referencedRelation: "metro_areas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       memory_book_orders: {
         Row: {
@@ -5270,6 +5529,53 @@ export type Database = {
             columns: ["member_id"]
             isOneToOne: false
             referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      metro_areas: {
+        Row: {
+          activated_at: string | null
+          coordinator_family_member_id: string | null
+          created_at: string
+          id: string
+          member_count: number
+          name: string
+          slug: string
+          state: string
+          status: string
+          zip_prefixes: string[]
+        }
+        Insert: {
+          activated_at?: string | null
+          coordinator_family_member_id?: string | null
+          created_at?: string
+          id?: string
+          member_count?: number
+          name: string
+          slug: string
+          state: string
+          status?: string
+          zip_prefixes?: string[]
+        }
+        Update: {
+          activated_at?: string | null
+          coordinator_family_member_id?: string | null
+          created_at?: string
+          id?: string
+          member_count?: number
+          name?: string
+          slug?: string
+          state?: string
+          status?: string
+          zip_prefixes?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "metro_areas_coordinator_family_member_id_fkey"
+            columns: ["coordinator_family_member_id"]
+            isOneToOne: false
+            referencedRelation: "family_members"
             referencedColumns: ["id"]
           },
         ]
@@ -6753,6 +7059,9 @@ export type Database = {
           provider_booking_id: string | null
           provider_name: string | null
           requested_for: string | null
+          ride_auto_book: boolean
+          ride_confirmation: string | null
+          ride_provider: string | null
           service_type: string
           status: Database["public"]["Enums"]["booking_status"]
           volunteer_id: string | null
@@ -6769,6 +7078,9 @@ export type Database = {
           provider_booking_id?: string | null
           provider_name?: string | null
           requested_for?: string | null
+          ride_auto_book?: boolean
+          ride_confirmation?: string | null
+          ride_provider?: string | null
           service_type: string
           status?: Database["public"]["Enums"]["booking_status"]
           volunteer_id?: string | null
@@ -6785,6 +7097,9 @@ export type Database = {
           provider_booking_id?: string | null
           provider_name?: string | null
           requested_for?: string | null
+          ride_auto_book?: boolean
+          ride_confirmation?: string | null
+          ride_provider?: string | null
           service_type?: string
           status?: Database["public"]["Enums"]["booking_status"]
           volunteer_id?: string | null
@@ -7348,6 +7663,101 @@ export type Database = {
           },
         ]
       }
+      transition_plan_steps: {
+        Row: {
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          plan_id: string
+          sort_order: number
+          title: string
+          week_number: number
+        }
+        Insert: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          plan_id: string
+          sort_order?: number
+          title: string
+          week_number: number
+        }
+        Update: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          plan_id?: string
+          sort_order?: number
+          title?: string
+          week_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transition_plan_steps_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "transition_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transition_plans: {
+        Row: {
+          created_at: string
+          family_can_view: boolean
+          id: string
+          member_id: string
+          notes: string | null
+          pathway: string
+          started_by: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          family_can_view?: boolean
+          id?: string
+          member_id: string
+          notes?: string | null
+          pathway: string
+          started_by?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          family_can_view?: boolean
+          id?: string
+          member_id?: string
+          notes?: string | null
+          pathway?: string
+          started_by?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transition_plans_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transition_plans_started_by_fkey"
+            columns: ["started_by"]
+            isOneToOne: false
+            referencedRelation: "family_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trusted_advisors: {
         Row: {
           accepts_new_clients: boolean
@@ -7451,6 +7861,63 @@ export type Database = {
             columns: ["vetted_by"]
             isOneToOne: false
             referencedRelation: "family_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      veterans_profiles: {
+        Row: {
+          benefits_enrolled: string[] | null
+          branch: string | null
+          created_at: string
+          discharge_type: string | null
+          id: string
+          member_id: string
+          service_years: string | null
+          va_file_number: string | null
+          vavs_eligible: boolean
+          vavs_enrolled: boolean
+          vso_chapter_id: string | null
+        }
+        Insert: {
+          benefits_enrolled?: string[] | null
+          branch?: string | null
+          created_at?: string
+          discharge_type?: string | null
+          id?: string
+          member_id: string
+          service_years?: string | null
+          va_file_number?: string | null
+          vavs_eligible?: boolean
+          vavs_enrolled?: boolean
+          vso_chapter_id?: string | null
+        }
+        Update: {
+          benefits_enrolled?: string[] | null
+          branch?: string | null
+          created_at?: string
+          discharge_type?: string | null
+          id?: string
+          member_id?: string
+          service_years?: string | null
+          va_file_number?: string | null
+          vavs_eligible?: boolean
+          vavs_enrolled?: boolean
+          vso_chapter_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "veterans_profiles_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: true
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vp_vso_fk"
+            columns: ["vso_chapter_id"]
+            isOneToOne: false
+            referencedRelation: "vso_chapters"
             referencedColumns: ["id"]
           },
         ]
@@ -7786,6 +8253,7 @@ export type Database = {
           is_neighbor_volunteer: boolean
           languages: string[] | null
           license_state: string | null
+          metro_area_id: string | null
           notes: string | null
           phone: string | null
           prior_experience: string | null
@@ -7826,6 +8294,7 @@ export type Database = {
           is_neighbor_volunteer?: boolean
           languages?: string[] | null
           license_state?: string | null
+          metro_area_id?: string | null
           notes?: string | null
           phone?: string | null
           prior_experience?: string | null
@@ -7866,6 +8335,7 @@ export type Database = {
           is_neighbor_volunteer?: boolean
           languages?: string[] | null
           license_state?: string | null
+          metro_area_id?: string | null
           notes?: string | null
           phone?: string | null
           prior_experience?: string | null
@@ -7889,7 +8359,53 @@ export type Database = {
             referencedRelation: "corporate_volunteer_programs"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "volunteers_metro_area_id_fkey"
+            columns: ["metro_area_id"]
+            isOneToOne: false
+            referencedRelation: "metro_areas"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      vso_chapters: {
+        Row: {
+          active: boolean
+          city: string | null
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          id: string
+          name: string
+          organization: string
+          state: string
+        }
+        Insert: {
+          active?: boolean
+          city?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          organization: string
+          state: string
+        }
+        Update: {
+          active?: boolean
+          city?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          organization?: string
+          state?: string
+        }
+        Relationships: []
       }
       wearable_connections: {
         Row: {
