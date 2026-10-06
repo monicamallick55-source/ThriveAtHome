@@ -2248,6 +2248,50 @@ export type Database = {
           },
         ]
       }
+      cognitive_activities: {
+        Row: {
+          activity_key: string
+          activity_name: string
+          duration_minutes: number | null
+          id: string
+          logged_at: string
+          max_score: number | null
+          member_id: string
+          notes: string | null
+          score: number | null
+        }
+        Insert: {
+          activity_key: string
+          activity_name: string
+          duration_minutes?: number | null
+          id?: string
+          logged_at?: string
+          max_score?: number | null
+          member_id: string
+          notes?: string | null
+          score?: number | null
+        }
+        Update: {
+          activity_key?: string
+          activity_name?: string
+          duration_minutes?: number | null
+          id?: string
+          logged_at?: string
+          max_score?: number | null
+          member_id?: string
+          notes?: string | null
+          score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cognitive_activities_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       community_orgs: {
         Row: {
           address: string | null
@@ -4484,6 +4528,53 @@ export type Database = {
           },
         ]
       }
+      fitness_logs: {
+        Row: {
+          category: string
+          difficulty_felt: string | null
+          duration_minutes: number | null
+          exercise_key: string
+          id: string
+          logged_at: string
+          member_id: string
+          notes: string | null
+          reps: number | null
+          sets: number | null
+        }
+        Insert: {
+          category: string
+          difficulty_felt?: string | null
+          duration_minutes?: number | null
+          exercise_key: string
+          id?: string
+          logged_at?: string
+          member_id: string
+          notes?: string | null
+          reps?: number | null
+          sets?: number | null
+        }
+        Update: {
+          category?: string
+          difficulty_felt?: string | null
+          duration_minutes?: number | null
+          exercise_key?: string
+          id?: string
+          logged_at?: string
+          member_id?: string
+          notes?: string | null
+          reps?: number | null
+          sets?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fitness_logs_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       grief_pattern_flags: {
         Row: {
           computed_at: string
@@ -5909,6 +6000,7 @@ export type Database = {
           call_frequency_preference: string
           check_in_frequency: Database["public"]["Enums"]["check_in_frequency"]
           checkin_preference: string
+          cognitive_concern_score: number
           corporate_account_id: string | null
           created_at: string
           date_of_birth: string
@@ -5924,10 +6016,12 @@ export type Database = {
           emergency_contact_2_phone: string | null
           emergency_contact_2_rel: string | null
           faith_preference: string | null
+          fall_risk_level: string | null
           family_can_see_alerts: boolean
           family_can_see_call_summaries: boolean
           family_can_see_mood: boolean
           family_can_see_service_history: boolean
+          fitness_goal: string | null
           full_name: string
           grief_enrolled_at: string | null
           grief_loss_type: string | null
@@ -5936,8 +6030,10 @@ export type Database = {
           health_conditions: string | null
           id: string
           last_aria_call_at: string | null
+          last_cognitive_activity_at: string | null
           lives_alone: boolean | null
           medications: string | null
+          memory_care_pathway: boolean
           metro_area_id: string | null
           ml_insights_opt_out: boolean
           mobility_devices: string[] | null
@@ -5950,12 +6046,15 @@ export type Database = {
           preferred_contact_method: string
           preferred_language: string
           preferred_name: string
+          pt_referral_date: string | null
+          pt_referral_requested: boolean
           risk_override_calls: boolean
           status: Database["public"]["Enums"]["member_status"]
           supabase_auth_id: string | null
           timezone: string
           topics_avoid: string | null
           topics_enjoy: string[] | null
+          wandering_prevention_plan: string | null
           zip_code: string | null
         }
         Insert: {
@@ -5968,6 +6067,7 @@ export type Database = {
           call_frequency_preference?: string
           check_in_frequency?: Database["public"]["Enums"]["check_in_frequency"]
           checkin_preference?: string
+          cognitive_concern_score?: number
           corporate_account_id?: string | null
           created_at?: string
           date_of_birth: string
@@ -5983,10 +6083,12 @@ export type Database = {
           emergency_contact_2_phone?: string | null
           emergency_contact_2_rel?: string | null
           faith_preference?: string | null
+          fall_risk_level?: string | null
           family_can_see_alerts?: boolean
           family_can_see_call_summaries?: boolean
           family_can_see_mood?: boolean
           family_can_see_service_history?: boolean
+          fitness_goal?: string | null
           full_name: string
           grief_enrolled_at?: string | null
           grief_loss_type?: string | null
@@ -5995,8 +6097,10 @@ export type Database = {
           health_conditions?: string | null
           id?: string
           last_aria_call_at?: string | null
+          last_cognitive_activity_at?: string | null
           lives_alone?: boolean | null
           medications?: string | null
+          memory_care_pathway?: boolean
           metro_area_id?: string | null
           ml_insights_opt_out?: boolean
           mobility_devices?: string[] | null
@@ -6009,12 +6113,15 @@ export type Database = {
           preferred_contact_method?: string
           preferred_language?: string
           preferred_name: string
+          pt_referral_date?: string | null
+          pt_referral_requested?: boolean
           risk_override_calls?: boolean
           status?: Database["public"]["Enums"]["member_status"]
           supabase_auth_id?: string | null
           timezone?: string
           topics_avoid?: string | null
           topics_enjoy?: string[] | null
+          wandering_prevention_plan?: string | null
           zip_code?: string | null
         }
         Update: {
@@ -6027,6 +6134,7 @@ export type Database = {
           call_frequency_preference?: string
           check_in_frequency?: Database["public"]["Enums"]["check_in_frequency"]
           checkin_preference?: string
+          cognitive_concern_score?: number
           corporate_account_id?: string | null
           created_at?: string
           date_of_birth?: string
@@ -6042,10 +6150,12 @@ export type Database = {
           emergency_contact_2_phone?: string | null
           emergency_contact_2_rel?: string | null
           faith_preference?: string | null
+          fall_risk_level?: string | null
           family_can_see_alerts?: boolean
           family_can_see_call_summaries?: boolean
           family_can_see_mood?: boolean
           family_can_see_service_history?: boolean
+          fitness_goal?: string | null
           full_name?: string
           grief_enrolled_at?: string | null
           grief_loss_type?: string | null
@@ -6054,8 +6164,10 @@ export type Database = {
           health_conditions?: string | null
           id?: string
           last_aria_call_at?: string | null
+          last_cognitive_activity_at?: string | null
           lives_alone?: boolean | null
           medications?: string | null
+          memory_care_pathway?: boolean
           metro_area_id?: string | null
           ml_insights_opt_out?: boolean
           mobility_devices?: string[] | null
@@ -6068,12 +6180,15 @@ export type Database = {
           preferred_contact_method?: string
           preferred_language?: string
           preferred_name?: string
+          pt_referral_date?: string | null
+          pt_referral_requested?: boolean
           risk_override_calls?: boolean
           status?: Database["public"]["Enums"]["member_status"]
           supabase_auth_id?: string | null
           timezone?: string
           topics_avoid?: string | null
           topics_enjoy?: string[] | null
+          wandering_prevention_plan?: string | null
           zip_code?: string | null
         }
         Relationships: [
