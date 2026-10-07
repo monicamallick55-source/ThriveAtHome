@@ -114,7 +114,7 @@ export async function GET(req: NextRequest) {
     .not('member_id', 'is', null)
 
   const memberIds = (memberRows ?? [])
-    .map(r => r.member_id)
+    .map((r: any) => r.member_id)
     .filter((id): id is string => id !== null && id !== undefined)
 
   // 9. Compute aggregated call metrics for the last 30 days
@@ -133,7 +133,7 @@ export async function GET(req: NextRequest) {
 
   const moodScores = calls
     .filter(c => c.mood_score !== null && c.mood_score !== undefined)
-    .map(c => c.mood_score as number)
+    .map((c: any) => c.mood_score as number)
   const avgMoodScore =
     moodScores.length > 0
       ? Math.round((moodScores.reduce((a, b) => a + b, 0) / moodScores.length) * 10) / 10
@@ -143,7 +143,7 @@ export async function GET(req: NextRequest) {
   const engagedMemberIds = new Set(
     calls
       .filter(c => c.status === 'completed')
-      .map(c => c.member_id)
+      .map((c: any) => c.member_id)
       .filter(Boolean)
   )
   const uniqueMembersEngaged = engagedMemberIds.size

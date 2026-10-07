@@ -69,8 +69,8 @@ export default async function AddOnsPage() {
         </p>
 
         <AddOnsClient
-          catalog={catalog}
-          memberAddons={memberAddons}
+          catalog={(catalog ?? []) as any}
+          memberAddons={(memberAddons ?? []) as any}
           memberAge={age}
           planTier={member?.plan_tier ?? 'basics'}
           hasLongDistance={hasLongDistance}

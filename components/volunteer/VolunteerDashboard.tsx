@@ -1,7 +1,8 @@
 'use client'
 import { useState, useEffect } from 'react'
 import type { Volunteer, PrivateMemberView, VolunteerVisit } from '@/lib/data/volunteers'
-import type { VisitType } from '@/types/database'
+import type { Tables } from '@/types/database'
+type VisitType = any
 import VolunteerAvailability from '@/components/volunteer/VolunteerAvailability'
 
 interface CorporateProgramData {

@@ -2,7 +2,10 @@
 // Enables agencies to customize their display name, colors, and logo while ThriveAtHome
 // branding is always visible ("Powered by ThriveAtHome" cannot be removed).
 import { createAdminClient } from '../supabase/admin'
-import type { BrandConfigRow, BrandConfigInsert, BrandConfigUpdate } from '@/types/database'
+import type { Tables } from '@/types/database'
+type BrandConfigRow = Tables<'brand_configs'>
+type BrandConfigInsert = any
+type BrandConfigUpdate = any
 
 type Result<T> = Promise<{ data: T | null; error: string | null }>
 

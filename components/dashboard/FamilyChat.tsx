@@ -63,7 +63,7 @@ export function FamilyChat({
         (payload) => {
           const newMsg = payload.new as FamilyMessage
           setMessages((prev) =>
-            prev.some((m) => m.id === newMsg.id) ? prev : [...prev, newMsg]
+            prev.some((m: any) => m.id === newMsg.id) ? prev : [...prev, newMsg]
           )
         }
       )
@@ -93,7 +93,7 @@ export function FamilyChat({
       // Optimistically append — Realtime will deduplicate
       setMessages((prev) => {
         const newMsg = json.message as FamilyMessage
-        return prev.some((m) => m.id === newMsg.id) ? prev : [...prev, newMsg]
+        return prev.some((m: any) => m.id === newMsg.id) ? prev : [...prev, newMsg]
       })
       setBody('')
     }
@@ -131,7 +131,7 @@ export function FamilyChat({
           <div key={day}>
             <div className="text-center text-sm text-gray-400 my-2">{day}</div>
             <div className="space-y-2">
-              {msgs.map((msg) => {
+              {msgs.map((msg: any) => {
                 const isOwn = msg.sender_id === familyMemberId
                 return (
                   <div

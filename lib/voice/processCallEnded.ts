@@ -11,7 +11,10 @@ import { AGENTS, agentNameFromId, type AgentName } from './agents'
 import { toE164 } from './phone'
 import { lookupCallerByPhone, NO_CALLER, type CallerMatch, type CallerRole } from './caller'
 import { detectAgentsInvolved, type RetellTranscriptEvent } from './transfers'
-import type { CallType, CallStatus, CallDirection } from '@/types/database'
+import type { Tables } from '@/types/database'
+type CallType = any
+type CallStatus = any
+type CallDirection = any
 
 // ── Retell payload shape (only the fields we read) ───────────────────────────
 export interface RetellTranscriptTurn {

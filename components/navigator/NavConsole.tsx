@@ -134,7 +134,7 @@ function NavigatorEmailSection() {
       {sentHistory.length > 0 && (
         <div style={{ marginTop: '16px', borderTop: '1px solid #E8E4DC', paddingTop: '16px' }}>
           <h3 style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 700, color: '#7A7268', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 10px' }}>Sent this session</h3>
-          {sentHistory.map((item, i) => (
+          {sentHistory.map((item: any, i: number) => (
             <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '8px 12px', backgroundColor: '#F9F7F4', borderRadius: '8px', marginBottom: '6px', gap: '16px' }}>
               <div>
                 <div style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-navy)' }}>{item.subject}</div>
@@ -234,8 +234,8 @@ export function NavConsole({
   // Build unified action feed
   const alertItems: ActionItem[] = caseload.flatMap(entry =>
     entry.unacknowledgedAlerts
-      .filter(a => !acknowledgedIds.has(a.id))
-      .map(a => ({
+      .filter((a: any) => !acknowledgedIds.has(a.id))
+      .map((a: any) => ({
         kind: 'alert' as const,
         id: a.id,
         memberName: entry.member.preferred_name || entry.member.full_name,
@@ -249,7 +249,7 @@ export function NavConsole({
 
   const griefItems: ActionItem[] = griefRequests
     .filter(r => !contactedIds.has(r.id))
-    .map(r => ({
+    .map((r: any) => ({
       kind: 'grief' as const,
       id: r.id,
       memberName: r.members?.preferred_name ?? r.members?.full_name ?? 'Unknown',
@@ -259,7 +259,7 @@ export function NavConsole({
       urgency: 7,
     }))
 
-  const serviceItems: ActionItem[] = pendingBookings.map(b => ({
+  const serviceItems: ActionItem[] = pendingBookings.map((b: any) => ({
     kind: 'service' as const,
     id: b.id,
     memberName: b.member_name,
@@ -271,7 +271,7 @@ export function NavConsole({
 
   const taskItems: ActionItem[] = tasks
     .filter(t => !completedTaskIds.has(t.id))
-    .map(t => ({
+    .map((t: any) => ({
       kind: 'task' as const,
       id: t.id,
       memberName: t.member_id ? (membersById[t.member_id] ?? 'Unknown') : '—',
@@ -283,7 +283,7 @@ export function NavConsole({
     }))
 
   const allActionItems: ActionItem[] = [...alertItems, ...griefItems, ...serviceItems, ...taskItems]
-    .sort((a, b) => b.urgency - a.urgency)
+    .sort((a: any, b: any) => b.urgency - a.urgency)
 
   const filteredActions = allActionItems.filter(item => {
     if (activeFilter === 'all') return true
@@ -308,7 +308,7 @@ export function NavConsole({
   // Caseload: build open items summary
   const griefPathMembers = caseload
     .filter(entry => (entry.member as Member & { grief_welcome_path?: boolean }).grief_welcome_path)
-    .sort((a, b) => {
+    .sort((a: any, b: any) => {
       const aDate = (a.member as Member & { grief_enrolled_at?: string | null }).grief_enrolled_at
       const bDate = (b.member as Member & { grief_enrolled_at?: string | null }).grief_enrolled_at
       if (!aDate && !bDate) return 0
@@ -437,7 +437,7 @@ export function NavConsole({
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {filteredActions.map(item => {
+              {filteredActions.map((item: any) => {
                 if (item.kind === 'alert') {
                   const s = SEVERITY_STYLE[item.severity] ?? SEVERITY_STYLE.urgent
                   return (
@@ -693,14 +693,14 @@ export function NavConsole({
                         {(caseloadFilter === 'grief_path'
                           ? ['Name', 'Plan', 'Enrolled (grief path)', 'Mood', 'Open items', '']
                           : ['Name', 'Plan', 'Last check-in', 'Mood', 'Open items', '']
-                        ).map(col => (
+                        ).map((col: any) => (
                           <th key={col} scope="col" style={{ padding: '12px 16px', fontWeight: 600, fontSize: '12px', letterSpacing: '0.05em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{col}</th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredCaseload.map((entry, idx) => {
-                        const alertsCount = entry.unacknowledgedAlerts.filter(a => !acknowledgedIds.has(a.id)).length
+                      {filteredCaseload.map((entry: any, idx: number) => {
+                        const alertsCount = entry.unacknowledgedAlerts.filter((a: any) => !acknowledgedIds.has(a.id)).length
                         const serviceReqCount = pendingBookings.filter(b => b.member_id === entry.member.id).length
                         const openItemsLabel = [
                           alertsCount > 0 ? `${alertsCount} alert${alertsCount > 1 ? 's' : ''}` : '',

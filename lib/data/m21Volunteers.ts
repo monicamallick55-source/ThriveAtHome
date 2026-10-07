@@ -1,6 +1,9 @@
 // M21 — Expanded Volunteer Ecosystem data layer
 import { createAdminClient } from '../supabase/admin'
-import type { MemberAmbassadorRow, K12SchoolRow, K12SchoolInsert } from '../../types/database'
+import type { Tables } from '@/types/database'
+type MemberAmbassadorRow = Tables<'member_ambassadors'>
+type K12SchoolRow = Tables<'k12_schools'>
+type K12SchoolInsert = any
 
 // ─── Phase 81: Retired Professionals ─────────────────────────────────────────
 

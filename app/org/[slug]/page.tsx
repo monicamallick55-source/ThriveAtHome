@@ -89,7 +89,7 @@ export default async function PublicOrgPage({ params }: Props) {
               Services and programs we offer to our community.
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-              {programs.map(program => (
+              {programs.map((program: any) => (
                 <div key={program.id} style={{ backgroundColor: 'white', borderRadius: '12px', padding: '24px', border: '1px solid #E8E4DC' }}>
                   <div style={{ fontSize: '28px', marginBottom: '12px' }}>{PROGRAM_TYPE_ICONS[program.program_type] ?? '⭐'}</div>
                   <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '8px' }}>{program.program_name}</h3>
@@ -123,7 +123,7 @@ export default async function PublicOrgPage({ params }: Props) {
               { label: 'Sliding Scale — Low', cents: org.annual_dues_sliding_low_cents },
               { label: 'Sliding Scale — Mid', cents: org.annual_dues_sliding_mid_cents },
               { label: 'Standard', cents: org.annual_dues_standard_cents },
-            ].map(tier => (
+            ].map((tier: any) => (
               <div key={tier.label} style={{ padding: '20px 28px', backgroundColor: 'white', borderRadius: '12px', border: '1px solid #E8E4DC', textAlign: 'center', minWidth: '160px' }}>
                 <div style={{ fontFamily: 'var(--font-body)', fontSize: '28px', fontWeight: 700, color: 'var(--color-navy)' }}>
                   {tier.cents === 0 ? 'Free' : `$${Math.round(tier.cents / 100)}`}

@@ -106,7 +106,7 @@ export default function EmployerLandingClient({ employer }: Props) {
             What your family gets
           </h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
-            {BENEFIT_FEATURES.map(f => (
+            {BENEFIT_FEATURES.map((f: any) => (
               <div key={f.title} style={{ backgroundColor: 'white', borderRadius: '12px', padding: '24px', border: '1px solid #E8E4DC' }}>
                 <div style={{ fontSize: '28px', marginBottom: '12px' }}>{f.icon}</div>
                 <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '8px' }}>{f.title}</h3>
@@ -125,7 +125,7 @@ export default function EmployerLandingClient({ employer }: Props) {
               { step: '2', title: 'We reach out', desc: 'A ThriveAtHome navigator calls to learn about your family situation.' },
               { step: '3', title: 'Setup in 24 hrs', desc: 'Your loved one is enrolled, check-ins begin, dashboard goes live.' },
               { step: '4', title: 'Peace of mind', desc: 'You get alerts, call summaries, and human support when it matters.' },
-            ].map(s => (
+            ].map((s: any) => (
               <div key={s.step} style={{ textAlign: 'center' }}>
                 <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: 'var(--color-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 600, color: 'white' }}>{s.step}</div>
                 <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 500, color: 'var(--color-cream)', marginBottom: '8px' }}>{s.title}</h3>

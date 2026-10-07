@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
 
   // Generate a secure token (128-bit hex)
   const token = Array.from(crypto.getRandomValues(new Uint8Array(16)))
-    .map((b) => b.toString(16).padStart(2, '0'))
+    .map((b: any) => b.toString(16).padStart(2, '0'))
     .join('')
 
   const { data: inv, error: invErr } = await admin

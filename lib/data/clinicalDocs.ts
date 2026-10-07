@@ -3,13 +3,12 @@
 // Tables are new and not in Supabase generated types; cast through any at query boundary.
 
 import { createAdminClient } from '@/lib/supabase/admin'
-import type {
-  SoapNoteRow,
-  SoapNoteInsert,
-  SoapNoteUpdate,
-  CarePlanVersionRow,
-  CarePlanVersionInsert,
-} from '@/types/database'
+import type { Tables } from '@/types/database'
+type SoapNoteRow = any
+type SoapNoteInsert = any
+type SoapNoteUpdate = any
+type CarePlanVersionRow = any
+type CarePlanVersionInsert = any
 
 type Result<T> = { data: T | null; error: string | null }
 

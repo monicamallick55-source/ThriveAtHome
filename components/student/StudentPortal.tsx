@@ -152,7 +152,7 @@ export default function StudentPortal({ student, initialVisits }: Props) {
         y = 20
       }
       const durationHrs = (visit.duration_minutes / 60).toFixed(1)
-      const typeLabel = VISIT_TYPES.find((t) => t.value === visit.visit_type)?.label ?? visit.visit_type
+      const typeLabel = VISIT_TYPES.find((t: any) => t.value === visit.visit_type)?.label ?? visit.visit_type
       doc.setFont('helvetica', 'bold')
       doc.text(`${visit.visit_date}  —  ${typeLabel}  (${durationHrs}h)`, margin, y)
       y += 6
@@ -350,7 +350,7 @@ export default function StudentPortal({ student, initialVisits }: Props) {
                     onChange={(e) => setForm((f) => ({ ...f, visitType: e.target.value }))}
                     style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)', border: '1.5px solid rgba(30,58,95,0.25)', fontFamily: 'var(--font-body)', fontSize: '15px', boxSizing: 'border-box' }}
                   >
-                    {VISIT_TYPES.map((t) => (
+                    {VISIT_TYPES.map((t: any) => (
                       <option key={t.value} value={t.value}>{t.label}</option>
                     ))}
                   </select>
@@ -430,9 +430,9 @@ export default function StudentPortal({ student, initialVisits }: Props) {
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {visits.map((visit) => {
+              {visits.map((visit: any) => {
                 const durationHrs = (visit.duration_minutes / 60).toFixed(1)
-                const typeLabel = VISIT_TYPES.find((t) => t.value === visit.visit_type)?.label ?? visit.visit_type
+                const typeLabel = VISIT_TYPES.find((t: any) => t.value === visit.visit_type)?.label ?? visit.visit_type
                 return (
                   <div
                     key={visit.id}

@@ -86,11 +86,11 @@ export async function POST(req: NextRequest) {
 
   // 5. Insert member row (plan_tier defaults to 'basics' in the database)
   const topicsEnjoyArray = body.topics_enjoy
-    ? body.topics_enjoy.split(',').map((t) => t.trim()).filter(Boolean)
+    ? body.topics_enjoy.split(',').map((t: any) => t.trim()).filter(Boolean)
     : []
 
   const buddyMatchTopicsArray = body.buddy_match_topics
-    ? body.buddy_match_topics.split(',').map((t) => t.trim()).filter(Boolean)
+    ? body.buddy_match_topics.split(',').map((t: any) => t.trim()).filter(Boolean)
     : []
 
   // Aria's daily calls are opt-in. Only 'daily' or 'less_often' turn them on.

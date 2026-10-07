@@ -20,7 +20,7 @@ function formatDate(dateStr: string): string {
 function filterCallsByDays(calls: CheckInCall[], days: Days) {
   const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
   return calls
-    .filter((c) => {
+    .filter((c: any) => {
       if (c.mood_score === null) return false
       const d = new Date(c.scheduled_at ?? c.created_at)
       return d >= cutoff
@@ -30,7 +30,7 @@ function filterCallsByDays(calls: CheckInCall[], days: Days) {
       const db = new Date(b.scheduled_at ?? b.created_at).getTime()
       return da - db
     })
-    .map((c) => ({
+    .map((c: any) => ({
       date: formatDate(c.scheduled_at ?? c.created_at),
       mood: c.mood_score as number,
     }))
@@ -139,7 +139,7 @@ export interface MoodChartProps {
 }
 
 export function MoodChart({ calls }: MoodChartProps) {
-  const tabs = TAB_DAYS.map((days) => ({
+  const tabs = TAB_DAYS.map((days: any) => ({
     id: `${days}d`,
     label: `${days} days`,
     content: <ChartContent calls={calls} days={days} />,

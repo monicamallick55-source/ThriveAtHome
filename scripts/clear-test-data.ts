@@ -19,7 +19,7 @@ async function clear(): Promise<void> {
 
   // ── 1. Find family_members and linked member ────────────────────
   const { data: existingUsers } = await admin.auth.admin.listUsers()
-  const authUser = existingUsers?.users.find((u) => u.email === TEST_EMAIL)
+  const authUser = existingUsers?.users.find((u: any) => u.email === TEST_EMAIL)
 
   let memberId: string | null = null
 

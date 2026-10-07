@@ -1,14 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import type {
-  SeniorCenterRow,
-  CenterDropinRow,
-  CenterActivityRow,
-  RoomBookingRow,
-  CongregrateMealRow,
-  SeniorCenterStats,
-} from '@/types/database'
+import type { Tables } from '@/types/database'
+type SeniorCenterStats = any
+type SeniorCenterRow = Tables<'senior_centers'>
+type CenterDropinRow = any
+type CenterActivityRow = any
+type RoomBookingRow = any
+type CongregrateMealRow = any
 
 const ACTIVITY_TYPES = [
   { value: 'class', label: 'Class / Workshop' },
@@ -131,7 +130,7 @@ export default function SeniorCenterPortal({ center, initialDropins, initialActi
     })
     const json = await res.json().catch(() => ({}))
     if (res.ok) {
-      setDropins(prev => prev.map(d => d.id === dropinId ? json.data : d))
+      setDropins(prev => prev.map((d: any) => d.id === dropinId ? json.data : d))
     }
   }
 
@@ -174,7 +173,7 @@ export default function SeniorCenterPortal({ center, initialDropins, initialActi
     const json = await res.json().catch(() => ({}))
     setRegSaving(false)
     if (res.ok) {
-      setActivities(prev => prev.map(a => a.id === activityId ? { ...a, registration_count: a.registration_count + 1 } : a))
+      setActivities(prev => prev.map((a: any) => a.id === activityId ? { ...a, registration_count: a.registration_count + 1 } : a))
       setRegSuccess(prev => ({ ...prev, [activityId]: `${regName.trim()} registered.` }))
       setRegName('')
       setTimeout(() => setRegSuccess(prev => { const n = { ...prev }; delete n[activityId]; return n }), 4000)
@@ -214,7 +213,7 @@ export default function SeniorCenterPortal({ center, initialDropins, initialActi
       body: JSON.stringify({ booking_id: bookingId }),
     })
     if (res.ok) {
-      setRooms(prev => prev.map(r => r.id === bookingId ? { ...r, status: 'cancelled' } : r))
+      setRooms(prev => prev.map((r: any) => r.id === bookingId ? { ...r, status: 'cancelled' } : r))
     }
   }
 
@@ -301,7 +300,7 @@ export default function SeniorCenterPortal({ center, initialDropins, initialActi
       {/* Tabs */}
       <div style={{ borderBottom: '2px solid var(--color-warm-grey)', backgroundColor: 'var(--color-warm-white)', padding: '0 32px' }}>
         <div style={{ display: 'flex', gap: '4px', maxWidth: '1100px', margin: '0 auto', overflowX: 'auto' }}>
-          {tabs.map(tab => (
+          {tabs.map((tab: any) => (
             <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ padding: '14px 20px', border: 'none', borderBottom: activeTab === tab.id ? '3px solid var(--color-navy)' : '3px solid transparent', backgroundColor: 'transparent', fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: activeTab === tab.id ? 700 : 500, color: activeTab === tab.id ? 'var(--color-navy)' : 'var(--color-text-secondary)', cursor: 'pointer', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '8px' }}>
               {tab.label}
               {tab.count !== null && tab.count > 0 && (
@@ -335,7 +334,7 @@ export default function SeniorCenterPortal({ center, initialDropins, initialActi
                   <div>
                     <label style={labelStyle}>Visitor type</label>
                     <select style={inputStyle} value={checkinType} onChange={e => setCheckinType(e.target.value)}>
-                      {VISITOR_TYPES.map(vt => <option key={vt.value} value={vt.value}>{vt.label}</option>)}
+                      {VISITOR_TYPES.map((vt: any) => <option key={vt.value} value={vt.value}>{vt.label}</option>)}
                     </select>
                   </div>
                   <div>
@@ -357,7 +356,7 @@ export default function SeniorCenterPortal({ center, initialDropins, initialActi
               {activeDropins.length === 0 ? (
                 <p style={{ color: 'var(--color-text-secondary)', fontFamily: 'var(--font-body)' }}>No active check-ins yet today.</p>
               ) : (
-                activeDropins.map(d => (
+                activeDropins.map((d: any) => (
                   <div key={d.id} style={{ ...cardStyle, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', borderLeft: '4px solid var(--color-teal)' }}>
                     <div>
                       <span style={{ fontFamily: 'var(--font-body)', fontSize: '16px', fontWeight: 600, color: 'var(--color-navy)' }}>{d.visitor_name}</span>
@@ -377,7 +376,7 @@ export default function SeniorCenterPortal({ center, initialDropins, initialActi
             {completedDropins.length > 0 && (
               <div>
                 <h3 style={{ fontFamily: 'var(--font-body)', fontSize: '16px', fontWeight: 700, color: 'var(--color-text-secondary)', marginBottom: '12px' }}>Checked out today ({completedDropins.length})</h3>
-                {completedDropins.map(d => (
+                {completedDropins.map((d: any) => (
                   <div key={d.id} style={{ ...cardStyle, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', opacity: 0.7 }}>
                     <div>
                       <span style={{ fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 600, color: 'var(--color-navy)' }}>{d.visitor_name}</span>
@@ -412,7 +411,7 @@ export default function SeniorCenterPortal({ center, initialDropins, initialActi
                   <div>
                     <label style={labelStyle}>Type</label>
                     <select style={inputStyle} value={activityForm.activity_type} onChange={e => setActivityForm(f => ({ ...f, activity_type: e.target.value }))}>
-                      {ACTIVITY_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                      {ACTIVITY_TYPES.map((t: any) => <option key={t.value} value={t.value}>{t.label}</option>)}
                     </select>
                   </div>
                   <div>
@@ -451,7 +450,7 @@ export default function SeniorCenterPortal({ center, initialDropins, initialActi
             {activities.length === 0 ? (
               <p style={{ color: 'var(--color-text-secondary)', fontFamily: 'var(--font-body)' }}>No upcoming activities scheduled. Click "+ Add Activity" to get started.</p>
             ) : (
-              activities.map(a => (
+              activities.map((a: any) => (
                 <div key={a.id} style={{ ...cardStyle, borderLeft: expandedActivity === a.id ? '4px solid var(--color-teal)' : '4px solid transparent' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
                     <div>
@@ -538,7 +537,7 @@ export default function SeniorCenterPortal({ center, initialDropins, initialActi
             {rooms.length === 0 ? (
               <p style={{ color: 'var(--color-text-secondary)', fontFamily: 'var(--font-body)' }}>No room bookings for today. Click "+ Book a Room" to add one.</p>
             ) : (
-              rooms.map(r => (
+              rooms.map((r: any) => (
                 <div key={r.id} style={{ ...cardStyle, opacity: r.status === 'cancelled' ? 0.5 : 1, borderLeft: r.status === 'confirmed' ? '4px solid var(--color-teal)' : '4px solid var(--color-warm-grey)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
                     <div>
@@ -588,7 +587,7 @@ export default function SeniorCenterPortal({ center, initialDropins, initialActi
                   <div>
                     <label style={labelStyle}>Meal type *</label>
                     <select style={inputStyle} value={mealForm.meal_type} onChange={e => setMealForm(f => ({ ...f, meal_type: e.target.value }))}>
-                      {MEAL_TYPES.map(mt => <option key={mt.value} value={mt.value}>{mt.label}</option>)}
+                      {MEAL_TYPES.map((mt: any) => <option key={mt.value} value={mt.value}>{mt.label}</option>)}
                     </select>
                   </div>
                   <div>
@@ -620,13 +619,13 @@ export default function SeniorCenterPortal({ center, initialDropins, initialActi
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--font-body)', fontSize: '14px' }}>
                   <thead>
                     <tr style={{ backgroundColor: 'var(--color-navy)', color: 'var(--color-cream)' }}>
-                      {['Date', 'Meal', 'Attendees', 'Menu', 'Notes'].map(h => (
+                      {['Date', 'Meal', 'Attendees', 'Menu', 'Notes'].map((h: any) => (
                         <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 600, whiteSpace: 'nowrap' }}>{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
-                    {meals.map((m, i) => (
+                    {meals.map((m: any, i: number) => (
                       <tr key={m.id} style={{ backgroundColor: i % 2 === 0 ? 'var(--color-warm-white)' : 'var(--color-cream)' }}>
                         <td style={{ padding: '10px 14px', whiteSpace: 'nowrap' }}>{m.meal_date}</td>
                         <td style={{ padding: '10px 14px', textTransform: 'capitalize' }}>{m.meal_type}</td>
@@ -661,14 +660,14 @@ export default function SeniorCenterPortal({ center, initialDropins, initialActi
                 <button
                   onClick={() => {
                     const headers = ['Date', 'Visitor Name', 'Visitor Type', 'Check-in Time', 'Check-out Time']
-                    const rows = dropins.map(d => [
+                    const rows = dropins.map((d: any) => [
                       d.check_in_at ? d.check_in_at.split('T')[0] : '',
                       d.visitor_name,
                       d.visitor_type,
                       d.check_in_at ? new Date(d.check_in_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '',
                       d.check_out_at ? new Date(d.check_out_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '',
                     ])
-                    const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n')
+                    const csv = [headers, ...rows].map((r: any) => r.map((c: any) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n')
                     const blob = new Blob([csv], { type: 'text/csv' })
                     const a = document.createElement('a'); a.href = URL.createObjectURL(blob)
                     a.download = `attendance_${center.center_name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`; a.click()
@@ -689,12 +688,12 @@ export default function SeniorCenterPortal({ center, initialDropins, initialActi
                 <button
                   onClick={() => {
                     const headers = ['Title', 'Activity Type', 'Room', 'Date/Time', 'Capacity', 'Registered', 'Status']
-                    const rows = activities.map(a => [
+                    const rows = activities.map((a: any) => [
                       a.title, a.activity_type ?? '', a.room ?? '',
                       a.scheduled_at ? new Date(a.scheduled_at).toLocaleString('en-US') : '',
                       a.max_capacity ?? '', a.registration_count, a.status,
                     ])
-                    const csv = [headers, ...rows].map(r => r.map(c => `"${String(c ?? '').replace(/"/g, '""')}"`).join(',')).join('\n')
+                    const csv = [headers, ...rows].map((r: any) => r.map((c: any) => `"${String(c ?? '').replace(/"/g, '""')}"`).join(',')).join('\n')
                     const blob = new Blob([csv], { type: 'text/csv' })
                     const a = document.createElement('a'); a.href = URL.createObjectURL(blob)
                     a.download = `activities_${center.center_name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`; a.click()
@@ -715,8 +714,8 @@ export default function SeniorCenterPortal({ center, initialDropins, initialActi
                 <button
                   onClick={() => {
                     const headers = ['Date', 'Meal Type', 'Attendees', 'Menu', 'Notes']
-                    const rows = meals.map(m => [m.meal_date, m.meal_type, m.attendee_count, m.menu_description ?? '', m.notes ?? ''])
-                    const csv = [headers, ...rows].map(r => r.map(c => `"${String(c ?? '').replace(/"/g, '""')}"`).join(',')).join('\n')
+                    const rows = meals.map((m: any) => [m.meal_date, m.meal_type, m.attendee_count, m.menu_description ?? '', m.notes ?? ''])
+                    const csv = [headers, ...rows].map((r: any) => r.map((c: any) => `"${String(c ?? '').replace(/"/g, '""')}"`).join(',')).join('\n')
                     const blob = new Blob([csv], { type: 'text/csv' })
                     const a = document.createElement('a'); a.href = URL.createObjectURL(blob)
                     a.download = `meals_${center.center_name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`; a.click()

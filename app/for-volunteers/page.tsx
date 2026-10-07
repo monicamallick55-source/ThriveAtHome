@@ -75,7 +75,7 @@ export default function ForVolunteersPage() {
                 { icon: '🚗', title: 'Rides and errands', desc: 'Help with medical transport, grocery runs, or social outings for seniors nearby.' },
                 { icon: '🎓', title: 'Skills and expertise', desc: 'Retired professionals share tax help, tech tutoring, legal guidance, or financial planning.' },
                 { icon: '🏠', title: 'Neighborly check-ins', desc: 'Simple, local presence — a friendly face who lives nearby and stops by from time to time.' },
-              ].map(f => (
+              ].map((f: any) => (
                 <div key={f.title} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   <span style={{ fontSize: '36px' }}>{f.icon}</span>
                   <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 500, color: 'var(--color-navy)', margin: 0 }}>{f.title}</h3>

@@ -102,7 +102,7 @@ export async function getProgramVolunteerSummaries(programId: string): Promise<{
     if (error) return { data: null, error: error.message }
     if (!hours || hours.length === 0) return { data: [], error: null }
 
-    const volunteerIds = [...new Set(hours.map((h) => h.volunteer_id))]
+    const volunteerIds = [...new Set(hours.map((h: any) => h.volunteer_id))]
     const { data: volunteers } = await admin
       .from('volunteers')
       .select('id, full_name, email')
@@ -149,7 +149,7 @@ export async function getAllHoursForExport(programId: string): Promise<{ data: C
     if (error) return { data: null, error: error.message }
     if (!hours || hours.length === 0) return { data: [], error: null }
 
-    const volunteerIds = [...new Set(hours.map((h) => h.volunteer_id))]
+    const volunteerIds = [...new Set(hours.map((h: any) => h.volunteer_id))]
     const { data: volunteers } = await admin
       .from('volunteers')
       .select('id, full_name, email')
@@ -159,7 +159,7 @@ export async function getAllHoursForExport(programId: string): Promise<{ data: C
       volMap[v.id] = { full_name: v.full_name, email: v.email }
     }
 
-    const result: CorporateVolunteerHourWithDetails[] = hours.map((h) => ({
+    const result: CorporateVolunteerHourWithDetails[] = hours.map((h: any) => ({
       id: h.id,
       created_at: h.created_at,
       corporate_program_id: h.corporate_program_id,
@@ -192,7 +192,7 @@ export async function getCorporateProgramTotals(programId: string): Promise<{ to
     const hours = hoursRes.data ?? []
     const totalHours = hours.reduce((sum, h) => sum + Number(h.hours_logged), 0)
     const totalMatchedValue = totalHours * rate
-    const volunteerCount = new Set(hours.map((h) => h.volunteer_id)).size
+    const volunteerCount = new Set(hours.map((h: any) => h.volunteer_id)).size
     return { totalHours, totalMatchedValue, volunteerCount }
   } catch {
     return { totalHours: 0, totalMatchedValue: 0, volunteerCount: 0 }

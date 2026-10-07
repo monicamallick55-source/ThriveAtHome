@@ -1,6 +1,9 @@
 // Human Buddy Programme — Phase 33a data layer. Server-side only.
 import { createAdminClient } from '../supabase/admin'
-import type { BuddyAssignmentRow, BuddyCallRow, BuddyCallInsert } from '../../types/database'
+import type { Tables } from '@/types/database'
+type BuddyAssignmentRow = Tables<'buddy_assignments'>
+type BuddyCallRow = Tables<'buddy_calls'>
+type BuddyCallInsert = any
 
 export type { BuddyAssignmentRow, BuddyCallRow }
 

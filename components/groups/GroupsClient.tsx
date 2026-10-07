@@ -101,7 +101,7 @@ export default function GroupsClient({ groups, joinedGroupIds, hasMember }: Prop
               Your Groups
             </h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-              {myGroups.map((g, i) => (
+              {myGroups.map((g: any, i: number) => (
                 <GroupCard
                   key={g.id}
                   group={g}
@@ -127,7 +127,7 @@ export default function GroupsClient({ groups, joinedGroupIds, hasMember }: Prop
               {myGroups.length > 0 ? 'More Groups' : 'All Groups'}
             </h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-              {otherGroups.map((g, i) => (
+              {otherGroups.map((g: any, i: number) => (
                 <GroupCard
                   key={g.id}
                   group={g}

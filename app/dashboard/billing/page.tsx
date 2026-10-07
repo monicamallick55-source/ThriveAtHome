@@ -65,7 +65,7 @@ export default async function BillingPage() {
             </div>
           ) : (
             <BillingClient
-              currentTier={currentTier}
+              currentTier={(currentTier ?? []) as any}
               subscription={subscription}
               memberName={memberName}
             />

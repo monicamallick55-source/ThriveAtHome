@@ -256,7 +256,7 @@ export default function LifeStoryClient({ initialEntries, memberName, planTier, 
       const json = await res.json().catch(() => ({}))
       if (!res.ok) { setError(json.error || 'Failed to update.'); return }
       const updated = json.entry as LifeStoryEntry
-      setEntries(prev => prev.map(e => (e.id === id ? updated : e)))
+      setEntries(prev => prev.map((e: any) => (e.id === id ? updated : e)))
       // Refresh signed URLs for this entry
       setSignedUrls(prev => {
         const next = { ...prev }
@@ -297,7 +297,7 @@ export default function LifeStoryClient({ initialEntries, memberName, planTier, 
 
     return (
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '12px' }}>
-        {paths.map((path, idx) => {
+        {paths.map((path: any, idx: number) => {
           const info = urls[idx]
           const isPdf = path.toLowerCase().endsWith('.pdf') || info?.mime === 'application/pdf'
           const isLoading = urls.length === 0
@@ -375,7 +375,7 @@ export default function LifeStoryClient({ initialEntries, memberName, planTier, 
         {/* Existing attachments (edit mode) */}
         {existingPaths && existingPaths.length > 0 && (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '8px' }}>
-            {existingPaths.map(path => (
+            {existingPaths.map((path: any) => (
               <div key={path} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#F3F4F6', border: '1px solid #D1D5DB', borderRadius: '6px', padding: '4px 10px', fontSize: '12px', color: '#374151' }}>
                 <span>📎 {path.split('/').pop()}</span>
                 <button
@@ -394,7 +394,7 @@ export default function LifeStoryClient({ initialEntries, memberName, planTier, 
         {/* New files selected */}
         {files.length > 0 && (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '8px' }}>
-            {files.map((f, i) => (
+            {files.map((f: any, i: number) => (
               <span key={i} style={{ backgroundColor: '#DBEAFE', border: '1px solid #93C5FD', borderRadius: '6px', padding: '4px 10px', fontSize: '12px', color: '#1E40AF' }}>
                 {f.name}
               </span>
@@ -472,7 +472,7 @@ export default function LifeStoryClient({ initialEntries, memberName, planTier, 
               style={{ width: '100%', border: '1.5px solid var(--color-warm-grey)', borderRadius: '8px', padding: '8px 12px', fontSize: '15px', backgroundColor: 'white' }}
             >
               <option value="">No era selected</option>
-              {ERAS.map(era => <option key={era} value={era}>{era}</option>)}
+              {ERAS.map((era: any) => <option key={era} value={era}>{era}</option>)}
             </select>
           </div>
           <div style={{ marginBottom: '16px' }}>
@@ -637,7 +637,7 @@ export default function LifeStoryClient({ initialEntries, memberName, planTier, 
               style={{ width: '100%', height: '48px', border: '1.5px solid var(--color-warm-grey)', borderRadius: '8px', padding: '0 14px', fontSize: '16px', backgroundColor: 'white' }}
             >
               <option value="">Choose an era…</option>
-              {ERAS.map(era => <option key={era} value={era}>{era}</option>)}
+              {ERAS.map((era: any) => <option key={era} value={era}>{era}</option>)}
             </select>
           </div>
           <div style={{ marginBottom: '16px' }}>
@@ -693,8 +693,8 @@ export default function LifeStoryClient({ initialEntries, memberName, planTier, 
       {/* Timeline by era */}
       {hasEntries && (
         <>
-          {orderedEras.map(era => renderEraSection(era, byEra[era]))}
-          {otherEras.map(era => renderEraSection(era, byEra[era]))}
+          {orderedEras.map((era: any) => renderEraSection(era, byEra[era]))}
+          {otherEras.map((era: any) => renderEraSection(era, byEra[era]))}
           {noEra.length > 0 && (
             <section style={{ marginBottom: '40px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>

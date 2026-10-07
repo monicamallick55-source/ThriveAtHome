@@ -100,7 +100,7 @@ function RoiDashboard({ stats, employees }: { stats: Stats; employees: Employee[
       ['Call completion rate (%)', callCompletionPct],
       ['Your utilization vs platform avg (%)', `${utilizationPct} vs ${platformAvgUtilization}`],
     ]
-    const csv = rows.map(r => r.join(',')).join('\n')
+    const csv = rows.map((r: any) => r.join(',')).join('\n')
     const blob = new Blob([csv], { type: 'text/csv' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -133,7 +133,7 @@ function RoiDashboard({ stats, employees }: { stats: Stats; employees: Employee[
           Anonymized mood trend across all enrolled seniors. No individual member identified.
         </p>
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: '16px', height: '140px', padding: '0 8px' }}>
-          {moodData.map((d) => {
+          {moodData.map((d: any) => {
             const pct = (d.score / maxMood) * 100
             return (
               <div key={d.period} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end' }}>
@@ -269,7 +269,7 @@ function EmailBroadcastSection() {
       {sentHistory.length > 0 && (
         <div style={{ marginTop: '24px', borderTop: '1px solid #E8E4DC', paddingTop: '20px' }}>
           <h3 style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 700, color: '#7A7268', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 12px' }}>Sent this session</h3>
-          {sentHistory.map((item, i) => (
+          {sentHistory.map((item: any, i: number) => (
             <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '10px 14px', backgroundColor: '#F9F7F4', borderRadius: '8px', marginBottom: '8px', gap: '16px' }}>
               <div>
                 <div style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, color: 'var(--color-navy)' }}>{item.subject}</div>
@@ -502,7 +502,7 @@ export default function EmployerDashboardClient({ account, employees, invitation
                   Recent invitations
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {invitations.slice(0, 8).map((inv) => (
+                  {invitations.slice(0, 8).map((inv: any) => (
                     <div key={inv.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', backgroundColor: '#F9F8F5', borderRadius: '8px' }}>
                       <span style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-navy)' }}>{inv.email}</span>
                       <span style={{
@@ -533,7 +533,7 @@ export default function EmployerDashboardClient({ account, employees, invitation
               </p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {employees.map((emp) => (
+                {employees.map((emp: any) => (
                   <div key={emp.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', backgroundColor: '#F9F8F5', borderRadius: '8px' }}>
                     <div>
                       <p style={{ margin: '0 0 2px', fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 600, color: 'var(--color-navy)' }}>
@@ -628,13 +628,13 @@ export default function EmployerDashboardClient({ account, employees, invitation
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--font-body)', fontSize: '14px' }}>
                       <thead>
                         <tr style={{ borderBottom: '2px solid var(--color-warm-grey)' }}>
-                          {['Name', 'Email', 'Hours logged', 'Hours remaining', 'Last activity', 'Status'].map(h => (
+                          {['Name', 'Email', 'Hours logged', 'Hours remaining', 'Last activity', 'Status'].map((h: any) => (
                             <th key={h} style={{ padding: '10px 12px', textAlign: 'left', color: '#7A7268', fontWeight: 600, fontSize: '12px', letterSpacing: '0.04em', textTransform: 'uppercase' }}>{h}</th>
                           ))}
                         </tr>
                       </thead>
                       <tbody>
-                        {corpProgram.summaries.map((s) => {
+                        {corpProgram.summaries.map((s: any) => {
                           const cap = corpProgram.program!.annual_hour_cap_per_employee
                           const remaining = cap ? Math.max(0, cap - s.total_hours) : null
                           const pctUsed = cap ? Math.min(100, Math.round((s.total_hours / cap) * 100)) : null

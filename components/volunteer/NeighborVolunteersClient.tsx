@@ -36,7 +36,7 @@ export function NeighborVolunteersClient() {
 
         {/* How it works */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '16px', marginBottom: '32px' }}>
-          {NEIGHBOR_TASKS.map(task => (
+          {NEIGHBOR_TASKS.map((task: any) => (
             <div
               key={task.label}
               style={{

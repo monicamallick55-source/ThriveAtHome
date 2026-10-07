@@ -83,7 +83,7 @@ export async function computeIsolationScore(memberId: string): Promise<Isolation
       .order('created_at', { ascending: false })
       .limit(10)
     const texts = (calls ?? [])
-      .map((c) => c.ai_summary || c.transcript || '')
+      .map((c: any) => c.ai_summary || c.transcript || '')
       .filter(Boolean)
     const sentiment = await mlProvider.analyzeSentiment(texts)
     result.sentimentValence = Math.round(sentiment.valence * 1000) / 1000
@@ -154,7 +154,7 @@ export async function computeIsolationScore(memberId: string): Promise<Isolation
         .from('circle_memberships')
         .select('circle_id')
         .eq('member_id', memberId)
-      const joined = new Set((memberCircles ?? []).map((c) => c.circle_id))
+      const joined = new Set((memberCircles ?? []).map((c: any) => c.circle_id))
       const { data: circles } = await admin
         .from('cultural_circles')
         .select('id, circle_name')

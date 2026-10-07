@@ -82,11 +82,11 @@ export async function GET(req: NextRequest) {
 
       const digestContent = await aiProvider.generateWeeklyDigest(
         toAiMember(member as unknown as Record<string, unknown>),
-        (calls ?? []).map((c) => toAiCall(c as unknown as Record<string, unknown>))
+        (calls ?? []).map((c: any) => toAiCall(c as unknown as Record<string, unknown>))
       )
 
       await Promise.allSettled(
-        emailRecipients.map((fm) =>
+        emailRecipients.map((fm: any) =>
           emailProvider.sendWeeklyDigest(fm.email, member.preferred_name, digestContent)
         )
       )

@@ -60,7 +60,7 @@ async function captureConsoleLogs(fn: () => Promise<void>): Promise<string[]> {
   const logs: string[] = []
   const orig = console.log
   console.log = (...args: unknown[]) => {
-    const line = args.map(a => String(a)).join(' ')
+    const line = args.map((a: any) => String(a)).join(' ')
     logs.push(line)
     orig(line)
   }
@@ -89,13 +89,13 @@ async function run() {
 
       // Step 1: emergency_log row
       const { data: emLogs } = await admin.from('emergency_log').select('*').eq('member_id', memberId)
-      testEmergencyLogIds.push(...(emLogs ?? []).map(e => e.id))
+      testEmergencyLogIds.push(...(emLogs ?? []).map((e: any) => e.id))
       if ((emLogs ?? []).length > 0) ok('Step 1: emergency_log row written')
       else err('Step 1: emergency_log row NOT found')
 
       // Step 2: emergency alert with severity=emergency
       const { data: alerts } = await admin.from('alerts').select('*').eq('member_id', memberId)
-      testAlertIds.push(...(alerts ?? []).map(a => a.id))
+      testAlertIds.push(...(alerts ?? []).map((a: any) => a.id))
       const crisisAlert = (alerts ?? []).find(a => a.alert_type === 'crisis')
       if (crisisAlert?.severity === 'emergency') ok('Step 2: crisis alert — severity=emergency')
       else err('Step 2: crisis alert NOT found or wrong severity', crisisAlert?.severity)
@@ -109,7 +109,7 @@ async function run() {
 
       // Step 4: Realtime notification
       const { data: notifs } = await admin.from('realtime_notifications').select('*').eq('member_id', memberId)
-      testNotifIds.push(...(notifs ?? []).map(n => n.id))
+      testNotifIds.push(...(notifs ?? []).map((n: any) => n.id))
       if ((notifs ?? []).length > 0) ok('Step 4: Realtime notification inserted')
       else err('Step 4: Realtime notification NOT found')
 
@@ -132,9 +132,9 @@ async function run() {
       const { data: notifs }  = await admin.from('realtime_notifications').select('id').eq('member_id', memberId)
       const { data: emLogs }  = await admin.from('emergency_log').select('id').eq('member_id', memberId)
 
-      testAlertIds.push(...(alerts ?? []).map(a => a.id))
-      testNotifIds.push(...(notifs ?? []).map(n => n.id))
-      testEmergencyLogIds.push(...(emLogs ?? []).map(e => e.id))
+      testAlertIds.push(...(alerts ?? []).map((a: any) => a.id))
+      testNotifIds.push(...(notifs ?? []).map((n: any) => n.id))
+      testEmergencyLogIds.push(...(emLogs ?? []).map((e: any) => e.id))
 
       const total = (alerts?.length ?? 0) + (tasks?.length ?? 0) + (notifs?.length ?? 0) + (emLogs?.length ?? 0)
       if (total === 0) ok('No escalation for normal transcript — 0 alerts, tasks, notifs, logs')
@@ -153,8 +153,8 @@ async function run() {
       const { data: tasks }   = await admin.from('navigator_tasks').select('id').eq('member_id', memberId)
       const { data: emLogs }  = await admin.from('emergency_log').select('id').eq('member_id', memberId)
 
-      testAlertIds.push(...(alerts ?? []).map(a => a.id))
-      testEmergencyLogIds.push(...(emLogs ?? []).map(e => e.id))
+      testAlertIds.push(...(alerts ?? []).map((a: any) => a.id))
+      testEmergencyLogIds.push(...(emLogs ?? []).map((e: any) => e.id))
 
       const total = (alerts?.length ?? 0) + (tasks?.length ?? 0) + (emLogs?.length ?? 0)
       if (total === 0) ok('"fell asleep watching TV" — no escalation (correct, not a crisis phrase)')
@@ -183,7 +183,7 @@ async function run() {
         t => t.description === 'Crisis detection failed — manual review required',
       )
       if (fallbackTask) ok('Fallback navigator task created with correct description')
-      else err('Fallback navigator task NOT found or description mismatch', (tasks ?? []).map(t => t.description))
+      else err('Fallback navigator task NOT found or description mismatch', (tasks ?? []).map((t: any) => t.description))
 
       // handleCrisisDetection must not propagate the exception
       ok('Call processing continued normally (no exception was thrown to caller)')

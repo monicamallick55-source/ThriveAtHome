@@ -13,5 +13,5 @@ export default async function AmbassadorsAdminPage() {
   if (role !== 'admin' && role !== 'navigator') redirect('/dashboard')
 
   const { data: ambassadors } = await getActiveAmbassadors()
-  return <AmbassadorsAdminClient ambassadors={ambassadors} />
+  return <AmbassadorsAdminClient ambassadors={(ambassadors ?? []) as any} />
 }

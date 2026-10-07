@@ -94,7 +94,7 @@ export function AdminVolunteerMatching({ pendingMembers }: Props) {
             All members have been matched.
           </div>
         ) : (
-          pendingMembers.map(m => (
+          pendingMembers.map((m: any) => (
             <div key={m.id}
               onClick={() => {
                 setSelectedMemberId(m.id)
@@ -166,7 +166,7 @@ export function AdminVolunteerMatching({ pendingMembers }: Props) {
           </div>
         )}
 
-        {matches && matches.map(m => {
+        {matches && matches.map((m: any) => {
           const isConfirmed = confirmed.has(m.volunteer.id)
           return (
             <div key={m.volunteer.id} style={{
@@ -194,7 +194,7 @@ export function AdminVolunteerMatching({ pendingMembers }: Props) {
                   </p>
                   {m.reasons.length > 0 && (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                      {m.reasons.map(r => (
+                      {m.reasons.map((r: any) => (
                         <span key={r} style={{ display: 'inline-flex', padding: '3px 10px', backgroundColor: 'var(--color-cream)', border: '1px solid var(--color-warm-grey)', borderRadius: '999px', fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)' }}>
                           {r}
                         </span>

@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser, getUserRole } from '@/lib/auth'
 import { updateVolunteerStatus } from '@/lib/data/volunteers'
 import { createAdminClient } from '@/lib/supabase/admin'
-import type { VolunteerStatus } from '@/types/database'
+import type { Enums } from '@/types/database'
+type VolunteerStatus = Enums<'volunteer_status'>
 
 export async function PATCH(
   req: NextRequest,

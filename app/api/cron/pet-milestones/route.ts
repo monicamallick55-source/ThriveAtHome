@@ -45,13 +45,13 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'DB error fetching pets', detail: petsErr.message }, { status: 500 })
   }
 
-  const memberIds = Array.from(new Set((pets ?? []).map((p) => p.member_id)))
+  const memberIds = Array.from(new Set((pets ?? []).map((p: any) => p.member_id)))
   const { data: activeMembers } = await admin
     .from('members')
     .select('id, preferred_name, full_name, status')
     .in('id', memberIds.length ? memberIds : ['00000000-0000-0000-0000-000000000000'])
   const activeMemberMap = new Map(
-    (activeMembers ?? []).filter((m) => m.status === 'active').map((m) => [m.id, m])
+    (activeMembers ?? []).filter((m: any) => m.status === 'active').map((m: any) => [m.id, m])
   )
 
   for (const pet of pets ?? []) {
@@ -145,7 +145,7 @@ export async function GET(req: NextRequest) {
           `[STUB][Aria] Would gently mention in ${memberName}'s next friendly call: "${c.message}"`
         )
 
-        const { error: notifErr } = await admin.from('realtime_notifications').insert({
+        const { error: notifErr } = await (admin as any).from('realtime_notifications').insert({
           member_id: pet.member_id,
           type: 'celebration_upcoming',
           severity: 'info',

@@ -87,15 +87,15 @@ export async function assessGriefPattern(memberId: string): Promise<GriefPattern
       .gte('created_at', since90)
       .order('created_at', { ascending: false })
     const moods = (calls ?? [])
-      .map((c) => c.mood_score)
+      .map((c: any) => c.mood_score)
       .filter((n): n is number => typeof n === 'number')
     const lowMoodRatio =
-      moods.length > 0 ? moods.filter((m) => m <= 4).length / moods.length : 0
+      moods.length > 0 ? moods.filter((m: any) => m <= 4).length / moods.length : 0
 
     // Sentiment from recent grief-pathway calls.
     const texts = (calls ?? [])
       .slice(0, 10)
-      .map((c) => c.ai_summary || c.transcript || '')
+      .map((c: any) => c.ai_summary || c.transcript || '')
       .filter(Boolean)
     const sentiment = await mlProvider.analyzeSentiment(texts)
 
@@ -120,7 +120,7 @@ export async function assessGriefPattern(memberId: string): Promise<GriefPattern
     const priorEng = await engCount(d60, d30)
     const engagementTrend = (recentEng + 1) / (priorEng + 1)
 
-    const anniversaryNear = (griefReqs ?? []).some((r) =>
+    const anniversaryNear = (griefReqs ?? []).some((r: any) =>
       anniversaryWithinDays(r.loss_anniversary_date, 14)
     )
 

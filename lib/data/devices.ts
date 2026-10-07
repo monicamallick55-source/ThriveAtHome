@@ -1,14 +1,13 @@
 // M22 — Device & Smart Home Integration data layer (server-side, admin client).
 import { createAdminClient } from '../supabase/admin'
-import type {
-  MemberDeviceRow,
-  MemberDeviceInsert,
-  WearableConnectionRow,
-  WearableReadingRow,
-  FallEventRow,
-  EhrConnectionRow,
-  FhirExportLogRow,
-} from '../../types/database'
+import type { Tables } from '@/types/database'
+type MemberDeviceRow = Tables<'member_devices'>
+type MemberDeviceInsert = any
+type WearableConnectionRow = Tables<'wearable_connections'>
+type WearableReadingRow = Tables<'wearable_readings'>
+type FallEventRow = Tables<'fall_events'>
+type EhrConnectionRow = Tables<'ehr_connections'>
+type FhirExportLogRow = any
 import type { WearableDailyReading } from '../interfaces/WearableProvider'
 
 type Result<T> = { data: T; error: string | null }
@@ -33,7 +32,7 @@ export async function registerDevice(
   const admin = createAdminClient()
   const { data, error } = await admin
     .from('member_devices')
-    .insert(insert)
+    .insert(insert as any)
     .select('*')
     .maybeSingle()
   return { data: (data as MemberDeviceRow | null) ?? null, error: error?.message ?? null }
@@ -46,7 +45,7 @@ export async function updateDevice(
   const admin = createAdminClient()
   const { data, error } = await admin
     .from('member_devices')
-    .update(patch)
+    .update(patch as any)
     .eq('id', id)
     .select('*')
     .maybeSingle()
@@ -76,7 +75,7 @@ export async function recordDeviceSignal(params: {
     member_id: params.memberId,
     device_id: params.deviceId ?? null,
     signal_type: params.signalType,
-    signal_value: params.signalValue ?? {},
+    signal_value: params.signalValue ?? {} as any,
     occurred_at: params.occurredAt ?? new Date().toISOString(),
   })
   return { error: error?.message ?? null }
@@ -154,7 +153,7 @@ export async function saveWearableReadings(params: {
 }): Promise<{ saved: number; error: string | null }> {
   const admin = createAdminClient()
   if (params.readings.length === 0) return { saved: 0, error: null }
-  const rows = params.readings.map((r) => ({
+  const rows = params.readings.map((r: any) => ({
     member_id: params.memberId,
     connection_id: params.connectionId,
     reading_date: r.readingDate,
@@ -307,7 +306,7 @@ export async function getDeviceSummaryForMember(
   ])
 
   const devices = devicesRes.data ?? []
-  const activeDevices = devices.filter((d) => d.status === 'active').length
+  const activeDevices = devices.filter((d: any) => d.status === 'active').length
   const wearablesConnected = (wearablesRes.data ?? []).length
 
   const summary: DeviceSummary = {

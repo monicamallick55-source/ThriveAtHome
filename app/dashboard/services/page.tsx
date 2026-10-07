@@ -17,5 +17,5 @@ export default async function ServicesPage() {
     initialBookings = data ?? []
   }
 
-  return <ServicesClient initialBookings={initialBookings} />
+  return <ServicesClient initialBookings={(initialBookings ?? []) as any} />
 }

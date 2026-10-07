@@ -75,7 +75,7 @@ export function Step2Preferences({ data, onChange, isSelf = false }: Props) {
   const whoPossessive = data.preferred_name || (isSelf ? 'you' : 'they')
 
   const selectedBuddyTopics = data.buddy_match_topics
-    ? data.buddy_match_topics.split(',').map((t) => t.trim()).filter(Boolean)
+    ? data.buddy_match_topics.split(',').map((t: any) => t.trim()).filter(Boolean)
     : []
 
   function toggleBuddyTopic(topic: string) {
@@ -89,7 +89,7 @@ export function Step2Preferences({ data, onChange, isSelf = false }: Props) {
   }
 
   const selectedTopics = data.topics_enjoy
-    ? data.topics_enjoy.split(',').map((t) => t.trim()).filter(Boolean)
+    ? data.topics_enjoy.split(',').map((t: any) => t.trim()).filter(Boolean)
     : []
 
   function toggleTopic(topic: string) {
@@ -130,7 +130,7 @@ export function Step2Preferences({ data, onChange, isSelf = false }: Props) {
             : `When does ${who} like to have conversations?`}
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {CALL_TIMES.map((option) => {
+          {CALL_TIMES.map((option: any) => {
             const isSelected = data.preferred_call_time === option.value
             return (
               <label
@@ -196,7 +196,7 @@ export function Step2Preferences({ data, onChange, isSelf = false }: Props) {
           add Aria later — it&apos;s entirely your choice, and you can change this any time.
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {ARIA_OPT_IN_CHOICES.map((option) => {
+          {ARIA_OPT_IN_CHOICES.map((option: any) => {
             const isSelected = data.aria_call_opt_in === option.value
             return (
               <label
@@ -259,7 +259,7 @@ export function Step2Preferences({ data, onChange, isSelf = false }: Props) {
         <legend style={labelStyle}>How often should we call?</legend>
         <p style={hintStyle}>You can change this at any time from your portal.</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {FREQUENCIES.map((option) => {
+          {FREQUENCIES.map((option: any) => {
             const isSelected = data.check_in_frequency === option.value
             return (
               <label
@@ -323,7 +323,7 @@ export function Step2Preferences({ data, onChange, isSelf = false }: Props) {
         </p>
         <p style={hintStyle}>Select as many as you like — we&apos;ll bring these up naturally on your calls.</p>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-          {TOPICS.map((topic) => {
+          {TOPICS.map((topic: any) => {
             const isSelected = selectedTopics.includes(topic)
             return (
               <button
@@ -418,7 +418,7 @@ export function Step2Preferences({ data, onChange, isSelf = false }: Props) {
               <p style={{ ...labelStyle, color: '#005f5f', marginBottom: '4px' }}>Topics to connect over (pick up to 3)</p>
               <p style={{ ...hintStyle, color: '#2d7a7a' }}>Used to match with a buddy who shares the same interests.</p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                {BUDDY_MATCH_TOPICS.map((topic) => {
+                {BUDDY_MATCH_TOPICS.map((topic: any) => {
                   const isSel = selectedBuddyTopics.includes(topic)
                   const isDisabled = !isSel && selectedBuddyTopics.length >= 3
                   return (
@@ -454,7 +454,7 @@ export function Step2Preferences({ data, onChange, isSelf = false }: Props) {
             <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
               <legend style={{ ...labelStyle, color: '#005f5f' }}>{isSelf ? 'Era you most enjoy reminiscing about' : 'Era they most enjoy reminiscing about'}</legend>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
-                {ERAS.map((era) => {
+                {ERAS.map((era: any) => {
                   const isSel = data.buddy_match_era === era.value
                   return (
                     <label
@@ -491,7 +491,7 @@ export function Step2Preferences({ data, onChange, isSelf = false }: Props) {
             <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
               <legend style={{ ...labelStyle, color: '#005f5f' }}>Preferred call length with buddy</legend>
               <div style={{ display: 'flex', gap: '10px', marginTop: '8px', flexWrap: 'wrap' }}>
-                {CALL_LENGTHS.map((opt) => {
+                {CALL_LENGTHS.map((opt: any) => {
                   const isSel = data.buddy_call_length_preference === opt.value
                   return (
                     <label

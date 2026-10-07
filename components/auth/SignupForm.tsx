@@ -185,7 +185,7 @@ export function SignupForm({ referralCode }: { referralCode?: string }) {
             finding peace of mind.&rdquo;
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {['HIPAA compliant', 'No contracts', 'Cancel anytime'].map((item) => (
+            {['HIPAA compliant', 'No contracts', 'Cancel anytime'].map((item: any) => (
               <span
                 key={item}
                 style={{
@@ -286,7 +286,7 @@ export function SignupForm({ referralCode }: { referralCode?: string }) {
                 {([
                   { value: 'self', title: "I'm signing up for myself", desc: "I'll receive the check-ins and support" },
                   { value: 'proxy', title: 'Someone I care for', desc: 'A parent, spouse, or another loved one' },
-                ] as const).map((opt) => {
+                ] as const).map((opt: any) => {
                   const selected = accountType === opt.value
                   return (
                     <label
@@ -372,7 +372,7 @@ export function SignupForm({ referralCode }: { referralCode?: string }) {
                   }}
                 >
                   <option value="">Select relationship…</option>
-                  {RELATIONSHIP_OPTIONS.map((r) => (
+                  {RELATIONSHIP_OPTIONS.map((r: any) => (
                     <option key={r} value={r}>{r}</option>
                   ))}
                 </select>
@@ -423,7 +423,7 @@ export function SignupForm({ referralCode }: { referralCode?: string }) {
               {password.length > 0 && (
                 <div style={{ marginTop: '8px' }}>
                   <div style={{ display: 'flex', gap: '4px', marginBottom: '4px' }}>
-                    {[1, 2, 3, 4].map((i) => (
+                    {[1, 2, 3, 4].map((i: any) => (
                       <div
                         key={i}
                         style={{

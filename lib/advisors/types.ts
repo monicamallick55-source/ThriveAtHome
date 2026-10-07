@@ -107,15 +107,15 @@ export const LISTING_TIERS: ListingTierInfo[] = [
 ]
 
 export function advisorTypeLabel(value: string): string {
-  return ADVISOR_TYPES.find((t) => t.value === value)?.label ?? value
+  return ADVISOR_TYPES.find((t: any) => t.value === value)?.label ?? value
 }
 
 export function advisorTypeEmoji(value: string): string {
-  return ADVISOR_TYPES.find((t) => t.value === value)?.emoji ?? '👤'
+  return ADVISOR_TYPES.find((t: any) => t.value === value)?.emoji ?? '👤'
 }
 
 export function listingTierInfo(value: string): ListingTierInfo | undefined {
-  return LISTING_TIERS.find((t) => t.value === value)
+  return LISTING_TIERS.find((t: any) => t.value === value)
 }
 
 /** Connection status → warm, plain-English label for families. */

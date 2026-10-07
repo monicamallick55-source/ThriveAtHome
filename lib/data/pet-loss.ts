@@ -5,11 +5,10 @@ import { createAdminClient } from '../supabase/admin'
 import { emailProvider } from '../providers'
 import { pushRealtimeNotification } from '../realtime/notifications'
 import type { Database } from '../../types/database'
-import type {
-  PetLossCircleMemberRow,
-  PetLossCirclePostRow,
-  PetLossSupportRequestRow,
-} from '../../types/database'
+import type { Tables } from '@/types/database'
+type PetLossCircleMemberRow = Tables<'pet_loss_circle_members'>
+type PetLossCirclePostRow = Tables<'pet_loss_circle_posts'>
+type PetLossSupportRequestRow = Tables<'pet_loss_support_requests'>
 
 type PetLossRequestUpdate = Database['public']['Tables']['pet_loss_support_requests']['Update']
 

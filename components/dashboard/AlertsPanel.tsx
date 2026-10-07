@@ -48,10 +48,10 @@ const severityStyle: Record<string, { border: string; bg: string; badge: string;
 }
 
 function highestSeverity(alerts: Alert[]): StatusLevel {
-  const unacked = alerts.filter((a) => !a.acknowledged)
-  if (unacked.some((a) => a.severity === 'emergency')) return 'emergency'
-  if (unacked.some((a) => a.severity === 'urgent')) return 'urgent'
-  if (unacked.some((a) => a.severity === 'concern')) return 'concern'
+  const unacked = alerts.filter((a: any) => !a.acknowledged)
+  if (unacked.some((a: any) => a.severity === 'emergency')) return 'emergency'
+  if (unacked.some((a: any) => a.severity === 'urgent')) return 'urgent'
+  if (unacked.some((a: any) => a.severity === 'concern')) return 'concern'
   if (unacked.length > 0) return 'concern'
   return 'no_alerts'
 }
@@ -113,7 +113,7 @@ export function AlertsPanel({ memberId, familyMemberId, initialAlerts, error }: 
       .eq('id', alertId)
     if (!err) {
       setAlerts((prev) =>
-        prev.map((a) =>
+        prev.map((a: any) =>
           a.id === alertId
             ? { ...a, acknowledged: true, acknowledged_at: new Date().toISOString() }
             : a
@@ -125,8 +125,8 @@ export function AlertsPanel({ memberId, familyMemberId, initialAlerts, error }: 
 
   if (error) return <SectionError message={error} />
 
-  const unacked = alerts.filter((a) => !a.acknowledged)
-  const acked = alerts.filter((a) => a.acknowledged)
+  const unacked = alerts.filter((a: any) => !a.acknowledged)
+  const acked = alerts.filter((a: any) => a.acknowledged)
 
   if (unacked.length === 0 && acked.length === 0) {
     return (
@@ -158,7 +158,7 @@ export function AlertsPanel({ memberId, familyMemberId, initialAlerts, error }: 
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-      {unacked.map((alert) => {
+      {unacked.map((alert: any) => {
         const style = severityStyle[alert.severity] ?? severityStyle.concern
         const isEmergency = alert.severity === 'emergency'
         return (
@@ -256,7 +256,7 @@ export function AlertsPanel({ memberId, familyMemberId, initialAlerts, error }: 
             {acked.length} acknowledged alert{acked.length === 1 ? '' : 's'}
           </summary>
           <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {acked.map((alert) => {
+            {acked.map((alert: any) => {
               const style = severityStyle[alert.severity] ?? severityStyle.concern
               return (
                 <div

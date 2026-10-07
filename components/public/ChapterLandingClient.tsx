@@ -110,7 +110,7 @@ export default function ChapterLandingClient({ org, programs }: Props) {
               What our chapter offers to members and the community.
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-              {programs.map(p => (
+              {programs.map((p: any) => (
                 <div key={p.id} style={{ backgroundColor: 'white', borderRadius: '12px', padding: '24px', border: '1px solid #E8E4DC' }}>
                   <div style={{ fontSize: '28px', marginBottom: '12px' }}>{PROGRAM_ICONS[p.program_type] ?? '⭐'}</div>
                   <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '8px' }}>{p.program_name}</h3>
@@ -136,7 +136,7 @@ export default function ChapterLandingClient({ org, programs }: Props) {
             Give a few hours a month. Drive a neighbour to an appointment. Share a meal. Help with tech. Every act of kindness keeps a senior in their home and connected to community.
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px', marginBottom: '28px' }}>
-            {['🚗 Rides', '🍲 Meals', '🔧 Home tasks', '💻 Tech help', '🤝 Friendly visits', '📞 Phone check-ins'].map(item => (
+            {['🚗 Rides', '🍲 Meals', '🔧 Home tasks', '💻 Tech help', '🤝 Friendly visits', '📞 Phone check-ins'].map((item: any) => (
               <div key={item} style={{ padding: '16px', backgroundColor: 'white', borderRadius: '10px', fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, color: 'var(--color-navy)', textAlign: 'center' }}>
                 {item}
               </div>
@@ -166,7 +166,7 @@ export default function ChapterLandingClient({ org, programs }: Props) {
                   { label: 'Sliding Scale — Low', cents: org.annual_dues_sliding_low_cents },
                   { label: 'Sliding Scale — Mid', cents: org.annual_dues_sliding_mid_cents },
                   { label: 'Standard', cents: org.annual_dues_standard_cents },
-                ].map(tier => (
+                ].map((tier: any) => (
                   <div key={tier.label} style={{ padding: '16px 20px', backgroundColor: 'white', borderRadius: '10px', border: '1px solid #E8E4DC', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-navy)', fontWeight: 500 }}>{tier.label}</span>
                     <span style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 600, color: 'var(--color-teal)' }}>

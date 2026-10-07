@@ -30,8 +30,8 @@ export interface TasksPanelProps {
 export function TasksPanel({ tasks, error }: TasksPanelProps) {
   if (error) return <SectionError message={error} />
 
-  const pending = tasks.filter((t) => !t.completed)
-  const done = tasks.filter((t) => t.completed)
+  const pending = tasks.filter((t: any) => !t.completed)
+  const done = tasks.filter((t: any) => t.completed)
 
   if (tasks.length === 0) {
     return (
@@ -51,7 +51,7 @@ export function TasksPanel({ tasks, error }: TasksPanelProps) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-      {pending.map((task) => (
+      {pending.map((task: any) => (
         <div
           key={task.id}
           style={{
@@ -103,7 +103,7 @@ export function TasksPanel({ tasks, error }: TasksPanelProps) {
             {done.length} completed task{done.length === 1 ? '' : 's'}
           </summary>
           <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            {done.slice(0, 5).map((task) => (
+            {done.slice(0, 5).map((task: any) => (
               <div
                 key={task.id}
                 style={{

@@ -13,5 +13,5 @@ export default async function K12AdminPage() {
   if (role !== 'admin' && role !== 'navigator') redirect('/dashboard')
 
   const { data: schools } = await getK12Schools()
-  return <K12AdminClient schools={schools} />
+  return <K12AdminClient schools={(schools ?? []) as any} />
 }

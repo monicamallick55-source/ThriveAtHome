@@ -1,19 +1,18 @@
 // Senior Center data layer (migration 046)
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
-import type {
-  SeniorCenterRow,
-  CenterDropinRow,
-  CenterActivityRow,
-  ActivityRegistrationRow,
-  RoomBookingRow,
-  CongregrateMealRow,
-  SeniorCenterStats,
-  CenterDropinInsert,
-  CenterActivityInsert,
-  RoomBookingInsert,
-  CongregrateMealInsert,
-} from '@/types/database'
+import type { Tables } from '@/types/database'
+type SeniorCenterRow = any
+type CenterDropinRow = any
+type CenterActivityRow = any
+type ActivityRegistrationRow = any
+type RoomBookingRow = any
+type CongregrateMealRow = any
+type SeniorCenterStats = any
+type CenterDropinInsert = any
+type CenterActivityInsert = any
+type RoomBookingInsert = any
+type CongregrateMealInsert = any
 
 type Result<T> = { data: T | null; error: string | null }
 

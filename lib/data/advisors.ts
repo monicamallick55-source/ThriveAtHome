@@ -3,12 +3,11 @@
 // admin review, and directory-revenue reporting.
 
 import { createAdminClient } from '../supabase/admin'
-import type {
-  TrustedAdvisorRow,
-  AdvisorListingApplicationRow,
-  AdvisorConnectionRow,
-  TrustedAdvisorInsert,
-} from '../../types/database'
+import type { Tables } from '@/types/database'
+type TrustedAdvisorRow = Tables<'trusted_advisors'>
+type AdvisorListingApplicationRow = Tables<'advisor_listing_applications'>
+type AdvisorConnectionRow = Tables<'advisor_connections'>
+type TrustedAdvisorInsert = any
 import type { AdvisorType, AdvisorListingTier } from '../advisors/types'
 import { LISTING_TIERS } from '../advisors/types'
 
@@ -32,7 +31,7 @@ export async function getActiveAdvisors(
   try {
     const admin = createAdminClient()
     let q = admin.from('trusted_advisors').select('*').eq('listing_status', 'active')
-    if (filters.advisorType) q = q.eq('advisor_type', filters.advisorType)
+    if (filters.advisorType) q = q.eq('advisor_type', filters.advisorType as any)
     if (filters.state) q = q.contains('service_states', [filters.state])
     if (filters.acceptingOnly) q = q.eq('accepts_new_clients', true)
     const { data, error } = await q
@@ -274,7 +273,7 @@ export async function approveAdvisorApplication(
     if (app.status === 'approved') return { data: null, error: 'Already approved' }
 
     const tier = (overrides.listing_tier as string) ?? app.requested_tier
-    const fee = LISTING_TIERS.find((t) => t.value === tier)?.annualFee ?? 2400
+    const fee = LISTING_TIERS.find((t: any) => t.value === tier)?.annualFee ?? 2400
     const now = new Date()
     const expires = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000)
 
@@ -285,7 +284,7 @@ export async function approveAdvisorApplication(
         firm_name: app.firm_name,
         advisor_type: app.advisor_type,
         credentials: app.credentials ? [app.credentials] : [],
-        listing_tier: tier,
+        listing_tier: tier as any,
         listing_fee_annual: fee,
         listing_status: 'active',
         listing_started_at: now.toISOString(),

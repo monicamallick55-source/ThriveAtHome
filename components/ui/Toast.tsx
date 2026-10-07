@@ -92,7 +92,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         aria-label="Notifications"
         className="fixed top-6 right-6 z-50 flex flex-col gap-2 items-end"
       >
-        {toasts.map(t => (
+        {toasts.map((t: any) => (
           <ToastItem key={t.id} toast={t} onDismiss={dismiss} />
         ))}
       </div>

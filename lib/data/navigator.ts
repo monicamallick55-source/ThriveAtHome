@@ -74,7 +74,7 @@ export async function getNavigatorCaseload(
       return { data: null, error: aErr.message }
     }
 
-    const memberIds = (assignments ?? []).map(a => a.member_id)
+    const memberIds = (assignments ?? []).map((a: any) => a.member_id)
     if (memberIds.length === 0) return { data: [], error: null }
 
     const { data: members, error: mErr } = await admin
@@ -118,7 +118,7 @@ export async function getNavigatorCaseload(
       alertsByMember.set(alert.member_id, existing)
     }
 
-    const caseload: CaseloadEntry[] = (members ?? []).map(member => {
+    const caseload: CaseloadEntry[] = (members ?? []).map((member: any) => {
       const memberAlerts = alertsByMember.get(member.id) ?? []
       return {
         member: member as Member,

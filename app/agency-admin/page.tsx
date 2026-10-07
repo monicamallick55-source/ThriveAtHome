@@ -61,10 +61,10 @@ export default async function AgencyAdminPage() {
 
   return (
     <AgencyDashboardClient
-      agency={agency}
+      agency={(agency ?? []) as any}
       workers={workersRes.data ?? []}
-      upcomingVisits={upcomingRes.data ?? []}
-      recentVisits={recentRes.data ?? []}
+      upcomingVisits={(upcomingRes.data ?? []) as any}
+      recentVisits={(recentRes.data ?? []) as any}
       members={membersRes.data ?? []}
       pendingReferrals={referralsRes.data ?? []}
       initialLocations={locationsRes.data ?? []}

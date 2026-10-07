@@ -50,7 +50,7 @@ export default async function AdminPage() {
           Management
         </h2>
         <div style={{ display: 'grid', gap: '14px', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
-          {LINKS.map((l) => (
+          {LINKS.map((l: any) => (
             <Link key={l.href} href={l.href}
               style={{ display: 'block', backgroundColor: 'white', border: '1px solid #E8E4DC', borderRadius: '12px', padding: '18px 20px', textDecoration: 'none' }}>
               <div style={{ fontFamily: 'var(--font-body)', fontSize: '16px', fontWeight: 600, color: 'var(--color-navy)' }}>{l.label}</div>

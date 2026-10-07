@@ -4,7 +4,9 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { advisorTypeLabel, LISTING_TIERS } from '@/lib/advisors/types'
-import type { TrustedAdvisorRow, AdvisorListingApplicationRow } from '@/types/database'
+import type { Tables } from '@/types/database'
+type TrustedAdvisorRow = Tables<'trusted_advisors'>
+type AdvisorListingApplicationRow = Tables<'advisor_listing_applications'>
 import type { DirectoryRevenueSummary } from '@/lib/data/advisors'
 
 interface Props {
@@ -37,7 +39,7 @@ export default function AdvisorAdminClient({ initialAdvisors, initialApplication
     const json = await res.json()
     if (!res.ok) setMsg(json.error ?? 'Action failed.')
     else {
-      setApplications((prev) => prev.map((a) => (a.id === id ? { ...a, status: action === 'approve' ? 'approved' : 'rejected' } : a)))
+      setApplications((prev) => prev.map((a: any) => (a.id === id ? { ...a, status: action === 'approve' ? 'approved' : 'rejected' } : a)))
       if (json.advisor) setAdvisors((prev) => [json.advisor as TrustedAdvisorRow, ...prev])
       setMsg(action === 'approve' ? 'Listing created and activated.' : 'Application rejected.')
     }
@@ -53,14 +55,14 @@ export default function AdvisorAdminClient({ initialAdvisors, initialApplication
     })
     const json = await res.json()
     if (res.ok && json.advisor) {
-      setAdvisors((prev) => prev.map((a) => (a.id === id ? (json.advisor as TrustedAdvisorRow) : a)))
+      setAdvisors((prev) => prev.map((a: any) => (a.id === id ? (json.advisor as TrustedAdvisorRow) : a)))
     } else {
       setMsg(json.error ?? 'Update failed.')
     }
     setBusy(null)
   }
 
-  const pending = applications.filter((a) => a.status === 'new' || a.status === 'reviewing')
+  const pending = applications.filter((a: any) => a.status === 'new' || a.status === 'reviewing')
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -78,7 +80,7 @@ export default function AdvisorAdminClient({ initialAdvisors, initialApplication
             <Stat label="Active listings" value={String(revenue.activeListings)} />
             <Stat label="Annualised revenue" value={`$${revenue.annualisedRevenue.toLocaleString()}`} />
             <Stat label="Expiring within 45 days" value={String(revenue.expiringSoon)} />
-            {revenue.byTier.map((t) => (
+            {revenue.byTier.map((t: any) => (
               <Stat key={t.tier} label={`${t.tier} (${t.count})`} value={`$${t.revenue.toLocaleString()}`} />
             ))}
           </div>
@@ -96,7 +98,7 @@ export default function AdvisorAdminClient({ initialAdvisors, initialApplication
           <p style={{ fontFamily: 'var(--font-body)', color: 'var(--color-text-secondary)' }}>No applications waiting for review.</p>
         ) : (
           <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {pending.map((a) => (
+            {pending.map((a: any) => (
               <li key={a.id} style={{ borderTop: '1px solid var(--color-warm-grey)', paddingTop: '12px', fontFamily: 'var(--font-body)' }}>
                 <strong style={{ color: 'var(--color-navy)' }}>{a.full_name}</strong>
                 {a.firm_name ? ` · ${a.firm_name}` : ''} · {advisorTypeLabel(a.advisor_type)}
@@ -111,7 +113,7 @@ export default function AdvisorAdminClient({ initialAdvisors, initialApplication
                     defaultValue={a.requested_tier}
                     style={{ height: '40px', borderRadius: 'var(--radius-md)', border: '1.5px solid var(--color-warm-grey)', padding: '0 10px' }}
                   >
-                    {LISTING_TIERS.map((t) => (
+                    {LISTING_TIERS.map((t: any) => (
                       <option key={t.value} value={t.value}>{t.label} (${t.annualFee.toLocaleString()})</option>
                     ))}
                   </select>
@@ -141,7 +143,7 @@ export default function AdvisorAdminClient({ initialAdvisors, initialApplication
           Listings ({advisors.length})
         </h2>
         <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {advisors.map((a) => (
+          {advisors.map((a: any) => (
             <li key={a.id} style={{ borderTop: '1px solid var(--color-warm-grey)', paddingTop: '10px', fontFamily: 'var(--font-body)', display: 'flex', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
               <div>
                 <strong style={{ color: 'var(--color-navy)' }}>{a.full_name}</strong> · {advisorTypeLabel(a.advisor_type)} ·{' '}

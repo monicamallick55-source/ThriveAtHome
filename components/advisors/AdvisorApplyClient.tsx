@@ -95,7 +95,7 @@ export default function AdvisorApplyClient() {
         <label style={labelStyle} htmlFor="a-type">Type of advisor *</label>
         <select id="a-type" style={field} value={form.advisor_type} onChange={(e) => set('advisor_type', e.target.value)}>
           <option value="">Choose one…</option>
-          {ADVISOR_TYPES.map((t) => (
+          {ADVISOR_TYPES.map((t: any) => (
             <option key={t.value} value={t.value}>{t.label}</option>
           ))}
         </select>
@@ -127,7 +127,7 @@ export default function AdvisorApplyClient() {
       <div>
         <label style={labelStyle} htmlFor="a-tier">Listing tier you are interested in</label>
         <select id="a-tier" style={field} value={form.requested_tier} onChange={(e) => set('requested_tier', e.target.value)}>
-          {LISTING_TIERS.map((t) => (
+          {LISTING_TIERS.map((t: any) => (
             <option key={t.value} value={t.value}>{t.label} — ${t.annualFee.toLocaleString()}/year</option>
           ))}
         </select>

@@ -286,7 +286,7 @@ export default function AdminCirclesClient({ circles: initialCircles }: Props) {
                   {[
                     { value: 'cultural', label: 'Cultural & Heritage', desc: 'Cultural, ethnic, and heritage communities' },
                     { value: 'interest', label: 'Interest & Hobby', desc: 'Hobby, interest, and activity groups' },
-                  ].map(opt => (
+                  ].map((opt: any) => (
                     <label
                       key={opt.value}
                       style={{
@@ -329,7 +329,7 @@ export default function AdminCirclesClient({ circles: initialCircles }: Props) {
                     onChange={e => setCommunityForm(f => ({ ...f, primary_language: e.target.value }))}
                     style={{ ...inputStyle }}
                   >
-                    {LANGUAGE_OPTIONS.map(opt => (
+                    {LANGUAGE_OPTIONS.map((opt: any) => (
                       <option key={opt.value} value={opt.value}>{opt.label}</option>
                     ))}
                   </select>
@@ -341,7 +341,7 @@ export default function AdminCirclesClient({ circles: initialCircles }: Props) {
                     onChange={e => setCommunityForm(f => ({ ...f, interest_tag: e.target.value }))}
                     style={{ ...inputStyle }}
                   >
-                    {INTEREST_TAG_OPTIONS.map(opt => (
+                    {INTEREST_TAG_OPTIONS.map((opt: any) => (
                       <option key={opt} value={opt}>{opt || '— None —'}</option>
                     ))}
                   </select>
@@ -534,7 +534,7 @@ export default function AdminCirclesClient({ circles: initialCircles }: Props) {
                   gap: '8px', maxHeight: '280px', overflowY: 'auto',
                   border: '1px solid var(--color-warm-grey)', borderRadius: '10px', padding: '12px',
                 }}>
-                  {circles.map((circle, i) => {
+                  {circles.map((circle: any, i: number) => {
                     const isSelected = form.circleIds.includes(circle.id)
                     const color = CIRCLE_COLORS[i % CIRCLE_COLORS.length]
                     return (
@@ -612,7 +612,7 @@ export default function AdminCirclesClient({ circles: initialCircles }: Props) {
         )}
 
         {/* Circles list — split by community_type, 3-column card grid */}
-        {(['cultural', 'interest'] as const).map(type => {
+        {(['cultural', 'interest'] as const).map((type: any) => {
           const sectionCircles = circles.filter(c => (c.community_type ?? 'cultural') === type)
           if (sectionCircles.length === 0) return null
           const sectionLabel = type === 'cultural' ? 'Cultural & Heritage Communities' : 'Interest & Hobby Communities'
@@ -644,7 +644,7 @@ export default function AdminCirclesClient({ circles: initialCircles }: Props) {
                 gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
                 gap: '20px',
               }}>
-                {sectionCircles.map((circle) => {
+                {sectionCircles.map((circle: any) => {
                   const i = circles.findIndex(c => c.id === circle.id)
                   const accentColor = CIRCLE_COLORS[i % CIRCLE_COLORS.length]
                   return (

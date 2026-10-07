@@ -88,8 +88,8 @@ export default async function CulturalProgrammingPage() {
 
         <CulturalProgrammingClient
           hasMember={!!memberId}
-          festivals={festivals.map((f) => ({ id: f.id, festival_name: f.festival_name, festival_date: f.festival_date }))}
-          circles={circles.map((c) => ({ id: c.id, circle_name: c.circle_name }))}
+          festivals={festivals.map((f: any) => ({ id: f.id, festival_name: f.festival_name, festival_date: f.festival_date }))}
+          circles={circles.map((c: any) => ({ id: c.id, circle_name: c.circle_name }))}
           potlucks={potlucks}
           storySessions={storySessions}
           storyContributions={storyContributions}

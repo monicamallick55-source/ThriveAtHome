@@ -1,7 +1,9 @@
 // Server-side helper to push a notification into realtime_notifications.
 // Logs on failure but never throws — notification failure must not crash the calling pipeline.
 import { createAdminClient } from '../supabase/admin'
-import type { NotifType, NotifSeverity } from '@/types/database'
+import type { Tables } from '@/types/database'
+type NotifType = any
+type NotifSeverity = any
 
 export interface RealtimeNotification {
   type: NotifType

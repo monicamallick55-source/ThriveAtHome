@@ -5,7 +5,10 @@
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
-import type { PremiumAddonRow, CaregiverVideoDiaryEntryRow, PlanTier } from '@/types/database'
+import type { Tables } from '@/types/database'
+import type { PlanTier } from '@/lib/entitlements'
+type PremiumAddonRow = any
+type CaregiverVideoDiaryEntryRow = any
 import type { MemberAddonWithCatalog } from '@/lib/data/premium-addons'
 
 interface Props {
@@ -17,7 +20,7 @@ interface Props {
   initialVideoDiary: CaregiverVideoDiaryEntryRow[]
 }
 
-const PLAN_RANK: Record<PlanTier, number> = { basics: 0, connect: 1, complete: 2, premier: 3 }
+const PLAN_RANK: Record<PlanTier, number> = { free: 0, standard: 1, premier: 2, enterprise: 3 }
 const INTAKE_KEYS = new Set([
   'annual_care_planning',
   'benefits_maximizer_deep_dive',
@@ -77,7 +80,7 @@ function statusLabel(status: string): string {
 /** Which milestone birthdays the member is within ~13 months of. */
 function eligibleMilestones(age: number | null): number[] {
   if (age == null) return [70, 75, 80]
-  return [70, 75, 80].filter((m) => age >= m - 2 && age <= m + 1)
+  return [70, 75, 80].filter((m: any) => age >= m - 2 && age <= m + 1)
 }
 
 export default function AddOnsClient({
@@ -120,8 +123,8 @@ export default function AddOnsClient({
   }, [memberAddons])
 
   const milestones = eligibleMilestones(memberAge)
-  const monthly = catalog.filter((a) => a.billing === 'monthly')
-  const oneTime = catalog.filter((a) => a.billing === 'one_time')
+  const monthly = catalog.filter((a: any) => a.billing === 'monthly')
+  const oneTime = catalog.filter((a: any) => a.billing === 'one_time')
 
   function planAllows(a: PremiumAddonRow): boolean {
     if (!a.min_plan_tier) return true
@@ -241,14 +244,14 @@ export default function AddOnsClient({
           <>
             <span style={label}>What should the session focus on? (choose any)</span>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
-              {CARE_PLAN_FOCUS.map((f) => {
+              {CARE_PLAN_FOCUS.map((f: any) => {
                 const on = focusAreas.includes(f)
                 return (
                   <button
                     key={f}
                     type="button"
                     aria-pressed={on}
-                    onClick={() => setFocusAreas((prev) => (on ? prev.filter((x) => x !== f) : [...prev, f]))}
+                    onClick={() => setFocusAreas((prev) => (on ? prev.filter((x: any) => x !== f) : [...prev, f]))}
                     style={{
                       border: `1.5px solid ${on ? 'var(--color-navy)' : 'var(--color-warm-grey)'}`,
                       backgroundColor: on ? 'var(--color-navy)' : 'white',
@@ -328,7 +331,7 @@ export default function AddOnsClient({
             <label style={label} htmlFor="mb-age">Which milestone birthday?</label>
             <select id="mb-age" style={field} value={milestoneAge} onChange={(e) => setMilestoneAge(e.target.value)}>
               <option value="">Choose…</option>
-              {[70, 75, 80].map((m) => (
+              {[70, 75, 80].map((m: any) => (
                 <option key={m} value={m} disabled={milestones.length > 0 && !milestones.includes(m)}>
                   {m}th birthday{milestones.length > 0 && !milestones.includes(m) ? ' (not near this date)' : ''}
                 </option>
@@ -407,7 +410,7 @@ export default function AddOnsClient({
         </p>
         {a.benefits.length > 0 && (
           <ul style={{ margin: '10px 0 0', paddingLeft: '18px', fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)' }}>
-            {a.benefits.map((b) => (
+            {a.benefits.map((b: string) => (
               <li key={b} style={{ marginBottom: '3px' }}>{b}</li>
             ))}
           </ul>
@@ -488,13 +491,13 @@ export default function AddOnsClient({
         </div>
       )}
 
-      {memberAddons.some((r) => r.status === 'active' || r.status === 'pending') && (
+      {memberAddons.some((r: any) => r.status === 'active' || r.status === 'pending') && (
         <>
           <h2 style={{ ...sectionHeading, marginTop: 0 }}>Your add-ons</h2>
           <div style={{ ...card, padding: 0 }}>
             {memberAddons
-              .filter((r) => r.status === 'active' || r.status === 'pending')
-              .map((r, i) => (
+              .filter((r: any) => r.status === 'active' || r.status === 'pending')
+              .map((r: any, i: number) => (
                 <div
                   key={r.id}
                   style={{
@@ -542,7 +545,7 @@ export default function AddOnsClient({
             </form>
             {diary.length > 0 && (
               <ul style={{ listStyle: 'none', padding: 0, margin: '12px 0 0' }}>
-                {diary.map((d) => (
+                {diary.map((d: any) => (
                   <li
                     key={d.id}
                     style={{ borderTop: '1px solid var(--color-warm-grey)', padding: '10px 0', fontFamily: 'var(--font-body)', fontSize: '14px' }}

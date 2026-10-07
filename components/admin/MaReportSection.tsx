@@ -69,16 +69,16 @@ function generateCsv(res: ApiResponse): string {
     [''],
     ['MOOD TREND (90-day window)'],
     ['Period', 'Avg Mood Score'],
-    ...r.mood_trend.map(p => [p.label, p.avg_mood ?? 'n/a']),
+    ...r.mood_trend.map((p: any) => [p.label, p.avg_mood ?? 'n/a']),
     [''],
     ['TOP ICD-10 CODES (aggregate frequency)'],
     ['Code', 'Count'],
-    ...r.top_icd10_codes.map(e => [e.code, e.count]),
+    ...r.top_icd10_codes.map((e: any) => [e.code, e.count]),
     [''],
     ['DE-IDENTIFICATION ATTESTATION'],
     [att.statement],
   ]
-  return rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n')
+  return rows.map((row: any) => row.map((cell: any) => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n')
 }
 
 export function MaReportSection() {
@@ -155,7 +155,7 @@ export function MaReportSection() {
             <label style={labelStyle}>Cohort</label>
             <select value={cohort} onChange={e => setCohort(e.target.value)}
               style={{ width: '100%', padding: '9px 12px', border: '1.5px solid #D4CFC8', borderRadius: '8px', fontFamily: 'inherit', fontSize: '15px', backgroundColor: 'white', boxSizing: 'border-box' }}>
-              {COHORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+              {COHORT_OPTIONS.map((o: any) => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
           </div>
           <div>
@@ -202,7 +202,7 @@ export function MaReportSection() {
                 { label: 'Alerts / Member', value: fmt(r.alert_frequency_per_member) },
                 { label: 'Fall Risk Mentions', value: fmt(r.fall_risk_mention_count) },
                 { label: 'Cognitive Signals', value: fmt(r.cognitive_alert_count) },
-              ].map(m => (
+              ].map((m: any) => (
                 <div key={m.label} style={cardStyle}>
                   <span style={labelStyle}>{m.label}</span>
                   <div style={valStyle}>{m.value}</div>
@@ -214,7 +214,7 @@ export function MaReportSection() {
             <div style={cardStyle}>
               <span style={{ ...labelStyle, marginBottom: '16px' }}>90-Day Mood Trend (aggregate)</span>
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px', height: '80px' }}>
-                {r.mood_trend.map((p, i) => {
+                {r.mood_trend.map((p: any, i: number) => {
                   const h = p.avg_mood !== null ? Math.round((p.avg_mood / 10) * 72) : 8
                   return (
                     <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
@@ -232,7 +232,7 @@ export function MaReportSection() {
               <div style={cardStyle}>
                 <span style={{ ...labelStyle, marginBottom: '12px' }}>Top ICD-10 Codes (aggregate frequency)</span>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {r.top_icd10_codes.map(e => (
+                  {r.top_icd10_codes.map((e: any) => (
                     <div key={e.code} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', backgroundColor: '#F9F7F4', borderRadius: '6px' }}>
                       <span style={{ fontFamily: 'var(--font-mono)', fontSize: '14px', fontWeight: 600, color: 'var(--color-navy)' }}>{e.code}</span>
                       <span style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: '#6B7280' }}>{e.count} alert{e.count !== 1 ? 's' : ''}</span>

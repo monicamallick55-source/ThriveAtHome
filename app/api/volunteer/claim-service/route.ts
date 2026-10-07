@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
 
   // Notify navigator via realtime
   try {
-    await admin.from('realtime_notifications').insert({
+    await (admin as any).from('realtime_notifications').insert({
       member_id: booking.member_id,
       type: 'volunteer_matched' as const,
       severity: 'info' as const,

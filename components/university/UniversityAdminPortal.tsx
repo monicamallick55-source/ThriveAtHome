@@ -40,7 +40,7 @@ export default function UniversityAdminPortal({ universityName, adminName, stude
 
   const totalStudents = students.length
   const totalHours = students.reduce((sum, s) => sum + (s.total_hours_logged ?? 0), 0)
-  const activeStudents = students.filter((s) => s.status === 'active' || s.total_hours_logged > 0).length
+  const activeStudents = students.filter((s: any) => s.status === 'active' || s.total_hours_logged > 0).length
 
   function showToast(msg: string) {
     setToast(msg)
@@ -247,7 +247,7 @@ export default function UniversityAdminPortal({ universityName, adminName, stude
               { label: 'Total students', value: totalStudents },
               { label: 'Active volunteers', value: activeStudents },
               { label: 'Total hours logged', value: `${Math.round(totalHours * 10) / 10}h` },
-            ].map((stat) => (
+            ].map((stat: any) => (
               <div key={stat.label} style={{
                 background: 'rgba(255,255,255,0.1)',
                 borderRadius: 'var(--radius-lg)',
@@ -361,14 +361,14 @@ export default function UniversityAdminPortal({ universityName, adminName, stude
                 background: 'rgba(30,58,95,0.04)',
                 borderBottom: '1px solid rgba(30,58,95,0.08)',
               }}>
-                {['Student', 'Major', 'Grad Year', 'Total Hours', 'Status', 'Actions'].map((h) => (
+                {['Student', 'Major', 'Grad Year', 'Total Hours', 'Status', 'Actions'].map((h: any) => (
                   <span key={h} style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: 'var(--color-navy)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     {h}
                   </span>
                 ))}
               </div>
 
-              {students.map((student) => {
+              {students.map((student: any) => {
                 const isExpanded = expandedStudentId === student.id
                 const visits = studentVisits[student.id]
                 const hours = Math.round((student.total_hours_logged ?? 0) * 10) / 10
@@ -450,7 +450,7 @@ export default function UniversityAdminPortal({ universityName, adminName, stude
                             <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-navy)', margin: '0 0 4px' }}>
                               Visit history ({visits.length} visit{visits.length !== 1 ? 's' : ''})
                             </p>
-                            {visits.map((v) => (
+                            {visits.map((v: any) => (
                               <div key={v.id} style={{
                                 background: 'white', borderRadius: 'var(--radius-md)',
                                 padding: '12px 16px', border: '1px solid rgba(30,58,95,0.08)',

@@ -38,7 +38,7 @@ export async function getUniversityForAdmin(authId: string): Promise<string | nu
     .eq('supabase_auth_id', authId)
     .maybeSingle()
   if (error) console.error('[university/getUniversityForAdmin]', error)
-  return data?.university_name ?? null
+  return (data as any)?.university_name ?? null
 }
 
 /** Returns all student_volunteers for a given university, sorted by name. */
@@ -53,7 +53,7 @@ export async function getStudentsByUniversity(universityName: string): Promise<U
     console.error('[university/getStudentsByUniversity]', error)
     return []
   }
-  return data ?? []
+  return data as any ?? []
 }
 
 /** Returns all student visits for a given student — used for per-student PDF generation. */
@@ -68,7 +68,7 @@ export async function getVisitsForStudent(studentId: string): Promise<StudentVis
     console.error('[university/getVisitsForStudent]', error)
     return []
   }
-  return data ?? []
+  return data as any ?? []
 }
 
 /** Returns all visits for all students at a university, optionally filtered to a date range. */
@@ -83,8 +83,8 @@ export async function getVisitsByUniversity(
   const students = await getStudentsByUniversity(universityName)
   if (students.length === 0) return []
 
-  const studentIds = students.map((s) => s.id)
-  const studentMap = new Map(students.map((s) => [s.id, s]))
+  const studentIds = students.map((s: any) => s.id)
+  const studentMap = new Map(students.map((s: any) => [s.id, s]))
 
   let query = admin
     .from('student_visits')
@@ -101,7 +101,7 @@ export async function getVisitsByUniversity(
     return []
   }
 
-  return (data ?? []).map((v) => {
+  return (data ?? []).map((v: any) => {
     const student = studentMap.get(v.student_id)
     return {
       ...v,

@@ -77,7 +77,7 @@ export function detectAgentsInvolved(first: AgentName, events: RetellTranscriptE
   if (!Array.isArray(events)) return agents
 
   const failed = new Set(
-    events.filter(e => e.role === 'tool_call_result' && e.successful === false && e.tool_call_id).map(e => e.tool_call_id),
+    events.filter(e => e.role === 'tool_call_result' && e.successful === false && e.tool_call_id).map((e: any) => e.tool_call_id),
   )
   // Results can carry the destination agent_id when the invocation doesn't
   const resultTargets = new Map<string, AgentName>()

@@ -146,7 +146,7 @@ export function LoginForm() {
             to hear from you.&rdquo;
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {['HIPAA compliant', 'No contracts', 'Cancel anytime'].map((item) => (
+            {['HIPAA compliant', 'No contracts', 'Cancel anytime'].map((item: any) => (
               <span
                 key={item}
                 style={{

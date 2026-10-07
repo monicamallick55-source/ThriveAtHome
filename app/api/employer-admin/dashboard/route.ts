@@ -47,7 +47,7 @@ export async function GET() {
   ])
 
   const employees = employeesRes.data ?? []
-  const memberIds = employees.map((e) => e.member_id).filter(Boolean) as string[]
+  const memberIds = employees.map((e: any) => e.member_id).filter(Boolean) as string[]
 
   // Aggregate check-in calls and alerts for all enrolled members
   let checkInCount = 0

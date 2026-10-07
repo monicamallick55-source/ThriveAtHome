@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
             .from('circle_memberships')
             .select('member_id')
             .eq('circle_id', circle.id)
-          memberIds = (memberships ?? []).map((m) => m.member_id)
+          memberIds = (memberships ?? []).map((m: any) => m.member_id)
         }
       }
 
@@ -56,7 +56,7 @@ export async function GET(req: NextRequest) {
           .eq('member_id', memberId)
         if ((fms ?? []).length > 0) {
           try {
-            await admin.from('realtime_notifications').insert({
+            await (admin as any).from('realtime_notifications').insert({
               member_id: memberId,
               type: 'celebration_upcoming',
               severity: 'info',

@@ -247,7 +247,7 @@ export default function HomePage() {
                 { step: '1', title: 'Sign up in minutes', desc: 'A family member or the senior themselves signs up, and a navigator calls within 24 hours.' },
                 { step: '2', title: 'Your navigator builds the relationship', desc: '21 days of human-first care — getting to know them before anything is automated.' },
                 { step: '3', title: 'Aria calls every morning', desc: 'A daily AI companion call keeps the connection going, with the family seeing updates in real time.' },
-              ].map((item) => (
+              ].map((item: any) => (
                 <div key={item.step} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div
                     style={{
@@ -295,7 +295,7 @@ export default function HomePage() {
                 gap: '24px',
               }}
             >
-              {featureCards.map((f) => (
+              {featureCards.map((f: any) => (
                 <div key={f.title} style={cardStyle}>
                   <FeatureIcon>{f.icon}</FeatureIcon>
                   <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 500, color: 'var(--color-navy)', margin: '16px 0 8px' }}>
@@ -328,7 +328,7 @@ export default function HomePage() {
                   For seniors
                 </h3>
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {['Age at home with independence', 'A daily voice that checks in and listens', 'Real human connection, not just technology'].map((item) => (
+                  {['Age at home with independence', 'A daily voice that checks in and listens', 'Real human connection, not just technology'].map((item: any) => (
                     <li key={item} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', fontSize: '18px', color: 'var(--color-text-secondary)' }}>
                       <CheckIcon /> {item}
                     </li>
@@ -340,7 +340,7 @@ export default function HomePage() {
                   For families
                 </h3>
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {['Peace of mind between visits', 'Real-time updates after every call', 'Coordinate care with navigators and volunteers'].map((item) => (
+                  {['Peace of mind between visits', 'Real-time updates after every call', 'Coordinate care with navigators and volunteers'].map((item: any) => (
                     <li key={item} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', fontSize: '18px', color: 'var(--color-text-secondary)' }}>
                       <CheckIcon /> {item}
                     </li>
@@ -367,7 +367,7 @@ export default function HomePage() {
                 marginBottom: '40px',
               }}
             >
-              {plans.map((plan) => (
+              {plans.map((plan: any) => (
                 <div key={plan.name} style={cardStyle}>
                   <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--color-navy)', marginBottom: '8px' }}>
                     {plan.name}

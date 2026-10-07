@@ -56,7 +56,7 @@ export function Tabs({ tabs, defaultTab, onChange, label, variant = 'underline' 
         aria-label={label}
         className={`flex gap-1 overflow-x-auto ${variant === 'underline' ? 'border-b border-[var(--color-warm-grey)]' : 'p-1 bg-[var(--color-warm-grey)] rounded-[var(--radius-full)] w-fit'}`}
       >
-        {tabs.map((tab, i) => (
+        {tabs.map((tab: any, i: number) => (
           <button
             key={tab.id}
             ref={el => { buttonRefs.current[i] = el }}
@@ -79,7 +79,7 @@ export function Tabs({ tabs, defaultTab, onChange, label, variant = 'underline' 
           </button>
         ))}
       </div>
-      {tabs.map(tab => (
+      {tabs.map((tab: any) => (
         <div
           key={tab.id}
           role="tabpanel"

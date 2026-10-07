@@ -62,7 +62,7 @@ async function main() {
 
   if (cols && enumVals && rls && idx && policies) {
     check('member_id nullable', cols[0]?.is_nullable === 'YES', cols[0]?.is_nullable)
-    const labels = enumVals.map(e => e.enumlabel)
+    const labels = enumVals.map((e: any) => e.enumlabel)
     const want = ['onboarding', 'callback', 'celebration', 'reminder', 'crisis', 'care_line']
     check('call_type enum extended', want.every(w => labels.includes(w)), labels.join(', '))
     check('inbound_call_log RLS enabled', rls[0]?.relrowsecurity === true)

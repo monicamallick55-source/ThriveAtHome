@@ -1,7 +1,12 @@
 'use client'
+import type { Tables } from '@/types/database'
+type CareAgencyRow = Tables<'care_agencies'>
+type CareWorkerRow = Tables<'care_workers'>
+type CareVisitRow = Tables<'care_visits'>
+type AgencyReferralRow = Tables<'agency_referrals'>
+type AgencyLocationRow = Tables<'agency_locations'>
 
 import React, { useState, useEffect } from 'react'
-import type { CareAgencyRow, CareWorkerRow, CareVisitRow, AgencyReferralRow, AgencyLocationRow } from '@/types/database'
 import ClinicalNotesTab from './ClinicalNotesTab'
 
 // LocationMetrics is imported from agencies data layer; re-declare interface here for client use
@@ -186,11 +191,11 @@ export default function AgencyDashboardClient({
   const [workerSuccessMessage, setWorkerSuccessMessage] = useState<string | null>(null)
   // Per-worker location assignment UI state (workerId → locationId)
   const [workerLocationMap, setWorkerLocationMap] = useState<Record<string, string | null>>(
-    () => Object.fromEntries(workersList.map(w => [w.id, w.location_id ?? null]))
+    () => Object.fromEntries(workersList.map((w: any) => [w.id, w.location_id ?? null]))
   )
 
-  const activeWorkers = workersList.filter((w) => w.is_active)
-  const inProgressVisits = upcomingVisits.filter((v) => v.status === 'in_progress')
+  const activeWorkers = workersList.filter((w: any) => w.is_active)
+  const inProgressVisits = upcomingVisits.filter((v: any) => v.status === 'in_progress')
 
   // Fetch location-specific metrics when location selector changes
   useEffect(() => {
@@ -256,7 +261,7 @@ export default function AgencyDashboardClient({
           email: workerFormData.email.trim(),
           phone: workerFormData.phone.trim() || null,
           worker_role: workerFormData.worker_role,
-          certifications: workerFormData.certifications ? workerFormData.certifications.split(',').map(c => c.trim()).filter(Boolean) : [],
+          certifications: workerFormData.certifications ? workerFormData.certifications.split(',').map((c: any) => c.trim()).filter(Boolean) : [],
           notes: workerFormData.notes.trim() || null,
         }),
       })
@@ -379,7 +384,7 @@ export default function AgencyDashboardClient({
   function downloadWellnessCsv() {
     const rows = [
       ['Client Name', 'Last Aria Call', 'Mood Score', 'Mood Trend', 'Alert Count', 'Last Visit Date', 'Last Visit Type'],
-      ...wellnessClients.map(c => [
+      ...wellnessClients.map((c: any) => [
         c.preferred_name || c.full_name,
         c.last_aria_call_at ? new Date(c.last_aria_call_at).toLocaleDateString() : '',
         c.last_mood_score ?? '',
@@ -389,7 +394,7 @@ export default function AgencyDashboardClient({
         c.last_visit_type ?? '',
       ])
     ]
-    const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n')
+    const csv = rows.map((r: any) => r.map((v: any) => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n')
     const blob = new Blob([csv], { type: 'text/csv' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -437,7 +442,7 @@ export default function AgencyDashboardClient({
               style={{ padding: '8px 12px', borderRadius: '8px', border: '1.5px solid #D1D5DB', fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-navy)', backgroundColor: '#fff', cursor: 'pointer', minWidth: '200px' }}
             >
               <option value="">All Locations</option>
-              {locations.map(loc => (
+              {locations.map((loc: any) => (
                 <option key={loc.id} value={loc.id}>
                   {loc.location_name}{loc.is_headquarters ? ' (HQ)' : ''}{!loc.is_active ? ' [Inactive]' : ''}
                 </option>
@@ -449,7 +454,7 @@ export default function AgencyDashboardClient({
 
       {/* Tabs */}
       <div style={{ backgroundColor: '#fff', borderBottom: '1px solid #E5E7EB', padding: '0 32px', display: 'flex', gap: '4px' }}>
-        {tabs.map((t) => (
+        {tabs.map((t: any) => (
           <button
             key={t.id}
             onClick={() => { setActiveTab(t.id); if (t.id === 'documents') loadAgencyDocs(); if (t.id === 'wellness') loadWellness(); if (t.id === 'partner_program') loadPartnerProgram() }}
@@ -506,7 +511,7 @@ export default function AgencyDashboardClient({
                 { label: 'Clients Served', value: members.length },
                 { label: 'Upcoming Visits (7d)', value: upcomingVisits.length },
                 { label: 'Pending Referrals', value: pendingReferrals.length },
-              ]).map((s) => (
+              ]).map((s: any) => (
                 <div key={s.label} style={{ backgroundColor: '#fff', borderRadius: '12px', padding: '20px 24px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
                   <div style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '6px' }}>{s.label}</div>
                   <div style={{ fontFamily: 'var(--font-display)', fontSize: '36px', fontWeight: 500, color: 'var(--color-navy)' }}>{s.value}</div>
@@ -520,7 +525,7 @@ export default function AgencyDashboardClient({
                 <div style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, color: '#065F46', marginBottom: '8px' }}>
                   {inProgressVisits.length} visit{inProgressVisits.length > 1 ? 's' : ''} currently in progress
                 </div>
-                {inProgressVisits.map((v) => (
+                {inProgressVisits.map((v: any) => (
                   <div key={v.id} style={{ fontSize: '13px', color: '#047857', marginTop: '4px' }}>
                     {v.care_worker?.full_name ?? 'Worker'} with {v.member?.preferred_name ?? v.member?.full_name ?? 'Client'} — started {formatTime(v.scheduled_start_time)}
                   </div>
@@ -539,13 +544,13 @@ export default function AgencyDashboardClient({
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
                     <tr style={{ borderBottom: '1px solid #E5E7EB' }}>
-                      {['Date', 'Time', 'Client', 'Worker', 'Type', 'Status'].map((h) => (
+                      {['Date', 'Time', 'Client', 'Worker', 'Type', 'Status'].map((h: any) => (
                         <th key={h} style={{ textAlign: 'left', padding: '8px 12px', fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
-                    {upcomingVisits.map((v) => (
+                    {upcomingVisits.map((v: any) => (
                       <tr key={v.id} style={{ borderBottom: '1px solid #F3F4F6' }}>
                         <td style={{ padding: '10px 12px', fontFamily: 'var(--font-body)', fontSize: '14px' }}>{formatDate(v.scheduled_date)}</td>
                         <td style={{ padding: '10px 12px', fontFamily: 'var(--font-body)', fontSize: '14px' }}>{formatTime(v.scheduled_start_time)} – {formatTime(v.scheduled_end_time)}</td>
@@ -570,7 +575,7 @@ export default function AgencyDashboardClient({
                 <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 500, color: '#92400E', marginBottom: '16px' }}>
                   Pending Referrals ({pendingReferrals.length})
                 </h2>
-                {pendingReferrals.map((r) => (
+                {pendingReferrals.map((r: any) => (
                   <div key={r.id} style={{ padding: '12px 0', borderBottom: '1px solid #FDE68A', fontFamily: 'var(--font-body)', fontSize: '14px' }}>
                     <div style={{ fontWeight: 600, color: '#92400E', marginBottom: '4px' }}>
                       Services: {r.services_requested?.join(', ') ?? '—'}
@@ -596,13 +601,13 @@ export default function AgencyDashboardClient({
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid #E5E7EB' }}>
-                    {['Client', 'Last Visit', 'Assigned Worker'].map((h) => (
+                    {['Client', 'Last Visit', 'Assigned Worker'].map((h: any) => (
                       <th key={h} style={{ textAlign: 'left', padding: '8px 12px', fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {members.map((m) => (
+                  {members.map((m: any) => (
                     <tr key={m.id} style={{ borderBottom: '1px solid #F3F4F6' }}>
                       <td style={{ padding: '12px', fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 500 }}>{m.preferred_name || m.full_name}</td>
                       <td style={{ padding: '12px', fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)' }}>{formatDate(m.last_visit_date)}</td>
@@ -654,7 +659,7 @@ export default function AgencyDashboardClient({
                     <div>
                       <label style={{ display: 'block', fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-navy)', marginBottom: '4px' }}>Role</label>
                       <select value={workerFormData.worker_role} onChange={e => setWorkerFormData(p => ({ ...p, worker_role: e.target.value }))} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1.5px solid #D1D5DB', fontFamily: 'var(--font-body)', fontSize: '14px', backgroundColor: '#fff', boxSizing: 'border-box' }}>
-                        {WORKER_ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
+                        {WORKER_ROLES.map((r: any) => <option key={r.value} value={r.value}>{r.label}</option>)}
                       </select>
                     </div>
                     <div style={{ gridColumn: 'span 2' }}>
@@ -686,13 +691,13 @@ export default function AgencyDashboardClient({
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
                       <tr style={{ borderBottom: '1px solid #E5E7EB' }}>
-                        {['Name', 'Role', 'Email', 'Phone', 'Certifications', 'Location', 'Status'].map((h) => (
+                        {['Name', 'Role', 'Email', 'Phone', 'Certifications', 'Location', 'Status'].map((h: any) => (
                           <th key={h} style={{ textAlign: 'left', padding: '8px 12px', fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>{h}</th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
-                      {workersList.map((w) => (
+                      {workersList.map((w: any) => (
                         <tr key={w.id} style={{ borderBottom: '1px solid #F3F4F6' }}>
                           <td style={{ padding: '12px', fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 500, whiteSpace: 'nowrap' }}>{w.full_name}</td>
                           <td style={{ padding: '12px', fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>{w.worker_role?.replace(/_/g, ' ')}</td>
@@ -709,7 +714,7 @@ export default function AgencyDashboardClient({
                                 style={{ padding: '5px 8px', borderRadius: '6px', border: '1.5px solid #D1D5DB', fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-navy)', backgroundColor: '#fff', cursor: 'pointer', maxWidth: '160px' }}
                               >
                                 <option value="">No location</option>
-                                {locations.map(loc => (
+                                {locations.map((loc: any) => (
                                   <option key={loc.id} value={loc.id}>{loc.location_name}</option>
                                 ))}
                               </select>
@@ -742,13 +747,13 @@ export default function AgencyDashboardClient({
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid #E5E7EB' }}>
-                    {['Date', 'Client', 'Worker', 'Type', 'Check-in', 'Check-out', 'Hours', 'Status'].map((h) => (
+                    {['Date', 'Client', 'Worker', 'Type', 'Check-in', 'Check-out', 'Hours', 'Status'].map((h: any) => (
                       <th key={h} style={{ textAlign: 'left', padding: '8px 12px', fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {recentVisits.map((v) => (
+                  {recentVisits.map((v: any) => (
                     <tr key={v.id} style={{ borderBottom: '1px solid #F3F4F6' }}>
                       <td style={{ padding: '10px 12px', fontFamily: 'var(--font-body)', fontSize: '13px' }}>{formatDate(v.scheduled_date)}</td>
                       <td style={{ padding: '10px 12px', fontFamily: 'var(--font-body)', fontSize: '13px' }}>{v.member?.preferred_name ?? '—'}</td>
@@ -784,14 +789,14 @@ export default function AgencyDashboardClient({
               <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', marginBottom: '20px' }}>
                 Summary of billable hours by care worker. Hours rounded to nearest 0.25.
               </p>
-              {recentVisits.filter((v) => v.status === 'completed').length === 0 ? (
+              {recentVisits.filter((v: any) => v.status === 'completed').length === 0 ? (
                 <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)' }}>No completed visits yet to report on.</p>
               ) : (
                 <div>
                   {/* Group by worker */}
                   {(() => {
                     const map = new Map<string, { name: string; hours: number; visits: number; uninvoiced: number }>()
-                    for (const v of recentVisits.filter((r) => r.status === 'completed')) {
+                    for (const v of recentVisits.filter((r: any) => r.status === 'completed')) {
                       const name = v.care_worker?.full_name ?? 'Unknown'
                       const entry = map.get(name) ?? { name, hours: 0, visits: 0, uninvoiced: 0 }
                       entry.hours += v.billable_hours ?? 0
@@ -799,7 +804,7 @@ export default function AgencyDashboardClient({
                       if (!v.invoiced) entry.uninvoiced += v.billable_hours ?? 0
                       map.set(name, entry)
                     }
-                    return Array.from(map.values()).sort((a, b) => b.hours - a.hours).map((entry) => (
+                    return Array.from(map.values()).sort((a, b) => b.hours - a.hours).map((entry: any) => (
                       <div key={entry.name} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid #F3F4F6' }}>
                         <div>
                           <div style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, color: 'var(--color-navy)' }}>{entry.name}</div>
@@ -855,7 +860,7 @@ export default function AgencyDashboardClient({
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--font-body)', fontSize: '14px' }}>
                   <thead>
                     <tr style={{ backgroundColor: 'var(--color-navy)', color: 'white', textAlign: 'left' }}>
-                      {['Client', 'Last Aria Call', 'Mood', 'Alerts', 'Last Visit', ''].map(col => (
+                      {['Client', 'Last Aria Call', 'Mood', 'Alerts', 'Last Visit', ''].map((col: any) => (
                         <th key={col} style={{ padding: '12px 16px', fontWeight: 600, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{col}</th>
                       ))}
                     </tr>
@@ -863,7 +868,7 @@ export default function AgencyDashboardClient({
                   <tbody>
                     {wellnessClients
                       .filter(c => wellnessFilter === 'alerts' ? c.alert_count > 0 : true)
-                      .map((c, i) => {
+                      .map((c: any, i: number) => {
                         const trendIcon = c.mood_trend === 'up' ? '↑' : c.mood_trend === 'down' ? '↓' : c.mood_trend === 'stable' ? '→' : '—'
                         const trendColor = c.mood_trend === 'up' ? '#059669' : c.mood_trend === 'down' ? '#DC2626' : '#6B7280'
                         const isLogging = logVisitClientId === c.id
@@ -977,7 +982,7 @@ export default function AgencyDashboardClient({
                   <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '20px 24px', border: '1px solid #E8E4DC', marginBottom: '20px' }}>
                     <h3 style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 14px' }}>Your referral links</h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                      {referralLinks.map(link => (
+                      {referralLinks.map((link: any) => (
                         <div key={link.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', backgroundColor: '#F9F7F4', borderRadius: '8px', flexWrap: 'wrap', gap: '10px' }}>
                           <div>
                             <div style={{ fontFamily: 'var(--font-mono)', fontSize: '15px', fontWeight: 700, color: 'var(--color-navy)' }}>
@@ -1013,13 +1018,13 @@ export default function AgencyDashboardClient({
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--font-body)', fontSize: '14px' }}>
                       <thead>
                         <tr style={{ backgroundColor: '#F9F7F4', textAlign: 'left' }}>
-                          {['Member Name', 'Joined', 'Current Plan', 'Referral Fee'].map(col => (
+                          {['Member Name', 'Joined', 'Current Plan', 'Referral Fee'].map((col: any) => (
                             <th key={col} style={{ padding: '10px 16px', fontWeight: 700, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#9CA3AF' }}>{col}</th>
                           ))}
                         </tr>
                       </thead>
                       <tbody>
-                        {referredMembers.map((m, i) => (
+                        {referredMembers.map((m: any, i: number) => (
                           <tr key={m.id} style={{ borderTop: '1px solid #E8E4DC', backgroundColor: i % 2 === 0 ? 'white' : '#FAFAFA' }}>
                             <td style={{ padding: '12px 16px', fontWeight: 600, color: 'var(--color-navy)' }}>{m.full_name}</td>
                             <td style={{ padding: '12px 16px', color: '#6B7280' }}>{new Date(m.joined_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
@@ -1048,7 +1053,7 @@ export default function AgencyDashboardClient({
         {activeTab === 'clinical' && (
           <ClinicalNotesTab
             agencyId={agency.id}
-            members={members.map(m => ({ id: m.id, preferred_name: m.preferred_name, full_name: m.full_name }))}
+            members={members.map((m: any) => ({ id: m.id, preferred_name: m.preferred_name, full_name: m.full_name }))}
             signerName={signerName || agency.contact_name}
           />
         )}
@@ -1147,7 +1152,7 @@ export default function AgencyDashboardClient({
                 </div>
               ) : (
                 <div style={{ display: 'grid', gap: '12px' }}>
-                  {locations.map(loc => (
+                  {locations.map((loc: any) => (
                     <div key={loc.id} style={{ border: '1px solid #E5E7EB', borderRadius: '10px', padding: '18px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', backgroundColor: loc.is_headquarters ? '#FAFAF8' : '#fff' }}>
                       <div style={{ flex: 1 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
@@ -1180,7 +1185,7 @@ export default function AgencyDashboardClient({
                           if (locWorkers.length === 0) return null
                           return (
                             <div style={{ marginTop: '8px', fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)' }}>
-                              Workers assigned: {locWorkers.map(w => w.full_name).join(', ')}
+                              Workers assigned: {locWorkers.map((w: any) => w.full_name).join(', ')}
                             </div>
                           )
                         })()}
@@ -1201,7 +1206,7 @@ export default function AgencyDashboardClient({
                 <div style={{ marginTop: '32px', borderTop: '1px solid #E5E7EB', paddingTop: '24px' }}>
                   <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '17px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '12px' }}>Assign Workers to Locations</h3>
                   <div style={{ display: 'grid', gap: '8px' }}>
-                    {workersList.map(worker => (
+                    {workersList.map((worker: any) => (
                       <div key={worker.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', border: '1px solid #E5E7EB', borderRadius: '8px', backgroundColor: '#fff' }}>
                         <span style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-navy)', fontWeight: worker.is_active ? 500 : 400, opacity: worker.is_active ? 1 : 0.5 }}>
                           {worker.full_name} <span style={{ color: 'var(--color-text-secondary)', fontWeight: 400 }}>· {worker.worker_role.replace('_', ' ')}</span>
@@ -1212,7 +1217,7 @@ export default function AgencyDashboardClient({
                           style={{ padding: '6px 10px', borderRadius: '6px', border: '1.5px solid #D1D5DB', fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-navy)', backgroundColor: '#fff', cursor: 'pointer' }}
                         >
                           <option value="">No location assigned</option>
-                          {locations.map(loc => (
+                          {locations.map((loc: any) => (
                             <option key={loc.id} value={loc.id}>{loc.location_name}</option>
                           ))}
                         </select>
@@ -1254,7 +1259,7 @@ export default function AgencyDashboardClient({
                   fieldLabel: 'WellSky Agency ID',
                   value: agency.wellsky_id,
                 },
-              ].map((integration) => (
+              ].map((integration: any) => (
                 <div key={integration.name} style={{ border: '1px solid #E5E7EB', borderRadius: '10px', padding: '20px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
@@ -1430,7 +1435,7 @@ export default function AgencyDashboardClient({
               <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)' }}>No documents uploaded yet.</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {agencyDocs.map(doc => (
+                {agencyDocs.map((doc: any) => (
                   <div key={doc.id} style={{ backgroundColor: 'white', borderRadius: '10px', padding: '14px 18px', border: '1px solid #E8E4DC', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>

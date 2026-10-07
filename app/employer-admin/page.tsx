@@ -90,7 +90,7 @@ export default async function EmployerAdminPage() {
 
   const employees = employeesRes.data ?? []
   const seatsUsed = employees.length
-  const memberIds = employees.map((e) => e.member_id).filter(Boolean) as string[]
+  const memberIds = employees.map((e: any) => e.member_id).filter(Boolean) as string[]
 
   let checkInCount = 0
   let alertCount = 0

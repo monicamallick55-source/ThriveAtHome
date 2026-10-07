@@ -138,7 +138,7 @@ export async function detectWellnessDrift(memberId: string): Promise<void> {
   const recentCount = calls.filter(c => new Date(c.created_at) >= sevenDaysAgo).length
   if (recentCount < WELLNESS_DRIFT_MIN_CALLS) return
 
-  const scores = calls.map(c => c.mood_score as number)
+  const scores = calls.map((c: any) => c.mood_score as number)
   const half = WELLNESS_DRIFT_WINDOW / 2
 
   const recentAvg = scores.slice(0, half).reduce((a, b) => a + b, 0) / half

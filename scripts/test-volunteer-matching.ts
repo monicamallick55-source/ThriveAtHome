@@ -8,7 +8,7 @@ import type { Database } from '../types/database'
 
 type Member = Database['public']['Tables']['members']['Row']
 
-function makeVolunteer(overrides: Partial<Volunteer>): Volunteer {
+function makeVolunteer(overrides: any): any {
   return {
     id: crypto.randomUUID(),
     created_at: new Date().toISOString(),
@@ -48,7 +48,7 @@ function makeVolunteer(overrides: Partial<Volunteer>): Volunteer {
   }
 }
 
-function makeMember(overrides: Partial<Member>): Member {
+function makeMember(overrides: any): any {
   return {
     id: crypto.randomUUID(),
     created_at: new Date().toISOString(),
@@ -141,7 +141,7 @@ const volunteers = [
 
 const results = getTopVolunteerMatchesFromList(volunteers, member, 3)
 console.log('\nTest 2: Top matches:')
-results.forEach((r, i) => console.log(`  ${i + 1}. ${r.volunteer.id} — score: ${r.score} — reasons: ${r.reasons.join(', ')}`))
+results.forEach((r: any, i: number) => console.log(`  ${i + 1}. ${r.volunteer.id} — score: ${r.score} — reasons: ${r.reasons.join(', ')}`))
 
 if (results.length <= 3 && results[0].score >= results[results.length - 1].score) {
   console.log('✓ PASS: Results sorted by score descending, max 3 returned')

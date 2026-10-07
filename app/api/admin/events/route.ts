@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser, getUserRole } from '@/lib/auth'
 import { createEvent } from '@/lib/data/events'
-import type { EventFormat } from '@/types/database'
+type EventFormat = 'in_person' | 'virtual' | 'hybrid'
 
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser()

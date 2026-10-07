@@ -55,7 +55,7 @@ export function FamilyTaskBoard({
           const newTask = payload.new as FamilyTaskItem
           // Avoid duplicate if we optimistically added it ourselves
           setTasks((prev) =>
-            prev.some((t) => t.id === newTask.id) ? prev : [newTask, ...prev]
+            prev.some((t: any) => t.id === newTask.id) ? prev : [newTask, ...prev]
           )
         }
       )
@@ -69,7 +69,7 @@ export function FamilyTaskBoard({
         },
         (payload) => {
           const updated = payload.new as FamilyTaskItem
-          setTasks((prev) => prev.map((t) => (t.id === updated.id ? updated : t)))
+          setTasks((prev) => prev.map((t: any) => (t.id === updated.id ? updated : t)))
         }
       )
       .subscribe()
@@ -119,7 +119,7 @@ export function FamilyTaskBoard({
     // Realtime UPDATE will update the state — optimistically mark locally too
     if (!err) {
       setTasks((prev) =>
-        prev.map((t) =>
+        prev.map((t: any) =>
           t.id === taskId ? { ...t, completed: true, completed_at: new Date().toISOString() } : t
         )
       )
@@ -129,8 +129,8 @@ export function FamilyTaskBoard({
 
   if (error) return <SectionError message={error} />
 
-  const pending = tasks.filter((t) => !t.completed)
-  const completed = tasks.filter((t) => t.completed)
+  const pending = tasks.filter((t: any) => !t.completed)
+  const completed = tasks.filter((t: any) => t.completed)
 
   return (
     <div className="space-y-4">
@@ -176,7 +176,7 @@ export function FamilyTaskBoard({
       )}
 
       <ul className="space-y-2" aria-label="Pending tasks">
-        {pending.map((task) => (
+        {pending.map((task: any) => (
           <li
             key={task.id}
             className="flex items-start justify-between gap-4 rounded-xl border border-gray-200 bg-white px-5 py-4"
@@ -208,7 +208,7 @@ export function FamilyTaskBoard({
             {completed.length} completed task{completed.length === 1 ? '' : 's'}
           </summary>
           <ul className="mt-2 space-y-2" aria-label="Completed tasks">
-            {completed.map((task) => (
+            {completed.map((task: any) => (
               <li
                 key={task.id}
                 className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white px-5 py-3 opacity-60"

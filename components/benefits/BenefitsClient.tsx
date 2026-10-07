@@ -165,7 +165,7 @@ function Question({
         {question}
       </h2>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {options.map(opt => (
+        {options.map((opt: any) => (
           <button
             key={opt.value}
             onClick={() => onSelect(opt.value)}
@@ -206,7 +206,7 @@ function YesNoQuestion({
         {question}
       </h2>
       <div style={{ display: 'flex', gap: '16px' }}>
-        {([true, false] as const).map(v => (
+        {([true, false] as const).map((v: any) => (
           <button
             key={String(v)}
             onClick={() => onSelect(v)}
@@ -292,7 +292,7 @@ function ResultsView({ results, onRestart }: { results: BenefitProgram[]; onRest
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '40px' }}>
-          {results.map(b => (
+          {results.map((b: any) => (
             <BenefitCard key={b.id} benefit={b} />
           ))}
         </div>

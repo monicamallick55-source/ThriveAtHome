@@ -7,5 +7,5 @@ export const metadata: Metadata = { title: 'Retired Professionals — ThriveAtHo
 
 export default async function RetiredProfessionalsPage() {
   const { data: professionals } = await getRetiredProfessionalVolunteers()
-  return <RetiredProfessionalsClient professionals={professionals} />
+  return <RetiredProfessionalsClient professionals={(professionals ?? []) as any} />
 }

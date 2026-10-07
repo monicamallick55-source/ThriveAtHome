@@ -41,7 +41,7 @@ export default async function AdvisorsPage() {
         </div>
         <AdvisorsDirectoryClient
           initialAdvisors={advisors ?? []}
-          initialConnections={connections ?? []}
+          initialConnections={(connections ?? []) as any}
         />
       </main>
     </div>

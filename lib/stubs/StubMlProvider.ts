@@ -106,9 +106,9 @@ export class StubMlProvider implements MlProvider {
     // real Isolation Forest would score it as strongly anomalous.
     const score = clamp01(blended / 2.5)
     const drivers = scored
-      .filter((f) => f.z >= 2)
+      .filter((f: any) => f.z >= 2)
       .sort((a, b) => b.z - a.z)
-      .map((f) => f.name)
+      .map((f: any) => f.name)
     return { score, drivers }
   }
 

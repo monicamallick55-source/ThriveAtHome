@@ -46,15 +46,15 @@ export default async function MemberPortalPage() {
 
   return (
     <MemberPortalClient
-      member={member}
+      member={(member ?? []) as any}
       upcomingServices={servicesRes.data ?? []}
       trackedItems={trackedRes.data ?? []}
       suggestedDates={suggestedDates}
-      addonCatalog={addonCatalogRes.data}
-      memberAddons={memberAddonsRes.data}
+      addonCatalog={addonCatalogRes.data as any}
+      memberAddons={memberAddonsRes.data as any}
       familySeatLimit={familySeatLimit}
       hasLongDistanceAddon={hasLongDistance}
-      initialVideoDiary={videoDiary ?? []}
+      initialVideoDiary={(videoDiary ?? []) as any}
     />
   )
 }

@@ -40,7 +40,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to generate signed URLs' }, { status: 500 })
   }
 
-  const urls = (data ?? []).map((item) => {
+  const urls = (data ?? []).map((item: any) => {
     const p = item.path ?? ''
     return {
       path: p,

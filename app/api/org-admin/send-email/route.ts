@@ -39,11 +39,11 @@ export async function POST(req: NextRequest) {
       .select('member_id')
       .eq('org_id', fm.org_id)
       .gte('dues_paid_date', `${currentYear}-01-01`)
-    const paidSet = new Set(((paidIds ?? []) as { member_id: string }[]).map(m => m.member_id))
+    const paidSet = new Set(((paidIds ?? []) as { member_id: string }[]).map((m: any) => m.member_id))
     const { data: allMemberships } = await membershipQuery
     const dueIds = ((allMemberships ?? []) as { member_id: string }[])
       .filter(m => !paidSet.has(m.member_id))
-      .map(m => m.member_id)
+      .map((m: any) => m.member_id)
     if (!dueIds.length) return NextResponse.json({ sent: 0, message: 'No members with dues due.' })
 
     const { data: contacts } = await admin.from('family_members').select('email, full_name').in('member_id', dueIds)
@@ -76,8 +76,8 @@ export async function POST(req: NextRequest) {
       .eq('org_id', fm.org_id)
       .eq('is_anonymous', false)
       .not('donor_email', 'is', null) as { data: { donor_email: string; donor_name: string }[] | null }
-    const uniqueDonors = Array.from(new Map((donorRows ?? []).map(d => [d.donor_email, d])).values())
-    const donorContacts = uniqueDonors.map(d => ({ email: d.donor_email, full_name: d.donor_name }))
+    const uniqueDonors = Array.from(new Map((donorRows ?? []).map((d: any) => [d.donor_email, d])).values())
+    const donorContacts = uniqueDonors.map((d: any) => ({ email: d.donor_email, full_name: d.donor_name }))
     const sent = await sendToContacts(donorContacts, orgName, subject, message)
     const logged = await logSentEmail(admin, fm.org_id, subject, message, recipientGroup, sent, fm.full_name)
     return NextResponse.json({ sent, logged })
@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
   if (!memberships?.length) {
     return NextResponse.json({ sent: 0, message: 'No active members to send to.' })
   }
-  const memberIds = (memberships as { member_id: string }[]).map(m => m.member_id)
+  const memberIds = (memberships as { member_id: string }[]).map((m: any) => m.member_id)
   const { data: contacts } = await admin.from('family_members').select('email, full_name').in('member_id', memberIds)
 
   const sent = await sendToContacts(contacts ?? [], orgName, subject, message)

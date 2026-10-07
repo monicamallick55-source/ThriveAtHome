@@ -13,7 +13,7 @@ export default async function AdminVolunteerMatchingPage() {
 
   const { data: pendingMembers, error } = await getPendingMatchRequests()
 
-  const members = (pendingMembers ?? []).map(r => r.member)
+  const members = (pendingMembers ?? []).map((r: any) => r.member)
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-cream)', display: 'flex', flexDirection: 'column' }}>

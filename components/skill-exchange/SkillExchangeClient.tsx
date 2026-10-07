@@ -180,7 +180,7 @@ export default function SkillExchangeClient({
           { key: 'learn', label: 'Learn' },
           { key: 'share', label: 'Share a Skill' },
           { key: 'credits', label: `My Credits${balance > 0 ? ` (${balance})` : ''}` },
-        ] as const).map(t => (
+        ] as const).map((t: any) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
@@ -221,7 +221,7 @@ export default function SkillExchangeClient({
             </div>
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-              {skills.map(skill => {
+              {skills.map((skill: any) => {
                 const color = CATEGORY_COLORS[skill.skill_category] ?? '#6B7280'
                 const catLabel = CATEGORIES.find(c => c.value === skill.skill_category)?.label ?? skill.skill_category
                 const delLabel = DELIVERY.find(d => d.value === skill.delivery_method)?.label ?? skill.delivery_method
@@ -325,7 +325,7 @@ export default function SkillExchangeClient({
                   color: 'var(--color-navy)', backgroundColor: 'white', boxSizing: 'border-box',
                 }}
               >
-                {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+                {CATEGORIES.map((c: any) => <option key={c.value} value={c.value}>{c.label}</option>)}
               </select>
             </div>
 
@@ -361,7 +361,7 @@ export default function SkillExchangeClient({
                     color: 'var(--color-navy)', backgroundColor: 'white', boxSizing: 'border-box',
                   }}
                 >
-                  {DELIVERY.map(d => <option key={d.value} value={d.value}>{d.label}</option>)}
+                  {DELIVERY.map((d: any) => <option key={d.value} value={d.value}>{d.label}</option>)}
                 </select>
               </div>
               <div>
@@ -377,7 +377,7 @@ export default function SkillExchangeClient({
                     color: 'var(--color-navy)', backgroundColor: 'white', boxSizing: 'border-box',
                   }}
                 >
-                  {[1, 2, 3, 4, 5, 6, 8, 10].map(n => (
+                  {[1, 2, 3, 4, 5, 6, 8, 10].map((n: any) => (
                     <option key={n} value={n}>{n === 1 ? '1 person (1-on-1)' : `Up to ${n} people`}</option>
                   ))}
                 </select>
@@ -410,7 +410,7 @@ export default function SkillExchangeClient({
                 Your shared skills
               </h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {ownSkills.map(skill => (
+                {ownSkills.map((skill: any) => (
                   <div key={skill.id} style={{
                     backgroundColor: 'white', borderRadius: '8px',
                     border: '1px solid var(--color-warm-grey)', padding: '16px',
@@ -497,7 +497,7 @@ export default function SkillExchangeClient({
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {transactions.map(tx => (
+              {transactions.map((tx: any) => (
                 <div key={tx.id} style={{
                   backgroundColor: 'white', borderRadius: '8px',
                   border: '1px solid var(--color-warm-grey)', padding: '16px',

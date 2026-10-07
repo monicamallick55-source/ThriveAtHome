@@ -1,7 +1,9 @@
 // VITA / TCE free tax-prep — server-side data access (admin client).
 // Phase 99 (M24).
 import { createAdminClient } from '../supabase/admin'
-import type { VitaSiteRow, VitaAppointmentRow } from '../../types/database'
+import type { Tables } from '@/types/database'
+type VitaSiteRow = Tables<'vita_sites'>
+type VitaAppointmentRow = Tables<'vita_appointments'>
 
 export async function getVitaSites(
   state?: string

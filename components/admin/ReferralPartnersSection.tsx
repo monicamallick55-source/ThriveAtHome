@@ -64,7 +64,7 @@ export function ReferralPartnersSection() {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: partner.id, is_active: !partner.is_active }),
     })
-    setPartners(prev => prev.map(p => p.id === partner.id ? { ...p, is_active: !p.is_active } : p))
+    setPartners(prev => prev.map((p: any) => p.id === partner.id ? { ...p, is_active: !p.is_active } : p))
   }
 
   const typeLabel = (v: string) => PARTNER_TYPES.find(t => t.value === v)?.label ?? v
@@ -107,7 +107,7 @@ export function ReferralPartnersSection() {
             <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '4px', fontFamily: 'var(--font-body)' }}>Partner type</label>
             <select value={form.partner_type} onChange={e => setForm(f => ({ ...f, partner_type: e.target.value }))}
               style={{ ...inputStyle, backgroundColor: 'white' }}>
-              {PARTNER_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+              {PARTNER_TYPES.map((t: any) => <option key={t.value} value={t.value}>{t.label}</option>)}
             </select>
           </div>
           <div>
@@ -133,7 +133,7 @@ export function ReferralPartnersSection() {
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {partners.map(p => (
+          {partners.map((p: any) => (
             <div key={p.id} style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '14px 18px', backgroundColor: p.is_active ? 'white' : '#F9F7F4', border: `1px solid ${p.is_active ? '#E8E4DC' : '#D4CFC8'}`, borderRadius: '10px', gap: '12px', flexWrap: 'wrap' }}>
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>

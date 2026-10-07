@@ -9,7 +9,9 @@ import {
   advisorTypeEmoji,
   ADVISOR_CONNECTION_STATUS,
 } from '@/lib/advisors/types'
-import type { TrustedAdvisorRow, AdvisorConnectionRow } from '@/types/database'
+import type { Tables } from '@/types/database'
+type TrustedAdvisorRow = Tables<'trusted_advisors'>
+type AdvisorConnectionRow = Tables<'advisor_connections'>
 
 interface ConnectionWithAdvisor extends AdvisorConnectionRow {
   advisor: Pick<TrustedAdvisorRow, 'id' | 'full_name' | 'firm_name' | 'advisor_type' | 'phone' | 'email' | 'city' | 'state'> | null
@@ -43,15 +45,15 @@ export default function AdvisorsDirectoryClient({ initialAdvisors, initialConnec
   const [reviewText, setReviewText] = useState('')
 
   const connectedIds = useMemo(
-    () => new Set(connections.filter((c) => ['requested', 'introduced'].includes(c.status)).map((c) => c.advisor_id)),
+    () => new Set(connections.filter((c: any) => ['requested', 'introduced'].includes(c.status)).map((c: any) => c.advisor_id)),
     [connections]
   )
   const metIds = useMemo(
-    () => new Set(connections.filter((c) => ['introduced', 'met'].includes(c.status)).map((c) => c.advisor_id)),
+    () => new Set(connections.filter((c: any) => ['introduced', 'met'].includes(c.status)).map((c: any) => c.advisor_id)),
     [connections]
   )
 
-  const filtered = advisors.filter((a) => {
+  const filtered = advisors.filter((a: any) => {
     if (typeFilter && a.advisor_type !== typeFilter) return false
     if (acceptingOnly && !a.accepts_new_clients) return false
     return true
@@ -130,11 +132,11 @@ export default function AdvisorsDirectoryClient({ initialAdvisors, initialConnec
             Your introductions
           </h2>
           <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {connections.map((c) => {
+            {connections.map((c: any) => {
               const s = ADVISOR_CONNECTION_STATUS[c.status] ?? ADVISOR_CONNECTION_STATUS.requested
               const name =
                 c.advisor?.full_name ??
-                advisors.find((a) => a.id === c.advisor_id)?.full_name ??
+                advisors.find((a: any) => a.id === c.advisor_id)?.full_name ??
                 'Advisor'
               return (
                 <li key={c.id} style={{ borderTop: '1px solid var(--color-warm-grey)', paddingTop: '10px' }}>
@@ -170,7 +172,7 @@ export default function AdvisorsDirectoryClient({ initialAdvisors, initialConnec
                   {reviewFor === c.advisor_id && (
                     <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                       <div>
-                        {[1, 2, 3, 4, 5].map((n) => (
+                        {[1, 2, 3, 4, 5].map((n: any) => (
                           <button
                             key={n}
                             aria-label={`${n} star${n > 1 ? 's' : ''}`}
@@ -209,7 +211,7 @@ export default function AdvisorsDirectoryClient({ initialAdvisors, initialConnec
           style={{ height: '48px', borderRadius: 'var(--radius-md)', border: '1.5px solid var(--color-warm-grey)', padding: '0 12px', fontFamily: 'var(--font-body)', fontSize: '15px' }}
         >
           <option value="">All advisor types</option>
-          {ADVISOR_TYPES.map((t) => (
+          {ADVISOR_TYPES.map((t: any) => (
             <option key={t.value} value={t.value}>
               {t.emoji} {t.label}
             </option>
@@ -229,7 +231,7 @@ export default function AdvisorsDirectoryClient({ initialAdvisors, initialConnec
         </p>
       ) : (
         <div style={{ display: 'grid', gap: '16px', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
-          {filtered.map((a) => (
+          {filtered.map((a: any) => (
             <article key={a.id} style={{ ...card, display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ fontSize: '22px' }}>{advisorTypeEmoji(a.advisor_type)}</span>

@@ -12,7 +12,7 @@ export default function BlogPage() {
       <h1 className="text-3xl font-bold text-gray-900 mb-2">Senior Living Blog</h1>
       <p className="text-gray-600 mb-10">Expert guidance to help you age safely and independently at home.</p>
       <div className="space-y-8">
-        {BLOG_POSTS.map((post) => (
+        {BLOG_POSTS.map((post: any) => (
           <article key={post.slug} className="border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow">
             <div className="flex items-center gap-3 mb-3">
               <span className="text-xs font-medium bg-teal-50 text-teal-700 px-2 py-1 rounded-full capitalize">

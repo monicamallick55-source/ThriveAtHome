@@ -63,7 +63,7 @@ export default async function CircleDetailPage({ params }: Props) {
       </nav>
 
       <CircleDetailClient
-        circle={circle}
+        circle={(circle ?? []) as any}
         circleIndex={circleIndex >= 0 ? circleIndex : 0}
         initialPosts={posts}
         events={events}

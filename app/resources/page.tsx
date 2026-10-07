@@ -27,7 +27,7 @@ export default function ResourcesPage() {
       <h1 className="text-3xl font-bold text-gray-900 mb-2">Senior Living Resources</h1>
       <p className="text-gray-600 mb-10">Free guides, tools, and expert advice on every aspect of aging well at home.</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {RESOURCE_TOPICS.map((topic) => (
+        {RESOURCE_TOPICS.map((topic: any) => (
           <Link
             key={topic.slug}
             href={`/resources/${topic.slug}`}

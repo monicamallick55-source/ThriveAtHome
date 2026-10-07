@@ -307,7 +307,7 @@ export default function VolunteerApplyPage() {
                 <select id="vol-state" style={{ ...inputStyle, cursor: 'pointer' }} value={form.state}
                   onChange={e => setField('state', e.target.value)}>
                   <option value="">Select state</option>
-                  {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                  {US_STATES.map((s: any) => <option key={s} value={s}>{s}</option>)}
                 </select>
               </div>
             </div>
@@ -316,7 +316,7 @@ export default function VolunteerApplyPage() {
             <div style={{ marginTop: '20px' }}>
               <p style={labelStyle}>Preferred contact method</p>
               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '8px' }}>
-                {CONTACT_METHODS.map(m => (
+                {CONTACT_METHODS.map((m: any) => (
                   <button key={m.value} type="button"
                     onClick={() => setField('preferred_contact', m.value)}
                     style={pillStyle(form.preferred_contact === m.value)}
@@ -387,7 +387,7 @@ export default function VolunteerApplyPage() {
                   <div>
                     <label style={{ ...labelStyle, color: '#3730A3' }}>Your specialty</label>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '8px' }}>
-                      {PROFESSIONAL_SPECIALTIES.map(s => (
+                      {PROFESSIONAL_SPECIALTIES.map((s: any) => (
                         <button key={s.value} type="button"
                           onClick={() => setField('volunteer_specialty', form.volunteer_specialty === s.value ? '' : s.value)}
                           style={{
@@ -428,7 +428,7 @@ export default function VolunteerApplyPage() {
                 <div style={{ padding: '16px 20px', backgroundColor: '#FFF7ED', borderRadius: '10px', border: '1.5px solid #FED7AA' }}>
                   <label style={{ ...labelStyle, color: '#9A3412', display: 'block', marginBottom: '8px' }}>Your faith tradition</label>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                    {FAITH_TRADITIONS.map(f => (
+                    {FAITH_TRADITIONS.map((f: any) => (
                       <button key={f.value} type="button"
                         onClick={() => setField('faith_affiliation', form.faith_affiliation === f.value ? '' : f.value)}
                         style={{
@@ -493,7 +493,7 @@ export default function VolunteerApplyPage() {
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '26px', color: 'var(--color-navy)', fontWeight: 500, marginBottom: '8px' }}>Languages spoken</h2>
             <p style={{ fontFamily: 'var(--font-body)', fontSize: '16px', color: 'var(--color-text-secondary)', marginBottom: '20px' }}>Select all languages you can use comfortably.</p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-              {LANGUAGES.map(lang => (
+              {LANGUAGES.map((lang: any) => (
                 <button key={lang} type="button" onClick={() => setField('languages', toggleItem(form.languages, lang))} style={pillStyle(form.languages.includes(lang))} aria-pressed={form.languages.includes(lang)}>
                   {lang}
                 </button>
@@ -508,7 +508,7 @@ export default function VolunteerApplyPage() {
             <div style={{ marginBottom: '24px' }}>
               <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 500, color: 'var(--color-text)', marginBottom: '12px' }}>Days of the week</p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                {DAYS.map(day => (
+                {DAYS.map((day: any) => (
                   <button key={day} type="button" onClick={() => setField('availability_days', toggleItem(form.availability_days, day))} style={pillStyle(form.availability_days.includes(day))} aria-pressed={form.availability_days.includes(day)}>
                     {day}
                   </button>
@@ -519,7 +519,7 @@ export default function VolunteerApplyPage() {
               <label style={labelStyle} htmlFor="vol-hours">Hours available per week</label>
               <select id="vol-hours" style={{ ...inputStyle, width: '240px', cursor: 'pointer' }} value={form.hours_per_week} onChange={e => setField('hours_per_week', e.target.value)}>
                 <option value="">Select hours</option>
-                {HOURS_OPTIONS.map(h => <option key={h} value={h}>{h}</option>)}
+                {HOURS_OPTIONS.map((h: any) => <option key={h} value={h}>{h}</option>)}
               </select>
             </div>
           </div>
@@ -531,13 +531,13 @@ export default function VolunteerApplyPage() {
               Select all the types of support you are willing and able to provide. This helps us match you with seniors who need exactly your skills.
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              {VOLUNTEER_SUBTYPE_GROUPS.map(group => (
+              {VOLUNTEER_SUBTYPE_GROUPS.map((group: any) => (
                 <div key={group.category}>
                   <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 700, color: 'var(--color-navy)', marginBottom: '10px' }}>
                     {group.emoji} {group.category}
                   </p>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                    {group.subtypes.map(st => (
+                    {group.subtypes.map((st: any) => (
                       <button
                         key={st.value}
                         type="button"
@@ -577,7 +577,7 @@ export default function VolunteerApplyPage() {
                       <select id="vol-lic-state" style={{ ...inputStyle, width: '200px', cursor: 'pointer' }}
                         value={form.license_state} onChange={e => setField('license_state', e.target.value)}>
                         <option value="">Select state</option>
-                        {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                        {US_STATES.map((s: any) => <option key={s} value={s}>{s}</option>)}
                       </select>
                     </div>
                   )}
@@ -604,7 +604,7 @@ export default function VolunteerApplyPage() {
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '26px', color: 'var(--color-navy)', fontWeight: 500, marginBottom: '8px' }}>Your interests</h2>
             <p style={{ fontFamily: 'var(--font-body)', fontSize: '16px', color: 'var(--color-text-secondary)', marginBottom: '20px' }}>Shared interests help us match you with seniors you&apos;ll connect with naturally.</p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-              {INTERESTS.map(interest => (
+              {INTERESTS.map((interest: any) => (
                 <button key={interest} type="button" onClick={() => setField('interests', toggleItem(form.interests, interest))} style={pillStyle(form.interests.includes(interest))} aria-pressed={form.interests.includes(interest)}>
                   {interest}
                 </button>
@@ -657,7 +657,7 @@ export default function VolunteerApplyPage() {
                     onChange={e => setField('corporate_program_id', e.target.value)}
                   >
                     <option value="">-- Select a program --</option>
-                    {corporatePrograms.map(p => (
+                    {corporatePrograms.map((p: any) => (
                       <option key={p.id} value={p.id}>{p.program_name}</option>
                     ))}
                   </select>

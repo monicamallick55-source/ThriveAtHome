@@ -30,7 +30,7 @@ export async function GET() {
     .eq('agency_id', agencyId)
 
   const rawVisitMembers: { member_id: string }[] = (visitMembers ?? []) as { member_id: string }[]
-  const memberIds: string[] = [...new Set(rawVisitMembers.map(v => v.member_id))]
+  const memberIds: string[] = [...new Set(rawVisitMembers.map((v: any) => v.member_id))]
 
   if (memberIds.length === 0) {
     return NextResponse.json({ clients: [], total: 0 })

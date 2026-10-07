@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  const memberIds = Array.from(new Set((addons ?? []).map((a) => a.member_id)))
+  const memberIds = Array.from(new Set((addons ?? []).map((a: any) => a.member_id)))
   const cutoff = new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString()
   let created = 0
 

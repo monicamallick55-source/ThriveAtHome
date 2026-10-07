@@ -13,7 +13,9 @@ import {
   GET_YOUR_REFUND_URL,
   type EligibilityResult,
 } from '@/lib/vita/eligibility'
-import type { VitaSiteRow, VitaAppointmentRow } from '@/types/database'
+import type { Tables } from '@/types/database'
+type VitaSiteRow = any
+type VitaAppointmentRow = any
 
 interface Props {
   age: number | null
@@ -128,7 +130,7 @@ export default function TaxHelpClient({ age, initialSites, initialAppointments }
             Your tax-help requests
           </h2>
           <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {appointments.map((a) => (
+            {appointments.map((a: any) => (
               <li
                 key={a.id}
                 style={{
@@ -162,7 +164,7 @@ export default function TaxHelpClient({ age, initialSites, initialAppointments }
             <label htmlFor="income" style={label}>Household income last year</label>
             <select id="income" style={field} value={incomeBand} onChange={(e) => setIncomeBand(e.target.value)}>
               <option value="">Choose one…</option>
-              {INCOME_BANDS.map((b) => (
+              {INCOME_BANDS.map((b: any) => (
                 <option key={b.value} value={b.value}>{b.label}</option>
               ))}
             </select>
@@ -171,7 +173,7 @@ export default function TaxHelpClient({ age, initialSites, initialAppointments }
             <label htmlFor="situation" style={label}>Which best describes the return?</label>
             <select id="situation" style={field} value={situation} onChange={(e) => setSituation(e.target.value)}>
               <option value="">Choose one…</option>
-              {FILING_SITUATIONS.map((s) => (
+              {FILING_SITUATIONS.map((s: any) => (
                 <option key={s.value} value={s.value}>{s.label}</option>
               ))}
             </select>
@@ -210,7 +212,7 @@ export default function TaxHelpClient({ age, initialSites, initialAppointments }
           </p>
         ) : (
           <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {initialSites.map((s) => (
+            {initialSites.map((s: any) => (
               <li key={s.id} style={{ border: '1px solid var(--color-warm-grey)', borderRadius: 'var(--radius-md)', padding: '14px 16px' }}>
                 <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 700, color: 'var(--color-navy)', margin: '0 0 2px' }}>
                   {s.site_name}{' '}
@@ -257,7 +259,7 @@ export default function TaxHelpClient({ age, initialSites, initialAppointments }
           <div>
             <label htmlFor="taxYear" style={label}>Tax year</label>
             <select id="taxYear" style={field} value={taxYear} onChange={(e) => setTaxYear(e.target.value)}>
-              {[0, 1, 2, 3].map((n) => {
+              {[0, 1, 2, 3].map((n: any) => {
                 const y = currentYear - 1 - n
                 return <option key={y} value={y}>{y}</option>
               })}
@@ -268,7 +270,7 @@ export default function TaxHelpClient({ age, initialSites, initialAppointments }
               <label htmlFor="site" style={label}>Preferred site (optional)</label>
               <select id="site" style={field} value={siteId} onChange={(e) => setSiteId(e.target.value)}>
                 <option value="">No preference — navigator chooses</option>
-                {initialSites.map((s) => (
+                {initialSites.map((s: any) => (
                   <option key={s.id} value={s.id}>{s.site_name}</option>
                 ))}
               </select>
@@ -320,11 +322,11 @@ export default function TaxHelpClient({ age, initialSites, initialAppointments }
           What to bring
         </h2>
         <div style={{ display: 'grid', gap: '14px' }}>
-          {WHAT_TO_BRING.map((g) => (
+          {WHAT_TO_BRING.map((g: any) => (
             <div key={g.group}>
               <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 700, color: 'var(--color-navy)', margin: '0 0 4px' }}>{g.group}</p>
               <ul style={{ margin: 0, paddingLeft: '20px', fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
-                {g.items.map((it) => <li key={it}>{it}</li>)}
+                {g.items.map((it: any) => <li key={it}>{it}</li>)}
               </ul>
             </div>
           ))}

@@ -48,7 +48,7 @@ export function Step3Preferences({ data, onChange, errors }: Props) {
           onChange={(e) => onChange('preferred_language', e.target.value)}
           className={selectClass}
         >
-          {LANGUAGES.map((lang) => (
+          {LANGUAGES.map((lang: any) => (
             <option key={lang} value={lang}>
               {lang.charAt(0).toUpperCase() + lang.slice(1)}
             </option>
@@ -65,7 +65,7 @@ export function Step3Preferences({ data, onChange, errors }: Props) {
           onChange={(e) => onChange('check_in_frequency', e.target.value)}
           className={selectClass}
         >
-          {CALL_FREQUENCIES.map((f) => (
+          {CALL_FREQUENCIES.map((f: any) => (
             <option key={f.value} value={f.value}>{f.label}</option>
           ))}
         </select>

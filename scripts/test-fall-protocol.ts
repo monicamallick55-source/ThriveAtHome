@@ -127,7 +127,7 @@ async function main() {
   else err('no-motion anomaly did not escalate', anomaly)
 
   const { data: m3Alerts } = await admin.from('alerts').select('alert_type').eq('member_id', m3)
-  if ((m3Alerts ?? []).some((a) => a.alert_type === 'fall')) ok('no-motion emergency produced a fall alert')
+  if ((m3Alerts ?? []).some((a: any) => a.alert_type === 'fall')) ok('no-motion emergency produced a fall alert')
   else err('no fall alert from no-motion emergency', m3Alerts)
 
   console.log(`\n${fail === 0 ? '✅' : '❌'} ${pass} passed, ${fail} failed`)

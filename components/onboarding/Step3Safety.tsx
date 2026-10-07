@@ -98,7 +98,7 @@ export function Step3Safety({ data, onChange, isSelf = false }: Props) {
               style={{ ...inputStyle, cursor: 'pointer', backgroundColor: 'white' }}
             >
               <option value="">Select relationship…</option>
-              {RELATIONSHIPS.map((r) => (
+              {RELATIONSHIPS.map((r: any) => (
                 <option key={r} value={r}>{r}</option>
               ))}
             </select>
@@ -185,7 +185,7 @@ export function Step3Safety({ data, onChange, isSelf = false }: Props) {
           {[
             { value: 'yes', label: 'Yes, lives alone' },
             { value: 'no', label: 'Not alone' },
-          ].map((option) => {
+          ].map((option: any) => {
             const isSelected = livesAlone === option.value
             return (
               <button
@@ -338,7 +338,7 @@ export function Step3Safety({ data, onChange, isSelf = false }: Props) {
           {[
             { value: '', label: 'No recent loss' },
             { value: 'true', label: 'Yes, recent loss' },
-          ].map((option) => {
+          ].map((option: any) => {
             const isSelected = data.grief_welcome_path === option.value
             return (
               <button

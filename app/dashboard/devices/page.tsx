@@ -63,7 +63,7 @@ export default async function DevicesPage() {
           </p>
         </div>
         <DevicesClient
-          preferredName={preferredName}
+          preferredName={(preferredName ?? []) as any}
           initialDevices={devicesRes.data}
           initialWearables={wearablesRes.data}
           initialReadings={readingsRes.data}

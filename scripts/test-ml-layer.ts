@@ -96,7 +96,7 @@ async function seedHistory(memberId: string) {
   // Stable baseline calls: days 9..30 ago, mood ~8, energy ~7
   const baselineMoods = [8, 8, 7, 8, 9, 8, 7, 8, 8, 7]
   const calls: Record<string, unknown>[] = []
-  baselineMoods.forEach((m, i) => {
+  baselineMoods.forEach((m: any, i: number) => {
     calls.push({
       member_id: memberId,
       call_type: 'check_in',
@@ -110,7 +110,7 @@ async function seedHistory(memberId: string) {
   })
   // Declining recent calls: last 7 days, mood ~3, negative + grief + lonely language
   const recentMoods = [4, 3, 3, 3]
-  recentMoods.forEach((m, i) => {
+  recentMoods.forEach((m: any, i: number) => {
     calls.push({
       member_id: memberId,
       call_type: 'check_in',
@@ -193,7 +193,7 @@ async function main() {
   if (['concern', 'urgent'].includes(anomaly.outcome)) ok(`behavioral anomaly flagged (${anomaly.outcome}, score ${(anomaly.score * 100).toFixed(0)}%)`)
   else err('anomaly not flagged despite sharp decline', anomaly)
   const { data: anomalyRows } = await admin.from('behavioral_anomalies').select('*').eq('member_id', m)
-  if ((anomalyRows ?? []).some((r) => r.anomaly_score >= 0.6)) ok('behavioral_anomalies row persisted with score >= 0.6')
+  if ((anomalyRows ?? []).some((r: any) => r.anomaly_score >= 0.6)) ok('behavioral_anomalies row persisted with score >= 0.6')
   else err('no behavioral_anomalies row >= 0.6', anomalyRows)
   const { data: driftAlert } = await admin.from('alerts').select('alert_type,severity').eq('member_id', m).eq('alert_type', 'wellness_drift').maybeSingle()
   if (driftAlert) ok(`wellness_drift alert raised (${driftAlert.severity})`)
@@ -201,8 +201,8 @@ async function main() {
 
   // ─── 3. Fall risk ───
   const fall = await computeFallRisk(m)
-  if (fall.band === 'high') ok(`fall risk HIGH (${(fall.probability * 100).toFixed(0)}%), factors: ${fall.factors.map((f) => f.factor).join(', ')}`)
-  else if (fall.band === 'moderate') warn(`fall risk MODERATE (${(fall.probability * 100).toFixed(0)}%) — expected high; heuristic weights may need tuning`, fall.factors.map((f) => f.factor))
+  if (fall.band === 'high') ok(`fall risk HIGH (${(fall.probability * 100).toFixed(0)}%), factors: ${fall.factors.map((f: any) => f.factor).join(', ')}`)
+  else if (fall.band === 'moderate') warn(`fall risk MODERATE (${(fall.probability * 100).toFixed(0)}%) — expected high; heuristic weights may need tuning`, fall.factors.map((f: any) => f.factor))
   else err('fall risk not elevated for an 88yo on sedatives with prior falls', fall)
   const { data: fallRows } = await admin.from('fall_risk_scores').select('*').eq('member_id', m)
   if ((fallRows ?? []).length === 1) ok('fall_risk_scores row persisted')

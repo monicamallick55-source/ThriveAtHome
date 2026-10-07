@@ -5,7 +5,8 @@
 
 import { createAdminClient } from '../supabase/admin'
 import { mean, stddev, round } from './stats'
-import type { WellnessBaselineRow } from '../../types/database'
+import type { Tables } from '@/types/database'
+type WellnessBaselineRow = Tables<'wellness_baselines'>
 
 export const BASELINE_WINDOW_DAYS = 30
 /** Minimum combined data points before a baseline is considered usable. */
@@ -51,20 +52,20 @@ export async function computeWellnessBaseline(
     const calls = callsRes.data ?? []
     const readings = readingsRes.data ?? []
 
-    const mood = calls.map((c) => c.mood_score).filter((n): n is number => typeof n === 'number')
-    const energy = calls.map((c) => c.energy_score).filter((n): n is number => typeof n === 'number')
-    const pain = calls.map((c) => c.pain_score).filter((n): n is number => typeof n === 'number')
-    const sleep = readings.map((r) => r.sleep_hours).filter((n): n is number => typeof n === 'number')
-    const steps = readings.map((r) => r.steps).filter((n): n is number => typeof n === 'number')
+    const mood = calls.map((c: any) => c.mood_score).filter((n): n is number => typeof n === 'number')
+    const energy = calls.map((c: any) => c.energy_score).filter((n): n is number => typeof n === 'number')
+    const pain = calls.map((c: any) => c.pain_score).filter((n): n is number => typeof n === 'number')
+    const sleep = readings.map((r: any) => r.sleep_hours).filter((n): n is number => typeof n === 'number')
+    const steps = readings.map((r: any) => r.steps).filter((n): n is number => typeof n === 'number')
     const restingHr = readings
-      .map((r) => r.resting_heart_rate)
+      .map((r: any) => r.resting_heart_rate)
       .filter((n): n is number => typeof n === 'number')
 
     // Call engagement rate: completed calls / calls that were scheduled or attempted.
-    const consideredCalls = calls.filter((c) =>
+    const consideredCalls = calls.filter((c: any) =>
       ['completed', 'missed', 'failed', 'in_progress'].includes(c.status)
     )
-    const completed = calls.filter((c) => c.status === 'completed').length
+    const completed = calls.filter((c: any) => c.status === 'completed').length
     const engagementRate =
       consideredCalls.length > 0 ? completed / consideredCalls.length : null
 

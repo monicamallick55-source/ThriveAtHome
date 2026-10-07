@@ -1,10 +1,12 @@
 'use client'
+import type { Tables } from '@/types/database'
+type CareAgencyRow = Tables<'care_agencies'>
+type BrandConfigRow = Tables<'brand_configs'>
 
 // Branding customization UI for agency admins.
 // Allows setting display name, colors, logo URL, and tagline.
 // "Powered by ThriveAtHome" is always shown — this is enforced both in the UI and on the server.
 import { useState, useTransition } from 'react'
-import type { CareAgencyRow, BrandConfigRow } from '@/types/database'
 
 interface BrandingClientProps {
   agency: CareAgencyRow

@@ -119,7 +119,7 @@ function endedPayload(callId: string, opts: {
   const userLines = opts.userLines ?? ['I am doing fine today, thank you.']
   const turns = [
     { role: 'agent', content: 'Hi, this is your check-in call. How are you? If it is ever an emergency, call 911.' },
-    ...userLines.map(content => ({ role: 'user', content })),
+    ...userLines.map((content: any) => ({ role: 'user', content })),
   ]
   return {
     event: opts.event ?? 'call_ended',
@@ -133,7 +133,7 @@ function endedPayload(callId: string, opts: {
       end_timestamp: T0 + 95_000,
       duration_ms: 95_000,
       disconnection_reason: opts.disconnection ?? 'user_hangup',
-      transcript: turns.map(t => `${t.role === 'agent' ? 'Agent' : 'User'}: ${t.content}`).join('\n'),
+      transcript: turns.map((t: any) => `${t.role === 'agent' ? 'Agent' : 'User'}: ${t.content}`).join('\n'),
       transcript_object: turns,
       metadata: opts.memberId ? { member_id: opts.memberId, call_type: opts.callType ?? 'check_in' } : {},
     },

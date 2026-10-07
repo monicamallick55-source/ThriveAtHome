@@ -247,7 +247,7 @@ export function OnboardingForm({ isSelf = false }: { isSelf?: boolean }) {
         {/* Step progress */}
         <div style={{ marginBottom: '32px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0' }}>
-            {STEP_LABELS.map((label, index) => {
+            {STEP_LABELS.map((label: any, index: number) => {
               const stepNum = index + 1
               const isComplete = step > stepNum
               const isActive = step === stepNum

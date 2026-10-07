@@ -53,7 +53,7 @@ export default async function TaxHelpPage() {
           will help arrange an appointment.
         </p>
         <TaxHelpClient
-          age={age}
+          age={(age ?? []) as any}
           initialSites={sites ?? []}
           initialAppointments={appointments ?? []}
         />

@@ -66,7 +66,7 @@ export default async function PetLossSupportPage() {
             initialPosts={posts ?? []}
             roster={roster ?? []}
             existingRequests={requests ?? []}
-            pets={(pets ?? []).map((p) => ({ id: p.id, name: p.name, passed_away_on: p.passed_away_on }))}
+            pets={(pets ?? []).map((p: any) => ({ id: p.id, name: p.name, passed_away_on: p.passed_away_on }))}
             resources={PET_LOSS_RESOURCES}
           />
         </ToastProvider>

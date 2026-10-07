@@ -1,7 +1,14 @@
 // Data access layer for home care agency portal (Phase 59 — M19).
 // These tables are not yet in Supabase generated types, so all queries cast through unknown.
 import { createAdminClient } from '../supabase/admin'
-import type { CareAgencyRow, CareWorkerRow, CareVisitRow, AgencyReferralRow, AgencyLocationRow, AgencyLocationInsert, AgencyLocationUpdate } from '@/types/database'
+import type { Tables } from '@/types/database'
+type CareAgencyRow = Tables<'care_agencies'>
+type CareWorkerRow = Tables<'care_workers'>
+type CareVisitRow = Tables<'care_visits'>
+type AgencyReferralRow = Tables<'agency_referrals'>
+type AgencyLocationRow = Tables<'agency_locations'>
+type AgencyLocationInsert = any
+type AgencyLocationUpdate = any
 
 export type { CareAgencyRow, CareWorkerRow, CareVisitRow, AgencyReferralRow, AgencyLocationRow }
 
@@ -429,7 +436,7 @@ export async function getLocationMetrics(agencyId: string, locationId: string | 
   const visits = vResult.data ?? []
   const completed = visits.filter(v => v.status === 'completed')
   const billableHours = completed.reduce((sum, v) => sum + (v.billable_hours ?? 0), 0)
-  const clientsServed = new Set(visits.map(v => v.member_id)).size
+  const clientsServed = new Set(visits.map((v: any) => v.member_id)).size
 
   return {
     data: {

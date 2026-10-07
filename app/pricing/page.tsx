@@ -55,7 +55,7 @@ export default async function PricingPage() {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '24px' }}>
-            {plans.map((plan) => (
+            {plans.map((plan: any) => (
               <div
                 key={plan.tier}
                 style={{
@@ -118,7 +118,7 @@ export default async function PricingPage() {
                 </div>
 
                 <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px', display: 'flex', flexDirection: 'column', gap: '12px', flex: 1 }}>
-                  {plan.features.map((feature) => (
+                  {plan.features.map((feature: any) => (
                     <li key={feature} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
                       <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true" style={{ flexShrink: 0, marginTop: '2px' }}>
                         <circle cx="9" cy="9" r="9" fill={plan.highlighted ? 'rgba(255,255,255,0.15)' : 'var(--color-teal)'} opacity={plan.highlighted ? 1 : 0.15} />

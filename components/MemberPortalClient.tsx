@@ -7,7 +7,8 @@ import type { TrackedItem } from '@/lib/data/tracked-items-types'
 import { SUBCATEGORY_OPTIONS } from '@/lib/data/tracked-items-types'
 import type { SuggestedDate } from '@/lib/data/tracked-items'
 import type { MemberAddonWithCatalog } from '@/lib/data/premium-addons'
-import type { PremiumAddonRow, CaregiverVideoDiaryEntryRow } from '@/types/database'
+type PremiumAddonRow = any
+type CaregiverVideoDiaryEntryRow = any
 import CrisisResourceBar from '@/components/shared/CrisisResourceBar'
 import AddOnsClient from '@/components/dashboard/AddOnsClient'
 
@@ -1012,11 +1013,11 @@ export default function MemberPortalClient({
                   </div>
                 ))}
               </div>
-              {!editingPrefs && member.topics_enjoy?.length > 0 && (
+              {!editingPrefs && (member.topics_enjoy?.length ?? 0) > 0 && (
                 <div style={{ marginTop: '20px' }}>
                   <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>Topics I enjoy</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                    {member.topics_enjoy.map(t => <span key={t} style={{ padding: '6px 14px', backgroundColor: '#F0F9F7', borderRadius: '20px', fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-teal)', border: '1px solid #2A9D8F20' }}>{t}</span>)}
+                    {(member.topics_enjoy ?? []).map(t => <span key={t} style={{ padding: '6px 14px', backgroundColor: '#F0F9F7', borderRadius: '20px', fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-teal)', border: '1px solid #2A9D8F20' }}>{t}</span>)}
                   </div>
                 </div>
               )}
@@ -1609,7 +1610,7 @@ export default function MemberPortalClient({
                     <div style={{ padding: '14px 18px', backgroundColor: '#F9F6F0', borderRadius: '10px' }}>
                       <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Topics of interest</div>
                       <div style={{ fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 600, color: 'var(--color-navy)' }}>
-                        {member.topics_enjoy && member.topics_enjoy.length > 0 ? member.topics_enjoy.join(', ') : 'Not specified yet'}
+                        {member.topics_enjoy && ((member.topics_enjoy?.length ?? 0) > 0) ? member.topics_enjoy.join(', ') : 'Not specified yet'}
                       </div>
                     </div>
                   </div>

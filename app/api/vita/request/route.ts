@@ -8,8 +8,8 @@ import { INCOME_BANDS, FILING_SITUATIONS } from '@/lib/vita/eligibility'
 
 export const runtime = 'nodejs'
 
-const VALID_BANDS = INCOME_BANDS.map((b) => b.value)
-const VALID_SITUATIONS = FILING_SITUATIONS.map((s) => s.value)
+const VALID_BANDS = INCOME_BANDS.map((b: any) => b.value)
+const VALID_SITUATIONS = FILING_SITUATIONS.map((s: any) => s.value)
 
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser()

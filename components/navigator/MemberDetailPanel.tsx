@@ -4,7 +4,8 @@ import type { Member } from '@/lib/data/members'
 import type { CheckInCall } from '@/lib/data/calls'
 import type { FamilyMember, NavigatorNote } from '@/lib/data/navigator'
 import type { ServiceBooking } from '@/lib/data/services'
-import type { BookingStatus } from '@/types/database'
+import type { Tables } from '@/types/database'
+type BookingStatus = any
 import type { Volunteer } from '@/lib/data/volunteers'
 import type { TrackedItem } from '@/lib/data/tracked-items-types'
 import { ITEM_TYPE_DEFAULTS } from '@/lib/data/tracked-items-types'
@@ -122,7 +123,7 @@ function isFutureDateTime(dt: string | undefined): boolean {
 
 function getMemberCity(address: string | null | undefined): string {
   if (!address) return ''
-  const parts = address.split(',').map(s => s.trim()).filter(Boolean)
+  const parts = address.split(',').map((s: any) => s.trim()).filter(Boolean)
   // "123 Main St, Chicago, IL 60601" → ["123 Main St", "Chicago", "IL 60601"]
   // Return second-to-last segment as city if at least 2 parts
   if (parts.length >= 2) return parts[parts.length - 2]
@@ -301,7 +302,7 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
       if (!res.ok) {
         setBookingActionError(prev => ({ ...prev, [bookingId]: json.error ?? 'Dispatch failed.' }))
       } else {
-        setLocalBookings(prev => prev.map(b => b.id === bookingId ? (json.booking as ServiceBooking) : b))
+        setLocalBookings(prev => prev.map((b: any) => b.id === bookingId ? (json.booking as ServiceBooking) : b))
         setActiveDispatch(prev => ({ ...prev, [bookingId]: null }))
         setDispatchFormData(prev => ({ ...prev, [bookingId]: {} }))
         // Clear volunteer selections for this booking
@@ -338,7 +339,7 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
       if (!res.ok) {
         setBookingActionError(prev => ({ ...prev, [bookingId]: json.error ?? 'Reschedule failed.' }))
       } else {
-        setLocalBookings(prev => prev.map(b => b.id === bookingId ? (json.booking as ServiceBooking) : b))
+        setLocalBookings(prev => prev.map((b: any) => b.id === bookingId ? (json.booking as ServiceBooking) : b))
         setRescheduleMode(prev => ({ ...prev, [bookingId]: false }))
         setRescheduleTime(prev => ({ ...prev, [bookingId]: '' }))
         setRescheduleProvider(prev => ({ ...prev, [bookingId]: '' }))
@@ -364,7 +365,7 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
       if (!res.ok) {
         setBookingActionError(prev => ({ ...prev, [bookingId]: json.error ?? 'Could not clear schedule.' }))
       } else {
-        setLocalBookings(prev => prev.map(b => b.id === bookingId ? (json.booking as ServiceBooking) : b))
+        setLocalBookings(prev => prev.map((b: any) => b.id === bookingId ? (json.booking as ServiceBooking) : b))
       }
     } catch {
       setBookingActionError(prev => ({ ...prev, [bookingId]: 'Network error. Please try again.' }))
@@ -390,7 +391,7 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
       if (!res.ok) {
         setBookingActionError(prev => ({ ...prev, [bookingId]: json.error ?? 'Cancellation failed.' }))
       } else {
-        setLocalBookings(prev => prev.map(b => b.id === bookingId ? (json.booking as ServiceBooking) : b))
+        setLocalBookings(prev => prev.map((b: any) => b.id === bookingId ? (json.booking as ServiceBooking) : b))
         setShowCancelReason(prev => ({ ...prev, [bookingId]: false }))
       }
     } catch {
@@ -467,7 +468,7 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
       if (!res.ok) {
         setBookingActionError(prev => ({ ...prev, [bookingId]: json.error ?? 'Action failed.' }))
       } else {
-        setLocalBookings(prev => prev.map(b => b.id === bookingId ? (json.booking as ServiceBooking) : b))
+        setLocalBookings(prev => prev.map((b: any) => b.id === bookingId ? (json.booking as ServiceBooking) : b))
         if (status === 'cancelled') setShowCancelInput(prev => ({ ...prev, [bookingId]: false }))
         if (opts?.navigator_note) setBookingNoteText(prev => ({ ...prev, [bookingId]: '' }))
         if (status !== 'cancelled') setExpandedBookingId(null)
@@ -610,7 +611,7 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
               {/* Family contacts */}
               {panelData.family.length > 0 && (
                 <Section title="Family contacts">
-                  {panelData.family.map(fm => (
+                  {panelData.family.map((fm: any) => (
                     <div
                       key={fm.id}
                       style={{ backgroundColor: 'white', border: '1px solid var(--color-warm-grey)', borderRadius: 'var(--radius-md)', padding: '12px 16px', marginBottom: '8px' }}
@@ -657,7 +658,7 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                 {panelData.calls.length === 0 ? (
                   <EmptyState text="No calls on record." />
                 ) : (
-                  panelData.calls.map(call => (
+                  panelData.calls.map((call: any) => (
                     <div
                       key={call.id}
                       style={{ backgroundColor: 'white', border: '1px solid var(--color-warm-grey)', borderRadius: 'var(--radius-md)', padding: '12px 16px', marginBottom: '8px' }}
@@ -744,7 +745,7 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                 {localNotes.length === 0 ? (
                   <EmptyState text="No notes yet." />
                 ) : (
-                  localNotes.map(n => (
+                  localNotes.map((n: any) => (
                     <div
                       key={n.id}
                       style={{ backgroundColor: 'white', border: '1px solid var(--color-warm-grey)', borderRadius: 'var(--radius-md)', padding: '12px 16px', marginBottom: '8px' }}
@@ -860,7 +861,7 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                   <EmptyState text="No service bookings for this member." />
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {localBookings.slice(0, 8).map((b) => {
+                    {localBookings.slice(0, 8).map((b: any) => {
                       const isExpanded = expandedBookingId === b.id
                       const sc = statusColor(b.status)
                       const details = b.booking_details as Record<string, string>
@@ -1704,13 +1705,13 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                     {panelData.trackedItems
                       .filter(t => t.status === 'active' || t.status === 'snoozed')
                       .sort((a, b) => a.expiration_or_appointment_date.localeCompare(b.expiration_or_appointment_date))
-                      .map(t => {
+                      .map((t: any) => {
                         const today = new Date(); today.setUTCHours(0, 0, 0, 0)
                         const exp = new Date(t.expiration_or_appointment_date); exp.setUTCHours(0, 0, 0, 0)
                         const days = Math.round((exp.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
                         const color = days <= 7 ? '#dc2626' : days <= 30 ? '#d97706' : '#059669'
                         const bg = days <= 7 ? '#fef2f2' : days <= 30 ? '#fffbeb' : '#f0fdf4'
-                        const defaults = ITEM_TYPE_DEFAULTS[t.item_type]
+                        const defaults = (ITEM_TYPE_DEFAULTS as any)[t.item_type]
                         const emoji = defaults?.emoji ?? '📅'
                         const countdownText = days < 0 ? `${Math.abs(days)}d overdue` : days === 0 ? 'Today' : `in ${days}d`
                         return (
@@ -1746,7 +1747,7 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                   <EmptyState text="No connected devices or wearables for this member." />
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    {(panelData.devices ?? []).map(d => (
+                    {(panelData.devices ?? []).map((d: any) => (
                       <div key={d.id} style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', backgroundColor: 'white', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 'var(--radius-md)', padding: '8px 12px' }}>
                         <span style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
                           {d.device_name || d.device_type.replace(/_/g, ' ')}
@@ -1756,7 +1757,7 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                         </span>
                       </div>
                     ))}
-                    {(panelData.wearables ?? []).map(w => (
+                    {(panelData.wearables ?? []).map((w: any) => (
                       <div key={w.id} style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', backgroundColor: 'white', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 'var(--radius-md)', padding: '8px 12px' }}>
                         <span style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
                           ⌚ {w.platform.replace(/_/g, ' ')}
@@ -1773,7 +1774,7 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                     <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 700, color: 'var(--color-text-secondary)', margin: 0 }}>
                       Fall events
                     </p>
-                    {(panelData.fallEvents ?? []).map(f => (
+                    {(panelData.fallEvents ?? []).map((f: any) => (
                       <div key={f.id} style={{ backgroundColor: f.resolved ? '#f0fdf4' : '#fef2f2', border: `1px solid ${f.resolved ? '#bbf7d0' : '#fecaca'}`, borderRadius: 'var(--radius-md)', padding: '8px 12px' }}>
                         <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: f.resolved ? '#166534' : '#b91c1c', margin: 0 }}>
                           {f.resolved ? '✓ Resolved' : '⚠ Open'} · {f.source.replace(/_/g, ' ')} · {formatDate(f.detected_at)}
@@ -1795,7 +1796,7 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                   <EmptyState text="The family has not shared any vault documents with the care team." />
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    {(panelData.sharedDocuments ?? []).map(d => (
+                    {(panelData.sharedDocuments ?? []).map((d: any) => (
                       <div key={d.id} style={{ backgroundColor: 'white', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 'var(--radius-md)', padding: '8px 12px' }}>
                         <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-primary)', margin: 0 }}>
                           {d.is_advance_directive ? '🕊️ ' : '📎 '}{d.file_name}
@@ -1817,7 +1818,7 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
               {(panelData.advisorConnections ?? []).length > 0 && (
                 <Section title={`Advisor introductions (${(panelData.advisorConnections ?? []).length})`}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    {(panelData.advisorConnections ?? []).map(c => (
+                    {(panelData.advisorConnections ?? []).map((c: any) => (
                       <div key={c.id} style={{ backgroundColor: 'white', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 'var(--radius-md)', padding: '8px 12px' }}>
                         <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-primary)', margin: 0 }}>
                           {c.advisor?.full_name ?? 'Advisor'}{c.advisor?.firm_name ? ` · ${c.advisor.firm_name}` : ''}
@@ -1873,7 +1874,7 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                           {pa.monthlyTotalCents > 0 ? ` · $${(pa.monthlyTotalCents / 100).toFixed(2)}/mo` : ''}
                         </p>
                       )}
-                      {pa.pendingFulfillment.map((p) => (
+                      {pa.pendingFulfillment.map((p: any) => (
                         <p key={p.addon_key + p.created_at} style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0 }}>
                           {p.addon_name}: <strong style={{ color: 'var(--color-text-primary)' }}>{p.status}</strong>
                           {' '}— see the task queue for the fulfilment task
@@ -1903,7 +1904,7 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                         <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0 }}>
                           Companions:{' '}
                           <strong style={{ color: 'var(--color-text-primary)' }}>
-                            {ps.activePets.map((p) => `${p.name} (${p.species})`).join(', ')}
+                            {ps.activePets.map((p: any) => `${p.name} (${p.species})`).join(', ')}
                           </strong>
                         </p>
                       )}
@@ -1914,7 +1915,7 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                       )}
                       {ps.memorializedPets.length > 0 && (
                         <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0 }}>
-                          Remembered: <strong style={{ color: 'var(--color-text-primary)' }}>{ps.memorializedPets.map((p) => p.name).join(', ')}</strong>
+                          Remembered: <strong style={{ color: 'var(--color-text-primary)' }}>{ps.memorializedPets.map((p: any) => p.name).join(', ')}</strong>
                         </p>
                       )}
                       {ps.openPetLossRequests > 0 && (
@@ -1992,7 +1993,7 @@ export function MemberDetailPanel({ memberId, memberName, triggerRef, onClose }:
                             <Row
                               label="Fall risk"
                               band={ml.fallRisk.risk_band}
-                              detail={`${(ml.fallRisk.risk_probability * 100).toFixed(0)}% · ${Array.isArray(ml.fallRisk.contributing_factors) ? (ml.fallRisk.contributing_factors as { factor: string }[]).map(f => f.factor).join('; ') : ''} · ${formatDate(ml.fallRisk.computed_at)}`}
+                              detail={`${(ml.fallRisk.risk_probability * 100).toFixed(0)}% · ${Array.isArray(ml.fallRisk.contributing_factors) ? (ml.fallRisk.contributing_factors as { factor: string }[]).map((f: any) => f.factor).join('; ') : ''} · ${formatDate(ml.fallRisk.computed_at)}`}
                             />
                           )}
                           {ml.isolation && (
@@ -2203,7 +2204,7 @@ function ServiceProviderPicker({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', maxHeight: '160px', overflowY: 'auto', marginBottom: '4px' }}>
-      {providers.map(p => {
+      {providers.map((p: any) => {
         const displayName = p.company_name ? `${p.full_name} — ${p.company_name}` : p.full_name
         const isSelected = selectedProviderName === displayName
         const isNearMember = memberCity ? (p.city ?? '').toLowerCase().trim() === memberCity.toLowerCase().trim() : false
@@ -2506,7 +2507,7 @@ function VolunteerPicker({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', maxHeight: '210px', overflowY: 'auto', marginBottom: '6px' }}>
-      {volunteers.map(vol => {
+      {volunteers.map((vol: any) => {
         const isSelected = vol.id === selectedId
         const availDays = (vol.availability_days as string[] | null)?.join(', ') ?? '—'
         const location = [vol.city, vol.state].filter(Boolean).join(', ') || '—'

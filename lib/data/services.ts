@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import type { BookingStatus } from '@/types/database'
+import type { Tables } from '@/types/database'
+type BookingStatus = any
 
 export interface ServiceBooking {
   id: string
@@ -131,7 +132,7 @@ export async function getAllBookingsForNavigator(): Promise<{ data: (ServiceBook
   if (error) return { data: null, error: error.message }
 
   type RawRow = ServiceBooking & { members: { preferred_name: string; full_name: string; phone_number: string } }
-  const mapped = (data as RawRow[]).map((row) => ({
+  const mapped = (data as RawRow[]).map((row: any) => ({
     ...row,
     member_name: row.members.preferred_name,
     member_phone: row.members.phone_number,

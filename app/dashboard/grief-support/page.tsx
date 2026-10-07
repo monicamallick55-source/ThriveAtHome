@@ -22,7 +22,7 @@ export default async function GriefSupportPage() {
   return (
     <ToastProvider>
       <GriefSupportClient
-        memberName={memberName}
+        memberName={(memberName ?? []) as any}
         existingRequests={existingRequests ?? []}
       />
       <CrisisResourceBar surface="grief" />

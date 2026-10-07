@@ -4,7 +4,8 @@ import { updateBookingStatus, getServiceBookingsForMember } from '@/lib/data/ser
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveMemberContext } from '@/lib/data/members'
 import { pushRealtimeNotification } from '@/lib/realtime/notifications'
-import type { BookingStatus } from '@/types/database'
+import type { Enums } from '@/types/database'
+type BookingStatus = Enums<'booking_status'>
 
 const VALID_STATUSES: BookingStatus[] = ['requested', 'confirmed', 'in_progress', 'completed', 'cancelled']
 

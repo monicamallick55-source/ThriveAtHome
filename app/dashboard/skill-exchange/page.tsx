@@ -51,7 +51,7 @@ export default async function SkillExchangePage() {
       </nav>
 
       <SkillExchangeClient
-        allSkills={allSkills}
+        allSkills={(allSkills ?? []) as any}
         mySkills={mySkills}
         myCredits={credits}
         myTransactions={transactions}

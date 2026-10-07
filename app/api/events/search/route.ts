@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
   const events = data ?? []
   let attendance: Record<string, { count: number; going: boolean }> = {}
   if (category === 'festival' && events.length > 0) {
-    const { data: attendanceData } = await getLiveEventAttendance(events.map((e) => e.url), memberId)
+    const { data: attendanceData } = await getLiveEventAttendance(events.map((e: any) => e.url), memberId)
     attendance = attendanceData
   }
 

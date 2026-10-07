@@ -18,7 +18,7 @@ export default async function AdminBuddyMatchingPage() {
   ])
 
   // Normalise volunteers so buddy_capacity / buddy_active_count always exist
-  const volunteers = (rawVolunteers ?? []).map(v => ({
+  const volunteers = (rawVolunteers ?? []).map((v: any) => ({
     ...v,
     buddy_capacity: (v as unknown as { buddy_capacity?: number }).buddy_capacity ?? 3,
     buddy_active_count: (v as unknown as { buddy_active_count?: number }).buddy_active_count ?? 0,
@@ -49,7 +49,7 @@ export default async function AdminBuddyMatchingPage() {
       <main style={{ flex: 1, maxWidth: '1200px', margin: '0 auto', padding: '32px', width: '100%' }}>
         <AdminBuddyMatching
           unmatchedMembers={unmatchedMembers ?? []}
-          volunteers={volunteers ?? []}
+          volunteers={volunteers as any}
         />
       </main>
     </div>

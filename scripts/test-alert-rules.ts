@@ -124,9 +124,9 @@ async function run() {
 
       const alerts = await getAlertsForMember(memberId)
       const missedAlert = alerts.find(a => a.alert_type === 'missed_call')
-      testAlertIds.push(...alerts.map(a => a.id))
+      testAlertIds.push(...alerts.map((a: any) => a.id))
       const notifs = await getNotificationsForMember(memberId)
-      testNotifIds.push(...notifs.map(n => n.id))
+      testNotifIds.push(...notifs.map((n: any) => n.id))
 
       if (missedAlert) {
         ok('missed_call alert created with type=missed_call')
@@ -149,9 +149,9 @@ async function run() {
       await detectAlertsForCall(callId, memberId)
 
       const alerts = await getAlertsForMember(memberId)
-      testAlertIds.push(...alerts.map(a => a.id))
+      testAlertIds.push(...alerts.map((a: any) => a.id))
       const notifs = await getNotificationsForMember(memberId)
-      testNotifIds.push(...notifs.map(n => n.id))
+      testNotifIds.push(...notifs.map((n: any) => n.id))
 
       const moodAlert = alerts.find(a => a.alert_type === 'mood_drop')
       if (moodAlert) {
@@ -171,9 +171,9 @@ async function run() {
       await detectAlertsForCall(callId, memberId)
 
       const alerts = await getAlertsForMember(memberId)
-      testAlertIds.push(...alerts.map(a => a.id))
+      testAlertIds.push(...alerts.map((a: any) => a.id))
       const notifs = await getNotificationsForMember(memberId)
-      testNotifIds.push(...notifs.map(n => n.id))
+      testNotifIds.push(...notifs.map((n: any) => n.id))
 
       const moodAlert = alerts.find(a => a.alert_type === 'mood_drop')
       if (moodAlert) {
@@ -193,9 +193,9 @@ async function run() {
       await detectAlertsForCall(callId, memberId)
 
       const alerts = await getAlertsForMember(memberId)
-      testAlertIds.push(...alerts.map(a => a.id))
+      testAlertIds.push(...alerts.map((a: any) => a.id))
       const notifs = await getNotificationsForMember(memberId)
-      testNotifIds.push(...notifs.map(n => n.id))
+      testNotifIds.push(...notifs.map((n: any) => n.id))
 
       const medAlert = alerts.find(a => a.alert_type === 'medication_miss')
       if (medAlert) {
@@ -215,9 +215,9 @@ async function run() {
       await detectAlertsForCall(callId, memberId)
 
       const alerts = await getAlertsForMember(memberId)
-      testAlertIds.push(...alerts.map(a => a.id))
+      testAlertIds.push(...alerts.map((a: any) => a.id))
       const notifs = await getNotificationsForMember(memberId)
-      testNotifIds.push(...notifs.map(n => n.id))
+      testNotifIds.push(...notifs.map((n: any) => n.id))
 
       const fallAlert = alerts.find(a => a.alert_type === 'fall')
       if (fallAlert) {
@@ -237,11 +237,11 @@ async function run() {
       await detectAlertsForCall(callId, memberId)
 
       const alerts = await getAlertsForMember(memberId)
-      testAlertIds.push(...alerts.map(a => a.id))
+      testAlertIds.push(...alerts.map((a: any) => a.id))
       const notifs = await getNotificationsForMember(memberId)
-      testNotifIds.push(...notifs.map(n => n.id))
+      testNotifIds.push(...notifs.map((n: any) => n.id))
       const emLogs = await getEmergencyLogsForMember(memberId)
-      testEmergencyLogIds.push(...emLogs.map(e => e.id))
+      testEmergencyLogIds.push(...emLogs.map((e: any) => e.id))
 
       const crisisAlert = alerts.find(a => a.alert_type === 'crisis')
       if (crisisAlert) {
@@ -264,11 +264,11 @@ async function run() {
       await detectAlertsForCall(callId, memberId)
 
       const alerts = await getAlertsForMember(memberId)
-      testAlertIds.push(...alerts.map(a => a.id))
+      testAlertIds.push(...alerts.map((a: any) => a.id))
       const notifs = await getNotificationsForMember(memberId)
-      testNotifIds.push(...notifs.map(n => n.id))
+      testNotifIds.push(...notifs.map((n: any) => n.id))
       const emLogs = await getEmergencyLogsForMember(memberId)
-      testEmergencyLogIds.push(...emLogs.map(e => e.id))
+      testEmergencyLogIds.push(...emLogs.map((e: any) => e.id))
 
       const emergAlert = alerts.find(a => a.alert_type === 'emergency')
       if (emergAlert) {
@@ -304,9 +304,9 @@ async function run() {
       })
 
       const alerts = await getAlertsForMember(memberId)
-      testAlertIds.push(...alerts.map(a => a.id))
+      testAlertIds.push(...alerts.map((a: any) => a.id))
       const notifs = await getNotificationsForMember(memberId)
-      testNotifIds.push(...notifs.map(n => n.id))
+      testNotifIds.push(...notifs.map((n: any) => n.id))
 
       const moodAlerts = alerts.filter(a => a.alert_type === 'mood_drop')
       if (moodAlerts.length === 1) ok('deduplication: exactly 1 mood_drop row (not 2)')
@@ -341,11 +341,11 @@ async function run() {
       })
 
       const alerts = await getAlertsForMember(memberId)
-      testAlertIds.push(...alerts.map(a => a.id))
+      testAlertIds.push(...alerts.map((a: any) => a.id))
       const notifs = await getNotificationsForMember(memberId)
-      testNotifIds.push(...notifs.map(n => n.id))
+      testNotifIds.push(...notifs.map((n: any) => n.id))
       const emLogs = await getEmergencyLogsForMember(memberId)
-      testEmergencyLogIds.push(...emLogs.map(e => e.id))
+      testEmergencyLogIds.push(...emLogs.map((e: any) => e.id))
 
       if (emLogs.length > 0) ok('emergency_log row written for crisis createAlert call')
       else err('emergency_log row NOT written')
@@ -368,9 +368,9 @@ async function run() {
       await detectAlertsForCall(callId, memberId)
 
       const alerts = await getAlertsForMember(memberId)
-      testAlertIds.push(...alerts.map(a => a.id))
+      testAlertIds.push(...alerts.map((a: any) => a.id))
       const notifs = await getNotificationsForMember(memberId)
-      testNotifIds.push(...notifs.map(n => n.id))
+      testNotifIds.push(...notifs.map((n: any) => n.id))
 
       if (alerts.length === 0) ok('no alerts for healthy call (score 8, meds taken, no flags)')
       else err(`false positive: ${alerts.length} alert(s) created for healthy call`)

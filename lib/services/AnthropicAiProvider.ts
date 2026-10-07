@@ -33,7 +33,7 @@ export class AnthropicAiProvider implements AiProvider {
     if (response.stop_reason === 'refusal') return null
     const text = response.content
       .filter((b): b is Anthropic.Beta.BetaTextBlock => b.type === 'text')
-      .map(b => b.text)
+      .map((b: any) => b.text)
       .join('')
       .trim()
     return text || null
@@ -76,7 +76,7 @@ export class AnthropicAiProvider implements AiProvider {
     if (response.stop_reason === 'refusal') return empty
     const text = response.content
       .filter((b): b is Anthropic.Beta.BetaTextBlock => b.type === 'text')
-      .map(b => b.text)
+      .map((b: any) => b.text)
       .join('')
     const parsed = JSON.parse(text) as Partial<CallScores>
     const clamp = (n: unknown) => (typeof n === 'number' && n >= 1 && n <= 10 ? Math.round(n) : null)

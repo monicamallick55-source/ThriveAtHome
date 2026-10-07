@@ -43,7 +43,7 @@ export async function runMlAnalyticsSweep(): Promise<MlSweepResult> {
     return result
   }
 
-  const eligible = (members ?? []).filter((m) => !m.ml_insights_opt_out)
+  const eligible = (members ?? []).filter((m: any) => !m.ml_insights_opt_out)
   result.membersChecked = eligible.length
 
   for (const m of eligible) {

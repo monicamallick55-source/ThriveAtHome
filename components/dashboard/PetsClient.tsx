@@ -5,7 +5,8 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/components/ui/Toast'
-import type { MemberPetRow } from '@/types/database'
+import type { Tables } from '@/types/database'
+type MemberPetRow = any
 
 const SPECIES: { value: string; label: string; emoji: string }[] = [
   { value: 'dog', label: 'Dog', emoji: '🐕' },
@@ -17,7 +18,7 @@ const SPECIES: { value: string; label: string; emoji: string }[] = [
   { value: 'other', label: 'Other', emoji: '🐾' },
 ]
 function speciesEmoji(s: string): string {
-  return SPECIES.find((x) => x.value === s)?.emoji ?? '🐾'
+  return SPECIES.find((x: any) => x.value === s)?.emoji ?? '🐾'
 }
 
 const CELEB_LABELS: Record<string, { emoji: string; label: string }> = {
@@ -129,8 +130,8 @@ export default function PetsClient({
   const [memorialDate, setMemorialDate] = useState('')
   const [memorialNote, setMemorialNote] = useState('')
 
-  const livingPets = pets.filter((p) => p.is_active && !p.passed_away_on)
-  const memorializedPets = pets.filter((p) => p.passed_away_on)
+  const livingPets = pets.filter((p: any) => p.is_active && !p.passed_away_on)
+  const memorializedPets = pets.filter((p: any) => p.passed_away_on)
 
   function startAdd() {
     setEditingId(null)
@@ -169,7 +170,7 @@ export default function PetsClient({
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Something went wrong.')
       const saved: MemberPetRow = json.pet
-      setPets((prev) => (editingId ? prev.map((p) => (p.id === saved.id ? saved : p)) : [saved, ...prev]))
+      setPets((prev) => (editingId ? prev.map((p: any) => (p.id === saved.id ? saved : p)) : [saved, ...prev]))
       setShowForm(false)
       setEditingId(null)
       setForm(emptyForm)
@@ -189,7 +190,7 @@ export default function PetsClient({
       const res = await fetch(`/api/pets/${pet.id}`, { method: 'DELETE' })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Could not remove the profile.')
-      setPets((prev) => prev.filter((p) => p.id !== pet.id))
+      setPets((prev) => prev.filter((p: any) => p.id !== pet.id))
       push({ title: `${pet.name}'s profile removed.`, severity: 'info' })
       router.refresh()
     } catch (err) {
@@ -215,7 +216,7 @@ export default function PetsClient({
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Could not save.')
       const saved: MemberPetRow = json.pet
-      setPets((prev) => prev.map((p) => (p.id === saved.id ? saved : p)))
+      setPets((prev) => prev.map((p: any) => (p.id === saved.id ? saved : p)))
       setMemorialFor(null)
       setMemorialDate('')
       setMemorialNote('')
@@ -239,7 +240,7 @@ export default function PetsClient({
         <section style={card}>
           <h2 style={h2}>Upcoming companion milestones</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {upcomingCelebrations.map((c) => {
+            {upcomingCelebrations.map((c: any) => {
               const info = CELEB_LABELS[c.celebration_type] ?? { emoji: '🐾', label: c.celebration_type }
               return (
                 <div
@@ -288,7 +289,7 @@ export default function PetsClient({
         )}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: livingPets.length ? '14px' : 0 }}>
-          {livingPets.map((pet) => (
+          {livingPets.map((pet: any) => (
             <div
               key={pet.id}
               style={{ border: '1px solid var(--color-warm-grey)', borderRadius: 'var(--radius-md)', padding: '14px' }}
@@ -299,7 +300,7 @@ export default function PetsClient({
                   {pet.name}
                 </span>
                 <span style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-muted)' }}>
-                  {[SPECIES.find((s) => s.value === pet.species)?.label, pet.breed].filter(Boolean).join(' · ')}
+                  {[SPECIES.find((s: any) => s.value === pet.species)?.label, pet.breed].filter(Boolean).join(' · ')}
                 </span>
               </div>
               <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: '6px 0 0' }}>
@@ -355,7 +356,7 @@ export default function PetsClient({
                 value={form.species}
                 onChange={(e) => setForm({ ...form, species: e.target.value })}
               >
-                {SPECIES.map((s) => (
+                {SPECIES.map((s: any) => (
                   <option key={s.value} value={s.value}>{s.emoji} {s.label}</option>
                 ))}
               </select>
@@ -441,7 +442,7 @@ export default function PetsClient({
         <section style={card}>
           <h2 style={h2}>Remembered</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {memorializedPets.map((pet) => (
+            {memorializedPets.map((pet: any) => (
               <div key={pet.id} style={{ borderLeft: '3px solid var(--color-teal)', paddingLeft: '12px' }}>
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: '16px', color: 'var(--color-navy)', margin: 0 }}>
                   {speciesEmoji(pet.species)} {pet.name}

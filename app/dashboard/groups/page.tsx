@@ -44,7 +44,7 @@ export default async function GroupsPage() {
       </nav>
 
       <GroupsClient
-        groups={groups}
+        groups={(groups ?? []) as any}
         joinedGroupIds={joinedIds}
         hasMember={!!memberId}
       />

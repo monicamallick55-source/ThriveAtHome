@@ -106,7 +106,7 @@ export async function handleFallEvent(
         confidence: typeof confidence === 'number' ? confidence : null,
         alert_id: result.alertId,
         navigator_task_id: result.navigatorTaskId,
-        raw: raw ?? {},
+        raw: raw ?? {} as any,
       })
       .select('id')
       .maybeSingle()

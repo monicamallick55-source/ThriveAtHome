@@ -23,7 +23,7 @@ export async function GET(req: Request) {
   const apiKey = process.env.APIFY_API_TOKEN
   if (!apiKey) return NextResponse.json({ error: 'APIFY_API_TOKEN not set' })
 
-  const startUrls = SOURCES.map(s => ({ url: s.url }))
+  const startUrls = SOURCES.map((s: any) => ({ url: s.url }))
 
   let pages: Array<{ url: string; text: string }> = []
   try {
@@ -93,7 +93,7 @@ export async function GET(req: Request) {
   }).slice(0, 20)
 
   // Store under each zip that has sources
-  const zips = [...new Set(SOURCES.map(s => s.zip))]
+  const zips = [...new Set(SOURCES.map((s: any) => s.zip))]
   for (const zip of zips) {
     const cacheKey = 'searchapi:cultural:' + zip + ':25'
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

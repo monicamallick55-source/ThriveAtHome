@@ -36,7 +36,7 @@ export default function OrgJoinRequestsClient() {
     setBusy(null)
     if (res.ok) {
       setMsg(decision === 'approved' ? 'Member approved and added to your roster.' : 'Request declined.')
-      setRequests(prev => prev.map(r => r.id === id ? { ...r, status: decision } : r))
+      setRequests(prev => prev.map((r: any) => r.id === id ? { ...r, status: decision } : r))
     } else {
       const j = await res.json().catch(() => ({ error: 'Error' }))
       setMsg(j.error ?? 'Something went wrong.')
@@ -57,7 +57,7 @@ export default function OrgJoinRequestsClient() {
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 500, color: 'var(--color-navy)', margin: '8px 0 12px' }}>Pending ({pending.length})</h2>
       {pending.length === 0 ? (
         <p style={{ fontFamily: 'var(--font-body)', color: 'var(--color-text-secondary)', marginBottom: '24px' }}>No pending requests right now.</p>
-      ) : pending.map(r => {
+      ) : pending.map((r: any) => {
         const name = r.members?.preferred_name ?? r.members?.full_name ?? r.requester_name ?? 'A member'
         return (
           <div key={r.id} style={card}>
@@ -83,7 +83,7 @@ export default function OrgJoinRequestsClient() {
       {decided.length > 0 && (
         <>
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 500, color: 'var(--color-navy)', margin: '24px 0 12px' }}>Decided</h2>
-          {decided.map(r => {
+          {decided.map((r: any) => {
             const name = r.members?.preferred_name ?? r.members?.full_name ?? r.requester_name ?? 'A member'
             return (
               <div key={r.id} style={{ ...card, opacity: 0.75 }}>

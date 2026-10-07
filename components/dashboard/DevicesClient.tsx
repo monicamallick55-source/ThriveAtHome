@@ -3,14 +3,13 @@
 // M22 — device management UI: companion tablet, voice assistants + smart home,
 // wearables, fall protection status, and EHR / FHIR health-record export.
 import { useState } from 'react'
-import type {
-  MemberDeviceRow,
-  WearableConnectionRow,
-  WearableReadingRow,
-  FallEventRow,
-  EhrConnectionRow,
-  FhirExportLogRow,
-} from '@/types/database'
+import type { Tables,  } from '@/types/database'
+type MemberDeviceRow = any
+type WearableConnectionRow = any
+type WearableReadingRow = any
+type FallEventRow = any
+type EhrConnectionRow = any
+type FhirExportLogRow = any
 
 type Tab = 'tablet' | 'voice' | 'wearables' | 'fall' | 'ehr'
 
@@ -181,7 +180,7 @@ export default function DevicesClient({
     setBusy(id)
     try {
       await api(`/api/devices/${id}`, { method: 'DELETE' })
-      setDevices((prev) => prev.map((d) => (d.id === id ? { ...d, status: 'disconnected' } : d)))
+      setDevices((prev) => prev.map((d: any) => (d.id === id ? { ...d, status: 'disconnected' } : d)))
     } catch (e) {
       setMsg({ kind: 'err', text: e instanceof Error ? e.message : 'Please try again.' })
     } finally {
@@ -197,7 +196,7 @@ export default function DevicesClient({
         method: 'POST',
         body: JSON.stringify({ platform }),
       })
-      setWearables((prev) => [connection, ...prev.filter((w) => w.platform !== platform)])
+      setWearables((prev) => [connection, ...prev.filter((w: any) => w.platform !== platform)])
       setMsg({ kind: 'ok', text: 'Wearable connected. Fall detection is now active for this device.' })
     } catch (e) {
       setMsg({ kind: 'err', text: e instanceof Error ? e.message : 'Please try again.' })
@@ -210,7 +209,7 @@ export default function DevicesClient({
     setBusy(id)
     try {
       await api(`/api/wearables/${id}`, { method: 'DELETE' })
-      setWearables((prev) => prev.map((w) => (w.id === id ? { ...w, status: 'revoked' } : w)))
+      setWearables((prev) => prev.map((w: any) => (w.id === id ? { ...w, status: 'revoked' } : w)))
     } catch (e) {
       setMsg({ kind: 'err', text: e instanceof Error ? e.message : 'Please try again.' })
     } finally {
@@ -265,7 +264,7 @@ export default function DevicesClient({
         method: 'POST',
         body: JSON.stringify({ ehr_system: system, fhir_base_url: fhirBaseUrl }),
       })
-      setEhr((prev) => [connection, ...prev.filter((c) => c.ehr_system !== system)])
+      setEhr((prev) => [connection, ...prev.filter((c: any) => c.ehr_system !== system)])
       setMsg({ kind: 'ok', text: 'Health record connected. You can now export wellness data as FHIR.' })
     } catch (e) {
       setMsg({ kind: 'err', text: e instanceof Error ? e.message : 'Please try again.' })
@@ -278,7 +277,7 @@ export default function DevicesClient({
     setBusy(id)
     try {
       await api(`/api/ehr/${id}`, { method: 'DELETE' })
-      setEhr((prev) => prev.map((c) => (c.id === id ? { ...c, status: 'revoked' } : c)))
+      setEhr((prev) => prev.map((c: any) => (c.id === id ? { ...c, status: 'revoked' } : c)))
     } catch (e) {
       setMsg({ kind: 'err', text: e instanceof Error ? e.message : 'Please try again.' })
     } finally {
@@ -309,14 +308,14 @@ export default function DevicesClient({
     }
   }
 
-  const activeWearables = wearables.filter((w) => w.status === 'active')
-  const activeDevices = devices.filter((d) => d.status === 'active')
+  const activeWearables = wearables.filter((w: any) => w.status === 'active')
+  const activeDevices = devices.filter((d: any) => d.status === 'active')
 
   return (
     <div>
       {/* Tabs */}
       <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '20px' }}>
-        {TABS.map((t) => (
+        {TABS.map((t: any) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
@@ -386,7 +385,7 @@ export default function DevicesClient({
               </p>
             ) : (
               <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {devices.map((d) => (
+                {devices.map((d: any) => (
                   <li
                     key={d.id}
                     style={{
@@ -436,8 +435,8 @@ export default function DevicesClient({
               notice if something seems off at home.
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '10px' }}>
-              {VOICE_OPTIONS.map((o) => {
-                const linked = devices.find((d) => d.device_type === o.type && d.status !== 'disconnected')
+              {VOICE_OPTIONS.map((o: any) => {
+                const linked = devices.find((d: any) => d.device_type === o.type && d.status !== 'disconnected')
                 return (
                   <div key={o.type} style={{ padding: '12px 14px', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--color-cream)' }}>
                     <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, margin: '0 0 6px' }}>
@@ -475,8 +474,8 @@ export default function DevicesClient({
               rate, and sleep — and to enable automatic fall detection.
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '10px' }}>
-              {WEARABLE_OPTIONS.map((o) => {
-                const conn = wearables.find((w) => w.platform === o.platform && w.status === 'active')
+              {WEARABLE_OPTIONS.map((o: any) => {
+                const conn = wearables.find((w: any) => w.platform === o.platform && w.status === 'active')
                 return (
                   <div key={o.platform} style={{ padding: '12px 14px', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--color-cream)' }}>
                     <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, margin: '0 0 6px' }}>{o.label}</p>
@@ -527,7 +526,7 @@ export default function DevicesClient({
                     </tr>
                   </thead>
                   <tbody>
-                    {readings.map((r) => (
+                    {readings.map((r: any) => (
                       <tr key={r.id} style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}>
                         <td style={{ padding: '6px 8px' }}>{r.reading_date}</td>
                         <td style={{ padding: '6px 8px' }}>{r.steps ?? '—'}</td>
@@ -582,7 +581,7 @@ export default function DevicesClient({
               </p>
             ) : (
               <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {fallEvents.map((f) => (
+                {fallEvents.map((f: any) => (
                   <li key={f.id} style={{ padding: '12px 14px', borderRadius: 'var(--radius-md)', backgroundColor: f.resolved ? 'var(--color-cream)' : '#fef2f2' }}>
                     <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, margin: '0 0 2px' }}>
                       {f.resolved ? '✓ Resolved' : '⚠ Open'} · {f.source.replace(/_/g, ' ')}
@@ -610,8 +609,8 @@ export default function DevicesClient({
               standard HL7 FHIR records.
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '10px' }}>
-              {EHR_OPTIONS.map((o) => {
-                const conn = ehr.find((c) => c.ehr_system === o.system && c.status === 'active')
+              {EHR_OPTIONS.map((o: any) => {
+                const conn = ehr.find((c: any) => c.ehr_system === o.system && c.status === 'active')
                 return (
                   <div key={o.system} style={{ padding: '12px 14px', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--color-cream)' }}>
                     <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, margin: '0 0 6px' }}>{o.label}</p>
@@ -636,7 +635,7 @@ export default function DevicesClient({
                 )
               })}
             </div>
-            {ehr.some((c) => c.status === 'active') && (
+            {ehr.some((c: any) => c.status === 'active') && (
               <button style={{ ...btnGhost, marginTop: '14px' }} disabled={busy === 'fhir-export'} onClick={exportFhir}>
                 {busy === 'fhir-export' ? 'Exporting…' : 'Export last 30 days as FHIR'}
               </button>
@@ -651,7 +650,7 @@ export default function DevicesClient({
               </p>
             ) : (
               <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {fhirLog.map((l) => (
+                {fhirLog.map((l: any) => (
                   <li key={l.id} style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)' }}>
                     {fmtDate(l.created_at)} · {l.resource_type} × {l.resource_count} · {l.export_status}
                   </li>

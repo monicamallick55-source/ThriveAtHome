@@ -40,10 +40,10 @@ export const DOC_CATEGORIES: DocCategory[] = [
 ]
 
 export function docCategory(value: string | null | undefined): DocCategory {
-  return DOC_CATEGORIES.find((c) => c.value === value) ?? DOC_CATEGORIES[DOC_CATEGORIES.length - 1]
+  return DOC_CATEGORIES.find((c: any) => c.value === value) ?? DOC_CATEGORIES[DOC_CATEGORIES.length - 1]
 }
 
-export const ESSENTIAL_DOC_CATEGORIES = DOC_CATEGORIES.filter((c) => c.essential)
+export const ESSENTIAL_DOC_CATEGORIES = DOC_CATEGORIES.filter((c: any) => c.essential)
 
 /** Days-until-expiry buckets for the vault warnings. */
 export function expiryStatus(expiresOn: string | null): 'none' | 'expired' | 'soon' | 'ok' {

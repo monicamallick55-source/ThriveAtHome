@@ -29,14 +29,14 @@ export default function AdvisorApplyPage() {
         </p>
 
         <div style={{ display: 'grid', gap: '12px', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', marginBottom: '28px' }}>
-          {LISTING_TIERS.map((t) => (
+          {LISTING_TIERS.map((t: any) => (
             <div key={t.value} style={{ backgroundColor: 'white', border: '1px solid var(--color-warm-grey)', borderRadius: 'var(--radius-lg)', padding: '16px' }}>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--color-navy)', fontWeight: 600 }}>{t.label}</div>
               <div style={{ fontFamily: 'var(--font-body)', fontSize: '22px', color: 'var(--color-navy)', fontWeight: 700 }}>
                 ${t.annualFee.toLocaleString()}<span style={{ fontSize: '13px', fontWeight: 400, color: 'var(--color-text-muted)' }}>/year</span>
               </div>
               <ul style={{ margin: '8px 0 0', paddingLeft: '18px', fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)' }}>
-                {t.perks.map((p) => (
+                {t.perks.map((p: any) => (
                   <li key={p}>{p}</li>
                 ))}
               </ul>

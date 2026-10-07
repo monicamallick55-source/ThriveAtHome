@@ -4,7 +4,8 @@ import { NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
 import { getBuddyCallsForFamily, createBuddyCall } from '@/lib/data/buddies'
 import { createAdminClient } from '@/lib/supabase/admin'
-import type { BuddyCallInsert } from '@/types/database'
+import type { TablesInsert } from '@/types/database'
+type BuddyCallInsert = TablesInsert<'buddy_calls'>
 
 export async function GET(req: Request) {
   try {
@@ -31,7 +32,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'assignment_id, member_id, and volunteer_id are required' }, { status: 400 })
     }
 
-    const callInsert: BuddyCallInsert = {
+    const callInsert = {
       assignment_id,
       member_id,
       volunteer_id,
@@ -46,7 +47,7 @@ export async function POST(req: Request) {
       milestone_description: milestone_flag ? (milestone_description ?? null) : null,
     }
 
-    const { data, error } = await createBuddyCall(callInsert)
+    const { data, error } = await createBuddyCall(callInsert as any)
     if (error) return NextResponse.json({ error }, { status: 500 })
 
     // If concern flagged, create a navigator task

@@ -52,7 +52,7 @@ export function AdminBuddyMatching({ unmatchedMembers, volunteers }: Props) {
 
   const topMatches = selectedMember
     ? availableVolunteers
-        .map(v => ({
+        .map((v: any) => ({
           volunteer: v,
           ...scoreBuddyVolunteer(v, selectedMember),
         }))
@@ -111,7 +111,7 @@ export function AdminBuddyMatching({ unmatchedMembers, volunteers }: Props) {
           </div>
         ) : (
           <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
-            {displayMembers.map(member => {
+            {displayMembers.map((member: any) => {
               const isSelected = selectedMember?.id === member.id
               return (
                 <button
@@ -217,7 +217,7 @@ export function AdminBuddyMatching({ unmatchedMembers, volunteers }: Props) {
                         </p>
                       )}
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                        {reasons.map(r => (
+                        {reasons.map((r: any) => (
                           <span key={r} style={{ fontSize: '12px', fontFamily: 'var(--font-body)', backgroundColor: 'var(--color-cream)', color: 'var(--color-text-secondary)', padding: '3px 10px', borderRadius: 'var(--radius-full)', border: '1px solid var(--color-warm-grey)' }}>
                             {r}
                           </span>

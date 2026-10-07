@@ -67,7 +67,7 @@ export default function CognitivePage() {
       <section className="mb-10">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Today's Brain Activities</h2>
         <div className="space-y-4">
-          {BRAIN_ACTIVITIES.map((activity) => (
+          {BRAIN_ACTIVITIES.map((activity: any) => (
             <div key={activity.key} className="border border-gray-200 rounded-xl p-5 flex items-center gap-4">
               <div className="text-3xl shrink-0">{activity.icon}</div>
               <div className="flex-1 min-w-0">

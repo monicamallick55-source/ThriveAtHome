@@ -142,7 +142,7 @@ export default function DirectoryClient() {
           </p>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '12px' }}>
-            {members.map(m => (
+            {members.map((m: any) => (
               <div key={m.id} style={{ backgroundColor: '#F9F6F0', borderRadius: '12px', padding: '16px' }}>
                 <div style={{ fontFamily: 'var(--font-body)', fontSize: '16px', fontWeight: 600, color: 'var(--color-navy)' }}>{m.name}</div>
                 {(m.city || m.state) && (
@@ -153,7 +153,7 @@ export default function DirectoryClient() {
                 {m.bio && <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: '8px 0 0', lineHeight: 1.5 }}>{m.bio}</p>}
                 {m.interests.length > 0 && (
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '10px' }}>
-                    {m.interests.map(i => (
+                    {m.interests.map((i: any) => (
                       <span key={i} style={{ fontFamily: 'var(--font-body)', fontSize: '11px', backgroundColor: 'white', border: '1px solid #E8E4DC', borderRadius: '10px', padding: '2px 8px', color: 'var(--color-text-secondary)' }}>{i}</span>
                     ))}
                   </div>

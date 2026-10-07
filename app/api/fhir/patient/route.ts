@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('members')
-    .insert({ full_name, preferred_name, phone, date_of_birth, zip_code })
+    .insert({ full_name, preferred_name, phone, date_of_birth, zip_code } as any)
     .select()
     .single()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

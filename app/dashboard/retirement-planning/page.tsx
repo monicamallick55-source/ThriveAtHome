@@ -81,7 +81,7 @@ export default function RetirementPlanningPage() {
               { label: 'Age 62', amount: ssResult.at62, note: 'Reduced' },
               { label: `Age ${ssResult.fraAge} (FRA)`, amount: ssResult.atFRA, note: 'Full benefit' },
               { label: 'Age 70', amount: ssResult.at70, note: 'Maximum' },
-            ].map((item) => (
+            ].map((item: any) => (
               <div key={item.label} className="bg-gray-50 rounded-lg p-4 text-center">
                 <div className="text-xs text-gray-500 mb-1">{item.label}</div>
                 <div className="text-2xl font-bold text-teal-700">${item.amount.toLocaleString()}</div>
@@ -133,7 +133,7 @@ export default function RetirementPlanningPage() {
         </div>
         {deadlines && (
           <div className="space-y-2">
-            {deadlines.map((d) => (
+            {deadlines.map((d: any) => (
               <div key={d.label} className="flex items-start gap-3 border border-gray-100 rounded-lg p-3">
                 <div className="text-sm font-semibold text-teal-700 w-36 shrink-0">{d.label}</div>
                 <div>
@@ -202,7 +202,7 @@ export default function RetirementPlanningPage() {
               { label: 'Monthly Expenses', value: budgetResult.totalExpenses, color: 'text-gray-900' },
               { label: 'Monthly Surplus', value: budgetResult.monthlySurplus, color: budgetResult.monthlySurplus >= 0 ? 'text-green-700' : 'text-red-600' },
               { label: 'Yearly Surplus', value: budgetResult.yearlySurplus, color: budgetResult.yearlySurplus >= 0 ? 'text-green-700' : 'text-red-600' },
-            ].map((item) => (
+            ].map((item: any) => (
               <div key={item.label} className="bg-gray-50 rounded-lg p-3 text-center">
                 <div className="text-xs text-gray-500 mb-1">{item.label}</div>
                 <div className={`text-xl font-bold ${item.color}`}>

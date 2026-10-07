@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ donations: [], seniorsHelpedThisMonth, totalThisMonthCents })
   }
 
-  const donations = (data ?? []).map(d => ({
+  const donations = (data ?? []).map((d: any) => ({
     ...d,
     impact: impactFor(Number(d.amount_cents ?? 0)),
   }))

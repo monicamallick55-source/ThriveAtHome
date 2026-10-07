@@ -83,7 +83,7 @@ export async function GET(req: NextRequest) {
 
       for (const fm of (fms ?? [])) {
         try {
-          await admin.from('realtime_notifications').insert({
+          await (admin as any).from('realtime_notifications').insert({
             member_id: item.member_id,
             type: 'important_date_reminder',
             severity: daysUntil <= 3 ? 'concern' : 'info',

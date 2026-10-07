@@ -157,7 +157,7 @@ export default function AdminCreateEventClient() {
       <div>
         <label style={labelStyle}>Format *</label>
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-          {FORMAT_OPTIONS.map(opt => (
+          {FORMAT_OPTIONS.map((opt: any) => (
             <label key={opt.value} style={{
               display: 'flex', alignItems: 'center', gap: '8px',
               padding: '10px 16px', borderRadius: '10px',

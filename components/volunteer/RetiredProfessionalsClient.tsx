@@ -15,7 +15,7 @@ const SPECIALTIES = [
 ]
 
 const SPECIALTY_LABELS: Record<string, string> = Object.fromEntries(
-  SPECIALTIES.filter(s => s.value !== 'all').map(s => [s.value, s.label])
+  SPECIALTIES.filter(s => s.value !== 'all').map((s: any) => [s.value, s.label])
 )
 
 interface Professional {
@@ -56,7 +56,7 @@ export function RetiredProfessionalsClient({ professionals }: Props) {
 
         {/* Specialty filter */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '32px' }}>
-          {SPECIALTIES.map(s => (
+          {SPECIALTIES.map((s: any) => (
             <button
               key={s.value}
               onClick={() => setSelectedSpecialty(s.value)}
@@ -130,7 +130,7 @@ export function RetiredProfessionalsClient({ professionals }: Props) {
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-            {filtered.map(pro => (
+            {filtered.map((pro: any) => (
               <div
                 key={pro.id}
                 style={{

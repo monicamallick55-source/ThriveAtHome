@@ -79,7 +79,7 @@ export async function GET(req: NextRequest) {
       )
 
       // Record the nudge to enable dedup
-      await admin.from('realtime_notifications').insert({
+      await (admin as any).from('realtime_notifications').insert({
         member_id: fm.member_id as string,
         type: 'family_nudge',
         severity: 'info',

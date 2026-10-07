@@ -38,7 +38,7 @@ export default function ForFamiliesPage() {
           The Caregiver Strain Index helps identify stress before it becomes burnout. Takes about 2 minutes.
         </p>
         <div className="space-y-3 mb-6">
-          {BURNOUT_QUESTIONS.map((q, i) => (
+          {BURNOUT_QUESTIONS.map((q: any, i: number) => (
             <label key={i} className="flex items-start gap-3 cursor-pointer group">
               <input
                 type="checkbox"
@@ -46,7 +46,7 @@ export default function ForFamiliesPage() {
                 onChange={() => toggle(i)}
                 className="mt-1 h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
               />
-              <span className="text-sm text-gray-700 group-hover:text-gray-900">{q}</span>
+              <span className="text-sm text-gray-700 group-hover:text-gray-900">{q.text}</span>
             </label>
           ))}
         </div>
@@ -69,7 +69,7 @@ export default function ForFamiliesPage() {
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide mb-2">Recommended resources:</p>
                 <ul className="space-y-1">
-                  {result.resources.map((r, i) => (
+                  {result.resources.map((r: any, i: number) => (
                     <li key={i} className="text-sm">• {r}</li>
                   ))}
                 </ul>
@@ -83,12 +83,12 @@ export default function ForFamiliesPage() {
       <section className="mb-10">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Caregiver Guides</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {CAREGIVER_GUIDES.map((guide) => (
+          {CAREGIVER_GUIDES.map((guide: any) => (
             <div key={guide.slug} className="border border-gray-200 rounded-xl p-5 hover:shadow-sm transition-shadow">
               <h3 className="font-semibold text-gray-900 mb-2">{guide.title}</h3>
-              <p className="text-sm text-gray-600 mb-3">{guide.description}</p>
+              <p className="text-sm text-gray-600 mb-3">{guide.summary}</p>
               <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-400">{guide.readTimeMinutes} min read</span>
+                <span className="text-xs text-gray-400">Read guide</span>
                 <Link
                   href={`/resources/caregiver-support`}
                   className="text-sm font-medium text-teal-600 hover:text-teal-800"

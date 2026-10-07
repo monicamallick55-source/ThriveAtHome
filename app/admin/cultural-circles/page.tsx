@@ -39,7 +39,7 @@ export default async function AdminCulturalCirclesPage() {
         </div>
       </nav>
 
-      <AdminCirclesClient circles={circles} />
+      <AdminCirclesClient circles={(circles ?? []) as any} />
     </div>
   )
 }

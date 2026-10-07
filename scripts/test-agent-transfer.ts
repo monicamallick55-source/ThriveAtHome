@@ -73,7 +73,7 @@ function quinnCall(callId: string, to: Transfer, from: string, userLines: string
     end_timestamp: T0 + 120_000,
     duration_ms: 120_000,
     disconnection_reason: 'user_hangup',
-    transcript: turns.map(t => `${t.role === 'agent' ? 'Agent' : 'User'}: ${t.content}`).join('\n'),
+    transcript: turns.map((t: any) => `${t.role === 'agent' ? 'Agent' : 'User'}: ${t.content}`).join('\n'),
     transcript_object: turns,
     transcript_with_tool_calls: events,
     metadata: {},

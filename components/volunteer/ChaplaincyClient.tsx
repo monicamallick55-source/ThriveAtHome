@@ -15,7 +15,7 @@ const FAITHS = [
 ]
 
 const FAITH_LABELS: Record<string, string> = Object.fromEntries(
-  FAITHS.filter(f => f.value !== 'all').map(f => [f.value, f.label])
+  FAITHS.filter(f => f.value !== 'all').map((f: any) => [f.value, f.label])
 )
 
 interface Chaplain {
@@ -52,7 +52,7 @@ export function ChaplaincyClient({ chaplains }: Props) {
 
         {/* Faith tradition filter */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '32px' }}>
-          {FAITHS.map(f => (
+          {FAITHS.map((f: any) => (
             <button
               key={f.value}
               onClick={() => setSelectedFaith(f.value)}
@@ -105,7 +105,7 @@ export function ChaplaincyClient({ chaplains }: Props) {
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
-            {filtered.map(c => (
+            {filtered.map((c: any) => (
               <div
                 key={c.id}
                 style={{

@@ -1,7 +1,9 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import type { CareWorkerRow, CareVisitRow } from '@/types/database'
+import type { Tables } from '@/types/database'
+type CareWorkerRow = Tables<'care_workers'>
+type CareVisitRow = Tables<'care_visits'>
 
 interface CareVisitWithMember extends CareVisitRow {
   member?: { preferred_name: string; full_name: string; address: string | null; phone_number?: string | null } | null
@@ -59,7 +61,7 @@ export default function CareWorkerDashboardClient({ worker, todaysVisits }: Care
         return
       }
       setVisits((prev) =>
-        prev.map((v) => v.id === visitId ? { ...v, status: 'in_progress', actual_check_in_at: json.visit?.actual_check_in_at } : v)
+        prev.map((v: any) => v.id === visitId ? { ...v, status: 'in_progress', actual_check_in_at: json.visit?.actual_check_in_at } : v)
       )
     })
   }
@@ -79,15 +81,15 @@ export default function CareWorkerDashboardClient({ worker, todaysVisits }: Care
         return
       }
       setVisits((prev) =>
-        prev.map((v) => v.id === visitId ? { ...v, status: 'completed', actual_check_out_at: json.visit?.actual_check_out_at, billable_hours: json.visit?.billable_hours } : v)
+        prev.map((v: any) => v.id === visitId ? { ...v, status: 'completed', actual_check_out_at: json.visit?.actual_check_out_at, billable_hours: json.visit?.billable_hours } : v)
       )
       setExpandedVisit(null)
       setCheckoutNotes((prev) => { const n = { ...prev }; delete n[visitId]; return n })
     })
   }
 
-  const completedCount = visits.filter((v) => v.status === 'completed').length
-  const totalHours = visits.filter((v) => v.status === 'completed').reduce((sum, v) => sum + (v.billable_hours ?? 0), 0)
+  const completedCount = visits.filter((v: any) => v.status === 'completed').length
+  const totalHours = visits.filter((v: any) => v.status === 'completed').reduce((sum, v) => sum + (v.billable_hours ?? 0), 0)
 
   return (
     <div style={{ minHeight: '100dvh', backgroundColor: '#F9FAFB', fontFamily: 'var(--font-body)' }}>
@@ -132,7 +134,7 @@ export default function CareWorkerDashboardClient({ worker, todaysVisits }: Care
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {visits.map((visit, index) => {
+            {visits.map((visit: any, index: number) => {
               const member = visit.member
               const colors = STATUS_COLORS[visit.status] ?? STATUS_COLORS.scheduled
               const isExpanded = expandedVisit === visit.id

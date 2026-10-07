@@ -1,5 +1,6 @@
 'use client'
-import type { K12SchoolRow } from '@/types/database'
+import type { Tables } from '@/types/database'
+type K12SchoolRow = Tables<'k12_schools'>
 
 const PROGRAM_LABELS: Record<string, string> = {
   pen_pals: '✉️ Pen Pals',
@@ -57,7 +58,7 @@ export function K12AdminClient({ schools }: Props) {
                     {school.city ? ` · ${school.city}, ${school.state}` : ''}
                   </p>
                   <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                    {school.program_types.map(p => (
+                    {(school.program_types ?? []).map(p => (
                       <span key={p} style={{ backgroundColor: '#FFF7ED', color: '#9A3412', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 600, fontFamily: 'var(--font-body)' }}>
                         {PROGRAM_LABELS[p] ?? p}
                       </span>
@@ -102,7 +103,7 @@ export function K12AdminClient({ schools }: Props) {
                       {school.school_type} · {school.contact_name} · {school.contact_email}
                     </p>
                     <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                      {school.program_types.map(p => (
+                      {(school.program_types ?? []).map(p => (
                         <span key={p} style={{ backgroundColor: '#D1FAE5', color: '#065F46', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 600, fontFamily: 'var(--font-body)' }}>
                           {PROGRAM_LABELS[p] ?? p}
                         </span>

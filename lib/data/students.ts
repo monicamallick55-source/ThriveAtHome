@@ -35,7 +35,7 @@ export async function getStudentByAuthId(authId: string): Promise<StudentVolunte
     .eq('supabase_auth_id', authId)
     .maybeSingle()
   if (error) console.error('[students/getStudentByAuthId]', error)
-  return data
+  return data as any
 }
 
 export async function getStudentVisits(studentId: string): Promise<StudentVisit[]> {
@@ -49,7 +49,7 @@ export async function getStudentVisits(studentId: string): Promise<StudentVisit[
     console.error('[students/getStudentVisits]', error)
     return []
   }
-  return data ?? []
+  return data as any ?? []
 }
 
 export async function logStudentVisit(params: {

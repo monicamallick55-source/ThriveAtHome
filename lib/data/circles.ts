@@ -94,7 +94,7 @@ export async function getMemberCircleIds(memberId: string): Promise<string[]> {
     console.error('[circles] getMemberCircleIds error:', error.message)
     return []
   }
-  return (data ?? []).map(r => r.circle_id)
+  return (data ?? []).map((r: any) => r.circle_id)
 }
 
 export async function joinCircle(memberId: string, circleId: string): Promise<boolean> {
@@ -202,16 +202,16 @@ export async function getCircleEvents(circleId: string, memberId?: string): Prom
 
   let rsvpedIds = new Set<string>()
   if (memberId && events && events.length > 0) {
-    const eventIds = events.map(e => e.id)
+    const eventIds = events.map((e: any) => e.id)
     const { data: rsvps } = await supabase
       .from('circle_event_rsvps')
       .select('event_id')
       .eq('member_id', memberId)
       .in('event_id', eventIds)
-    rsvpedIds = new Set((rsvps ?? []).map(r => r.event_id))
+    rsvpedIds = new Set((rsvps ?? []).map((r: any) => r.event_id))
   }
 
-  return (events ?? []).map(e => ({
+  return (events ?? []).map((e: any) => ({
     ...e,
     circle_ids: e.circle_ids ?? [],
     user_has_rsvped: rsvpedIds.has(e.id),
@@ -281,16 +281,16 @@ export async function getPlatformWideEvents(memberId?: string): Promise<CircleEv
 
   let rsvpedIds = new Set<string>()
   if (memberId && events && events.length > 0) {
-    const eventIds = events.map(e => e.id)
+    const eventIds = events.map((e: any) => e.id)
     const { data: rsvps } = await supabase
       .from('circle_event_rsvps')
       .select('event_id')
       .eq('member_id', memberId)
       .in('event_id', eventIds)
-    rsvpedIds = new Set((rsvps ?? []).map(r => r.event_id))
+    rsvpedIds = new Set((rsvps ?? []).map((r: any) => r.event_id))
   }
 
-  return (events ?? []).map(e => ({
+  return (events ?? []).map((e: any) => ({
     ...e,
     circle_ids: e.circle_ids ?? [],
     location_address: e.location_address ?? null,

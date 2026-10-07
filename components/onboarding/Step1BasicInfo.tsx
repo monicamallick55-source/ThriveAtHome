@@ -184,7 +184,7 @@ export function Step1BasicInfo({ data, onChange, errors, isSelf = false }: Props
           onChange={(e) => onChange('preferred_language', e.target.value)}
           style={{ ...inputStyle, cursor: 'pointer', backgroundColor: 'white' }}
         >
-          {LANGUAGES.map((l) => (
+          {LANGUAGES.map((l: any) => (
             <option key={l.value} value={l.value}>{l.label}</option>
           ))}
         </select>

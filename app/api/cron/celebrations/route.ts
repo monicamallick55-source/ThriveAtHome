@@ -245,7 +245,7 @@ export async function GET(req: NextRequest) {
           ? `Wishing ${memberName} a wonderful birthday today!`
           : `Plan ahead to make ${memberName}'s day extra special.`
 
-      const { error: notifError } = await admin.from('realtime_notifications').insert({
+      const { error: notifError } = await (admin as any).from('realtime_notifications').insert({
         member_id: member.id,
         type: 'celebration_upcoming',
         severity: 'info',

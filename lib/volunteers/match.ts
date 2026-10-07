@@ -17,8 +17,8 @@ export function volunteerCanHandleSubtype(volunteer: Volunteer, serviceType: str
   if (subtype && types.includes(subtype)) return true
   const cat = getCategoryById(serviceType)
   if (!cat) return types.includes(serviceType)
-  const catVisitTypes = cat.subtypes.map((s) => s.visitType).filter(Boolean)
-  return types.some((t) => catVisitTypes.includes(t) || t === serviceType)
+  const catVisitTypes = cat.subtypes.map((s: any) => s.visitType).filter(Boolean)
+  return types.some((t: any) => catVisitTypes.includes(t) || t === serviceType)
 }
 
 export function scoreVolunteerForMember(volunteer: Volunteer, member: Member, serviceType?: string, subtype?: string): { score: number; reasons: string[] } {
@@ -48,7 +48,7 @@ export function scoreVolunteerForMember(volunteer: Volunteer, member: Member, se
 
   // Shared interests (max 45 points)
   const memberTopics = member.topics_enjoy ?? []
-  const sharedInterests = volunteer.interests.filter(i => {
+  const sharedInterests = (volunteer.interests ?? []).filter(i => {
     const normalized = i.toLowerCase().replace(/[^a-z]/g, '')
     return memberTopics.some(t => t.toLowerCase().replace(/[^a-z]/g, '').includes(normalized) || normalized.includes(t.toLowerCase().replace(/[^a-z]/g, '')))
   })
@@ -61,7 +61,7 @@ export function scoreVolunteerForMember(volunteer: Volunteer, member: Member, se
   // Language match (if member non-English primary)
   const memberLang = member.preferred_language?.toLowerCase()
   if (memberLang && memberLang !== 'english') {
-    const volLangs = volunteer.languages.map(l => l.toLowerCase())
+    const volLangs = (volunteer.languages ?? []).map((l: any) => l.toLowerCase())
     if (volLangs.some(l => l.includes(memberLang) || memberLang.includes(l))) {
       score += 20
       reasons.push(`Speaks ${member.preferred_language}`)
@@ -69,7 +69,7 @@ export function scoreVolunteerForMember(volunteer: Volunteer, member: Member, se
   }
 
   // Veteran match — veteran volunteers score higher for veteran members
-  if (volunteer.interests.includes('veteran') && memberTopics.some(t => t.toLowerCase().includes('veteran'))) {
+  if ((volunteer.interests ?? []).includes('veteran') && memberTopics.some(t => t.toLowerCase().includes('veteran'))) {
     score += 20
     reasons.push('Veteran-to-veteran connection')
   }
@@ -106,7 +106,7 @@ export function getTopVolunteerMatchesFromList(
 ): MatchResult[] {
   const scored = volunteers
     .filter(v => v.status === 'active')
-    .map(v => {
+    .map((v: any) => {
       const { score, reasons } = scoreVolunteerForMember(v, member)
       return { volunteer: v, score, reasons }
     })

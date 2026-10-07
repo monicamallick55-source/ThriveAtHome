@@ -152,7 +152,7 @@ async function pushMilestoneNotification(
   title: string,
   body: string
 ): Promise<boolean> {
-  const { error: notifError } = await admin.from('realtime_notifications').insert({
+  const { error: notifError } = await (admin as any).from('realtime_notifications').insert({
     member_id: memberId,
     type: 'celebration_upcoming',
     severity: 'info',

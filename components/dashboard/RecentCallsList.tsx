@@ -51,7 +51,7 @@ export function RecentCallsList({ calls, error }: RecentCallsListProps) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-      {recent.map((call) => (
+      {recent.map((call: any) => (
         <div
           key={call.id}
           style={{

@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
 
   // Create navigator task
   const priority = ['scam_or_fraud', 'worried_about_member'].includes(reason) ? 'high' : 'medium'
-  await supabase.from('navigator_tasks').insert({
+  await (supabase as any).from('navigator_tasks').insert({
     task_type: 'community_report',
     priority,
     description: `Community report: ${reason}`,

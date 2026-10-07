@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
-import type { MemberAmbassadorRow } from '@/types/database'
+import type { Tables } from '@/types/database'
+type MemberAmbassadorRow = Tables<'member_ambassadors'>
 
 const AMBASSADOR_SPECIALTIES = [
   { value: 'onboarding_support', label: 'Onboarding Support' },
@@ -104,7 +105,7 @@ export function AmbassadorsAdminClient({ ambassadors: initial }: Props) {
                 Ambassador specialties
               </p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                {AMBASSADOR_SPECIALTIES.map(s => (
+                {AMBASSADOR_SPECIALTIES.map((s: any) => (
                   <button
                     key={s.value}
                     type="button"
@@ -173,7 +174,7 @@ export function AmbassadorsAdminClient({ ambassadors: initial }: Props) {
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ backgroundColor: '#F8F8F3' }}>
-                    {['Member', 'Since', 'Specialties', 'Members Welcomed', 'Events Hosted', 'Status'].map(h => (
+                    {['Member', 'Since', 'Specialties', 'Members Welcomed', 'Events Hosted', 'Status'].map((h: any) => (
                       <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-muted)', borderBottom: '1px solid var(--color-warm-grey)' }}>
                         {h}
                       </th>
@@ -181,11 +182,11 @@ export function AmbassadorsAdminClient({ ambassadors: initial }: Props) {
                   </tr>
                 </thead>
                 <tbody>
-                  {ambassadors.map((amb, i) => (
+                  {ambassadors.map((amb: any, i: number) => (
                     <tr key={amb.id} style={{ borderBottom: i < ambassadors.length - 1 ? '1px solid var(--color-warm-grey)' : 'none' }}>
                       <td style={{ padding: '12px 16px', fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 500, color: 'var(--color-navy)' }}>
-                        {(amb.member as { preferred_name?: string; full_name?: string } | null | undefined)?.preferred_name
-                          || (amb.member as { preferred_name?: string; full_name?: string } | null | undefined)?.full_name
+                        {((amb as any).member as { preferred_name?: string; full_name?: string } | null)?.preferred_name
+                          || ((amb as any).member as { preferred_name?: string; full_name?: string } | null)?.full_name
                           || amb.member_id.slice(0, 8) + '…'}
                       </td>
                       <td style={{ padding: '12px 16px', fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-muted)' }}>
@@ -193,8 +194,8 @@ export function AmbassadorsAdminClient({ ambassadors: initial }: Props) {
                       </td>
                       <td style={{ padding: '12px 16px' }}>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                          {amb.specialties.length > 0
-                            ? amb.specialties.map(s => (
+                          {(amb.specialties?.length ?? 0) > 0
+                            ? amb.specialties?.map((s: any) => (
                               <span key={s} style={{ backgroundColor: '#EEF2FF', color: '#4338CA', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 600, fontFamily: 'var(--font-body)' }}>
                                 {AMBASSADOR_SPECIALTIES.find(x => x.value === s)?.label ?? s}
                               </span>

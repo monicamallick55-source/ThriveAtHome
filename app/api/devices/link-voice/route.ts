@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
 
   // Reuse an existing row of the same type if present, else create one.
   const { data: existing } = await getDevicesForMember(memberId)
-  const match = existing.find((d) => d.device_type === deviceType)
+  const match = existing.find((d: any) => d.device_type === deviceType)
 
   if (match) {
     const { data, error } = await updateDevice(match.id, {

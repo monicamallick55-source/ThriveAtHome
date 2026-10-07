@@ -28,7 +28,7 @@ export default async function SelectRolePage() {
           {roles.map((r) => (
             <Link
               key={r}
-              href={ROLE_HOME[r] ?? '/dashboard'}
+              href={( ROLE_HOME as any)[r] ?? '/dashboard'}
               style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 backgroundColor: 'white', border: '1.5px solid #E8E4DC', borderRadius: '14px',

@@ -50,5 +50,5 @@ export default async function EmployerLandingPage({ params }: Props) {
   const { slug } = await params
   const employer = await getEmployerBySlug(slug)
   if (!employer) notFound()
-  return <EmployerLandingClient employer={employer} />
+  return <EmployerLandingClient employer={(employer ?? []) as any} />
 }

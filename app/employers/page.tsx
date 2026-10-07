@@ -202,7 +202,7 @@ export default function EmployersPage() {
                 For employees who are caring for aging parents. ThriveAtHome keeps their loved one safe, connected, and supported — so employees can be fully present at work.
               </p>
               <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {['Daily AI check-in calls for the senior', 'Real-time safety alerts for the family', 'Human care navigator on call', 'Volunteer companions and community circles'].map(item => (
+                {['Daily AI check-in calls for the senior', 'Real-time safety alerts for the family', 'Human care navigator on call', 'Volunteer companions and community circles'].map((item: any) => (
                   <li key={item} style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'rgba(250,250,245,0.8)', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
                     <span style={{ color: 'var(--color-teal)', fontWeight: 700, flexShrink: 0 }}>✓</span>
                     {item}
@@ -224,7 +224,7 @@ export default function EmployersPage() {
                 For employees who want to give back. They volunteer time with seniors on ThriveAtHome. Your company matches their hours with a cash donation — tracked and exported automatically to Benevity, YourCause, or Bright Funds.
               </p>
               <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {['Volunteer hours tracked automatically', 'Benevity / YourCause / Bright Funds export', 'Real impact: seniors matched with employee volunteers', 'Flexible matching rates ($10–$25/hr typical)'].map(item => (
+                {['Volunteer hours tracked automatically', 'Benevity / YourCause / Bright Funds export', 'Real impact: seniors matched with employee volunteers', 'Flexible matching rates ($10–$25/hr typical)'].map((item: any) => (
                   <li key={item} style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'rgba(250,250,245,0.8)', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
                     <span style={{ color: 'var(--color-teal)', fontWeight: 700, flexShrink: 0 }}>✓</span>
                     {item}
@@ -272,7 +272,7 @@ export default function EmployersPage() {
                 <div style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '4px' }}>{tier}</div>
                 <div style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 600, color: 'var(--color-navy)', marginBottom: '20px' }}>{price} <span style={{ fontSize: '14px', fontWeight: 400, color: 'var(--color-text-secondary)' }}>per employee</span></div>
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {features.map(f => (
+                  {features.map((f: any) => (
                     <li key={f} style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
                       <span style={{ color: 'var(--color-teal)', fontWeight: 700, flexShrink: 0 }}>✓</span> {f}
                     </li>
@@ -384,7 +384,7 @@ export default function EmployersPage() {
                   style={{ width: '100%', padding: '10px 14px', fontFamily: 'var(--font-body)', fontSize: '15px', border: '1.5px solid var(--color-warm-grey)', borderRadius: 'var(--radius-sm)', outline: 'none', backgroundColor: 'white', boxSizing: 'border-box' }}
                 >
                   <option value="">Select company size</option>
-                  {COMPANY_SIZES.map(s => <option key={s} value={s}>{s}</option>)}
+                  {COMPANY_SIZES.map((s: any) => <option key={s} value={s}>{s}</option>)}
                 </select>
               </div>
 

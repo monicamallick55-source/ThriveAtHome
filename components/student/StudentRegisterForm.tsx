@@ -113,7 +113,7 @@ export default function StudentRegisterForm({ email }: Props) {
               onChange={(e) => setForm((f) => ({ ...f, graduation_year: Number(e.target.value) }))}
               style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)', border: '1.5px solid rgba(30,58,95,0.25)', fontFamily: 'var(--font-body)', fontSize: '15px', boxSizing: 'border-box' }}
             >
-              {Array.from({ length: 8 }, (_, i) => CURRENT_YEAR + i).map((y) => (
+              {Array.from({ length: 8 }, (_, i) => CURRENT_YEAR + i).map((y: any) => (
                 <option key={y} value={y}>{y}</option>
               ))}
             </select>

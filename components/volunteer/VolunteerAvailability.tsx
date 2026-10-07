@@ -54,7 +54,7 @@ export default function VolunteerAvailability() {
 
       <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '14px' }}>
         <select value={dow} onChange={e => setDow(Number(e.target.value))} style={sel}>
-          {DAYS.map((d, i) => <option key={d} value={i}>{d}</option>)}
+          {DAYS.map((d: any, i: number) => <option key={d} value={i}>{d}</option>)}
         </select>
         <input type="time" value={start} onChange={e => setStart(e.target.value)} style={sel} />
         <span style={{ fontFamily: 'var(--font-body)', color: 'var(--color-text-secondary)' }}>to</span>
@@ -72,7 +72,7 @@ export default function VolunteerAvailability() {
         <p style={{ fontFamily: 'var(--font-body)', color: 'var(--color-text-secondary)' }}>No availability set yet.</p>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {shifts.map(s => (
+          {shifts.map((s: any) => (
             <div key={s.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '10px 16px', backgroundColor: 'rgba(26,122,106,0.06)', borderRadius: '10px' }}>
               <span style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-navy)' }}>
                 <strong>{DAYS[s.day_of_week]}</strong> · {s.start_time}–{s.end_time}

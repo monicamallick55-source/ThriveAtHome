@@ -30,7 +30,7 @@ async function seed(): Promise<void> {
   let authUserId: string
 
   const { data: existingUsers } = await admin.auth.admin.listUsers()
-  const existingUser = existingUsers?.users.find((u) => u.email === TEST_EMAIL)
+  const existingUser = existingUsers?.users.find((u: any) => u.email === TEST_EMAIL)
 
   if (existingUser) {
     authUserId = existingUser.id
@@ -134,7 +134,7 @@ async function seed(): Promise<void> {
     console.log(`   ↩  Already have ${existingCallCount} calls, skipping`)
   } else {
     const now = new Date()
-    const callsToInsert = MOOD_ARC.map((moodScore, i) => {
+    const callsToInsert = MOOD_ARC.map((moodScore: any, i: number) => {
       const daysAgo = MOOD_ARC.length - 1 - i
       const scheduledAt = new Date(now)
       scheduledAt.setDate(scheduledAt.getDate() - daysAgo)
@@ -234,7 +234,7 @@ async function seed(): Promise<void> {
 
   // 7a. Navigator auth user
   let navAuthUserId: string
-  const existingNavUser = existingUsers?.users.find((u) => u.email === NAV_EMAIL)
+  const existingNavUser = existingUsers?.users.find((u: any) => u.email === NAV_EMAIL)
   if (existingNavUser) {
     navAuthUserId = existingNavUser.id
     console.log(`   ↩  Navigator auth user already exists (${navAuthUserId})`)
@@ -437,7 +437,7 @@ async function seed(): Promise<void> {
   const VOL_PASSWORD = 'TestPassword123!'
 
   let volAuthUserId: string
-  const existingVolUser = existingUsers?.users.find((u) => u.email === VOL_EMAIL)
+  const existingVolUser = existingUsers?.users.find((u: any) => u.email === VOL_EMAIL)
   if (existingVolUser) {
     volAuthUserId = existingVolUser.id
     console.log(`   ↩  Auth user exists: ${VOL_EMAIL} (${volAuthUserId})`)
@@ -537,7 +537,7 @@ async function seed(): Promise<void> {
   const STUDENT_PASSWORD = 'TestPassword123!'
 
   let studentAuthUserId: string | undefined
-  const existingStudentUser = existingUsers?.users.find((u) => u.email === STUDENT_EMAIL)
+  const existingStudentUser = existingUsers?.users.find((u: any) => u.email === STUDENT_EMAIL)
   if (existingStudentUser) {
     studentAuthUserId = existingStudentUser.id
     console.log(`   ↩  Auth user exists: ${STUDENT_EMAIL} (${studentAuthUserId})`)

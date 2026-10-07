@@ -162,7 +162,7 @@ function ScheduledServicesSection({ bookings, history }: { bookings: ServiceBook
             Scheduled
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: history.length > 0 ? '20px' : 0 }}>
-            {bookings.slice(0, 3).map((b) => (
+            {bookings.slice(0, 3).map((b: any) => (
               <ServiceBookingCard key={b.id} b={b} />
             ))}
           </div>
@@ -174,7 +174,7 @@ function ScheduledServicesSection({ bookings, history }: { bookings: ServiceBook
             Recent history
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {history.map((b) => (
+            {history.map((b: any) => (
               <ServiceBookingCard key={b.id} b={b} />
             ))}
           </div>
@@ -302,7 +302,7 @@ function WellnessInsightsSection({ summary }: { summary: MlSummaryForDash | null
         </Link>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {cards.map((c, i) => (
+        {cards.map((c: any, i: number) => (
           <div
             key={i}
             style={{ backgroundColor: 'white', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-warm-grey)', borderLeft: '4px solid var(--color-teal)', padding: '16px', boxShadow: 'var(--shadow-card)' }}
@@ -374,7 +374,7 @@ function QuickActions() {
         }}
         className="quick-actions-grid"
       >
-        {actions.map((action) => (
+        {actions.map((action: any) => (
           <Link
             key={action.label}
             href={action.href}
@@ -467,7 +467,7 @@ function UpcomingTrackedItemsSection({ items }: { items: TrackedItem[] }) {
         </Link>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        {upcoming.map(item => {
+        {upcoming.map((item: any) => {
           const days = getDaysUntil(item.expiration_or_appointment_date)
           const { color, bg } = urgencyColor(days)
           const defaults = ITEM_TYPE_DEFAULTS[item.item_type as keyof typeof ITEM_TYPE_DEFAULTS]
@@ -522,7 +522,7 @@ function MilestonesSection({ events }: { events: CelebrationEvent[] }) {
         </Link>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {events.map((event) => {
+        {events.map((event: any) => {
           const info = MILESTONE_LABELS[event.celebration_type] ?? { emoji: '🎉', label: event.celebration_type.replace(/_/g, ' '), color: '#4361ee' }
           const today = new Date().toISOString().slice(0, 10)
           const isToday = event.event_date === today

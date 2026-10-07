@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
 import { getVolunteerByAuthId, logVolunteerVisit } from '@/lib/data/volunteers'
 import { createAdminClient } from '@/lib/supabase/admin'
-import type { VisitType } from '@/types/database'
+import type { VisitType } from '@/lib/services/serviceTypes'
 
 // service_bookings.service_type → volunteer_visits.visit_type
 const VISIT_TYPE_MAP: Record<string, VisitType> = {
@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
 
   // 3. Let the member know
   try {
-    await admin.from('realtime_notifications').insert({
+    await (admin as any).from('realtime_notifications').insert({
       member_id: booking.member_id,
       type: 'volunteer_matched' as const,
       severity: 'info' as const,

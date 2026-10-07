@@ -39,7 +39,7 @@ function csvRow(row: AAAServiceUnitRow): string {
     row.worker_name ?? '',
     row.notes ?? '',
   ]
-  return fields.map((f) => `"${String(f).replace(/"/g, '""')}"`).join(',')
+  return fields.map((f: any) => `"${String(f).replace(/"/g, '""')}"`).join(',')
 }
 
 const CSV_HEADER = [

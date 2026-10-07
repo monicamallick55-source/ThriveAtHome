@@ -91,7 +91,7 @@ export async function runNoMotionSweep(): Promise<{
     .eq('device_category', 'smart_home')
     .eq('status', 'active')
 
-  const memberIds = Array.from(new Set((rows ?? []).map((r) => r.member_id)))
+  const memberIds = Array.from(new Set((rows ?? []).map((r: any) => r.member_id)))
   let concern = 0
   let emergency = 0
 

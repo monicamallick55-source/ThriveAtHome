@@ -26,7 +26,7 @@ export async function GET() {
   const { data: shifts } = await (admin.from as any)('volunteer_shifts')
     .select('volunteer_id, day_of_week, start_time, end_time')
 
-  const byDay = DAY_NAMES.map((name, dow) => {
+  const byDay = DAY_NAMES.map((name: any, dow: number) => {
     const rows = (shifts ?? []).filter((s: { day_of_week: number }) => s.day_of_week === dow)
     const volunteers = new Set(rows.map((r: { volunteer_id: string }) => r.volunteer_id))
     // Union of covered clock-hours (0-23).

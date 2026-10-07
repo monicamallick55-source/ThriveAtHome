@@ -191,7 +191,7 @@ export default function DonationModule({
       <div style={{ marginBottom: '20px' }}>
         <span style={label}>Amount</span>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '10px' }}>
-          {PRESET_AMOUNTS.map(a => (
+          {PRESET_AMOUNTS.map((a: any) => (
             <button
               key={a}
               type="button"
@@ -300,7 +300,7 @@ function PastGifts({ history }: { history: PastDonation[] }) {
         ${(total / 100).toFixed(0)} given across {history.length} {history.length === 1 ? 'gift' : 'gifts'} — thank you.
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        {history.map(d => (
+        {history.map((d: any) => (
           <div key={d.id} style={{ backgroundColor: '#F9F6F0', borderRadius: '10px', padding: '12px 16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}>
               <span style={{ fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 600, color: 'var(--color-navy)' }}>

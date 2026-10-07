@@ -105,7 +105,7 @@ export default function TechTutorialsPage() {
 
         {/* Tutorial categories */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '24px' }}>
-          {TUTORIAL_CATEGORIES.map((category) => (
+          {TUTORIAL_CATEGORIES.map((category: any) => (
             <div
               key={category.title}
               style={{ backgroundColor: 'white', borderRadius: 'var(--radius-xl)', border: '1.5px solid var(--color-warm-grey)', boxShadow: 'var(--shadow-card)', padding: '28px 32px' }}
@@ -122,7 +122,7 @@ export default function TechTutorialsPage() {
                 </div>
               </div>
               <ul style={{ margin: 0, paddingLeft: '0', listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {category.tutorials.map((tutorial) => (
+                {category.tutorials.map((tutorial: any) => (
                   <li key={tutorial} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <span style={{ width: '28px', height: '28px', backgroundColor: '#f0fdf4', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', flexShrink: 0 }}>▶</span>
                     <span style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-primary)' }}>

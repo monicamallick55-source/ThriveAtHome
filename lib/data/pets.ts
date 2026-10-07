@@ -4,7 +4,9 @@
 import { createAdminClient } from '../supabase/admin'
 import { pushRealtimeNotification } from '../realtime/notifications'
 import { emailProvider } from '../providers'
-import type { MemberPetRow, MemberPetInsert } from '../../types/database'
+import type { Tables } from '@/types/database'
+type MemberPetRow = Tables<'member_pets'>
+type MemberPetInsert = any
 
 const SPECIES = ['dog', 'cat', 'bird', 'rabbit', 'fish', 'horse', 'other'] as const
 export type PetSpecies = (typeof SPECIES)[number]
@@ -53,7 +55,7 @@ export async function getActivePetsForMember(
   memberId: string
 ): Promise<{ data: MemberPetRow[]; error: string | null }> {
   const { data, error } = await getPetsForMember(memberId)
-  return { data: data.filter((p) => p.is_active && !p.passed_away_on), error }
+  return { data: data.filter((p: any) => p.is_active && !p.passed_away_on), error }
 }
 
 export async function getPetById(
@@ -135,7 +137,7 @@ export async function updatePet(
 
     const { data, error } = await admin
       .from('member_pets')
-      .update(patch)
+      .update(patch as any)
       .eq('id', petId)
       .select('*')
       .maybeSingle()
@@ -348,11 +350,11 @@ export async function getMemberPetSummary(memberId: string): Promise<MemberPetSu
     ])
     return {
       activePets: (pets ?? [])
-        .filter((p) => p.is_active && !p.passed_away_on)
-        .map((p) => ({ name: p.name as string, species: p.species as string })),
+        .filter((p: any) => p.is_active && !p.passed_away_on)
+        .map((p: any) => ({ name: p.name as string, species: p.species as string })),
       memorializedPets: (pets ?? [])
-        .filter((p) => p.passed_away_on)
-        .map((p) => ({ name: p.name as string, passed_away_on: p.passed_away_on as string | null })),
+        .filter((p: any) => p.passed_away_on)
+        .map((p: any) => ({ name: p.name as string, passed_away_on: p.passed_away_on as string | null })),
       upcomingPetCelebrations: celebs?.length ?? 0,
       openPetLossRequests: reqs?.length ?? 0,
     }

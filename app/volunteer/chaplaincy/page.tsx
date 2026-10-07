@@ -7,5 +7,5 @@ export const metadata: Metadata = { title: 'Faith Community Chaplaincy — Thriv
 
 export default async function ChaplaincyPage() {
   const { data: chaplains } = await getChaplainVolunteers()
-  return <ChaplaincyClient chaplains={chaplains} />
+  return <ChaplaincyClient chaplains={(chaplains ?? []) as any} />
 }

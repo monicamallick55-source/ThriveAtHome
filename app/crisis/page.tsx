@@ -46,7 +46,7 @@ export default function CrisisPage() {
         </div>
 
         <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {CRISIS_RESOURCES.map((r) => (
+          {CRISIS_RESOURCES.map((r: any) => (
             <li
               key={r.key}
               style={{

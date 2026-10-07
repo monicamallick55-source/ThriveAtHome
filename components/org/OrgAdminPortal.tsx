@@ -456,7 +456,7 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
     const json = await res.json().catch(() => ({ error: 'Server error' }))
     setUpdatingNeedId(null)
     if (!res.ok) { setNeedError(json.error ?? 'Failed to update need'); return }
-    setMemberNeeds(prev => prev.map(n => n.id === needId ? { ...n, status, fulfilled_at: json.data?.fulfilled_at ?? n.fulfilled_at, claimed_at: json.data?.claimed_at ?? n.claimed_at } : n))
+    setMemberNeeds(prev => prev.map((n: any) => n.id === needId ? { ...n, status, fulfilled_at: json.data?.fulfilled_at ?? n.fulfilled_at, claimed_at: json.data?.claimed_at ?? n.claimed_at } : n))
   }
 
   async function handleRecordDues() {
@@ -632,7 +632,7 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
 
         {/* Tabs */}
         <div style={{ display: 'flex', gap: '4px', overflowX: 'auto' }}>
-          {tabs.map(tab => (
+          {tabs.map((tab: any) => (
             <button
               key={tab.id}
               onClick={() => { setActiveTab(tab.id as typeof activeTab); if (tab.id === 'documents') loadDocs() }}
@@ -669,7 +669,7 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
                 { label: 'Open Needs', value: stats.open_needs_count, icon: '🙋', highlight: stats.open_needs_count > 0 },
                 { label: 'Active Members This Year', value: stats.active_memberships_count, icon: '🏷️' },
                 { label: 'Dues Collected', value: formatCents(stats.dues_collected_cents), icon: '💳' },
-              ].map(s => (
+              ].map((s: any) => (
                 <div key={s.label} style={{ backgroundColor: 'white', borderRadius: '12px', padding: '20px', border: s.highlight ? '2px solid #D62828' : '1px solid #E8E4DC' }}>
                   <div style={{ fontSize: '28px', marginBottom: '8px' }}>{s.icon}</div>
                   <div style={{ fontFamily: 'var(--font-body)', fontSize: '28px', fontWeight: 700, color: s.highlight ? '#D62828' : 'var(--color-navy)' }}>{s.value}</div>
@@ -720,7 +720,7 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
                   <div>
                     <label style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-navy)', display: 'block', marginBottom: '6px' }}>Program Type *</label>
                     <select value={programForm.program_type} onChange={e => setProgramForm(f => ({ ...f, program_type: e.target.value }))} style={{ width: '100%', padding: '10px 14px', border: '1px solid #D1C9BC', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '15px', boxSizing: 'border-box' }}>
-                      {PROGRAM_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                      {PROGRAM_TYPES.map((t: any) => <option key={t.value} value={t.value}>{t.label}</option>)}
                     </select>
                   </div>
                   <div style={{ gridColumn: '1 / -1' }}>
@@ -760,7 +760,7 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
               </div>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
-                {programs.map(p => (
+                {programs.map((p: any) => (
                   <div key={p.id} style={{ backgroundColor: 'white', borderRadius: '12px', padding: '20px', border: '1px solid #E8E4DC' }}>
                     <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '8px' }}>
                       <h3 style={{ fontFamily: 'var(--font-body)', fontSize: '16px', fontWeight: 700, color: 'var(--color-navy)', margin: 0 }}>{p.program_name}</h3>
@@ -820,7 +820,7 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
                     {orgMembers.length > 0 ? (
                       <select value={needForm.member_id} onChange={e => setNeedForm(f => ({ ...f, member_id: e.target.value }))} style={{ width: '100%', padding: '10px 14px', border: '1px solid #D1C9BC', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '14px', boxSizing: 'border-box' }}>
                         <option value="">— Select a member —</option>
-                        {orgMembers.map(m => (
+                        {orgMembers.map((m: any) => (
                           <option key={m.id} value={m.id}>{m.preferred_name ? `${m.preferred_name} (${m.full_name})` : m.full_name}</option>
                         ))}
                       </select>
@@ -831,7 +831,7 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
                   <div>
                     <label style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-navy)', display: 'block', marginBottom: '6px' }}>Need Type *</label>
                     <select value={needForm.need_type} onChange={e => setNeedForm(f => ({ ...f, need_type: e.target.value }))} style={{ width: '100%', padding: '10px 14px', border: '1px solid #D1C9BC', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '14px', boxSizing: 'border-box' }}>
-                      {NEED_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                      {NEED_TYPES.map((t: any) => <option key={t.value} value={t.value}>{t.label}</option>)}
                     </select>
                   </div>
                   <div style={{ gridColumn: '1 / -1' }}>
@@ -874,7 +874,7 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px' }}>
-                {openNeeds.map(need => (
+                {openNeeds.map((need: any) => (
                   <NeedCard key={need.id} need={need} onUpdateStatus={handleNeedStatusUpdate} isUpdating={updatingNeedId === need.id} />
                 ))}
               </div>
@@ -885,7 +885,7 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
               <>
                 <h3 style={{ fontFamily: 'var(--font-body)', fontSize: '16px', fontWeight: 700, color: '#F59E0B', marginBottom: '12px' }}>🟡 Claimed ({claimedNeeds.length})</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px' }}>
-                  {claimedNeeds.map(need => (
+                  {claimedNeeds.map((need: any) => (
                     <NeedCard key={need.id} need={need} onUpdateStatus={handleNeedStatusUpdate} isUpdating={updatingNeedId === need.id} />
                   ))}
                 </div>
@@ -897,7 +897,7 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
               <>
                 <h3 style={{ fontFamily: 'var(--font-body)', fontSize: '16px', fontWeight: 700, color: '#15803D', marginBottom: '12px' }}>✅ Fulfilled ({fulfilledNeeds.length})</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {fulfilledNeeds.slice(0, 10).map(need => (
+                  {fulfilledNeeds.slice(0, 10).map((need: any) => (
                     <NeedCard key={need.id} need={need} onUpdateStatus={handleNeedStatusUpdate} isUpdating={updatingNeedId === need.id} />
                   ))}
                 </div>
@@ -914,7 +914,7 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ backgroundColor: '#F9F6F0' }}>
-                    {['Name', 'Tier', 'Dues Paid', 'Payment Date', 'Notes', ''].map(h => (
+                    {['Name', 'Tier', 'Dues Paid', 'Payment Date', 'Notes', ''].map((h: any) => (
                       <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 700, color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</th>
                     ))}
                   </tr>
@@ -922,7 +922,7 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
                 <tbody>
                   {memberships.length === 0 ? (
                     <tr><td colSpan={6} style={{ padding: '48px', textAlign: 'center', fontFamily: 'var(--font-body)', fontSize: '16px', color: 'var(--color-text-secondary)' }}>No membership records for {new Date().getFullYear()} yet.</td></tr>
-                  ) : memberships.map((m, i) => (
+                  ) : memberships.map((m: any, i: number) => (
                     <tr key={m.id} style={{ borderTop: i > 0 ? '1px solid #E8E4DC' : undefined }}>
                       <td style={{ padding: '12px 16px', fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-navy)', fontWeight: 600 }}>{m.member?.full_name ?? 'Unknown'}</td>
                       <td style={{ padding: '12px 16px', fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)' }}>{MEMBERSHIP_TIERS.find(t => t.value === m.membership_tier)?.label ?? m.membership_tier}</td>
@@ -975,14 +975,14 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
                   { label: 'Sliding Scale — Low', amount: orgFees.annual_dues_sliding_low_cents, note: 'For members who cannot afford standard dues' },
                   { label: 'Sliding Scale — Mid', amount: orgFees.annual_dues_sliding_mid_cents, note: 'Reduced rate for those with limited income' },
                   { label: 'Standard', amount: orgFees.annual_dues_standard_cents, note: 'Regular annual membership' },
-                ].map(tier => (
+                ].map((tier: any) => (
                   <div key={tier.label} style={{ padding: '16px', backgroundColor: '#F9F6F0', borderRadius: '8px', border: '1px solid #E8E4DC' }}>
                     <div style={{ fontFamily: 'var(--font-body)', fontSize: '22px', fontWeight: 700, color: 'var(--color-teal)' }}>{formatCents(tier.amount)}</div>
                     <div style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 700, color: 'var(--color-navy)', marginBottom: '4px' }}>{tier.label}</div>
                     <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)' }}>{tier.note}</div>
                   </div>
                 ))}
-                {tiers.filter(t => t.is_active).map(t => (
+                {tiers.filter(t => t.is_active).map((t: any) => (
                   <div key={t.id} style={{ padding: '16px', backgroundColor: '#F0F9F7', borderRadius: '8px', border: '1px solid #2A9D8F30' }}>
                     <div style={{ fontFamily: 'var(--font-body)', fontSize: '22px', fontWeight: 700, color: 'var(--color-teal)' }}>{formatCents(t.amount_cents)}</div>
                     <div style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 700, color: 'var(--color-navy)', marginBottom: '4px' }}>{t.tier_name}</div>
@@ -1004,7 +1004,7 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
                     {orgMembers.length > 0 ? (
                       <select value={duesForm.member_id} onChange={e => setDuesForm(f => ({ ...f, member_id: e.target.value }))} style={{ width: '100%', padding: '10px 14px', border: '1px solid #D1C9BC', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '14px', boxSizing: 'border-box' }}>
                         <option value="">— Select a member —</option>
-                        {orgMembers.map(m => (
+                        {orgMembers.map((m: any) => (
                           <option key={m.id} value={m.id}>{m.preferred_name ? `${m.preferred_name} (${m.full_name})` : m.full_name}</option>
                         ))}
                       </select>
@@ -1015,7 +1015,7 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
                   <div>
                     <label style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-navy)', display: 'block', marginBottom: '6px' }}>Membership Tier</label>
                     <select value={duesForm.membership_tier} onChange={e => setDuesForm(f => ({ ...f, membership_tier: e.target.value }))} style={{ width: '100%', padding: '10px 14px', border: '1px solid #D1C9BC', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '14px', boxSizing: 'border-box' }}>
-                      {MEMBERSHIP_TIERS.map(t => <option key={t.value} value={t.value}>{t.label} — {formatCents(tierDues(orgFees, t.value))}/yr</option>)}
+                      {MEMBERSHIP_TIERS.map((t: any) => <option key={t.value} value={t.value}>{t.label} — {formatCents(tierDues(orgFees, t.value))}/yr</option>)}
                     </select>
                   </div>
                   <div>
@@ -1064,7 +1064,7 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
                   { key: 'sliding_low' as const, label: 'Sliding Scale — Low', note: 'For members who cannot afford standard dues', bg: '#F0F9F7' },
                   { key: 'sliding_mid' as const, label: 'Sliding Scale — Mid', note: 'Reduced rate for those with limited income', bg: '#F9F6F0' },
                   { key: 'standard' as const, label: 'Standard', note: 'Regular annual membership rate', bg: '#F9F6F0' },
-                ].map(tier => (
+                ].map((tier: any) => (
                   <div key={tier.key} style={{ padding: '20px', backgroundColor: tier.bg, borderRadius: '10px', border: '1px solid #E8E4DC' }}>
                     <label style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 700, color: 'var(--color-navy)', display: 'block', marginBottom: '4px' }}>{tier.label}</label>
                     <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)', marginBottom: '10px' }}>{tier.note}</p>
@@ -1074,7 +1074,7 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
                         type="number"
                         min="0"
                         step="1"
-                        value={feeForm[tier.key]}
+                        value={(feeForm as any)[tier.key]}
                         onChange={e => setFeeForm(f => ({ ...f, [tier.key]: e.target.value }))}
                         style={{ width: '100px', padding: '8px 12px', border: '1px solid #D1C9BC', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '18px', fontWeight: 700, color: 'var(--color-teal)' }}
                       />
@@ -1157,7 +1157,7 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
                 <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)', textAlign: 'center', padding: '24px' }}>No custom tiers yet. Click "+ Add Tier" to create one.</p>
               ) : (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '12px' }}>
-                  {tiers.map(t => (
+                  {tiers.map((t: any) => (
                     <div key={t.id} style={{ padding: '16px', backgroundColor: '#F0F9F7', borderRadius: '10px', border: '1px solid #2A9D8F30', opacity: t.is_active ? 1 : 0.5 }}>
                       <div style={{ fontFamily: 'var(--font-body)', fontSize: '22px', fontWeight: 700, color: 'var(--color-teal)' }}>{formatCents(t.amount_cents)}/yr</div>
                       <div style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 700, color: 'var(--color-navy)', marginBottom: '4px' }}>{t.tier_name}</div>
@@ -1185,8 +1185,8 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
                     { label: 'Sliding Scale — Low', amount: Math.round(parseFloat(feeForm.sliding_low || '0') * 100) },
                     { label: 'Sliding Scale — Mid', amount: Math.round(parseFloat(feeForm.sliding_mid || '0') * 100) },
                     { label: 'Standard', amount: Math.round(parseFloat(feeForm.standard || '0') * 100) },
-                    ...tiers.filter(t => t.is_active).map(t => ({ label: t.tier_name, amount: t.amount_cents })),
-                  ].map(tier => (
+                    ...tiers.filter(t => t.is_active).map((t: any) => ({ label: t.tier_name, amount: t.amount_cents })),
+                  ].map((tier: any) => (
                     <div key={tier.label} style={{ padding: '16px', border: '1px solid #E8E4DC', borderRadius: '8px', textAlign: 'center', cursor: 'pointer', backgroundColor: 'white' }}>
                       <div style={{ fontFamily: 'var(--font-body)', fontSize: '24px', fontWeight: 700, color: 'var(--color-navy)' }}>{tier.amount === 0 ? 'Free' : formatCents(tier.amount)}</div>
                       {tier.amount > 0 && <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)' }}>/year</div>}
@@ -1209,7 +1209,7 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
                   { tier: 'in_development', label: 'In-Development', price: '$49/mo', desc: 'Up to 50 members. All core features.', highlight: false },
                   { tier: 'growth', label: 'Growth', price: '$149/mo', desc: 'Up to 200 members. + Wellness data & Aria.', highlight: true },
                   { tier: 'scale', label: 'Scale', price: '$349/mo', desc: 'Unlimited members. Full AI outcomes data.', highlight: false },
-                ].map(plan => (
+                ].map((plan: any) => (
                   <div key={plan.tier} style={{ padding: '20px', borderRadius: '10px', border: plan.highlight ? '2px solid var(--color-teal)' : '1px solid #E8E4DC', backgroundColor: plan.highlight ? '#F0F9F7' : 'white', position: 'relative' }}>
                     {plan.highlight && <div style={{ position: 'absolute', top: '-10px', left: '50%', transform: 'translateX(-50%)', backgroundColor: 'var(--color-teal)', color: 'white', padding: '2px 12px', borderRadius: '12px', fontFamily: 'var(--font-body)', fontSize: '11px', fontWeight: 700, whiteSpace: 'nowrap' }}>Most popular</div>}
                     <div style={{ fontFamily: 'var(--font-body)', fontSize: '22px', fontWeight: 700, color: 'var(--color-navy)' }}>{plan.price}</div>
@@ -1323,7 +1323,7 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
                   </div>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {donations.map(d => (
+                    {donations.map((d: any) => (
                       <div key={d.id} style={{ backgroundColor: 'white', borderRadius: '10px', padding: '16px 20px', border: '1px solid #E8E4DC', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
                         <div>
                           <span style={{ fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 700, color: 'var(--color-navy)' }}>{d.is_anonymous ? 'Anonymous' : d.donor_name}</span>
@@ -1367,7 +1367,7 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
                     <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)' }}>No templates yet. Compose an email and save it as a template.</p>
                   ) : (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                      {templates.map(t => (
+                      {templates.map((t: any) => (
                         <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', backgroundColor: t.org_id ? '#F0F9F7' : '#F9F6F0', borderRadius: '8px', border: `1px solid ${t.org_id ? '#2A9D8F30' : '#E8E4DC'}` }}>
                           <button
                             onClick={() => applyTemplate(t)}
@@ -1403,7 +1403,7 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
                   <option value="dues_due">Members with dues due (unpaid this year)</option>
                   <option value="volunteers">All active volunteers</option>
                   <option value="donors">All donors (non-anonymous)</option>
-                  {programs.map(p => (
+                  {programs.map((p: any) => (
                     <option key={p.id} value={`program_${p.id}`}>Program: {p.program_name}</option>
                   ))}
                 </select>
@@ -1512,7 +1512,7 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
                 <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)' }}>No emails sent yet.</p>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {sentEmails.map(e => (
+                  {sentEmails.map((e: any) => (
                     <div key={e.id} style={{ padding: '16px', backgroundColor: '#FAFAF5', borderRadius: '8px', border: '1px solid #E8E4DC' }}>
                       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px' }}>
                         <div>
@@ -1602,7 +1602,7 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
               <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)' }}>No documents uploaded yet. Use the form above to add your first document.</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {docs.map(doc => (
+                {docs.map((doc: any) => (
                   <div key={doc.id} style={{ backgroundColor: 'white', borderRadius: '10px', padding: '16px 20px', border: '1px solid #E8E4DC', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
@@ -1709,12 +1709,12 @@ function SchedulingTab({ orgMembers }: { orgMembers: Array<{ id: string; full_na
   }
 
   async function togglePause(id: string, next: boolean) {
-    setSchedules(prev => prev.map(s => s.id === id ? { ...s, is_active: next } : s))
+    setSchedules(prev => prev.map((s: any) => s.id === id ? { ...s, is_active: next } : s))
     const res = await fetch('/api/org-admin/recurring-schedules', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, is_active: next }),
     })
-    if (!res.ok) { setSchedules(prev => prev.map(s => s.id === id ? { ...s, is_active: !next } : s)); setMsg('Could not update that schedule.') }
+    if (!res.ok) { setSchedules(prev => prev.map((s: any) => s.id === id ? { ...s, is_active: !next } : s)); setMsg('Could not update that schedule.') }
   }
 
   const inputSty = { padding: '10px 14px', border: '1px solid #DDD', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '14px', backgroundColor: 'white' } as const
@@ -1731,7 +1731,7 @@ function SchedulingTab({ orgMembers }: { orgMembers: Array<{ id: string; full_na
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
           <select value={form.member_id} onChange={e => setForm(f => ({ ...f, member_id: e.target.value }))} style={{ ...inputSty, gridColumn: '1 / -1' }}>
             <option value="">Select a member…</option>
-            {orgMembers.map(m => <option key={m.id} value={m.id}>{m.preferred_name ?? m.full_name} ({m.full_name})</option>)}
+            {orgMembers.map((m: any) => <option key={m.id} value={m.id}>{m.preferred_name ?? m.full_name} ({m.full_name})</option>)}
           </select>
           <select value={form.service_type} onChange={e => setForm(f => ({ ...f, service_type: e.target.value }))} style={inputSty}>
             <option value="transport">🚗 Transport</option>
@@ -1747,7 +1747,7 @@ function SchedulingTab({ orgMembers }: { orgMembers: Array<{ id: string; full_na
             <option value="biweekly">Every two weeks</option>
           </select>
           <select value={form.day_of_week} onChange={e => setForm(f => ({ ...f, day_of_week: e.target.value }))} style={inputSty}>
-            {DOW_LABELS.map((d, i) => <option key={i} value={String(i)}>{d}</option>)}
+            {DOW_LABELS.map((d: any, i: number) => <option key={i} value={String(i)}>{d}</option>)}
           </select>
           <input type="time" value={form.time_of_day} onChange={e => setForm(f => ({ ...f, time_of_day: e.target.value }))} style={inputSty} />
           <input value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} placeholder="Notes (optional)" style={{ ...inputSty, gridColumn: '1 / -1' }} />
@@ -1765,7 +1765,7 @@ function SchedulingTab({ orgMembers }: { orgMembers: Array<{ id: string; full_na
         <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', marginBottom: '32px' }}>No recurring schedules yet.</p>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '32px' }}>
-          {schedules.map(s => (
+          {schedules.map((s: any) => (
             <div key={s.id} style={{ backgroundColor: 'white', borderRadius: '10px', padding: '16px 20px', border: '1px solid #E8E4DC', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', opacity: s.is_active ? 1 : 0.55 }}>
               <div>
                 <div style={{ fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 600, color: 'var(--color-navy)' }}>
@@ -1790,7 +1790,7 @@ function SchedulingTab({ orgMembers }: { orgMembers: Array<{ id: string; full_na
         Which days your volunteers have published availability. Days with no coverage are flagged.
       </p>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px' }}>
-        {coverage.map(d => (
+        {coverage.map((d: any) => (
           <div key={d.day_of_week} style={{ backgroundColor: 'white', borderRadius: '10px', padding: '14px 16px', border: `1px solid ${d.gap ? '#D6282850' : '#E8E4DC'}`, borderLeft: `4px solid ${d.gap ? '#D62828' : 'var(--color-teal)'}` }}>
             <div style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 700, color: 'var(--color-navy)' }}>{d.day}</div>
             <div style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: d.gap ? '#D62828' : 'var(--color-text-secondary)', marginTop: '4px' }}>
@@ -1848,13 +1848,13 @@ function TrendsTab() {
         <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)' }}>No data yet.</p>
       ) : (
         <div style={{ display: 'grid', gap: '24px' }}>
-          {metrics.map(m => {
-            const max = Math.max(1, ...trends.map(t => Number(t[m.key]) || 0))
+          {metrics.map((m: any) => {
+            const max = Math.max(1, ...trends.map((t: any) => Number(t[m.key]) || 0))
             return (
               <div key={m.key} style={{ backgroundColor: 'white', borderRadius: '12px', padding: '20px 24px', border: '1px solid #E8E4DC' }}>
                 <div style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 700, color: 'var(--color-navy)', marginBottom: '16px' }}>{m.label}</div>
                 <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', height: '120px' }}>
-                  {trends.map(t => {
+                  {trends.map((t: any) => {
                     const v = Number(t[m.key]) || 0
                     return (
                       <div key={t.month} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>

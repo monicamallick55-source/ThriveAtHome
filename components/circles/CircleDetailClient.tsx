@@ -55,7 +55,7 @@ export default function CircleDetailClient({
   const [postContent, setPostContent] = useState('')
   const [posting, setPosting] = useState(false)
   const [rsvpedEvents, setRsvpedEvents] = useState<Set<string>>(
-    new Set(events.filter(e => e.user_has_rsvped).map(e => e.id))
+    new Set(events.filter(e => e.user_has_rsvped).map((e: any) => e.id))
   )
   const [joinLoading, setJoinLoading] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
@@ -196,7 +196,7 @@ export default function CircleDetailClient({
               color: 'var(--color-text-secondary)', textTransform: 'uppercase',
               letterSpacing: '0.06em', margin: '0 0 12px',
             }}>Upcoming Events</h2>
-            {events.map(event => {
+            {events.map((event: any) => {
               const rsvped = rsvpedEvents.has(event.id)
               return (
                 <div key={event.id} style={{
@@ -352,7 +352,7 @@ export default function CircleDetailClient({
               No posts yet. Be the first to share something!
             </div>
           ) : (
-            posts.map(post => (
+            posts.map((post: any) => (
               <div key={post.id} style={{
                 backgroundColor: 'white', borderRadius: '14px',
                 boxShadow: '0 2px 6px rgba(0,0,0,0.05)', padding: '18px', marginBottom: '10px',

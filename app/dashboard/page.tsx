@@ -24,7 +24,8 @@ import type { FamilyMember } from '@/lib/data/family'
 import type { CelebrationEvent } from '@/lib/data/celebrations'
 import type { ServiceBooking } from '@/lib/data/services'
 import type { TrackedItem } from '@/lib/data/tracked-items-types'
-import type { BrandConfigRow } from '@/types/database'
+import type { Tables } from '@/types/database'
+type BrandConfigRow = Tables<'brand_configs'>
 
 export const metadata: Metadata = { title: 'Dashboard — ThriveAtHome' }
 
@@ -114,7 +115,7 @@ export default async function DashboardPage({
 
   return (
     <DashboardClient
-      member={member}
+      member={(member ?? []) as any}
       familyMemberId={fmResult.data?.id ?? null}
       initialCalls={callsResult.data ?? []}
       callsError={callsResult.error}
@@ -132,7 +133,7 @@ export default async function DashboardPage({
       serviceHistory={serviceHistoryResult.data ?? []}
       brandConfig={brandConfigResult.data ?? null}
       deviceSummary={deviceSummaryResult.data ?? null}
-      mlSummary={mlSummaryResult.data ?? null}
+      mlSummary={mlSummaryResult.data as any ?? null}
     />
   )
 }

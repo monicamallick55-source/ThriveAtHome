@@ -10,7 +10,7 @@ import {
   getEffectiveFamilySeatLimit,
   type PurchaseIntake,
 } from '@/lib/data/premium-addons'
-import type { PlanTier } from '@/types/database'
+import type { PlanTier } from '@/lib/interfaces/BillingProvider'
 
 export const runtime = 'nodejs'
 
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
   const rawIntake = (intake && typeof intake === 'object' ? intake : {}) as Record<string, unknown>
   const cleanIntake: PurchaseIntake = {
     focusAreas: Array.isArray(rawIntake.focusAreas)
-      ? (rawIntake.focusAreas as unknown[]).map((s) => String(s).slice(0, 80)).slice(0, 12)
+      ? (rawIntake.focusAreas as unknown[]).map((s: any) => String(s).slice(0, 80)).slice(0, 12)
       : undefined,
     preferredTimes:
       typeof rawIntake.preferredTimes === 'string' ? rawIntake.preferredTimes.trim().slice(0, 300) || null : undefined,

@@ -24,17 +24,18 @@ async function getAdminOutcomesData() {
       { count: totalVolunteers },
       { count: visitsThisMonth },
       { data: employers },
-    ] = await Promise.all([
-      admin.from('members').select('*', { count: 'exact', head: true }),
-      admin.from('members').select('*', { count: 'exact', head: true }).eq('status', 'active'),
-      admin.from('check_in_calls').select('*', { count: 'exact', head: true }).gte('created_at', thirtyDaysAgo),
-      admin.from('check_in_calls').select('*', { count: 'exact', head: true }).eq('status', 'completed').gte('created_at', thirtyDaysAgo),
-      admin.from('notifications').select('*', { count: 'exact', head: true }).eq('severity', 'high').gte('created_at', sevenDaysAgo),
-      admin.from('notifications').select('*', { count: 'exact', head: true }).eq('severity', 'high').eq('read', true).gte('created_at', sevenDaysAgo),
-      admin.from('volunteers').select('*', { count: 'exact', head: true }).eq('status', 'active'),
-      admin.from('volunteer_visits').select('*', { count: 'exact', head: true }).gte('created_at', thirtyDaysAgo),
-      admin.from('employer_accounts').select('id, company_name, seats_purchased, seats_used, status').eq('status', 'active').order('company_name'),
-    ])
+    ] = await (async () => {
+      const r1 = await admin.from('members').select('*', { count: 'exact', head: true })
+      const r2 = await admin.from('members').select('*', { count: 'exact', head: true }).eq('status', 'active')
+      const r3 = await admin.from('check_in_calls').select('*', { count: 'exact', head: true }).gte('created_at', thirtyDaysAgo)
+      const r4 = await admin.from('check_in_calls').select('*', { count: 'exact', head: true }).eq('status', 'completed').gte('created_at', thirtyDaysAgo)
+      const r5 = await (admin as any).from('notifications').select('*', { count: 'exact', head: true }).eq('severity', 'high').gte('created_at', sevenDaysAgo)
+      const r6 = await (admin as any).from('notifications').select('*', { count: 'exact', head: true }).eq('severity', 'high').eq('read', true).gte('created_at', sevenDaysAgo)
+      const r7 = await admin.from('volunteers').select('*', { count: 'exact', head: true }).eq('status', 'active')
+      const r8 = await admin.from('volunteer_visits').select('*', { count: 'exact', head: true }).gte('created_at', thirtyDaysAgo)
+      const r9 = await admin.from('employer_accounts').select('id, company_name, seats_purchased, seats_used, status').eq('status', 'active').order('company_name')
+      return [r1, r2, r3, r4, r5, r6, r7, r8, r9]
+    })() as any[]
 
     const callCompletionRate = (callsThisMonth ?? 0) > 0
       ? Math.round(((completedCallsThisMonth ?? 0) / (callsThisMonth ?? 1)) * 100)
@@ -107,7 +108,7 @@ export default async function AdminOutcomesPage() {
         <section style={{ marginBottom: '48px' }}>
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '20px' }}>Platform Overview</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
-            {platformMetrics.map(m => (
+            {platformMetrics.map((m: any) => (
               <div key={m.label} style={{ backgroundColor: 'white', borderRadius: 'var(--radius-md)', padding: '20px', border: '1px solid var(--color-warm-grey)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
                   <div style={{ width: '36px', height: '36px', borderRadius: '10px', backgroundColor: m.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
@@ -143,7 +144,7 @@ export default async function AdminOutcomesPage() {
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-                    {['Company', 'Seats purchased', 'Seats used', 'Utilisation', 'Status'].map(col => (
+                    {['Company', 'Seats purchased', 'Seats used', 'Utilisation', 'Status'].map((col: any) => (
                       <th key={col} style={{ textAlign: 'left', padding: '12px 16px', fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--color-text-secondary)' }}>{col}</th>
                     ))}
                   </tr>

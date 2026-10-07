@@ -76,7 +76,7 @@ export function DashNav({ seniorName, unreadCount, onMarkAllRead }: DashNavProps
           style={{ display: 'flex', gap: '4px', flex: 1, justifyContent: 'center' }}
           className="dash-nav-links"
         >
-          {NAV_LINKS.map((link) => {
+          {NAV_LINKS.map((link: any) => {
             const isActive = pathname === link.href || (link.href !== '/dashboard' && pathname?.startsWith(link.href))
             return (
               <Link
@@ -133,7 +133,7 @@ export function DashNav({ seniorName, unreadCount, onMarkAllRead }: DashNavProps
 
       {/* Mobile bottom nav */}
       <div className="dash-mobile-nav">
-        {NAV_LINKS.map((link) => {
+        {NAV_LINKS.map((link: any) => {
           const isActive = pathname === link.href || (link.href !== '/dashboard' && pathname?.startsWith(link.href))
           return (
             <Link

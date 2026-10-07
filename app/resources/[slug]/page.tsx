@@ -3,17 +3,17 @@ import Link from 'next/link'
 import { RESOURCE_TOPICS } from '@/lib/content/resources'
 
 export function generateStaticParams() {
-  return RESOURCE_TOPICS.map((t) => ({ slug: t.slug }))
+  return RESOURCE_TOPICS.map((t: any) => ({ slug: t.slug }))
 }
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const topic = RESOURCE_TOPICS.find((t) => t.slug === params.slug)
+  const topic = RESOURCE_TOPICS.find((t: any) => t.slug === params.slug)
   if (!topic) return {}
   return { title: `${topic.title} | ThriveAtHome Resources`, description: topic.description }
 }
 
 export default function ResourceTopicPage({ params }: { params: { slug: string } }) {
-  const topic = RESOURCE_TOPICS.find((t) => t.slug === params.slug)
+  const topic = RESOURCE_TOPICS.find((t: any) => t.slug === params.slug)
   if (!topic) notFound()
 
   return (
@@ -26,7 +26,7 @@ export default function ResourceTopicPage({ params }: { params: { slug: string }
         <section className="mb-10">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">Browse Topics</h2>
           <div className="flex flex-wrap gap-2">
-            {topic.subtopics.map((sub) => (
+            {topic.subtopics.map((sub: any) => (
               <span key={sub} className="bg-teal-50 text-teal-700 text-sm px-3 py-1 rounded-full">{sub}</span>
             ))}
           </div>
@@ -49,7 +49,7 @@ export default function ResourceTopicPage({ params }: { params: { slug: string }
       <section>
         <h2 className="text-lg font-semibold text-gray-800 mb-4">Related Articles</h2>
         <div className="space-y-3">
-          {Array.from({ length: topic.articleCount }).map((_, i) => (
+          {Array.from({ length: topic.articleCount }).map((_: any, i: number) => (
             <div key={i} className="border border-gray-200 rounded-lg p-4 text-gray-400 text-sm italic">
               Article coming soon
             </div>

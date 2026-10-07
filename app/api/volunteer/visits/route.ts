@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
 import { getVolunteerByAuthId, logVolunteerVisit } from '@/lib/data/volunteers'
 import { createCorporateHourFromVisit } from '@/lib/data/corporate-volunteers'
-import type { VisitType } from '@/types/database'
+import type { VisitType } from '@/lib/services/serviceTypes'
 
 export async function POST(req: NextRequest) {
   try {

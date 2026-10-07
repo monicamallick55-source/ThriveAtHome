@@ -50,8 +50,8 @@ export function DocumentVault({ memberId, initialDocuments, error }: DocumentVau
   const activeCat = docCategory(category)
 
   const presentEssential = useMemo(() => {
-    const set = new Set(documents.map((d) => d.doc_category))
-    return new Set(ESSENTIAL_DOC_CATEGORIES.filter((c) => set.has(c.value)).map((c) => c.value))
+    const set = new Set(documents.map((d: any) => d.doc_category))
+    return new Set(ESSENTIAL_DOC_CATEGORIES.filter((c: any) => set.has(c.value)).map((c: any) => c.value))
   }, [documents])
 
   async function uploadFile(file: File) {
@@ -111,7 +111,7 @@ export function DocumentVault({ memberId, initialDocuments, error }: DocumentVau
     if (!res.ok) {
       alert(json.error ?? 'Delete failed. Please try again.')
     } else {
-      setDocuments((prev) => prev.filter((d) => d.id !== docId))
+      setDocuments((prev) => prev.filter((d: any) => d.id !== docId))
     }
     setDeleting(null)
   }
@@ -164,7 +164,7 @@ export function DocumentVault({ memberId, initialDocuments, error }: DocumentVau
           Essential documents ({presentEssential.size}/{ESSENTIAL_DOC_CATEGORIES.length} stored)
         </p>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-          {ESSENTIAL_DOC_CATEGORIES.map((c) => {
+          {ESSENTIAL_DOC_CATEGORIES.map((c: any) => {
             const have = presentEssential.has(c.value)
             return (
               <span
@@ -194,7 +194,7 @@ export function DocumentVault({ memberId, initialDocuments, error }: DocumentVau
               Document type
             </label>
             <select id="doc-category" value={category} onChange={(e) => setCategory(e.target.value)} style={inputStyle}>
-              {DOC_CATEGORIES.map((c) => (
+              {DOC_CATEGORIES.map((c: any) => (
                 <option key={c.value} value={c.value}>{c.emoji} {c.label}</option>
               ))}
             </select>
@@ -316,7 +316,7 @@ export function DocumentVault({ memberId, initialDocuments, error }: DocumentVau
 
         {documents.length > 0 && (
           <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '10px' }} aria-label="Document list">
-            {documents.map((doc) => {
+            {documents.map((doc: any) => {
               const cat = docCategory(doc.doc_category)
               const exp = expiryStatus(doc.expires_on)
               return (

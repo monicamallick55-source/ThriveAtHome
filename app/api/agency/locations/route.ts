@@ -3,7 +3,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getLocationsForAgency, createAgencyLocation } from '@/lib/data/agencies'
-import type { AgencyLocationInsert } from '@/types/database'
+import type { TablesInsert } from '@/types/database'
+type AgencyLocationInsert = TablesInsert<'agency_locations'>
 
 async function getAgencyAdmin(userId: string): Promise<string | null> {
   const admin = createAdminClient()

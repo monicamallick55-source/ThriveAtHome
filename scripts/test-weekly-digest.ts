@@ -99,7 +99,7 @@ async function main() {
   console.log('\n--- Test 1: Weekly Digest ---')
   const weeklyContent = await aiProvider.generateWeeklyDigest(
     aiMember,
-    (weeklyCalls ?? []).map((c) => toAiCall(c as unknown as Record<string, unknown>))
+    (weeklyCalls ?? []).map((c: any) => toAiCall(c as unknown as Record<string, unknown>))
   )
   console.log(`AI digest: "${weeklyContent}"`)
 
@@ -110,7 +110,7 @@ async function main() {
   console.log('\n--- Test 2: Monthly Summary ---')
   const monthlyContent = await aiProvider.generateMonthlySummary(
     aiMember,
-    (monthlyCalls ?? []).map((c) => toAiCall(c as unknown as Record<string, unknown>))
+    (monthlyCalls ?? []).map((c: any) => toAiCall(c as unknown as Record<string, unknown>))
   )
   console.log(`AI summary: "${monthlyContent}"`)
 

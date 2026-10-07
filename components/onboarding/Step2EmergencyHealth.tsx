@@ -88,7 +88,7 @@ export function Step2EmergencyHealth({ data, onChange, errors }: Props) {
       <div>
         <p className={labelClass}>Does {data.preferred_name || 'the senior'} live alone?</p>
         <div className="flex gap-3 mt-1">
-          {(['yes', 'no'] as const).map((opt) => (
+          {(['yes', 'no'] as const).map((opt: any) => (
             <button
               key={opt}
               type="button"

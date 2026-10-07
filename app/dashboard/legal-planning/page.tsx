@@ -30,21 +30,18 @@ export default function LegalPlanningPage() {
       <section className="mb-10">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Legal Document Checklist</h2>
         <div className="space-y-3">
-          {LEGAL_DOCUMENTS.map((doc) => (
-            <div key={doc.type} className={`border rounded-xl p-4 ${PRIORITY_COLORS[doc.priority] ?? 'bg-gray-50 border-gray-200'}`}>
+          {LEGAL_DOCUMENTS.map((doc: any) => (
+            <div key={doc.key} className={`border rounded-xl p-4 ${PRIORITY_COLORS[doc.priority] ?? 'bg-gray-50 border-gray-200'}`}>
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3">
                   <input
                     type="checkbox"
                     className="mt-1 h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
-                    aria-label={`Mark ${doc.name} as complete`}
+                    aria-label={`Mark ${doc.title} as complete`}
                   />
                   <div>
-                    <h3 className="font-semibold text-gray-900">{doc.name}</h3>
+                    <h3 className="font-semibold text-gray-900">{doc.title}</h3>
                     <p className="text-sm text-gray-600 mt-0.5">{doc.description}</p>
-                    {doc.renewalNote && (
-                      <p className="text-xs text-amber-700 mt-1 italic">⚠️ {doc.renewalNote}</p>
-                    )}
                   </div>
                 </div>
                 <div className="shrink-0 flex flex-col items-end gap-2">
@@ -87,12 +84,12 @@ export default function LegalPlanningPage() {
       <section>
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Plain-Language Legal Guides</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {LEGAL_GUIDES.map((guide) => (
+          {LEGAL_GUIDES.map((guide: any) => (
             <div key={guide.slug} className="border border-gray-200 rounded-xl p-5 hover:shadow-sm transition-shadow">
               <h3 className="font-semibold text-gray-900 mb-2">{guide.title}</h3>
-              <p className="text-sm text-gray-600 mb-3">{guide.description}</p>
+              <p className="text-sm text-gray-600 mb-3">{guide.summary}</p>
               <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-400">{guide.readTimeMinutes} min read</span>
+                <span className="text-xs text-gray-400">Read guide</span>
                 <a
                   href={`/resources/legal-planning`}
                   className="text-sm font-medium text-teal-600 hover:text-teal-800"

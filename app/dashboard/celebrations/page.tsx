@@ -128,14 +128,14 @@ export default async function CelebrationsPage() {
 
   const { data: allEvents } = await getCelebrationEvents(member.id)
   const today = new Date().toISOString().slice(0, 10)
-  const upcoming = (allEvents ?? []).filter((e) => e.event_date >= today)
-  const past = (allEvents ?? []).filter((e) => e.event_date < today)
+  const upcoming = (allEvents ?? []).filter((e: any) => e.event_date >= today)
+  const past = (allEvents ?? []).filter((e: any) => e.event_date < today)
 
   const todayBirthday = member.date_of_birth ? isTodayBirthday(member.date_of_birth) : false
   const nextBirthday = member.date_of_birth ? getNextBirthdayDate(member.date_of_birth) : null
   const nextBirthdayStr = nextBirthday ? nextBirthday.toISOString().slice(0, 10) : null
   const birthdayAlreadyScheduled =
-    nextBirthdayStr && upcoming.some((e) => e.celebration_type === 'birthday' && e.event_date === nextBirthdayStr)
+    nextBirthdayStr && upcoming.some((e: any) => e.celebration_type === 'birthday' && e.event_date === nextBirthdayStr)
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-cream)' }}>
@@ -270,7 +270,7 @@ export default async function CelebrationsPage() {
           )}
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {upcoming.map((event) => (
+            {upcoming.map((event: any) => (
               <UpcomingCard
                 key={event.id}
                 event={event}
@@ -320,7 +320,7 @@ export default async function CelebrationsPage() {
               Past milestones
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {past.map((event) => (
+              {past.map((event: any) => (
                 <PastMilestoneCard key={event.id} event={event} />
               ))}
             </div>

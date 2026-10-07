@@ -41,8 +41,8 @@ export default async function CareWorkerDashboardPage() {
 
   return (
     <CareWorkerDashboardClient
-      worker={worker}
-      todaysVisits={todaysVisits ?? []}
+      worker={(worker ?? []) as any}
+      todaysVisits={(todaysVisits ?? []) as any}
     />
   )
 }

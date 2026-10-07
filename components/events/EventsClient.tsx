@@ -111,7 +111,7 @@ export default function EventsClient({ initialEvents }: Props) {
         return
       }
 
-      setEvents(prev => prev.map(evt => {
+      setEvents(prev => prev.map((evt: any) => {
         if (evt.id !== eventId) return evt
         return {
           ...evt,
@@ -153,7 +153,7 @@ export default function EventsClient({ initialEvents }: Props) {
             letterSpacing: '0.06em', margin: '0 0 16px',
           }}>Happening Today</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {todayEvents.map(evt => <EventCard key={evt.id} evt={evt} isToday={true} loadingId={loadingId} onRsvp={handleRsvp} isWaitlisted={waitlistedIds.has(evt.id)} />)}
+            {todayEvents.map((evt: any) => <EventCard key={evt.id} evt={evt} isToday={true} loadingId={loadingId} onRsvp={handleRsvp} isWaitlisted={waitlistedIds.has(evt.id)} />)}
           </div>
         </div>
       )}
@@ -167,7 +167,7 @@ export default function EventsClient({ initialEvents }: Props) {
             letterSpacing: '0.06em', margin: '0 0 16px',
           }}>Upcoming Events</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {upcomingEvents.map(evt => <EventCard key={evt.id} evt={evt} isToday={false} loadingId={loadingId} onRsvp={handleRsvp} isWaitlisted={waitlistedIds.has(evt.id)} />)}
+            {upcomingEvents.map((evt: any) => <EventCard key={evt.id} evt={evt} isToday={false} loadingId={loadingId} onRsvp={handleRsvp} isWaitlisted={waitlistedIds.has(evt.id)} />)}
           </div>
         </div>
       )}
@@ -229,7 +229,7 @@ export default function EventsClient({ initialEvents }: Props) {
         )}
         {liveEvents.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {liveEvents.map((evt, i) => (
+            {liveEvents.map((evt: any, i: number) => (
               <div key={i} style={{
                 backgroundColor: 'white', borderRadius: '16px', padding: '20px 24px',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.06)',

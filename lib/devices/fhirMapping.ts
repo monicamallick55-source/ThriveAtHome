@@ -75,8 +75,8 @@ export async function buildFhirBundleForMember(
   }
 
   const conditions: FhirConditionInput[] = (alertsRes.data ?? [])
-    .filter((a) => Array.isArray(a.icd10_codes) && (a.icd10_codes as string[]).length > 0)
-    .map((a) => ({
+    .filter((a: any) => Array.isArray(a.icd10_codes) && (a.icd10_codes as string[]).length > 0)
+    .map((a: any) => ({
       code: (a.icd10_codes as string[])[0],
       display: a.message.slice(0, 120),
       onsetDateTime: a.created_at,

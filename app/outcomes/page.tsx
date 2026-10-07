@@ -19,7 +19,7 @@ async function getAggregateStats() {
       admin.from('members').select('*', { count: 'exact', head: true }),
       admin.from('check_in_calls').select('*', { count: 'exact', head: true }),
       admin.from('check_in_calls').select('*', { count: 'exact', head: true }).eq('status', 'completed'),
-      admin.from('notifications').select('*', { count: 'exact', head: true })
+      (admin as any).from('notifications').select('*', { count: 'exact', head: true })
         .eq('severity', 'high')
         .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
       admin.from('volunteers').select('*', { count: 'exact', head: true }).eq('status', 'active'),
@@ -136,7 +136,7 @@ export default async function OutcomesPage() {
 
         {/* Stats grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px', marginBottom: '64px' }}>
-          {statCards.map(card => (
+          {statCards.map((card: any) => (
             <div key={card.label} style={{ backgroundColor: 'white', borderRadius: 'var(--radius-md)', padding: '28px 24px', border: '1px solid var(--color-warm-grey)', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', marginBottom: '16px' }}>
                 <div style={{ width: '44px', height: '44px', borderRadius: '12px', backgroundColor: card.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', flexShrink: 0 }}>
@@ -169,7 +169,7 @@ export default async function OutcomesPage() {
               { title: 'Safety alerts', body: 'High-priority alerts are reviewed by human navigators within hours. Every alert on this page was seen by a human care professional.' },
               { title: 'Volunteer hours', body: 'Background-checked volunteers log visits after each connection. Hours are verified by care navigators for employer reporting.' },
               { title: 'Privacy by design', body: 'This page shows only aggregate, anonymized data. No individual member\'s information is ever published publicly.' },
-            ].map(item => (
+            ].map((item: any) => (
               <div key={item.title}>
                 <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 700, color: 'var(--color-navy)', margin: '0 0 6px' }}>{item.title}</p>
                 <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', margin: '0', lineHeight: 1.6 }}>{item.body}</p>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import type { NotifType, NotifSeverity } from '@/types/database'
+type NotifType = string
+type NotifSeverity = 'low' | 'medium' | 'high' | 'critical'
 
 export const runtime = 'nodejs'
 
@@ -66,7 +67,7 @@ export async function GET(req: NextRequest) {
   ): Promise<boolean> {
     if (!(await canNotify(memberId))) return false
     try {
-      await admin.from('realtime_notifications').insert({
+      await (admin as any).from('realtime_notifications').insert({
         member_id: memberId,
         type,
         severity,
@@ -81,7 +82,7 @@ export async function GET(req: NextRequest) {
   }
 
   async function wasRecentlyFired(memberId: string, type: NotifType): Promise<boolean> {
-    const { data } = await admin
+    const { data } = await (admin as any)
       .from('realtime_notifications')
       .select('id')
       .eq('member_id', memberId)
@@ -129,7 +130,7 @@ export async function GET(req: NextRequest) {
             ? `${name} hasn't had a check-in call in ${daysSince} days. Log in to review or contact your navigator.`
             : `${name} hasn't had a completed check-in call yet. Log in to check their status.`
 
-          const sent = await pushNotif(m.id, 'automation_isolation', 'concern', `Check in on ${name}`, body)
+          const sent = await pushNotif(m.id, 'automation_isolation', 'medium', `Check in on ${name}`, body)
           if (sent) r.fired++; else r.skipped++
         } catch (e) {
           console.error(`[automations/isolation] member ${m.id}:`, e)
@@ -171,7 +172,7 @@ export async function GET(req: NextRequest) {
 
             const name = m.preferred_name ?? m.full_name ?? 'your family member'
             const sent = await pushNotif(
-              m.id, 'automation_vaccination', 'info',
+              m.id, 'automation_vaccination', 'low',
               `Flu vaccine season for ${name}`,
               `It's flu vaccine season. Consider scheduling a flu shot for ${name} — your navigator can help coordinate.`
             )
@@ -279,7 +280,7 @@ export async function GET(req: NextRequest) {
           if (await wasRecentlyFired(match.member_id, 'automation_volunteer_reengagement')) { r.skipped++; continue }
 
           const sent = await pushNotif(
-            match.member_id, 'automation_volunteer_reengagement', 'info',
+            match.member_id, 'automation_volunteer_reengagement', 'low',
             'Stay connected with your volunteer',
             'It has been a while since your last volunteer visit. Your navigator can help schedule the next one.'
           )
@@ -324,7 +325,7 @@ export async function GET(req: NextRequest) {
           if (await wasRecentlyFired(rsvp.member_id, 'automation_event_noshow')) { r.skipped++; continue }
 
           const sent = await pushNotif(
-            rsvp.member_id, 'automation_event_noshow', 'info',
+            rsvp.member_id, 'automation_event_noshow', 'low',
             'We missed you at the event',
             `We hope you are doing well — you had registered for "${event.title}". Check the Events section for upcoming opportunities.`
           )
@@ -364,7 +365,7 @@ export async function GET(req: NextRequest) {
           if (!m.emergency_contact_1_name) missing.push('emergency contact')
 
           const sent = await pushNotif(
-            m.id, 'automation_onboarding', 'info',
+            m.id, 'automation_onboarding', 'low',
             `Complete ${name}'s profile`,
             `Adding ${missing.join(' and ')} helps your navigator respond quickly in an emergency.`
           )
@@ -437,7 +438,7 @@ export async function GET(req: NextRequest) {
           if (await wasRecentlyFired(b.member_id, 'automation_transport_followup')) { r.skipped++; continue }
 
           const sent = await pushNotif(
-            b.member_id, 'automation_transport_followup', 'info',
+            b.member_id, 'automation_transport_followup', 'low',
             'How was the ride?',
             'We hope your transport went smoothly. Let your navigator know if anything needs follow-up, or if you would like to book again.'
           )
@@ -474,7 +475,7 @@ export async function GET(req: NextRequest) {
           if (await wasRecentlyFired(b.member_id, 'automation_tech_help_check')) { r.skipped++; continue }
 
           const sent = await pushNotif(
-            b.member_id, 'automation_tech_help_check', 'info',
+            b.member_id, 'automation_tech_help_check', 'low',
             'Did the tech help resolve your issue?',
             'We hope your tech session helped. If you still need assistance, your navigator is here for you.'
           )
@@ -511,7 +512,7 @@ export async function GET(req: NextRequest) {
           if (await wasRecentlyFired(b.member_id, 'automation_meal_feedback')) { r.skipped++; continue }
 
           const sent = await pushNotif(
-            b.member_id, 'automation_meal_feedback', 'info',
+            b.member_id, 'automation_meal_feedback', 'low',
             'How was the meal delivery?',
             'We hope the meal arrived well and was enjoyed. Let your navigator know any preferences for next time.'
           )

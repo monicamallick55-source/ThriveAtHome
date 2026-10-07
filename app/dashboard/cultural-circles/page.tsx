@@ -51,7 +51,7 @@ export default async function CulturalCirclesPage() {
       </nav>
 
       <CulturalCirclesClient
-        circles={circles}
+        circles={(circles ?? []) as any}
         joinedCircleIds={joinedIds}
         platformEvents={platformEvents}
         localEventSuggestions={localEvents}

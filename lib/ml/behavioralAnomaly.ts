@@ -147,7 +147,7 @@ export async function detectBehavioralAnomaly(memberId: string): Promise<Anomaly
         anomaly_score: score,
         severity: 'info',
         top_drivers: drivers,
-        features: { current, baseline: baselineStats },
+        features: { current, baseline: baselineStats } as any,
       })
       return { ...base, outcome: 'ok' }
     }
@@ -199,7 +199,7 @@ export async function detectBehavioralAnomaly(memberId: string): Promise<Anomaly
       anomaly_score: score,
       severity,
       top_drivers: drivers,
-      features: { current, baseline: baselineStats },
+      features: { current, baseline: baselineStats } as any,
       alert_id: alertResult.alertId,
       navigator_task_id: navigatorTaskId,
     })

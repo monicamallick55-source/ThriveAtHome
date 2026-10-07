@@ -5,13 +5,12 @@
 // and a navigator task so the care team picks it up.
 import { createAdminClient } from '../supabase/admin'
 import { pushRealtimeNotification } from '../realtime/notifications'
-import type {
-  PremiumAddonRow,
-  MemberAddonRow,
-  CaregiverVideoDiaryEntryRow,
-  PlanTier,
-  TaskPriority,
-} from '../../types/database'
+import type { Tables } from '@/types/database'
+type PremiumAddonRow = any
+type MemberAddonRow = Tables<'member_addons'>
+type CaregiverVideoDiaryEntryRow = any
+type PlanTier = any
+type TaskPriority = any
 
 /** Base number of family dashboard seats before any add-on. */
 export const BASE_FAMILY_SEATS = 3
@@ -59,7 +58,7 @@ export async function getMemberAddons(
       console.error('[data/premium-addons/getMemberAddons]', error)
       return { data: [], error: error.message }
     }
-    const rows = (data ?? []).map((r) => {
+    const rows = (data ?? []).map((r: any) => {
       const cat = (r as unknown as { premium_addons: { name: string; tagline: string | null; fulfillment: string } | null }).premium_addons
       return {
         ...(r as MemberAddonRow),
@@ -134,15 +133,15 @@ export async function getMemberAddonSummary(memberId: string): Promise<MemberAdd
   const empty: MemberAddonSummary = { activeCount: 0, monthlyTotalCents: 0, activeKeys: [], pendingFulfillment: [] }
   try {
     const { data } = await getMemberAddons(memberId)
-    const active = data.filter((r) => r.status === 'active')
-    const pending = data.filter((r) => r.status === 'pending')
+    const active = data.filter((r: any) => r.status === 'active')
+    const pending = data.filter((r: any) => r.status === 'pending')
     return {
       activeCount: active.length,
       monthlyTotalCents: active
-        .filter((r) => r.billing === 'monthly')
+        .filter((r: any) => r.billing === 'monthly')
         .reduce((s, r) => s + (r.price_cents ?? 0), 0),
-      activeKeys: active.map((r) => r.addon_key),
-      pendingFulfillment: pending.map((r) => ({
+      activeKeys: active.map((r: any) => r.addon_key),
+      pendingFulfillment: pending.map((r: any) => ({
         addon_key: r.addon_key,
         addon_name: r.addon_name,
         status: r.status,
@@ -251,7 +250,7 @@ export async function purchaseAddon(
         status,
         purchased_by: input.purchasedBy,
         renews_at: renewsAt,
-        metadata: (input.intake ?? {}) as Record<string, unknown>,
+        metadata: (input.intake ?? {}) as Record<string, unknown> as any,
       })
       .select('*')
       .maybeSingle()
@@ -321,7 +320,7 @@ export async function purchaseAddon(
           member_id: input.memberId,
           member_addon_id: memberAddon.id,
           requested_by: input.purchasedBy,
-          household: (input.intake?.household ?? {}) as Record<string, unknown>,
+          household: (input.intake?.household ?? {}) as Record<string, unknown> as any,
           status: 'requested',
           navigator_task_id: taskId,
         })

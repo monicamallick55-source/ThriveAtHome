@@ -59,7 +59,7 @@ export default function CulturalCirclesClient({ circles, joinedCircleIds, platfo
   const [toast, setToast] = useState<string | null>(null)
   const [, startTransition] = useTransition()
   const [platformRsvped, setPlatformRsvped] = useState<Set<string>>(
-    new Set(platformEvents.filter(e => e.user_has_rsvped).map(e => e.id))
+    new Set(platformEvents.filter(e => e.user_has_rsvped).map((e: any) => e.id))
   )
   const [platformRsvpLoading, setPlatformRsvpLoading] = useState<string | null>(null)
 
@@ -144,7 +144,7 @@ export default function CulturalCirclesClient({ circles, joinedCircleIds, platfo
   const otherCircles = circles.filter(c => !joined.has(c.id))
 
   // Recommended: match interest_tag against member's topics_enjoy (case-insensitive)
-  const memberTopicsLower = memberTopics.map(t => t.toLowerCase())
+  const memberTopicsLower = memberTopics.map((t: any) => t.toLowerCase())
   const interestMatches = otherCircles.filter(c =>
     c.interest_tag && memberTopicsLower.includes(c.interest_tag.toLowerCase())
   )
@@ -270,7 +270,7 @@ export default function CulturalCirclesClient({ circles, joinedCircleIds, platfo
     )
   }
 
-  const allCirclesWithIndex = circles.map((c, i) => ({ circle: c, index: i }))
+  const allCirclesWithIndex = circles.map((c: any, i: number) => ({ circle: c, index: i }))
   const joinedWithIndex = allCirclesWithIndex.filter(({ circle }) => joined.has(circle.id))
 
   // Split unjoined circles by community_type for separate sections
@@ -364,7 +364,7 @@ export default function CulturalCirclesClient({ circles, joinedCircleIds, platfo
               gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
               gap: '20px',
             }}>
-              {recommended.map(circle => {
+              {recommended.map((circle: any) => {
                 const index = circles.findIndex(c => c.id === circle.id)
                 return <CircleCard key={circle.id} circle={circle} colorIndex={index >= 0 ? index : 0} />
               })}
@@ -381,7 +381,7 @@ export default function CulturalCirclesClient({ circles, joinedCircleIds, platfo
               letterSpacing: '0.06em', margin: '0 0 16px',
             }}>Community Events</h2>
             <div style={{ display: 'grid', gap: '12px' }}>
-              {platformEvents.map(event => {
+              {platformEvents.map((event: any) => {
                 const rsvped = platformRsvped.has(event.id)
                 const isLoading = platformRsvpLoading === event.id
                 return (
@@ -471,7 +471,7 @@ export default function CulturalCirclesClient({ circles, joinedCircleIds, platfo
               Community events from local organizations that may interest you.
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
-              {localEventSuggestions.map((evt, i) => (
+              {localEventSuggestions.map((evt: any, i: number) => (
                 <div key={i} style={{
                   backgroundColor: 'white', borderRadius: '14px',
                   boxShadow: '0 2px 6px rgba(0,0,0,0.05)', padding: '18px',

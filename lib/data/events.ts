@@ -1,5 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
-import type { Database, EventFormat, EventStatus } from '@/types/database'
+import type { Database } from '@/types/database'
+type EventFormat = any
+type EventStatus = any
 
 type EventRow = Database['public']['Tables']['events']['Row']
 type EventInsert = Database['public']['Tables']['events']['Insert']
@@ -30,10 +32,10 @@ export async function getUpcomingEvents(memberId?: string): Promise<{ data: Even
         .from('event_rsvps')
         .select('event_id')
         .eq('member_id', memberId)
-      if (rsvps) rsvpedEventIds = new Set(rsvps.map(r => r.event_id))
+      if (rsvps) rsvpedEventIds = new Set(rsvps.map((r: any) => r.event_id))
     }
 
-    const result: EventWithRsvp[] = events.map(evt => ({
+    const result: EventWithRsvp[] = events.map((evt: any) => ({
       ...evt,
       user_has_rsvped: rsvpedEventIds.has(evt.id),
     }))

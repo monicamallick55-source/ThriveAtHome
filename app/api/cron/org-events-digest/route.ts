@@ -47,7 +47,7 @@ export async function GET(req: Request) {
 
       if (!memberships?.length) continue
 
-      const memberIds = memberships.map(m => m.member_id)
+      const memberIds = memberships.map((m: any) => m.member_id)
       const { data: contacts } = await admin
         .from('family_members')
         .select('email, full_name')
@@ -56,7 +56,7 @@ export async function GET(req: Request) {
       if (!contacts?.length) continue
 
       // Format event list
-      const eventLines = events.map(e => {
+      const eventLines = events.map((e: any) => {
         const timeStr = e.event_time ? ` at ${e.event_time}` : ''
         const formatStr = e.format === 'phone_only' ? '📞 Phone'
           : e.format === 'in_person' ? '📍 In person'

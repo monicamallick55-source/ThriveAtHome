@@ -23,7 +23,7 @@ export default async function CulturalFestivalsPage() {
     getAllCircles(),
     memberId ? getMemberCircleIds(memberId) : Promise.resolve([]),
   ])
-  const myCircleNames = circles.filter((c) => joinedIds.includes(c.id)).map((c) => c.circle_name)
+  const myCircleNames = circles.filter((c: any) => joinedIds.includes(c.id)).map((c: any) => c.circle_name)
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-cream)' }}>
@@ -54,7 +54,7 @@ export default async function CulturalFestivalsPage() {
         <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 600, color: 'var(--color-navy)', margin: '0 0 16px' }}>
           Our Community Calendar
         </h2>
-        <FestivalCalendarClient festivals={festivals} myCircleNames={myCircleNames} />
+        <FestivalCalendarClient festivals={(festivals ?? []) as any} myCircleNames={myCircleNames} />
       </main>
     </div>
   )

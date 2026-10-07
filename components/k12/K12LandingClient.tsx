@@ -125,7 +125,7 @@ export function K12LandingClient() {
 
         {/* Program cards */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px', marginBottom: '48px' }}>
-          {PROGRAMS.map(prog => (
+          {PROGRAMS.map((prog: any) => (
             <div
               key={prog.id}
               style={{
@@ -153,7 +153,7 @@ export function K12LandingClient() {
                 {prog.description}
               </p>
               <ul style={{ margin: 0, paddingLeft: '16px', color: prog.text, fontFamily: 'var(--font-body)', fontSize: '13px', lineHeight: 1.8 }}>
-                {prog.benefits.map(b => <li key={b}>{b}</li>)}
+                {prog.benefits.map((b: any) => <li key={b}>{b}</li>)}
               </ul>
             </div>
           ))}
@@ -231,7 +231,7 @@ export function K12LandingClient() {
                     value={form.school_type} onChange={e => setForm(f => ({ ...f, school_type: e.target.value }))}
                     style={{ width: '100%', height: '48px', border: '1.5px solid var(--color-warm-grey)', borderRadius: '8px', padding: '0 14px', fontSize: '15px', fontFamily: 'var(--font-body)', backgroundColor: 'white', boxSizing: 'border-box' }}
                   >
-                    {SCHOOL_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                    {SCHOOL_TYPES.map((t: any) => <option key={t.value} value={t.value}>{t.label}</option>)}
                   </select>
                 </div>
               </div>
@@ -277,7 +277,7 @@ export function K12LandingClient() {
                   Programs you&apos;d like to participate in *
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {PROGRAMS.map(prog => (
+                  {PROGRAMS.map((prog: any) => (
                     <label key={prog.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', cursor: 'pointer' }}>
                       <input
                         type="checkbox"

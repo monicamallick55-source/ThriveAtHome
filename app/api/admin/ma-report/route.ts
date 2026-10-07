@@ -84,7 +84,7 @@ export async function GET(req: NextRequest) {
   const alertList: { member_id: string; alert_type: string; severity: string; icd10_codes: string[] }[] = alerts ?? []
 
   // Compute aggregates — NO PHI
-  const moodScores = callList.map(c => c.mood_score).filter((s): s is number => s !== null)
+  const moodScores = callList.map((c: any) => c.mood_score).filter((s): s is number => s !== null)
   const avgMoodScore = moodScores.length > 0
     ? Math.round((moodScores.reduce((a, b) => a + b, 0) / moodScores.length) * 10) / 10
     : null
@@ -155,7 +155,7 @@ function computeMoodTrend(
 ): Array<{ label: string; avg_mood: number | null }> {
   const span = end.getTime() - start.getTime()
   const quarter = span / 4
-  return [0, 1, 2, 3].map(i => {
+  return [0, 1, 2, 3].map((i: any) => {
     const windowStart = start.getTime() + i * quarter
     const windowEnd = windowStart + quarter
     const label = new Date(windowStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
@@ -164,7 +164,7 @@ function computeMoodTrend(
       const t = new Date(c.created_at).getTime()
       return t >= windowStart && t < windowEnd
     })
-    const scores = windowCalls.map(c => c.mood_score).filter((s): s is number => s !== null)
+    const scores = windowCalls.map((c: any) => c.mood_score).filter((s): s is number => s !== null)
     return {
       label,
       avg_mood: scores.length > 0

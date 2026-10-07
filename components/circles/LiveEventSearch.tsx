@@ -176,7 +176,7 @@ export default function LiveEventSearch({ category, initialZip }: Props) {
             onChange={(e) => setRadius(Number(e.target.value))}
             style={{ ...inputStyle, width: '160px' }}
           >
-            {RADII.map((r) => (
+            {RADII.map((r: any) => (
               <option key={r} value={r}>Within {r} miles</option>
             ))}
           </select>
@@ -204,7 +204,7 @@ export default function LiveEventSearch({ category, initialZip }: Props) {
         </div>
       )}
 
-      {!loading && events.map((event) => {
+      {!loading && events.map((event: any) => {
         const att = attendance[event.url] ?? { count: 0, going: false }
         return (
           <article key={event.url} style={card}>

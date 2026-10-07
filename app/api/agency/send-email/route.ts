@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ sent: 0, message: 'No care clients found.' })
   }
 
-  const memberIds = members.map(m => m.id)
+  const memberIds = members.map((m: any) => m.id)
 
   // Get contact info from family_members (primary contact / family liaison)
   const admin = createAdminClient()

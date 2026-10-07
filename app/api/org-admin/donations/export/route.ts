@@ -24,7 +24,7 @@ export async function GET() {
 
   const rows = [
     ['Donor Name', 'Email', 'Amount', 'Date', 'Payment Method', 'Anonymous', 'Receipt Sent', 'Notes'],
-    ...(donations ?? []).map(d => [
+    ...(donations ?? []).map((d: any) => [
       d.is_anonymous ? 'Anonymous' : d.donor_name,
       d.is_anonymous ? '' : (d.donor_email ?? ''),
       `$${(d.amount_cents / 100).toFixed(2)}`,
@@ -36,8 +36,8 @@ export async function GET() {
     ]),
   ]
 
-  const csv = rows.map(row =>
-    row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
+  const csv = rows.map((row: any) =>
+    row.map((cell: any) => `"${String(cell).replace(/"/g, '""')}"`).join(',')
   ).join('\n')
 
   return new NextResponse(csv, {

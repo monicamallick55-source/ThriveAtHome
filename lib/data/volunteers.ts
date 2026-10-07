@@ -1,6 +1,8 @@
 // Volunteer data access functions — server-side only, uses admin client.
 import { createAdminClient } from '../supabase/admin'
-import type { Database, VolunteerStatus, VisitType } from '../../types/database'
+import type { Database } from '@/types/database'
+type VolunteerStatus = any
+type VisitType = any
 import { getTopVolunteerMatchesFromList, type MatchResult } from '../volunteers/match'
 
 export type Volunteer = Database['public']['Tables']['volunteers']['Row']
@@ -192,7 +194,7 @@ export async function getPendingMatchRequests(): Promise<{ data: Array<{ member:
       .eq('status', 'matched')
     if (matchError) return { data: null, error: matchError.message }
 
-    const matchedIds = (matched ?? []).map(m => m.member_id)
+    const matchedIds = (matched ?? []).map((m: any) => m.member_id)
 
     let query = admin
       .from('members')
@@ -203,7 +205,7 @@ export async function getPendingMatchRequests(): Promise<{ data: Array<{ member:
     }
     const { data, error } = await query
     if (error) return { data: null, error: error.message }
-    return { data: (data ?? []).map(m => ({ member: m })), error: null }
+    return { data: (data ?? []).map((m: any) => ({ member: m })), error: null }
   } catch (e) {
     console.error('[data/volunteers/getPendingMatchRequests] Unexpected error:', e)
     return { data: null, error: e instanceof Error ? e.message : String(e) }
@@ -312,14 +314,14 @@ export async function getVolunteerMatchedMembers(
     if (matchErr) return { data: null, error: matchErr.message }
     if (!matches || matches.length === 0) return { data: [], error: null }
 
-    const memberIds = matches.map(m => m.member_id)
+    const memberIds = matches.map((m: any) => m.member_id)
     const { data: members, error: memErr } = await admin
       .from('members')
       .select('id, full_name, preferred_language, topics_enjoy')
       .in('id', memberIds)
     if (memErr) return { data: null, error: memErr.message }
 
-    const result: PrivateMemberView[] = (members ?? []).map(m => {
+    const result: PrivateMemberView[] = (members ?? []).map((m: any) => {
       const match = matches.find(mx => mx.member_id === m.id)!
       const nameParts = m.full_name.trim().split(/\s+/)
       const firstName = nameParts[0] ?? ''
@@ -373,7 +375,7 @@ export async function logVolunteerVisit(
       .from('volunteer_visits')
       .select('member_id')
       .eq('volunteer_id', visitData.volunteer_id)
-    const distinctMembersCount = new Set((allVisits ?? []).map(v => v.member_id)).size
+    const distinctMembersCount = new Set((allVisits ?? []).map((v: any) => v.member_id)).size
 
     await admin
       .from('volunteers')
@@ -401,7 +403,7 @@ export async function getVolunteerMembersHelpedCount(
       .select('member_id')
       .eq('volunteer_id', volunteerId)
     if (!data) return 0
-    return new Set(data.map(v => v.member_id)).size
+    return new Set(data.map((v: any) => v.member_id)).size
   } catch {
     return 0
   }

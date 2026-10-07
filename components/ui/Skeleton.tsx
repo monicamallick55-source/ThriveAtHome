@@ -33,7 +33,7 @@ export function SkeletonCard() {
 export function SkeletonText({ lines = 3 }: { lines?: number }) {
   return (
     <div role="status" aria-label="Loading text" className="space-y-2">
-      {Array.from({ length: lines }).map((_, i) => (
+      {Array.from({ length: lines }).map((_: any, i: number) => (
         <Skeleton key={i} height="h-4" width={i === lines - 1 ? 'w-2/3' : 'w-full'} />
       ))}
       <span className="sr-only">Loading…</span>

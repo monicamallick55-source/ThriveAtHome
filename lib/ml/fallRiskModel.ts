@@ -47,7 +47,7 @@ function ageFromDob(dob: string | null): number | null {
 function keywordHit(text: string | null, keywords: string[]): boolean {
   if (!text) return false
   const t = text.toLowerCase()
-  return keywords.some((k) => t.includes(k))
+  return keywords.some((k: any) => t.includes(k))
 }
 
 export async function computeFallRisk(memberId: string): Promise<FallRiskResult> {
@@ -136,7 +136,7 @@ export async function computeFallRisk(memberId: string): Promise<FallRiskResult>
     }
 
     const meanSteps = mean(
-      readings.map((r) => r.steps).filter((n): n is number => typeof n === 'number')
+      readings.map((r: any) => r.steps).filter((n): n is number => typeof n === 'number')
     )
     if (
       meanSteps !== null &&
@@ -203,7 +203,7 @@ export async function computeFallRisk(memberId: string): Promise<FallRiskResult>
         .eq('completed', false)
         .maybeSingle()
       if (!existingTask) {
-        const factorList = result.factors.map((f) => f.factor).join('; ')
+        const factorList = result.factors.map((f: any) => f.factor).join('; ')
         const { data: task } = await admin
           .from('navigator_tasks')
           .insert({

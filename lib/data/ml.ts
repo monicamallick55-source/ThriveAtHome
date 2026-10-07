@@ -1,13 +1,12 @@
 // M23 — Advanced AI/ML Layer read model (server-side, admin client).
 // Surfaces the latest stored scores for the family dashboard and navigator panel.
 import { createAdminClient } from '../supabase/admin'
-import type {
-  WellnessBaselineRow,
-  BehavioralAnomalyRow,
-  FallRiskScoreRow,
-  IsolationScoreRow,
-  GriefPatternFlagRow,
-} from '../../types/database'
+import type { Tables } from '@/types/database'
+type WellnessBaselineRow = Tables<'wellness_baselines'>
+type BehavioralAnomalyRow = Tables<'behavioral_anomalies'>
+type FallRiskScoreRow = Tables<'fall_risk_scores'>
+type IsolationScoreRow = Tables<'isolation_scores'>
+type GriefPatternFlagRow = Tables<'grief_pattern_flags'>
 
 type Result<T> = { data: T; error: string | null }
 

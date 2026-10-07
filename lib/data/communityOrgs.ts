@@ -257,7 +257,7 @@ export async function getOrgMembers(orgId: string): Promise<{ data: { id: string
     .eq('is_active', true)
   if (error) return { data: [], error: error.message }
   const members = ((data ?? []) as Array<{ member: { id: string; full_name: string; preferred_name: string | null } | null }>)
-    .map(row => row.member)
+    .map((row: any) => row.member)
     .filter((m): m is { id: string; full_name: string; preferred_name: string | null } => m !== null)
   return { data: members, error: null }
 }
@@ -377,7 +377,7 @@ export async function getOrgMemberEmails(orgId: string): Promise<{ data: { full_
   if (error) return { data: [], error: error.message }
   if (!memberships?.length) return { data: [], error: null }
 
-  const memberIds = (memberships as { member_id: string }[]).map(m => m.member_id)
+  const memberIds = (memberships as { member_id: string }[]).map((m: any) => m.member_id)
   const { data: members, error: mErr } = await admin
     .from('members')
     .select('full_name')

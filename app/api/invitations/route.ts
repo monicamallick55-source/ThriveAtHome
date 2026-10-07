@@ -13,7 +13,7 @@ import type { UserRole } from '@/lib/auth'
 
 function genToken(): string {
   return Array.from(crypto.getRandomValues(new Uint8Array(20)))
-    .map((b) => b.toString(16).padStart(2, '0'))
+    .map((b: any) => b.toString(16).padStart(2, '0'))
     .join('')
 }
 

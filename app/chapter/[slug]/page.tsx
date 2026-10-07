@@ -29,5 +29,5 @@ export default async function ChapterPage({ params }: Props) {
 
   const { data: programs } = await getPublicOrgPrograms(org.id)
 
-  return <ChapterLandingClient org={org} programs={programs ?? []} />
+  return <ChapterLandingClient org={(org ?? []) as any} programs={programs ?? []} />
 }

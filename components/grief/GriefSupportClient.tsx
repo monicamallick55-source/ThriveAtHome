@@ -218,7 +218,7 @@ export default function GriefSupportClient({ memberName, existingRequests }: Pro
                 Select the area where you need support. There&apos;s no wrong answer.
               </p>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '14px' }}>
-                {LOSS_TYPES.map(lt => {
+                {LOSS_TYPES.map((lt: any) => {
                   const isSelected = selectedLoss === lt.id
                   return (
                     <button
@@ -265,7 +265,7 @@ export default function GriefSupportClient({ memberName, existingRequests }: Pro
                       What kind of support sounds right? <span style={{ fontWeight: 400, color: 'var(--color-text-secondary)' }}>(optional)</span>
                     </label>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      {CIRCLE_TYPES.map(ct => (
+                      {CIRCLE_TYPES.map((ct: any) => (
                         <label key={ct} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '10px 14px', borderRadius: '8px', cursor: 'pointer', backgroundColor: circleType === ct ? '#EFF6FF' : '#F9FAFB', border: circleType === ct ? '1.5px solid var(--color-navy)' : '1.5px solid transparent' }}>
                           <input
                             type="radio"
@@ -287,7 +287,7 @@ export default function GriefSupportClient({ memberName, existingRequests }: Pro
                       Best time to reach you <span style={{ fontWeight: 400, color: 'var(--color-text-secondary)' }}>(optional)</span>
                     </label>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                      {AVAILABILITY.map(a => (
+                      {AVAILABILITY.map((a: any) => (
                         <button
                           key={a}
                           type="button"
@@ -379,7 +379,7 @@ export default function GriefSupportClient({ memberName, existingRequests }: Pro
               { name: 'Hospice Foundation of America', desc: 'Resources for families navigating end-of-life care and bereavement.', href: 'https://hospicefoundation.org' },
               { name: 'American Foundation for Suicide Prevention', desc: 'Resources for those who have lost someone to suicide.', href: 'https://afsp.org' },
               { name: 'Veterans Crisis Line', desc: 'Confidential crisis support for veterans and their families, 24/7.', href: 'https://www.veteranscrisisline.net' },
-            ].map(r => (
+            ].map((r: any) => (
               <a
                 key={r.name}
                 href={r.href}
@@ -407,7 +407,7 @@ export default function GriefSupportClient({ memberName, existingRequests }: Pro
               Your support history
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {existingRequests.map(r => {
+              {existingRequests.map((r: any) => {
                 const lossLabel = LOSS_TYPES.find(l => l.id === r.loss_type)?.title ?? r.loss_type
                 const date = new Date(r.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
                 const statusColor = r.status === 'matched' ? '#065F46' : r.status === 'pending' ? '#92400E' : '#4B5563'

@@ -60,7 +60,7 @@ async function setup(): Promise<void> {
 
   // Clean up any stale test user from a previous crashed run
   const { data: existingUsers } = await admin.auth.admin.listUsers()
-  const stale = existingUsers?.users.find((u) => u.email === TEST_EMAIL)
+  const stale = existingUsers?.users.find((u: any) => u.email === TEST_EMAIL)
   if (stale) {
     await admin.from('family_members').delete().eq('supabase_auth_id', stale.id)
     await admin.auth.admin.deleteUser(stale.id)

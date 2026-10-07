@@ -82,7 +82,7 @@ export async function GET(
   }
 
   const summaries = (callsResult.data ?? [])
-    .map(c => c.ai_summary)
+    .map((c: any) => c.ai_summary)
     .filter((s): s is string => Boolean(s))
 
   let brief = 'Navigator brief unavailable.'

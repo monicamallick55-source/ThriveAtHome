@@ -32,7 +32,7 @@ export default function DonatePage() {
             { amount: '$25', impact: 'Covers one month of daily Aria check-in calls for a senior who lives alone' },
             { amount: '$75', impact: 'Funds a volunteer matching and three visits for a senior who needs companionship' },
             { amount: '$150', impact: 'Supports one month of full navigator care coordination for a senior in need' },
-          ].map(card => (
+          ].map((card: any) => (
             <div key={card.amount} style={{ backgroundColor: 'white', borderRadius: '16px', padding: '24px', border: '1px solid #E8E4DC', textAlign: 'center' }}>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: '32px', color: 'var(--color-teal)', fontWeight: 500, marginBottom: '10px' }}>{card.amount}</div>
               <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>{card.impact}</p>

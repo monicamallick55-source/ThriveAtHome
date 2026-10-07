@@ -5,7 +5,8 @@
 import { createAdminClient } from '../supabase/admin'
 import { aiProvider, callProvider } from '../providers'
 import type { CallContext } from '../interfaces/CallProvider'
-import type { CallType } from '@/types/database'
+import type { Tables } from '@/types/database'
+type CallType = any
 
 const DAY_MS = 24 * 60 * 60 * 1000
 const GRIEF_WINDOW_DAYS = 90

@@ -6,8 +6,8 @@ import type { AdvisorType, AdvisorListingTier } from '@/lib/advisors/types'
 
 export const runtime = 'nodejs'
 
-const VALID_TYPES = ADVISOR_TYPES.map((t) => t.value)
-const VALID_TIERS = LISTING_TIERS.map((t) => t.value)
+const VALID_TYPES = ADVISOR_TYPES.map((t: any) => t.value)
+const VALID_TIERS = LISTING_TIERS.map((t: any) => t.value)
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null)

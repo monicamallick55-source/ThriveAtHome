@@ -86,9 +86,9 @@ async function run() {
       await detectWellnessDrift(memberId)
 
       const alerts = await getAlertsForMember(memberId)
-      testAlertIds.push(...alerts.map(a => a.id))
+      testAlertIds.push(...alerts.map((a: any) => a.id))
       const { data: notifs } = await admin.from('realtime_notifications').select('id').eq('member_id', memberId)
-      testNotifIds.push(...(notifs ?? []).map(n => n.id))
+      testNotifIds.push(...(notifs ?? []).map((n: any) => n.id))
 
       const driftAlert = alerts.find(a => a.alert_type === 'wellness_drift')
       if (driftAlert) {
@@ -110,9 +110,9 @@ async function run() {
       await detectWellnessDrift(memberId)
 
       const alerts = await getAlertsForMember(memberId)
-      testAlertIds.push(...alerts.map(a => a.id))
+      testAlertIds.push(...alerts.map((a: any) => a.id))
       const { data: notifs } = await admin.from('realtime_notifications').select('id').eq('member_id', memberId)
-      testNotifIds.push(...(notifs ?? []).map(n => n.id))
+      testNotifIds.push(...(notifs ?? []).map((n: any) => n.id))
 
       const driftAlert = alerts.find(a => a.alert_type === 'wellness_drift')
       if (!driftAlert) ok('no wellness_drift alert for flat scores')
@@ -129,9 +129,9 @@ async function run() {
       await detectWellnessDrift(memberId)
 
       const alerts = await getAlertsForMember(memberId)
-      testAlertIds.push(...alerts.map(a => a.id))
+      testAlertIds.push(...alerts.map((a: any) => a.id))
       const { data: notifs } = await admin.from('realtime_notifications').select('id').eq('member_id', memberId)
-      testNotifIds.push(...(notifs ?? []).map(n => n.id))
+      testNotifIds.push(...(notifs ?? []).map((n: any) => n.id))
 
       const driftAlert = alerts.find(a => a.alert_type === 'wellness_drift')
       if (!driftAlert) ok('no wellness_drift when fewer than 14 calls in window')
@@ -148,9 +148,9 @@ async function run() {
       await detectWellnessDrift(memberId)
 
       const alerts = await getAlertsForMember(memberId)
-      testAlertIds.push(...alerts.map(a => a.id))
+      testAlertIds.push(...alerts.map((a: any) => a.id))
       const { data: notifs } = await admin.from('realtime_notifications').select('id').eq('member_id', memberId)
-      testNotifIds.push(...(notifs ?? []).map(n => n.id))
+      testNotifIds.push(...(notifs ?? []).map((n: any) => n.id))
 
       const driftAlert = alerts.find(a => a.alert_type === 'wellness_drift')
       if (!driftAlert) ok('no wellness_drift for improving scores')

@@ -45,7 +45,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to generate signed URLs' }, { status: 500 })
   }
 
-  const urls = (data ?? []).map(item => {
+  const urls = (data ?? []).map((item: any) => {
     const p = item.path ?? ''
     const ext = p.split('.').pop()?.toLowerCase() ?? ''
     const mime = ext === 'pdf' ? 'application/pdf' : ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg'

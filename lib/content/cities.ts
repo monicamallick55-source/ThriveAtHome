@@ -67,5 +67,5 @@ export function getCityBySlug(stateCode: string, citySlug: string): CityPage | u
 }
 
 export function getCitiesByState(stateCode: string): CityPage[] {
-  return CITY_PAGES.filter((c) => c.stateCode.toLowerCase() === stateCode.toLowerCase())
+  return CITY_PAGES.filter((c: any) => c.stateCode.toLowerCase() === stateCode.toLowerCase())
 }

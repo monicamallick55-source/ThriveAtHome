@@ -22,7 +22,7 @@ export async function getActiveSkills(): Promise<SkillWithMember[]> {
     if (!skills || skills.length === 0) return []
 
     // fetch member names
-    const memberIds = [...new Set(skills.map(s => s.member_id))]
+    const memberIds = [...new Set(skills.map((s: any) => s.member_id))]
     const { data: members } = await admin
       .from('members')
       .select('id, preferred_name, full_name')
@@ -33,7 +33,7 @@ export async function getActiveSkills(): Promise<SkillWithMember[]> {
       nameMap.set(m.id, m.preferred_name || m.full_name.split(' ')[0])
     }
 
-    return skills.map(s => ({
+    return skills.map((s: any) => ({
       ...s,
       teacher_name: nameMap.get(s.member_id) ?? 'Community Member',
     }))

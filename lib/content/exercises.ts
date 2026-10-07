@@ -168,9 +168,9 @@ export const EXERCISE_LIBRARY: Exercise[] = [
 ]
 
 export function getExercisesForRiskLevel(level: 'low' | 'moderate' | 'high'): Exercise[] {
-  return EXERCISE_LIBRARY.filter((e) => e.fallRiskLevels.includes(level))
+  return EXERCISE_LIBRARY.filter((e: any) => e.fallRiskLevels.includes(level))
 }
 
 export function getExercisesByCategory(category: Exercise['category']): Exercise[] {
-  return EXERCISE_LIBRARY.filter((e) => e.category === category)
+  return EXERCISE_LIBRARY.filter((e: any) => e.category === category)
 }

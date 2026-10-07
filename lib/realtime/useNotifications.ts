@@ -4,7 +4,9 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useToast, type ToastSeverity } from '@/components/ui/Toast'
-import type { NotifSeverity, NotifType } from '@/types/database'
+import type { Tables } from '@/types/database'
+type NotifSeverity = any
+type NotifType = any
 
 export interface NotificationRow {
   id: string
@@ -40,7 +42,7 @@ export function useNotifications(memberId: string | null) {
         .limit(50)
       if (data) {
         setNotifications(data as NotificationRow[])
-        setUnreadCount(data.filter((n) => !n.read).length)
+        setUnreadCount(data.filter((n: any) => !n.read).length)
       }
     }
     fetchInitial()
@@ -92,7 +94,7 @@ export function useNotifications(memberId: string | null) {
         return
       }
       setNotifications((prev) =>
-        prev.map((n) =>
+        prev.map((n: any) =>
           n.id === notificationId ? { ...n, read: true, read_at: new Date().toISOString() } : n
         )
       )
@@ -113,7 +115,7 @@ export function useNotifications(memberId: string | null) {
       return
     }
     setNotifications((prev) =>
-      prev.map((n) => ({ ...n, read: true, read_at: n.read_at ?? new Date().toISOString() }))
+      prev.map((n: any) => ({ ...n, read: true, read_at: n.read_at ?? new Date().toISOString() }))
     )
     setUnreadCount(0)
   }, [memberId, supabase])
