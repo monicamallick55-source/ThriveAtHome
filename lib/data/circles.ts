@@ -357,3 +357,71 @@ export async function createCommunityCircle(circle: {
   }
   return data
 }
+
+// ── Comments ─────────────────────────────────────────────────────────────────
+
+export interface CirclePostComment {
+  id: string
+  created_at: string
+  post_id: string
+  member_id: string
+  content: string
+  member_name?: string
+}
+
+export async function getPostComments(postId: string): Promise<CirclePostComment[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('circle_post_comments' as any)
+    .select('*, members(preferred_name, full_name)')
+    .eq('post_id', postId)
+    .order('created_at', { ascending: true })
+    .limit(100)
+  if (error) {
+    console.error('[circles] getPostComments error:', error.message)
+    return []
+  }
+  return ((data as any[]) ?? []).map((c: any) => ({
+    id: c.id,
+    created_at: c.created_at,
+    post_id: c.post_id,
+    member_id: c.member_id,
+    content: c.content,
+    member_name:
+      c.members?.preferred_name ??
+      c.members?.full_name?.split(' ')[0] ??
+      'Community member',
+  }))
+}
+
+export async function addPostComment(
+  memberId: string,
+  postId: string,
+  content: string,
+): Promise<CirclePostComment | null> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('circle_post_comments' as any)
+    .insert({ member_id: memberId, post_id: postId, content })
+    .select()
+    .maybeSingle()
+  if (error) {
+    console.error('[circles] addPostComment error:', error.message)
+    return null
+  }
+  return data as CirclePostComment | null
+}
+
+export async function deletePostComment(commentId: string, memberId: string): Promise<boolean> {
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('circle_post_comments' as any)
+    .delete()
+    .eq('id', commentId)
+    .eq('member_id', memberId) // RLS enforced; also enforce here
+  if (error) {
+    console.error('[circles] deletePostComment error:', error.message)
+    return false
+  }
+  return true
+}
