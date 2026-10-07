@@ -15,6 +15,7 @@ const NAV_LINKS = [
   { href: '/dashboard/calls', label: 'History' },
   { href: '/dashboard/family', label: 'Family' },
   { href: '/dashboard/documents', label: 'Documents' },
+  { href: '/dashboard/friends', label: 'Friends' },
 ]
 
 export function DashNav({ seniorName, unreadCount, onMarkAllRead }: DashNavProps) {
