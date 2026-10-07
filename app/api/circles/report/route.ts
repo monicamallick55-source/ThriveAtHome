@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+const VALID_REASONS = ['spam', 'harassment', 'inappropriate', 'misinformation', 'other']
+
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -10,35 +12,33 @@ export async function POST(req: NextRequest) {
     .from('family_members')
     .select('member_id')
     .eq('supabase_auth_id', user.id)
-    .single()
-  if (!fm?.member_id) return NextResponse.json({ error: 'Member not found' }, { status: 403 })
+    .maybeSingle()
+  if (!fm?.member_id) return NextResponse.json({ error: 'No member' }, { status: 403 })
 
-  const body = await req.json()
-  const { postId, commentId, reason, details } = body
-  if (!reason) return NextResponse.json({ error: 'reason required' }, { status: 400 })
-  if (!postId && !commentId) return NextResponse.json({ error: 'postId or commentId required' }, { status: 400 })
+  const { post_id, comment_id, reason, details } = await req.json()
+  if (!reason || !VALID_REASONS.includes(reason)) {
+    return NextResponse.json({ error: 'Invalid reason' }, { status: 400 })
+  }
+  if (!post_id && !comment_id) {
+    return NextResponse.json({ error: 'post_id or comment_id required' }, { status: 400 })
+  }
 
-  const { data: report, error } = await supabase
-    .from('community_reports')
+  const { data, error } = await supabase
+    .from('community_reports' as any)
     .insert({
-      post_id: postId ?? null,
-      comment_id: commentId ?? null,
       reported_by: fm.member_id,
+      post_id: post_id ?? null,
+      comment_id: comment_id ?? null,
       reason,
-      details: details ?? null,
+      details: details?.trim() ?? null,
+      status: 'open',
     })
-    .select()
-    .single()
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    .select('id')
+    .maybeSingle()
 
-  // Create navigator task
-  const priority = ['scam_or_fraud', 'worried_about_member'].includes(reason) ? 'high' : 'medium'
-  await (supabase as any).from('navigator_tasks').insert({
-    task_type: 'community_report',
-    priority,
-    description: `Community report: ${reason}`,
-    related_id: report.id,
-  })
-
-  return NextResponse.json(report, { status: 201 })
+  if (error) {
+    console.error('[report] insert error:', error.message)
+    return NextResponse.json({ error: 'Failed to submit report' }, { status: 500 })
+  }
+  return NextResponse.json({ ok: true, id: (data as any)?.id }, { status: 201 })
 }
