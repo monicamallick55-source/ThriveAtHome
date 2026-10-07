@@ -5,6 +5,8 @@ import { detectAgentsInvolved, type RetellTranscriptEvent } from './transfers'
 import { aiProvider } from '@/lib/providers'
 import { handleCrisisDetection } from '@/lib/alerts/detectCrisis'
 import { detectAlertsForCall } from '@/lib/alerts/detectAlerts'
+import { sendCareTeamUrgent } from '../alerts/careTeamSms'
+import { sendFamilySummary } from '../alerts/familySummary'
 
 export interface RetellCall {
   call_id: string
@@ -205,7 +207,7 @@ export async function processCallEnded(call: RetellCall, opts: ProcessCallOption
       crisis_flag: crisisFlag || alwaysCrisis,
       status: callStatus,
       processed_at: new Date().toISOString(),
-    } as any, { onConflict: 'retell_call_id' }).select('id').maybeSingle()
+    } as any, { onConflict: 'retell_call_id' }).select('id, phone, sms_opted_in').maybeSingle()
     insertedCallId = (upserted as any)?.id ?? null
   } else {
     // Unknown caller → inbound_call_log
@@ -260,7 +262,7 @@ export async function processCallEnded(call: RetellCall, opts: ProcessCallOption
   if (memberId && !isMissed) {
     const { data: familyMembers } = await supabase
       .from('family_members')
-      .select('id')
+      .select('id, phone, sms_opted_in')
       .eq('member_id', memberId)
     if (familyMembers?.length) {
       const notifType = crisisFlag || alwaysCrisis ? 'crisis_call' : 'call_completed'
@@ -277,6 +279,14 @@ export async function processCallEnded(call: RetellCall, opts: ProcessCallOption
           metadata: { call_id: call.call_id, member_id: memberId, agent: final },
         }))
       )
+
+      // G5.8 — Family daily summary SMS
+      const memberDisplayName = memberId ?? 'your loved one'
+      try {
+        await sendFamilySummary(familyMembers as any[], memberDisplayName, final, aiSummary ?? retellSummary ?? 'Check-in call completed.', !!(crisisFlag || alwaysCrisis))
+      } catch (e) {
+        console.error('[processCallEnded] familySummary SMS failed:', e instanceof Error ? e.message : e)
+      }
     }
   }
 
