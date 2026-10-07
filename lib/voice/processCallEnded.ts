@@ -1,6 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
-import { AGENTS, agentNameFromId, agentIdFor, type AgentName } from './agents'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { AGENTS, agentNameFromId, type AgentName } from './agents'
 import { detectAgentsInvolved, type RetellTranscriptEvent } from './transfers'
+import { aiProvider } from '@/lib/providers'
+import { handleCrisisDetection } from '@/lib/alerts/detectCrisis'
+import { detectAlertsForCall } from '@/lib/alerts/detectAlerts'
 
 export interface RetellCall {
   call_id: string
@@ -53,20 +57,15 @@ export function memberSpeech(call: RetellCall): string {
     .join('\n')
 }
 
-const CRISIS_KEYWORDS = [
-  "hurt myself", "end my life", "kill myself", "suicide",
-  "want to die", "not worth living", "no reason to live",
-  "don't want to be here", "want to end my life",
-  "chest pain", "can't breathe", "fallen and can't",
-]
-
-function detectCrisis(text: string): boolean {
-  const lower = text.toLowerCase()
-  return CRISIS_KEYWORDS.some(kw => lower.includes(kw))
-}
+const MISSED_REASONS = new Set([
+  'dial_no_answer',
+  'dial_busy',
+  'voicemail_reached',
+  'no_answer',
+])
 
 export interface ProcessCallOptions {
-  _crisisScanner?: (text: string) => boolean
+  _crisisScanner?: (text: string) => string | null
 }
 
 export interface ProcessResult {
@@ -97,7 +96,11 @@ export async function processCallEnded(call: RetellCall, opts: ProcessCallOption
   const callType = agentCfg?.callType ?? 'daily_companion'
   const direction = (call.direction ?? agentCfg?.direction ?? 'inbound') as 'inbound' | 'outbound'
 
-  // Step 3 — Find member by phone
+  // Step 3 — Missed call detection
+  const isMissed = MISSED_REASONS.has(call.disconnection_reason ?? '')
+  const callStatus = isMissed ? 'missed' : 'completed'
+
+  // Step 4 — Find member by phone
   const phoneToMatch = direction === 'outbound' ? call.to_number : call.from_number
   let memberId: string | null = null
 
@@ -111,30 +114,75 @@ export async function processCallEnded(call: RetellCall, opts: ProcessCallOption
     memberId = (member as any)?.id ?? null
   }
 
-  // Step 4 — Crisis detection on member speech only
+  // Step 5 — Crisis detection (runs on full transcript, member speech preferred)
   const speech = memberSpeech(call)
-  const scanner = opts._crisisScanner ?? detectCrisis
-  let crisisFlag: boolean
-  try {
-    crisisFlag = scanner(speech)
-  } catch {
-    // crisis scanner threw — create manual review task and continue
-    crisisFlag = false
-    if (memberId) {
-      const supabase2 = await createClient()
-      await supabase2.from('navigator_tasks').insert({ member_id: memberId, task_type: 'crisis', priority: 'critical', description: 'Crisis detection failed — manual review required', status: 'open' } as any)
+  const fullTranscript = call.transcript ?? speech
+  const alwaysCrisis = final === 'hope'
+  let crisisFlag = false
+
+  if (!isMissed && memberId) {
+    await handleCrisisDetection({
+      memberId,
+      callId: call.call_id,
+      transcript: speech || fullTranscript,
+      _scanner: opts._crisisScanner,
+    })
+    // Re-read crisis flag from the scanner result for the record
+    const { scanForCrisisPhrase } = await import('@/lib/alerts/detectCrisis')
+    const scanner = opts._crisisScanner ?? scanForCrisisPhrase
+    try {
+      crisisFlag = !!scanner(speech || fullTranscript)
+    } catch {
+      crisisFlag = false
     }
   }
-  const alwaysCrisis = final === 'hope' // Hope calls always get crisis task
 
-  // Step 5 — AI summary
-  const summary = call.call_analysis?.call_summary ?? null
+  // Step 6 — AI summary + clinical field extraction (skip for missed calls)
+  const retellSummary = call.call_analysis?.call_summary ?? null
   const sentiment = call.call_analysis?.user_sentiment ?? null
   const durationSeconds = call.duration_ms ? Math.round(call.duration_ms / 1000) : null
 
-  // Step 6 — Upsert check_in_calls or inbound_call_log
+  let aiSummary: string | null = null
+  let moodScore: number | null = null
+  let energyScore: number | null = null
+  let painScore: number | null = null
+  let medicationTaken: boolean | null = null
+  let alertFlags: string[] = []
+
+  if (!isMissed && fullTranscript) {
+    // AI summary
+    try {
+      aiSummary = await aiProvider.generateCallSummary(fullTranscript)
+    } catch (e) {
+      console.warn('[processCallEnded] generateCallSummary failed:', e instanceof Error ? e.message : e)
+      aiSummary = retellSummary // fall back to Retell's summary
+    }
+
+    // Clinical field extraction from member speech only
+    if (speech) {
+      try {
+        const scores = await aiProvider.extractCallScores(speech)
+        moodScore = scores.mood_score
+        energyScore = scores.energy_score
+        painScore = scores.pain_score
+        medicationTaken = scores.medication_taken
+        alertFlags = scores.alert_flags ?? []
+      } catch (e) {
+        console.warn('[processCallEnded] extractCallScores failed:', e instanceof Error ? e.message : e)
+      }
+    }
+  }
+
+  // Merge crisis into alert_flags
+  if ((crisisFlag || alwaysCrisis) && !alertFlags.includes('crisis')) {
+    alertFlags = [...alertFlags, 'crisis']
+  }
+
+  // Step 7 — Upsert check_in_calls or inbound_call_log
+  let insertedCallId: string | null = null
+
   if (memberId) {
-    await supabase.from('check_in_calls').upsert({
+    const { data: upserted } = await supabase.from('check_in_calls').upsert({
       retell_call_id: call.call_id,
       member_id: memberId,
       agent_id: call.agent_id,
@@ -146,12 +194,19 @@ export async function processCallEnded(call: RetellCall, opts: ProcessCallOption
       call_type: callType,
       duration_seconds: durationSeconds,
       transcript: call.transcript,
-      summary,
+      summary: retellSummary,
+      ai_summary: aiSummary,
       sentiment,
+      mood_score: moodScore,
+      energy_score: energyScore,
+      pain_score: painScore,
+      medication_taken: medicationTaken,
+      alert_flags: alertFlags,
       crisis_flag: crisisFlag || alwaysCrisis,
-      status: 'completed',
+      status: callStatus,
       processed_at: new Date().toISOString(),
-    } as any, { onConflict: 'retell_call_id' })
+    } as any, { onConflict: 'retell_call_id' }).select('id').maybeSingle()
+    insertedCallId = (upserted as any)?.id ?? null
   } else {
     // Unknown caller → inbound_call_log
     await supabase.from('inbound_call_log' as any).upsert({
@@ -163,7 +218,8 @@ export async function processCallEnded(call: RetellCall, opts: ProcessCallOption
       to_number: call.to_number,
       duration_seconds: durationSeconds,
       transcript: call.transcript,
-      summary,
+      summary: retellSummary,
+      ai_summary: aiSummary,
       sentiment,
       call_type: callType,
       needs_followup: crisisFlag || alwaysCrisis,
@@ -172,39 +228,53 @@ export async function processCallEnded(call: RetellCall, opts: ProcessCallOption
     }, { onConflict: 'retell_call_id' })
   }
 
-  // Step 7 — Crisis escalation
-  if (crisisFlag || alwaysCrisis) {
-    if (memberId) {
-      await supabase.from('navigator_tasks').insert({
-        member_id: memberId,
-        task_type: 'crisis',
-        priority: 'critical',
-        description: `Hope crisis-line call ${call.call_id} — ${crisisFlag ? 'crisis phrase detected' : 'Hope line always escalates'}`,
-        status: 'open',
-      } as any)
-      await supabase.from('emergency_log').insert({
-        member_id: memberId,
-        alert_type: final === 'hope' ? 'crisis' : 'crisis',
-        call_id: call.call_id,
-        triggered_phrase: speech.slice(0, 200),
-      } as any)
+  // Step 8 — Alert rules (mood drop, medication miss, fall, wellness drift)
+  if (memberId && insertedCallId && !isMissed) {
+    try {
+      await detectAlertsForCall(insertedCallId, memberId)
+    } catch (e) {
+      console.error('[processCallEnded] detectAlertsForCall failed:', e instanceof Error ? e.message : e)
     }
   }
 
-  // Step 8 — Family notification
-  if (memberId && callType === 'daily_companion') {
+  // Step 9 — Hope line always escalates (if not already caught by crisis detection)
+  if (alwaysCrisis && memberId && !crisisFlag) {
+    const admin = createAdminClient()
+    await admin.from('navigator_tasks').insert({
+      member_id: memberId,
+      task_type: 'crisis',
+      priority: 'critical',
+      description: `Hope crisis-line call ${call.call_id} — Hope line always escalates`,
+      status: 'open',
+    } as any)
+  }
+
+  // Step 10 — Member bookkeeping
+  if (memberId && !isMissed) {
+    const admin = createAdminClient()
+    const updates: Record<string, unknown> = { last_aria_call_at: new Date().toISOString() }
+    await admin.from('members').update(updates as any).eq('id', memberId)
+  }
+
+  // Step 11 — Family notification (all completed call types, never includes transcript)
+  if (memberId && !isMissed) {
     const { data: familyMembers } = await supabase
       .from('family_members')
       .select('id')
       .eq('member_id', memberId)
     if (familyMembers?.length) {
+      const notifType = crisisFlag || alwaysCrisis ? 'crisis_call' : 'call_completed'
+      const notifTitle = crisisFlag || alwaysCrisis
+        ? '\u{1F6A8} Crisis flag on call'
+        : `${final === 'joy' ? 'Joy' : final === 'grace' ? 'Grace' : 'Aria'} completed a call`
+      const notifBody = aiSummary ?? retellSummary ?? 'Check-in call completed'
       await supabase.from('realtime_notifications' as any).insert(
         familyMembers.map((fm: any) => ({
           user_id: fm.id,
-          type: crisisFlag ? 'crisis_call' : 'call_completed',
-          title: crisisFlag ? '🚨 Crisis flag on call' : 'Aria completed a call',
-          body: summary ?? 'Daily companion call completed',
-          metadata: { call_id: call.call_id, member_id: memberId },
+          type: notifType,
+          title: notifTitle,
+          body: notifBody,
+          metadata: { call_id: call.call_id, member_id: memberId, agent: final },
         }))
       )
     }
