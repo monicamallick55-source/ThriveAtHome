@@ -5,7 +5,7 @@ import { resolveMemberContext } from '@/lib/data/members'
 
 const VALID_STATUSES = ['approved', 'rejected', 'cancelled']
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { memberId } = await resolveMemberContext(user.id)
@@ -33,7 +33,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
   const { data, error } = await (supabase.from as any)('circle_events')
     .update({ status, review_note: review_note ?? null, reviewed_by: memberId })
-    .eq('id', params.id)
+    .eq('id', (await params).id)
     .eq('status', 'proposed')
     .select()
     .maybeSingle()
