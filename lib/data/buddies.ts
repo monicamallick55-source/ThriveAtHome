@@ -214,8 +214,8 @@ export async function getUnmatchedBuddyMembers(): Promise<{ data: Array<{ id: st
 
 // Scores an active volunteer for buddy matching.
 export function scoreBuddyVolunteer(
-  volunteer: { city: string | null; interests: string[]; languages: string[]; buddy_capacity: number; buddy_active_count: number; buddy_preferences: Record<string, unknown> | null },
-  member: { address: string | null; topics_enjoy: string[]; preferred_language: string; buddy_match_topics?: string[] }
+  volunteer: { city: string | null; state?: string | null; metro_area_id?: string | null; interests: string[]; languages: string[]; buddy_capacity: number; buddy_active_count: number; buddy_preferences: Record<string, unknown> | null },
+  member: { address: string | null; state?: string | null; metro_area_id?: string | null; topics_enjoy: string[]; preferred_language: string; buddy_match_topics?: string[] }
 ): { score: number; reasons: string[] } {
   let score = 0
   const reasons: string[] = []
@@ -225,8 +225,14 @@ export function scoreBuddyVolunteer(
     ...(member.buddy_match_topics ?? []),
   ]
 
-  // Location
-  if (volunteer.city && member.address && member.address.toLowerCase().includes(volunteer.city.toLowerCase())) {
+  // Metro area match (+30), same state (+15), same city fallback (+20)
+  if (volunteer.metro_area_id && member.metro_area_id && volunteer.metro_area_id === member.metro_area_id) {
+    score += 30
+    reasons.push('Same metro area')
+  } else if (volunteer.state && member.state && volunteer.state === member.state) {
+    score += 15
+    reasons.push('Same state')
+  } else if (volunteer.city && member.address && member.address.toLowerCase().includes(volunteer.city.toLowerCase())) {
     score += 20
     reasons.push('Same city')
   }
