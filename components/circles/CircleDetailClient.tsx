@@ -60,6 +60,9 @@ export default function CircleDetailClient({
   )
   const [joinLoading, setJoinLoading] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
+  const [proposeOpen, setProposeOpen] = useState(false)
+  const [proposeForm, setProposeForm] = useState({ title: '', event_date: '', event_time: '', description: '', format: 'phone', location_text: '' })
+  const [proposing, setProposing] = useState(false)
 
   const accentColor = CIRCLE_COLORS[circleIndex % CIRCLE_COLORS.length]
 
@@ -162,6 +165,24 @@ export default function CircleDetailClient({
     }
   }
 
+  const handlePropose = async () => {
+    if (!proposeForm.title.trim() || !proposeForm.event_date) return
+    setProposing(true)
+    try {
+      const res = await fetch('/api/circles/events/propose', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...proposeForm, circle_id: circle.id, circle_ids: [circle.id] }),
+      })
+      if (res.ok) {
+        setProposeOpen(false)
+        setProposeForm({ title: '', event_date: '', event_time: '', description: '', format: 'phone', location_text: '' })
+        showToast('Event proposed! A navigator will review it shortly.')
+      } else {
+        showToast('Could not submit proposal — please try again.')
+      }
+    } finally { setProposing(false) }
+  }
+
   return (
     <div style={{ flex: 1, padding: '32px 24px' }}>
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
@@ -261,6 +282,88 @@ export default function CircleDetailClient({
                 </div>
               )
             })}
+          </div>
+        )}
+
+        {/* Propose event button */}
+        {hasMember && joined && (
+          <div style={{ marginBottom: '16px', textAlign: 'right' }}>
+            <button onClick={() => setProposeOpen(true)} style={{
+              padding: '9px 18px', borderRadius: '10px',
+              fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 500,
+              cursor: 'pointer', border: `1px solid ${accentColor}`,
+              backgroundColor: 'white', color: accentColor,
+            }}>+ Propose an event</button>
+          </div>
+        )}
+
+        {/* Propose event modal */}
+        {proposeOpen && (
+          <div style={{
+            position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.4)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200, padding: '16px',
+          }}>
+            <div style={{
+              backgroundColor: 'white', borderRadius: '16px', padding: '28px',
+              width: '100%', maxWidth: '520px', boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+            }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 500, color: 'var(--color-navy)', margin: '0 0 20px' }}>Propose an event</h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <div>
+                  <label style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-secondary)', display: 'block', marginBottom: '4px' }}>Event title *</label>
+                  <input value={proposeForm.title} onChange={e => setProposeForm(f => ({ ...f, title: e.target.value }))}
+                    placeholder="e.g. Morning Book Chat" maxLength={120}
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #ddd', fontFamily: 'var(--font-body)', fontSize: '15px', boxSizing: 'border-box' }} />
+                </div>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-secondary)', display: 'block', marginBottom: '4px' }}>Date *</label>
+                    <input type="date" value={proposeForm.event_date} onChange={e => setProposeForm(f => ({ ...f, event_date: e.target.value }))}
+                      style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #ddd', fontFamily: 'var(--font-body)', fontSize: '15px', boxSizing: 'border-box' }} />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-secondary)', display: 'block', marginBottom: '4px' }}>Time (optional)</label>
+                    <input type="time" value={proposeForm.event_time} onChange={e => setProposeForm(f => ({ ...f, event_time: e.target.value }))}
+                      style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #ddd', fontFamily: 'var(--font-body)', fontSize: '15px', boxSizing: 'border-box' }} />
+                  </div>
+                </div>
+                <div>
+                  <label style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-secondary)', display: 'block', marginBottom: '4px' }}>Format</label>
+                  <select value={proposeForm.format} onChange={e => setProposeForm(f => ({ ...f, format: e.target.value }))}
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #ddd', fontFamily: 'var(--font-body)', fontSize: '15px', boxSizing: 'border-box' }}>
+                    <option value="phone">Phone call</option>
+                    <option value="video">Video (Zoom / FaceTime)</option>
+                    <option value="in_person">In person</option>
+                  </select>
+                </div>
+                {proposeForm.format === 'in_person' && (
+                  <div>
+                    <label style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-secondary)', display: 'block', marginBottom: '4px' }}>Location (optional)</label>
+                    <input value={proposeForm.location_text} onChange={e => setProposeForm(f => ({ ...f, location_text: e.target.value }))}
+                      placeholder="e.g. Community center, 123 Main St"
+                      style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #ddd', fontFamily: 'var(--font-body)', fontSize: '15px', boxSizing: 'border-box' }} />
+                  </div>
+                )}
+                <div>
+                  <label style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-secondary)', display: 'block', marginBottom: '4px' }}>Description (optional)</label>
+                  <textarea value={proposeForm.description} onChange={e => setProposeForm(f => ({ ...f, description: e.target.value }))}
+                    placeholder="What will you do? Who is it for?" rows={3} maxLength={500}
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #ddd', fontFamily: 'var(--font-body)', fontSize: '15px', resize: 'vertical', boxSizing: 'border-box' }} />
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '12px', marginTop: '20px', justifyContent: 'flex-end' }}>
+                <button onClick={() => setProposeOpen(false)} style={{
+                  padding: '10px 20px', borderRadius: '10px', fontFamily: 'var(--font-body)', fontSize: '15px',
+                  cursor: 'pointer', border: '1px solid #ddd', backgroundColor: 'white', color: 'var(--color-text-primary)',
+                }}>Cancel</button>
+                <button onClick={handlePropose} disabled={proposing || !proposeForm.title.trim() || !proposeForm.event_date} style={{
+                  padding: '10px 20px', borderRadius: '10px', fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 500,
+                  cursor: (proposing || !proposeForm.title.trim() || !proposeForm.event_date) ? 'not-allowed' : 'pointer',
+                  border: 'none', backgroundColor: accentColor, color: 'white',
+                  opacity: (proposing || !proposeForm.title.trim() || !proposeForm.event_date) ? 0.6 : 1,
+                }}>{proposing ? 'Submitting...' : 'Submit proposal'}</button>
+              </div>
+            </div>
           </div>
         )}
 
