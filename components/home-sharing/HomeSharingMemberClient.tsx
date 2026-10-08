@@ -24,9 +24,9 @@ interface Props {
 }
 
 const STATUS_LABELS: Record<string, { label: string; color: string; desc: string }> = {
-  inquiring:  { label: 'Inquiry Received',    color: 'bg-blue-100 text-blue-700',    desc: 'We've received your interest. A navigator will be in touch soon.' },
-  screening:  { label: 'Under Review',        color: 'bg-purple-100 text-purple-700', desc: 'We're reviewing your information and may schedule a call.' },
-  matched:    { label: 'Match Found',         color: 'bg-orange-100 text-orange-700', desc: 'We've identified a potential match. A navigator will connect you.' },
+  inquiring:  { label: 'Inquiry Received',    color: 'bg-blue-100 text-blue-700',    desc: "We've received your interest. A navigator will be in touch soon." },
+  screening:  { label: 'Under Review',        color: 'bg-purple-100 text-purple-700', desc: "We're reviewing your information and may schedule a call." },
+  matched:    { label: 'Match Found',         color: 'bg-orange-100 text-orange-700', desc: "We've identified a potential match. A navigator will connect you." },
   trial:      { label: 'Trial Period',        color: 'bg-teal-100 text-teal-700',    desc: 'A trial home share arrangement is in place.' },
   active:     { label: 'Active Arrangement',  color: 'bg-green-100 text-green-700',  desc: 'Your home share is confirmed and active.' },
   paused:     { label: 'On Hold',             color: 'bg-yellow-100 text-yellow-700', desc: 'Your inquiry is temporarily paused.' },
@@ -192,7 +192,7 @@ export default function HomeSharingMemberClient({ referral: initialReferral }: P
             <p className="text-xs text-gray-500 mt-1">
               {r === 'host'
                 ? 'You have a spare room or space and would like to share it with a compatible housemate.'
-                : 'You\'re looking for an affordable, supportive living arrangement with a welcoming host.'}
+                : "You're looking for an affordable, supportive living arrangement with a welcoming host."}
             </p>
           </button>
         ))}
