@@ -1,66 +1,78 @@
-import { redirect } from 'next/navigation'
-import type { Metadata } from 'next'
-import { requireAuth, getUserRole } from '@/lib/auth'
-import { getNavigatorByAuthId, getNavigatorCaseload, getNavigatorTasks } from '@/lib/data/navigator'
-import { getAllPendingGriefRequests } from '@/lib/data/grief'
-import { getAllBookingsForNavigator } from '@/lib/data/services'
-import { NavConsole } from '@/components/navigator/NavConsole'
-import { ToastProvider } from '@/components/ui/Toast'
-import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
+// app/navigator/members/[memberId]/page.tsx
+// Navigator member detail page — profile overview + "Suggest an introduction" action.
 
-export const metadata: Metadata = { title: 'Navigator Console — ThriveAtHome' }
+import { createAdminClient } from '@/lib/supabase/admin'
+import { notFound, redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+import NavigatorMemberDetailClient from '@/components/navigator/NavigatorMemberDetailClient'
 
-export default async function NavigatorPage() {
-  const user = await requireAuth()
+// ── Auth guard (server-side) ──────────────────────────────────────────────────
 
-  const role = await getUserRole(user.id)
-  if (role === 'family') redirect('/dashboard')
+async function getStaffSession() {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return null
 
-  const { data: navigator } = await getNavigatorByAuthId(user.id)
+  const { data: fm } = await supabase
+    .from('family_members')
+    .select('id, role')
+    .eq('supabase_auth_id', user.id)
+    .maybeSingle()
 
-  let caseload = null as Awaited<ReturnType<typeof getNavigatorCaseload>>['data']
-  let caseloadError: string | null = null
-  let tasks = null as Awaited<ReturnType<typeof getNavigatorTasks>>['data']
-  let tasksError: string | null = null
+  if (!fm || (fm.role !== 'admin' && fm.role !== 'navigator')) return null
+  return fm
+}
 
-  if (navigator) {
-    const [caseloadResult, tasksResult] = await Promise.all([
-      getNavigatorCaseload(navigator.id),
-      getNavigatorTasks(navigator.id),
-    ])
-    caseload = caseloadResult.data
-    caseloadError = caseloadResult.error
-    tasks = tasksResult.data
-    tasksError = tasksResult.error
-  }
+// ── Page ──────────────────────────────────────────────────────────────────────
 
-  // Build member name lookup for task display
-  const membersById: Record<string, string> = {}
-  for (const entry of (caseload ?? [])) {
-    membersById[entry.member.id] = entry.member.preferred_name || entry.member.full_name
-  }
+export default async function NavigatorMemberDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id: memberId } = await params
 
-  const [{ data: griefRequests }, { data: pendingBookings }] = await Promise.all([
-    getAllPendingGriefRequests(),
-    getAllBookingsForNavigator(),
-  ])
+  const staff = await getStaffSession()
+  if (!staff) redirect('/login')
 
-  const navigatorName = navigator?.full_name ?? (role === 'admin' ? 'Admin' : 'Navigator')
+  const admin = createAdminClient()
+
+  // Fetch member (omit org_id until confirmed on schema)
+  const { data: member } = await admin
+    .from('members')
+    .select(
+      `id, full_name, preferred_name, email, phone, city, state,
+       directory_bio, directory_opt_in,
+       risk_level, aria_call_opted_in, created_at,
+       subscription_tier`,
+    )
+    .eq('id', memberId)
+    .maybeSingle()
+
+  if (!member) notFound()
+
+  // Fetch their navigator-introduced connections
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: introductions } = await (admin as any)
+    .from('member_connections')
+    .select(
+      `id, created_at, status, intro_note, requester_accepted, recipient_accepted,
+       requester:members!member_connections_requester_id_fkey(id, preferred_name, full_name),
+       recipient:members!member_connections_recipient_id_fkey(id, preferred_name, full_name)`,
+    )
+    .or(`requester_id.eq.${memberId},recipient_id.eq.${memberId}`)
+    .not('introduced_by', 'is', null)
+    .order('created_at', { ascending: false })
+    .limit(20)
 
   return (
-    <ToastProvider>
-      <ErrorBoundary section="navigator console">
-        <NavConsole
-          navigatorName={navigatorName}
-          caseload={caseload ?? []}
-          tasks={tasks ?? []}
-          membersById={membersById}
-          caseloadError={navigator ? caseloadError : null}
-          tasksError={navigator ? tasksError : null}
-          griefRequests={griefRequests ?? []}
-          pendingBookings={pendingBookings ?? []}
-        />
-      </ErrorBoundary>
-    </ToastProvider>
+    <NavigatorMemberDetailClient
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      member={member as any}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      introductions={(introductions ?? []) as any}
+    />
   )
 }
