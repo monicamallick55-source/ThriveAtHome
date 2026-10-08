@@ -188,7 +188,7 @@ export default function HomeSharingMemberClient({ referral: initialReferral }: P
             className={`rounded-xl border-2 p-4 text-left transition-colors
               ${role === r ? 'border-teal-600 bg-teal-50' : 'border-gray-200 hover:border-gray-300'}`}
           >
-            <p className="font-semibold text-gray-900 capitalize">{r === 'host' ? '🏠 I have a home to share' : '🔍 I'm looking for a home'}</p>
+            <p className="font-semibold text-gray-900 capitalize">{r === 'host' ? '🏠 I have a home to share' : "🔍 I'm looking for a home"}</p>
             <p className="text-xs text-gray-500 mt-1">
               {r === 'host'
                 ? 'You have a spare room or space and would like to share it with a compatible housemate.'
