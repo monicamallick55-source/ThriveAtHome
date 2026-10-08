@@ -3,9 +3,8 @@
 // Volunteer view: assigned homes, checklist, mark work done
 
 import { useState } from 'react'
-import { SAFETY_CHECKLIST } from '@/app/api/home-safety/checks/[id]/items/route'
+import { SAFETY_CHECKLIST } from '@/lib/home-safety/checklist'
 
-// Re-export the checklist for client use
 const CHECKLIST = SAFETY_CHECKLIST
 
 interface CheckItem { id: string; room: string; item_key: string; result: string; note: string | null; photo_path: string | null }
