@@ -1,15 +1,45 @@
+// lib/data/circles.ts
+// Data layer for cultural circles, posts, comments, events, and interest groups.
+// circle_members is not in Supabase TS types yet — uses (supabase as any) casts.
+// circle_event_rsvps — same.
+
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+
+// ── Types ─────────────────────────────────────────────────────────────────────
 
 export interface CulturalCircle {
   id: string
+  created_at: string
   circle_name: string
-  primary_language: string
-  description: string
-  member_count: number
-  is_active: boolean
+  description: string | null
+  community_type: string | null
+  primary_language: string | null
   image_placeholder: string | null
   interest_tag: string | null
-  community_type: string
+  membership_visibility: string | null
+  member_count: number
+  is_active: boolean
+}
+
+export interface CircleEvent {
+  id: string
+  created_at: string
+  circle_id: string | null
+  circle_ids: string[] | null
+  title: string
+  description: string | null
+  event_date: string
+  event_time: string | null
+  format: string | null
+  is_platform_wide: boolean | null
+  is_recurring: boolean | null
+  location_address: string | null
+  rsvp_count: number
+  video_link: string | null
+  dial_in_code: string | null
+  dial_in_number: string | null
+  user_has_rsvped?: boolean
 }
 
 export interface CirclePost {
@@ -18,347 +48,10 @@ export interface CirclePost {
   circle_id: string
   member_id: string
   content: string
-  post_type: string
-  member_name?: string
+  comment_count: number
+  is_hidden: boolean
+  members: { preferred_name: string | null; full_name: string | null } | null
 }
-
-export interface CircleEvent {
-  id: string
-  circle_id: string | null
-  circle_ids: string[]
-  title: string
-  description: string | null
-  event_date: string
-  event_time: string | null
-  format: string
-  dial_in_number: string | null
-  dial_in_code: string | null
-  video_link: string | null
-  location_address: string | null
-  rsvp_count: number
-  is_recurring: boolean
-  is_platform_wide: boolean
-  user_has_rsvped?: boolean
-}
-
-export async function getAllCircles(): Promise<CulturalCircle[]> {
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('cultural_circles')
-    .select('*')
-    .eq('is_active', true)
-    .order('circle_name')
-  if (error) {
-    console.error('[circles] getAllCircles error:', error.message)
-    return []
-  }
-  return data ?? []
-}
-
-export async function getInterestGroups(): Promise<CulturalCircle[]> {
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('cultural_circles')
-    .select('*')
-    .eq('is_active', true)
-    .eq('community_type', 'interest')
-    .order('circle_name')
-  if (error) {
-    console.error('[circles] getInterestGroups error:', error.message)
-    return []
-  }
-  return data ?? []
-}
-
-export async function getCircleById(circleId: string): Promise<CulturalCircle | null> {
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('cultural_circles')
-    .select('*')
-    .eq('id', circleId)
-    .maybeSingle()
-  if (error) {
-    console.error('[circles] getCircleById error:', error.message)
-    return null
-  }
-  return data
-}
-
-export async function getMemberCircleIds(memberId: string): Promise<string[]> {
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('circle_memberships')
-    .select('circle_id')
-    .eq('member_id', memberId)
-  if (error) {
-    console.error('[circles] getMemberCircleIds error:', error.message)
-    return []
-  }
-  return (data ?? []).map((r: any) => r.circle_id)
-}
-
-export async function joinCircle(memberId: string, circleId: string): Promise<boolean> {
-  const supabase = await createClient()
-  const { error } = await supabase
-    .from('circle_memberships')
-    .insert({ member_id: memberId, circle_id: circleId })
-  if (error) {
-    console.error('[circles] joinCircle error:', error.message)
-    return false
-  }
-  // Increment member_count
-  const { data: circle } = await supabase
-    .from('cultural_circles')
-    .select('member_count')
-    .eq('id', circleId)
-    .maybeSingle()
-  if (circle) {
-    await supabase
-      .from('cultural_circles')
-      .update({ member_count: (circle.member_count ?? 0) + 1 })
-      .eq('id', circleId)
-  }
-  return true
-}
-
-export async function leaveCircle(memberId: string, circleId: string): Promise<boolean> {
-  const supabase = await createClient()
-  const { error } = await supabase
-    .from('circle_memberships')
-    .delete()
-    .eq('member_id', memberId)
-    .eq('circle_id', circleId)
-  if (error) {
-    console.error('[circles] leaveCircle error:', error.message)
-    return false
-  }
-  // Decrement member_count
-  const { data: circle } = await supabase
-    .from('cultural_circles')
-    .select('member_count')
-    .eq('id', circleId)
-    .maybeSingle()
-  if (circle && circle.member_count > 0) {
-    await supabase
-      .from('cultural_circles')
-      .update({ member_count: circle.member_count - 1 })
-      .eq('id', circleId)
-  }
-  return true
-}
-
-export async function getCirclePosts(circleId: string): Promise<CirclePost[]> {
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('circle_posts')
-    .select('*, members(preferred_name, full_name)')
-    .eq('circle_id', circleId)
-    .order('created_at', { ascending: false })
-    .limit(50)
-  if (error) {
-    console.error('[circles] getCirclePosts error:', error.message)
-    return []
-  }
-  return (data ?? []).map((p: Record<string, unknown>) => ({
-    id: p.id as string,
-    created_at: p.created_at as string,
-    circle_id: p.circle_id as string,
-    member_id: p.member_id as string,
-    content: p.content as string,
-    post_type: p.post_type as string,
-    member_name: ((p.members as Record<string, string> | null)?.preferred_name
-      ?? (p.members as Record<string, string> | null)?.full_name?.split(' ')[0]
-      ?? 'Community member'),
-  }))
-}
-
-export async function postToCircle(memberId: string, circleId: string, content: string): Promise<CirclePost | null> {
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('circle_posts')
-    .insert({ member_id: memberId, circle_id: circleId, content, post_type: 'update' })
-    .select()
-    .maybeSingle()
-  if (error) {
-    console.error('[circles] postToCircle error:', error.message)
-    return null
-  }
-  return data
-}
-
-export async function getCircleEvents(circleId: string, memberId?: string): Promise<CircleEvent[]> {
-  const supabase = await createClient()
-  // Fetch events where this circle is the primary circle OR in the multi-circle array
-  const { data: events, error } = await supabase
-    .from('circle_events')
-    .select('*')
-    .or(`circle_id.eq.${circleId},circle_ids.cs.{${circleId}}`)
-    .gte('event_date', new Date().toISOString().slice(0, 10))
-    .order('event_date')
-  if (error) {
-    console.error('[circles] getCircleEvents error:', error.message)
-    return []
-  }
-
-  let rsvpedIds = new Set<string>()
-  if (memberId && events && events.length > 0) {
-    const eventIds = events.map((e: any) => e.id)
-    const { data: rsvps } = await supabase
-      .from('circle_event_rsvps')
-      .select('event_id')
-      .eq('member_id', memberId)
-      .in('event_id', eventIds)
-    rsvpedIds = new Set((rsvps ?? []).map((r: any) => r.event_id))
-  }
-
-  return (events ?? []).map((e: any) => ({
-    ...e,
-    circle_ids: e.circle_ids ?? [],
-    user_has_rsvped: rsvpedIds.has(e.id),
-  }))
-}
-
-export async function rsvpToCircleEvent(memberId: string, eventId: string): Promise<boolean> {
-  const supabase = await createClient()
-  const { error } = await supabase
-    .from('circle_event_rsvps')
-    .insert({ member_id: memberId, event_id: eventId })
-  if (error) {
-    console.error('[circles] rsvpToCircleEvent error:', error.message)
-    return false
-  }
-  const { data: ev } = await supabase
-    .from('circle_events')
-    .select('rsvp_count')
-    .eq('id', eventId)
-    .maybeSingle()
-  if (ev) {
-    await supabase
-      .from('circle_events')
-      .update({ rsvp_count: (ev.rsvp_count ?? 0) + 1 })
-      .eq('id', eventId)
-  }
-  return true
-}
-
-export async function cancelRsvpToCircleEvent(memberId: string, eventId: string): Promise<boolean> {
-  const supabase = await createClient()
-  const { error } = await supabase
-    .from('circle_event_rsvps')
-    .delete()
-    .eq('member_id', memberId)
-    .eq('event_id', eventId)
-  if (error) {
-    console.error('[circles] cancelRsvpToCircleEvent error:', error.message)
-    return false
-  }
-  const { data: ev } = await supabase
-    .from('circle_events')
-    .select('rsvp_count')
-    .eq('id', eventId)
-    .maybeSingle()
-  if (ev && ev.rsvp_count > 0) {
-    await supabase
-      .from('circle_events')
-      .update({ rsvp_count: ev.rsvp_count - 1 })
-      .eq('id', eventId)
-  }
-  return true
-}
-
-export async function getPlatformWideEvents(memberId?: string): Promise<CircleEvent[]> {
-  const supabase = await createClient()
-  const { data: events, error } = await supabase
-    .from('circle_events')
-    .select('*')
-    .eq('is_platform_wide', true)
-    .gte('event_date', new Date().toISOString().slice(0, 10))
-    .order('event_date')
-  if (error) {
-    console.error('[circles] getPlatformWideEvents error:', error.message)
-    return []
-  }
-
-  let rsvpedIds = new Set<string>()
-  if (memberId && events && events.length > 0) {
-    const eventIds = events.map((e: any) => e.id)
-    const { data: rsvps } = await supabase
-      .from('circle_event_rsvps')
-      .select('event_id')
-      .eq('member_id', memberId)
-      .in('event_id', eventIds)
-    rsvpedIds = new Set((rsvps ?? []).map((r: any) => r.event_id))
-  }
-
-  return (events ?? []).map((e: any) => ({
-    ...e,
-    circle_ids: e.circle_ids ?? [],
-    location_address: e.location_address ?? null,
-    is_platform_wide: e.is_platform_wide ?? true,
-    user_has_rsvped: rsvpedIds.has(e.id),
-  }))
-}
-
-export async function createCircleEvent(event: {
-  circle_id?: string | null
-  circle_ids?: string[]
-  title: string
-  description?: string
-  event_date: string
-  event_time?: string
-  format?: string
-  dial_in_number?: string
-  dial_in_code?: string
-  video_link?: string
-  location_address?: string
-  is_platform_wide?: boolean
-  is_recurring?: boolean
-}): Promise<CircleEvent | null> {
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('circle_events')
-    .insert({
-      ...event,
-      circle_ids: event.circle_ids ?? [],
-    })
-    .select()
-    .maybeSingle()
-  if (error) {
-    console.error('[circles] createCircleEvent error:', error.message)
-    return null
-  }
-  return data ? { ...data, circle_ids: data.circle_ids ?? [] } : null
-}
-
-export async function createCommunityCircle(circle: {
-  circle_name: string
-  description: string
-  primary_language: string
-  interest_tag?: string | null
-  community_type?: string
-}): Promise<CulturalCircle | null> {
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('cultural_circles')
-    .insert({
-      circle_name: circle.circle_name,
-      description: circle.description,
-      primary_language: circle.primary_language,
-      interest_tag: circle.interest_tag ?? null,
-      community_type: circle.community_type ?? 'cultural',
-      is_active: true,
-      member_count: 0,
-    })
-    .select()
-    .maybeSingle()
-  if (error) {
-    console.error('[circles] createCommunityCircle error:', error.message)
-    return null
-  }
-  return data
-}
-
-// ── Comments ─────────────────────────────────────────────────────────────────
 
 export interface CirclePostComment {
   id: string
@@ -366,62 +59,429 @@ export interface CirclePostComment {
   post_id: string
   member_id: string
   content: string
-  member_name?: string
+  is_hidden: boolean
+  members: {
+    preferred_name: string | null
+    full_name: string | null
+  } | null
 }
 
-export async function getPostComments(postId: string): Promise<CirclePostComment[]> {
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('circle_post_comments' as any)
-    .select('*, members(preferred_name, full_name)')
-    .eq('post_id', postId)
-    .order('created_at', { ascending: true })
-    .limit(100)
-  if (error) {
-    console.error('[circles] getPostComments error:', error.message)
+// ── Circles ───────────────────────────────────────────────────────────────────
+
+/** Fetch all active circles, ordered by member_count descending. Returns array directly. */
+export async function getAllCircles(): Promise<CulturalCircle[]> {
+  try {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+      .from('cultural_circles')
+      .select('*')
+      .eq('is_active', true)
+      .order('member_count', { ascending: false })
+
+    if (error) {
+      console.error('[circles/getAllCircles]', error)
+      return []
+    }
+    return (data as unknown as CulturalCircle[]) ?? []
+  } catch (e) {
+    console.error('[circles/getAllCircles] unexpected:', e)
     return []
   }
-  return ((data as any[]) ?? []).map((c: any) => ({
-    id: c.id,
-    created_at: c.created_at,
-    post_id: c.post_id,
-    member_id: c.member_id,
-    content: c.content,
-    member_name:
-      c.members?.preferred_name ??
-      c.members?.full_name?.split(' ')[0] ??
-      'Community member',
-  }))
 }
 
+/** Fetch a single circle by ID. */
+export async function getCircleById(circleId: string): Promise<CulturalCircle | null> {
+  try {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+      .from('cultural_circles')
+      .select('*')
+      .eq('id', circleId)
+      .maybeSingle()
+
+    if (error) {
+      console.error('[circles/getCircleById]', error)
+      return null
+    }
+    return data as unknown as CulturalCircle | null
+  } catch (e) {
+    console.error('[circles/getCircleById] unexpected:', e)
+    return null
+  }
+}
+
+/** Fetch the circle IDs the given member has joined. Returns array directly. */
+export async function getMemberCircleIds(memberId: string): Promise<string[]> {
+  try {
+    const supabase = await createClient()
+    // circle_members is not in TS types yet — cast to any
+    const { data, error } = await (supabase as any)
+      .from('circle_members')
+      .select('circle_id')
+      .eq('member_id', memberId)
+
+    if (error) {
+      console.error('[circles/getMemberCircleIds]', error)
+      return []
+    }
+    return ((data ?? []) as Array<{ circle_id: string }>).map((r) => r.circle_id)
+  } catch (e) {
+    console.error('[circles/getMemberCircleIds] unexpected:', e)
+    return []
+  }
+}
+
+/** Join a circle. Idempotent. */
+export async function joinCircle(
+  memberId: string,
+  circleId: string,
+): Promise<{ error: string | null }> {
+  try {
+    const supabase = await createClient()
+    const { error } = await (supabase as any)
+      .from('circle_members')
+      .upsert({ member_id: memberId, circle_id: circleId }, { onConflict: 'member_id,circle_id' })
+
+    if (error) {
+      console.error('[circles/joinCircle]', error)
+      return { error: error.message }
+    }
+    return { error: null }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e)
+    console.error('[circles/joinCircle] unexpected:', msg)
+    return { error: msg }
+  }
+}
+
+/** Leave a circle. */
+export async function leaveCircle(
+  memberId: string,
+  circleId: string,
+): Promise<{ error: string | null }> {
+  try {
+    const supabase = await createClient()
+    const { error } = await (supabase as any)
+      .from('circle_members')
+      .delete()
+      .eq('member_id', memberId)
+      .eq('circle_id', circleId)
+
+    if (error) {
+      console.error('[circles/leaveCircle]', error)
+      return { error: error.message }
+    }
+    return { error: null }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e)
+    console.error('[circles/leaveCircle] unexpected:', msg)
+    return { error: msg }
+  }
+}
+
+// ── Posts ─────────────────────────────────────────────────────────────────────
+
+/** Fetch visible posts for a circle, newest-first. Returns array directly. */
+export async function getCirclePosts(circleId: string): Promise<CirclePost[]> {
+  try {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+      .from('circle_posts')
+      .select('*, members(preferred_name, full_name)')
+      .eq('circle_id', circleId)
+      .eq('is_hidden', false)
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('[circles/getCirclePosts]', error)
+      return []
+    }
+    return (data as unknown as CirclePost[]) ?? []
+  } catch (e) {
+    console.error('[circles/getCirclePosts] unexpected:', e)
+    return []
+  }
+}
+
+/** Post a new message to a circle. Returns the created row. */
+export async function postToCircle(
+  memberId: string,
+  circleId: string,
+  content: string,
+): Promise<{ data: CirclePost | null; error: string | null }> {
+  try {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+      .from('circle_posts')
+      .insert({ member_id: memberId, circle_id: circleId, content })
+      .select('*, members(preferred_name, full_name)')
+      .maybeSingle()
+
+    if (error) {
+      console.error('[circles/postToCircle]', error)
+      return { data: null, error: error.message }
+    }
+    if (!data) return { data: null, error: 'Insert returned no row' }
+    return { data: data as unknown as CirclePost, error: null }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e)
+    console.error('[circles/postToCircle] unexpected:', msg)
+    return { data: null, error: msg }
+  }
+}
+
+// ── Events ────────────────────────────────────────────────────────────────────
+
+/** Fetch upcoming events for a circle, soonest-first. Returns array directly.
+ *  memberId param accepted but currently unused (reserved for RSVP status join). */
+export async function getCircleEvents(
+  circleId: string,
+  _memberId?: string,
+): Promise<CircleEvent[]> {
+  try {
+    const supabase = await createClient()
+    const now = new Date().toISOString()
+    const { data, error } = await supabase
+      .from('circle_events')
+      .select('*')
+      .eq('circle_id', circleId)
+      .gte('event_date', now)
+      .order('event_date', { ascending: true })
+
+    if (error) {
+      console.error('[circles/getCircleEvents]', error)
+      return []
+    }
+    return (data as unknown as CircleEvent[]) ?? []
+  } catch (e) {
+    console.error('[circles/getCircleEvents] unexpected:', e)
+    return []
+  }
+}
+
+/** Fetch platform-wide upcoming events, soonest-first, limit 20. Returns array directly.
+ *  memberId param accepted but currently unused (reserved for RSVP status join). */
+export async function getPlatformWideEvents(_memberId?: string): Promise<CircleEvent[]> {
+  try {
+    const supabase = await createClient()
+    const now = new Date().toISOString()
+    const { data, error } = await supabase
+      .from('circle_events')
+      .select('*')
+      .gte('event_date', now)
+      .order('event_date', { ascending: true })
+      .limit(20)
+
+    if (error) {
+      console.error('[circles/getPlatformWideEvents]', error)
+      return []
+    }
+    return (data as unknown as CircleEvent[]) ?? []
+  } catch (e) {
+    console.error('[circles/getPlatformWideEvents] unexpected:', e)
+    return []
+  }
+}
+
+/** RSVP to a circle event. Idempotent. */
+export async function rsvpToCircleEvent(
+  memberId: string,
+  eventId: string,
+): Promise<{ error: string | null }> {
+  try {
+    const supabase = await createClient()
+    const { error } = await (supabase as any)
+      .from('circle_event_rsvps')
+      .upsert({ member_id: memberId, event_id: eventId }, { onConflict: 'member_id,event_id' })
+
+    if (error) {
+      console.error('[circles/rsvpToCircleEvent]', error)
+      return { error: error.message }
+    }
+    return { error: null }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e)
+    console.error('[circles/rsvpToCircleEvent] unexpected:', msg)
+    return { error: msg }
+  }
+}
+
+/** Cancel RSVP to a circle event. */
+export async function cancelRsvpToCircleEvent(
+  memberId: string,
+  eventId: string,
+): Promise<{ error: string | null }> {
+  try {
+    const supabase = await createClient()
+    const { error } = await (supabase as any)
+      .from('circle_event_rsvps')
+      .delete()
+      .eq('member_id', memberId)
+      .eq('event_id', eventId)
+
+    if (error) {
+      console.error('[circles/cancelRsvpToCircleEvent]', error)
+      return { error: error.message }
+    }
+    return { error: null }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e)
+    console.error('[circles/cancelRsvpToCircleEvent] unexpected:', msg)
+    return { error: msg }
+  }
+}
+
+// ── Interest Groups ───────────────────────────────────────────────────────────
+
+/** Fetch active interest groups (circles filtered by community_type). Returns array directly. */
+export async function getInterestGroups(): Promise<CulturalCircle[]> {
+  try {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+      .from('cultural_circles')
+      .select('*')
+      .eq('is_active', true)
+      .eq('community_type', 'interest_group')
+      .order('member_count', { ascending: false })
+
+    if (error) {
+      console.error('[circles/getInterestGroups]', error)
+      return []
+    }
+    return (data as unknown as CulturalCircle[]) ?? []
+  } catch (e) {
+    console.error('[circles/getInterestGroups] unexpected:', e)
+    return []
+  }
+}
+
+// ── Admin ─────────────────────────────────────────────────────────────────────
+
+/** Admin: create a new circle. */
+export async function createCommunityCircle(
+  fields: Omit<CulturalCircle, 'id' | 'created_at' | 'member_count'>,
+): Promise<{ data: CulturalCircle | null; error: string | null }> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const admin = createAdminClient() as any
+    const { data, error } = await admin
+      .from('cultural_circles')
+      .insert(fields)
+      .select()
+      .maybeSingle()
+
+    if (error) {
+      console.error('[circles/createCommunityCircle]', error)
+      return { data: null, error: error.message }
+    }
+    if (!data) return { data: null, error: 'Insert returned no row' }
+    return { data: data as CulturalCircle, error: null }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e)
+    console.error('[circles/createCommunityCircle] unexpected:', msg)
+    return { data: null, error: msg }
+  }
+}
+
+/** Admin: create a circle event. */
+export async function createCircleEvent(
+  fields: Omit<CircleEvent, 'id' | 'created_at' | 'rsvp_count' | 'user_has_rsvped'>,
+): Promise<{ data: CircleEvent | null; error: string | null }> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const admin = createAdminClient() as any
+    const { data, error } = await admin
+      .from('circle_events')
+      .insert(fields)
+      .select()
+      .maybeSingle()
+
+    if (error) {
+      console.error('[circles/createCircleEvent]', error)
+      return { data: null, error: error.message }
+    }
+    if (!data) return { data: null, error: 'Insert returned no row' }
+    return { data: data as CircleEvent, error: null }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e)
+    console.error('[circles/createCircleEvent] unexpected:', msg)
+    return { data: null, error: msg }
+  }
+}
+
+// ── Comments (G2.1) ───────────────────────────────────────────────────────────
+
+/** Fetch all visible comments for a post, oldest-first. */
+export async function getPostComments(
+  postId: string,
+): Promise<{ data: CirclePostComment[] | null; error: string | null }> {
+  try {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+      .from('circle_post_comments')
+      .select('*, members(preferred_name, full_name)')
+      .eq('post_id', postId)
+      .eq('is_hidden', false)
+      .order('created_at', { ascending: true })
+
+    if (error) {
+      console.error('[circles/getPostComments]', error)
+      return { data: null, error: error.message }
+    }
+    return { data: (data as unknown as CirclePostComment[]) ?? [], error: null }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e)
+    console.error('[circles/getPostComments] unexpected:', msg)
+    return { data: null, error: msg }
+  }
+}
+
+/** Insert a new comment on a post. Returns the created row. */
 export async function addPostComment(
   memberId: string,
   postId: string,
   content: string,
-): Promise<CirclePostComment | null> {
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('circle_post_comments' as any)
-    .insert({ member_id: memberId, post_id: postId, content })
-    .select()
-    .maybeSingle()
-  if (error) {
-    console.error('[circles] addPostComment error:', error.message)
-    return null
+): Promise<{ data: CirclePostComment | null; error: string | null }> {
+  try {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+      .from('circle_post_comments')
+      .insert({ member_id: memberId, post_id: postId, content })
+      .select('*, members(preferred_name, full_name)')
+      .maybeSingle()
+
+    if (error) {
+      console.error('[circles/addPostComment]', error)
+      return { data: null, error: error.message }
+    }
+    if (!data) return { data: null, error: 'Insert returned no row' }
+    return { data: data as unknown as CirclePostComment, error: null }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e)
+    console.error('[circles/addPostComment] unexpected:', msg)
+    return { data: null, error: msg }
   }
-  return data as CirclePostComment | null
 }
 
-export async function deletePostComment(commentId: string, memberId: string): Promise<boolean> {
-  const supabase = await createClient()
-  const { error } = await supabase
-    .from('circle_post_comments' as any)
-    .delete()
-    .eq('id', commentId)
-    .eq('member_id', memberId) // RLS enforced; also enforce here
-  if (error) {
-    console.error('[circles] deletePostComment error:', error.message)
-    return false
+/** Hard-delete a comment by ID. RLS enforces ownership at DB level. */
+export async function deletePostComment(
+  commentId: string,
+): Promise<{ error: string | null }> {
+  try {
+    const supabase = await createClient()
+    const { error } = await supabase
+      .from('circle_post_comments')
+      .delete()
+      .eq('id', commentId)
+
+    if (error) {
+      console.error('[circles/deletePostComment]', error)
+      return { error: error.message }
+    }
+    return { error: null }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e)
+    console.error('[circles/deletePostComment] unexpected:', msg)
+    return { error: msg }
   }
-  return true
 }

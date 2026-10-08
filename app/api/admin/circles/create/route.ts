@@ -1,47 +1,56 @@
+// app/api/admin/circles/create/route.ts
+// POST — admin creates a new cultural circle.
+
 import { NextResponse } from 'next/server'
-import { getCurrentUser, getUserRole } from '@/lib/auth'
-import { createCommunityCircle } from '@/lib/data/circles'
+import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
-export async function POST(request: Request) {
-  const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+async function resolveAdminContext(supabase: Awaited<ReturnType<typeof createClient>>) {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+  const { data: fm } = await supabase
+    .from('family_members')
+    .select('id, role')
+    .eq('supabase_auth_id', user.id)
+    .maybeSingle()
+  if (!fm || fm.role !== 'admin') return null
+  return fm
+}
 
-  const role = await getUserRole(user.id)
-  if (role !== 'admin' && role !== 'navigator') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-  }
+export async function POST(req: Request) {
+  const supabase = await createClient()
+  const staff = await resolveAdminContext(supabase)
+  if (!staff) return NextResponse.json({ error: 'Admin only' }, { status: 403 })
 
-  let body: Record<string, unknown>
-  try {
-    body = await request.json()
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
-  }
+  const body = await req.json().catch(() => ({}))
 
-  const { circle_name, description, primary_language, interest_tag, community_type } = body
+  const {
+    circle_name, description, community_type, primary_language,
+    image_placeholder, interest_tag, membership_visibility,
+  } = body as Record<string, string | undefined>
 
-  if (!circle_name || typeof circle_name !== 'string' || !circle_name.trim()) {
+  if (!circle_name?.trim()) {
     return NextResponse.json({ error: 'circle_name is required' }, { status: 400 })
   }
-  if (!description || typeof description !== 'string' || !description.trim()) {
-    return NextResponse.json({ error: 'description is required' }, { status: 400 })
-  }
 
-  const circle = await createCommunityCircle({
-    circle_name: (circle_name as string).trim(),
-    description: (description as string).trim(),
-    primary_language: typeof primary_language === 'string' && primary_language.trim()
-      ? primary_language.trim()
-      : 'english',
-    interest_tag: typeof interest_tag === 'string' && interest_tag.trim()
-      ? interest_tag.trim()
-      : null,
-    community_type: typeof community_type === 'string' && community_type.trim()
-      ? community_type.trim()
-      : 'cultural',
-  })
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (admin as any)
+    .from('cultural_circles')
+    .insert({
+      circle_name: circle_name.trim(),
+      description: description?.trim() || null,
+      community_type: community_type?.trim() || null,
+      primary_language: primary_language?.trim() || null,
+      image_placeholder: image_placeholder?.trim() || null,
+      interest_tag: interest_tag?.trim() || null,
+      membership_visibility: membership_visibility?.trim() || 'public',
+      is_active: true,
+      member_count: 0,
+    })
+    .select()
+    .single()
 
-  if (!circle) return NextResponse.json({ error: 'Failed to create community' }, { status: 500 })
-
-  return NextResponse.json({ circle })
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json(data, { status: 201 })
 }

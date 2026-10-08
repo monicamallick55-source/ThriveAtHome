@@ -158,7 +158,7 @@ export default function CulturalCirclesClient({ circles, joinedCircleIds, platfo
     const isJoined = joined.has(circle.id)
     const isLoading = loadingId === circle.id
     const accentColor = CIRCLE_COLORS[colorIndex % CIRCLE_COLORS.length]
-    const langLabel = LANGUAGE_LABELS[circle.primary_language] ?? circle.primary_language
+    const langLabel = circle.primary_language ? (LANGUAGE_LABELS[circle.primary_language] ?? circle.primary_language) : null
 
     return (
       <div style={{

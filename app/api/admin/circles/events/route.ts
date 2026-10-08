@@ -1,49 +1,64 @@
+// app/api/admin/circles/events/route.ts
+// POST — admin creates a circle event.
+
 import { NextResponse } from 'next/server'
-import { getCurrentUser, getUserRole } from '@/lib/auth'
-import { createCircleEvent } from '@/lib/data/circles'
+import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
-export async function POST(request: Request) {
-  const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+async function resolveAdminContext(supabase: Awaited<ReturnType<typeof createClient>>) {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+  const { data: fm } = await supabase
+    .from('family_members')
+    .select('id, role')
+    .eq('supabase_auth_id', user.id)
+    .maybeSingle()
+  if (!fm || fm.role !== 'admin') return null
+  return fm
+}
 
-  const role = await getUserRole(user.id)
-  if (role !== 'admin' && role !== 'navigator') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+export async function POST(req: Request) {
+  const supabase = await createClient()
+  const staff = await resolveAdminContext(supabase)
+  if (!staff) return NextResponse.json({ error: 'Admin only' }, { status: 403 })
+
+  const body = await req.json().catch(() => ({}))
+
+  const {
+    circle_id, title, description, event_date, event_time, format,
+    location_address, video_link, dial_in_code, dial_in_number,
+    is_platform_wide, is_recurring,
+  } = body as Record<string, string | boolean | undefined>
+
+  if (!title || typeof title !== 'string' || !title.trim()) {
+    return NextResponse.json({ error: 'title is required' }, { status: 400 })
+  }
+  if (!event_date || typeof event_date !== 'string') {
+    return NextResponse.json({ error: 'event_date is required' }, { status: 400 })
   }
 
-  let body: Record<string, unknown>
-  try {
-    body = await request.json()
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
-  }
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (admin as any)
+    .from('circle_events')
+    .insert({
+      circle_id: circle_id ?? null,
+      title: (title as string).trim(),
+      description: (description as string | undefined)?.trim() ?? null,
+      event_date,
+      event_time: (event_time as string | undefined) ?? null,
+      format: (format as string | undefined) ?? null,
+      location_address: (location_address as string | undefined)?.trim() ?? null,
+      video_link: (video_link as string | undefined)?.trim() ?? null,
+      dial_in_code: (dial_in_code as string | undefined)?.trim() ?? null,
+      dial_in_number: (dial_in_number as string | undefined)?.trim() ?? null,
+      is_platform_wide: is_platform_wide ?? false,
+      is_recurring: is_recurring ?? false,
+      rsvp_count: 0,
+    })
+    .select()
+    .single()
 
-  const { title, event_date, is_platform_wide } = body
-  const circleIds = Array.isArray(body.circle_ids) ? (body.circle_ids as string[]) : []
-
-  if (!title || !event_date) {
-    return NextResponse.json({ error: 'title and event_date are required' }, { status: 400 })
-  }
-  if (!is_platform_wide && circleIds.length === 0) {
-    return NextResponse.json({ error: 'Select at least one circle or mark as platform-wide' }, { status: 400 })
-  }
-
-  const event = await createCircleEvent({
-    circle_id: circleIds[0] ?? null,
-    circle_ids: circleIds,
-    title: body.title as string,
-    event_date: body.event_date as string,
-    description: body.description as string | undefined,
-    event_time: body.event_time as string | undefined,
-    format: body.format as string | undefined,
-    dial_in_number: body.dial_in_number as string | undefined,
-    dial_in_code: body.dial_in_code as string | undefined,
-    video_link: body.video_link as string | undefined,
-    location_address: body.location_address as string | undefined,
-    is_platform_wide: body.is_platform_wide as boolean | undefined,
-    is_recurring: body.is_recurring as boolean | undefined,
-  })
-  if (!event) return NextResponse.json({ error: 'Failed to create event' }, { status: 500 })
-
-  return NextResponse.json({ event })
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json(data, { status: 201 })
 }
