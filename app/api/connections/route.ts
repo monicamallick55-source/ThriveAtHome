@@ -207,10 +207,7 @@ export async function PATCH(
 
 // ── GET /api/connections/[id] — fetch one connection ─────────────────────────
 
-export async function GET(
-  _req: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function GET(_req: Request) {
   const { id: connectionId } = await params
   const supabase = await createClient()
 
