@@ -30,9 +30,9 @@ async function getStaffSession() {
 export default async function NavigatorMemberDetailPage({
   params,
 }: {
-  params: Promise<{ memberId: string }>
+  params: Promise<{ id: string }>
 }) {
-  const { memberId } = await params
+  const { id: memberId } = await params
 
   const staff = await getStaffSession()
   if (!staff) redirect('/login')

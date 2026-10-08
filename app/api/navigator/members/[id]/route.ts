@@ -25,9 +25,9 @@ async function resolveStaffContext(supabase: Awaited<ReturnType<typeof createCli
 
 export async function GET(
   _req: Request,
-  { params }: { params: Promise<{ memberId: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const { memberId } = await params
+  const { id: memberId } = await params
   const supabase = await createClient()
 
   const staff = await resolveStaffContext(supabase)
@@ -37,14 +37,14 @@ export async function GET(
 
   const admin = createAdminClient()
 
-  // Member core profile
+  // Member core profile (email not a column on members — use family_members for contact)
   const { data: member } = await admin
     .from('members')
     .select(
-      `id, full_name, preferred_name, email, phone, city, state,
+      `id, full_name, preferred_name, phone, city, state,
        directory_bio, directory_opt_in,
        risk_level, aria_call_opted_in, created_at,
-       subscription_tier, org_id`,
+       subscription_tier`,
     )
     .eq('id', memberId)
     .maybeSingle()
@@ -53,8 +53,9 @@ export async function GET(
     return NextResponse.json({ error: 'Member not found' }, { status: 404 })
   }
 
-  // Their connections (introduced ones)
-  const { data: introductions } = await admin
+  // Their connections (navigator-introduced ones)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: introductions } = await (admin as any)
     .from('member_connections')
     .select(
       `id, created_at, status, intro_note, requester_accepted, recipient_accepted,
