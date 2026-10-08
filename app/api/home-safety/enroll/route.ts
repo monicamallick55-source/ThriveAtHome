@@ -37,15 +37,17 @@ export async function POST(req: Request) {
   if (!program.enrollment_open) return NextResponse.json({ error: 'Enrollment is closed for this program' }, { status: 400 })
 
   // Check member's subscription tier against eligibility
-  const { data: member } = await admin
-    .from('members')
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+const { data: member } = await (admin as any)
+  .from('members')
     .select('subscription_tier')
     .eq('id', fm.member_id)
     .maybeSingle()
 
   const eligibility = program.eligibility as { org_tiers?: string[] } | null
   if (eligibility?.org_tiers?.length && member) {
-    const tier = (member as Record<string, string>).subscription_tier ?? 'social'
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+const tier = (member as any).subscription_tier ?? 'social'
     if (!eligibility.org_tiers.includes(tier)) {
       return NextResponse.json({
         error: `This program requires a ${eligibility.org_tiers.join(' or ')} membership. Your current plan is ${tier}.`,
