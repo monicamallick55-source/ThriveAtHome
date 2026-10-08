@@ -266,7 +266,7 @@ export default function HomeSafetyAdminClient({ programs, enrollments, volunteer
                             {volunteers
                               .filter(v => v.program_id === enr.program_id)
                               .map(v => {
-                                const count = volunteerCounts[`${v.program_id}-${v.volunteer_id}`] ?? 0
+                                const count = volunteerCounts[`${v.program_id}-${v.volunteer?.id}`] ?? 0
                                 const atMax = count >= v.max_households
                                 return (
                                   <option key={v.id} value={v.volunteer?.id ?? ''} disabled={atMax}>
