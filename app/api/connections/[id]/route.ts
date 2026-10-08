@@ -45,6 +45,42 @@ function displayName(
   return m?.preferred_name ?? m?.full_name ?? 'A member'
 }
 
+// ── GET /api/connections/[id] — fetch one connection ─────────────────────────
+
+export async function GET(
+  _req: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id: connectionId } = await params
+  const supabase = await createClient()
+
+  const ctx = await resolveMemberContext(supabase)
+  if (!ctx) {
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const admin = createAdminClient() as any
+  const { data: conn } = await admin
+    .from('member_connections')
+    .select(
+      `id, created_at, status, intro_note, introduced_by,
+       requester_accepted, recipient_accepted,
+       requester:members!member_connections_requester_id_fkey(id, preferred_name, full_name),
+       recipient:members!member_connections_recipient_id_fkey(id, preferred_name, full_name)`,
+    )
+    .eq('id', connectionId)
+    .maybeSingle()
+
+  if (!conn) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
+  if (conn.requester_id !== ctx.memberId && conn.recipient_id !== ctx.memberId) {
+    return NextResponse.json({ error: 'Not a party to this connection' }, { status: 403 })
+  }
+
+  return NextResponse.json(conn)
+}
+
 // ── PATCH /api/connections/[id] ───────────────────────────────────────────────
 
 export async function PATCH(
@@ -203,40 +239,4 @@ export async function PATCH(
     status: 'pending',
     message: `Waiting for ${waitingFor} to also accept before messaging is enabled.`,
   })
-}
-
-// ── GET /api/connections/[id] — fetch one connection ─────────────────────────
-
-export async function GET(
-  _req: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
-  const { id: connectionId } = await params
-  const supabase = await createClient()
-
-  const ctx = await resolveMemberContext(supabase)
-  if (!ctx) {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
-  const { data: conn } = await admin
-    .from('member_connections')
-    .select(
-      `id, created_at, status, intro_note, introduced_by,
-       requester_accepted, recipient_accepted,
-       requester:members!member_connections_requester_id_fkey(id, preferred_name, full_name),
-       recipient:members!member_connections_recipient_id_fkey(id, preferred_name, full_name)`,
-    )
-    .eq('id', connectionId)
-    .maybeSingle()
-
-  if (!conn) return NextResponse.json({ error: 'Not found' }, { status: 404 })
-
-  if (conn.requester_id !== ctx.memberId && conn.recipient_id !== ctx.memberId) {
-    return NextResponse.json({ error: 'Not a party to this connection' }, { status: 403 })
-  }
-
-  return NextResponse.json(conn)
 }
