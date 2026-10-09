@@ -17,7 +17,7 @@ export default async function GriefSupportPage() {
     .eq('supabase_auth_id', user.id)
     .maybeSingle()
 
-  if (!fm) redirect('/dashboard')
+  if (!fm || !fm.member_id) redirect('/dashboard')
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const admin = createAdminClient() as any
@@ -45,7 +45,7 @@ export default async function GriefSupportPage() {
 
   return (
     <GriefSupportClient
-      memberId={fm.member_id}
+      memberId={fm.member_id as string}
       advisors={advisors ?? []}
       connections={connections ?? []}
       transitionPlans={plans ?? []}
