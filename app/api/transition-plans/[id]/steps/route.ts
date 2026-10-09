@@ -1,29 +1,47 @@
+// app/api/transition-plans/[id]/steps/route.ts
+// PATCH — mark a step complete / incomplete
+
 import { NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth'
-import { resolveMemberContext } from '@/lib/data/members'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
-export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { memberId } = await resolveMemberContext(user.id)
-  if (!memberId) return NextResponse.json({ error: 'Member not found' }, { status: 404 })
-
+export async function PATCH(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
   const { id: planId } = await params
-  const { step_id, status } = await req.json()
-  if (!step_id || !status) return NextResponse.json({ error: 'step_id and status required' }, { status: 400 })
 
   const supabase = await createClient()
-  const updates: Record<string, unknown> = { status }
-  if (status === 'completed') updates.completed_at = new Date().toISOString()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 })
+  const { data: isStaff } = await supabase.rpc('is_staff')
+  if (!isStaff) return NextResponse.json({ error: 'Staff only' }, { status: 403 })
 
-  const { data, error } = await (supabase.from as any)('transition_plan_steps')
-    .update(updates)
+  const body = await req.json().catch(() => ({}))
+  const { step_id, completed } = body as { step_id?: string; completed?: boolean }
+  if (!step_id) return NextResponse.json({ error: 'step_id required' }, { status: 400 })
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const admin = createAdminClient() as any
+
+  // Get navigator family_member id
+  const { data: navFm } = await admin
+    .from('family_members')
+    .select('id')
+    .eq('supabase_auth_id', user.id)
+    .maybeSingle()
+
+  const { data: step, error } = await admin
+    .from('transition_plan_steps')
+    .update({
+      completed_at: completed ? new Date().toISOString() : null,
+      completed_by: completed ? (navFm?.id ?? null) : null,
+    })
     .eq('id', step_id)
     .eq('plan_id', planId)
     .select()
-    .maybeSingle()
+    .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json(data)
+  return NextResponse.json({ step })
 }

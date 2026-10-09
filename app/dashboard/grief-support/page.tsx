@@ -1,31 +1,54 @@
-import type { Metadata } from 'next'
-import { requireAuth } from '@/lib/auth'
-import { getMemberForAuthUser } from '@/lib/data/members'
-import { getGriefSupportRequestsForMember } from '@/lib/data/grief'
-import GriefSupportClient from '@/components/grief/GriefSupportClient'
-import { ToastProvider } from '@/components/ui/Toast'
-import CrisisResourceBar from '@/components/shared/CrisisResourceBar'
+// app/dashboard/grief-support/page.tsx
+// Life transitions & grief support — 4 pathway cards + trusted advisor directory
 
-export const metadata: Metadata = { title: 'Grief & Transition Support — ThriveAtHome' }
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import GriefSupportClient from '@/components/grief/GriefSupportClient'
 
 export default async function GriefSupportPage() {
-  const user = await requireAuth()
-  const { data: member } = await getMemberForAuthUser(user.id)
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
 
-  const memberName = member?.preferred_name ?? member?.full_name ?? 'your loved one'
-  const memberId = member?.id ?? ''
+  const { data: fm } = await supabase
+    .from('family_members')
+    .select('id, member_id, role')
+    .eq('supabase_auth_id', user.id)
+    .maybeSingle()
 
-  const { data: existingRequests } = memberId
-    ? await getGriefSupportRequestsForMember(memberId)
-    : { data: [] }
+  if (!fm) redirect('/dashboard')
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const admin = createAdminClient() as any
+
+  // Load therapists, grief counselors, and chaplains
+  const { data: advisors } = await admin
+    .from('trusted_advisors')
+    .select('id, full_name, advisor_type, bio, phone, email, telehealth_ok, license_number, license_state, member_request_only')
+    .in('advisor_type', ['therapist', 'grief_counselor', 'chaplain'])
+    .eq('listing_status', 'active')
+    .order('full_name')
+
+  // Load existing advisor connections for this member
+  const { data: connections } = await admin
+    .from('advisor_connections')
+    .select('advisor_id, status')
+    .eq('member_id', fm.member_id)
+
+  // Load active transition plans
+  const { data: plans } = await admin
+    .from('transition_plans')
+    .select('id, title, status, family_can_view, target_move_date, facility_name')
+    .eq('member_id', fm.member_id)
+    .eq('status', 'active')
 
   return (
-    <ToastProvider>
-      <GriefSupportClient
-        memberName={(memberName ?? []) as any}
-        existingRequests={existingRequests ?? []}
-      />
-      <CrisisResourceBar surface="grief" />
-    </ToastProvider>
+    <GriefSupportClient
+      memberId={fm.member_id}
+      advisors={advisors ?? []}
+      connections={connections ?? []}
+      transitionPlans={plans ?? []}
+    />
   )
 }
