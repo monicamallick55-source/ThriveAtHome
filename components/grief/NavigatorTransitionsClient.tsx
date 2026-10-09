@@ -9,7 +9,7 @@ interface Step {
   week_number: number
   title: string
   completed_at: string | null
-  advisor_type: string
+  category: string
   sort_order: number
 }
 
@@ -34,7 +34,7 @@ interface Connection {
   navigator_notes?: string
   introduced_at?: string
   member: { id: string; full_name: string; preferred_name: string | null }
-  advisor: { id: string; name: string; category: string; specialty?: string }
+  advisor: { id: string; full_name: string; advisor_type: string; specialty?: string }
 }
 
 interface Member {
