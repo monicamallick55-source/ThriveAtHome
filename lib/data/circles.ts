@@ -116,7 +116,7 @@ export async function getMemberCircleIds(memberId: string): Promise<string[]> {
     const supabase = await createClient()
     // circle_members is not in TS types yet — cast to any
     const { data, error } = await (supabase as any)
-      .from('circle_members')
+      .from('circle_memberships')
       .select('circle_id')
       .eq('member_id', memberId)
 
@@ -139,7 +139,7 @@ export async function joinCircle(
   try {
     const supabase = await createClient()
     const { error } = await (supabase as any)
-      .from('circle_members')
+      .from('circle_memberships')
       .upsert({ member_id: memberId, circle_id: circleId }, { onConflict: 'member_id,circle_id' })
 
     if (error) {
@@ -162,7 +162,7 @@ export async function leaveCircle(
   try {
     const supabase = await createClient()
     const { error } = await (supabase as any)
-      .from('circle_members')
+      .from('circle_memberships')
       .delete()
       .eq('member_id', memberId)
       .eq('circle_id', circleId)
