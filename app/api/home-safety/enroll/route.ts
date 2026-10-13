@@ -38,8 +38,8 @@ export async function POST(req: Request) {
 
   // Check member's subscription tier against eligibility
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const { data: member } = await (admin as any)
-  .from('members')
+  const { data: member } = await (admin as any)
+    .from('members')
     .select('subscription_tier')
     .eq('id', fm.member_id)
     .maybeSingle()
@@ -47,7 +47,7 @@ const { data: member } = await (admin as any)
   const eligibility = program.eligibility as { org_tiers?: string[] } | null
   if (eligibility?.org_tiers?.length && member) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const tier = (member as any).subscription_tier ?? 'social'
+    const tier = (member as any).subscription_tier ?? 'social'
     if (!eligibility.org_tiers.includes(tier)) {
       return NextResponse.json({
         error: `This program requires a ${eligibility.org_tiers.join(' or ')} membership. Your current plan is ${tier}.`,
