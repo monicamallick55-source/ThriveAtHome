@@ -5,7 +5,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
-interface Member { id: string; first_name: string; last_name: string }
+interface Member { id: string; full_name: string }
 
 interface Campaign {
   id: string
@@ -23,7 +23,7 @@ interface Campaign {
   total_confirmed_cents: number
   navigator_notes: string | null
   created_at: string
-  members: { first_name: string; last_name: string }
+  members: { full_name: string }
 }
 
 interface Contribution {
@@ -93,12 +93,12 @@ export default function NavigatorCampaignsPage() {
     const [{ data: camps }, { data: mems }] = await Promise.all([
       supabase
         .from('member_campaigns')
-        .select('*, members(first_name, last_name)')
+        .select('*, members(full_name)')
         .order('created_at', { ascending: false }),
       supabase
         .from('members')
-        .select('id, first_name, last_name')
-        .order('last_name'),
+        .select('id, full_name')
+        .order('full_name'),
     ])
     if (camps) {
       setCampaigns(camps as any)
@@ -114,7 +114,7 @@ export default function NavigatorCampaignsPage() {
       }
       setContributions(contribMap)
     }
-    if (mems) setMembers(mems)
+    if (mems) setMembers(mems as any)
     setLoading(false)
   }
 
@@ -255,7 +255,7 @@ export default function NavigatorCampaignsPage() {
               >
                 <option value="">Select member…</option>
                 {members.map(m => (
-                  <option key={m.id} value={m.id}>{m.last_name}, {m.first_name}</option>
+                  <option key={m.id} value={m.id}>{m.full_name}</option>
                 ))}
               </select>
             </div>
@@ -380,7 +380,7 @@ export default function NavigatorCampaignsPage() {
                           )}
                         </div>
                         <div className="text-xs text-gray-400 mt-0.5">
-                          {c.members.first_name} {c.members.last_name} · {new Date(c.created_at).toLocaleDateString()}
+                          {c.members.full_name} · {new Date(c.created_at).toLocaleDateString()}
                         </div>
                       </div>
                       <span className="text-gray-400 text-sm mt-0.5">{isExpanded ? '▲' : '▼'}</span>

@@ -16,7 +16,7 @@ interface Campaign {
   total_confirmed_cents: number
   created_at: string
   deadline: string | null
-  members: { first_name: string; last_name: string }
+  members: { full_name: string }
 }
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
@@ -39,7 +39,7 @@ export default function AdminCampaignsPage() {
       setLoading(true)
       const { data } = await supabase
         .from('member_campaigns')
-        .select('*, members(first_name, last_name)')
+        .select('*, members(full_name)')
         .order('created_at', { ascending: false })
       if (data) setCampaigns(data as any)
       setLoading(false)
@@ -125,7 +125,7 @@ export default function AdminCampaignsPage() {
                 return (
                   <tr key={c.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50 transition">
                     <td className="px-5 py-3 text-gray-700 whitespace-nowrap">
-                      {c.members.first_name} {c.members.last_name}
+                      {c.members.full_name}
                     </td>
                     <td className="px-5 py-3 text-gray-900 font-medium max-w-xs truncate">{c.title}</td>
                     <td className="px-5 py-3">

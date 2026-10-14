@@ -19,7 +19,7 @@ interface Campaign {
   total_pledged_cents: number
   total_confirmed_cents: number
   created_at: string
-  members: { first_name: string; last_name: string }
+  members: { full_name: string }
 }
 
 interface Pledge {
@@ -126,7 +126,7 @@ function PledgeModal({
           <h3 className="text-lg font-bold text-gray-900 mb-1">Send your gift now</h3>
           <p className="text-sm text-gray-500 mb-5">
             Your pledge is saved. Now send the payment directly to{' '}
-            <span className="font-semibold">{campaign.members.first_name}</span> using {paymentMethod}:
+            <span className="font-semibold">{campaign.members.full_name}</span> using {paymentMethod}:
           </p>
 
           <div className="bg-teal-50 rounded-xl p-4 mb-5">
@@ -334,7 +334,7 @@ export default function FamilyCampaignsPage() {
     setLoading(true)
     const { data } = await supabase
       .from('member_campaigns')
-      .select('*, members(first_name, last_name)')
+      .select('*, members(full_name)')
       .eq('status', 'active')
       .order('created_at', { ascending: false })
     if (data) setCampaigns(data as any)
@@ -395,7 +395,7 @@ export default function FamilyCampaignsPage() {
                   </span>
                 </div>
                 <div className="text-xs text-gray-400 mb-3">
-                  for {c.members.first_name} {c.members.last_name}
+                  for {c.members.full_name}
                   {c.deadline && <> · Deadline {new Date(c.deadline).toLocaleDateString()}</>}
                 </div>
                 <p className="text-sm text-gray-700 mb-4">{c.story}</p>
