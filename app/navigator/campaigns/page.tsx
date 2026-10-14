@@ -110,7 +110,7 @@ export default function NavigatorCampaignsPage() {
           .select('*')
           .eq('campaign_id', c.id)
           .order('created_at', { ascending: false })
-        if (contribs) contribMap[c.id] = contribs
+        if (contribs) contribMap[c.id] = contribs as any
       }
       setContributions(contribMap)
     }
