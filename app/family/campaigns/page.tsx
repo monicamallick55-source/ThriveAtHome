@@ -348,7 +348,7 @@ export default function FamilyCampaignsPage() {
           .select('*')
           .eq('campaign_id', c.id)
           .order('created_at', { ascending: false })
-        if (p) pledgeMap[c.id] = p
+        if (p) pledgeMap[c.id] = p as any
       }
     }
     setMyPledges(pledgeMap)
