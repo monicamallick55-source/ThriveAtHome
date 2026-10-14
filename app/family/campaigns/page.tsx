@@ -3,7 +3,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 interface Campaign {
   id: string
@@ -321,7 +321,7 @@ function PledgeModal({
 }
 
 export default function FamilyCampaignsPage() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [myPledges, setMyPledges] = useState<Record<string, Pledge[]>>({})
   const [loading, setLoading] = useState(true)

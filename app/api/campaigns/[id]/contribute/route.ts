@@ -1,8 +1,8 @@
 // app/api/campaigns/[id]/contribute/route.ts
 // G6.4 — POST pledge, PATCH confirm, GET contributions for a campaign
 import { NextRequest, NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+
+import { createClient } from '@/lib/supabase/server'
 
 export async function POST(
   req: NextRequest,
@@ -10,7 +10,7 @@ export async function POST(
 ) {
   try {
     const { id: campaignId } = await params
-    const supabase = createRouteHandlerClient({ cookies })
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -86,7 +86,7 @@ export async function PATCH(
 ) {
   try {
     const { id: campaignId } = await params
-    const supabase = createRouteHandlerClient({ cookies })
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -160,7 +160,7 @@ export async function GET(
 ) {
   try {
     const { id: campaignId } = await params
-    const supabase = createRouteHandlerClient({ cookies })
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 

@@ -3,7 +3,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 interface Campaign {
   id: string
@@ -41,7 +41,7 @@ const CATEGORIES = [
 ]
 
 export default function MemberCampaignsPage() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
