@@ -3,7 +3,7 @@
 // G5.1 adds: extractClinicalFields, ICD-10 mapping, ml_insights_opt_out honour
 
 import { createClient } from '@/lib/supabase/server'
-import { getAgentConfig } from './agents'
+import { agentNameFromId, AGENTS } from './agents'
 import { extractClinicalFields } from '@/lib/services/AnthropicAiProvider.clinical'
 import { scanAndFlag } from '@/lib/fraud/flagService'
 
@@ -37,7 +37,8 @@ export async function processCallEnded(payload: RetellCallEndedPayload) {
   if (existing?.processed_at) return { skipped: true, reason: 'already_processed' }
 
   // Step 2: Identify agent
-  const agent = getAgentConfig(agent_id)
+  const agentName = agentNameFromId(agent_id)
+  const agent = agentName ? AGENTS[agentName] : null
   if (!agent) {
     console.error('[processCallEnded] Unknown agent_id:', agent_id)
     return { error: 'unknown_agent' }
