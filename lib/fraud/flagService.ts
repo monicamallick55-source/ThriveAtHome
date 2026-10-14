@@ -56,7 +56,8 @@ export async function createFraudFlag(opts: CreateFraudFlagOptions): Promise<str
   const priority = match.severity === 'urgent' ? 'critical' : 'high'
   const taskDescription = buildTaskDescription(match, source, sourceId)
 
-  const { data: task, error: taskErr } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: task, error: taskErr } = await (admin as any)
     .from('navigator_tasks')
     .insert({
       member_id: memberId,
