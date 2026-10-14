@@ -44,7 +44,8 @@ export async function PATCH(
     if (resolutionNote) updates.resolution_note = resolutionNote
   }
 
-  const { error } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (admin as any)
     .from('fraud_flags')
     .update(updates)
     .eq('id', flagId)

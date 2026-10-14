@@ -30,7 +30,8 @@ export async function createFraudFlag(opts: CreateFraudFlagOptions): Promise<str
   const { memberId, source, sourceId, match } = opts
 
   // 1. Insert fraud_flags row
-  const { data: flag, error: flagErr } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: flag, error: flagErr } = await (admin as any)
     .from('fraud_flags')
     .insert({
       member_id: memberId,
@@ -71,7 +72,8 @@ export async function createFraudFlag(opts: CreateFraudFlagOptions): Promise<str
     console.error('[createFraudFlag] navigator task failed:', taskErr)
   } else if (task) {
     // Update fraud_flag with task reference
-    await admin
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (admin as any)
       .from('fraud_flags')
       .update({ navigator_task_id: task.id })
       .eq('id', flagId)
@@ -146,7 +148,8 @@ async function notifyFamilyUrgent(
   const admin = createAdminClient()
 
   // Mark family_notified_at
-  await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (admin as any)
     .from('fraud_flags')
     .update({ family_notified_at: new Date().toISOString() })
     .eq('id', flagId)

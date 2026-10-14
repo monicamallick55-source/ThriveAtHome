@@ -54,7 +54,8 @@ export async function GET(req: Request) {
   const limit = Math.min(parseInt(searchParams.get('limit') ?? '50', 10), 100)
 
   const admin = createAdminClient()
-  const { data, error } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (admin as any)
     .from('fraud_flags')
     .select(`
       id, created_at, member_id, source, source_id, scam_type,

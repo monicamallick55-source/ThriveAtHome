@@ -40,7 +40,8 @@ export async function PATCH(
   if (facility_address !== undefined) update.facility_address = facility_address
   if (notes !== undefined) update.notes = notes
 
-  const { data: plan, error } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: plan, error } = await (admin as any)
     .from('transition_plans')
     .update(update)
     .eq('id', planId)
