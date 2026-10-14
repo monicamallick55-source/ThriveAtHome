@@ -65,7 +65,7 @@ export default function MemberCampaignsPage() {
       .from('member_campaigns')
       .select('*')
       .order('created_at', { ascending: false })
-    if (!error && data) setCampaigns(data)
+    if (!error if (!error && data) setCampaigns(data)if (!error && data) setCampaigns(data) data) setCampaigns(data as any)
     setLoading(false)
   }
 
