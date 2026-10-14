@@ -59,7 +59,8 @@ export async function processCallEnded(payload: RetellCallEndedPayload) {
   }
 
   // Step 4: Find member by phone
-  const { data: member } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: member } = await (supabase as any)
     .from('members')
     .select('id, full_name, ml_insights_opt_out')
     .eq('phone', to_number ?? '')

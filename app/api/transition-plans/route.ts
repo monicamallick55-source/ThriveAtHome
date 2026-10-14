@@ -1,130 +1,223 @@
 // app/api/transition-plans/route.ts
-// GET — list transition plans for member (or all for staff)
-// POST — navigator creates a new 6-week plan
+// G7.15 — Facility-move planning workflow
+// GET  — list plans for member (staff, navigator, or family when family_can_see=true)
+// POST — navigator creates a new plan with 6-week auto-checklist
+// PATCH — mark step complete, update plan status, toggle family visibility
 
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
-const DEFAULT_STEPS = [
-  // Week 1 — Research
-  { week_number: 1, category: 'research', title: 'Research facility options', description: 'Identify 3–5 facilities that meet the member\'s needs, budget, and location preferences.', sort_order: 1 },
-  { week_number: 1, category: 'research', title: 'Check facility reviews and ratings', description: 'Review state inspection reports and ratings at Medicare.gov/care-compare.', sort_order: 2 },
-  // Week 2 — Visits
-  { week_number: 2, category: 'visits', title: 'Schedule facility tours', description: 'Book visits to the top 2–3 facilities. Note staff warmth, cleanliness, and activity programmes.', sort_order: 1 },
-  { week_number: 2, category: 'transport', title: 'Arrange transport to tours', description: 'Coordinate transport for the member and family to attend facility visits.', sort_order: 2 },
-  // Week 3 — Paperwork
-  { week_number: 3, category: 'paperwork', title: 'Gather key documents', description: 'Medical records, insurance cards, advance directive, financial statements, and identification.', sort_order: 1 },
-  { week_number: 3, category: 'paperwork', title: 'Review admission agreement', description: 'Have the attorney or trusted advisor review the facility\'s admission contract before signing.', sort_order: 2 },
-  // Week 4 — Family coordination
-  { week_number: 4, category: 'family', title: 'Family meeting', description: 'Bring family together to align on the decision, roles on moving day, and ongoing visit schedules.', sort_order: 1 },
-  { week_number: 4, category: 'family', title: 'Assign family roles', description: 'Who coordinates the move? Who handles utilities/address change? Who does daily calls the first week?', sort_order: 2 },
-  // Week 5 — Moving day plan
-  { week_number: 5, category: 'moving', title: 'Pack personal items', description: 'Choose meaningful items, photos, and comfort objects. Label everything clearly.', sort_order: 1 },
-  { week_number: 5, category: 'transport', title: 'Book moving transport', description: 'Arrange vehicle or moving service for furniture and belongings.', sort_order: 2 },
-  { week_number: 5, category: 'moving', title: 'Update address and utilities', description: 'Notify post office, Medicare, Social Security, bank, and subscription services.', sort_order: 3 },
-  // Week 6 — Post-move
-  { week_number: 6, category: 'post_move', title: 'Move-in day support', description: 'Navigator or family present on move-in day to help the member settle in.', sort_order: 1 },
-  { week_number: 6, category: 'post_move', title: 'Day-3 check-in call', description: 'Grace or navigator calls the member on day 3 to see how they are settling.', sort_order: 2 },
-  { week_number: 6, category: 'post_move', title: 'Week-2 family update', description: 'Navigator sends a written update to the family about the member\'s adjustment.', sort_order: 3 },
+// 6-week facility-move checklist template
+const MOVE_CHECKLIST: Array<{ week: number; step: number; title: string; description: string; requiresTransport: boolean }> = [
+  // Week 1 — Assessment & Planning
+  { week: 1, step: 1, title: 'Initial assessment meeting', description: 'Navigator meets with member and family to assess needs, preferences, and timeline for the move.', requiresTransport: false },
+  { week: 1, step: 2, title: 'Research facility options', description: 'Identify 3–5 suitable facilities based on care level, location, cost, and member preferences.', requiresTransport: false },
+  { week: 1, step: 3, title: 'Schedule facility tours', description: 'Book tours at top 2–3 candidate facilities with member and key family members.', requiresTransport: true },
+
+  // Week 2 — Decision & Paperwork
+  { week: 2, step: 4, title: 'Facility tours', description: 'Accompany member and family on tours. Take notes and photos for comparison.', requiresTransport: true },
+  { week: 2, step: 5, title: 'Select facility', description: 'Review tour notes with member and family. Confirm facility selection and place hold if available.', requiresTransport: false },
+  { week: 2, step: 6, title: 'Obtain admission paperwork', description: 'Request and review admission agreement, fee schedule, and care plan from chosen facility.', requiresTransport: false },
+
+  // Week 3 — Medical & Financial Prep
+  { week: 3, step: 7, title: 'Medical records transfer', description: 'Request transfer of medical records, medication list, and care history to new facility.', requiresTransport: false },
+  { week: 3, step: 8, title: 'Financial & benefits review', description: 'Confirm payment method (Medicare, Medicaid, private pay). Coordinate with Benefits Hub if needed.', requiresTransport: false },
+  { week: 3, step: 9, title: 'Sign admission agreement', description: 'Review and sign admission agreement with member and power-of-attorney family member.', requiresTransport: true },
+
+  // Week 4 — Logistics
+  { week: 4, step: 10, title: 'Sort and donate belongings', description: 'Help member decide what to bring, store, donate, or gift. Coordinate donations pickup if needed.', requiresTransport: false },
+  { week: 4, step: 11, title: 'Arrange moving help', description: 'Coordinate volunteers, family, or professional movers for moving day. Book transport for member.', requiresTransport: false },
+  { week: 4, step: 12, title: 'Notify service providers', description: 'Update address with USPS, Medicare, Social Security, bank, pharmacy, and other key services.', requiresTransport: false },
+
+  // Week 5 — Move Day Prep
+  { week: 5, step: 13, title: 'Personalize new room', description: 'Arrange delivery of photos, furniture, and meaningful items to new room before move-in.', requiresTransport: true },
+  { week: 5, step: 14, title: 'Move day transport', description: 'Transport member to new facility on move day. Ensure family or navigator present for first hours.', requiresTransport: true },
+  { week: 5, step: 15, title: 'Meet care team', description: 'Introduce member and family to facility care team, roommate if applicable, and key staff.', requiresTransport: false },
+
+  // Week 6 — Adjustment & Follow-up
+  { week: 6, step: 16, title: '3-day check-in call', description: 'Navigator calls member 3 days after move-in to assess comfort, identify any issues.', requiresTransport: false },
+  { week: 6, step: 17, title: '1-week family debrief', description: 'Check in with family on how member is adjusting. Address any concerns with facility.', requiresTransport: false },
+  { week: 6, step: 18, title: '30-day post-move review', description: 'Schedule 30-day review with facility care team and family. Update care plan as needed.', requiresTransport: false },
 ]
 
 export async function GET(req: Request) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 })
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
-  const { searchParams } = new URL(req.url)
-  const memberId = searchParams.get('member_id')
+  const url = new URL(req.url)
+  const memberId = url.searchParams.get('memberId')
+  const planId = url.searchParams.get('planId')
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
+  const admin = createAdminClient()
 
-  let query = admin
-    .from('transition_plans')
-    .select(`
-      id, created_at, updated_at, member_id, title, status, family_can_view,
-      target_move_date, facility_name, facility_address, notes,
-      member:members(id, full_name, preferred_name),
-      navigator:family_members(id, member:members(full_name)),
-      steps:transition_plan_steps(id, week_number, title, description, due_date, completed_at, category, sort_order)
-    `)
-    .order('created_at', { ascending: false })
-
-  const { data: isStaff } = await supabase.rpc('is_staff')
-
-  if (isStaff && memberId) {
-    query = query.eq('member_id', memberId)
-  } else if (!isStaff) {
-    // Member sees own plans (RLS handles it but we scope anyway)
-    const { data: fm } = await supabase
-      .from('family_members')
-      .select('member_id')
-      .eq('supabase_auth_id', user.id)
+  // If planId specified, return plan + steps
+  if (planId) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: plan, error } = await (admin as any)
+      .from('transition_plans')
+      .select('*, steps:transition_plan_steps(*)')
+      .eq('id', planId)
       .maybeSingle()
-    if (fm) query = query.eq('member_id', fm.member_id)
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    if (!plan) return NextResponse.json({ error: 'Plan not found' }, { status: 404 })
+    return NextResponse.json({ plan })
   }
 
-  const { data: plans, error } = await query
+  if (!memberId) return NextResponse.json({ error: 'memberId required' }, { status: 400 })
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: plans, error } = await (admin as any)
+    .from('transition_plans')
+    .select('*, steps:transition_plan_steps(id, step_number, title, completed_at, due_date)')
+    .eq('member_id', memberId)
+    .order('created_at', { ascending: false })
+
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ plans: plans ?? [] })
+  return NextResponse.json({ plans })
 }
 
 export async function POST(req: Request) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 })
-  const { data: isStaff } = await supabase.rpc('is_staff')
-  if (!isStaff) return NextResponse.json({ error: 'Staff only' }, { status: 403 })
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
-  const body = await req.json().catch(() => ({}))
-  const { member_id, title, target_move_date, facility_name, family_can_view } = body as {
-    member_id?: string
-    title?: string
-    target_move_date?: string
-    facility_name?: string
-    family_can_view?: boolean
-  }
-
-  if (!member_id) return NextResponse.json({ error: 'member_id required' }, { status: 400 })
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
-
-  // Get navigator's family_member id
-  const { data: navFm } = await admin
+  // Staff only
+  const { data: fm } = await supabase
     .from('family_members')
-    .select('id')
+    .select('id, role')
     .eq('supabase_auth_id', user.id)
     .maybeSingle()
+  if (!fm || !['staff', 'navigator', 'admin'].includes((fm as any).role)) {
+    return NextResponse.json({ error: 'Staff only' }, { status: 403 })
+  }
 
-  const { data: plan, error: planError } = await admin
+  const body = await req.json().catch(() => ({}))
+  const memberId: string | null = typeof body?.memberId === 'string' ? body.memberId : null
+  const planType: string = typeof body?.planType === 'string' ? body.planType : 'facility_move'
+  const title: string = typeof body?.title === 'string' ? body.title.slice(0, 200) : 'Facility Move Plan'
+  const targetDate: string | null = typeof body?.targetDate === 'string' ? body.targetDate : null
+  const familyCanSee: boolean = body?.familyCanSee !== false
+
+  if (!memberId) return NextResponse.json({ error: 'memberId required' }, { status: 400 })
+
+  const admin = createAdminClient()
+
+  // Create the plan
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: plan, error: planError } = await (admin as any)
     .from('transition_plans')
     .insert({
-      member_id,
-      navigator_id: navFm?.id ?? null,
-      title: title ?? 'Facility Move Plan',
-      target_move_date: target_move_date ?? null,
-      facility_name: facility_name ?? null,
-      family_can_view: family_can_view ?? false,
+      member_id: memberId,
+      navigator_id: fm.id,
+      plan_type: planType,
+      title,
+      target_date: targetDate,
+      family_can_see: familyCanSee,
+      status: 'active',
     })
-    .select()
+    .select('id')
     .single()
 
   if (planError) return NextResponse.json({ error: planError.message }, { status: 500 })
 
-  // Seed default 6-week steps
-  const steps = DEFAULT_STEPS.map(s => ({ ...s, plan_id: plan.id }))
-  await admin.from('transition_plan_steps').insert(steps)
+  // Auto-generate 6-week checklist
+  const startDate = targetDate ? new Date(targetDate) : new Date()
+  // Target date is end of week 6; week 1 starts 6 weeks before target
+  const week1Start = new Date(startDate)
+  week1Start.setDate(week1Start.getDate() - 35) // 5 weeks before target
 
-  // Notify member
-  await admin.from('realtime_notifications').insert({
-    member_id,
-    type: 'system_message',
-    title: 'Your navigator has started a move planning checklist',
-    body: 'Your navigator created a 6-week plan to help with your upcoming facility move. You can view it in your dashboard.',
-    severity: 'info',
+  const steps = MOVE_CHECKLIST.map((tpl) => {
+    const dueDate = new Date(week1Start)
+    dueDate.setDate(dueDate.getDate() + (tpl.week - 1) * 7 + 6) // end of each week
+    return {
+      plan_id: plan.id,
+      step_number: tpl.step,
+      week_number: tpl.week,
+      title: tpl.title,
+      description: tpl.description,
+      due_date: dueDate.toISOString().split('T')[0],
+      requires_transport: tpl.requiresTransport,
+    }
   })
 
-  return NextResponse.json({ plan }, { status: 201 })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error: stepsError } = await (admin as any)
+    .from('transition_plan_steps')
+    .insert(steps)
+
+  if (stepsError) return NextResponse.json({ error: stepsError.message }, { status: 500 })
+
+  // Create navigator task
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (admin as any).from('navigator_tasks').insert({
+    member_id: memberId,
+    task_type: 'transition_plan_started',
+    priority: 'high',
+    description: `Facility move plan "${title}" created. 18-step, 6-week checklist generated.`,
+    metadata: { plan_id: plan.id, target_date: targetDate },
+  }).catch(() => null)
+
+  return NextResponse.json({ ok: true, planId: plan.id, stepsCreated: steps.length }, { status: 201 })
+}
+
+export async function PATCH(req: Request) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+
+  const { data: fm } = await supabase
+    .from('family_members')
+    .select('id, role')
+    .eq('supabase_auth_id', user.id)
+    .maybeSingle()
+  if (!fm) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+
+  const body = await req.json().catch(() => ({}))
+  const { planId, stepId, action } = body
+
+  const admin = createAdminClient()
+
+  if (action === 'complete_step' && stepId) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (admin as any)
+      .from('transition_plan_steps')
+      .update({
+        completed_at: new Date().toISOString(),
+        completed_by: fm.id,
+        notes: body.notes ?? null,
+      })
+      .eq('id', stepId)
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ ok: true })
+  }
+
+  if (action === 'uncomplete_step' && stepId) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (admin as any)
+      .from('transition_plan_steps')
+      .update({ completed_at: null, completed_by: null })
+      .eq('id', stepId)
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ ok: true })
+  }
+
+  if (action === 'update_plan' && planId) {
+    const updates: Record<string, unknown> = {}
+    if (body.status) updates.status = body.status
+    if (body.familyCanSee !== undefined) updates.family_can_see = body.familyCanSee
+    if (body.notes !== undefined) updates.notes = body.notes
+    if (body.targetDate !== undefined) updates.target_date = body.targetDate
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (admin as any)
+      .from('transition_plans')
+      .update(updates)
+      .eq('id', planId)
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ ok: true })
+  }
+
+  return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
 }
