@@ -12,7 +12,7 @@ export const STRIPE_PLANS: Record<PlanTier, StripePlanConfig> = {
   basics: {
     tier: 'basics',
     name: 'Thrive Basics',
-    price: 19,
+    price: 29,
     features: [
       'Daily AI check-ins',
       'Medication reminders',
@@ -23,7 +23,7 @@ export const STRIPE_PLANS: Record<PlanTier, StripePlanConfig> = {
   connect: {
     tier: 'connect',
     name: 'Thrive Connect',
-    price: 39,
+    price: 49,
     features: [
       'Everything in Basics',
       'Volunteer connections',
@@ -35,7 +35,7 @@ export const STRIPE_PLANS: Record<PlanTier, StripePlanConfig> = {
   complete: {
     tier: 'complete',
     name: 'Thrive Complete',
-    price: 69,
+    price: 99,
     features: [
       'Everything in Connect',
       'Care navigator (2 hrs/month)',
@@ -46,11 +46,10 @@ export const STRIPE_PLANS: Record<PlanTier, StripePlanConfig> = {
   premier: {
     tier: 'premier',
     name: 'Thrive Premier',
-    price: 129,
+    price: 199,
     features: [
       'Everything in Complete',
       'Dedicated navigator (8 hrs/month)',
-      'Companion credits ($50/mo)',
       'Milestone celebrations',
     ],
   },
