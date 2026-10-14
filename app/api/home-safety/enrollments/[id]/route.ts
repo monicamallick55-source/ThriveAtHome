@@ -1,12 +1,12 @@
 // app/api/home-safety/enrollments/[id]/route.ts
 // PATCH — member updates their own enrollment (withdraw, update home_type/comments)
 
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function PATCH(
-  req: Request,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params

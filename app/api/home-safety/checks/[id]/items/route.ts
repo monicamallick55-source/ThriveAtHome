@@ -2,7 +2,7 @@
 // GET  — load checklist items for a check
 // POST — save/update checklist items (upsert by check_id + item_key)
 
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { SAFETY_CHECKLIST } from '@/lib/home-safety/checklist'
@@ -21,7 +21,7 @@ async function resolveUser(supabase: Awaited<ReturnType<typeof createClient>>) {
 }
 
 export async function GET(
-  _req: Request,
+  _req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id: checkId } = await params
@@ -41,7 +41,7 @@ export async function GET(
 }
 
 export async function POST(
-  req: Request,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id: checkId } = await params
