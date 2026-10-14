@@ -124,7 +124,7 @@ export default function AddonStore({ memberId }: Props) {
           const highlights = SKU_HIGHLIGHTS[sku.slug] ?? []
 
           return (
-            <div key={sku.sku} style={{ background: '#fff', borderRadius: '12px', padding: '20px', boxShadow: '0 1px 4px rgba(0,0,0,0.07)', border: isActive ? '1px solid #bbf7d0' : '1px solid #f3f4f6' }}>
+            <div key={sku.slug} style={{ background: '#fff', borderRadius: '12px', padding: '20px', boxShadow: '0 1px 4px rgba(0,0,0,0.07)', border: isActive ? '1px solid #bbf7d0' : '1px solid #f3f4f6' }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
