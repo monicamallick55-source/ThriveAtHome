@@ -101,7 +101,7 @@ export default function NavigatorCampaignsPage() {
         .order('last_name'),
     ])
     if (camps) {
-      setCampaigns(camps)
+      setCampaigns(camps as any)
       // Load contributions for each campaign
       const contribMap: Record<string, Contribution[]> = {}
       for (const c of camps) {

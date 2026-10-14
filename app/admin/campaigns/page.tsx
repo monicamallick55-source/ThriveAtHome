@@ -41,7 +41,7 @@ export default function AdminCampaignsPage() {
         .from('member_campaigns')
         .select('*, members(first_name, last_name)')
         .order('created_at', { ascending: false })
-      if (data) setCampaigns(data)
+      if (data) setCampaigns(data as any)
       setLoading(false)
     }
     load()

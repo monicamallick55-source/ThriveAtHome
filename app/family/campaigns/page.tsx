@@ -337,7 +337,7 @@ export default function FamilyCampaignsPage() {
       .select('*, members(first_name, last_name)')
       .eq('status', 'active')
       .order('created_at', { ascending: false })
-    if (data) setCampaigns(data)
+    if (data) setCampaigns(data as any)
 
     // Load my pledges per campaign
     const pledgeMap: Record<string, Pledge[]> = {}
