@@ -134,7 +134,7 @@ export default function HomePage() {
           textAlign: 'center',
         }}>
           <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-            <SectionLabel>Now serving Bay Area families</SectionLabel>
+            <SectionLabel>Serving seniors across the United States</SectionLabel>
             <h1 style={{
               fontFamily: 'var(--font-display)',
               fontSize: 'clamp(34px, 6vw, 58px)',
@@ -167,7 +167,7 @@ export default function HomePage() {
         {/* ── 2. SOCIAL PROOF BAR ── */}
         <section style={{ backgroundColor: 'var(--color-navy)', padding: '18px 24px' }}>
           <p style={{ ...maxW, textAlign: 'center', fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(250,250,245,0.55)', margin: '0 auto' }}>
-            Trusted by families across the Bay Area · HIPAA-compliant · Anthropic & Retell AI BAAs signed
+            Serving seniors across the United States · HIPAA-compliant · Anthropic & Retell AI BAAs signed
           </p>
         </section>
 
@@ -575,15 +575,18 @@ export default function HomePage() {
           <div style={maxW}>
             <div style={{ textAlign: 'center', marginBottom: '56px' }}>
               <SectionLabel>B2B partnerships</SectionLabel>
-              <h2 style={heading2}>For employers, care agencies, and community organisations</h2>
+              <h2 style={heading2}>For senior living, villages, nonprofits, employers & care agencies</h2>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '20px' }}>
               {[
+                { icon: '🏡', title: 'Senior living facilities', desc: 'Bring ThriveAtHome inside independent living, assisted living, and continuing care communities. Supplement your activity programme with AI check-ins, buddy matching, and family dashboards — white-label ready.' },
+                { icon: '🌐', title: 'Village networks', desc: 'Purpose-built for Village to Village Network members and independent villages. Extend your volunteer coordination, member engagement, and family communication through our platform.' },
+                { icon: '💙', title: 'Senior nonprofits & AAAs', desc: 'Area Agencies on Aging, senior centres, and senior-serving nonprofits can offer ThriveAtHome as a subsidised or free member benefit. Grant-friendly pricing and impact reporting built in.' },
                 { icon: '🏢', title: 'Employer benefits', desc: 'Offer ThriveAtHome as an employee benefit — caregiver support that reduces absenteeism and drives retention. Per-employee-per-month pricing.' },
-                { icon: '🏥', title: 'Care agency portals', desc: 'White-label platform for home care agencies. Your brand, our infrastructure. HIPAA-compliant, BAAs in place.' },
-                { icon: '🏛️', title: 'Medicare Advantage', desc: 'Supplemental benefit integration for Medicare Advantage plans — targeting social isolation as a health determinant.' },
+                { icon: '🏥', title: 'Home care agencies', desc: 'White-label platform for home care agencies. Your brand, our infrastructure. HIPAA-compliant, BAAs in place.' },
+                { icon: '🏛️', title: 'Medicare Advantage plans', desc: 'Supplemental benefit integration for MA plans — targeting social isolation as a clinical health determinant with measurable outcomes.' },
                 { icon: '🎓', title: 'University partnerships', desc: 'Structured service-hours programmes for university students. Service record PDFs for transcripts and graduate applications.' },
-                { icon: '⛪', title: 'Faith & community organisations', desc: 'Platform for faith communities, nonprofits, and neighbourhood organisations to serve their senior members.' },
+                { icon: '⛪', title: 'Faith communities', desc: 'Congregations and faith-based organisations can serve their senior members through ThriveAtHome — coordinating volunteers, check-ins, and community events.' },
                 { icon: '💼', title: 'Corporate volunteer programme', desc: '3-tier structure ($5K–$50K+). Community Partner, Champion, and Leader tiers with naming rights and CEO recognition at top tier.' },
               ].map(p => (
                 <div key={p.title} style={card}>
