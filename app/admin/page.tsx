@@ -19,6 +19,7 @@ const LINKS: { href: string; label: string; desc: string }[] = [
   { href: '/admin/events/create', label: 'Create an event', desc: 'Add a virtual or in-person event' },
   { href: '/admin/advisors', label: 'Advisor directory', desc: 'Curate the trusted advisor list' },
   { href: '/admin/ambassadors', label: 'Ambassadors', desc: 'Manage circle ambassadors' },
+  { href: '/admin/org-linking', label: 'Org linking', desc: 'Link org-admin users to their AAA, community org, agency, or senior center portal' },
   { href: '/admin/outcomes', label: 'Outcomes', desc: 'Platform outcomes and reporting' },
   { href: '/admin/settings', label: 'Settings', desc: 'Platform configuration' },
 ]

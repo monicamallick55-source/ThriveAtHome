@@ -30,11 +30,11 @@ export async function POST(
 
     // Get referral to pull nonprofit_org_id and referral context
     const supabase = createAdminClient()
-    const { data: referral } = await supabase
+    const { data: referral } = await (supabase
       .from('nonprofit_referrals')
       .select('*')
       .eq('id', referralId)
-      .maybeSingle()
+      .maybeSingle() as any) as { data: Record<string, any> | null; error: unknown }
 
     if (!referral) {
       return NextResponse.json({ error: 'Referral not found' }, { status: 404 })

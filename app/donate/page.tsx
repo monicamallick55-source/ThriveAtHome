@@ -42,6 +42,15 @@ export default function DonatePage() {
 
         <DonationModule backHref="/dashboard" backLabel="← Back to Dashboard" />
 
+        {/* Tax notice — ThriveAtHome is a for-profit company, not a 501(c)(3) */}
+        <div style={{ marginTop: '24px', padding: '16px 20px', backgroundColor: '#fefce8', border: '1.5px solid #fde047', borderRadius: '12px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+          <span style={{ fontSize: '20px', flexShrink: 0, lineHeight: 1.3 }} aria-hidden="true">ℹ️</span>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: '#713f12', lineHeight: 1.65, margin: 0 }}>
+            <strong>Tax deductibility:</strong> ThriveAtHome is a for-profit social enterprise and does not hold 501(c)(3) nonprofit status.
+            Donations are <strong>not tax-deductible</strong> as charitable contributions. Please consult your tax adviser for guidance.
+          </p>
+        </div>
+
         <div style={{ marginTop: '48px', padding: '32px 40px', backgroundColor: 'var(--color-navy)', borderRadius: '20px', textAlign: 'center' }}>
           <blockquote style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontStyle: 'italic', color: 'var(--color-cream)', lineHeight: 1.6, margin: '0 0 16px' }}>
             &ldquo;Before ThriveAtHome, I didn&apos;t know if Mom was okay every day. Now I get a gentle update and I sleep better.&rdquo;

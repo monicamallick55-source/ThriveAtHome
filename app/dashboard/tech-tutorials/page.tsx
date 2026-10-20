@@ -6,7 +6,7 @@ const TUTORIAL_CATEGORIES = [
     title: 'Smartphone Basics',
     description: 'Making calls, sending texts, adjusting settings, and staying safe',
     tutorials: [
-      'How to make and receive phone calls',
+      { title: 'How to make and receive phone calls', slug: 'how-to-make-phone-calls' },
       'Sending and reading text messages',
       'Adjusting text size and display brightness',
       'Setting up voicemail',
@@ -18,7 +18,7 @@ const TUTORIAL_CATEGORIES = [
     title: 'Video Calls',
     description: 'FaceTime, Zoom, and video chatting with family',
     tutorials: [
-      'How to use FaceTime on iPhone or iPad',
+      { title: 'How to use FaceTime or Zoom for video calls', slug: 'how-to-video-call-facetime-zoom' },
       'Joining a Zoom meeting',
       'Video calling on Android',
       'Troubleshooting a blurry or frozen video call',
@@ -30,7 +30,7 @@ const TUTORIAL_CATEGORIES = [
     title: 'Online Safety',
     description: 'Protecting yourself from scams, fraud, and privacy risks',
     tutorials: [
-      'Recognising and avoiding phone scams',
+      { title: 'Recognising and avoiding phone scams', slug: 'recognising-phone-scams' },
       'What is phishing and how to spot it',
       'Safe online shopping — what to look for',
       'Creating strong passwords and staying secure',
@@ -123,11 +123,20 @@ export default function TechTutorialsPage() {
               </div>
               <ul style={{ margin: 0, paddingLeft: '0', listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {category.tutorials.map((tutorial: any) => (
-                  <li key={tutorial} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <li key={typeof tutorial === 'string' ? tutorial : tutorial.title} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <span style={{ width: '28px', height: '28px', backgroundColor: '#f0fdf4', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', flexShrink: 0 }}>▶</span>
-                    <span style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-primary)' }}>
-                      {tutorial}
-                    </span>
+                    {typeof tutorial === 'object' && tutorial.slug ? (
+                      <Link
+                        href={`/blog/${tutorial.slug}`}
+                        style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-teal)', textDecoration: 'underline', textUnderlineOffset: '2px' }}
+                      >
+                        {tutorial.title}
+                      </Link>
+                    ) : (
+                      <span style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-primary)' }}>
+                        {typeof tutorial === 'string' ? tutorial : tutorial.title}
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>
