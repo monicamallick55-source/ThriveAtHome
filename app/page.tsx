@@ -119,6 +119,7 @@ export default function HomePage() {
           <nav style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
             <Link href="/for-volunteers" style={{ ...bodyText, textDecoration: 'none', padding: '8px 14px', fontSize: '15px', color: 'var(--color-text-secondary)' }}>For Volunteers</Link>
             <Link href="/pricing" style={{ ...bodyText, textDecoration: 'none', padding: '8px 14px', fontSize: '15px', color: 'var(--color-text-secondary)' }}>Pricing</Link>
+            <Link href="/donate" style={{ ...bodyText, textDecoration: 'none', padding: '8px 14px', fontSize: '14px', color: 'var(--color-teal)', fontWeight: 700 }}>♥ Donate</Link>
             <Link href="/login" style={{ ...bodyText, textDecoration: 'none', padding: '8px 16px', fontSize: '15px', color: 'var(--color-navy)', fontWeight: 500 }}>Sign in</Link>
             <CTAButton href="/signup" variant="navy">Get started</CTAButton>
           </nav>
@@ -164,7 +165,20 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── 2. SOCIAL PROOF BAR ── */}
+        {/* ── 2. MISSION STRIP ── */}
+        <section style={{ backgroundColor: '#0f2a47', padding: '0 24px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+          <div style={{ ...maxW, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', padding: '13px 0', margin: '0 auto' }}>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '13.5px', color: 'rgba(250,250,245,0.8)', margin: 0, lineHeight: 1.4 }}>
+              <span style={{ color: '#6fd4c4', fontWeight: 700 }}>Mission-driven: </span>
+              1% of every subscription funds free Community Access memberships for seniors who can&apos;t afford care. Every paid plan helps fund one.
+            </p>
+            <Link href="/donate" style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 700, color: '#6fd4c4', textDecoration: 'none', whiteSpace: 'nowrap', border: '1px solid #6fd4c4', borderRadius: '100px', padding: '6px 16px', flexShrink: 0 }}>
+              Donate a membership →
+            </Link>
+          </div>
+        </section>
+
+        {/* ── 3. SOCIAL PROOF BAR ── */}
         <section style={{ backgroundColor: 'var(--color-navy)', padding: '18px 24px' }}>
           <p style={{ ...maxW, textAlign: 'center', fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(250,250,245,0.55)', margin: '0 auto' }}>
             Serving seniors across the United States · HIPAA-compliant · Anthropic & Retell AI BAAs signed
