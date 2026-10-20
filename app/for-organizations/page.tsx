@@ -119,6 +119,8 @@ export default function HomePage() {
           <nav style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
             <Link href="/for-volunteers" style={{ ...bodyText, textDecoration: 'none', padding: '8px 14px', fontSize: '15px', color: 'var(--color-text-secondary)' }}>For Volunteers</Link>
             <Link href="/pricing" style={{ ...bodyText, textDecoration: 'none', padding: '8px 14px', fontSize: '15px', color: 'var(--color-text-secondary)' }}>Pricing</Link>
+            <Link href="/for-organizations" style={{ ...bodyText, textDecoration: 'none', padding: '8px 14px', fontSize: '15px', color: 'var(--color-text-secondary)' }}>For Organizations</Link>
+            <Link href="/donate" style={{ ...bodyText, textDecoration: 'none', padding: '8px 14px', fontSize: '14px', color: 'var(--color-teal)', fontWeight: 700 }}>♥ Donate</Link>
             <Link href="/login" style={{ ...bodyText, textDecoration: 'none', padding: '8px 16px', fontSize: '15px', color: 'var(--color-navy)', fontWeight: 500 }}>Sign in</Link>
             <CTAButton href="/signup" variant="navy">Get started</CTAButton>
           </nav>
@@ -151,9 +153,12 @@ export default function HomePage() {
               a daily companion call, a matched human buddy, 25+ communities of people who share
               their world, and a family that stays close no matter the distance.
             </p>
-            <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '48px' }}>
-              <CTAButton href="/signup" variant="navy" size="lg">Start for free</CTAButton>
-              <CTAButton href="#how-it-works" variant="outline" size="lg">See how it works</CTAButton>
+            <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '20px' }}>
+              <CTAButton href="/signup" variant="navy" size="lg">Join as a member</CTAButton>
+              <CTAButton href="/for-organizations" variant="teal" size="lg">Partner with us →</CTAButton>
+            </div>
+            <div style={{ marginBottom: '28px' }}>
+              <Link href="#how-it-works" style={{ ...bodyText, fontSize: '15px', color: 'var(--color-text-secondary)', textDecoration: 'underline', textDecorationColor: 'transparent' }}>See how it works ↓</Link>
             </div>
             {/* Trust signals */}
             <div style={{ display: 'flex', gap: '32px', flexWrap: 'wrap', justifyContent: 'center' }}>
@@ -164,7 +169,20 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── 2. SOCIAL PROOF BAR ── */}
+        {/* ── 2. MISSION STRIP ── */}
+        <section style={{ backgroundColor: '#0f2a47', padding: '0 24px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+          <div style={{ ...maxW, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', padding: '13px 0', margin: '0 auto' }}>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '13.5px', color: 'rgba(250,250,245,0.8)', margin: 0, lineHeight: 1.4 }}>
+              <span style={{ color: '#6fd4c4', fontWeight: 700 }}>Mission-driven: </span>
+              1% of every subscription funds free Community Access memberships for seniors who can&apos;t afford care. Every paid plan helps fund one.
+            </p>
+            <Link href="/donate" style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 700, color: '#6fd4c4', textDecoration: 'none', whiteSpace: 'nowrap', border: '1px solid #6fd4c4', borderRadius: '100px', padding: '6px 16px', flexShrink: 0 }}>
+              Donate a membership →
+            </Link>
+          </div>
+        </section>
+
+        {/* ── 3. SOCIAL PROOF BAR ── */}
         <section style={{ backgroundColor: 'var(--color-navy)', padding: '18px 24px' }}>
           <p style={{ ...maxW, textAlign: 'center', fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(250,250,245,0.55)', margin: '0 auto' }}>
             Serving seniors across the United States · HIPAA-compliant · Anthropic & Retell AI BAAs signed
@@ -755,6 +773,11 @@ export default function HomePage() {
               <p style={{ ...bodyText, fontSize: '19px', maxWidth: '500px', margin: '16px auto 0' }}>
                 No hidden fees. No long-term contracts. Save 20% with annual billing.
               </p>
+              {/* Pricing toggle */}
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '0', marginTop: '28px', border: '1.5px solid var(--color-warm-grey)', borderRadius: 'var(--radius-md)', overflow: 'hidden', width: 'fit-content', margin: '28px auto 0' }}>
+                <Link href="#pricing" style={{ padding: '10px 24px', fontSize: '15px', fontFamily: 'var(--font-body)', fontWeight: 600, backgroundColor: 'var(--color-navy)', color: 'white', textDecoration: 'none' }}>For Members</Link>
+                <Link href="/for-organizations" style={{ padding: '10px 24px', fontSize: '15px', fontFamily: 'var(--font-body)', fontWeight: 500, backgroundColor: 'transparent', color: 'var(--color-navy)', textDecoration: 'none' }}>For Organizations</Link>
+              </div>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '20px', marginBottom: '40px' }}>
               {[
@@ -843,7 +866,7 @@ export default function HomePage() {
               <p style={{ color: 'rgba(250,250,245,0.5)', fontSize: '14px', lineHeight: 1.6, margin: 0 }}>Senior independence platform combining AI, human care, and community.</p>
             </div>
             {[
-              { label: 'Product', links: [['Features', '#how-it-works'], ['Pricing', '/pricing'], ['Communities', '/dashboard/communities'], ['For Families', '/for-families']] },
+              { label: 'Product', links: [['Features', '#how-it-works'], ['Pricing', '/pricing'], ['Communities', '/dashboard/communities'], ['For Families', '/for-families'], ['For Organizations', '/for-organizations']] },
               { label: 'Volunteer', links: [['Become a Buddy', '/for-volunteers'], ['College students', '/for-volunteers'], ['Corporate teams', '/for-volunteers'], ['K-12 programs', '/for-volunteers']] },
               { label: 'Company', links: [['About', '/about'], ['Privacy', '/privacy'], ['Terms', '/terms'], ['Contact', 'mailto:hello@thriveathome.app']] },
             ].map(col => (
