@@ -34,13 +34,29 @@ interface Circle {
   member_count: number
 }
 
+interface CircleEvent {
+  id: string
+  title: string
+  description: string | null
+  event_date: string
+  event_time: string | null
+  format: string | null
+  location_address: string | null
+  rsvp_count: number
+  video_link: string | null
+  dial_in_number: string | null
+  dial_in_code: string | null
+  user_has_rsvped?: boolean
+  is_platform_wide?: boolean | null
+}
+
 interface Props {
   circle: Circle
   initialPosts: CirclePost[]
   currentMember?: Member | null
   // Navigation / join state passed from page
   circleIndex?: number
-  events?: unknown[]
+  events?: CircleEvent[]
   isJoined?: boolean
   hasMember?: boolean
 }
@@ -683,17 +699,194 @@ function ProposeEventModal({ circleId, onClose }: { circleId: string; onClose: (
   )
 }
 
+// ── Post compose box ──────────────────────────────────────────────────────────
+
+interface PostComposeProps {
+  circleId: string
+  currentMember: Member
+  onPosted: (post: CirclePost) => void
+}
+
+function PostCompose({ circleId, currentMember, onPosted }: PostComposeProps) {
+  const [draft, setDraft] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const handlePost = async () => {
+    if (!draft.trim() || submitting) return
+    setSubmitting(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/circles/posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ circleId, content: draft.trim() }),
+      })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        setError((body as { error?: string }).error ?? 'Could not post. Please try again.')
+        return
+      }
+      const { post } = await res.json() as { post: CirclePost }
+      onPosted({ ...post, members: { preferred_name: currentMember.preferred_name, full_name: currentMember.full_name } })
+      setDraft('')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const remaining = 2000 - draft.length
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-3">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-full bg-brand-navy/10 flex items-center justify-center text-brand-navy font-bold text-[17px]" aria-hidden>
+          {displayName(currentMember).charAt(0).toUpperCase()}
+        </div>
+        <span className="font-semibold text-brand-navy text-[18px]">{displayName(currentMember)}</span>
+      </div>
+      <textarea
+        value={draft}
+        onChange={e => setDraft(e.target.value)}
+        placeholder={`Share something with ${'’'}your circle…`}
+        rows={4}
+        maxLength={2000}
+        className="w-full border border-gray-200 rounded-xl p-3 text-[18px] focus:outline-none focus:ring-2 focus:ring-brand-teal resize-none"
+        aria-label="Write a post"
+      />
+      <div className="flex items-center justify-between gap-3">
+        <span className={`text-[15px] ${remaining < 100 ? 'text-amber-600' : 'text-gray-400'}`}>
+          {remaining} characters left
+        </span>
+        <button
+          onClick={handlePost}
+          disabled={!draft.trim() || submitting}
+          className="bg-brand-teal text-white font-semibold px-6 py-2.5 rounded-xl text-[18px] min-h-[48px] disabled:opacity-50 hover:bg-brand-teal-light transition-colors"
+        >
+          {submitting ? 'Posting…' : 'Post'}
+        </button>
+      </div>
+      {error && <p className="text-red-600 text-[18px]" role="alert">{error}</p>}
+    </div>
+  )
+}
+
+// ── Events tab ────────────────────────────────────────────────────────────────
+
+function formatEventDate(dateStr: string, timeStr: string | null): string {
+  const date = new Date(dateStr + (timeStr ? 'T' + timeStr : ''))
+  return date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }) +
+    (timeStr ? ' at ' + date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '')
+}
+
+function EventsTab({ events, currentMemberId }: { events: CircleEvent[]; currentMemberId: string | null }) {
+  const [rsvpState, setRsvpState] = useState<Record<string, boolean>>(() => {
+    const m: Record<string, boolean> = {}
+    events.forEach(e => { if (e.user_has_rsvped) m[e.id] = true })
+    return m
+  })
+  const [loading, setLoading] = useState<Record<string, boolean>>({})
+
+  const toggleRsvp = async (eventId: string) => {
+    if (!currentMemberId) return
+    const going = rsvpState[eventId]
+    setLoading(l => ({ ...l, [eventId]: true }))
+    try {
+      const res = await fetch(`/api/circles/events/${eventId}/rsvp`, {
+        method: going ? 'DELETE' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+      if (res.ok) setRsvpState(s => ({ ...s, [eventId]: !going }))
+    } finally {
+      setLoading(l => ({ ...l, [eventId]: false }))
+    }
+  }
+
+  if (events.length === 0) {
+    return (
+      <div className="text-center py-12 space-y-3">
+        <p className="text-4xl" aria-hidden>📅</p>
+        <p className="text-gray-500 text-[18px]">No upcoming events yet.</p>
+        <p className="text-gray-400 text-[16px]">Use &ldquo;Propose an Event&rdquo; to suggest one!</p>
+      </div>
+    )
+  }
+
+  return (
+    <ul className="space-y-4">
+      {events.map(event => {
+        const going = !!rsvpState[event.id]
+        const busy = !!loading[event.id]
+        return (
+          <li key={event.id} className="bg-white rounded-2xl border border-gray-200 p-5 space-y-3">
+            <div className="flex items-start justify-between gap-3 flex-wrap">
+              <div className="space-y-1 flex-1 min-w-0">
+                <h3 className="font-bold text-brand-navy text-[20px] leading-tight">{event.title}</h3>
+                <p className="text-teal-700 font-medium text-[17px]">📅 {formatEventDate(event.event_date, event.event_time)}</p>
+                {event.format && (
+                  <p className="text-gray-500 text-[16px]">
+                    {event.format === 'phone' ? '📞 Phone call' : event.format === 'video' ? '💻 Video call' : '📍 In person'}
+                    {event.location_address ? ` · ${event.location_address}` : ''}
+                  </p>
+                )}
+                {event.description && <p className="text-gray-600 text-[17px] leading-relaxed">{event.description}</p>}
+              </div>
+              <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                <span className="text-gray-400 text-[15px]">{event.rsvp_count + (going && !event.user_has_rsvped ? 1 : 0)} going</span>
+                {currentMemberId ? (
+                  <button
+                    onClick={() => toggleRsvp(event.id)}
+                    disabled={busy}
+                    className={`font-semibold px-5 py-2 rounded-xl text-[17px] min-h-[48px] min-w-[120px] transition-colors disabled:opacity-50 ${
+                      going
+                        ? 'bg-green-100 text-green-700 border border-green-300 hover:bg-green-200'
+                        : 'bg-brand-teal text-white hover:bg-brand-teal-light'
+                    }`}
+                  >
+                    {busy ? '…' : going ? '✓ Going' : 'RSVP'}
+                  </button>
+                ) : (
+                  <span className="text-gray-400 text-[15px]">Sign in to RSVP</span>
+                )}
+              </div>
+            </div>
+            {/* Show dial-in/video only after RSVP */}
+            {going && (event.dial_in_number || event.video_link) && (
+              <div className="bg-teal-50 border border-teal-200 rounded-xl p-4 text-[17px] space-y-1">
+                <p className="font-semibold text-teal-800">Your join details</p>
+                {event.dial_in_number && <p className="text-teal-700">📞 {event.dial_in_number}{event.dial_in_code ? ` · Code: ${event.dial_in_code}` : ''}</p>}
+                {event.video_link && <a href={event.video_link} target="_blank" rel="noreferrer" className="text-teal-700 underline">💻 Join video call</a>}
+              </div>
+            )}
+          </li>
+        )
+      })}
+    </ul>
+  )
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 
-export default function CircleDetailClient({ circle, initialPosts, currentMember }: Props) {
+export default function CircleDetailClient({ circle, initialPosts, currentMember, events = [] }: Props) {
+  const [posts, setPosts] = useState<CirclePost[]>(initialPosts)
   const [proposing, setProposing] = useState(false)
   const [reportTarget, setReportTarget] = useState<ReportTarget | null>(null)
-  const [activeTab, setActiveTab] = useState<'posts' | 'content'>('posts')
+  const [activeTab, setActiveTab] = useState<'posts' | 'events' | 'content'>('posts')
 
   const staff = isStaff(currentMember?.role)
 
+  const handlePosted = (post: CirclePost) => {
+    setPosts(prev => [post, ...prev])
+  }
+
+  const TABS = [
+    { key: 'posts' as const, label: '💬 Posts' },
+    { key: 'events' as const, label: `📅 Events${events.length > 0 ? ` (${events.length})` : ''}` },
+    { key: 'content' as const, label: '📚 Content' },
+  ]
+
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8 space-y-8">
+    <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
       {/* Circle header */}
       <div className="space-y-1">
         <h1 className="text-3xl font-bold text-brand-navy">{circle.name}</h1>
@@ -707,56 +900,66 @@ export default function CircleDetailClient({ circle, initialPosts, currentMember
 
       {/* Actions */}
       <div className="flex gap-3 flex-wrap">
-        <a
-          href={`/dashboard/cultural-circles/${circle.id}/members`}
-          className="border border-brand-teal text-brand-teal font-semibold px-5 py-2.5
-                     rounded-xl text-[18px] min-h-[52px] flex items-center hover:bg-brand-teal/5
-                     transition-colors"
-        >
-          View Members
-        </a>
         {currentMember && (
           <button
             onClick={() => setProposing(true)}
-            className="bg-brand-teal text-white font-semibold px-5 py-2.5 rounded-xl
-                       text-[18px] min-h-[52px] hover:bg-brand-teal-light transition-colors"
+            className="border border-brand-teal text-brand-teal font-semibold px-5 py-2.5
+                       rounded-xl text-[18px] min-h-[52px] flex items-center hover:bg-brand-teal/5
+                       transition-colors"
           >
-            Propose an Event
+            + Propose an Event
           </button>
         )}
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 border-b border-gray-200">
-        {(['posts', 'content'] as const).map(tab => (
+      <div className="flex border-b border-gray-200 overflow-x-auto">
+        {TABS.map(tab => (
           <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
-              activeTab === tab
-                ? 'border-indigo-600 text-indigo-600'
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            className={`px-4 py-3 text-[17px] font-medium transition-colors border-b-2 -mb-px whitespace-nowrap flex-shrink-0 ${
+              activeTab === tab.key
+                ? 'border-brand-teal text-brand-teal'
                 : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}
           >
-            {tab === 'posts' ? '💬 Posts' : '📚 Content'}
+            {tab.label}
           </button>
         ))}
       </div>
+
+      {/* Post compose */}
+      {activeTab === 'posts' && currentMember && (
+        <PostCompose circleId={circle.id} currentMember={currentMember} onPosted={handlePosted} />
+      )}
+      {activeTab === 'posts' && !currentMember && (
+        <div className="bg-gray-50 border border-gray-200 rounded-2xl p-5 text-center">
+          <p className="text-gray-500 text-[18px]">
+            <a href="/login" className="text-brand-teal underline font-medium">Sign in</a> to post and comment in this circle.
+          </p>
+        </div>
+      )}
 
       {/* Content feed tab */}
       {activeTab === 'content' && (
         <CircleContentFeed circleId={circle.id} circleName={circle.name} />
       )}
 
+      {/* Events tab */}
+      {activeTab === 'events' && (
+        <EventsTab events={events} currentMemberId={currentMember?.id ?? null} />
+      )}
+
       {/* Posts */}
       {activeTab === 'posts' && <section aria-label="Circle posts">
-        {initialPosts.length === 0 ? (
+        {posts.length === 0 ? (
           <p className="text-gray-400 text-[18px] text-center py-12">
             No posts yet. Be the first to share something!
           </p>
         ) : (
           <ul className="space-y-6">
-            {initialPosts.map((post) => (
+            {posts.map((post) => (
               <li
                 key={post.id}
                 className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-3"

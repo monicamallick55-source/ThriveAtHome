@@ -11,11 +11,20 @@ interface DashNavProps {
 }
 
 const NAV_LINKS = [
+  { href: '/dashboard', label: 'Home', icon: '🏠' },
+  { href: '/dashboard/calls', label: 'History', icon: '📋' },
+  { href: '/dashboard/communities', label: 'Community', icon: '🌍' },
+  { href: '/dashboard/friends', label: 'Friends', icon: '👥' },
+  { href: '/dashboard/documents', label: 'Docs', icon: '📁' },
+]
+
+const DESKTOP_LINKS = [
   { href: '/dashboard', label: 'Dashboard' },
   { href: '/dashboard/calls', label: 'History' },
+  { href: '/dashboard/communities', label: 'Community' },
+  { href: '/dashboard/friends', label: 'Friends' },
   { href: '/dashboard/family', label: 'Family' },
   { href: '/dashboard/documents', label: 'Documents' },
-  { href: '/dashboard/friends', label: 'Friends' },
 ]
 
 export function DashNav({ seniorName, unreadCount, onMarkAllRead }: DashNavProps) {
@@ -77,7 +86,7 @@ export function DashNav({ seniorName, unreadCount, onMarkAllRead }: DashNavProps
           style={{ display: 'flex', gap: '4px', flex: 1, justifyContent: 'center' }}
           className="dash-nav-links"
         >
-          {NAV_LINKS.map((link: any) => {
+          {DESKTOP_LINKS.map((link: any) => {
             const isActive = pathname === link.href || (link.href !== '/dashboard' && pathname?.startsWith(link.href))
             return (
               <Link
@@ -147,18 +156,17 @@ export function DashNav({ seniorName, unreadCount, onMarkAllRead }: DashNavProps
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontFamily: 'var(--font-body)',
-                fontSize: '11px',
+                fontSize: '10px',
                 fontWeight: isActive ? 600 : 400,
                 color: isActive ? 'var(--color-teal)' : 'var(--color-text-muted)',
                 textDecoration: 'none',
-                padding: '8px 4px',
-                gap: '2px',
+                padding: '6px 2px 4px',
+                gap: '3px',
+                minWidth: 0,
               }}
             >
-              <span style={{ fontSize: '20px' }}>
-                {link.label === 'Dashboard' ? '🏠' : link.label === 'History' ? '📋' : link.label === 'Family' ? '👥' : '📁'}
-              </span>
-              {link.label}
+              <span style={{ fontSize: '22px', lineHeight: 1 }}>{link.icon}</span>
+              <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%', display: 'block', textAlign: 'center' }}>{link.label}</span>
             </Link>
           )
         })}
@@ -166,7 +174,7 @@ export function DashNav({ seniorName, unreadCount, onMarkAllRead }: DashNavProps
 
       <style>{`
         .dash-nav-links { display: none !important; }
-        .dash-mobile-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; background: white; border-top: 1px solid var(--color-warm-grey); height: 60px; flex-direction: row; }
+        .dash-mobile-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; background: white; border-top: 1px solid var(--color-warm-grey); height: 62px; flex-direction: row; padding-bottom: env(safe-area-inset-bottom, 0px); }
         @media (min-width: 768px) {
           .dash-nav-links { display: flex !important; }
           .dash-mobile-nav { display: none !important; }
