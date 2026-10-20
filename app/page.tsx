@@ -365,7 +365,8 @@ export default function HomePage() {
                   { icon: '📖', title: 'Life story archive', desc: 'Guided questions build a living archive of memories. Memory book PDF created for milestone birthdays.' },
                   { icon: '🎤', title: 'Oral history programme', desc: 'Recorded conversations become a permanent family keepsake — and fuel richer AI conversations for years.' },
                   { icon: '📅', title: 'Family Events Calendar', desc: 'Add family birthdays, anniversaries, graduations, travel. Aria mentions them naturally in the next morning call.' },
-                  { icon: '🎁', title: 'Gift sending platform', desc: 'Send notes (free), cards ($4.99), flowers, or a food basket — coordinated from your family dashboard.' },
+                  { icon: '🎁', title: 'Send gifts from anywhere', desc: 'Families send a note (free), a card ($4.99), flowers, or a food basket directly from their dashboard — no separate app, no awkward coordination.' },
+                  { icon: '🐾', title: 'Pet profiles & milestones', desc: 'Add your parent\'s pet — Aria asks about them by name. Pet birthdays trigger celebrations just like family ones.' },
                 ].map(item => (
                   <div key={item.title} style={{ ...card, display: 'flex', gap: '16px' }}>
                     <span style={{ fontSize: '26px', flexShrink: 0 }}>{item.icon}</span>
@@ -454,7 +455,119 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── 10. FAMILY DASHBOARD ── */}
+        {/* ── 10. HOME SAFETY ── */}
+        <section style={sectionPadAlt}>
+          <div style={maxW}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '56px', alignItems: 'center' }}>
+              <div>
+                <SectionLabel>Home safety</SectionLabel>
+                <h2 style={{ ...heading2, marginBottom: '16px' }}>Safe at home — not just tracked</h2>
+                <p style={{ ...bodyText, marginBottom: '24px' }}>
+                  ThriveAtHome coordinates proactive home safety — not just emergency response. Navigators help arrange assessments, modifications, and the right technology so your parent stays safe before something goes wrong.
+                </p>
+                {[
+                  'Fall prevention assessment coordinated by your navigator',
+                  'Home modification referrals — grab bars, ramps, lighting, non-slip surfaces',
+                  'Medical alert system guidance and comparison',
+                  'Smart home technology roadmap (Alexa, Google Home, Apple Health — Month 22)',
+                  'Wearables and fall-detection device integration',
+                  'Emergency preparedness planning',
+                  'Welfare check protocol — 3 missed calls triggers a check automatically',
+                  'Hope agent — crisis detection and escalation in every call',
+                ].map(f => (
+                  <div key={f} style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+                    <CheckIcon color="#16a34a" />
+                    <span style={{ ...bodyText, margin: 0, fontSize: '15px' }}>{f}</span>
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {[
+                  { icon: '🏠', title: 'Home modification coordination', desc: 'Your navigator connects your parent with vetted local contractors for accessibility modifications — no cold calls, no scams.' },
+                  { icon: '📱', title: 'Medical alert integration', desc: 'ThriveAtHome works alongside your parent\'s existing medical alert system and adds a layer of daily human context to every alert.' },
+                  { icon: '🚨', title: 'Missed call welfare check', desc: '1 missed call: gentle nudge. 2 in a row: navigator phones. 3 consecutive: welfare check protocol initiated — family and navigator both notified immediately.' },
+                  { icon: '🤖', title: 'Smart home roadmap', desc: 'Alexa, Google Home, Apple HealthKit, wearables, passive fall detection — device integration launching Month 22.' },
+                ].map(item => (
+                  <div key={item.title} style={{ ...card, display: 'flex', gap: '16px', borderLeft: '3px solid #16a34a' }}>
+                    <span style={{ fontSize: '26px', flexShrink: 0 }}>{item.icon}</span>
+                    <div>
+                      <div style={{ ...heading3, fontSize: '17px', marginBottom: '4px' }}>{item.title}</div>
+                      <p style={{ ...bodyText, margin: 0, fontSize: '15px' }}>{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── 11. GIVING, CAMPAIGNS & BENEFITS ── */}
+        <section style={sectionPadAlt}>
+          <div style={maxW}>
+            <div style={{ textAlign: 'center', marginBottom: '56px' }}>
+              <SectionLabel>Community giving</SectionLabel>
+              <h2 style={heading2}>A platform that gives back — and lets you give too</h2>
+              <p style={{ ...bodyText, fontSize: '19px', maxWidth: '600px', margin: '16px auto 0' }}>
+                ThriveAtHome is built on the belief that no senior should be left out because of cost. Three ways the community shows up for each other.
+              </p>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginBottom: '48px' }}>
+              {[
+                {
+                  icon: '💙',
+                  title: 'Donate a membership',
+                  desc: 'Anyone — members, families, corporates, foundations — can donate to sponsor a subsidised membership for a senior who can\'t afford one. 1% of ThriveAtHome revenue funds Community Access memberships at $0–$5/mo for referred seniors.',
+                  cta: 'Donate now',
+                  href: '/donate',
+                  color: '#2563eb',
+                },
+                {
+                  icon: '🙏',
+                  title: 'Member-in-Need campaigns',
+                  desc: 'Any member, their family, or their navigator can start a community campaign for a specific need — a hearing aid, a safety ramp, groceries after a hospital stay. The community gives directly to the vendor or partner organisation. Navigator-approved, fraud-protected, no cash to the member.',
+                  cta: 'See open campaigns',
+                  href: '/campaigns',
+                  color: 'var(--color-teal)',
+                },
+                {
+                  icon: '💰',
+                  title: 'Benefits discovery',
+                  desc: 'Most seniors are leaving money on the table. ThriveAtHome scans 15+ government and community benefit programmes — SNAP, HEAP, VITA tax assistance, Medicaid, PACE, transportation vouchers, utility assistance — and shows your parent exactly what they qualify for.',
+                  cta: 'Check eligibility',
+                  href: '/dashboard/benefits',
+                  color: '#16a34a',
+                },
+              ].map(item => (
+                <div key={item.title} style={{ ...card, borderTop: `3px solid ${item.color}`, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{ fontSize: '36px' }}>{item.icon}</div>
+                  <h3 style={{ ...heading3, fontSize: '20px' }}>{item.title}</h3>
+                  <p style={{ ...bodyText, fontSize: '15px', flex: 1 }}>{item.desc}</p>
+                  <Link href={item.href} style={{ fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 600, color: item.color, textDecoration: 'none' }}>{item.cta} →</Link>
+                </div>
+              ))}
+            </div>
+            {/* Career & Purpose row */}
+            <div style={{ ...card, padding: '32px', display: 'flex', gap: '24px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+              <div style={{ fontSize: '36px', flexShrink: 0 }}>💼</div>
+              <div style={{ flex: 1, minWidth: '240px' }}>
+                <h3 style={{ ...heading3, fontSize: '20px', marginBottom: '8px' }}>Career & purpose for seniors who want to keep contributing</h3>
+                <p style={{ ...bodyText, fontSize: '15px', margin: '0 0 12px' }}>
+                  Retirement doesn&apos;t mean stopping. ThriveAtHome connects members to SCSEP (Senior Community Service Employment Program) placements, paid companion roles, skill-exchange teaching, volunteer leadership, and part-time work opportunities — all fraud-screened, all coordinated by their navigator.
+                </p>
+                <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
+                  {['SCSEP job placement', 'Skill-exchange teaching', 'Paid companion roles', 'Volunteer leadership', 'Benefits-safe income guidance'].map(f => (
+                    <div key={f} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <CheckIcon color="#7c3aed" />
+                      <span style={{ ...bodyText, fontSize: '14px', margin: 0 }}>{f}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── 12. FAMILY DASHBOARD ── */}
         <section style={sectionPadAlt}>
           <div style={maxW}>
             <div style={{ textAlign: 'center', marginBottom: '56px' }}>
@@ -504,9 +617,12 @@ export default function HomePage() {
                   'A real Human Buddy matched on shared interests and background',
                   'Communities in your own language and cultural tradition',
                   'Services arranged with a single call — no navigating providers alone',
-                  'Your wisdom shared through skill exchange',
+                  'Your wisdom shared through skill exchange and career opportunities',
                   'Every birthday, every milestone — celebrated properly',
                   'Financial fraud protection built in, not bolted on',
+                  'Home safety assessment and fall prevention coordination',
+                  'Benefits discovery — 15+ programmes checked automatically',
+                  'Start a community campaign when you need help',
                   'Grief and life transitions met with sustained, compassionate support',
                 ].map(i => (
                   <div key={i} style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
