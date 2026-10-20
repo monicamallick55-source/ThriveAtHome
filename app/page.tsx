@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'ThriveAtHome — Senior Independence Platform',
-  description: 'ThriveAtHome combines daily AI companion calls, human buddies, 25+ communities, family engagement, and real care navigation so seniors thrive at home.',
+  title: 'ThriveAtHome — Where Seniors Thrive Together',
+  description: 'ThriveAtHome tackles loneliness by connecting seniors with daily companion calls, a real human buddy, 25+ communities, and family engagement — so they thrive at home.',
 }
 
 // ── Shared style tokens ───────────────────────────────────────────────────────
@@ -144,12 +144,12 @@ export default function HomePage() {
               lineHeight: 1.1,
               marginBottom: '24px',
             }}>
-              Your parent deserves a morning call,<br />not a medical alert.
+              Loneliness is the real risk.<br />Connection is the answer.
             </h1>
-            <p style={{ ...bodyText, fontSize: '20px', maxWidth: '600px', margin: '0 auto 40px', lineHeight: 1.7 }}>
-              ThriveAtHome combines Aria&apos;s daily AI companion calls, a real human buddy,
-              25+ cultural and interest communities, family engagement, and dedicated
-              care navigation — so seniors thrive at home, independently.
+            <p style={{ ...bodyText, fontSize: '20px', maxWidth: '620px', margin: '0 auto 40px', lineHeight: 1.7 }}>
+              ThriveAtHome helps seniors thrive at home by surrounding them with real connection —
+              a daily companion call, a matched human buddy, 25+ communities of people who share
+              their world, and a family that stays close no matter the distance.
             </p>
             <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '48px' }}>
               <CTAButton href="/signup" variant="navy" size="lg">Start for free</CTAButton>
@@ -254,7 +254,7 @@ export default function HomePage() {
               <SectionLabel>Layer 2 · Human Companion Network</SectionLabel>
               <h2 style={heading2}>Real humans. Real relationships.</h2>
               <p style={{ ...bodyText, fontSize: '19px', maxWidth: '580px', margin: '16px auto 0' }}>
-                AI handles the daily check-ins. Humans handle the friendship.
+                Loneliness shrinks when someone genuinely shows up. ThriveAtHome makes sure someone always does.
               </p>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '24px' }}>
@@ -704,10 +704,10 @@ export default function HomePage() {
               lineHeight: 1.2,
               marginBottom: '20px',
             }}>
-              Your parent deserves to feel remembered.
+              Your parent shouldn&apos;t have to face another day alone.
             </h2>
             <p style={{ ...bodyText, fontSize: '19px', color: 'rgba(250,250,245,0.75)', marginBottom: '40px' }}>
-              Join families who&apos;ve found peace of mind with ThriveAtHome. Human-first. AI when it helps. Always on their terms.
+              ThriveAtHome tackles senior loneliness with real human connection — and AI that helps when it should. Always at home, always on their terms.
             </p>
             <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
               <CTAButton href="/signup" variant="teal" size="lg">Start for free</CTAButton>
