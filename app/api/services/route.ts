@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
             auto_dispatched:     true,
           },
         })
-        .eq('id', (booking as Record<string, unknown>).id)
+        .eq('id', String((booking as Record<string, unknown>).id))
 
       // Queue SMS confirmation to member (fires if Twilio key present)
       const { data: member } = await admin
@@ -134,7 +134,7 @@ export async function POST(req: NextRequest) {
     await admin
       .from('service_bookings')
       .update({ status: 'confirmed' })
-      .eq('id', (booking as Record<string, unknown>).id)
+      .eq('id', String((booking as Record<string, unknown>).id))
     // No navigator task created — meal bookings self-resolve via cron
   }
 
@@ -147,7 +147,7 @@ export async function POST(req: NextRequest) {
       await admin
         .from('service_bookings')
         .update({ status: 'confirmed' })
-        .eq('id', (booking as Record<string, unknown>).id)
+        .eq('id', String((booking as Record<string, unknown>).id))
     } else {
       // No companion selected yet — needs matching
       await admin.from('navigator_tasks').insert({
