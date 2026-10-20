@@ -31,12 +31,12 @@ export async function POST(
     // Get referral to pull nonprofit_org_id and referral context
     const supabase = createAdminClient()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const referralQuery: any = supabase
+    const db = supabase as any
+    const { data: referral } = await db
       .from('nonprofit_referrals')
       .select('*')
       .eq('id', referralId)
-      .maybeSingle()
-    const { data: referral } = await referralQuery as { data: Record<string, any> | null; error: unknown }
+      .maybeSingle() as { data: Record<string, any> | null; error: unknown }
 
     if (!referral) {
       return NextResponse.json({ error: 'Referral not found' }, { status: 404 })
@@ -68,7 +68,7 @@ export async function POST(
     })
 
     // Create a navigator task to call the new Community Access member within 24h
-    await supabase.from('navigator_tasks').insert({
+    await db.from('navigator_tasks').insert({
       member_id,
       task_type: 'community_access_welcome',
       description: `New Community Access member referred by ${referral.nonprofit_org_id}. Call within 24 hours for welcome onboarding.`,
