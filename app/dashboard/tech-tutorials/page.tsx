@@ -128,9 +128,6 @@ export default function TechTutorialsPage() {
                     <span style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-primary)' }}>
                       {tutorial}
                     </span>
-                    <span style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-muted)', backgroundColor: '#f0fdf4', border: '1px solid #d1fae5', borderRadius: '20px', padding: '2px 8px', flexShrink: 0 }}>
-                      Coming soon
-                    </span>
                   </li>
                 ))}
               </ul>

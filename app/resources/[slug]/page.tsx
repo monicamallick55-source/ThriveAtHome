@@ -1,6 +1,13 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { RESOURCE_TOPICS } from '@/lib/content/resources'
+import { RESOURCE_TOPICS, BLOG_POSTS } from '@/lib/content/resources'
+
+// Map resource topic slugs to relevant blog post slugs
+const TOPIC_TO_POSTS: Record<string, string[]> = {
+  'home-safety': ['fall-prevention-at-home'],
+  'retirement-planning': ['medicare-enrollment-guide-2026'],
+  'family-caregiving': ['having-the-conversation-aging-parents'],
+}
 
 export function generateStaticParams() {
   return RESOURCE_TOPICS.map((t: any) => ({ slug: t.slug }))
@@ -15,6 +22,12 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 export default function ResourceTopicPage({ params }: { params: { slug: string } }) {
   const topic = RESOURCE_TOPICS.find((t: any) => t.slug === params.slug)
   if (!topic) notFound()
+
+  // Find blog posts relevant to this topic
+  const relatedPostSlugs = TOPIC_TO_POSTS[params.slug] ?? []
+  const relatedPosts = relatedPostSlugs
+    .map((slug: string) => BLOG_POSTS.find((p: any) => p.slug === slug))
+    .filter(Boolean)
 
   return (
     <main className="max-w-4xl mx-auto px-4 py-12">
@@ -46,16 +59,28 @@ export default function ResourceTopicPage({ params }: { params: { slug: string }
         </Link>
       </section>
 
-      <section>
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">Related Articles</h2>
-        <div className="space-y-3">
-          {Array.from({ length: topic.articleCount }).map((_: any, i: number) => (
-            <div key={i} className="border border-gray-200 rounded-lg p-4 text-gray-400 text-sm italic">
-              Article coming soon
-            </div>
-          ))}
-        </div>
-      </section>
+      {relatedPosts.length > 0 && (
+        <section>
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">Related Articles</h2>
+          <div className="space-y-3">
+            {relatedPosts.map((post: any) => (
+              <Link
+                key={post.slug}
+                href={`/blog/${post.slug}`}
+                className="flex items-start gap-4 border border-gray-200 rounded-lg p-4 hover:border-teal-300 hover:shadow-sm transition-all group"
+              >
+                <span className="text-xs font-medium bg-teal-50 text-teal-700 px-2 py-1 rounded-full capitalize whitespace-nowrap mt-0.5">
+                  {post.category.replace(/-/g, ' ')}
+                </span>
+                <div>
+                  <p className="font-medium text-gray-900 group-hover:text-teal-700 leading-snug">{post.title}</p>
+                  <p className="text-sm text-gray-500 mt-1">{post.readTimeMinutes} min read · {post.author}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
     </main>
   )
 }
