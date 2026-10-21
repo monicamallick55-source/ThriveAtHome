@@ -155,7 +155,7 @@ export async function POST(req: Request) {
         priority,
         description: taskNote,
       })
-      .then(({ error }) => {
+      .then(({ error }: { error: unknown }) => {
         if (error) console.error('[report/POST] navigator task:', error)
       })
 
@@ -169,7 +169,7 @@ export async function POST(req: Request) {
           priority: 'high',
           description: `A community member flagged concern for this member's wellbeing. Please follow up.`,
         })
-        .then(({ error }) => {
+        .then(({ error }: { error: unknown }) => {
           if (error) console.error('[report/POST] wellbeing task:', error)
         })
     }
