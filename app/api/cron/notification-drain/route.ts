@@ -38,17 +38,19 @@ export async function GET(req: NextRequest) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const now = new Date().toISOString()
 
   // Fetch pending rows that are due and haven't exceeded retry limit
-  const { data: rows, error: fetchErr } = await admin
+  const { data: rows, error: fetchErr } = await db
     .from('notification_queue')
     .select('id, channel, phone, email, subject, device_token, message, retry_count, member_id')
     .eq('status', 'pending')
     .lte('scheduled_at', now)
     .lt('retry_count', MAX_RETRIES)
     .order('scheduled_at', { ascending: true })
-    .limit(BATCH_SIZE)
+    .limit(BATCH_SIZE) as { data: QueueRow[] | null; error: { message: string } | null }
 
   if (fetchErr) {
     console.error('[notification-drain] fetch error:', fetchErr.message)
@@ -79,7 +81,7 @@ export async function GET(req: NextRequest) {
       }
 
       if (ok) {
-        await admin
+        await db
           .from('notification_queue')
           .update({ status: 'sent', sent_at: new Date().toISOString() })
           .eq('id', row.id)
@@ -91,7 +93,7 @@ export async function GET(req: NextRequest) {
       console.error(`[notification-drain] failed id=${row.id}:`, String(err))
       const newRetry = row.retry_count + 1
       const isFinal = newRetry >= MAX_RETRIES
-      await admin
+      await db
         .from('notification_queue')
         .update({
           retry_count: newRetry,
