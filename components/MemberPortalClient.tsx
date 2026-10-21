@@ -11,6 +11,7 @@ type PremiumAddonRow = any
 type CaregiverVideoDiaryEntryRow = any
 import CrisisResourceBar from '@/components/shared/CrisisResourceBar'
 import AddOnsClient from '@/components/dashboard/AddOnsClient'
+import RecommendedForYou from '@/components/dashboard/RecommendedForYou'
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
@@ -227,6 +228,9 @@ export default function MemberPortalClient({
   const [circles, setCircles] = useState<CircleData[]>([])
   const [circleEvents, setCircleEvents] = useState<CircleEventData[]>([])
   const [circlesLoaded, setCirclesLoaded] = useState(false)
+  const [ageCircle, setAgeCircle] = useState<{ id: string; circle_name: string; description: string; emoji: string | null; already_joined: boolean } | null>(null)
+  const [joiningAgeCircle, setJoiningAgeCircle] = useState(false)
+  const [ageCircleJoined, setAgeCircleJoined] = useState(false)
 
   const [buddyAssignment, setBuddyAssignment] = useState<{ id: string; status: string; volunteers: { full_name: string } | null } | null>(null)
   const [buddyCallCount, setBuddyCallCount] = useState(0)
@@ -385,9 +389,11 @@ export default function MemberPortalClient({
   const loadCircles = useCallback(async () => {
     if (circlesLoaded) return
     const res = await fetch('/api/member/circles')
-    const json = await res.json().catch(() => ({ circles: [], events: [] }))
+    const json = await res.json().catch(() => ({ circles: [], events: [], ageCircle: null }))
     setCircles(json.circles ?? [])
     setCircleEvents(json.events ?? [])
+    setAgeCircle(json.ageCircle ?? null)
+    setAgeCircleJoined(json.ageCircle?.already_joined ?? false)
     setCirclesLoaded(true)
   }, [circlesLoaded])
 
@@ -971,6 +977,7 @@ export default function MemberPortalClient({
         {/* ─── MY PROFILE ──────────────────────────────────────────────────── */}
         {activeTab === 'profile' && (
           <div>
+            <RecommendedForYou dateOfBirth={member.date_of_birth} />
             {showAriaReintro && (
               <div style={{ ...card, backgroundColor: '#F0F9F7', border: '2px solid var(--color-teal)' }}>
                 <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '8px' }}>
@@ -1265,6 +1272,48 @@ export default function MemberPortalClient({
         {activeTab === 'community' && (
           <div>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '24px' }}>My Community</h2>
+
+            {/* Age-stage circle prompt */}
+            {circlesLoaded && ageCircle && !ageCircleJoined && (
+              <div style={{ backgroundColor: 'rgba(0,139,130,0.06)', border: '2px solid rgba(0,139,130,0.25)', borderRadius: '14px', padding: '20px 24px', marginBottom: '20px', display: 'flex', gap: '16px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '32px', flexShrink: 0 }}>{ageCircle.emoji ?? '🌿'}</span>
+                <div style={{ flex: 1, minWidth: '200px' }}>
+                  <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-teal)', marginBottom: '4px' }}>Your age-stage community</div>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '6px' }}>{ageCircle.circle_name}</div>
+                  <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', margin: '0 0 14px' }}>{ageCircle.description}</p>
+                  <button
+                    disabled={joiningAgeCircle}
+                    onClick={async () => {
+                      setJoiningAgeCircle(true)
+                      try {
+                        const res = await fetch('/api/circles/join', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ circleId: ageCircle.id }) })
+                        if (res.ok) {
+                          setAgeCircleJoined(true)
+                          setCircles(prev => [...prev, { id: ageCircle.id, circle_name: ageCircle.circle_name, member_count: 0, description: ageCircle.description, primary_language: '' }])
+                          showToast('You joined ' + ageCircle.circle_name + '!')
+                        } else {
+                          showToast('Could not join — please try again.')
+                        }
+                      } finally {
+                        setJoiningAgeCircle(false)
+                      }
+                    }}
+                    style={{ padding: '10px 24px', backgroundColor: 'var(--color-teal)', color: 'white', border: 'none', borderRadius: '10px', fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, cursor: joiningAgeCircle ? 'not-allowed' : 'pointer', opacity: joiningAgeCircle ? 0.7 : 1 }}
+                  >
+                    {joiningAgeCircle ? 'Joining…' : 'Join this community'}
+                  </button>
+                </div>
+              </div>
+            )}
+            {circlesLoaded && ageCircle && ageCircleJoined && (
+              <div style={{ backgroundColor: '#F0FFF4', border: '1px solid #86EFAC', borderRadius: '12px', padding: '14px 20px', marginBottom: '20px', display: 'flex', gap: '12px', alignItems: 'center' }}>
+                <span style={{ fontSize: '22px' }}>{ageCircle.emoji ?? '🌿'}</span>
+                <div>
+                  <span style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, color: '#15803D' }}>You're a member of </span>
+                  <span style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 700, color: '#15803D' }}>{ageCircle.circle_name}</span>
+                </div>
+              </div>
+            )}
 
             <div style={card}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
