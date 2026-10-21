@@ -1,6 +1,6 @@
-import QuinnWidget from '@/components/shared/QuinnWidget'
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import QuinnWidget from '@/components/shared/QuinnWidget'
 
 export const metadata: Metadata = {
   title: 'ThriveAtHome — Where Seniors Thrive Together',
@@ -106,7 +106,6 @@ function CTAButton({ href, children, variant = 'navy', size = 'md' }: {
 export default function HomePage() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-cream)' }}>
-
 
       <main style={{ flex: 1 }}>
 
@@ -301,11 +300,32 @@ export default function HomePage() {
                     </div>
                   ))}
                 </div>
+                {/* Age-range groups */}
+                <div style={{ backgroundColor: 'rgba(0,139,130,0.06)', border: '1px solid rgba(0,139,130,0.15)', borderRadius: 'var(--radius-lg)', padding: '16px 20px', marginBottom: '8px' }}>
+                  <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-teal)', marginBottom: '10px' }}>Age-stage communities</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 24px' }}>
+                    {[
+                      { range: '55–64', label: 'Active Pre-Retirees', desc: 'Still working, planning retirement, navigating the transition' },
+                      { range: '65–74', label: 'Early Retirees', desc: 'Newly retired, active lifestyle, travel and new pursuits' },
+                      { range: '75–84', label: 'Established Seniors', desc: 'Life wisdom, grandparenting, staying engaged at home' },
+                      { range: '85+', label: 'Elder Community', desc: 'Longer-term support, legacy, deep community connection' },
+                    ].map(g => (
+                      <div key={g.range} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+                        <CheckIcon />
+                        <div>
+                          <span style={{ ...bodyText, fontSize: '14px', margin: 0, fontWeight: 600 }}>{g.range} · {g.label}</span>
+                          <p style={{ ...bodyText, fontSize: '12px', margin: 0, color: 'var(--color-text-muted)' }}>{g.desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {[
                   { icon: '💬', title: 'Circle posts & comments', desc: 'Members share updates, ask questions, and celebrate moments in their communities — with human moderation built in.' },
                   { icon: '📅', title: 'Community events', desc: 'Member-proposed, navigator-approved events. One-tap RSVP, optional ride booking, dial-in and video join options.' },
+                  { icon: '✈️', title: 'Senior travel with fellow members', desc: 'Group trips planned and coordinated within the community — from day trips to international travel with people who share your interests and pace.' },
                   { icon: '🔄', title: 'Skill exchange', desc: 'Seniors teach what they know — languages, crafts, cooking, history. Time banking recognises wisdom as an asset.' },
                   { icon: '🎉', title: 'Social potlucks', desc: 'Coordinated cultural potluck events, oral history archives, festival calendars — depth, not just breadth.' },
                 ].map(item => (
@@ -340,7 +360,7 @@ export default function HomePage() {
                 { icon: '💻', title: 'Tech help', desc: 'Friendly tech support — help with the phone, tablet, TV, or any device they\'re struggling with.' },
                 { icon: '🏥', title: 'Health services', desc: 'Telehealth, prescription delivery, and care coordination — coming Month 12.' },
                 { icon: '⚖️', title: 'Legal & financial', desc: 'Benefits discovery (15+ programs), VITA tax assistance, trusted referrals to legal and financial advisors.' },
-                { icon: '✈️', title: 'Travel assistance', desc: 'Trip coordination, airport rides, travel companions, and logistics support.' },
+                { icon: '✈️', title: 'Travel with fellow seniors', desc: 'Group trips organised within the community — day trips, weekend getaways, and international travel with members who share your interests and pace. Plus airport rides and travel companion matching.' },
                 { icon: '🐾', title: 'Pet care', desc: 'Dog walking, pet sitting, vet transport — and a full pet companion profile with Aria\'s awareness.' },
                 { icon: '🤗', title: 'Companionship', desc: 'In-person social visits, errand escorts, and event attendance from vetted companion marketplace.' },
               ].map(s => (
@@ -354,27 +374,6 @@ export default function HomePage() {
           </div>
         </section>
 
-
-        {/* ── 7b. PARTNER DIRECTORY ── */}
-        <section style={{ padding: "64px 24px", backgroundColor: "var(--color-navy)" }}>
-          <div style={{ maxWidth: "1200px", margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "48px", alignItems: "center" }}>
-            <div>
-              <p style={{ fontFamily: "var(--font-body)", fontSize: "13px", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-teal)", marginBottom: "16px" }}>Partner Directory</p>
-              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(26px, 4vw, 40px)", fontWeight: 500, color: "var(--color-cream)", lineHeight: 1.2, letterSpacing: "-0.02em", marginBottom: "20px" }}>Find trusted local help — vetted by ThriveAtHome</h2>
-              <p style={{ fontFamily: "var(--font-body)", fontSize: "17px", color: "rgba(250,250,245,0.75)", lineHeight: 1.7, marginBottom: "32px" }}>Browse nonprofit partners, home care agencies, legal aid organizations, and community services near you — all screened and endorsed by our navigator team.</p>
-              <a href="/partner-directory" style={{ display: "inline-flex", alignItems: "center", gap: "8px", backgroundColor: "var(--color-teal)", color: "white", fontFamily: "var(--font-body)", fontWeight: 600, fontSize: "15px", padding: "12px 24px", borderRadius: "8px", textDecoration: "none" }}>Browse the directory →</a>
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-              {[["🏥","Health & Care","Home care agencies, hospice, therapy, telehealth"],["⚖️","Legal Aid","Estate planning, benefits help, elder law attorneys"],["🍲","Food & Nutrition","Meal programs, food banks, nutrition support"],["🚗","Transportation","Medical rides, errand services, volunteer drivers"],["🤝","Nonprofits","Senior centers, faith communities, volunteer orgs"],["💼","Benefits","SNAP, LIHEAP, Medicare counseling, VITA tax help"]].map(([icon, title, desc]) => (
-                <div key={title} style={{ backgroundColor: "rgba(255,255,255,0.06)", borderRadius: "10px", padding: "16px" }}>
-                  <div style={{ fontSize: "24px", marginBottom: "8px" }}>{icon}</div>
-                  <div style={{ fontFamily: "var(--font-body)", fontWeight: 600, fontSize: "14px", color: "var(--color-cream)", marginBottom: "4px" }}>{title}</div>
-                  <div style={{ fontFamily: "var(--font-body)", fontSize: "12px", color: "rgba(250,250,245,0.55)", lineHeight: 1.5 }}>{desc}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
         {/* ── 8. LAYER 5 — CELEBRATIONS & LIFE STORY ── */}
         <section style={sectionPadAlt}>
           <div style={maxW}>
@@ -635,6 +634,7 @@ export default function HomePage() {
                 {[
                   'A friendly voice every morning that remembers what you told it',
                   'A real Human Buddy matched on shared interests and background',
+                  'Group travel with fellow members — trips planned inside the community',
                   'Communities in your own language and cultural tradition',
                   'Services arranged with a single call — no navigating providers alone',
                   'Your wisdom shared through skill exchange and career opportunities',
@@ -853,10 +853,10 @@ export default function HomePage() {
             <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
               <CTAButton href="/signup" variant="teal" size="lg">Start for free</CTAButton>
               <CTAButton href="/for-volunteers" variant="white" size="lg">Volunteer as a buddy</CTAButton>
-            <div style={{ marginTop: "32px", display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
-              <p style={{ color: "rgba(250,250,245,0.55)", fontSize: "14px", margin: 0 }}>Have questions? Talk to Quinn right now.</p>
-              <QuinnWidget variant="ghost" compact />
             </div>
+            <div style={{ marginTop: '32px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+              <p style={{ color: 'rgba(250,250,245,0.55)', fontSize: '14px', margin: 0 }}>Have questions? Talk to Quinn right now.</p>
+              <QuinnWidget variant="ghost" compact />
             </div>
           </div>
         </section>
