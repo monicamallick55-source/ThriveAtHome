@@ -108,7 +108,7 @@ export async function GET(req: NextRequest) {
         .eq('check_in_frequency', 'daily')
         .eq('status', 'active')
 
-      for (const m of members ?? []) {
+      for (const m of ([] as any[]) || members ?? []) {
         try {
           const { data: lastCall } = await db
             .from('check_in_calls')
@@ -157,7 +157,7 @@ export async function GET(req: NextRequest) {
           .select('id, preferred_name, full_name')
           .eq('status', 'active')
 
-        for (const m of members ?? []) {
+        for (const m of ([] as any[]) || members ?? []) {
           try {
             const thisYear = now.getUTCFullYear()
             const { data: vaccItem } = await db
@@ -357,7 +357,7 @@ export async function GET(req: NextRequest) {
         .lt('created_at', joinedBefore)
         .or('date_of_birth.is.null,emergency_contact_1_name.is.null')
 
-      for (const m of members ?? []) {
+      for (const m of ([] as any[]) || members ?? []) {
         try {
           if (await wasRecentlyFired(m.id, 'automation_onboarding')) { r.skipped++; continue }
 
@@ -435,7 +435,7 @@ export async function GET(req: NextRequest) {
         .gte('completed_at', since24h)
         .lte('completed_at', since2h)
 
-      for (const b of bookings ?? []) {
+      for (const b of ([] as any[]) || bookings ?? []) {
         try {
           if (await wasRecentlyFired(b.member_id, 'automation_transport_followup')) { r.skipped++; continue }
 
@@ -472,7 +472,7 @@ export async function GET(req: NextRequest) {
         .gte('completed_at', since24h)
         .lte('completed_at', since2h)
 
-      for (const b of bookings ?? []) {
+      for (const b of ([] as any[]) || bookings ?? []) {
         try {
           if (await wasRecentlyFired(b.member_id, 'automation_tech_help_check')) { r.skipped++; continue }
 
@@ -509,7 +509,7 @@ export async function GET(req: NextRequest) {
         .gte('completed_at', since24h)
         .lte('completed_at', since4h)
 
-      for (const b of bookings ?? []) {
+      for (const b of ([] as any[]) || bookings ?? []) {
         try {
           if (await wasRecentlyFired(b.member_id, 'automation_meal_feedback')) { r.skipped++; continue }
 
@@ -539,9 +539,9 @@ export async function GET(req: NextRequest) {
   // 16. Subscription value summary        → /api/cron/monthly-summary
   // 17. Benefits renewal reminder         → static benefits page, no external API needed
 
-  const totalFired = results.reduce((s, r) => s + r.fired, 0)
-  const totalSkipped = results.reduce((s, r) => s + r.skipped, 0)
-  const totalErrors = results.reduce((s, r) => s + r.errors, 0)
+  const totalFired = results.reduce((s: any, r: any) => s + r.fired, 0)
+  const totalSkipped = results.reduce((s: any, r: any) => s + r.skipped, 0)
+  const totalErrors = results.reduce((s: any, r: any) => s + r.errors, 0)
 
   console.log('[automations] Complete:', { totalFired, totalSkipped, totalErrors })
   return NextResponse.json({

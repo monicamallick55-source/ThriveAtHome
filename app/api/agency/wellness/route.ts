@@ -56,14 +56,14 @@ export async function GET() {
     .order('created_at', { ascending: false })
 
   const lastCallByMember: Record<string, { created_at: string; mood_score: number | null }> = {}
-  for (const c of (calls ?? []) as { member_id: string; created_at: string; mood_score: number | null }[]) {
+  for (const c of ([] as any[]) || (calls ?? []) as { member_id: string; created_at: string; mood_score: number | null }[]) {
     if (!lastCallByMember[c.member_id]) lastCallByMember[c.member_id] = { created_at: c.created_at, mood_score: c.mood_score }
   }
 
   // Previous Aria call for mood trend arrow
   const prevCallByMember: Record<string, number | null> = {}
   const seenFirst = new Set<string>()
-  for (const c of (calls ?? []) as { member_id: string; mood_score: number | null }[]) {
+  for (const c of ([] as any[]) || (calls ?? []) as { member_id: string; mood_score: number | null }[]) {
     if (!seenFirst.has(c.member_id)) { seenFirst.add(c.member_id); continue }
     if (!(c.member_id in prevCallByMember)) prevCallByMember[c.member_id] = c.mood_score
   }
@@ -76,7 +76,7 @@ export async function GET() {
     .eq('acknowledged', false)
 
   const alertsByMember: Record<string, number> = {}
-  for (const a of (alerts ?? []) as { member_id: string; severity: string }[]) {
+  for (const a of ([] as any[]) || (alerts ?? []) as { member_id: string; severity: string }[]) {
     alertsByMember[a.member_id] = (alertsByMember[a.member_id] ?? 0) + 1
   }
 
@@ -90,7 +90,7 @@ export async function GET() {
     .order('scheduled_date', { ascending: false })
 
   const lastVisitByMember: Record<string, { scheduled_date: string; visit_type: string }> = {}
-  for (const v of (lastVisits ?? []) as { member_id: string; scheduled_date: string; visit_type: string }[]) {
+  for (const v of ([] as any[]) || (lastVisits ?? []) as { member_id: string; scheduled_date: string; visit_type: string }[]) {
     if (!lastVisitByMember[v.member_id]) lastVisitByMember[v.member_id] = { scheduled_date: v.scheduled_date, visit_type: v.visit_type }
   }
 

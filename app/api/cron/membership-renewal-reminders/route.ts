@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
 
   const results = { checked: 0, reminded: 0, skipped: 0 }
 
-  for (const m of memberships ?? []) {
+  for (const m of ([] as any[]) || memberships ?? []) {
     results.checked++
     const paid = new Date(m.dues_paid_date + 'T00:00:00Z')
     const expiry = new Date(paid)

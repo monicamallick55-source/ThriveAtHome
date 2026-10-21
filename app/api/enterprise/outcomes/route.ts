@@ -138,7 +138,7 @@ export async function GET(req: NextRequest) {
     .map((c: any) => c.mood_score as number)
   const avgMoodScore =
     moodScores.length > 0
-      ? Math.round((moodScores.reduce((a, b) => a + b, 0) / moodScores.length) * 10) / 10
+      ? Math.round((moodScores.reduce((a: any, b: any) => a + b, 0) / moodScores.length) * 10) / 10
       : null
 
   // Count unique members who had at least one completed call (engagement)

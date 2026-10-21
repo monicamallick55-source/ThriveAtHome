@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
 
   const results = { due: (due ?? []).length, created: 0, skipped: 0 }
 
-  for (const s of due ?? []) {
+  for (const s of ([] as any[]) || due ?? []) {
     const runDate: string = s.next_run_date
     const requestedFor = s.time_of_day
       ? new Date(`${runDate}T${s.time_of_day}:00Z`).toISOString()

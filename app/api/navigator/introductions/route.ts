@@ -76,8 +76,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'One or both members not found' }, { status: 404 })
   }
 
-  const mA = members.find((m) => m.id === memberIdA)!
-  const mB = members.find((m) => m.id === memberIdB)!
+  const mA = members.find((m: any) => m.id === memberIdA)!
+  const mB = members.find((m: any) => m.id === memberIdB)!
 
   // 4. Check shared circle (safety gate — org_id check skipped until schema is confirmed)
   // circle_members is not in TS types yet — cast to any

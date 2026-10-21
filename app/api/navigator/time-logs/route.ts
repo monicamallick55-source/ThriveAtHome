@@ -61,9 +61,9 @@ export async function GET(req: Request) {
 
   // Compute totals
   const logs = (data ?? []) as Array<{ duration_minutes: number; billable: boolean; approved: boolean }>
-  const totalMinutes = logs.reduce((s, l) => s + l.duration_minutes, 0)
-  const billableMinutes = logs.filter(l => l.billable).reduce((s, l) => s + l.duration_minutes, 0)
-  const approvedMinutes = logs.filter(l => l.approved).reduce((s, l) => s + l.duration_minutes, 0)
+  const totalMinutes = logs.reduce((s: any, l: any) => s + l.duration_minutes, 0)
+  const billableMinutes = logs.filter(l => l.billable).reduce((s: any, l: any) => s + l.duration_minutes, 0)
+  const approvedMinutes = logs.filter(l => l.approved).reduce((s: any, l: any) => s + l.duration_minutes, 0)
 
   return NextResponse.json({
     logs: data ?? [],

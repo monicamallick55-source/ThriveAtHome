@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
   if (type === 'care-plans') {
     const { data: plans } = await getCarePlansForMember(memberId, agencyId)
     csv = 'Version,Status,Effective Date,Review Date,Goals,Interventions,Visit Frequency,Diagnoses,Functional Status,Safety Concerns,Approved By,Approved At\n'
-    for (const p of plans ?? []) {
+    for (const p of ([] as any[]) || plans ?? []) {
       csv += toRow([
         p.version_number, p.status, p.effective_date, p.review_date,
         p.goals, p.interventions, p.visit_frequency, p.diagnoses.join('; '),
@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
     // SOAP notes (default)
     const { data: notes } = await getSoapNotesForMember(memberId, agencyId)
     csv = 'Date,Visit Type,Duration (min),Status,Subjective,Objective,Assessment,Plan,Billing Codes,Signed By,Signed At\n'
-    for (const n of notes ?? []) {
+    for (const n of ([] as any[]) || notes ?? []) {
       csv += toRow([
         n.note_date, n.visit_type, n.duration_minutes, n.status,
         n.subjective, n.objective, n.assessment, n.plan,

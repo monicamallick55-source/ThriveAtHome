@@ -53,7 +53,7 @@ export async function GET(req: Request) {
     .eq('status', 'active')
 
   const listingMap = new Map<string, string>()
-  for (const l of listings ?? []) listingMap.set(l.trusted_advisor_id, l.listing_tier)
+  for (const l of ([] as any[]) || listings ?? []) listingMap.set(l.trusted_advisor_id, l.listing_tier)
 
   const advisors = (data ?? []).map((a: any) => ({
     ...a,

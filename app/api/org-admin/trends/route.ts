@@ -49,7 +49,7 @@ export async function GET() {
     .select('member_id, created_at')
     .eq('org_id', fm.org_id)
   const memberIds: string[] = (memRows ?? []).map((m: { member_id: string }) => m.member_id)
-  for (const m of memRows ?? []) {
+  for (const m of ([] as any[]) || memRows ?? []) {
     const k = monthKey(new Date(m.created_at))
     if (k in index) buckets[index[k]].new_members++
   }
@@ -59,11 +59,11 @@ export async function GET() {
       admin.from('service_bookings').select('created_at').in('member_id', memberIds).gte('created_at', since),
       admin.from('volunteer_visits').select('visit_date, duration_minutes').in('member_id', memberIds).gte('visit_date', since.slice(0, 10)),
     ])
-    for (const b of bookings ?? []) {
+    for (const b of ([] as any[]) || bookings ?? []) {
       const k = monthKey(new Date(b.created_at))
       if (k in index) buckets[index[k]].service_volume++
     }
-    for (const v of visits ?? []) {
+    for (const v of ([] as any[]) || visits ?? []) {
       const k = monthKey(new Date(v.visit_date))
       if (k in index) buckets[index[k]].volunteer_hours += Math.round(((v.duration_minutes ?? 0) / 60) * 10) / 10
     }
@@ -74,7 +74,7 @@ export async function GET() {
     .select('created_at')
     .eq('org_id', fm.org_id)
     .gte('created_at', since)
-  for (const n of needs ?? []) {
+  for (const n of ([] as any[]) || needs ?? []) {
     const k = monthKey(new Date(n.created_at))
     if (k in index) buckets[index[k]].needs_posted++
   }

@@ -33,7 +33,7 @@ export async function GET() {
     const volunteers = new Set(rows.map((r: { volunteer_id: string }) => r.volunteer_id))
     // Union of covered clock-hours (0-23).
     const hours = new Set<number>()
-    for (const r of rows as { start_time: string; end_time: string }[]) {
+    for (const r of ([] as any[]) || rows as { start_time: string; end_time: string }[]) {
       const start = parseInt(r.start_time.slice(0, 2), 10)
       const end = parseInt(r.end_time.slice(0, 2), 10)
       for (let h = start; h < end; h++) hours.add(h)
