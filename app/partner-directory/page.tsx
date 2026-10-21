@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 const CATEGORIES = [
@@ -263,6 +264,18 @@ function ReferralForm({
 }
 
 export default function PartnerDirectoryPage() {
+  const router = useRouter()
+  const [checking, setChecking] = useState(true)
+
+  useEffect(() => {
+    fetch("/api/auth/me").then(r => {
+      if (!r.ok) router.replace("/login?next=/partner-directory")
+      else setChecking(false)
+    }).catch(() => router.replace("/login?next=/partner-directory"))
+  }, [])
+
+  if (checking) return <div style={{minHeight:"60vh",display:"flex",alignItems:"center",justifyContent:"center"}}>Loading...</div>
+
   const [search, setSearch] = useState('')
   const [expanded, setExpanded] = useState<string | null>(null)
   const [referralCategory, setReferralCategory] = useState<string | null>(null)
