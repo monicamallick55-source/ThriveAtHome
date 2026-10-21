@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
   if (!memberId) return NextResponse.json({ error: 'memberId required' }, { status: 400 })
 
   const supabase = await createClient()
-  const { data, error } = await (admin as any).from('members').select('*').eq('id', memberId).single()
+  const { data, error } = await (createAdminClient() as any).from('members').select('*').eq('id', memberId).single()
   if (error) return NextResponse.json({ error: error.message }, { status: 404 })
 
   return NextResponse.json(memberToFhirPatient(data as Record<string, unknown>), {
