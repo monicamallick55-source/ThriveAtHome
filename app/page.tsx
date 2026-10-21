@@ -1,3 +1,4 @@
+import QuinnWidget from '@/components/shared/QuinnWidget'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 

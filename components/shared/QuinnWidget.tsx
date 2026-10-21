@@ -30,7 +30,7 @@ export default function QuinnWidget({ label = 'Talk to Quinn', variant = 'teal',
         if (typeof window === 'undefined') return
         if ((window as any).__retellWebSdkLoaded) return
         const script = document.createElement('script')
-        script.src = 'https://cdn.jsdelivr.net/npm/retell-client-js-sdk@1/dist/index.umd.js'
+        script.src = 'https://cdn.jsdelivr.net/npm/retell-client-js-sdk@2.0.0/dist/index.umd.js'
         script.async = true
         script.onload = () => {
           if (mounted) (window as any).__retellWebSdkLoaded = true
