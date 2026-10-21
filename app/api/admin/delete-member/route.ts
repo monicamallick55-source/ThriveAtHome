@@ -58,7 +58,7 @@ export async function DELETE(req: NextRequest) {
 
   const authUserIds: string[] = (familyRows ?? [])
     .map((r: any) => r.supabase_auth_id)
-    .filter((id): id is string => !!id)
+    .filter((id: any): id is string => !!id)
 
   // 6. Hard-delete all PHI in dependency order (child tables first)
   const tables: string[] = [
