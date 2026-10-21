@@ -63,8 +63,23 @@ export default function QuinnWidget({ label = 'Talk to Quinn', variant = 'teal',
       const { access_token } = await res.json() as { access_token: string }
 
       // 2. Start call via Retell Web SDK
-      const RetellWebClient = (window as any).RetellWebClient
-      if (!RetellWebClient) throw new Error('Voice SDK not ready — try refreshing the page.')
+      // Wait up to 8s for SDK to finish loading
+      let RetellWebClient = (window as any).RetellWebClient
+      if (!RetellWebClient) {
+        await new Promise<void>((resolve, reject) => {
+          const deadline = Date.now() + 8000
+          const poll = setInterval(() => {
+            if ((window as any).RetellWebClient) {
+              clearInterval(poll); resolve()
+            } else if (Date.now() > deadline) {
+              clearInterval(poll)
+              reject(new Error('Voice SDK could not load. Please refresh and try again.'))
+            }
+          }, 200)
+        })
+        RetellWebClient = (window as any).RetellWebClient
+      }
+      if (!RetellWebClient) throw new Error('Voice SDK could not load. Please refresh and try again.')
       const client = new RetellWebClient()
       retellRef.current = client
 
