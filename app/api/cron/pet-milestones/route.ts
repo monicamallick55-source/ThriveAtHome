@@ -115,7 +115,7 @@ export async function GET(req: NextRequest) {
         }
       }
 
-      for (const c of ([] as any[]) || candidates) {
+      for (const c of (candidates ?? [])) {
         const exists = c.oneTime
           ? await petOneTimeCelebrationExists(pet.id, c.type)
           : await petCelebrationExists(pet.id, c.type, new Date(c.eventDate + 'T00:00:00Z').getUTCFullYear())

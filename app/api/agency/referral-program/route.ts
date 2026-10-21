@@ -58,7 +58,7 @@ export async function GET() {
       .from('members')
       .select('id, plan_tier')
       .in('id', memberIds)
-    for (const p of ([] as any[]) || (plans ?? []) as { id: string; plan_tier: string }[]) {
+    for (const p of (plans ?? []) as { id: string; plan_tier: string }[]) {
       memberPlans[p.id] = p.plan_tier
     }
   }

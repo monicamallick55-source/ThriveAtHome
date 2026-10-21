@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
       other: 'Other',
     }
 
-    for (const v of ([] as any[]) || visits) {
+    for (const v of (visits ?? [])) {
       const hours = (v.duration_minutes / 60).toFixed(2)
       const typeLabel = VISIT_TYPE_LABELS[v.visit_type] ?? v.visit_type
       // Escape CSV fields that may contain commas or quotes

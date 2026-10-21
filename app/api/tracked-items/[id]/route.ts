@@ -136,7 +136,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     'category', 'status', 'snoozed_until',
   ]
   const updates: Record<string, unknown> = {}
-  for (const f of ([] as any[]) || allowedFields) {
+  for (const f of (allowedFields ?? [])) {
     if (f in rest) updates[f] = rest[f]
   }
   const { data, error } = await updateTrackedItem(id, updates)

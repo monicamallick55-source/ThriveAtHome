@@ -21,7 +21,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   if (action === 'approve') {
     const overrides: Record<string, unknown> = {}
-    for (const k of ([] as any[]) || ['listing_tier', 'city', 'state', 'service_states', 'service_metros', 'bio', 'website', 'languages']) {
+    for (const k of ['listing_tier', 'city', 'state', 'service_states', 'service_metros', 'bio', 'website', 'languages']) {
       if (k in b) overrides[k] = b[k]
     }
     const { data, error } = await approveAdvisorApplication(id, reviewedBy, overrides)

@@ -109,7 +109,7 @@ export async function GET(req: NextRequest) {
 
   // ICD-10 frequency map (aggregate)
   const icd10Freq: Record<string, number> = {}
-  for (const a of ([] as any[]) || alertList) {
+  for (const a of (alertList ?? [])) {
     for (const code of (a.icd10_codes ?? [])) {
       icd10Freq[code] = (icd10Freq[code] ?? 0) + 1
     }

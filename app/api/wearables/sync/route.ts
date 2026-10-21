@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
     })
     totalSaved += saved
 
-    for (const r of ([] as any[]) || readings) {
+    for (const r of (readings ?? [])) {
       if (r.fallDetected) {
         await handleFallEvent({
           memberId,

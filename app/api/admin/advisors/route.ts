@@ -40,7 +40,7 @@ export async function PATCH(req: NextRequest) {
 
   const allowed: Record<string, unknown> = {}
   const b = body as Record<string, unknown>
-  for (const k of ([] as any[]) || ['listing_tier', 'listing_status', 'accepts_new_clients', 'listing_fee_annual', 'listing_expires_at', 'notes']) {
+  for (const k of ['listing_tier', 'listing_status', 'accepts_new_clients', 'listing_fee_annual', 'listing_expires_at', 'notes']) {
     if (k in b) allowed[k] = b[k]
   }
 

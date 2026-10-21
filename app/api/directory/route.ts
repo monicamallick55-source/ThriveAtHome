@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: memberships } = await (admin.from as any)('org_memberships')
       .select('org_id').eq('member_id', memberId).eq('is_active', true)
-    for (const m of ([] as any[]) || memberships ?? []) orgIds.add(m.org_id)
+    for (const m of memberships ?? []) orgIds.add(m.org_id)
   }
 
   let members: Array<Record<string, unknown>> = []

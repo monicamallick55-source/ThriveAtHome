@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
     email,
     role,
   }
-  for (const k of ([] as any[]) || ['org_id', 'agency_id', 'employer_account_id', 'senior_center_id', 'aaa_id', 'network_id', 'university_name']) {
+  for (const k of ['org_id', 'agency_id', 'employer_account_id', 'senior_center_id', 'aaa_id', 'network_id', 'university_name']) {
     if (inv[k]) fmRow[k] = inv[k]
   }
 
