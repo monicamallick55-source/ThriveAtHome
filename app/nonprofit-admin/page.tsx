@@ -243,22 +243,6 @@ export default function NonprofitAdminPage() {
     <div style={{ minHeight: '100vh', backgroundColor: cream, fontFamily: 'system-ui, sans-serif' }}>
 
       {/* Header */}
-      <header style={{ backgroundColor: navy, padding: '0 24px' }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 0' }}>
-          <div>
-            <Link href="/" style={{ textDecoration: 'none', color: 'rgba(255,255,255,0.6)', fontSize: '13px' }}>← ThriveAtHome</Link>
-            <h1 style={{ margin: '4px 0 0', fontSize: '20px', fontWeight: 600, color: '#fff', letterSpacing: '-0.01em' }}>
-              Partner Portal
-            </h1>
-          </div>
-          {org && (
-            <div style={{ textAlign: 'right' }}>
-              <p style={{ margin: 0, color: 'rgba(255,255,255,0.7)', fontSize: '13px' }}>Signed in as</p>
-              <p style={{ margin: 0, color: '#fff', fontWeight: 600, fontSize: '14px' }}>{org.name}</p>
-            </div>
-          )}
-        </div>
-      </header>
 
       {/* Mission band */}
       <div style={{ backgroundColor: teal, padding: '10px 24px', textAlign: 'center' }}>

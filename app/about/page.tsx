@@ -32,16 +32,6 @@ export default function AboutPage() {
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-cream)' }}>
       {/* Nav */}
-      <nav style={{ backgroundColor: 'white', borderBottom: '1px solid var(--color-warm-grey)', height: '64px', display: 'flex', alignItems: 'center', position: 'sticky', top: 0, zIndex: 40 }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Link href="/" style={{ fontFamily: 'var(--font-display)', fontSize: '20px', color: 'var(--color-navy)', fontWeight: 500, textDecoration: 'none' }}>ThriveAtHome</Link>
-          <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
-            <Link href="/resources" style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', textDecoration: 'none' }}>Resources</Link>
-            <Link href="/contact" style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', textDecoration: 'none' }}>Contact</Link>
-            <Link href="/signup" style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, color: 'white', backgroundColor: 'var(--color-teal)', padding: '8px 18px', borderRadius: 'var(--radius-lg)', textDecoration: 'none' }}>Get started</Link>
-          </div>
-        </div>
-      </nav>
 
       {/* Hero */}
       <div style={{ backgroundColor: 'var(--color-navy)', padding: '72px 24px 80px' }}>

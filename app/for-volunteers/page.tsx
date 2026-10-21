@@ -32,15 +32,6 @@ const ctaPrimary: React.CSSProperties = {
 export default function ForVolunteersPage() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <header style={navStyle}>
-        <div style={navInner}>
-          <Link href="/" style={{ fontFamily: 'var(--font-display)', fontSize: '24px', color: 'var(--color-navy)', fontWeight: 500, textDecoration: 'none' }}>
-            ThriveAtHome
-          </Link>
-          <nav style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <Link href="/login" style={{ color: 'var(--color-navy)', fontFamily: 'var(--font-body)', fontSize: '18px', fontWeight: 500, padding: '8px 20px', textDecoration: 'none' }}>Sign in</Link>
-            <Link href="/volunteer/apply" style={ctaPrimary}>Apply to volunteer</Link>
-          </nav>
         </div>
       </header>
 

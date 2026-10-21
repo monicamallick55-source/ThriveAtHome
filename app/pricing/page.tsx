@@ -21,27 +21,6 @@ export default async function PricingPage() {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-cream)', display: 'flex', flexDirection: 'column' }}>
-      <nav style={{ backgroundColor: 'white', borderBottom: '1px solid var(--color-warm-grey)', padding: '0 32px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Link href={signedIn ? '/member-portal' : '/'} style={{ fontFamily: 'var(--font-body)', fontSize: '18px', fontWeight: 500, color: 'var(--color-navy)', textDecoration: 'none' }}>
-          {signedIn ? '← Back to my portal' : 'ThriveAtHome'}
-        </Link>
-        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-          {signedIn ? (
-            <Link href="/dashboard/billing" style={{ fontFamily: 'var(--font-body)', fontSize: '18px', fontWeight: 500, color: 'white', backgroundColor: 'var(--color-navy)', textDecoration: 'none', padding: '8px 20px', borderRadius: 'var(--radius-md)', minHeight: '44px', display: 'inline-flex', alignItems: 'center' }}>
-              My plan &amp; billing
-            </Link>
-          ) : (
-            <>
-              <Link href="/login" style={{ fontFamily: 'var(--font-body)', fontSize: '18px', fontWeight: 500, color: 'var(--color-navy)', textDecoration: 'none' }}>
-                Sign in
-              </Link>
-              <Link href="/signup" style={{ fontFamily: 'var(--font-body)', fontSize: '18px', fontWeight: 500, color: 'white', backgroundColor: 'var(--color-navy)', textDecoration: 'none', padding: '8px 20px', borderRadius: 'var(--radius-md)', minHeight: '44px', display: 'inline-flex', alignItems: 'center' }}>
-                Get started
-              </Link>
-            </>
-          )}
-        </div>
-      </nav>
 
       <main style={{ flex: 1, padding: '64px 24px' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>

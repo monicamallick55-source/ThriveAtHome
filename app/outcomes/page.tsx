@@ -106,16 +106,6 @@ export default async function OutcomesPage() {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-cream)', display: 'flex', flexDirection: 'column' }}>
-      <nav style={{ backgroundColor: 'var(--color-navy)', padding: '0 32px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Link href="/" style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--color-cream)', textDecoration: 'none', fontWeight: 500 }}>
-          ThriveAtHome
-        </Link>
-        <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
-          <Link href="/pricing" style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'rgba(250,250,245,0.7)', textDecoration: 'none' }}>Pricing</Link>
-          <Link href="/employers" style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'rgba(250,250,245,0.7)', textDecoration: 'none' }}>Employers</Link>
-          <Link href="/login" style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'rgba(250,250,245,0.7)', textDecoration: 'none' }}>Sign in</Link>
-        </div>
-      </nav>
 
       {/* Hero */}
       <header style={{ backgroundColor: 'var(--color-navy)', padding: '48px 0 64px' }}>

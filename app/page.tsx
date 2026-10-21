@@ -107,27 +107,6 @@ export default function HomePage() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-cream)' }}>
 
-      {/* ── NAV ── */}
-      <header style={{
-        position: 'sticky', top: 0, zIndex: 50,
-        backgroundColor: 'rgba(250,250,245,0.95)', backdropFilter: 'blur(8px)',
-        borderBottom: '1px solid var(--color-warm-grey)',
-      }}>
-        <div style={{ ...maxW, padding: '0 24px', height: '68px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--color-navy)', fontWeight: 500, letterSpacing: '-0.01em' }}>
-            ThriveAtHome
-          </span>
-          <nav style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <Link href="/for-volunteers" style={{ ...bodyText, textDecoration: 'none', padding: '8px 14px', fontSize: '15px', color: 'var(--color-text-secondary)' }}>For Volunteers</Link>
-            <Link href="/partner-directory" style={{ ...bodyText, textDecoration: 'none', padding: '8px 14px', fontSize: '15px', color: 'var(--color-text-secondary)' }}>Find Local Help</Link>
-            <Link href="/pricing" style={{ ...bodyText, textDecoration: 'none', padding: '8px 14px', fontSize: '15px', color: 'var(--color-text-secondary)' }}>Pricing</Link>
-            <Link href="/for-organizations" style={{ ...bodyText, textDecoration: 'none', padding: '8px 14px', fontSize: '15px', color: 'var(--color-text-secondary)' }}>For Organizations</Link>
-            <Link href="/donate" style={{ ...bodyText, textDecoration: 'none', padding: '8px 14px', fontSize: '14px', color: 'var(--color-teal)', fontWeight: 700 }}>♥ Donate</Link>
-            <Link href="/login" style={{ ...bodyText, textDecoration: 'none', padding: '8px 16px', fontSize: '15px', color: 'var(--color-navy)', fontWeight: 500 }}>Sign in</Link>
-            <CTAButton href="/signup" variant="navy">Get started</CTAButton>
-          </nav>
-        </div>
-      </header>
 
       <main style={{ flex: 1 }}>
 

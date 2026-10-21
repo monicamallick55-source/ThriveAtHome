@@ -9,10 +9,6 @@ export const metadata: Metadata = {
 export default function DonatePage() {
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-cream)' }}>
-      <nav style={{ backgroundColor: 'var(--color-navy)', padding: '0 32px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <a href="/" style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--color-cream)', fontWeight: 500, textDecoration: 'none' }}>ThriveAtHome</a>
-        <a href="/login" style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'rgba(250,250,245,0.75)', textDecoration: 'none' }}>Sign in</a>
-      </nav>
 
       <main style={{ maxWidth: '720px', margin: '0 auto', padding: '64px 24px' }}>
         <a href="/dashboard" style={{ display: 'inline-block', marginBottom: '24px', fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', textDecoration: 'none' }}>

@@ -77,24 +77,6 @@ export default function EmployersPage() {
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-cream)', display: 'flex', flexDirection: 'column' }}>
       {/* Nav */}
-      <nav style={{
-        backgroundColor: 'var(--color-navy)',
-        padding: '0 32px',
-        height: '64px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        position: 'sticky',
-        top: 0,
-        zIndex: 50,
-      }}>
-        <Link href="/" style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--color-cream)', textDecoration: 'none', fontWeight: 500 }}>
-          ThriveAtHome
-        </Link>
-        <Link href="/login" style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'rgba(250,250,245,0.75)', textDecoration: 'none' }}>
-          Sign in
-        </Link>
-      </nav>
 
       {/* Hero */}
       <section style={{

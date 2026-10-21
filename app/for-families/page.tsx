@@ -171,23 +171,6 @@ export default function ForOrganizationsPage() {
     <div style={{ minHeight: '100vh', backgroundColor: cream, display: 'flex', flexDirection: 'column' }}>
 
       {/* Nav */}
-      <header style={{ position: 'sticky', top: 0, zIndex: 50, backgroundColor: 'rgba(250,250,245,0.95)', backdropFilter: 'blur(8px)', borderBottom: '1px solid var(--color-warm-grey)' }}>
-        <div style={{ ...maxW, padding: '0 24px', height: '68px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
-          <Link href="/" style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: navy, fontWeight: 500, letterSpacing: '-0.01em', textDecoration: 'none' }}>
-            ThriveAtHome
-          </Link>
-          <nav style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <Link href="/pricing" style={{ ...bodyText, textDecoration: 'none', padding: '8px 14px', fontSize: '15px' }}>For Members</Link>
-            <Link href="/employers" style={{ ...bodyText, textDecoration: 'none', padding: '8px 14px', fontSize: '15px' }}>For Employers</Link>
-            <Link href="/nonprofit-admin" style={{ ...bodyText, textDecoration: 'none', padding: '8px 14px', fontSize: '15px' }}>Nonprofit Portal</Link>
-            <Link href="/contact" style={{ ...bodyText, textDecoration: 'none', padding: '8px 14px', fontSize: '15px' }}>Contact</Link>
-            <Link href="/login" style={{ ...bodyText, textDecoration: 'none', padding: '8px 16px', fontSize: '15px', color: navy, fontWeight: 500 }}>Sign in</Link>
-            <Link href="/signup" style={{ display: 'inline-flex', alignItems: 'center', backgroundColor: navy, color: cream, fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: '15px', padding: '10px 20px', borderRadius: 'var(--radius-md)', textDecoration: 'none' }}>
-              Join as a member
-            </Link>
-          </nav>
-        </div>
-      </header>
 
       {/* Hero */}
       <section style={{ padding: 'clamp(56px, 8vw, 96px) 24px 72px', textAlign: 'center', background: `radial-gradient(ellipse at 20% 30%, rgba(0,139,130,0.07) 0%, transparent 60%), ${cream}` }}>
