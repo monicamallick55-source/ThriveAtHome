@@ -32,8 +32,6 @@ const ctaPrimary: React.CSSProperties = {
 export default function ForVolunteersPage() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-        </div>
-      </header>
 
       <main style={{ flex: 1 }}>
         {/* Hero */}
