@@ -51,7 +51,7 @@ export default function QuinnWidget({ label = 'Talk to Quinn', variant = 'teal',
 
     try {
       // 1. Fetch a Retell Web Call access token from our backend
-      const res = await fetch('/api/retell/web-call', {
+      const res = await fetch('/api/retell/tools/web-call', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ agent: 'quinn' }),
