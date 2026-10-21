@@ -90,7 +90,7 @@
     },
     {
       "path": "/api/cron/notification-drain",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 * * * *"
     }
   ]
 }
