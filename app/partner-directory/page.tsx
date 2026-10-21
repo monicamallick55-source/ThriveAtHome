@@ -291,6 +291,8 @@ export default function PartnerDirectoryPage() {
     )
   })
 
+  if (checking) return <div style={{minHeight:"60vh",display:"flex",alignItems:"center",justifyContent:"center"}}>Loading...</div>
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
