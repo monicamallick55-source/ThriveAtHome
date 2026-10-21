@@ -37,7 +37,7 @@ export async function GET() {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const gate = await requireLongDistance(user.id)
-  if (!gate.ok) return gate.response
+  if (!gate.ok) return (gate as any).response
 
   const { data } = await getVideoDiaryEntries(gate.memberId)
   return NextResponse.json({ entries: data })
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const gate = await requireLongDistance(user.id)
-  if (!gate.ok) return gate.response
+  if (!gate.ok) return (gate as any).response
 
   const body = await req.json().catch(() => null)
   if (!body || typeof body !== 'object') {
