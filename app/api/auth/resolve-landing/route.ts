@@ -1,3 +1,4 @@
+import { createAdminClient } from "@/lib/supabase/admin"
 // After sign-in the client asks this route where to go. Centralises role routing
 // for all role types in one server-side place. If the user holds more than one
 // role it returns multi=true and the client sends them to /select-role.

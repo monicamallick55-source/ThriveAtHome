@@ -1,3 +1,4 @@
+import { createAdminClient } from "@/lib/supabase/admin"
 /**
  * FHIR R4 Patient intake endpoint.
  * POST /api/fhir/patient — accepts a FHIR Patient resource, upserts into members.
