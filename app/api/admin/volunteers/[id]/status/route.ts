@@ -46,7 +46,7 @@ export async function PATCH(
       if (!authUserId) {
         const { data: authList } = await admin.auth.admin.listUsers()
         const authUser = authList?.users?.find(
-          (u) => u.email?.toLowerCase() === vol.email.toLowerCase()
+          (u: any) => u.email?.toLowerCase() === (vol as any).email?.toLowerCase()
         )
         if (authUser) {
           authUserId = authUser.id
