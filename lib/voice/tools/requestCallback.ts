@@ -4,7 +4,14 @@
 import { toolAdmin, resolveToolCaller, createToolTask, str, type ToolArgs, type ToolContext, type ToolOutcome } from './types'
 
 export async function run(args: ToolArgs, ctx: ToolContext): Promise<ToolOutcome> {
+  const webPhone = str(args.phone_number)
+if (webPhone && !ctx.fromNumber) {
+  ctx = { ...ctx, fromNumber: webPhone }
+}
   const caller = await resolveToolCaller(args, ctx)
+ if (webPhone && !caller.phone) {
+  (caller as any).phone = webPhone
+} 
   const memberId = caller.memberId
   // Retell's standard names (requested_time, reason) and ours (preferred_time, notes) are both accepted
   const preferredTime = str(args.preferred_time) ?? str(args.requested_time) // ISO string or natural language like "3pm today"
