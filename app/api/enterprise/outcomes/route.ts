@@ -13,6 +13,8 @@ const MINIMUM_COHORT_SIZE = 10
 
 export async function GET(req: NextRequest) {
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // 1. Extract Bearer token from Authorization header
   const authHeader = req.headers.get('authorization')
@@ -28,7 +30,7 @@ export async function GET(req: NextRequest) {
   }
 
   // 2. Look up the API key
-  const { data: keyRow, error: keyError } = await admin
+  const { data: keyRow, error: keyError } = await db
     .from('partner_api_keys')
     .select('id, employer_account_id, is_active, requests_today, requests_date')
     .eq('api_key', apiKey)
@@ -62,7 +64,7 @@ export async function GET(req: NextRequest) {
   }
 
   // 4. Log API access to audit_log (before computing metrics — so access is always recorded)
-  const { error: auditError } = await admin.from('audit_log').insert({
+  const { error: auditError } = await db.from('audit_log').insert({
     user_id: null,
     action: 'ENTERPRISE_API_ACCESS',
     resource_type: 'partner_api_keys',
@@ -74,13 +76,13 @@ export async function GET(req: NextRequest) {
   }
 
   // 5. Increment daily request counter
-  await admin
+  await db
     .from('partner_api_keys')
     .update({ requests_today: requestsToday + 1, requests_date: today })
     .eq('id', keyRow.id)
 
   // 6. Count members enrolled under this employer account
-  const { count: memberCount } = await admin
+  const { count: memberCount } = await db
     .from('family_members')
     .select('*', { count: 'exact', head: true })
     .eq('employer_account_id', keyRow.employer_account_id)
@@ -106,7 +108,7 @@ export async function GET(req: NextRequest) {
   }
 
   // 8. Get member IDs for this employer
-  const { data: memberRows } = await admin
+  const { data: memberRows } = await db
     .from('family_members')
     .select('member_id')
     .eq('employer_account_id', keyRow.employer_account_id)
@@ -119,7 +121,7 @@ export async function GET(req: NextRequest) {
 
   // 9. Compute aggregated call metrics for the last 30 days
   const periodStart = thirtyDaysAgo()
-  const { data: callData } = await admin
+  const { data: callData } = await db
     .from('check_in_calls')
     .select('status, mood_score, member_id')
     .in('member_id', memberIds)
@@ -149,7 +151,7 @@ export async function GET(req: NextRequest) {
   const uniqueMembersEngaged = engagedMemberIds.size
 
   // 10. Count active high-priority alerts (unacknowledged urgent/emergency)
-  const { count: activeAlerts } = await admin
+  const { count: activeAlerts } = await db
     .from('alerts')
     .select('*', { count: 'exact', head: true })
     .in('member_id', memberIds)

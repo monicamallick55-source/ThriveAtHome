@@ -24,6 +24,8 @@ export async function GET() {
 
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: interests } = await (admin as any)
     .from('career_interests')
     .select('id, status, note, created_at, opportunity:career_opportunities(id, title, organization, work_type, location, pay, status)')
@@ -42,6 +44,8 @@ export async function POST(req: Request) {
   if (!opportunity_id) return NextResponse.json({ error: 'opportunity_id required' }, { status: 400 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // Check opportunity is still active
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

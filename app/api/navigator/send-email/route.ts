@@ -19,9 +19,11 @@ export async function POST(req: NextRequest) {
   const message = String(body.message).trim().slice(0, 5000)
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // Get member IDs assigned to this navigator
-  const { data: assignments } = await admin
+  const { data: assignments } = await db
     .from('navigator_assignments')
     .select('member_id')
     .eq('navigator_id', navigator.id)
@@ -33,7 +35,7 @@ export async function POST(req: NextRequest) {
   const memberIds = assignments.map((a: { member_id: string }) => a.member_id)
 
   // Get contact info from family_members linked to these members
-  const { data: contacts } = await admin
+  const { data: contacts } = await db
     .from('family_members')
     .select('email, full_name')
     .in('member_id', memberIds)

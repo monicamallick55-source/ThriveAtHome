@@ -7,7 +7,9 @@ const BUCKET = 'platform-documents'
 
 async function getAgencyAdmin(userId: string) {
   const admin = createAdminClient()
-  const { data: fm } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: fm } = await db
     .from('family_members')
     .select('role, agency_id')
     .eq('supabase_auth_id', userId)
@@ -30,6 +32,8 @@ export async function GET(
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const { data: doc } = await (admin.from as any)('platform_documents')
     .select('storage_path, agency_id, file_name')
     .eq('id', id)
@@ -66,6 +70,8 @@ export async function DELETE(
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const { data: doc } = await (admin.from as any)('platform_documents')
     .select('storage_path, agency_id')
     .eq('id', id)

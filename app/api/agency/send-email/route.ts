@@ -30,7 +30,9 @@ export async function POST(req: NextRequest) {
 
   // Get contact info from family_members (primary contact / family liaison)
   const admin = createAdminClient()
-  const { data: contacts } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: contacts } = await db
     .from('family_members')
     .select('email, full_name')
     .in('member_id', memberIds)

@@ -31,6 +31,8 @@ export async function PATCH(
 
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (admin as any)
     .from('family_events')
     .update(updates)

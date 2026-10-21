@@ -79,6 +79,8 @@ export async function GET(req: Request) {
 
   // Deduplicate and also store for nearby zips
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const expiresAt = new Date(Date.now() + CACHE_HOURS * 60 * 60 * 1000).toISOString()
   const stored: string[] = []
 

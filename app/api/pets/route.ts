@@ -14,6 +14,8 @@ export async function GET(req: Request) {
   if (!memberId) return NextResponse.json({ error: 'memberId required' }, { status: 400 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: pets, error } = await (admin as any)
@@ -65,6 +67,8 @@ export async function POST(req: Request) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: pet, error } = await (admin as any)
@@ -125,6 +129,8 @@ export async function PATCH(req: Request) {
   if (!petId) return NextResponse.json({ error: 'petId required' }, { status: 400 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: pet } = await (admin as any)

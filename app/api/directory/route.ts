@@ -10,7 +10,7 @@ async function resolveMemberId(authId: string, admin: ReturnType<typeof createAd
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: direct } = await (admin.from as any)('members').select('id').eq('supabase_auth_id', authId).maybeSingle()
   if (direct?.id) return direct.id
-  const { data: fm } = await admin.from('family_members').select('member_id').eq('supabase_auth_id', authId).maybeSingle()
+  const { data: fm } = await db.from('family_members').select('member_id').eq('supabase_auth_id', authId).maybeSingle()
   return fm?.member_id ?? null
 }
 
@@ -19,6 +19,8 @@ export async function GET(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const memberId = await resolveMemberId(user.id, admin)
 
   // The caller's own directory setting.
@@ -77,6 +79,8 @@ export async function PATCH(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const memberId = await resolveMemberId(user.id, admin)
   if (!memberId) return NextResponse.json({ error: 'No member on file — finish onboarding first.' }, { status: 404 })
 

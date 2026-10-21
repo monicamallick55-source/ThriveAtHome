@@ -10,6 +10,8 @@ export async function GET(req: NextRequest) {
 
   const q = req.nextUrl.searchParams.get('q')?.trim() ?? ''
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   let query = (admin.from as any)('community_orgs')
     .select('id, org_name, org_type, city, state, zip_code, contact_phone, description, service_area_description, member_count')

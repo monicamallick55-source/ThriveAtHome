@@ -23,6 +23,8 @@ export async function PATCH(
   if (!fm) return NextResponse.json({ error: 'No session' }, { status: 403 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const isStaff = fm.role === 'admin' || fm.role === 'navigator'
 
   // Load proposal + enrollment to check ownership

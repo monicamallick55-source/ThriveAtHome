@@ -24,6 +24,8 @@ export async function POST(req: Request) {
   if (!consent_terms) return NextResponse.json({ error: 'You must consent to the program terms' }, { status: 400 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // Load program to check eligibility and capacity
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

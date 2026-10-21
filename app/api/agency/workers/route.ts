@@ -6,6 +6,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 async function getCallerAgencyInfo(userId: string): Promise<{ role: string; agency_id: string | null } | null> {
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (admin.from('family_members').select('role, agency_id').eq('supabase_auth_id', userId).maybeSingle() as any)
   if (!data) return null
   if (data.role !== 'agency_admin' && data.role !== 'admin') return null
@@ -43,6 +45,8 @@ export async function POST(req: NextRequest) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await ((admin.from('care_workers') as any)
     .insert({

@@ -19,7 +19,9 @@ export async function PATCH(
   const body = await req.json().catch(() => ({}))
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
   const updates: Record<string, unknown> = {}
 
   if (isStaff) {
@@ -50,7 +52,7 @@ export async function PATCH(
       .eq('supabase_auth_id', user.id)
       .maybeSingle()
 
-    const { data: existing } = await admin
+    const { data: existing } = await db
       .from('navigator_time_logs')
       .select('navigator_id, approved')
       .eq('id', id)
@@ -65,7 +67,7 @@ export async function PATCH(
     if (body.activity_type !== undefined) updates.activity_type = body.activity_type
   }
 
-  const { data, error } = await admin
+  const { data, error } = await db
     .from('navigator_time_logs')
     .update(updates)
     .eq('id', id)
@@ -89,8 +91,10 @@ export async function DELETE(
   if (!isStaff) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
-  const { error } = await admin.from('navigator_time_logs').delete().eq('id', id)
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
+  const { error } = await db.from('navigator_time_logs').delete().eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return new NextResponse(null, { status: 204 })
 }

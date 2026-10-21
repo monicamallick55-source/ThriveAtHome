@@ -9,6 +9,8 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const body = await req.json().catch(() => ({}))
   const { preferred_time, notes, immediate = false } = body
 
@@ -30,14 +32,14 @@ export async function POST(req: NextRequest) {
     memberLang = directMember.preferred_language ?? 'english'
     memberInterests = directMember.topics_enjoy ?? []
   } else {
-    const { data: fm } = await admin
+    const { data: fm } = await db
       .from('family_members')
       .select('member_id')
       .eq('supabase_auth_id', user.id)
       .maybeSingle()
     if (fm?.member_id) {
       memberId = fm.member_id
-      const { data: m } = await admin
+      const { data: m } = await db
         .from('members')
         .select('preferred_name, phone_number, preferred_language, topics_enjoy')
         .eq('id', fm.member_id)
@@ -80,7 +82,7 @@ export async function POST(req: NextRequest) {
         .update({ call_id: callId })
         .eq('id', cbReq.id)
 
-      await admin.from('check_in_calls').insert({
+      await db.from('check_in_calls').insert({
         member_id: memberId,
         call_type: 'check_in',
         status: 'scheduled',

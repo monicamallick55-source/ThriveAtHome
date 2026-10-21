@@ -41,7 +41,9 @@ async function resolveMemberContext(supabase: Awaited<ReturnType<typeof createCl
 /** Return true if the member belongs to the circle that owns this post. */
 async function memberInCircle(postId: string, memberId: string): Promise<boolean> {
   const admin = createAdminClient()
-  const { data: post } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: post } = await db
     .from('circle_posts')
     .select('circle_id')
     .eq('id', postId)
@@ -49,7 +51,7 @@ async function memberInCircle(postId: string, memberId: string): Promise<boolean
 
   if (!post) return false
 
-  const { data: membership } = await admin
+  const { data: membership } = await db
     .from('circle_memberships')
     .select('id')
     .eq('circle_id', post.circle_id)
@@ -138,8 +140,10 @@ async function notifyPostAuthor(
   commenterMembers: { preferred_name: string | null; full_name: string | null } | null,
 ) {
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
-  const { data: post } = await admin
+  const { data: post } = await db
     .from('circle_posts')
     .select('member_id')
     .eq('id', postId)
@@ -151,7 +155,7 @@ async function notifyPostAuthor(
   const commenterName =
     commenterMembers?.preferred_name ?? commenterMembers?.full_name ?? 'A member'
 
-  await admin.from('realtime_notifications').insert({
+  await db.from('realtime_notifications').insert({
     member_id: post.member_id,
     type: 'system_message',
     title: 'New comment on your post',

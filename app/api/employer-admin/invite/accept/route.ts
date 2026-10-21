@@ -13,8 +13,10 @@ export async function POST(req: NextRequest) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
-  const { data: inv } = await admin
+  const { data: inv } = await db
     .from('employer_invitations')
     .select('id, email, employer_account_id, status, expires_at')
     .eq('token', token)
@@ -27,7 +29,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'This invitation has already been used or has expired' }, { status: 410 })
   }
   if (new Date(inv.expires_at) < new Date()) {
-    await admin.from('employer_invitations').update({ status: 'expired' }).eq('id', inv.id)
+    await db.from('employer_invitations').update({ status: 'expired' }).eq('id', inv.id)
     return NextResponse.json({ error: 'This invitation link has expired' }, { status: 410 })
   }
 
@@ -46,7 +48,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Create family_members row linked to employer account
-  const { error: fmErr } = await admin.from('family_members').insert({
+  const { error: fmErr } = await db.from('family_members').insert({
     supabase_auth_id: authData.user.id,
     full_name: full_name.trim(),
     email: inv.email,
@@ -61,7 +63,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Mark invitation accepted
-  await admin.from('employer_invitations').update({
+  await db.from('employer_invitations').update({
     status: 'accepted',
     accepted_at: new Date().toISOString(),
     accepted_by_auth_id: authData.user.id,

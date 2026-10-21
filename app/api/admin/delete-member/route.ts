@@ -29,9 +29,11 @@ export async function DELETE(req: NextRequest) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // 3. Verify member exists and confirmation code matches full_name
-  const { data: member, error: memberError } = await admin
+  const { data: member, error: memberError } = await db
     .from('members')
     .select('id, full_name')
     .eq('id', memberId)
@@ -49,7 +51,7 @@ export async function DELETE(req: NextRequest) {
   await writeAuditLog('member_deleted', 'member', memberId, user.id)
 
   // 5. Collect Supabase auth user IDs linked to this member (for auth deletion later)
-  const { data: familyRows } = await admin
+  const { data: familyRows } = await db
     .from('family_members')
     .select('supabase_auth_id, id')
     .eq('member_id', memberId)
@@ -81,7 +83,7 @@ export async function DELETE(req: NextRequest) {
 
   for (const table of tables) {
     const col = table === 'members' ? 'id' : 'member_id'
-    const { error } = await admin.from(table as never).delete().eq(col, memberId)
+    const { error } = await db.from(table as never).delete().eq(col, memberId)
     if (error) {
       console.error(`[delete-member] Failed to delete from ${table}:`, error.message)
       errors.push(table)

@@ -34,6 +34,8 @@ export async function POST(req: NextRequest) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const description = kind === 'update_request'
     ? 'Member is asking for an update on their Human Buddy match status.'
     : `Buddy matching special request: ${message!.trim()}`

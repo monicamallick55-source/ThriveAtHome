@@ -11,6 +11,8 @@ export async function GET(req: Request) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const weekOf = new Date()
   weekOf.setDate(weekOf.getDate() - weekOf.getDay()) // Sunday of this week
   const weekOfStr = weekOf.toISOString().split('T')[0]

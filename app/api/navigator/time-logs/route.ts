@@ -19,7 +19,9 @@ export async function GET(req: Request) {
   const to = searchParams.get('to')
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
   const { data: isStaff } = await supabase.rpc('is_staff')
 
   const { data: fm } = await supabase
@@ -98,12 +100,14 @@ export async function POST(req: Request) {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
 
   const resolvedNavigatorId = isStaff && navigator_id ? navigator_id : fm?.id
   if (!resolvedNavigatorId) return NextResponse.json({ error: 'No navigator identity' }, { status: 400 })
 
-  const { data: log, error } = await admin
+  const { data: log, error } = await db
     .from('navigator_time_logs')
     .insert({
       navigator_id: resolvedNavigatorId,

@@ -29,6 +29,8 @@ export async function GET(
 
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: enrollment } = await (admin as any)
     .from('safety_program_enrollments')
     .select(`
@@ -59,6 +61,8 @@ export async function PATCH(
 
   const body = await req.json().catch(() => ({}))
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   if (body.action === 'assign_volunteer') {
     const { volunteer_id } = body

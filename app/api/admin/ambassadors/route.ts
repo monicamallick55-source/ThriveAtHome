@@ -6,7 +6,9 @@ import { nominateMemberAsAmbassador, getActiveAmbassadors } from '@/lib/data/m21
 
 async function getNavigatorId(userId: string): Promise<string | null> {
   const admin = createAdminClient()
-  const { data } = await admin.from('care_navigators').select('id').eq('supabase_auth_id', userId).maybeSingle()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data } = await db.from('care_navigators').select('id').eq('supabase_auth_id', userId).maybeSingle()
   return data?.id ?? null
 }
 
@@ -27,7 +29,9 @@ export async function POST(req: NextRequest) {
 
   // Verify admin or navigator role
   const admin = createAdminClient()
-  const { data: fm } = await admin.from('family_members').select('role').eq('supabase_auth_id', user.id).maybeSingle()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: fm } = await db.from('family_members').select('role').eq('supabase_auth_id', user.id).maybeSingle()
   if (!fm || !['admin', 'navigator'].includes(fm.role)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }

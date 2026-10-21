@@ -35,6 +35,8 @@ export async function GET(req: Request) {
 
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let query = (admin as any)
     .from('community_partners')
     .select('*')
@@ -72,6 +74,8 @@ export async function POST(req: Request) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (admin as any)
     .from('community_partners')

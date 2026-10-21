@@ -21,7 +21,9 @@ export async function POST(request: NextRequest) {
 
     // Conflict detection — check for overlapping active bookings in same room
     const admin = createAdminClient()
-    const { data: conflicts } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+    const { data: conflicts } = await db
       .from('room_bookings')
       .select('id, booking_title, start_time, end_time')
       .eq('center_id', center_id)
@@ -64,7 +66,9 @@ export async function DELETE(request: NextRequest) {
 
     // Verify user has access to this booking's center
     const admin = createAdminClient()
-    const { data: booking } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+    const { data: booking } = await db
       .from('room_bookings')
       .select('center_id')
       .eq('id', booking_id)

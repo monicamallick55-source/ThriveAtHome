@@ -18,7 +18,9 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
   if (!memberId) return NextResponse.json({ error: 'Complete onboarding first.' }, { status: 400 })
 
   const admin = createAdminClient()
-  const { data: conn } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: conn } = await db
     .from('wearable_connections')
     .select('id, member_id, external_user_id')
     .eq('id', id)

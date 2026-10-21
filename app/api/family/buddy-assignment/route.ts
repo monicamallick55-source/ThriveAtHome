@@ -16,6 +16,8 @@ export async function GET(req: Request) {
     // Verify the user is either a family member linked to this member, or the
     // senior themselves logged in via direct member auth.
     const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
     const [{ data: fm }, { data: directMember }] = await Promise.all([
       (admin.from as any)('family_members')
         .select('id')

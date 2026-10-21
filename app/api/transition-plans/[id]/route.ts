@@ -29,7 +29,9 @@ export async function PATCH(
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
 
   const update: Record<string, unknown> = {}
   if (title !== undefined) update.title = title

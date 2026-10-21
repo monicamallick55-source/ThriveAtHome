@@ -22,6 +22,8 @@ export async function GET() {
 
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: referrals } = await (admin as any)
     .from('home_sharing_referrals')
     .select(`

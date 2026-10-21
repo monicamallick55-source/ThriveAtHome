@@ -6,10 +6,12 @@ import { createAdminClient } from '@/lib/supabase/admin'
 async function resolveMember(authId: string): Promise<{ memberId: string | null; name: string | null }> {
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: direct } = await (admin.from as any)('members')
     .select('id, preferred_name, full_name').eq('supabase_auth_id', authId).maybeSingle()
   if (direct?.id) return { memberId: direct.id, name: direct.preferred_name ?? direct.full_name ?? null }
-  const { data: fm } = await admin
+  const { data: fm } = await db
     .from('family_members').select('member_id, full_name').eq('supabase_auth_id', authId).maybeSingle()
   return { memberId: fm?.member_id ?? null, name: fm?.full_name ?? null }
 }
@@ -21,6 +23,8 @@ export async function GET() {
   if (!memberId) return NextResponse.json({ requests: [] })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const { data } = await (admin.from as any)('org_join_requests')
     .select('id, org_id, status, created_at, decision_note, community_orgs(org_name)')
     .eq('member_id', memberId)
@@ -40,6 +44,8 @@ export async function POST(req: NextRequest) {
   if (!memberId) return NextResponse.json({ error: 'No member on file — finish onboarding first.' }, { status: 404 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const { data, error } = await (admin.from as any)('org_join_requests')
     .upsert({
       member_id: memberId,
@@ -75,6 +81,8 @@ export async function DELETE(req: NextRequest) {
   if (!memberId) return NextResponse.json({ error: 'No member' }, { status: 404 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const { error } = await (admin.from as any)('org_join_requests')
     .update({ status: 'cancelled' })
     .eq('member_id', memberId).eq('org_id', orgId).eq('status', 'pending')

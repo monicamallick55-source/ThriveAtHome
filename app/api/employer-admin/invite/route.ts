@@ -17,9 +17,11 @@ export async function POST(req: NextRequest) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // Get employer account for this admin
-  const { data: adminRow } = await admin
+  const { data: adminRow } = await db
     .from('family_members')
     .select('employer_account_id')
     .eq('supabase_auth_id', user.id)
@@ -32,7 +34,7 @@ export async function POST(req: NextRequest) {
   const employerId = adminRow.employer_account_id
 
   // Check for existing pending invitation to the same email
-  const { data: existing } = await admin
+  const { data: existing } = await db
     .from('employer_invitations')
     .select('id, status, expires_at')
     .eq('employer_account_id', employerId)
@@ -52,7 +54,7 @@ export async function POST(req: NextRequest) {
     .map((b: any) => b.toString(16).padStart(2, '0'))
     .join('')
 
-  const { data: inv, error: invErr } = await admin
+  const { data: inv, error: invErr } = await db
     .from('employer_invitations')
     .insert({
       employer_account_id: employerId,
@@ -68,7 +70,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Failed to create invitation' }, { status: 500 })
   }
 
-  const { data: account } = await admin
+  const { data: account } = await db
     .from('employer_accounts')
     .select('company_name')
     .eq('id', employerId)

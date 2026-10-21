@@ -7,7 +7,9 @@ import { getOrgMembershipTiers, createOrgMembershipTier } from '@/lib/data/commu
 
 async function getOrgId(userId: string): Promise<{ orgId: string | null; role: string | null; error?: string }> {
   const admin = createAdminClient()
-  const { data: fm } = await admin.from('family_members').select('role, org_id').eq('supabase_auth_id', userId).maybeSingle()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: fm } = await db.from('family_members').select('role, org_id').eq('supabase_auth_id', userId).maybeSingle()
   if (!fm) return { orgId: null, role: null, error: 'Not found' }
   if (fm.role !== 'org_admin' && fm.role !== 'admin') return { orgId: null, role: fm.role, error: 'Forbidden' }
   return { orgId: fm.org_id ?? null, role: fm.role }

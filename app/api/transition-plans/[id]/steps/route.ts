@@ -22,16 +22,18 @@ export async function PATCH(
   if (!step_id) return NextResponse.json({ error: 'step_id required' }, { status: 400 })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
 
   // Get navigator family_member id
-  const { data: navFm } = await admin
+  const { data: navFm } = await db
     .from('family_members')
     .select('id')
     .eq('supabase_auth_id', user.id)
     .maybeSingle()
 
-  const { data: step, error } = await admin
+  const { data: step, error } = await db
     .from('transition_plan_steps')
     .update({
       completed_at: completed ? new Date().toISOString() : null,

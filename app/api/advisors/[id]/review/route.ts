@@ -24,7 +24,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   // Authorise: the member must have an advisor_connection with this advisor.
   const admin = createAdminClient()
-  const { data: conn } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: conn } = await db
     .from('advisor_connections')
     .select('id')
     .eq('member_id', memberId)

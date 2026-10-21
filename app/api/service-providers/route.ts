@@ -16,6 +16,8 @@ export async function GET(req: NextRequest) {
   const serviceType = searchParams.get('serviceType')
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   let query = admin
     .from('service_providers')
     .select('*')

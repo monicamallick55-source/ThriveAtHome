@@ -26,6 +26,8 @@ export async function GET(req: NextRequest) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const now = new Date()
   const todayStart = new Date(now)
   todayStart.setUTCHours(0, 0, 0, 0)
@@ -37,7 +39,7 @@ export async function GET(req: NextRequest) {
 
   async function canNotify(memberId: string): Promise<boolean> {
     // Check opt-out on any linked family member
-    const { data: fms } = await admin
+    const { data: fms } = await db
       .from('family_members')
       .select('notification_prefs')
       .eq('member_id', memberId)
@@ -47,7 +49,7 @@ export async function GET(req: NextRequest) {
     if (optedOut) return false
 
     if (memberNotifCount[memberId] === undefined) {
-      const { count } = await admin
+      const { count } = await db
         .from('realtime_notifications')
         .select('id', { count: 'exact', head: true })
         .eq('member_id', memberId)
@@ -100,7 +102,7 @@ export async function GET(req: NextRequest) {
     const r: AutoResult = { rule: 'isolation_detection', fired: 0, skipped: 0, errors: 0 }
     try {
       const cutoff3days = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString()
-      const { data: members } = await admin
+      const { data: members } = await db
         .from('members')
         .select('id, preferred_name, full_name, check_in_frequency')
         .eq('check_in_frequency', 'daily')
@@ -108,7 +110,7 @@ export async function GET(req: NextRequest) {
 
       for (const m of members ?? []) {
         try {
-          const { data: lastCall } = await admin
+          const { data: lastCall } = await db
             .from('check_in_calls')
             .select('scheduled_at')
             .eq('member_id', m.id)
@@ -150,7 +152,7 @@ export async function GET(req: NextRequest) {
     const month = now.getUTCMonth() + 1
     if (month === 9 || month === 10) {
       try {
-        const { data: members } = await admin
+        const { data: members } = await db
           .from('members')
           .select('id, preferred_name, full_name')
           .eq('status', 'active')
@@ -158,7 +160,7 @@ export async function GET(req: NextRequest) {
         for (const m of members ?? []) {
           try {
             const thisYear = now.getUTCFullYear()
-            const { data: vaccItem } = await admin
+            const { data: vaccItem } = await db
               .from('tracked_items')
               .select('id')
               .eq('member_id', m.id)
@@ -204,7 +206,7 @@ export async function GET(req: NextRequest) {
     const r: AutoResult = { rule: 'fall_risk_flag', fired: 0, skipped: 0, errors: 0 }
     try {
       const since7days = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
-      const { data: fallAlerts } = await admin
+      const { data: fallAlerts } = await db
         .from('alerts')
         .select('id, member_id, message, created_at')
         .eq('alert_type', 'fall')
@@ -213,7 +215,7 @@ export async function GET(req: NextRequest) {
 
       for (const alert of fallAlerts ?? []) {
         try {
-          const { data: existingTask } = await admin
+          const { data: existingTask } = await db
             .from('navigator_tasks')
             .select('id')
             .eq('member_id', alert.member_id)
@@ -224,7 +226,7 @@ export async function GET(req: NextRequest) {
 
           if (existingTask) { r.skipped++; continue }
 
-          const { data: assignment } = await admin
+          const { data: assignment } = await db
             .from('navigator_assignments')
             .select('navigator_id')
             .eq('member_id', alert.member_id)
@@ -233,7 +235,7 @@ export async function GET(req: NextRequest) {
 
           if (!assignment?.navigator_id) { r.skipped++; continue }
 
-          await admin.from('navigator_tasks').insert({
+          await db.from('navigator_tasks').insert({
             member_id: alert.member_id,
             navigator_id: assignment.navigator_id,
             task_type: 'fall_risk_review',
@@ -260,14 +262,14 @@ export async function GET(req: NextRequest) {
     const r: AutoResult = { rule: 'volunteer_reengagement', fired: 0, skipped: 0, errors: 0 }
     try {
       const since14 = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString()
-      const { data: matches } = await admin
+      const { data: matches } = await db
         .from('volunteer_matches')
         .select('id, member_id, volunteer_id')
         .eq('status', 'matched')
 
       for (const match of matches ?? []) {
         try {
-          const { data: recentVisit } = await admin
+          const { data: recentVisit } = await db
             .from('volunteer_visits')
             .select('id')
             .eq('member_id', match.member_id)
@@ -305,14 +307,14 @@ export async function GET(req: NextRequest) {
       const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
       const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
 
-      const { data: rsvps } = await admin
+      const { data: rsvps } = await db
         .from('event_rsvps')
         .select('id, member_id, event_id')
         .eq('attended', false)
 
       for (const rsvp of rsvps ?? []) {
         try {
-          const { data: event } = await admin
+          const { data: event } = await db
             .from('events')
             .select('event_date, title')
             .eq('id', rsvp.event_id)
@@ -348,7 +350,7 @@ export async function GET(req: NextRequest) {
     const r: AutoResult = { rule: 'onboarding_completion', fired: 0, skipped: 0, errors: 0 }
     try {
       const joinedBefore = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString()
-      const { data: members } = await admin
+      const { data: members } = await db
         .from('members')
         .select('id, preferred_name, full_name, date_of_birth, emergency_contact_1_name, created_at')
         .eq('status', 'active')
@@ -387,14 +389,14 @@ export async function GET(req: NextRequest) {
   {
     const r: AutoResult = { rule: 'navigator_caseload_warning', fired: 0, skipped: 0, errors: 0 }
     try {
-      const { data: navigators } = await admin
+      const { data: navigators } = await db
         .from('care_navigators')
         .select('id, full_name, caseload_limit')
         .eq('is_active', true)
 
       for (const nav of navigators ?? []) {
         try {
-          const { count } = await admin
+          const { count } = await db
             .from('navigator_assignments')
             .select('id', { count: 'exact', head: true })
             .eq('navigator_id', nav.id)
@@ -425,7 +427,7 @@ export async function GET(req: NextRequest) {
     try {
       const since24h = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString()
       const since2h = new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString()
-      const { data: bookings } = await admin
+      const { data: bookings } = await db
         .from('service_bookings')
         .select('id, member_id')
         .eq('service_type', 'transport')
@@ -462,7 +464,7 @@ export async function GET(req: NextRequest) {
     try {
       const since24h = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString()
       const since2h = new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString()
-      const { data: bookings } = await admin
+      const { data: bookings } = await db
         .from('service_bookings')
         .select('id, member_id')
         .eq('service_type', 'tech_help')
@@ -499,7 +501,7 @@ export async function GET(req: NextRequest) {
     try {
       const since24h = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString()
       const since4h = new Date(now.getTime() - 4 * 60 * 60 * 1000).toISOString()
-      const { data: bookings } = await admin
+      const { data: bookings } = await db
         .from('service_bookings')
         .select('id, member_id')
         .eq('service_type', 'meals')

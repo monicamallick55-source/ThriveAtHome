@@ -10,7 +10,9 @@ async function getAgencyAdmin() {
   const { data: { user }, error } = await supabase.auth.getUser()
   if (error || !user) return null
   const admin = createAdminClient()
-  const { data: fm } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: fm } = await db
     .from('family_members')
     .select('role, agency_id')
     .eq('supabase_auth_id', user.id)
@@ -38,7 +40,7 @@ export async function GET() {
     .order('created_at', { ascending: false })
 
   // Get referred family members (those with referring_agency_id = this agency)
-  const { data: referredFamilyMembers } = await admin
+  const { data: referredFamilyMembers } = await db
     .from('family_members')
     .select('id, full_name, created_at, member_id, role')
     .eq('referring_agency_id', agencyId)
@@ -52,7 +54,7 @@ export async function GET() {
 
   let memberPlans: Record<string, string> = {}
   if (memberIds.length > 0) {
-    const { data: plans } = await admin
+    const { data: plans } = await db
       .from('members')
       .select('id, plan_tier')
       .in('id', memberIds)

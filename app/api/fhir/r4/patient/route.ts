@@ -10,8 +10,10 @@ export async function GET(req: NextRequest) {
   if (!user) return NextResponse.json({ resourceType: 'OperationOutcome', issue: [{ severity: 'error', code: 'login', diagnostics: 'Unauthorized' }] }, { status: 401 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
-  const { data: fm } = await admin
+  const { data: fm } = await db
     .from('family_members')
     .select('member_id')
     .eq('supabase_auth_id', user.id)
@@ -19,7 +21,7 @@ export async function GET(req: NextRequest) {
 
   if (!fm?.member_id) return NextResponse.json({ resourceType: 'OperationOutcome', issue: [{ severity: 'error', code: 'not-found', diagnostics: 'No member record found' }] }, { status: 404 })
 
-  const { data: memberRaw } = await admin
+  const { data: memberRaw } = await db
     .from('members')
     .select('id, full_name, preferred_name, date_of_birth, phone_number, plan_tier')
     .eq('id', fm.member_id)

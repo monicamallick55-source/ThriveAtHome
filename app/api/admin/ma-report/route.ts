@@ -10,7 +10,9 @@ async function assertAdmin() {
   const { data: { user }, error } = await supabase.auth.getUser()
   if (error || !user) return null
   const admin = createAdminClient()
-  const { data: fm } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: fm } = await db
     .from('family_members')
     .select('role')
     .eq('supabase_auth_id', user.id)

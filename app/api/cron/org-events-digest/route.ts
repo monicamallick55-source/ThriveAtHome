@@ -14,6 +14,8 @@ export async function GET(req: Request) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const now = new Date()
   const weekStart = now.toISOString().slice(0, 10)
   const weekEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
@@ -48,7 +50,7 @@ export async function GET(req: Request) {
       if (!memberships?.length) continue
 
       const memberIds = memberships.map((m: any) => m.member_id)
-      const { data: contacts } = await admin
+      const { data: contacts } = await db
         .from('family_members')
         .select('email, full_name')
         .in('member_id', memberIds)

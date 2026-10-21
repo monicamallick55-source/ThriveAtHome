@@ -13,9 +13,11 @@ export async function GET() {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // Open service bookings (status=requested, no volunteer_id assigned, not urgent)
-  const { data: serviceBookings } = await admin
+  const { data: serviceBookings } = await db
     .from('service_bookings')
     .select('id, created_at, service_type, booking_details, requested_for, status, notes, member_id')
     .eq('status', 'requested')
@@ -32,7 +34,7 @@ export async function GET() {
     .limit(30)
 
   // Claimed service bookings for this volunteer (for "My Upcoming" section)
-  const { data: claimedBookings } = await admin
+  const { data: claimedBookings } = await db
     .from('service_bookings')
     .select('id, created_at, service_type, booking_details, requested_for, status, member_id')
     .eq('volunteer_id', volunteer.id)

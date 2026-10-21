@@ -16,6 +16,8 @@ export async function POST(req: NextRequest) {
   if (!body?.need_id) return NextResponse.json({ error: 'need_id is required' }, { status: 400 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // Verify the need is still open
   const { data: need } = await (admin.from as any)('member_needs')

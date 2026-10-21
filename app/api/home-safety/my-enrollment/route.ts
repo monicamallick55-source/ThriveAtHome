@@ -18,6 +18,8 @@ export async function GET() {
   if (!fm?.member_id) return NextResponse.json({ error: 'No member record' }, { status: 403 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: enrollment } = await (admin as any)

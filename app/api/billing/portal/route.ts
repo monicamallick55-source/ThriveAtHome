@@ -8,10 +8,12 @@ export async function POST() {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // Resolve the member either via a family_members link or a direct senior login.
   let memberId: string | null = null
-  const { data: fm } = await admin
+  const { data: fm } = await db
     .from('family_members')
     .select('member_id')
     .eq('supabase_auth_id', user.id)
@@ -31,7 +33,7 @@ export async function POST() {
     return NextResponse.json({ error: 'No member found' }, { status: 404 })
   }
 
-  const { data: sub } = await admin
+  const { data: sub } = await db
     .from('subscriptions')
     .select('stripe_customer_id')
     .eq('member_id', memberId)

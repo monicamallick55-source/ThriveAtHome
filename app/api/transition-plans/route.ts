@@ -51,6 +51,8 @@ export async function GET(req: Request) {
   const planId = url.searchParams.get('planId')
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // If planId specified, return plan + steps
   if (planId) {
@@ -103,6 +105,8 @@ export async function POST(req: Request) {
   if (!memberId) return NextResponse.json({ error: 'memberId required' }, { status: 400 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // Create the plan
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -178,6 +182,8 @@ export async function PATCH(req: Request) {
   const { planId, stepId, action } = body
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   if (action === 'complete_step' && stepId) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

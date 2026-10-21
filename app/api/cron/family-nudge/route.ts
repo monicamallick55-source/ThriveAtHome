@@ -17,10 +17,12 @@ export async function GET(req: NextRequest) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const nudgeThreshold = new Date(Date.now() - NUDGE_WINDOW_DAYS * 24 * 60 * 60 * 1000).toISOString()
   const dedupThreshold = new Date(Date.now() - DEDUP_WINDOW_HOURS * 60 * 60 * 1000).toISOString()
 
-  const { data: inactiveFamilyMembers, error } = await admin
+  const { data: inactiveFamilyMembers, error } = await db
     .from('family_members')
     .select('id, email, full_name, member_id, notification_prefs, last_login_at')
     .or(`last_login_at.is.null,last_login_at.lt.${nudgeThreshold}`)
@@ -38,7 +40,7 @@ export async function GET(req: NextRequest) {
       if ((fm.notification_prefs as { email: boolean })?.email === false) continue
 
       // Only nudge if member has unacknowledged alerts
-      const { data: alerts } = await admin
+      const { data: alerts } = await db
         .from('alerts')
         .select('id')
         .eq('member_id', fm.member_id as string)
@@ -51,7 +53,7 @@ export async function GET(req: NextRequest) {
       }
 
       // 7-day dedup: check notification_log for recent family_nudge
-      const { data: recentNudge } = await admin
+      const { data: recentNudge } = await db
         .from('realtime_notifications')
         .select('id')
         .eq('member_id', fm.member_id as string)
@@ -64,7 +66,7 @@ export async function GET(req: NextRequest) {
         continue
       }
 
-      const { data: member } = await admin
+      const { data: member } = await db
         .from('members')
         .select('preferred_name, full_name')
         .eq('id', fm.member_id as string)

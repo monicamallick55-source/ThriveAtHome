@@ -16,7 +16,9 @@ export async function GET(req: Request) {
   const memberId = searchParams.get('member_id')
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
 
   // Resolve member_id
   let resolvedMemberId = memberId
@@ -31,7 +33,7 @@ export async function GET(req: Request) {
   if (!resolvedMemberId) return NextResponse.json({ error: 'Member not found' }, { status: 404 })
 
   // Auto-award welcome badge if not present
-  await admin.from('member_achievements').upsert({
+  await db.from('member_achievements').upsert({
     member_id: resolvedMemberId,
     achievement_key: 'welcome',
     title: ACHIEVEMENT_MAP['welcome'].title,
@@ -40,7 +42,7 @@ export async function GET(req: Request) {
   }, { onConflict: 'member_id,achievement_key', ignoreDuplicates: true })
 
   // Auto-award tenure milestones based on member created_at
-  const { data: member } = await admin
+  const { data: member } = await db
     .from('members')
     .select('created_at')
     .eq('id', resolvedMemberId)
@@ -58,7 +60,7 @@ export async function GET(req: Request) {
     for (const key of tenureKeys) {
       const def = ACHIEVEMENT_MAP[key]
       if (def) {
-        await admin.from('member_achievements').upsert({
+        await db.from('member_achievements').upsert({
           member_id: resolvedMemberId,
           achievement_key: key,
           title: def.title,
@@ -69,7 +71,7 @@ export async function GET(req: Request) {
     }
   }
 
-  const { data: achievements, error } = await admin
+  const { data: achievements, error } = await db
     .from('member_achievements')
     .select('id, achievement_key, title, description, icon, awarded_at')
     .eq('member_id', resolvedMemberId)
@@ -106,8 +108,10 @@ export async function POST(req: Request) {
   if (!def) return NextResponse.json({ error: 'Unknown achievement' }, { status: 400 })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
-  const { data, error } = await admin
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
+  const { data, error } = await db
     .from('member_achievements')
     .upsert({
       member_id,

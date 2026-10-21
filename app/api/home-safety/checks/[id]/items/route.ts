@@ -31,6 +31,8 @@ export async function GET(
 
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: items } = await (admin as any)
     .from('home_safety_items')
     .select('*')
@@ -55,6 +57,8 @@ export async function POST(
   if (!Array.isArray(items)) return NextResponse.json({ error: 'items array required' }, { status: 400 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // Mark check in_progress if still scheduled
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

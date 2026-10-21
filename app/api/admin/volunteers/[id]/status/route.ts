@@ -31,7 +31,9 @@ export async function PATCH(
   // create a family_members row with role='volunteer' so middleware routing works.
   if (status === 'active') {
     const admin = createAdminClient()
-    const { data: vol } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+    const { data: vol } = await db
       .from('volunteers')
       .select('id, email, full_name, supabase_auth_id')
       .eq('id', id)
@@ -48,7 +50,7 @@ export async function PATCH(
         )
         if (authUser) {
           authUserId = authUser.id
-          await admin
+          await db
             .from('volunteers')
             .update({ supabase_auth_id: authUserId })
             .eq('id', vol.id)
@@ -57,14 +59,14 @@ export async function PATCH(
 
       // Create family_members row with role='volunteer' if it doesn't exist
       if (authUserId) {
-        const { data: existing } = await admin
+        const { data: existing } = await db
           .from('family_members')
           .select('id')
           .eq('supabase_auth_id', authUserId)
           .maybeSingle()
 
         if (!existing) {
-          await admin.from('family_members').insert({
+          await db.from('family_members').insert({
             supabase_auth_id: authUserId,
             full_name: vol.full_name,
             email: vol.email,
@@ -73,7 +75,7 @@ export async function PATCH(
           })
         } else {
           // Ensure existing row has role='volunteer'
-          await admin
+          await db
             .from('family_members')
             .update({ role: 'volunteer' })
             .eq('supabase_auth_id', authUserId)

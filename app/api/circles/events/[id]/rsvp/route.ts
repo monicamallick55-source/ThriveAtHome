@@ -33,10 +33,12 @@ export async function POST(
   const { going, needs_ride, pickup_address } = body
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
 
   // Fetch event details (need title, start_time, location for ride booking)
-  const { data: event } = await admin
+  const { data: event } = await db
     .from('circle_events')
     .select('id, title, start_time, location_text, status, circle_id')
     .eq('id', eventId)
@@ -47,7 +49,7 @@ export async function POST(
 
   // Verify member belongs to the circle (or event is platform-wide: circle_id IS NULL)
   if (event.circle_id) {
-    const { data: membership } = await admin
+    const { data: membership } = await db
       .from('circle_memberships')
       .select('id')
       .eq('circle_id', event.circle_id)
@@ -58,19 +60,19 @@ export async function POST(
 
   // Toggle RSVP
   if (going) {
-    await admin
+    await db
       .from('circle_event_rsvps')
       .upsert({ event_id: eventId, member_id: memberId }, { onConflict: 'event_id,member_id' })
   } else {
     // Cancel RSVP
-    await admin
+    await db
       .from('circle_event_rsvps')
       .delete()
       .eq('event_id', eventId)
       .eq('member_id', memberId)
 
     // Cancel any linked ride bookings for this event
-    await admin
+    await db
       .from('ride_bookings')
       .update({ status: 'cancelled', cancellation_reason: 'rsvp_cancelled' })
       .eq('event_id', eventId)
@@ -84,7 +86,7 @@ export async function POST(
   let rideBooking = null
   if (going && needs_ride) {
     // Get member home address as fallback pickup
-    const { data: member } = await admin
+    const { data: member } = await db
       .from('members')
       .select('home_address')
       .eq('id', memberId)
@@ -102,7 +104,7 @@ export async function POST(
     }
 
     // Check for existing ride booking for this event
-    const { data: existing } = await admin
+    const { data: existing } = await db
       .from('ride_bookings')
       .select('id, status')
       .eq('event_id', eventId)
@@ -111,7 +113,7 @@ export async function POST(
       .maybeSingle()
 
     if (!existing) {
-      const { data: booking } = await admin
+      const { data: booking } = await db
         .from('ride_bookings')
         .insert({
           member_id: memberId,
@@ -151,16 +153,18 @@ export async function GET(
   const memberId = fm.member_id as string
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
 
-  const { data: rsvp } = await admin
+  const { data: rsvp } = await db
     .from('circle_event_rsvps')
     .select('id')
     .eq('event_id', eventId)
     .eq('member_id', memberId)
     .maybeSingle()
 
-  const { data: ride } = await admin
+  const { data: ride } = await db
     .from('ride_bookings')
     .select('id, status, pickup_time, pickup_address, dropoff_address')
     .eq('event_id', eventId)

@@ -30,7 +30,9 @@ export async function GET(req: Request) {
   const memberId = searchParams.get('member_id')
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
 
   let query = admin
     .from('time_bank_credits')
@@ -90,10 +92,12 @@ export async function POST(req: Request) {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
 
   // Look up earner's own senior (beneficiary)
-  const { data: earnerFm } = await admin
+  const { data: earnerFm } = await db
     .from('family_members')
     .select('id, member_id')
     .eq('id', earner_family_member_id)
@@ -108,7 +112,7 @@ export async function POST(req: Request) {
 
   const credits = hours_served // 1 credit per hour
 
-  const { data: credit, error } = await admin
+  const { data: credit, error } = await db
     .from('time_bank_credits')
     .insert({
       earner_family_member_id,
@@ -126,7 +130,7 @@ export async function POST(req: Request) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   // Notify beneficiary member
-  await admin.from('realtime_notifications').insert({
+  await db.from('realtime_notifications').insert({
     member_id: earnerFm.member_id,
     type: 'system_message',
     title: `${credits} time-bank credit${credits !== 1 ? 's' : ''} added to your account`,

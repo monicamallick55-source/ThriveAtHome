@@ -20,7 +20,9 @@ export async function GET() {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const admin = createAdminClient()
-  const { data, error } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data, error } = await db
     .from('companions')
     .select('id, full_name, bio, hourly_rate, service_types, languages, city, state, rating_average, total_sessions')
     .eq('is_active', true)

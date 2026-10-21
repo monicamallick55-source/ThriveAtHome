@@ -23,6 +23,8 @@ export async function GET() {
   if (!fm) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const isStaff = fm.role === 'admin' || fm.role === 'navigator'
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -57,6 +59,8 @@ export async function POST(req: Request) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: opp, error } = await (admin as any)
     .from('career_opportunities')

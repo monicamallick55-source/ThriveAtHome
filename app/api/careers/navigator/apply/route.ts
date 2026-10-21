@@ -22,6 +22,8 @@ export async function POST(req: NextRequest) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   const { data, error } = await (admin.from as any)('navigator_applications')
     .insert({ full_name, email, linkedin_url, why_interested, status: 'pending' })

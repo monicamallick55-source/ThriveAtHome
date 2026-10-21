@@ -21,6 +21,8 @@ export async function GET(req: NextRequest) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const today = new Date()
   today.setUTCHours(0, 0, 0, 0)
 

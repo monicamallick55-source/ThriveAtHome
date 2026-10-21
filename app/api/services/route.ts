@@ -62,6 +62,8 @@ export async function POST(req: NextRequest) {
   if (error) return NextResponse.json({ error }, { status: 500 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const subtype = (booking_details as Record<string, string>).subtype ?? ''
 
   // ─── AUTO-DISPATCH: Transport ────────────────────────────────────────────
@@ -87,7 +89,7 @@ export async function POST(req: NextRequest) {
         isRecurring,
       })
       // Persist provider booking ID back onto the booking row
-      await admin
+      await db
         .from('service_bookings')
         .update({
           status: 'confirmed',
@@ -101,7 +103,7 @@ export async function POST(req: NextRequest) {
         .eq('id', booking.id)
 
       // Queue SMS confirmation to member (fires if Twilio key present)
-      const { data: member } = await admin
+      const { data: member } = await db
         .from('members')
         .select('phone')
         .eq('id', memberId)
@@ -109,7 +111,7 @@ export async function POST(req: NextRequest) {
 
       if (member?.phone) {
         const timeLabel = dt ? new Date(dt).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' }) : 'your requested time'
-        await admin.from('notification_queue').insert({
+        await db.from('notification_queue').insert({
           member_id: memberId,
           channel:   'sms',
           phone:     member.phone,
@@ -119,7 +121,7 @@ export async function POST(req: NextRequest) {
     } catch (dispatchErr) {
       // Dispatch failed — fall back to navigator task so no ride is lost
       console.error('[Transport] Auto-dispatch failed, creating navigator task:', dispatchErr)
-      await admin.from('navigator_tasks').insert({
+      await db.from('navigator_tasks').insert({
         member_id: memberId,
         task_type: 'transport_dispatch_failed',
         description: `Transport booking auto-dispatch failed for booking ${booking.id}. Manually book a ride: ${pickup} → ${dest} at ${dt}. Error: ${String(dispatchErr)}`,
@@ -131,7 +133,7 @@ export async function POST(req: NextRequest) {
   // ─── AUTO-DISPATCH: Meals ────────────────────────────────────────────────
   // Automatically confirmed — no navigator needed for standard meal delivery.
   if (service_type === 'meals' && booking) {
-    await admin
+    await db
       .from('service_bookings')
       .update({ status: 'confirmed' })
       .eq('id', booking.id)
@@ -144,13 +146,13 @@ export async function POST(req: NextRequest) {
     const companionId = (booking_details as Record<string, string>).companion_id
     if (companionId) {
       // Matched companion — auto-confirm
-      await admin
+      await db
         .from('service_bookings')
         .update({ status: 'confirmed' })
         .eq('id', booking.id)
     } else {
       // No companion selected yet — needs matching
-      await admin.from('navigator_tasks').insert({
+      await db.from('navigator_tasks').insert({
         member_id: memberId,
         task_type: 'companion_matching',
         description: `Member requested companionship — no companion selected. Match and schedule a visit.`,
@@ -168,14 +170,14 @@ export async function POST(req: NextRequest) {
   // because they require human judgment, vetted matching, or emergency protocols.
   if (booking) {
     if (service_type === 'tech_help') {
-      await admin.from('navigator_tasks').insert({
+      await db.from('navigator_tasks').insert({
         member_id: memberId,
         task_type: 'tech_help_request',
         description: `Tech help request — subtype: ${subtype || 'unspecified'}. Coordinate volunteer or in-home visit.`,
         priority: 'medium',
       })
     } else if (service_type === 'telehealth' && subtype === 'mental_health_companion') {
-      await admin.from('navigator_tasks').insert({
+      await db.from('navigator_tasks').insert({
         member_id: memberId,
         task_type: 'mental_health_referral',
         description: 'Member requested mental health support. Review and provide a warm referral to appropriate professional.',
@@ -185,7 +187,7 @@ export async function POST(req: NextRequest) {
       const travelDesc = subtype === 'travel_companion'
         ? `Member needs a travel companion. Match with volunteers or paid companions willing to travel.`
         : `Member requested travel assistance — subtype: ${subtype || 'general'}. Connect with vetted travel agent.`
-      await admin.from('navigator_tasks').insert({
+      await db.from('navigator_tasks').insert({
         member_id: memberId,
         task_type: 'travel_assistance',
         description: travelDesc,
@@ -200,7 +202,7 @@ export async function POST(req: NextRequest) {
         : roadsideDetails.insurance_roadside_info
           ? ` Insurance roadside coverage: ${roadsideDetails.insurance_roadside_info}.`
           : ''
-      await admin.from('navigator_tasks').insert({
+      await db.from('navigator_tasks').insert({
         member_id: memberId,
         task_type: isCarRepair ? 'car_repair_coordination' : 'roadside_assistance',
         description: isCarRepair

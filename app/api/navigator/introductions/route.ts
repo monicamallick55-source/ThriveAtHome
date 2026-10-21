@@ -63,9 +63,11 @@ export async function POST(req: Request) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // 3. Verify both members exist (select only columns we know exist)
-  const { data: members } = await admin
+  const { data: members } = await db
     .from('members')
     .select('id, preferred_name, full_name')
     .in('id', [memberIdA, memberIdB])
@@ -185,8 +187,10 @@ export async function GET(req: Request) {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
-  const { data, error } = await admin
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
+  const { data, error } = await db
     .from('member_connections')
     .select(
       `id, created_at, status, intro_note, requester_accepted, recipient_accepted,

@@ -9,12 +9,14 @@ import { createAdminClient } from '@/lib/supabase/admin'
 // ─── Summary builder ──────────────────────────────────────────────────────────
 async function buildSummary(memberId: string): Promise<string> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
   const today = new Date()
   const todayStr = today.toISOString().split('T')[0]
 
   // 1. Member name
-  const { data: member } = await admin
+  const { data: member } = await db
     .from('members')
     .select('full_name, preferred_name')
     .eq('id', memberId)
@@ -25,7 +27,7 @@ async function buildSummary(memberId: string): Promise<string> {
   const lines: string[] = [`Good morning! Here's today's update for ${name}.`]
 
   // 2. Today's events
-  const { data: events } = await admin
+  const { data: events } = await db
     .from('events')
     .select('title, start_time, location')
     .gte('start_time', `${todayStr}T00:00:00Z`)
@@ -47,7 +49,7 @@ async function buildSummary(memberId: string): Promise<string> {
   }
 
   // 3. Ride bookings today
-  const { data: rides } = await admin
+  const { data: rides } = await db
     .from('ride_bookings')
     .select('pickup_time, status, dropoff_address')
     .eq('member_id', memberId)
@@ -68,7 +70,7 @@ async function buildSummary(memberId: string): Promise<string> {
 
   // 4. Recent safety check-in
   const yesterday = new Date(today.getTime() - 86400000).toISOString()
-  const { data: checkins } = await admin
+  const { data: checkins } = await db
     .from('safety_checkins')
     .select('checked_in_at, status')
     .eq('member_id', memberId)
@@ -130,7 +132,9 @@ export async function POST(req: Request) {
   const { member_id, dry_run = false } = body as { member_id?: string; dry_run?: boolean }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
 
   // Determine which members to send to
   let memberIds: string[] = []
@@ -138,7 +142,7 @@ export async function POST(req: Request) {
     memberIds = [member_id]
   } else {
     // All active members with a family contact that has SMS opt-in
-    const { data: members } = await admin
+    const { data: members } = await db
       .from('members')
       .select('id')
       .eq('status', 'active')
@@ -151,7 +155,7 @@ export async function POST(req: Request) {
 
   for (const mid of memberIds) {
     // Check if already sent today
-    const { data: existing } = await admin
+    const { data: existing } = await db
       .from('family_summary_log')
       .select('id')
       .eq('member_id', mid)
@@ -172,7 +176,7 @@ export async function POST(req: Request) {
     }
 
     // Get family member phone for SMS
-    const { data: familyMembers } = await admin
+    const { data: familyMembers } = await db
       .from('family_members')
       .select('id, phone, sms_opt_in')
       .eq('member_id', mid)
@@ -180,7 +184,7 @@ export async function POST(req: Request) {
       .not('phone', 'is', null)
 
     if (!familyMembers || familyMembers.length === 0) {
-      await admin.from('family_summary_log').insert({
+      await db.from('family_summary_log').insert({
         member_id: mid,
         summary_date: todayStr,
         channel: 'sms',
@@ -233,7 +237,7 @@ export async function POST(req: Request) {
       sendStatus = 'sent'
     }
 
-    await admin.from('family_summary_log').upsert({
+    await db.from('family_summary_log').upsert({
       member_id: mid,
       summary_date: todayStr,
       channel: 'sms',

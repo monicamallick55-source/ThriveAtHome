@@ -16,12 +16,14 @@ export async function GET(
 
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: directMember } = await (admin.from as any)('members')
     .select('id')
     .eq('supabase_auth_id', user.id)
     .maybeSingle()
 
-  const { data: fm } = await admin
+  const { data: fm } = await db
     .from('family_members')
     .select('member_id, org_id')
     .eq('supabase_auth_id', user.id)

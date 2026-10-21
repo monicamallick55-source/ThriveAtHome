@@ -9,9 +9,11 @@ export async function POST(req: NextRequest) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // Find metros with coordinator but not yet activated
-  const { data: metros, error } = await admin
+  const { data: metros, error } = await db
     .from('metro_areas')
     .select('id, name, member_count, coordinator_family_member_id')
     .eq('status', 'forming')
@@ -25,7 +27,7 @@ export async function POST(req: NextRequest) {
   let activated = 0
   for (const metro of metros ?? []) {
     if ((metro.member_count ?? 0) >= 50) {
-      const { error: updateErr } = await admin
+      const { error: updateErr } = await db
         .from('metro_areas')
         .update({ status: 'active', activated_at: new Date().toISOString() })
         .eq('id', metro.id)

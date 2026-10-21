@@ -17,6 +17,8 @@ export async function GET(req: Request) {
     if (!memberId) return NextResponse.json({ error: 'member_id required' }, { status: 400 })
 
     const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
     const { data: assignment } = await (admin.from as any)('buddy_assignments')
       .select('*, volunteers(full_name)')
       .eq('member_id', memberId)

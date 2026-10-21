@@ -29,6 +29,8 @@ export async function GET(req: Request) {
 
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (admin as any)
     .from('safety_program_volunteers')
     .select(`
@@ -54,6 +56,8 @@ export async function POST(req: Request) {
   if (!volunteer_id) return NextResponse.json({ error: 'volunteer_id required' }, { status: 400 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (admin as any)
     .from('safety_program_volunteers')

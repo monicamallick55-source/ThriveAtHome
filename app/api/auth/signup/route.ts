@@ -29,6 +29,8 @@ export async function POST(req: NextRequest) {
   const relationship = isSelfSignup ? 'self' : (body.relationship?.trim() || null)
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // Resolve referral code to agency
   let referringAgencyId: string | null = null
@@ -42,7 +44,7 @@ export async function POST(req: NextRequest) {
       .maybeSingle() as { data: { agency_id: string; referral_code: string } | null }
     if (link) {
       referringAgencyId = link.agency_id
-      const { data: agency } = await admin
+      const { data: agency } = await db
         .from('care_agencies' as any)
         .select('name')
         .eq('id', link.agency_id)
@@ -67,7 +69,7 @@ export async function POST(req: NextRequest) {
   const userId = authData.user.id
 
   // Step 2: Insert family_members row
-  const { error: insertError } = await admin.from('family_members').insert({
+  const { error: insertError } = await db.from('family_members').insert({
     supabase_auth_id: userId,
     full_name: fullName,
     email,

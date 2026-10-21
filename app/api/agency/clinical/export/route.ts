@@ -29,7 +29,9 @@ export async function GET(req: NextRequest) {
 
   // Verify caller is agency_admin for this agency
   const admin = createAdminClient()
-  const { data: fm } = await admin.from('family_members').select('role, agency_id').eq('supabase_auth_id', user.id).maybeSingle()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: fm } = await db.from('family_members').select('role, agency_id').eq('supabase_auth_id', user.id).maybeSingle()
   if (!fm || fm.role !== 'agency_admin' || fm.agency_id !== agencyId) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }

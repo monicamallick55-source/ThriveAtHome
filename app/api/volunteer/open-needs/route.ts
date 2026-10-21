@@ -13,6 +13,8 @@ export async function GET() {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const { data, error } = await (admin.from as any)('member_needs')
     .select('id, created_at, org_id, need_type, title, description, urgency, preferred_date, preferred_time, status')
     .eq('status', 'open')

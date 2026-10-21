@@ -7,6 +7,8 @@ import { getBrandConfigForAgency, upsertBrandConfig } from '@/lib/data/brandConf
 
 async function getAgencyIdForUser(authUserId: string): Promise<string | null> {
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const { data, error } = await (admin
     .from('family_members')
     .select('agency_id, role')

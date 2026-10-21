@@ -24,7 +24,9 @@ export async function GET(request: NextRequest) {
 
   // 3. Authorise: confirm this user is linked to the requested member
   const admin = createAdminClient()
-  const { data: fm, error: fmError } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: fm, error: fmError } = await db
     .from('family_members')
     .select('member_id')
     .eq('supabase_auth_id', user.id)
@@ -40,7 +42,7 @@ export async function GET(request: NextRequest) {
   }
 
   // 4. Fetch paginated calls, newest first — family-safe columns only (never the transcript)
-  const { data: calls, error: callsError } = await admin
+  const { data: calls, error: callsError } = await db
     .from('check_in_calls')
     .select(FAMILY_CALL_COLUMNS.join(', '))
     .eq('member_id', memberId)

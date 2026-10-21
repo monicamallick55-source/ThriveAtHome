@@ -16,6 +16,8 @@ export async function GET() {
 
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (admin.from as any)('volunteer_shifts')
     .select('id, day_of_week, start_time, end_time')
     .eq('volunteer_id', volunteer.id)
@@ -43,6 +45,8 @@ export async function POST(req: NextRequest) {
 
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (admin.from as any)('volunteer_shifts')
     .upsert({ volunteer_id: volunteer.id, day_of_week: dow, start_time: start, end_time: end },
       { onConflict: 'volunteer_id,day_of_week,start_time,end_time' })
@@ -65,6 +69,8 @@ export async function DELETE(req: NextRequest) {
   if (!id) return NextResponse.json({ error: 'id is required' }, { status: 400 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (admin.from as any)('volunteer_shifts')
     .delete().eq('id', id).eq('volunteer_id', volunteer.id)

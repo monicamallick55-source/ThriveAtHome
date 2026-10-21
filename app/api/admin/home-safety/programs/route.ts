@@ -25,6 +25,8 @@ export async function GET() {
 
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (admin as any)
     .from('safety_programs')
     .select(`
@@ -56,6 +58,8 @@ export async function POST(req: Request) {
   if (!program_year?.trim()) return NextResponse.json({ error: 'program_year required' }, { status: 400 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (admin as any)
     .from('safety_programs')

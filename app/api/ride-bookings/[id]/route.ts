@@ -18,7 +18,9 @@ export async function PATCH(
   const body = await req.json().catch(() => ({}))
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
   const { data: isStaff } = await supabase.rpc('is_staff')
 
   const updates: Record<string, unknown> = {}
@@ -41,7 +43,7 @@ export async function PATCH(
     // Non-staff can only cancel their own
     if (body.status === 'cancelled') {
       // Verify ownership
-      const { data: booking } = await admin
+      const { data: booking } = await db
         .from('ride_bookings')
         .select('requested_by, member_id, status')
         .eq('id', id)
@@ -67,7 +69,7 @@ export async function PATCH(
     }
   }
 
-  const { data, error } = await admin
+  const { data, error } = await db
     .from('ride_bookings')
     .update(updates)
     .eq('id', id)
@@ -83,7 +85,7 @@ export async function PATCH(
       ? `Your ride is confirmed${data.driver_name ? ` with ${data.driver_name}` : ''}.`
       : `Your ride has been cancelled${data.cancel_reason ? `: ${data.cancel_reason}` : '.'}`
 
-    await admin.from('realtime_notifications').insert({
+    await db.from('realtime_notifications').insert({
       type: `ride_${updates.status}`,
       title,
       body: body_text,
@@ -108,8 +110,10 @@ export async function DELETE(
   if (!isStaff) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
-  const { error } = await admin.from('ride_bookings').delete().eq('id', id)
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
+  const { error } = await db.from('ride_bookings').delete().eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   return new NextResponse(null, { status: 204 })

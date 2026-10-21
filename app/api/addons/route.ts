@@ -13,6 +13,8 @@ export async function GET(req: Request) {
   const memberId = url.searchParams.get('memberId')
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // Always return all active SKUs
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -60,6 +62,8 @@ export async function POST(req: Request) {
   if (!isFamily && !isStaff) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: skuRow } = await (admin as any)
@@ -149,6 +153,8 @@ export async function PATCH(req: Request) {
   if (!addonId) return NextResponse.json({ error: 'addonId required' }, { status: 400 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (admin as any)

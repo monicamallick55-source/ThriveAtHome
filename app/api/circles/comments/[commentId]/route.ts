@@ -50,7 +50,9 @@ export async function DELETE(
   const isStaff = ctx.role === 'admin' || ctx.role === 'navigator'
   if (!isStaff) {
     const admin = createAdminClient()
-    const { data: comment } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+    const { data: comment } = await db
       .from('circle_post_comments')
       .select('member_id')
       .eq('id', commentId)

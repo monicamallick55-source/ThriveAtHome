@@ -51,9 +51,11 @@ async function resolveContentAuthor(
   commentId: string | null,
 ): Promise<string | null> {
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   if (postId) {
-    const { data } = await admin
+    const { data } = await db
       .from('circle_posts')
       .select('member_id')
       .eq('id', postId)
@@ -62,7 +64,7 @@ async function resolveContentAuthor(
   }
 
   if (commentId) {
-    const { data } = await admin
+    const { data } = await db
       .from('circle_post_comments')
       .select('member_id')
       .eq('id', commentId)
@@ -106,9 +108,11 @@ export async function POST(req: Request) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // 4. Insert report (UNIQUE constraint catches duplicate reports gracefully)
-  const { data: report, error: reportError } = await admin
+  const { data: report, error: reportError } = await db
     .from('community_reports')
     .insert({
       post_id: postId,
@@ -143,7 +147,7 @@ export async function POST(req: Request) {
         ? `A member has reported concern for ${authorMemberId}'s wellbeing via a community post/comment.`
         : `Community report received. Reason: ${reason}. Report ID: ${report?.id ?? 'unknown'}.`
 
-    await admin
+    await db
       .from('navigator_tasks')
       .insert({
         member_id: authorMemberId,
@@ -157,7 +161,7 @@ export async function POST(req: Request) {
 
     // 7. Extra wellbeing task for "worried about member"
     if (reason === 'worried_about_member') {
-      await admin
+      await db
         .from('navigator_tasks')
         .insert({
           member_id: authorMemberId,

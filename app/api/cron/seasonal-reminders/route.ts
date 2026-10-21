@@ -24,10 +24,12 @@ export async function GET(req: NextRequest) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const month = String(new Date().getUTCMonth() + 1)
   const seasonTip = SEASON_TIPS[month] ?? 'seasonal home safety check'
 
-  const { data: members, error } = await admin
+  const { data: members, error } = await db
     .from('members')
     .select('id, first_name')
     .eq('status', 'active')

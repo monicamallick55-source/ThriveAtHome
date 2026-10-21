@@ -16,7 +16,9 @@ export async function GET(req: Request) {
   const status = searchParams.get('status')
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
 
   const { data: isStaff } = await supabase.rpc('is_staff')
 
@@ -89,9 +91,11 @@ export async function POST(req: Request) {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
 
-  const { data: booking, error } = await admin
+  const { data: booking, error } = await db
     .from('ride_bookings')
     .insert({
       member_id,
@@ -109,7 +113,7 @@ export async function POST(req: Request) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   // Notify navigator
-  await admin.from('realtime_notifications').insert({
+  await db.from('realtime_notifications').insert({
     type: 'ride_requested',
     title: '🚗 Ride Requested',
     body: `A ride has been requested for ${new Date(pickup_time).toLocaleString()}.`,

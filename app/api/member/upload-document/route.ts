@@ -31,6 +31,8 @@ export async function POST(request: NextRequest) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // Verify the user is linked to this member (direct member auth or family member)
   const [directCheck, familyCheck] = await Promise.all([

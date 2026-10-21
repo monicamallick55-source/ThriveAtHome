@@ -36,7 +36,9 @@ export async function POST(req: NextRequest) {
   if (!body?.booking_id) return NextResponse.json({ error: 'booking_id required' }, { status: 400 })
 
   const admin = createAdminClient()
-  const { data: booking } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: booking } = await db
     .from('service_bookings')
     .select('id, status, volunteer_id, member_id, service_type, booking_details, requested_for')
     .eq('id', body.booking_id)
@@ -58,7 +60,7 @@ export async function POST(req: NextRequest) {
     || (booking.requested_for ? booking.requested_for.slice(0, 10) : new Date().toISOString().slice(0, 10))
 
   // 1. Mark the booking complete
-  const { error: updErr } = await admin
+  const { error: updErr } = await db
     .from('service_bookings')
     .update({
       status: 'completed',

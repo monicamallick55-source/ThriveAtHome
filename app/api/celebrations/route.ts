@@ -26,6 +26,8 @@ export async function GET() {
 
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (admin as any)
     .from('celebration_requests')
     .select('*, messages:celebration_messages(count)')
@@ -65,6 +67,8 @@ export async function POST(req: Request) {
 
   const amountCents = TIER_PRICES[tier as string]
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // Check if member has an active grief_support_request close to this date (grief guard)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

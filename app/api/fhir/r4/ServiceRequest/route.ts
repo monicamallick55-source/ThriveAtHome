@@ -37,11 +37,13 @@ export async function POST(req: NextRequest) {
     : []
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   let memberId: string | null = null
 
   for (const id of identifiers) {
     if (!id.value) continue
-    const { data: m } = await admin.from('members')
+    const { data: m } = await db.from('members')
       .select('id')
       .or(`mrn.eq.${id.value},phone_number.eq.${id.value},phone.eq.${id.value}`)
       .maybeSingle()
@@ -88,7 +90,7 @@ export async function POST(req: NextRequest) {
 
   // Create navigator task
   const taskPriority = safePriority === 'stat' || safePriority === 'asap' ? 'critical' : safePriority === 'urgent' ? 'high' : 'medium'
-  await admin.from('navigator_tasks').insert({
+  await db.from('navigator_tasks').insert({
     member_id: memberId,
     task_type: 'hospital_referral',
     priority: taskPriority,

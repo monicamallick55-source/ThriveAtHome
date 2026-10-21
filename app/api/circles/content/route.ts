@@ -16,9 +16,11 @@ export async function GET(req: Request) {
   if (!circleId) return NextResponse.json({ error: 'circle_id required' }, { status: 400 })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
 
-  const { data: items, error } = await admin
+  const { data: items, error } = await db
     .from('circle_content_items')
     .select(`
       id, created_at, content_type, title, body, url, image_url,
@@ -57,7 +59,9 @@ export async function POST(req: Request) {
   if (!title?.trim()) return NextResponse.json({ error: 'title required' }, { status: 400 })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
 
   // Get navigator's family_member id
   const { data: fm } = await supabase
@@ -66,7 +70,7 @@ export async function POST(req: Request) {
     .eq('supabase_auth_id', user.id)
     .maybeSingle()
 
-  const { data: item, error } = await admin
+  const { data: item, error } = await db
     .from('circle_content_items')
     .insert({
       circle_id,

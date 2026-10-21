@@ -40,7 +40,9 @@ export async function POST(request: Request) {
   }
 
   const admin = createAdminClient()
-  const { data: rec } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: rec } = await db
     .from('oral_history_recordings')
     .select('id, member_id')
     .eq('id', recordingId)

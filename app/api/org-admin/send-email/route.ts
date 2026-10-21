@@ -9,7 +9,9 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const admin = createAdminClient()
-  const { data: fm } = await admin.from('family_members').select('id, role, org_id, full_name').eq('supabase_auth_id', user.id).maybeSingle()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: fm } = await db.from('family_members').select('id, role, org_id, full_name').eq('supabase_auth_id', user.id).maybeSingle()
   if (!fm || (fm.role !== 'org_admin' && fm.role !== 'admin')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
@@ -46,7 +48,7 @@ export async function POST(req: NextRequest) {
       .map((m: any) => m.member_id)
     if (!dueIds.length) return NextResponse.json({ sent: 0, message: 'No members with dues due.' })
 
-    const { data: contacts } = await admin.from('family_members').select('email, full_name').in('member_id', dueIds)
+    const { data: contacts } = await db.from('family_members').select('email, full_name').in('member_id', dueIds)
     const sent = await sendToContacts(contacts ?? [], orgName, subject, message)
     const logged = await logSentEmail(admin, fm.org_id, subject, message, recipientGroup, sent, fm.full_name)
     return NextResponse.json({ sent, logged })
@@ -55,7 +57,7 @@ export async function POST(req: NextRequest) {
   if (recipientGroup.startsWith('member_')) {
     // Individual member email
     const targetMemberId = recipientGroup.replace('member_', '')
-    const { data: contacts } = await admin.from('family_members').select('email, full_name').eq('member_id', targetMemberId)
+    const { data: contacts } = await db.from('family_members').select('email, full_name').eq('member_id', targetMemberId)
     const sent = await sendToContacts(contacts ?? [], orgName, subject, message)
     const logged = await logSentEmail(admin, fm.org_id, subject, message, recipientGroup, sent, fm.full_name)
     return NextResponse.json({ sent, logged })
@@ -63,7 +65,7 @@ export async function POST(req: NextRequest) {
 
   if (recipientGroup === 'volunteers') {
     // All active volunteers linked to this org (via volunteers table or family_members with role='volunteer')
-    const { data: volFMs } = await admin.from('family_members').select('email, full_name').eq('org_id', fm.org_id).eq('role', 'volunteer')
+    const { data: volFMs } = await db.from('family_members').select('email, full_name').eq('org_id', fm.org_id).eq('role', 'volunteer')
     const sent = await sendToContacts(volFMs ?? [], orgName, subject, message)
     const logged = await logSentEmail(admin, fm.org_id, subject, message, recipientGroup, sent, fm.full_name)
     return NextResponse.json({ sent, logged })
@@ -94,7 +96,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ sent: 0, message: 'No active members to send to.' })
   }
   const memberIds = (memberships as { member_id: string }[]).map((m: any) => m.member_id)
-  const { data: contacts } = await admin.from('family_members').select('email, full_name').in('member_id', memberIds)
+  const { data: contacts } = await db.from('family_members').select('email, full_name').in('member_id', memberIds)
 
   const sent = await sendToContacts(contacts ?? [], orgName, subject, message)
   const logged = await logSentEmail(admin, fm.org_id, subject, message, recipientGroup, sent, fm.full_name)

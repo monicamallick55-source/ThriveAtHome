@@ -44,7 +44,9 @@ export async function POST(req: Request) {
   }
 
   const admin = createAdminClient()
-  const { data, error } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data, error } = await db
     .from('navigator_notes')
     .insert({ member_id, navigator_id: navigator.id, note: note.trim() })
     .select()

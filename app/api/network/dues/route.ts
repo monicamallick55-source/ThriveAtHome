@@ -9,7 +9,9 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const admin = createAdminClient()
-  const { data: fm } = await admin.from('family_members').select('role, network_id').eq('supabase_auth_id', user.id).maybeSingle()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: fm } = await db.from('family_members').select('role, network_id').eq('supabase_auth_id', user.id).maybeSingle()
   if (!fm || (fm.role !== 'network_admin' && fm.role !== 'admin')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }

@@ -38,6 +38,8 @@ export async function PATCH(
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const updates: Record<string, unknown> = { status }
   if (['confirmed', 'false_positive', 'resolved'].includes(status as string)) {
     updates.resolved_by = fm.id

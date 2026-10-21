@@ -31,12 +31,14 @@ export async function GET(req: NextRequest) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const results = { pets_checked: 0, created: 0, notified: 0, skipped_exists: 0, errors: 0, details: [] as string[] }
   const today = new Date()
   const todayStr = today.toISOString().slice(0, 10)
 
   // Active members with at least one living pet.
-  const { data: pets, error: petsErr } = await admin
+  const { data: pets, error: petsErr } = await db
     .from('member_pets')
     .select('id, member_id, name, species, birth_date, adoption_date, is_active, passed_away_on')
     .eq('is_active', true)
@@ -46,7 +48,7 @@ export async function GET(req: NextRequest) {
   }
 
   const memberIds = Array.from(new Set((pets ?? []).map((p: any) => p.member_id)))
-  const { data: activeMembers } = await admin
+  const { data: activeMembers } = await db
     .from('members')
     .select('id, preferred_name, full_name, status')
     .in('id', memberIds.length ? memberIds : ['00000000-0000-0000-0000-000000000000'])
@@ -122,7 +124,7 @@ export async function GET(req: NextRequest) {
           continue
         }
 
-        const { data: celeb, error: createErr } = await admin
+        const { data: celeb, error: createErr } = await db
           .from('celebration_events')
           .insert({
             member_id: pet.member_id,
@@ -160,7 +162,7 @@ export async function GET(req: NextRequest) {
         if (notifErr) {
           results.details.push(`pet ${pet.id}: notification insert failed: ${notifErr.message}`)
         } else {
-          await admin
+          await db
             .from('celebration_events')
             .update({ family_notified_at: new Date().toISOString() })
             .eq('id', celeb.id)

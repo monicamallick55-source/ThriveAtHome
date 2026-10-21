@@ -25,7 +25,9 @@ export async function DELETE(
 
   // 2. Fetch the document to get member_id for authorization
   const admin = createAdminClient()
-  const { data: doc, error: docError } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: doc, error: docError } = await db
     .from('document_vault_items')
     .select('id, member_id, storage_path')
     .eq('id', documentId)
@@ -40,7 +42,7 @@ export async function DELETE(
   }
 
   // 3. Authorise: confirm this user is linked to the document's member
-  const { data: fm, error: fmError } = await admin
+  const { data: fm, error: fmError } = await db
     .from('family_members')
     .select('id')
     .eq('supabase_auth_id', user.id)

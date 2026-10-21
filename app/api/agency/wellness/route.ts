@@ -9,7 +9,9 @@ async function getAgencyAdmin() {
   const { data: { user }, error } = await supabase.auth.getUser()
   if (error || !user) return null
   const admin = createAdminClient()
-  const { data: fm } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: fm } = await db
     .from('family_members')
     .select('role, agency_id')
     .eq('supabase_auth_id', user.id)
@@ -37,7 +39,7 @@ export async function GET() {
   }
 
   // Fetch member basics (no DOB, address — only wellness-relevant fields)
-  const { data: members } = await admin
+  const { data: members } = await db
     .from('members')
     .select('id, preferred_name, full_name, status, check_in_frequency')
     .in('id', memberIds)
@@ -46,7 +48,7 @@ export async function GET() {
   const activeMemberIds = (members ?? []).map((m: { id: string }) => m.id)
 
   // Last Aria check-in call per member
-  const { data: calls } = await admin
+  const { data: calls } = await db
     .from('check_in_calls')
     .select('member_id, created_at, mood_score, status')
     .in('member_id', activeMemberIds)
@@ -67,7 +69,7 @@ export async function GET() {
   }
 
   // Unacknowledged alerts
-  const { data: alerts } = await admin
+  const { data: alerts } = await db
     .from('alerts')
     .select('member_id, severity')
     .in('member_id', activeMemberIds)

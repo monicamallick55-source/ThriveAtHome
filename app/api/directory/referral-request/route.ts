@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (memberId) {
-      await supabase.from('navigator_tasks').insert({
+      await db.from('navigator_tasks').insert({
         member_id: memberId,
         task_type: 'partner_referral_request',
         title: `Partner referral request: ${category}`,

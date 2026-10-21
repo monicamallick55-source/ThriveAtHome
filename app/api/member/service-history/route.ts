@@ -9,12 +9,14 @@ export async function GET() {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   let memberId: string | null = null
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: direct } = await (admin.from as any)('members').select('id').eq('supabase_auth_id', user.id).maybeSingle()
   if (direct?.id) memberId = direct.id
   else {
-    const { data: fm } = await admin.from('family_members').select('member_id').eq('supabase_auth_id', user.id).maybeSingle()
+    const { data: fm } = await db.from('family_members').select('member_id').eq('supabase_auth_id', user.id).maybeSingle()
     memberId = fm?.member_id ?? null
   }
   if (!memberId) return NextResponse.json({ bookings: [], needs: [] })

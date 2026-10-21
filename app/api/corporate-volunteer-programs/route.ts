@@ -5,7 +5,9 @@ import { createAdminClient } from '@/lib/supabase/admin'
 export async function GET() {
   try {
     const admin = createAdminClient()
-    const { data, error } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+    const { data, error } = await db
       .from('corporate_volunteer_programs')
       .select('id, program_name, tier, employer_account_id')
       .eq('status', 'active')

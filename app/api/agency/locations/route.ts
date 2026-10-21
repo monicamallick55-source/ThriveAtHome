@@ -9,6 +9,8 @@ type AgencyLocationInsert = TablesInsert<'agency_locations'>
 async function getAgencyAdmin(userId: string): Promise<string | null> {
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (admin.from('family_members').select('agency_id, role').eq('supabase_auth_id', userId).maybeSingle() as any)
   if (!data || (data.role !== 'agency_admin' && data.role !== 'admin')) return null
   return data.agency_id ?? null
@@ -26,6 +28,8 @@ export async function GET(req: NextRequest) {
   if (!callerAgencyId && callerAgencyId !== agencyId) {
     // Allow admin role regardless of agency_id
     const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: fm } = await (admin.from('family_members').select('role').eq('supabase_auth_id', user.id).maybeSingle() as any)
     if (!fm || fm.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
@@ -49,6 +53,8 @@ export async function POST(req: NextRequest) {
   const callerAgencyId = await getAgencyAdmin(user.id)
   if (callerAgencyId !== body.agency_id) {
     const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: fm } = await (admin.from('family_members').select('role').eq('supabase_auth_id', user.id).maybeSingle() as any)
     if (!fm || fm.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })

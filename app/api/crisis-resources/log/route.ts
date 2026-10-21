@@ -28,8 +28,10 @@ export async function POST(req: NextRequest) {
 
   try {
     const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
     const { memberId } = await resolveMemberContext(user.id)
-    const { error } = await admin.from('crisis_resource_views').insert({
+    const { error } = await db.from('crisis_resource_views').insert({
       member_id: memberId,
       viewer_auth_id: user.id,
       resource_key: resource_key.slice(0, 80),

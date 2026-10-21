@@ -10,9 +10,11 @@ export async function GET() {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // Get the employer account linked to this admin
-  const { data: adminRow } = await admin
+  const { data: adminRow } = await db
     .from('family_members')
     .select('employer_account_id')
     .eq('supabase_auth_id', user.id)
@@ -80,7 +82,7 @@ export async function GET() {
 
   // Sync seats_used if it differs
   if (account && account.seats_used !== seatsUsed) {
-    await admin
+    await db
       .from('employer_accounts')
       .update({ seats_used: seatsUsed })
       .eq('id', employerId)

@@ -7,6 +7,8 @@ export async function GET() {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // Find member ID
   let memberId: string | null = null
@@ -18,7 +20,7 @@ export async function GET() {
   if (directMember?.id) {
     memberId = directMember.id
   } else {
-    const { data: fm } = await admin
+    const { data: fm } = await db
       .from('family_members')
       .select('member_id')
       .eq('supabase_auth_id', user.id)
@@ -29,7 +31,7 @@ export async function GET() {
   if (!memberId) return NextResponse.json({ circles: [], events: [] })
 
   // Get joined circles
-  const { data: memberships } = await admin
+  const { data: memberships } = await db
     .from('circle_memberships')
     .select('circle_id, joined_at')
     .eq('member_id', memberId)
@@ -39,7 +41,7 @@ export async function GET() {
   if (circleIds.length === 0) return NextResponse.json({ circles: [], events: [] })
 
   // Get circle details
-  const { data: circles } = await admin
+  const { data: circles } = await db
     .from('cultural_circles')
     .select('id, circle_name, primary_language, description, member_count, image_placeholder')
     .in('id', circleIds)

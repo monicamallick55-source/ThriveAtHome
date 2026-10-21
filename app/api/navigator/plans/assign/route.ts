@@ -25,7 +25,9 @@ export async function POST(req: Request) {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
 
   const { data: fm } = await supabase
     .from('family_members')
@@ -35,7 +37,7 @@ export async function POST(req: Request) {
 
   if (plan_id) {
     // Cancel any existing active plan first
-    await admin
+    await db
       .from('member_plans')
       .update({ status: 'cancelled', cancelled_at: new Date().toISOString(), cancel_reason: 'Plan changed' })
       .eq('member_id', member_id)
@@ -45,7 +47,7 @@ export async function POST(req: Request) {
       ? new Date(Date.now() + trial_days * 86400000).toISOString()
       : null
 
-    const { data, error } = await admin
+    const { data, error } = await db
       .from('member_plans')
       .insert({
         member_id,
@@ -60,7 +62,7 @@ export async function POST(req: Request) {
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-    await admin.from('realtime_notifications').insert({
+    await db.from('realtime_notifications').insert({
       type: 'plan_assigned',
       title: '✨ Your plan has been updated',
       body: 'Your Thrive@Home plan has been assigned or changed.',
@@ -72,7 +74,7 @@ export async function POST(req: Request) {
   }
 
   if (addon_id) {
-    const { data, error } = await admin
+    const { data, error } = await db
       .from('member_addons')
       .insert({
         member_id,
@@ -85,7 +87,7 @@ export async function POST(req: Request) {
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-    await admin.from('realtime_notifications').insert({
+    await db.from('realtime_notifications').insert({
       type: 'addon_assigned',
       title: '✨ Add-on activated',
       body: 'A new service add-on has been added to your account.',
@@ -113,10 +115,12 @@ export async function DELETE(req: Request) {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
 
   if (member_plan_id) {
-    const { error } = await admin
+    const { error } = await db
       .from('member_plans')
       .update({
         status: 'cancelled',
@@ -130,7 +134,7 @@ export async function DELETE(req: Request) {
   }
 
   if (member_addon_id) {
-    const { error } = await admin
+    const { error } = await db
       .from('member_addons')
       .update({ status: 'cancelled', cancelled_at: new Date().toISOString() })
       .eq('id', member_addon_id)

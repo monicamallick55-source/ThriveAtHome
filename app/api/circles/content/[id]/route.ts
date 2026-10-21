@@ -32,8 +32,10 @@ export async function PATCH(
   if (body.content_type !== undefined) update.content_type = body.content_type
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
-  const { data: item, error } = await admin
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
+  const { data: item, error } = await db
     .from('circle_content_items')
     .update(update)
     .eq('id', id)
@@ -57,8 +59,10 @@ export async function DELETE(
   if (!isStaff) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
-  const { error } = await admin
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
+  const { error } = await db
     .from('circle_content_items')
     .delete()
     .eq('id', id)

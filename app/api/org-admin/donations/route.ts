@@ -7,7 +7,9 @@ const VALID_PAYMENT_METHODS = ['cash', 'check', 'card', 'online', 'in_kind']
 
 async function getOrgAdminContext(userId: string) {
   const admin = createAdminClient()
-  const { data: fm } = await admin.from('family_members').select('role, org_id').eq('supabase_auth_id', userId).maybeSingle()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: fm } = await db.from('family_members').select('role, org_id').eq('supabase_auth_id', userId).maybeSingle()
   if (!fm || (fm.role !== 'org_admin' && fm.role !== 'admin')) return null
   if (!fm.org_id) return null
   return fm as { role: string; org_id: string }

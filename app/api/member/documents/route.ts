@@ -10,6 +10,8 @@ export async function GET() {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // Get member and org_id — direct-auth senior first, then family_members linkage
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -18,7 +20,7 @@ export async function GET() {
     .eq('supabase_auth_id', user.id)
     .maybeSingle()
 
-  const { data: fm } = await admin
+  const { data: fm } = await db
     .from('family_members')
     .select('member_id, org_id, role')
     .eq('supabase_auth_id', user.id)

@@ -15,6 +15,8 @@ export async function POST(req: NextRequest) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // Find member ID and org_id via family_members or direct member
   let memberId: string | null = null
@@ -30,7 +32,7 @@ export async function POST(req: NextRequest) {
     memberId = directMember.id
   }
 
-  const { data: fm } = await admin
+  const { data: fm } = await db
     .from('family_members')
     .select('member_id, org_id')
     .eq('supabase_auth_id', user.id)

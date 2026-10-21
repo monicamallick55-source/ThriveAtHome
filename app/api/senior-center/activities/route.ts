@@ -55,6 +55,8 @@ export async function PATCH(request: NextRequest) {
     if (!isAdmin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
     const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
     // Insert registration (ignore duplicate if already registered)
     const { data: regData, error: regError } = await (admin.from as any)('activity_registrations')
       .insert({ activity_id, center_id, visitor_name: visitor_name.trim() })

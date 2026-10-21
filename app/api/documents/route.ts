@@ -24,7 +24,9 @@ export async function GET(request: NextRequest) {
 
   // 3. Authorise
   const admin = createAdminClient()
-  const { data: fm, error: fmError } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: fm, error: fmError } = await db
     .from('family_members')
     .select('id')
     .eq('supabase_auth_id', user.id)
@@ -89,7 +91,9 @@ export async function POST(request: NextRequest) {
 
   // 4. Authorise: confirm this user is linked to the requested member
   const admin = createAdminClient()
-  const { data: fm, error: fmError } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: fm, error: fmError } = await db
     .from('family_members')
     .select('id')
     .eq('supabase_auth_id', user.id)

@@ -19,6 +19,8 @@ export async function GET(req: NextRequest) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const today = new Date()
   today.setUTCHours(0, 0, 0, 0)
   const todayStr = today.toISOString().slice(0, 10)
@@ -26,7 +28,7 @@ export async function GET(req: NextRequest) {
   const results = { reminded: 0, skipped: 0, errors: 0 }
 
   // Fetch all active tracked items
-  const { data: items, error: fetchErr } = await admin
+  const { data: items, error: fetchErr } = await db
     .from('tracked_items')
     .select('*')
     .eq('status', 'active')
@@ -76,7 +78,7 @@ export async function GET(req: NextRequest) {
         : `Your ${typeLabel.toLowerCase()} "${item.item_name}" expires on ${item.expiration_or_appointment_date}.`
 
       // Push realtime notification to family
-      const { data: fms } = await admin
+      const { data: fms } = await db
         .from('family_members')
         .select('id')
         .eq('member_id', item.member_id)
@@ -97,7 +99,7 @@ export async function GET(req: NextRequest) {
 
       // Update last_reminded_at
       try {
-        await admin
+        await db
           .from('tracked_items')
           .update({ last_reminded_at: new Date().toISOString() })
           .eq('id', item.id)

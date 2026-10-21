@@ -9,7 +9,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ sc
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const admin = createAdminClient()
-  const { data: fm } = await admin.from('family_members').select('role').eq('supabase_auth_id', user.id).maybeSingle()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: fm } = await db.from('family_members').select('role').eq('supabase_auth_id', user.id).maybeSingle()
   if (!fm || !['admin', 'navigator'].includes(fm.role)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
@@ -18,7 +20,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ sc
   let body: { status?: string }
   try { body = await req.json() } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }) }
 
-  const { error } = await admin
+  const { error } = await db
     .from('k12_schools')
     .update({ status: body.status ?? 'active' })
     .eq('id', schoolId)

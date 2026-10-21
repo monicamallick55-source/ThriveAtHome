@@ -24,6 +24,8 @@ export async function GET() {
 
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: profile } = await (admin as any)
     .from('career_profiles')
     .select('*')
@@ -45,6 +47,8 @@ export async function POST(req: Request) {
   } = body as Record<string, unknown>
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: profile, error } = await (admin as any)
     .from('career_profiles')

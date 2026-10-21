@@ -22,6 +22,8 @@ export async function GET() {
 
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (admin as any)
     .from('gift_orders')
     .select('*')
@@ -63,6 +65,8 @@ export async function POST(req: Request) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   if (gift.amountCents === null || gift.amountCents === 0) {
     // Free gift (digital card) — insert directly
@@ -120,7 +124,7 @@ export async function POST(req: Request) {
   // TODO: create Stripe PaymentIntent and store stripe_pi_id
   // const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
   // const pi = await stripe.paymentIntents.create({ amount: gift.amountCents, currency: 'usd', metadata: { order_id: data.id } })
-  // await admin.from('gift_orders').update({ stripe_pi_id: pi.id }).eq('id', data.id)
+  // await db.from('gift_orders').update({ stripe_pi_id: pi.id }).eq('id', data.id)
   // return NextResponse.json({ ok: true, orderId: data.id, requiresPayment: true, clientSecret: pi.client_secret })
 
   return NextResponse.json({

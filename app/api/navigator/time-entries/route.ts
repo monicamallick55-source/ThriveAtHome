@@ -20,9 +20,11 @@ export async function GET(req: NextRequest) {
   if (!memberId) return NextResponse.json({ error: 'member_id required' }, { status: 400 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // Get member plan tier
-  const { data: member } = await admin.from('members').select('plan_tier').eq('id', memberId).maybeSingle()
+  const { data: member } = await db.from('members').select('plan_tier').eq('id', memberId).maybeSingle()
   const tier = (member as any)?.plan_tier ?? 'basics'
   const ent = getEntitlements(tier)
 
@@ -75,6 +77,8 @@ export async function POST(req: NextRequest) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const { data, error } = await (admin.from as any)('navigator_time_entries').insert({
     member_id,
     navigator_id: fm.id,

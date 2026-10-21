@@ -15,7 +15,9 @@ export async function GET(req: Request) {
   const memberId = searchParams.get('member_id')
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
   const { data: isStaff } = await supabase.rpc('is_staff')
 
   let query = admin
@@ -54,7 +56,9 @@ export async function POST(req: Request) {
   if (!advisor_id) return NextResponse.json({ error: 'advisor_id required' }, { status: 400 })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
 
   // Get member_id from family_member or direct member
   const { data: fm } = await supabase
@@ -66,7 +70,7 @@ export async function POST(req: Request) {
   if (!fm) return NextResponse.json({ error: 'Member not found' }, { status: 404 })
 
   // Guard: chaplain introductions are member_request_only — check it is allowed
-  const { data: advisor } = await admin
+  const { data: advisor } = await db
     .from('trusted_advisors')
     .select('category, member_request_only, name')
     .eq('id', advisor_id)
@@ -76,7 +80,7 @@ export async function POST(req: Request) {
   // chaplain can only be requested (not auto-suggested) — the UI enforces this;
   // here we just ensure the row exists and is accessible
 
-  const { data: connection, error } = await admin
+  const { data: connection, error } = await db
     .from('advisor_connections')
     .insert({
       member_id: fm.member_id,
@@ -95,7 +99,7 @@ export async function POST(req: Request) {
   }
 
   // Notify staff
-  await admin.from('realtime_notifications').insert({
+  await db.from('realtime_notifications').insert({
     type: 'system_message',
     title: `Introduction request: ${advisor.name}`,
     body: `A member has requested a warm introduction to ${advisor.name} (${advisor.category}).`,

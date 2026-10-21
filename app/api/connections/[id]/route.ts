@@ -60,8 +60,10 @@ export async function GET(
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
-  const { data: conn } = await admin
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
+  const { data: conn } = await db
     .from('member_connections')
     .select(
       `id, created_at, status, intro_note, introduced_by,
@@ -104,10 +106,12 @@ export async function PATCH(
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
 
   // 3. Fetch the connection
-  const { data: conn } = await admin
+  const { data: conn } = await db
     .from('member_connections')
     .select(
       `id, status, requester_id, recipient_id, introduced_by,
@@ -137,7 +141,7 @@ export async function PATCH(
 
   // 5. Handle block / decline (same for both modes)
   if (action === 'block') {
-    await admin
+    await db
       .from('member_connections')
       .update({ status: 'blocked', responded_at: now })
       .eq('id', connectionId)
@@ -145,7 +149,7 @@ export async function PATCH(
   }
 
   if (action === 'decline') {
-    await admin
+    await db
       .from('member_connections')
       .update({ status: 'declined', responded_at: now })
       .eq('id', connectionId)
@@ -170,14 +174,14 @@ export async function PATCH(
       )
     }
 
-    await admin
+    await db
       .from('member_connections')
       .update({ status: 'accepted', recipient_accepted: true, responded_at: now })
       .eq('id', connectionId)
 
     // Notify requester
     const recipientName = displayName(conn.recipient as { preferred_name: string | null; full_name: string | null } | null)
-    await admin.from('realtime_notifications').insert({
+    await db.from('realtime_notifications').insert({
       member_id: conn.requester_id,
       type: 'system_message',
       title: `${recipientName} accepted your friend request`,
@@ -200,7 +204,7 @@ export async function PATCH(
 
   if (bothAccepted) update.status = 'accepted'
 
-  await admin
+  await db
     .from('member_connections')
     .update(update)
     .eq('id', connectionId)

@@ -16,6 +16,8 @@ export async function GET(req: NextRequest) {
 
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (admin as any)
     .from('neighbor_match_requests')
     .select(`
@@ -48,6 +50,8 @@ export async function POST(req: NextRequest) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // G7.12: Verify volunteer is neighbor category
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -162,6 +166,8 @@ export async function PATCH(req: NextRequest) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (admin as any)
     .from('neighbor_match_requests')

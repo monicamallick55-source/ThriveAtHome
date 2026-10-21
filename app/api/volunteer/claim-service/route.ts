@@ -16,9 +16,11 @@ export async function POST(req: NextRequest) {
   if (!body?.booking_id) return NextResponse.json({ error: 'booking_id required' }, { status: 400 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // Fetch the booking to validate it's still claimable
-  const { data: booking } = await admin
+  const { data: booking } = await db
     .from('service_bookings')
     .select('id, status, volunteer_id, member_id, booking_details')
     .eq('id', body.booking_id)
@@ -35,7 +37,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Claim the booking
-  const { error } = await admin
+  const { error } = await db
     .from('service_bookings')
     .update({
       volunteer_id: volunteer.id,

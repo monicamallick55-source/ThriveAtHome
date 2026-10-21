@@ -9,7 +9,9 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const admin = createAdminClient()
-  const { data: fm } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: fm } = await db
     .from('family_members')
     .select('id, full_name, employer_account_id, role')
     .eq('supabase_auth_id', user.id)
@@ -31,7 +33,7 @@ export async function POST(req: NextRequest) {
 
   // Get company name
   type EmployerRow = { company_name: string }
-  const { data: account } = await admin
+  const { data: account } = await db
     .from('employer_accounts')
     .select('company_name')
     .eq('id', fm.employer_account_id)
@@ -39,7 +41,7 @@ export async function POST(req: NextRequest) {
   const companyName = account?.company_name ?? 'Your Employer'
 
   // Get enrolled employees (role=family members with this employer_account_id)
-  const { data: employees } = await admin
+  const { data: employees } = await db
     .from('family_members')
     .select('email, full_name')
     .eq('employer_account_id', fm.employer_account_id)

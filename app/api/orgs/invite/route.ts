@@ -8,10 +8,12 @@ import { emailProvider } from '@/lib/providers'
 async function resolveMember(authId: string): Promise<{ memberId: string | null; name: string | null }> {
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: direct } = await (admin.from as any)('members')
     .select('id, preferred_name, full_name').eq('supabase_auth_id', authId).maybeSingle()
   if (direct?.id) return { memberId: direct.id, name: direct.preferred_name ?? direct.full_name ?? null }
-  const { data: fm } = await admin
+  const { data: fm } = await db
     .from('family_members').select('member_id, full_name').eq('supabase_auth_id', authId).maybeSingle()
   return { memberId: fm?.member_id ?? null, name: fm?.full_name ?? null }
 }
@@ -41,6 +43,8 @@ export async function POST(req: NextRequest) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (admin.from as any)('org_suggestions')
     .insert({

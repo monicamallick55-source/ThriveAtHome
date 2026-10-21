@@ -22,6 +22,8 @@ export async function POST(req: NextRequest) {
   const connectionId = typeof body?.connection_id === 'string' ? body.connection_id : null
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   let q = admin
     .from('ehr_connections')
     .select('id, ehr_system, patient_fhir_id, status')
@@ -60,7 +62,7 @@ export async function POST(req: NextRequest) {
       payloadSummary: condResult.summary,
     })
 
-    await admin
+    await db
       .from('ehr_connections')
       .update({ last_export_at: new Date().toISOString() })
       .eq('id', conn.id)

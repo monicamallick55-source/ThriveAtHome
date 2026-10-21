@@ -15,13 +15,15 @@ export async function POST(request: NextRequest) {
 
     // Verify the dropin belongs to a center this user admins
     const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
     const { data: dropin } = await (admin.from as any)('center_dropins')
       .select('center_id')
       .eq('id', dropin_id)
       .maybeSingle()
     if (!dropin) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-    const { data: fm } = await admin
+    const { data: fm } = await db
       .from('family_members')
       .select('role, senior_center_id')
       .eq('supabase_auth_id', user.id)

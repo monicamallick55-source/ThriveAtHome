@@ -45,7 +45,9 @@ export async function PATCH(req: NextRequest) {
   }
 
   const admin = createAdminClient()
-  const { data, error } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data, error } = await db
     .from('trusted_advisors')
     .update(allowed as Database['public']['Tables']['trusted_advisors']['Update'])
     .eq('id', id)

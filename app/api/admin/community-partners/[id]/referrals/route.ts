@@ -37,10 +37,12 @@ export async function POST(
   if (!memberId) return NextResponse.json({ error: 'memberId is required' }, { status: 400 })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
 
   // Verify partner exists and is active
-  const { data: partner } = await admin
+  const { data: partner } = await db
     .from('community_partners')
     .select('id, name, status')
     .eq('id', partnerId)
@@ -52,7 +54,7 @@ export async function POST(
   }
 
   // Verify member exists
-  const { data: member } = await admin
+  const { data: member } = await db
     .from('members')
     .select('id, preferred_name, full_name')
     .eq('id', memberId)
@@ -61,7 +63,7 @@ export async function POST(
   if (!member) return NextResponse.json({ error: 'Member not found' }, { status: 404 })
 
   // Insert referral
-  const { data: referral, error } = await admin
+  const { data: referral, error } = await db
     .from('partner_referrals')
     .insert({
       partner_id:  partnerId,
@@ -115,12 +117,14 @@ export async function PATCH(
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
   const update: Record<string, string> = {}
   if (status)       update.status       = status
   if (outcome_note) update.outcome_note = outcome_note.trim()
 
-  const { data, error } = await admin
+  const { data, error } = await db
     .from('partner_referrals')
     .update(update)
     .eq('id', referralId)

@@ -48,9 +48,11 @@ export async function PATCH(
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // 3. Fetch the report to know what content to hide
-  const { data: report, error: fetchError } = await admin
+  const { data: report, error: fetchError } = await db
     .from('community_reports')
     .select('id, post_id, comment_id, status')
     .eq('id', reportId)
@@ -66,7 +68,7 @@ export async function PATCH(
   // 4. If hiding — set is_hidden=true on the post or comment
   if (action === 'hide') {
     if (report.post_id) {
-      const { error } = await admin
+      const { error } = await db
         .from('circle_posts')
         .update({ is_hidden: true })
         .eq('id', report.post_id)
@@ -76,7 +78,7 @@ export async function PATCH(
         return NextResponse.json({ error: error.message }, { status: 500 })
       }
     } else if (report.comment_id) {
-      const { error } = await admin
+      const { error } = await db
         .from('circle_post_comments')
         .update({ is_hidden: true })
         .eq('id', report.comment_id)
@@ -89,7 +91,7 @@ export async function PATCH(
   }
 
   // 5. Resolve report
-  const { error: resolveError } = await admin
+  const { error: resolveError } = await db
     .from('community_reports')
     .update({
       status: newStatus,
@@ -133,7 +135,9 @@ export async function GET(req: Request) {
   const status = url.searchParams.get('status') ?? 'open'
 
   const admin = createAdminClient()
-  const { data, error } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data, error } = await db
     .from('community_reports')
     .select(
       `id, created_at, reason, details, status,

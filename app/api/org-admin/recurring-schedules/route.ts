@@ -10,7 +10,9 @@ async function requireOrgAdmin() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { user: null, fm: null, error: 'Unauthorized' as const, status: 401 }
   const admin = createAdminClient()
-  const { data: fm } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: fm } = await db
     .from('family_members')
     .select('id, role, org_id')
     .eq('supabase_auth_id', user.id)
@@ -35,6 +37,8 @@ export async function GET() {
   if (error || !fm) return NextResponse.json({ error }, { status })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (admin.from as any)('recurring_service_schedules')
     .select('id, member_id, service_type, cadence, day_of_week, time_of_day, notes, next_run_date, is_active, last_generated_at, members(preferred_name, full_name)')
@@ -62,6 +66,8 @@ export async function POST(req: NextRequest) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   // Confirm the member belongs to this org (active membership).
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: mem } = await (admin.from as any)('org_memberships')
@@ -102,6 +108,8 @@ export async function PATCH(req: NextRequest) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error: updErr } = await (admin.from as any)('recurring_service_schedules')
     .update({ is_active: body.is_active })

@@ -5,7 +5,9 @@ import { createAdminClient } from '@/lib/supabase/admin'
 
 async function requireOrgAdmin(authId: string) {
   const admin = createAdminClient()
-  const { data: fm } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: fm } = await db
     .from('family_members')
     .select('id, role, org_id, full_name')
     .eq('supabase_auth_id', authId)
@@ -23,6 +25,8 @@ export async function GET() {
   if (error || !fm) return NextResponse.json({ error }, { status: error === 'Forbidden' ? 403 : 400 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const { data } = await (admin.from as any)('org_join_requests')
     .select('id, member_id, status, message, requester_name, created_at, members(preferred_name, full_name, city, zip_code)')
     .eq('org_id', fm.org_id)
@@ -45,6 +49,8 @@ export async function POST(req: NextRequest) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const { data: reqRow } = await (admin.from as any)('org_join_requests')
     .select('id, member_id, org_id, status')
     .eq('id', requestId)

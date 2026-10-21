@@ -6,7 +6,9 @@ import { updateSoapNote, signSoapNote, lockSoapNote, deleteSoapNote, getSoapNote
 
 async function verifyAgencyAccess(userId: string, agencyId: string): Promise<boolean> {
   const admin = createAdminClient()
-  const { data: fm } = await admin.from('family_members').select('role, agency_id').eq('supabase_auth_id', userId).maybeSingle()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: fm } = await db.from('family_members').select('role, agency_id').eq('supabase_auth_id', userId).maybeSingle()
   return !!(fm && fm.role === 'agency_admin' && fm.agency_id === agencyId)
 }
 
@@ -36,7 +38,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ no
     // with a placeholder ("Agency Admin" / "Admin"), so fall back to the
     // signer_name the client sends (wired to the agency's contact_name).
     const admin = createAdminClient()
-    const { data: fm } = await admin.from('family_members').select('full_name').eq('supabase_auth_id', user.id).maybeSingle()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+    const { data: fm } = await db.from('family_members').select('full_name').eq('supabase_auth_id', user.id).maybeSingle()
     const isPlaceholder = (s: string) => !s || /^(agency )?admin$/i.test(s.trim())
     const fmName = (fm?.full_name ?? '').trim()
     const bodySigner = (typeof body.signer_name === 'string' ? body.signer_name : '').trim()

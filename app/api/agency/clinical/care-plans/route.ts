@@ -6,7 +6,9 @@ import { getCarePlansForMember, createCarePlanVersion, approveCarePlanVersion } 
 
 async function verifyAgencyAccess(userId: string, agencyId: string): Promise<boolean> {
   const admin = createAdminClient()
-  const { data: fm } = await admin.from('family_members').select('role, agency_id').eq('supabase_auth_id', userId).maybeSingle()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: fm } = await db.from('family_members').select('role, agency_id').eq('supabase_auth_id', userId).maybeSingle()
   return !!(fm && fm.role === 'agency_admin' && fm.agency_id === agencyId)
 }
 

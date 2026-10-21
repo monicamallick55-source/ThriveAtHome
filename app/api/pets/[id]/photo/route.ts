@@ -34,7 +34,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 
   const admin = createAdminClient()
-  const { data: row } = await admin.from('member_pets').select('id, member_id').eq('id', id).maybeSingle()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: row } = await db.from('member_pets').select('id, member_id').eq('id', id).maybeSingle()
   if (!row || row.member_id !== memberId) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg'

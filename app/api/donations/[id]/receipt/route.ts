@@ -6,6 +6,8 @@ import { emailProvider } from '@/lib/providers'
 export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   const { data: donation, error } = await (admin.from as any)('donations')
     .select('id, donor_name, donor_email, amount_cents, donation_date, is_recurring')

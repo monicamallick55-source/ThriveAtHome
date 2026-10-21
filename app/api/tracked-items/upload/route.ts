@@ -39,7 +39,9 @@ export async function POST(request: Request) {
 
   // Verify the item belongs to this member
   const admin = createAdminClient()
-  const { data: item } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: item } = await db
     .from('tracked_items')
     .select('id, member_id')
     .eq('id', itemId)
@@ -63,9 +65,9 @@ export async function POST(request: Request) {
   }
 
   // Append path to item's attachments array
-  const { data: existing } = await admin.from('tracked_items').select('attachments').eq('id', itemId).maybeSingle()
+  const { data: existing } = await db.from('tracked_items').select('attachments').eq('id', itemId).maybeSingle()
   const currentAttachments: string[] = existing?.attachments ?? []
-  await admin.from('tracked_items').update({ attachments: [...currentAttachments, storagePath] }).eq('id', itemId)
+  await db.from('tracked_items').update({ attachments: [...currentAttachments, storagePath] }).eq('id', itemId)
 
   return NextResponse.json({ path: storagePath, original_name: file.name, mime: file.type }, { status: 201 })
 }

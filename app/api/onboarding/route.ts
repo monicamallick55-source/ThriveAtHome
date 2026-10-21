@@ -58,9 +58,11 @@ export async function POST(req: NextRequest) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // 4. Check for duplicate submission
-  const { data: fm, error: fmError } = await admin
+  const { data: fm, error: fmError } = await db
     .from('family_members')
     .select('id, member_id, relationship')
     .eq('supabase_auth_id', user.id)
@@ -145,7 +147,7 @@ export async function POST(req: NextRequest) {
   }
 
   // 6. Link family_members.member_id to the new member
-  const { error: linkError } = await admin
+  const { error: linkError } = await db
     .from('family_members')
     .update({ member_id: member.id })
     .eq('id', fm.id)
@@ -159,7 +161,7 @@ export async function POST(req: NextRequest) {
   }
 
   // 7. Agency-branded welcome email stub — if registering family member is linked to an agency
-  const { data: fmWithAgency } = await admin
+  const { data: fmWithAgency } = await db
     .from('family_members')
     .select('agency_id')
     .eq('id', fm.id)

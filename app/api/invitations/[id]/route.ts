@@ -24,9 +24,11 @@ export async function DELETE(
   const { data: isStaff } = await supabase.rpc('is_staff')
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
 
-  const { data: inv } = await admin
+  const { data: inv } = await db
     .from('family_invitations')
     .select('id, member_id')
     .eq('id', id)
@@ -37,7 +39,7 @@ export async function DELETE(
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  await admin
+  await db
     .from('family_invitations')
     .update({ revoked_at: new Date().toISOString() })
     .eq('id', id)

@@ -15,7 +15,9 @@ interface TemplateRow {
 
 async function getOrgAdminContext(userId: string) {
   const admin = createAdminClient()
-  const { data: fm } = await admin.from('family_members').select('role, org_id, full_name').eq('supabase_auth_id', userId).maybeSingle()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: fm } = await db.from('family_members').select('role, org_id, full_name').eq('supabase_auth_id', userId).maybeSingle()
   if (!fm || (fm.role !== 'org_admin' && fm.role !== 'admin')) return null
   return fm as { role: string; org_id: string | null; full_name: string }
 }
@@ -29,6 +31,8 @@ export async function GET() {
   if (!fm) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // Get factory templates + org-specific templates
   const factoryRes = await (admin.from as any)('org_email_templates')
@@ -67,6 +71,8 @@ export async function POST(req: NextRequest) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const { data, error } = await (admin.from as any)('org_email_templates').insert({
     org_id: fm.org_id,
     name: String(body.name).trim().slice(0, 100),
@@ -92,6 +98,8 @@ export async function DELETE(req: NextRequest) {
   if (!templateId) return NextResponse.json({ error: 'id required' }, { status: 400 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   // Only allow deleting own org templates (not factory)
   const { error } = await (admin.from as any)('org_email_templates')
     .delete()

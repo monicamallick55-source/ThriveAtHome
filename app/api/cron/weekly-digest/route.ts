@@ -43,9 +43,11 @@ export async function GET(req: NextRequest) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
 
-  const { data: members, error: membersError } = await admin
+  const { data: members, error: membersError } = await db
     .from('members')
     .select('*')
     .eq('status', 'active')
@@ -59,14 +61,14 @@ export async function GET(req: NextRequest) {
 
   for (const member of members ?? []) {
     try {
-      const { data: calls } = await admin
+      const { data: calls } = await db
         .from('check_in_calls')
         .select('*')
         .eq('member_id', member.id)
         .gte('created_at', sevenDaysAgo)
         .order('created_at', { ascending: false })
 
-      const { data: familyMembers } = await admin
+      const { data: familyMembers } = await db
         .from('family_members')
         .select('email, full_name, notification_prefs')
         .eq('member_id', member.id)

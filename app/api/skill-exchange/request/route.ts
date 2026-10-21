@@ -16,7 +16,9 @@ export async function POST(request: Request) {
 
   // look up the teacher from the skill
   const admin = createAdminClient()
-  const { data: skill } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: skill } = await db
     .from('skills_offered')
     .select('member_id')
     .eq('id', skill_id)

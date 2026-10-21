@@ -18,7 +18,9 @@ async function verifyOwnership(userId: string, itemId: string) {
   if (!memberId) return null
 
   const admin = createAdminClient()
-  const { data } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data } = await db
     .from('tracked_items')
     .select('id, member_id, is_recurring, recurrence_cycle_days, expiration_or_appointment_date')
     .eq('id', itemId)
@@ -108,7 +110,9 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   if (action === 'request_help') {
     // "Help me renew this" — creates navigator task
     const admin = createAdminClient()
-    const { data: item2 } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+    const { data: item2 } = await db
       .from('tracked_items')
       .select('item_name, expiration_or_appointment_date, renewal_contact_info')
       .eq('id', id)
@@ -116,7 +120,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     const desc = item2
       ? `Member needs help renewing: ${item2.item_name}. Due: ${item2.expiration_or_appointment_date}.${item2.renewal_contact_info ? ` Contact: ${item2.renewal_contact_info}` : ''}`
       : 'Member requested renewal help.'
-    await admin.from('navigator_tasks').insert({
+    await db.from('navigator_tasks').insert({
       member_id: owned.item.member_id,
       task_type: 'renewal_assistance',
       description: desc,

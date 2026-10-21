@@ -27,7 +27,9 @@ export async function POST(request: NextRequest) {
 
   // 3. Authorise: confirm this user is linked to the requested member and get family_member id
   const admin = createAdminClient()
-  const { data: fm, error: fmError } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: fm, error: fmError } = await db
     .from('family_members')
     .select('id, member_id')
     .eq('supabase_auth_id', user.id)

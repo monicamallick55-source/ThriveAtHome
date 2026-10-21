@@ -25,7 +25,9 @@ export async function POST(req: NextRequest) {
   }
 
   const admin = createAdminClient()
-  const { error } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { error } = await db
     .from('student_volunteers')
     .insert({
       supabase_auth_id: user.id,

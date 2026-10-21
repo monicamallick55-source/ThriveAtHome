@@ -14,6 +14,8 @@ export async function POST(req: Request) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const today = new Date()
   const mm = String(today.getUTCMonth() + 1).padStart(2, '0')
   const dd = String(today.getUTCDate()).padStart(2, '0')

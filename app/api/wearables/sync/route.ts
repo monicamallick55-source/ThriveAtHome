@@ -21,6 +21,8 @@ export async function POST(req: NextRequest) {
   const platform = typeof body?.platform === 'string' ? body.platform : null
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   let q = admin
     .from('wearable_connections')
     .select('id, platform, external_user_id, status')
@@ -65,7 +67,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    await admin
+    await db
       .from('wearable_connections')
       .update({ last_sync_at: new Date().toISOString() })
       .eq('id', conn.id)

@@ -15,7 +15,9 @@ export async function POST(
   }
 
   const admin = createAdminClient()
-  const { data, error } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data, error } = await db
     .from('navigator_tasks')
     .update({
       completed: true,

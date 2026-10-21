@@ -18,6 +18,8 @@ export async function GET(req: NextRequest) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const today = new Date()
   today.setUTCHours(0, 0, 0, 0)
   const todayStr = today.toISOString().slice(0, 10)
@@ -42,7 +44,7 @@ export async function GET(req: NextRequest) {
       : new Date(`${runDate}T15:00:00Z`).toISOString()
 
     // Idempotency guard — don't double-create for the same schedule + date.
-    const { data: existing } = await admin
+    const { data: existing } = await db
       .from('service_bookings')
       .select('id')
       .eq('member_id', s.member_id)
@@ -51,7 +53,7 @@ export async function GET(req: NextRequest) {
       .maybeSingle()
 
     if (!existing) {
-      const { error: insErr } = await admin.from('service_bookings').insert({
+      const { error: insErr } = await db.from('service_bookings').insert({
         member_id: s.member_id,
         service_type: s.service_type,
         status: 'requested',

@@ -13,7 +13,9 @@ async function ownedDevice(userId: string, deviceId: string) {
   const { memberId } = await resolveMemberContext(userId)
   if (!memberId) return null
   const admin = createAdminClient()
-  const { data } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data } = await db
     .from('member_devices')
     .select('id, member_id')
     .eq('id', deviceId)

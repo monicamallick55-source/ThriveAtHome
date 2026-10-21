@@ -20,7 +20,9 @@ export async function GET(req: Request) {
   const vso = searchParams.get('vso')
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
 
   // Load volunteer_hours joined to volunteers + members
   let query = admin

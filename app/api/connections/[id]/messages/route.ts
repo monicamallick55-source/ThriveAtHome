@@ -76,7 +76,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (flagged) {
     const { createAdminClient } = await import('@/lib/supabase/admin')
     const admin = createAdminClient()
-    await admin.from('navigator_tasks').insert({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+    await db.from('navigator_tasks').insert({
       member_id: receiverId,
       task_type: 'fraud_flag',
       priority: 'high',

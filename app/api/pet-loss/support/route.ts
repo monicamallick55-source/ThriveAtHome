@@ -30,7 +30,9 @@ export async function POST(req: NextRequest) {
   const b = body as Record<string, unknown>
 
   const admin = createAdminClient()
-  const { data: member } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: member } = await db
     .from('members')
     .select('preferred_name')
     .eq('id', memberId)

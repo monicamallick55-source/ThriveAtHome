@@ -36,9 +36,11 @@ export async function GET(
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // Member core profile (email not a column on members — use family_members for contact)
-  const { data: member } = await admin
+  const { data: member } = await db
     .from('members')
     .select(
       `id, full_name, preferred_name, phone, city, state,

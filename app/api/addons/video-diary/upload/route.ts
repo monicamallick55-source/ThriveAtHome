@@ -45,7 +45,9 @@ export async function POST(request: Request) {
   }
 
   const admin = createAdminClient()
-  const { data: row } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: row } = await db
     .from('caregiver_video_diary_entries')
     .select('id, member_id')
     .eq('id', entryId)

@@ -3,6 +3,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function POST(req: NextRequest) {
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // Authenticate via Authorization header: "Bearer org_..."
   const authHeader = req.headers.get('Authorization') || ''

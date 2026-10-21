@@ -47,7 +47,9 @@ export async function PATCH(
 
   // Get the booking to find the member_id
   const admin = createAdminClient()
-  const { data: booking, error: fetchErr } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: booking, error: fetchErr } = await db
     .from('service_bookings')
     .select('*')
     .eq('id', bookingId)
@@ -112,7 +114,7 @@ export async function PATCH(
     }
   }
 
-  const { error: updateErr } = await admin
+  const { error: updateErr } = await db
     .from('service_bookings')
     .update(updates as never)
     .eq('id', bookingId)
@@ -194,7 +196,7 @@ export async function PATCH(
   }
 
   // Return the updated booking
-  const { data: updated } = await admin
+  const { data: updated } = await db
     .from('service_bookings')
     .select('*')
     .eq('id', bookingId)
@@ -220,8 +222,10 @@ export async function DELETE(
   const { cancel_reason } = body as { cancel_reason?: string }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
-  const { data: booking, error: fetchErr } = await admin
+  const { data: booking, error: fetchErr } = await db
     .from('service_bookings')
     .select('*')
     .eq('id', bookingId)
@@ -258,7 +262,7 @@ export async function DELETE(
     ? `[Member cancelled] ${cancel_reason.trim()}`
     : '[Member cancelled their request]'
 
-  const { error: updateErr } = await admin
+  const { error: updateErr } = await db
     .from('service_bookings')
     .update({ status: 'cancelled', notes: noteText })
     .eq('id', bookingId)

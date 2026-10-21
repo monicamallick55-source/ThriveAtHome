@@ -22,7 +22,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const memorialNote = typeof b.memorial_note === 'string' ? b.memorial_note : null
 
   const admin = createAdminClient()
-  const { data: member } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: member } = await db
     .from('members')
     .select('preferred_name')
     .eq('id', memberId)

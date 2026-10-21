@@ -15,8 +15,10 @@ const DEFAULT_SEATS = 3
 
 async function getSeatLimit(memberId: string): Promise<number> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
-  const { data } = await admin
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
+  const { data } = await db
     .from('member_plans')
     .select('plans:plan_id(slug)')
     .eq('member_id', memberId)
@@ -33,7 +35,9 @@ export async function GET() {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
 
   const { data: fm } = await supabase
     .from('family_members')
@@ -88,17 +92,19 @@ export async function POST(request: Request) {
   const role = body.role ?? 'family'
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
 
   // Count current accepted family members (not counting the primary member themselves)
-  const { count: acceptedCount } = await admin
+  const { count: acceptedCount } = await db
     .from('family_members')
     .select('id', { count: 'exact', head: true })
     .eq('member_id', memberId)
     .neq('supabase_auth_id', null) // only accounts that actually signed up
 
   // Count pending invitations (not expired, not revoked)
-  const { count: pendingCount } = await admin
+  const { count: pendingCount } = await db
     .from('family_invitations')
     .select('id', { count: 'exact', head: true })
     .eq('member_id', memberId)
@@ -123,7 +129,7 @@ export async function POST(request: Request) {
   }
 
   // Create the invitation
-  const { data: invitation, error } = await admin
+  const { data: invitation, error } = await db
     .from('family_invitations')
     .insert({
       member_id: memberId,

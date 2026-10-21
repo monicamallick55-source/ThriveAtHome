@@ -53,6 +53,8 @@ export async function POST(req: Request) {
     // If concern flagged, create a navigator task
     if (concern_flag && concern_description) {
       const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
       // Find navigator for this member
       const { data: navAssignment } = await (admin.from as any)('navigator_assignments')
         .select('navigator_id')

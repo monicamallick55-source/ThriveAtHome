@@ -26,7 +26,9 @@ export async function GET(
 
   // 2. Fetch the document record to get storage_path and member_id
   const admin = createAdminClient()
-  const { data: doc, error: docError } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: doc, error: docError } = await db
     .from('document_vault_items')
     .select('id, member_id, storage_path, file_name')
     .eq('id', documentId)
@@ -41,7 +43,7 @@ export async function GET(
   }
 
   // 3. Authorise: confirm this user is linked to the document's member
-  const { data: fm, error: fmError } = await admin
+  const { data: fm, error: fmError } = await db
     .from('family_members')
     .select('id')
     .eq('supabase_auth_id', user.id)

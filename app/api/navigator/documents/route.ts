@@ -8,7 +8,9 @@ const MAX_FILE_SIZE = 20 * 1024 * 1024
 
 async function getNavigator(userId: string) {
   const admin = createAdminClient()
-  const { data: fm } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: fm } = await db
     .from('family_members')
     .select('role, full_name')
     .eq('supabase_auth_id', userId)
@@ -16,7 +18,7 @@ async function getNavigator(userId: string) {
   if (!fm || !['navigator', 'admin'].includes(fm.role ?? '')) return null
 
   if (fm.role === 'navigator') {
-    const { data: nav } = await admin
+    const { data: nav } = await db
       .from('care_navigators')
       .select('id')
       .eq('supabase_auth_id', userId)
@@ -38,6 +40,8 @@ export async function GET(request: NextRequest) {
   if (!memberId) return NextResponse.json({ error: 'memberId required' }, { status: 400 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const { data, error } = await (admin.from as any)('platform_documents')
     .select('id, created_at, title, description, file_name, file_type, file_size_bytes, category, visibility, uploaded_by_name, storage_path')
     .eq('member_id', memberId)
@@ -85,6 +89,8 @@ export async function POST(request: NextRequest) {
   const fileBuffer = await file.arrayBuffer()
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const { error: uploadError } = await admin.storage
     .from(BUCKET)
     .upload(storagePath, fileBuffer, {

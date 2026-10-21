@@ -36,6 +36,8 @@ export async function POST(request: Request) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const { data, error } = await admin.storage
     .from(BUCKET)
     .createSignedUrls(paths, 3600)

@@ -27,7 +27,9 @@ export async function GET(req: Request) {
   const programId = searchParams.get('program_id')
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
 
   let query = admin
     .from('corporate_volunteer_programs')
@@ -40,7 +42,7 @@ export async function GET(req: Request) {
     if (!program) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
     // Sum hours for this program
-    const { data: hoursData } = await admin
+    const { data: hoursData } = await db
       .from('volunteer_hours')
       .select('hours')
       .eq('corporate_program_id', programId)
@@ -85,7 +87,9 @@ export async function PATCH(req: Request) {
   if (!program_id) return NextResponse.json({ error: 'program_id required' }, { status: 400 })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
 
   const update: Record<string, unknown> = {}
   if (tier) {
@@ -94,7 +98,7 @@ export async function PATCH(req: Request) {
   }
   if (recognition_badge_url !== undefined) update.recognition_badge_url = recognition_badge_url
 
-  const { data: program, error } = await admin
+  const { data: program, error } = await db
     .from('corporate_volunteer_programs')
     .update(update)
     .eq('id', program_id)

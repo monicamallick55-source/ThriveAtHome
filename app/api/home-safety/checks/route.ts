@@ -25,6 +25,8 @@ export async function POST(req: Request) {
   if (!enrollment_id) return NextResponse.json({ error: 'enrollment_id required' }, { status: 400 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // Verify enrollment exists and caller is the assigned volunteer or staff
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

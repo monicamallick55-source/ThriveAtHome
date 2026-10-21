@@ -24,6 +24,8 @@ export async function GET() {
 
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: referral } = await (admin as any)
     .from('home_sharing_referrals')
     .select('*')
@@ -61,6 +63,8 @@ export async function POST(req: Request) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // Check for existing active referral
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

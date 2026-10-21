@@ -7,6 +7,8 @@ export async function GET() {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // Find member ID
   let memberId: string | null = null
@@ -15,7 +17,7 @@ export async function GET() {
   if (directMember?.id) {
     memberId = directMember.id
   } else {
-    const { data: fm } = await admin.from('family_members').select('member_id').eq('supabase_auth_id', user.id).maybeSingle()
+    const { data: fm } = await db.from('family_members').select('member_id').eq('supabase_auth_id', user.id).maybeSingle()
     memberId = fm?.member_id ?? null
   }
 

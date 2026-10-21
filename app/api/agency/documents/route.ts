@@ -8,7 +8,9 @@ const MAX_FILE_SIZE = 20 * 1024 * 1024
 
 async function getAgencyAdmin(userId: string) {
   const admin = createAdminClient()
-  const { data: fm } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: fm } = await db
     .from('family_members')
     .select('role, agency_id, full_name')
     .eq('supabase_auth_id', userId)
@@ -28,6 +30,8 @@ export async function GET() {
   if (!fm.agency_id) return NextResponse.json({ data: [] })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const { data, error } = await (admin.from as any)('platform_documents')
     .select('id, created_at, title, description, file_name, file_type, file_size_bytes, category, visibility, uploaded_by_name, scope, storage_path')
     .eq('agency_id', fm.agency_id)
@@ -77,6 +81,8 @@ export async function POST(request: NextRequest) {
   const fileBuffer = await file.arrayBuffer()
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const { error: uploadError } = await admin.storage
     .from(BUCKET)
     .upload(storagePath, fileBuffer, {

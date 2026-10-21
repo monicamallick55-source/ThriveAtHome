@@ -15,10 +15,12 @@ export async function POST(req: NextRequest) {
   const orgName = String(body.org_name ?? 'ThriveAtHome').trim().slice(0, 200)
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // Log the inquiry to employer_leads table (reuse existing table for all inquiries)
   try {
-    await admin.from('employer_leads').insert({
+    await db.from('employer_leads').insert({
       company_name: orgName,
       contact_name: name,
       email,

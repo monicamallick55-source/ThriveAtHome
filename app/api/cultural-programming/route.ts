@@ -14,6 +14,8 @@ export async function GET(req: Request) {
   const month = url.searchParams.get('month')
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   if (type === 'festivals') {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -97,6 +99,8 @@ export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}))
   const { type } = body
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   if (type === 'potluck_signup') {
     const { potluckId, dish, dietaryTags } = body

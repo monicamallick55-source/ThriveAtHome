@@ -19,8 +19,10 @@ export async function GET(req: NextRequest) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
-  const { data: addons, error } = await admin
+  const { data: addons, error } = await db
     .from('member_addons')
     .select('member_id')
     .eq('addon_key', 'caregiver_family_plan')
@@ -35,7 +37,7 @@ export async function GET(req: NextRequest) {
   let created = 0
 
   for (const memberId of memberIds) {
-    const { data: recent } = await admin
+    const { data: recent } = await db
       .from('navigator_tasks')
       .select('id, created_at')
       .eq('member_id', memberId)
@@ -46,13 +48,13 @@ export async function GET(req: NextRequest) {
 
     if (recent && recent.created_at >= cutoff) continue
 
-    const { data: member } = await admin
+    const { data: member } = await db
       .from('members')
       .select('preferred_name')
       .eq('id', memberId)
       .maybeSingle()
 
-    const { error: taskErr } = await admin.from('navigator_tasks').insert({
+    const { error: taskErr } = await db.from('navigator_tasks').insert({
       member_id: memberId,
       task_type: 'coordinator_call',
       description:

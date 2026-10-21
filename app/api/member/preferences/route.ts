@@ -25,6 +25,8 @@ export async function PATCH(req: NextRequest) {
   }
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   // Find member — either via direct auth or via family_members link
   let memberId: string | null = null
@@ -38,7 +40,7 @@ export async function PATCH(req: NextRequest) {
   if (directMember?.id) {
     memberId = directMember.id
   } else {
-    const { data: fm } = await admin
+    const { data: fm } = await db
       .from('family_members')
       .select('member_id')
       .eq('supabase_auth_id', user.id)

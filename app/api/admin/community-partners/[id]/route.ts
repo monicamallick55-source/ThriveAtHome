@@ -32,6 +32,8 @@ export async function GET(
   const { id } = await params
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (admin as any)
     .from('community_partners')
     .select('*, partner_referrals(id, member_id, status, reason, created_at)')
@@ -73,6 +75,8 @@ export async function PATCH(
 
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (admin as any)
     .from('community_partners')
     .update(update)
@@ -96,6 +100,8 @@ export async function DELETE(
   if (!staff) return NextResponse.json({ error: 'Staff only' }, { status: 403 })
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (admin as any)
     .from('community_partners')

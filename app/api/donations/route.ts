@@ -24,6 +24,8 @@ const DOLLARS_PER_SENIOR_MONTH = 25
 export async function GET(req: NextRequest) {
   const email = req.nextUrl.searchParams.get('email')?.trim().toLowerCase()
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
 
   const startOfMonth = new Date()
   startOfMonth.setUTCDate(1)
@@ -73,6 +75,8 @@ export async function POST(req: NextRequest) {
   const is_recurring = Boolean(body.is_recurring)
 
   const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
   const { data, error } = await (admin.from as any)('donations').insert({
     donor_name,
     donor_email,

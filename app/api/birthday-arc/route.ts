@@ -18,10 +18,12 @@ export async function GET(req: Request) {
   const days = Math.min(parseInt(searchParams.get('days') ?? '30'), 90)
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
 
   // Get members with birth_date set
-  const { data: members, error } = await admin
+  const { data: members, error } = await db
     .from('members')
     .select('id, full_name, preferred_name, birth_date, birth_date_year_hidden, status')
     .not('birth_date', 'is', null)
@@ -69,7 +71,7 @@ export async function GET(req: Request) {
 
   // Load already-sent messages this year
   const currentYear = today.getFullYear()
-  const { data: sentMessages } = await admin
+  const { data: sentMessages } = await db
     .from('birthday_messages')
     .select('member_id')
     .eq('birthday_year', currentYear)
@@ -102,7 +104,9 @@ export async function POST(req: Request) {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any as any
 
   const { data: fm } = await supabase
     .from('family_members')
@@ -112,7 +116,7 @@ export async function POST(req: Request) {
 
   const currentYear = new Date().getFullYear()
 
-  const { data: msg, error } = await admin
+  const { data: msg, error } = await db
     .from('birthday_messages')
     .insert({
       member_id,
@@ -127,7 +131,7 @@ export async function POST(req: Request) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   // Notify the member via realtime_notifications
-  await admin.from('realtime_notifications').insert({
+  await db.from('realtime_notifications').insert({
     type: 'birthday_message',
     title: '🎂 Happy Birthday!',
     body: message.trim(),

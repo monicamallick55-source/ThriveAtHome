@@ -16,7 +16,9 @@ export async function POST(request: Request) {
 
   // verify member is teacher or learner
   const admin = createAdminClient()
-  const { data: exchange } = await admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = admin as any
+  const { data: exchange } = await db
     .from('skill_exchanges')
     .select('teacher_member_id, learner_member_id, status')
     .eq('id', exchange_id)
