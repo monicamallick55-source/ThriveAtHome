@@ -11,7 +11,7 @@ async function getAgencyAdmin() {
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = admin as any
-  const { data: fm } = await db
+  const { data: fm } = await (admin as any)
     .from('family_members')
     .select('role, agency_id')
     .eq('supabase_auth_id', user.id)
@@ -39,7 +39,7 @@ export async function GET() {
   }
 
   // Fetch member basics (no DOB, address — only wellness-relevant fields)
-  const { data: members } = await db
+  const { data: members } = await (admin as any)
     .from('members')
     .select('id, preferred_name, full_name, status, check_in_frequency')
     .in('id', memberIds)
@@ -48,7 +48,7 @@ export async function GET() {
   const activeMemberIds = (members ?? []).map((m: { id: string }) => m.id)
 
   // Last Aria check-in call per member
-  const { data: calls } = await db
+  const { data: calls } = await (admin as any)
     .from('check_in_calls')
     .select('member_id, created_at, mood_score, status')
     .in('member_id', activeMemberIds)
@@ -69,7 +69,7 @@ export async function GET() {
   }
 
   // Unacknowledged alerts
-  const { data: alerts } = await db
+  const { data: alerts } = await (admin as any)
     .from('alerts')
     .select('member_id, severity')
     .in('member_id', activeMemberIds)
