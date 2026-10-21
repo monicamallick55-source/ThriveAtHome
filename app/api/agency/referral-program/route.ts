@@ -40,7 +40,7 @@ export async function GET() {
     .order('created_at', { ascending: false })
 
   // Get referred family members (those with referring_agency_id = this agency)
-  const { data: referredFamilyMembers } = await db
+  const { data: referredFamilyMembers } = await (admin as any)
     .from('family_members')
     .select('id, full_name, created_at, member_id, role')
     .eq('referring_agency_id', agencyId)
@@ -54,7 +54,7 @@ export async function GET() {
 
   let memberPlans: Record<string, string> = {}
   if (memberIds.length > 0) {
-    const { data: plans } = await db
+    const { data: plans } = await (admin as any)
       .from('members')
       .select('id, plan_tier')
       .in('id', memberIds)
