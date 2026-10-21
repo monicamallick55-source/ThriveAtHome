@@ -58,7 +58,7 @@ export async function GET(req: NextRequest) {
 
   for (const pet of pets ?? []) {
     results.pets_checked++
-    const member = activeMemberMap.get(pet.member_id)
+    const member = activeMemberMap.get(pet.member_id) as any
     if (!member) continue
     const memberName = member.preferred_name ?? member.full_name
 
