@@ -832,6 +832,10 @@ export default function HomePage() {
             <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
               <CTAButton href="/signup" variant="teal" size="lg">Start for free</CTAButton>
               <CTAButton href="/for-volunteers" variant="white" size="lg">Volunteer as a buddy</CTAButton>
+            <div style={{ marginTop: "32px", display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
+              <p style={{ color: "rgba(250,250,245,0.55)", fontSize: "14px", margin: 0 }}>Have questions? Talk to Quinn right now.</p>
+              <QuinnWidget variant="ghost" compact />
+            </div>
             </div>
           </div>
         </section>
