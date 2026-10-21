@@ -179,8 +179,8 @@ export function MaReportSection() {
       )}
 
       {result && !result.data_suppressed && (() => {
-        const r = result.report
-        const att = result.deidentification_attestation
+        const r = (result as any).report
+        const att = (result as any).deidentification_attestation
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {/* Header */}

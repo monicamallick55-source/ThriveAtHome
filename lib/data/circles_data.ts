@@ -239,7 +239,7 @@ export async function getCircleEvents(
   memberId?: string,
 ): Promise<CircleEvent[]> {
   try {
-    const supabase = await createClient()
+    const supabase = await createClient() as any
     const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD
     const { data, error } = await supabase
       .from('circle_events')
