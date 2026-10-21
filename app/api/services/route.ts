@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
             auto_dispatched:     true,
           },
         })
-        .eq('id', String((booking as Record<string, unknown>).id))
+        .eq('id', booking.id)
 
       // Queue SMS confirmation to member (fires if Twilio key present)
       const { data: member } = await admin
@@ -122,7 +122,7 @@ export async function POST(req: NextRequest) {
       await admin.from('navigator_tasks').insert({
         member_id: memberId,
         task_type: 'transport_dispatch_failed',
-        description: `Transport booking auto-dispatch failed for booking ${(booking as Record<string, unknown>).id}. Manually book a ride: ${pickup} → ${dest} at ${dt}. Error: ${String(dispatchErr)}`,
+        description: `Transport booking auto-dispatch failed for booking ${booking.id}. Manually book a ride: ${pickup} → ${dest} at ${dt}. Error: ${String(dispatchErr)}`,
         priority: 'high',
       })
     }
@@ -134,7 +134,7 @@ export async function POST(req: NextRequest) {
     await admin
       .from('service_bookings')
       .update({ status: 'confirmed' })
-      .eq('id', String((booking as Record<string, unknown>).id))
+      .eq('id', booking.id)
     // No navigator task created — meal bookings self-resolve via cron
   }
 
@@ -147,7 +147,7 @@ export async function POST(req: NextRequest) {
       await admin
         .from('service_bookings')
         .update({ status: 'confirmed' })
-        .eq('id', String((booking as Record<string, unknown>).id))
+        .eq('id', booking.id)
     } else {
       // No companion selected yet — needs matching
       await admin.from('navigator_tasks').insert({
