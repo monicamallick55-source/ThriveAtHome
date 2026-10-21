@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (memberId) {
-      await db.from('navigator_tasks').insert({
+      await (admin as any).from('navigator_tasks').insert({
         member_id: memberId,
         task_type: 'partner_referral_request',
         title: `Partner referral request: ${category}`,

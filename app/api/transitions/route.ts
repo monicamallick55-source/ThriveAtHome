@@ -5,7 +5,7 @@ export async function GET() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { data: fm } = await db.from('family_members').select('member_id').eq('supabase_auth_id', user.id).single()
+  const { data: fm } = await (admin as any).from('family_members').select('member_id').eq('supabase_auth_id', user.id).single()
   if (!fm?.member_id) return NextResponse.json({ error: 'Not found' }, { status: 403 })
   const { data, error } = await supabase
     .from('transition_plans')
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { data: fm } = await db.from('family_members').select('member_id, id').eq('supabase_auth_id', user.id).single()
+  const { data: fm } = await (admin as any).from('family_members').select('member_id, id').eq('supabase_auth_id', user.id).single()
   if (!fm?.member_id) return NextResponse.json({ error: 'Not found' }, { status: 403 })
   const { pathway, family_can_view, notes } = await req.json()
   if (!pathway) return NextResponse.json({ error: 'pathway required' }, { status: 400 })
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
     title: `Week ${i + 1}`,
     sort_order: i,
   }))
-  await db.from('transition_plan_steps').insert(steps)
+  await (admin as any).from('transition_plan_steps').insert(steps)
 
   return NextResponse.json(plan, { status: 201 })
 }
