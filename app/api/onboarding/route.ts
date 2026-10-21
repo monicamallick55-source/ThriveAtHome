@@ -58,11 +58,9 @@ export async function POST(req: NextRequest) {
   }
 
   const admin = createAdminClient()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = admin as any
 
   // 4. Check for duplicate submission
-  const { data: fm, error: fmError } = await db
+  const { data: fm, error: fmError } = await admin
     .from('family_members')
     .select('id, member_id, relationship')
     .eq('supabase_auth_id', user.id)
@@ -147,7 +145,7 @@ export async function POST(req: NextRequest) {
   }
 
   // 6. Link family_members.member_id to the new member
-  const { error: linkError } = await db
+  const { error: linkError } = await admin
     .from('family_members')
     .update({ member_id: member.id })
     .eq('id', fm.id)
@@ -160,8 +158,36 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  // 7. Agency-branded welcome email stub — if registering family member is linked to an agency
-  const { data: fmWithAgency } = await db
+  // 7. Auto-join age-group circle based on date_of_birth
+  if (date_of_birth) {
+    try {
+      const dob = new Date(date_of_birth)
+      const today = new Date()
+      const age = today.getFullYear() - dob.getFullYear() - (
+        today.getMonth() < dob.getMonth() ||
+        (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate()) ? 1 : 0
+      )
+      // Call the DB helper function to find the right circle
+      const { data: circleRow, error: circleErr } = await (admin as any).rpc('age_group_circle_id', { member_age: age }) as {
+        data: string | null; error: unknown
+      }
+      if (!circleErr && circleRow) {
+        const { error: circleJoinErr } = await (admin as any).from('circle_memberships').insert({
+          member_id: member.id,
+          circle_id: circleRow,
+          joined_via: 'onboarding_auto',
+        })
+        if (circleJoinErr) {
+          console.error('[api/onboarding] age-group circle_memberships insert failed:', circleJoinErr)
+        }
+      }
+    } catch (ageErr) {
+      console.error('[api/onboarding] age-group circle auto-join failed:', ageErr)
+    }
+  }
+
+  // 8. Agency-branded welcome email stub — if registering family member is linked to an agency
+  const { data: fmWithAgency } = await admin
     .from('family_members')
     .select('agency_id')
     .eq('id', fm.id)
