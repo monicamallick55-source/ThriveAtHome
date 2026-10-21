@@ -13,7 +13,7 @@ import type {
 // ─── NONPROFIT ORG CRUD ───────────────────────────────────────────────────────
 
 export async function getNonprofitOrg(orgId: string): Promise<NonprofitOrg | null> {
-  const supabase = createAdminClient()
+  const supabase = createAdminClient() as any
   const { data } = await supabase
     .from('nonprofit_orgs')
     .select('*')
@@ -23,7 +23,7 @@ export async function getNonprofitOrg(orgId: string): Promise<NonprofitOrg | nul
 }
 
 export async function getNonprofitOrgByEmail(email: string): Promise<NonprofitOrg | null> {
-  const supabase = createAdminClient()
+  const supabase = createAdminClient() as any
   const { data } = await supabase
     .from('nonprofit_orgs')
     .select('*')
@@ -43,7 +43,7 @@ export async function createNonprofitOrg(params: {
   address_state?: string
   website?: string
 }): Promise<{ data: NonprofitOrg | null; error: string | null }> {
-  const supabase = createAdminClient()
+  const supabase = createAdminClient() as any
   const { data, error } = await supabase
     .from('nonprofit_orgs')
     .insert({
@@ -60,7 +60,7 @@ export async function createNonprofitOrg(params: {
 }
 
 export async function getAllNonprofitOrgs(): Promise<NonprofitOrg[]> {
-  const supabase = createAdminClient()
+  const supabase = createAdminClient() as any
   const { data } = await supabase
     .from('nonprofit_orgs')
     .select('*')
@@ -82,7 +82,7 @@ export async function createReferral(params: {
   reason_for_referral: string
   financial_need_confirmed: boolean
 }): Promise<{ data: NonprofitReferral | null; error: string | null }> {
-  const supabase = createAdminClient()
+  const supabase = createAdminClient() as any
   const { data, error } = await supabase
     .from('nonprofit_referrals')
     .insert({ ...params, status: 'submitted' })
@@ -97,7 +97,7 @@ export async function createReferral(params: {
 }
 
 export async function getReferralsForOrg(orgId: string): Promise<NonprofitReferral[]> {
-  const supabase = createAdminClient()
+  const supabase = createAdminClient() as any
   const { data } = await supabase
     .from('nonprofit_referrals')
     .select('*')
@@ -107,7 +107,7 @@ export async function getReferralsForOrg(orgId: string): Promise<NonprofitReferr
 }
 
 export async function getPendingReferrals(): Promise<NonprofitReferral[]> {
-  const supabase = createAdminClient()
+  const supabase = createAdminClient() as any
   const { data } = await supabase
     .from('nonprofit_referrals')
     .select('*, nonprofit_orgs(name, org_type)')
@@ -125,7 +125,7 @@ export async function updateReferralStatus(
     decline_reason?: string
   }
 ): Promise<{ error: string | null }> {
-  const supabase = createAdminClient()
+  const supabase = createAdminClient() as any
   const { error } = await supabase
     .from('nonprofit_referrals')
     .update({ status, ...extra, updated_at: new Date().toISOString() })
@@ -148,7 +148,7 @@ export async function enrollSponsoredMembership(params: {
   navigator_id?: string
   end_date?: string
 }): Promise<{ data: SponsoredMembership | null; error: string | null }> {
-  const supabase = createAdminClient()
+  const supabase = createAdminClient() as any
 
   // Subsidised tier amounts
   const monthlyCost = params.tier === 'community_free' ? 0 : 500       // $0 or $5
@@ -193,7 +193,7 @@ export async function enrollSponsoredMembership(params: {
 }
 
 export async function getSponsoredMembershipsForOrg(orgId: string): Promise<SponsoredMembership[]> {
-  const supabase = createAdminClient()
+  const supabase = createAdminClient() as any
   const { data } = await supabase
     .from('sponsored_memberships')
     .select('*, members(preferred_name, full_name, phone_number, created_at)')
@@ -203,7 +203,7 @@ export async function getSponsoredMembershipsForOrg(orgId: string): Promise<Spon
 }
 
 export async function getMemberSponsoredMembership(memberId: string): Promise<SponsoredMembership | null> {
-  const supabase = createAdminClient()
+  const supabase = createAdminClient() as any
   const { data } = await supabase
     .from('sponsored_memberships')
     .select('*')
@@ -220,7 +220,7 @@ export async function getNonprofitImpactReport(
   periodStart: string,
   periodEnd: string
 ): Promise<NonprofitImpactReport | null> {
-  const supabase = createAdminClient()
+  const supabase = createAdminClient() as any
 
   const org = await getNonprofitOrg(orgId)
   if (!org) return null

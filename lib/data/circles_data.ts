@@ -258,7 +258,7 @@ export async function getCircleEvents(
     // Populate RSVP status if we have a member id
     if (memberId && events.length > 0) {
       try {
-        const admin = createAdminClient()
+        const admin = createAdminClient() as any
         const eventIds = events.map(e => e.id)
         const { data: rsvps } = await (admin as any)
           .from('circle_event_rsvps')
@@ -382,7 +382,7 @@ export async function createCommunityCircle(
 ): Promise<{ data: CulturalCircle | null; error: string | null }> {
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const admin = createAdminClient() as any
+    const admin = createAdminClient() as any as any
     const { data, error } = await admin
       .from('cultural_circles')
       .insert(fields)
@@ -408,7 +408,7 @@ export async function createCircleEvent(
 ): Promise<{ data: CircleEvent | null; error: string | null }> {
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const admin = createAdminClient() as any
+    const admin = createAdminClient() as any as any
     const { data, error } = await admin
       .from('circle_events')
       .insert(fields)

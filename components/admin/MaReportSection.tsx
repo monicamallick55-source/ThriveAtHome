@@ -43,8 +43,8 @@ function formatDate(iso: string) {
 
 function generateCsv(res: ApiResponse): string {
   if (res.data_suppressed) return 'ERROR: Data suppressed — cohort too small'
-  const r = res.report
-  const att = res.deidentification_attestation
+  const r = (res as any).report
+  const att = (res as any).deidentification_attestation
 
   const rows = [
     ['ThriveAtHome Medicare Advantage Outcomes Report'],
