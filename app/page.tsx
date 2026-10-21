@@ -354,6 +354,27 @@ export default function HomePage() {
           </div>
         </section>
 
+
+        {/* ── 7b. PARTNER DIRECTORY ── */}
+        <section style={{ padding: "64px 24px", backgroundColor: "var(--color-navy)" }}>
+          <div style={{ maxWidth: "1200px", margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "48px", alignItems: "center" }}>
+            <div>
+              <p style={{ fontFamily: "var(--font-body)", fontSize: "13px", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-teal)", marginBottom: "16px" }}>Partner Directory</p>
+              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(26px, 4vw, 40px)", fontWeight: 500, color: "var(--color-cream)", lineHeight: 1.2, letterSpacing: "-0.02em", marginBottom: "20px" }}>Find trusted local help — vetted by ThriveAtHome</h2>
+              <p style={{ fontFamily: "var(--font-body)", fontSize: "17px", color: "rgba(250,250,245,0.75)", lineHeight: 1.7, marginBottom: "32px" }}>Browse nonprofit partners, home care agencies, legal aid organizations, and community services near you — all screened and endorsed by our navigator team.</p>
+              <a href="/partner-directory" style={{ display: "inline-flex", alignItems: "center", gap: "8px", backgroundColor: "var(--color-teal)", color: "white", fontFamily: "var(--font-body)", fontWeight: 600, fontSize: "15px", padding: "12px 24px", borderRadius: "8px", textDecoration: "none" }}>Browse the directory →</a>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+              {[["🏥","Health & Care","Home care agencies, hospice, therapy, telehealth"],["⚖️","Legal Aid","Estate planning, benefits help, elder law attorneys"],["🍲","Food & Nutrition","Meal programs, food banks, nutrition support"],["🚗","Transportation","Medical rides, errand services, volunteer drivers"],["🤝","Nonprofits","Senior centers, faith communities, volunteer orgs"],["💼","Benefits","SNAP, LIHEAP, Medicare counseling, VITA tax help"]].map(([icon, title, desc]) => (
+                <div key={title} style={{ backgroundColor: "rgba(255,255,255,0.06)", borderRadius: "10px", padding: "16px" }}>
+                  <div style={{ fontSize: "24px", marginBottom: "8px" }}>{icon}</div>
+                  <div style={{ fontFamily: "var(--font-body)", fontWeight: 600, fontSize: "14px", color: "var(--color-cream)", marginBottom: "4px" }}>{title}</div>
+                  <div style={{ fontFamily: "var(--font-body)", fontSize: "12px", color: "rgba(250,250,245,0.55)", lineHeight: 1.5 }}>{desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
         {/* ── 8. LAYER 5 — CELEBRATIONS & LIFE STORY ── */}
         <section style={sectionPadAlt}>
           <div style={maxW}>
