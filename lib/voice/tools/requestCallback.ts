@@ -4,14 +4,30 @@
 import { toolAdmin, resolveToolCaller, createToolTask, str, type ToolArgs, type ToolContext, type ToolOutcome } from './types'
 
 export async function run(args: ToolArgs, ctx: ToolContext): Promise<ToolOutcome> {
+  // For web widget callers ctx.fromNumber is absent — Quinn collects it via the phone_number arg
   const webPhone = str(args.phone_number)
-if (webPhone && !ctx.fromNumber) {
-  ctx = { ...ctx, fromNumber: webPhone }
-}
+  if (webPhone) {
+    // Validate: strip non-digits, must be 10 digits (US) or 11 digits starting with 1
+    const digits = webPhone.replace(/\D/g, '')
+    const valid = digits.length === 10 || (digits.length === 11 && digits[0] === '1')
+    if (!valid) {
+      return {
+        status: 200,
+        body: {
+          success: false,
+          result: `I want to make sure I have that right. I need a 10-digit US phone number — for example, area code followed by the 7-digit number. Could you repeat it for me?`,
+        },
+      }
+    }
+    if (!ctx.fromNumber) {
+      ctx = { ...ctx, fromNumber: webPhone }
+    }
+  }
   const caller = await resolveToolCaller(args, ctx)
- if (webPhone && !caller.phone) {
-  (caller as any).phone = webPhone
-} 
+  // Ensure web-widget phone is attached to caller even if not a known member
+  if (webPhone && !caller.phone) {
+    (caller as any).phone = webPhone
+  }
   const memberId = caller.memberId
   // Retell's standard names (requested_time, reason) and ours (preferred_time, notes) are both accepted
   const preferredTime = str(args.preferred_time) ?? str(args.requested_time) // ISO string or natural language like "3pm today"
