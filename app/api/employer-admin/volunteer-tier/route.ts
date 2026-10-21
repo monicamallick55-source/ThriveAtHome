@@ -31,7 +31,7 @@ export async function GET(req: Request) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = admin as any as any
 
-  let query = admin
+  let query = (admin as any)
     .from('corporate_volunteer_programs')
     .select('id, name, tier, hour_target, recognition_badge_url, employer:employers(id, name, slug)')
 

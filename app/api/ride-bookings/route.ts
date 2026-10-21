@@ -22,7 +22,7 @@ export async function GET(req: Request) {
 
   const { data: isStaff } = await supabase.rpc('is_staff')
 
-  let query = admin
+  let query = (admin as any)
     .from('ride_bookings')
     .select(`
       id, created_at, updated_at, member_id, event_id,

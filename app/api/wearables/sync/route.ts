@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = admin as any
-  let q = admin
+  let q = (admin as any)
     .from('wearable_connections')
     .select('id, platform, external_user_id, status')
     .eq('member_id', memberId)

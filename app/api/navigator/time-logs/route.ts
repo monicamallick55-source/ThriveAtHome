@@ -30,7 +30,7 @@ export async function GET(req: Request) {
     .eq('supabase_auth_id', user.id)
     .maybeSingle()
 
-  let query = admin
+  let query = (admin as any)
     .from('navigator_time_logs')
     .select(`
       id, created_at, logged_at, duration_minutes, activity_type,

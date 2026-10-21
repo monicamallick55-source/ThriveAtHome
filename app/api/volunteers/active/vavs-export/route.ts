@@ -25,7 +25,7 @@ export async function GET(req: Request) {
   const db = admin as any as any
 
   // Load volunteer_hours joined to volunteers + members
-  let query = admin
+  let query = (admin as any)
     .from('volunteer_hours')
     .select(`
       id,

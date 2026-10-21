@@ -56,7 +56,7 @@ export async function GET() {
     return NextResponse.json({ error: 'No member context' }, { status: 403 })
   }
 
-  let query = admin
+  let query = (admin as any)
     .from('family_invitations')
     .select('*')
     .order('created_at', { ascending: false })

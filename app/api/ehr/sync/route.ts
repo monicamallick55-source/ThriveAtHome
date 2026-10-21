@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = admin as any
-  let q = admin
+  let q = (admin as any)
     .from('ehr_connections')
     .select('id, ehr_system, patient_fhir_id, status')
     .eq('member_id', memberId)

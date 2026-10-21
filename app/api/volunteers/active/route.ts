@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = admin as any
-  let query = admin
+  let query = (admin as any)
     .from('volunteers')
     .select('id, full_name, email, phone, city, state, languages, availability_days, hours_per_week, service_types, interests, rating_average, total_hours_logged, total_seniors_helped, status')
     .eq('status', 'active')

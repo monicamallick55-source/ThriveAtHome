@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = admin as any
-  let query = admin
+  let query = (admin as any)
     .from('service_providers')
     .select('*')
     .eq('is_active', true)
