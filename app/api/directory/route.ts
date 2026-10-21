@@ -8,9 +8,9 @@ import { createAdminClient } from '@/lib/supabase/admin'
 
 async function resolveMemberId(authId: string, admin: ReturnType<typeof createAdminClient>): Promise<string | null> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: direct } = await (admin.from as any)('members').select('id').eq('supabase_auth_id', authId).maybeSingle()
+  const { data: direct } = await (createAdminClient() as any).from('members').select('id').eq('supabase_auth_id', authId).maybeSingle()
   if (direct?.id) return direct.id
-  const { data: fm } = await db.from('family_members').select('member_id').eq('supabase_auth_id', authId).maybeSingle()
+  const { data: fm } = await (createAdminClient() as any).from('family_members').select('member_id').eq('supabase_auth_id', authId).maybeSingle()
   return fm?.member_id ?? null
 }
 
@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
   let me = { opted_in: false, bio: '' as string | null }
   if (memberId) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: meRow } = await (admin.from as any)('members')
+    const { data: meRow } = await (createAdminClient() as any).from('members')
       .select('directory_opt_in, directory_bio').eq('id', memberId).maybeSingle()
     if (meRow) me = { opted_in: !!meRow.directory_opt_in, bio: meRow.directory_bio ?? '' }
   }
@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
   const orgIds = new Set<string>()
   if (memberId) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: memberships } = await (admin.from as any)('org_memberships')
+    const { data: memberships } = await (createAdminClient() as any).from('org_memberships')
       .select('org_id').eq('member_id', memberId).eq('is_active', true)
     for (const m of memberships ?? []) orgIds.add(m.org_id)
   }
@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
   let members: Array<Record<string, unknown>> = []
   if (orgIds.size > 0) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: sameOrg } = await (admin.from as any)('org_memberships')
+    const { data: sameOrg } = await (createAdminClient() as any).from('org_memberships')
       .select('member_id').in('org_id', [...orgIds]).eq('is_active', true)
     const peerIds = [...new Set((sameOrg ?? []).map((r: { member_id: string }) => r.member_id))]
       .filter(id => id !== memberId)
@@ -95,7 +95,7 @@ export async function PATCH(req: NextRequest) {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (admin.from as any)('members').update(updates).eq('id', memberId)
+  const { error } = await (createAdminClient() as any).from('members').update(updates).eq('id', memberId)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })
 }
