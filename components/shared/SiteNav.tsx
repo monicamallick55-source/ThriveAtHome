@@ -121,16 +121,16 @@ export default function SiteNav() {
           <nav aria-label="Mobile" style={{ padding:'8px 20px 24px',display:'flex',flexDirection:'column' }}>
             <div style={mobileGroupLabel}>For You</div>
             {B2C_LINKS.map(l => (
-              <Link key={l.href} href={l.href} style={mobileLinkStyle}>{l.label}</Link>
+              <Link key={l.href} href={l.href} style={mobileLinkStyle} onClick={() => setOpenOn(null)}>{l.label}</Link>
             ))}
             <div style={{ ...mobileGroupLabel, marginTop: '4px' }}>For Organizations</div>
             {B2B_LINKS.map(l => (
-              <Link key={l.href} href={l.href} style={mobileLinkStyle}>{l.label}</Link>
+              <Link key={l.href} href={l.href} style={mobileLinkStyle} onClick={() => setOpenOn(null)}>{l.label}</Link>
             ))}
             <div style={{ height:'8px' }} />
-            <Link href="/donate" style={{ ...mobileLinkStyle,color:'var(--color-teal,#0d9488)',fontWeight:700 }}>♥ Donate</Link>
-            <Link href="/login" style={{ ...mobileLinkStyle,fontWeight:600 }}>Sign in</Link>
-            <Link href="/signup" className="flex" style={{ ...getStartedStyle, minHeight:'52px', fontSize:'17px', marginTop:'16px' }}>Get started</Link>
+            <Link href="/donate" style={{ ...mobileLinkStyle,color:'var(--color-teal,#0d9488)',fontWeight:700 }} onClick={() => setOpenOn(null)}>♥ Donate</Link>
+            <Link href="/login" style={{ ...mobileLinkStyle,fontWeight:600 }} onClick={() => setOpenOn(null)}>Sign in</Link>
+            <Link href="/signup" className="flex" style={{ ...getStartedStyle, minHeight:'52px', fontSize:'17px', marginTop:'16px' }} onClick={() => setOpenOn(null)}>Get started</Link>
           </nav>
         </div>
       )}
