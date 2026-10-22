@@ -11,7 +11,7 @@ const NO_NAV_PREFIXES = [
 ]
 
 const B2C_LINKS = [
-  { label: 'How It Works', href: '/#how-it-works' },
+  { label: 'How It Works', href: '/how-it-works' },
   { label: 'Volunteer', href: '/for-volunteers' },
   { label: 'Pricing', href: '/pricing' },
 ]
