@@ -12,11 +12,13 @@ interface QuinnWidgetProps {
   variant?: 'navy' | 'teal' | 'ghost'
   /** Compact mode for inline use */
   compact?: boolean
+  /** Round phone-icon button with no text label (used for the mobile floating button) */
+  iconOnly?: boolean
 }
 
 type CallState = 'idle' | 'connecting' | 'active' | 'ended' | 'error'
 
-export default function QuinnWidget({ label = 'Talk to Quinn', variant = 'teal', compact = false }: QuinnWidgetProps) {
+export default function QuinnWidget({ label = 'Talk to Quinn', variant = 'teal', compact = false, iconOnly = false }: QuinnWidgetProps) {
   const [callState, setCallState] = useState<CallState>('idle')
   const [errorMsg, setErrorMsg]   = useState<string | null>(null)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -119,10 +121,15 @@ export default function QuinnWidget({ label = 'Talk to Quinn', variant = 'teal',
 
   const buttonStyle: React.CSSProperties = { ...baseBtn, ...variantStyles[variant], opacity: isBusy ? 0.75 : 1 }
 
+  // Floating (iconOnly) states sit over page content, so they get a card background
+  const floatingCard: React.CSSProperties = iconOnly
+    ? { backgroundColor: 'white', padding: '10px 14px', borderRadius: '16px', boxShadow: '0 6px 20px rgba(0,0,0,0.18)' }
+    : {}
+
   // ── Render ───────────────────────────────────────────────────────────────
   if (callState === 'ended') {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '8px', ...floatingCard }}>
         <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-teal)', margin: 0, fontWeight: 600 }}>
           ✓ Call ended — thanks for talking with Quinn!
         </p>
@@ -135,7 +142,7 @@ export default function QuinnWidget({ label = 'Talk to Quinn', variant = 'teal',
 
   if (isActive) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', ...floatingCard }}>
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-teal)', fontWeight: 600 }}>
           <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#22c55e', display: 'inline-block', animation: 'pulse 1.5s ease-in-out infinite' }} aria-hidden="true" />
           Talking with Quinn
@@ -144,6 +151,30 @@ export default function QuinnWidget({ label = 'Talk to Quinn', variant = 'teal',
           End call
         </button>
         <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}`}</style>
+      </div>
+    )
+  }
+
+  if (iconOnly) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+        {callState === 'error' && (
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: '#dc2626', margin: 0, maxWidth: '240px', backgroundColor: 'white', padding: '8px 12px', borderRadius: '12px', boxShadow: 'var(--shadow-card)' }}>
+            {errorMsg ?? 'Could not connect.'}{' '}
+            <button onClick={reset} style={{ background: 'none', border: 'none', color: '#dc2626', textDecoration: 'underline', cursor: 'pointer', fontFamily: 'inherit', fontSize: 'inherit', padding: 0 }}>Retry</button>
+          </p>
+        )}
+        <button
+          onClick={startCall}
+          disabled={isBusy}
+          aria-label="Talk to Quinn — start a voice call with ThriveAtHome's AI concierge"
+          style={{ ...variantStyles[variant], width: '56px', height: '56px', borderRadius: '50%', border: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', cursor: isBusy ? 'default' : 'pointer', boxShadow: '0 6px 20px rgba(0,0,0,0.18)', opacity: isBusy ? 0.75 : 1 }}
+        >
+          {callState === 'connecting'
+            ? <span aria-hidden="true" style={{ display: 'inline-block', width: '20px', height: '20px', border: '2px solid rgba(255,255,255,0.4)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+            : <span aria-hidden="true">📞</span>}
+        </button>
+        <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
       </div>
     )
   }
