@@ -1,3 +1,4 @@
+cat > components/shared/SiteNav.tsx << 'NAVEOF'
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -10,18 +11,17 @@ const NO_NAV_PREFIXES = [
   '/onboarding','/login','/signup','/join',
 ]
 
-// Audience tabs — Families & Seniors is the landing page itself.
-// There is no /partners page; partners land on /for-organizations.
-const AUDIENCE_TABS = [
-  { label: 'For Families & Seniors', href: '/', match: (p: string) => p === '/' || p.startsWith('/for-families') },
-  { label: 'For Employers', href: '/employers', match: (p: string) => p.startsWith('/employers') },
-  { label: 'For Partners', href: '/for-organizations', match: (p: string) => p.startsWith('/for-organizations') },
+// B2C links — for seniors, families, and volunteers
+const B2C_LINKS = [
+  { label: 'How It Works', href: '/#how-it-works' },
+  { label: 'Volunteer', href: '/for-volunteers' },
+  { label: 'Pricing', href: '/pricing' },
 ]
 
-const SECONDARY_LINKS = [
-  { label: 'For Volunteers', href: '/for-volunteers' },
-  { label: 'Find Local Help', href: '/partner-directory' },
-  { label: 'Pricing', href: '/pricing' },
+// B2B links — organizations, employers, partners
+const B2B_LINKS = [
+  { label: 'For Employers', href: '/employers' },
+  { label: 'For Partners', href: '/for-organizations' },
 ]
 
 const linkStyle: React.CSSProperties = {
@@ -29,6 +29,13 @@ const linkStyle: React.CSSProperties = {
   textDecoration: 'none', padding: '8px 12px',
   fontSize: '15px', color: 'var(--color-text-secondary, #475569)',
   whiteSpace: 'nowrap',
+}
+
+const b2bLinkStyle: React.CSSProperties = {
+  ...linkStyle,
+  fontSize: '14px',
+  color: 'var(--color-navy,#1e3a5f)',
+  fontWeight: 500,
 }
 
 const getStartedStyle: React.CSSProperties = {
@@ -46,15 +53,21 @@ const mobileLinkStyle: React.CSSProperties = {
   borderBottom: '1px solid var(--color-warm-grey,#e8e4dc)',
 }
 
+const mobileGroupLabel: React.CSSProperties = {
+  fontFamily: 'var(--font-body)',
+  fontSize: '11px', fontWeight: 700,
+  letterSpacing: '0.1em', textTransform: 'uppercase',
+  color: 'var(--color-text-muted,#64748b)',
+  padding: '16px 4px 4px',
+}
+
 export default function SiteNav() {
   const pathname = usePathname()
-  // The menu is open only for the path it was opened on, so navigating closes it
   const [openOn, setOpenOn] = useState<string | null>(null)
   const open = openOn === pathname
   const setOpen = (next: boolean | ((o: boolean) => boolean)) =>
     setOpenOn((typeof next === 'function' ? next(open) : next) ? pathname : null)
 
-  // Close the mobile menu on Escape
   useEffect(() => {
     if (!open) return
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpenOn(null) }
@@ -68,35 +81,32 @@ export default function SiteNav() {
   return (
     <header style={{ position:'sticky',top:0,zIndex:50,backgroundColor:'rgba(250,250,245,0.97)',backdropFilter:'blur(8px)',borderBottom:'1px solid var(--color-warm-grey,#e8e4dc)' }}>
       <div style={{ maxWidth:1280,margin:'0 auto',padding:'0 20px',height:'68px',display:'flex',alignItems:'center',justifyContent:'space-between',gap:'16px' }}>
-        <Link href="/" style={{ fontFamily:'var(--font-display,Cormorant Garamond,serif)',fontSize:'22px',color:'var(--color-navy,#1e3a5f)',fontWeight:500,letterSpacing:'-0.01em',textDecoration:'none',flexShrink:0 }}>ThriveAtHome</Link>
 
-        {/* Desktop: audience tabs */}
-        <nav aria-label="Audience" className="hidden lg:flex" style={{ alignItems:'center',gap:'4px',backgroundColor:'var(--color-warm-white,#f5f4ef)',border:'1px solid var(--color-warm-grey,#e8e4dc)',borderRadius:'999px',padding:'4px' }}>
-          {AUDIENCE_TABS.map(tab => {
-            const active = tab.match(pathname)
-            return (
-              <Link
-                key={tab.href}
-                href={tab.href}
-                aria-current={active ? 'page' : undefined}
-                style={{
-                  ...linkStyle, fontSize:'14px', padding:'8px 16px', borderRadius:'999px',
-                  fontWeight: active ? 600 : 500,
-                  backgroundColor: active ? 'var(--color-navy,#1e3a5f)' : 'transparent',
-                  color: active ? 'var(--color-cream,#fafaf5)' : 'var(--color-navy,#1e3a5f)',
-                }}
-              >
-                {tab.label}
-              </Link>
-            )
-          })}
-        </nav>
+        {/* Logo */}
+        <Link href="/" style={{ fontFamily:'var(--font-display,Cormorant Garamond,serif)',fontSize:'22px',color:'var(--color-navy,#1e3a5f)',fontWeight:500,letterSpacing:'-0.01em',textDecoration:'none',flexShrink:0 }}>
+          ThriveAtHome
+        </Link>
 
-        {/* Desktop: secondary links + auth */}
-        <nav aria-label="Main" className="hidden lg:flex" style={{ alignItems:'center',gap:'2px' }}>
-          {SECONDARY_LINKS.map(l => (
-            <Link key={l.href} href={l.href} className="hidden xl:inline" style={linkStyle}>{l.label}</Link>
+        {/* Desktop nav */}
+        <nav aria-label="Main" className="hidden lg:flex" style={{ alignItems:'center',gap:'2px',flex:1,justifyContent:'flex-end' }}>
+
+          {/* B2C links */}
+          {B2C_LINKS.map(l => (
+            <Link key={l.href} href={l.href} style={linkStyle}>{l.label}</Link>
           ))}
+
+          {/* Separator */}
+          <div style={{ width:'1px',height:'20px',backgroundColor:'var(--color-warm-grey,#e8e4dc)',margin:'0 8px',flexShrink:0 }} aria-hidden="true" />
+
+          {/* B2B links */}
+          {B2B_LINKS.map(l => (
+            <Link key={l.href} href={l.href} style={b2bLinkStyle}>{l.label}</Link>
+          ))}
+
+          {/* Separator */}
+          <div style={{ width:'1px',height:'20px',backgroundColor:'var(--color-warm-grey,#e8e4dc)',margin:'0 8px',flexShrink:0 }} aria-hidden="true" />
+
+          {/* Auth */}
           <Link href="/donate" style={{ ...linkStyle,color:'var(--color-teal,#0d9488)',fontWeight:700 }}>♥ Donate</Link>
           <Link href="/login" style={{ ...linkStyle,color:'var(--color-navy,#1e3a5f)',fontWeight:500 }}>Sign in</Link>
           <Link href="/signup" className="inline-flex" style={{ ...getStartedStyle, marginLeft:'6px' }}>Get started</Link>
@@ -104,7 +114,6 @@ export default function SiteNav() {
 
         {/* Mobile: Get started + hamburger */}
         <div className="flex lg:hidden" style={{ alignItems:'center',gap:'8px' }}>
-          {/* Very narrow phones: Get started lives in the menu only, so the bar never overflows */}
           <Link href="/signup" className="inline-flex max-[379px]:hidden" style={{ ...getStartedStyle, fontSize:'14px', padding:'10px 14px' }}>Get started</Link>
           <button
             type="button"
@@ -127,20 +136,21 @@ export default function SiteNav() {
       {open && (
         <div id="site-nav-menu" className="lg:hidden" style={{ borderTop:'1px solid var(--color-warm-grey,#e8e4dc)',backgroundColor:'var(--color-cream,#fafaf5)',maxHeight:'calc(100vh - 68px)',overflowY:'auto' }}>
           <nav aria-label="Mobile" style={{ padding:'8px 20px 24px',display:'flex',flexDirection:'column' }}>
-            <div style={{ fontFamily:'var(--font-body)',fontSize:'12px',fontWeight:700,letterSpacing:'0.08em',textTransform:'uppercase',color:'var(--color-text-muted,#64748b)',padding:'12px 4px 4px' }}>I&apos;m looking for</div>
-            {AUDIENCE_TABS.map(tab => {
-              const active = tab.match(pathname)
-              return (
-                <Link key={tab.href} href={tab.href} aria-current={active ? 'page' : undefined}
-                  style={{ ...mobileLinkStyle, fontWeight: active ? 700 : 500, color: active ? 'var(--color-teal,#0d9488)' : mobileLinkStyle.color }}>
-                  {tab.label}
-                </Link>
-              )
-            })}
-            <div style={{ height:'12px' }} />
-            {SECONDARY_LINKS.map(l => (
+
+            {/* FOR YOU — B2C */}
+            <div style={mobileGroupLabel}>For You</div>
+            {B2C_LINKS.map(l => (
               <Link key={l.href} href={l.href} style={mobileLinkStyle}>{l.label}</Link>
             ))}
+
+            {/* FOR ORGANIZATIONS — B2B */}
+            <div style={{ ...mobileGroupLabel, marginTop: '4px' }}>For Organizations</div>
+            {B2B_LINKS.map(l => (
+              <Link key={l.href} href={l.href} style={mobileLinkStyle}>{l.label}</Link>
+            ))}
+
+            {/* Donate + Auth */}
+            <div style={{ height:'8px' }} />
             <Link href="/donate" style={{ ...mobileLinkStyle,color:'var(--color-teal,#0d9488)',fontWeight:700 }}>♥ Donate</Link>
             <Link href="/login" style={{ ...mobileLinkStyle,fontWeight:600 }}>Sign in</Link>
             <Link href="/signup" className="flex" style={{ ...getStartedStyle, minHeight:'52px', fontSize:'17px', marginTop:'16px' }}>Get started</Link>
@@ -150,3 +160,4 @@ export default function SiteNav() {
     </header>
   )
 }
+NAVEOF
