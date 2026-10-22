@@ -68,14 +68,24 @@ const PLANS = [
   },
 ]
 
-const COMPARISON = [
+type CellValue = boolean | string
+
+interface ComparisonRow {
+  feature: string
+  basics: CellValue
+  connect: CellValue
+  complete: CellValue
+  premier: CellValue
+}
+
+const COMPARISON: { category: string; rows: ComparisonRow[] }[] = [
   { category: 'AI & Automation', rows: [
     { feature: 'Daily Aria check-in calls', basics: true, connect: true, complete: true, premier: true },
     { feature: 'Mood, energy, sleep & pain tracking', basics: true, connect: true, complete: true, premier: true },
     { feature: 'Medication reminders', basics: true, connect: true, complete: true, premier: true },
     { feature: 'Missed call escalation protocol', basics: true, connect: true, complete: true, premier: true },
     { feature: 'Aria call frequency (daily/3x/weekly)', basics: true, connect: true, complete: true, premier: true },
-    { feature: 'AI agents (12 total)', basics: '3', connect: '6', complete: '10', premier: '12' },
+    { feature: 'AI agents', basics: '3', connect: '6', complete: '10', premier: '12' },
   ]},
   { category: 'Safety & Fraud', rows: [
     { feature: 'Fraud monitoring (7 categories)', basics: true, connect: true, complete: true, premier: true },
@@ -87,7 +97,7 @@ const COMPARISON = [
   { category: 'Human Connection', rows: [
     { feature: 'Matched Human Buddy', basics: false, connect: true, complete: true, premier: true },
     { feature: 'Buddy call frequency', basics: '—', connect: 'Weekly', complete: 'Weekly', premier: 'Bi-weekly' },
-    { feature: 'Dedicated care navigator', basics: false, connect: false, complete: '2 hr/mo', premier: '8 hr/mo' },
+    { feature: 'Dedicated care navigator', basics: '—', connect: '—', complete: '2 hr/mo', premier: '8 hr/mo' },
     { feature: 'Concierge line', basics: false, connect: false, complete: false, premier: true },
   ]},
   { category: 'Community', rows: [
@@ -100,7 +110,7 @@ const COMPARISON = [
     { feature: 'Family wellness dashboard', basics: true, connect: true, complete: true, premier: true },
     { feature: 'Family Events Calendar', basics: false, connect: false, complete: true, premier: true },
     { feature: 'Celebrations & gift sending', basics: false, connect: false, complete: true, premier: true },
-    { feature: 'Birthday/anniversary injection into Aria', basics: true, connect: true, complete: true, premier: true },
+    { feature: 'Birthday/anniversary in Aria calls', basics: true, connect: true, complete: true, premier: true },
   ]},
   { category: 'Services & Device', rows: [
     { feature: 'Services marketplace', basics: false, connect: false, complete: true, premier: true },
@@ -111,7 +121,7 @@ const COMPARISON = [
   ]},
 ]
 
-function Tick({ value }: { value: boolean | string }) {
+function Tick({ value }: { value: CellValue }) {
   if (value === false) return <span style={{ color: 'var(--color-text-muted)', fontSize: '18px' }}>—</span>
   if (value === true) return (
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-label="Included">
@@ -121,6 +131,9 @@ function Tick({ value }: { value: boolean | string }) {
   )
   return <span style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-navy)' }}>{value}</span>
 }
+
+const tiers = ['basics', 'connect', 'complete', 'premier'] as const
+type Tier = typeof tiers[number]
 
 export default async function PricingPage() {
   const user = await getCurrentUser()
@@ -136,7 +149,7 @@ export default async function PricingPage() {
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(32px, 5vw, 52px)', fontWeight: 500, color: 'var(--color-navy)', letterSpacing: '-0.02em', lineHeight: 1.1, marginBottom: '20px' }}>
             Simple, honest pricing
           </h1>
-          <p style={{ fontFamily: 'var(--font-body)', fontSize: '19px', color: 'var(--color-text-secondary)', lineHeight: 1.65, maxWidth: '500px', margin: '0 auto 16px' }}>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '19px', color: 'var(--color-text-secondary)', lineHeight: 1.65, maxWidth: '500px', margin: '0 auto 12px' }}>
             No hidden fees, no long-term contracts. 14-day free trial on every plan.
           </p>
           <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-teal)', fontWeight: 600, margin: 0 }}>
@@ -148,22 +161,16 @@ export default async function PricingPage() {
       {/* ── PLAN CARDS ── */}
       <section style={{ padding: '0 24px 80px' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-
-          {/* Annual toggle note */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', marginBottom: '40px' }}>
-            <div style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)' }}>
-              Prices shown monthly · <span style={{ color: 'var(--color-teal)', fontWeight: 600 }}>Annual plan saves 20%</span> · Contact us for Medicare Advantage or employer billing
-            </div>
-          </div>
-
+          <p style={{ textAlign: 'center', fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', marginBottom: '40px' }}>
+            Prices shown monthly · <span style={{ color: 'var(--color-teal)', fontWeight: 600 }}>Annual plan saves 20%</span> · Contact us for Medicare Advantage or employer billing
+          </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(240px, 100%), 1fr))', gap: '20px' }}>
             {PLANS.map(plan => (
               <div key={plan.tier} style={{
                 backgroundColor: plan.highlighted ? 'var(--color-navy)' : 'white',
                 borderRadius: 'var(--radius-xl)',
                 border: plan.highlighted ? 'none' : '1.5px solid var(--color-warm-grey)',
-                padding: '32px 24px',
-                display: 'flex', flexDirection: 'column',
+                padding: '32px 24px', display: 'flex', flexDirection: 'column',
                 boxShadow: plan.highlighted ? 'var(--shadow-card-hover)' : 'var(--shadow-card)',
                 position: 'relative',
               }}>
@@ -172,16 +179,10 @@ export default async function PricingPage() {
                     Most popular
                   </div>
                 )}
-                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: plan.highlighted ? 'white' : 'var(--color-navy)', marginBottom: '6px' }}>
-                  {plan.name}
-                </h2>
-                <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: plan.highlighted ? 'rgba(255,255,255,0.65)' : 'var(--color-text-secondary)', marginBottom: '20px', lineHeight: 1.5 }}>
-                  {plan.tagline}
-                </p>
-                <div style={{ marginBottom: '8px' }}>
-                  <span style={{ fontFamily: 'var(--font-body)', fontSize: '40px', fontWeight: 700, color: plan.highlighted ? 'white' : 'var(--color-navy)', letterSpacing: '-0.02em' }}>
-                    ${plan.monthlyPrice}
-                  </span>
+                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: plan.highlighted ? 'white' : 'var(--color-navy)', marginBottom: '6px' }}>{plan.name}</h2>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: plan.highlighted ? 'rgba(255,255,255,0.65)' : 'var(--color-text-secondary)', marginBottom: '20px', lineHeight: 1.5 }}>{plan.tagline}</p>
+                <div style={{ marginBottom: '6px' }}>
+                  <span style={{ fontFamily: 'var(--font-body)', fontSize: '40px', fontWeight: 700, color: plan.highlighted ? 'white' : 'var(--color-navy)', letterSpacing: '-0.02em' }}>${plan.monthlyPrice}</span>
                   <span style={{ fontFamily: 'var(--font-body)', fontSize: '16px', color: plan.highlighted ? 'rgba(255,255,255,0.6)' : 'var(--color-text-secondary)' }}>/mo</span>
                 </div>
                 <div style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: plan.highlighted ? 'rgba(255,255,255,0.55)' : 'var(--color-text-muted)', marginBottom: '24px' }}>
@@ -194,29 +195,23 @@ export default async function PricingPage() {
                         <circle cx="9" cy="9" r="9" fill={plan.highlighted ? 'rgba(255,255,255,0.15)' : 'var(--color-teal)'} opacity={plan.highlighted ? 1 : 0.15} />
                         <path d="M5 9l3 3 5-5" stroke={plan.highlighted ? 'white' : 'var(--color-teal)'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
-                      <span style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: plan.highlighted ? 'rgba(255,255,255,0.88)' : 'var(--color-text-primary)', lineHeight: 1.5 }}>
-                        {f}
-                      </span>
+                      <span style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: plan.highlighted ? 'rgba(255,255,255,0.88)' : 'var(--color-text-primary)', lineHeight: 1.5 }}>{f}</span>
                     </li>
                   ))}
                 </ul>
-                <Link
-                  href={signedIn ? '/dashboard/billing' : `/signup?plan=${plan.tier}`}
-                  style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontFamily: 'var(--font-body)', fontSize: '16px', fontWeight: 600,
-                    textDecoration: 'none', borderRadius: 'var(--radius-md)',
-                    padding: '14px 24px', minHeight: '52px',
-                    backgroundColor: plan.highlighted ? 'white' : 'var(--color-teal)',
-                    color: plan.highlighted ? 'var(--color-navy)' : 'white',
-                  }}
-                >
+                <Link href={signedIn ? '/dashboard/billing' : `/signup?plan=${plan.tier}`} style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontFamily: 'var(--font-body)', fontSize: '16px', fontWeight: 600,
+                  textDecoration: 'none', borderRadius: 'var(--radius-md)',
+                  padding: '14px 24px', minHeight: '52px',
+                  backgroundColor: plan.highlighted ? 'white' : 'var(--color-teal)',
+                  color: plan.highlighted ? 'var(--color-navy)' : 'white',
+                }}>
                   {signedIn ? 'Choose this plan' : 'Start free trial'}
                 </Link>
               </div>
             ))}
           </div>
-
           <p style={{ textAlign: 'center', marginTop: '32px', fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)' }}>
             All plans include a 14-day free trial. No credit card required to start.
           </p>
@@ -227,14 +222,9 @@ export default async function PricingPage() {
       <section style={{ padding: '0 24px 80px', backgroundColor: 'white' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', padding: '64px 0 48px' }}>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(26px, 3vw, 36px)', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '12px' }}>
-              Full feature comparison
-            </h2>
-            <p style={{ fontFamily: 'var(--font-body)', fontSize: '17px', color: 'var(--color-text-secondary)' }}>
-              Everything that&apos;s included in each plan.
-            </p>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(26px, 3vw, 36px)', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '12px' }}>Full feature comparison</h2>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '17px', color: 'var(--color-text-secondary)' }}>Everything that&apos;s included in each plan.</p>
           </div>
-
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--font-body)' }}>
               <thead>
@@ -258,7 +248,7 @@ export default async function PricingPage() {
                     {group.rows.map((row, i) => (
                       <tr key={row.feature} style={{ backgroundColor: i % 2 === 0 ? 'transparent' : 'rgba(0,0,0,0.015)' }}>
                         <td style={{ padding: '12px 16px', fontSize: '14px', color: 'var(--color-text-primary)', borderBottom: '1px solid var(--color-warm-grey)' }}>{row.feature}</td>
-                        {(['basics', 'connect', 'complete', 'premier'] as const).map(tier => (
+                        {tiers.map(tier => (
                           <td key={tier} style={{ textAlign: 'center', padding: '12px 16px', borderBottom: '1px solid var(--color-warm-grey)' }}>
                             <Tick value={row[tier]} />
                           </td>
@@ -276,9 +266,7 @@ export default async function PricingPage() {
       {/* ── B2B NOTE ── */}
       <section style={{ padding: '64px 24px', backgroundColor: 'var(--color-cream)', textAlign: 'center' }}>
         <div style={{ maxWidth: '700px', margin: '0 auto' }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(24px, 3vw, 34px)', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '16px' }}>
-            Employer &amp; partner plans
-          </h2>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(24px, 3vw, 34px)', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '16px' }}>Employer &amp; partner plans</h2>
           <p style={{ fontFamily: 'var(--font-body)', fontSize: '17px', color: 'var(--color-text-secondary)', lineHeight: 1.65, marginBottom: '32px' }}>
             ThriveAtHome is available as an employee benefit, Medicare Advantage supplemental benefit, or through senior care partners. Volume pricing, SSO, and dedicated account management included.
           </p>
