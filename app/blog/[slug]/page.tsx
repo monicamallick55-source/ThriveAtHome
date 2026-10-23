@@ -20,7 +20,7 @@ export default function BlogPostPage({ params }: Props) {
         <span className="inline-block bg-teal-100 text-teal-800 text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-4">{post.category}</span>
         <h1 className="font-display text-3xl md:text-4xl font-bold text-[#1e3a5f] leading-tight mb-4">{post.title}</h1>
         <div className="flex items-center gap-4 text-gray-400 text-[13px] mb-6 pb-6 border-b border-gray-200">
-          <span>{post.author}</span><span>·</span><span>{post.date}</span><span>·</span><span>{post.readTime} min read</span>
+          <span>{post.author}</span><span>·</span><span>{new Date(post.publishedAt).toLocaleDateString("en-US", {year:"numeric",month:"long",day:"numeric"})}</span><span>·</span><span>{post.readTime} min read</span>
         </div>
         <p className="text-lg text-gray-600 mb-8 leading-relaxed font-medium">{post.excerpt}</p>
         <article className="prose prose-lg max-w-none prose-headings:text-[#1e3a5f] prose-a:text-teal-600"

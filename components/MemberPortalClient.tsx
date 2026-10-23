@@ -149,7 +149,7 @@ function parseNeedText(text: string): { service_type: string; description: strin
   return { service_type: best, description: text.trim() }
 }
 
-type Tab = 'profile' | 'services' | 'requests' | 'community' | 'dates' | 'buddy' | 'life-story' | 'billing' | 'add-ons' | 'org' | 'notifications' | 'documents'
+type Tab = 'profile' | 'services' | 'requests' | 'community' | 'dates' | 'buddy' | 'life-story' | 'billing' | 'add-ons' | 'org' | 'notifications' | 'documents' | 'find-local-help'
 
 // ── Interfaces ──────────────────────────────────────────────────────────────
 
@@ -381,6 +381,7 @@ export default function MemberPortalClient({
   }
 
   function switchTab(t: Tab) {
+    if (t === 'find-local-help') { window.location.href = '/dashboard/find-local-help'; return }
     setActiveTab(t)
     window.history.replaceState(null, '', `#${t}`)
   }
@@ -894,6 +895,7 @@ export default function MemberPortalClient({
     { id: 'org', label: 'My Org' },
     { id: 'notifications', label: 'Notifications & Privacy' },
     { id: 'documents', label: '📎 Documents' },
+    { id: 'find-local-help', label: '🔍 Find Local Help' },
   ]
 
   // ── Styles ────────────────────────────────────────────────────────────────
@@ -951,13 +953,13 @@ export default function MemberPortalClient({
           <p style={{ fontFamily: 'var(--font-body)', fontSize: '16px', color: 'rgba(250,250,245,0.65)', marginBottom: '20px' }}>
             Your ThriveAtHome portal · {planTierLabel} plan
           </p>
-          <div style={{ display: 'flex', gap: '0', overflowX: 'auto', scrollbarWidth: 'none' }}>
+          <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', paddingBottom: '0' }}>
             {tabs.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => switchTab(tab.id)}
                 style={{
-                  height: '42px', padding: '0 16px', border: 'none', cursor: 'pointer',
+                  height: '38px', padding: '0 14px', border: 'none', cursor: 'pointer', marginBottom: '4px',
                   fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: activeTab === tab.id ? 700 : 400,
                   backgroundColor: activeTab === tab.id ? 'var(--color-cream)' : 'transparent',
                   color: activeTab === tab.id ? 'var(--color-navy)' : 'rgba(250,250,245,0.7)',
