@@ -22,7 +22,6 @@ function isToday(dateStr: string) {
 
 function formatEventDate(dateStr: string, timeStr: string, _timezone: string) {
   const [year, monthNum, dayNum] = dateStr.split('-').map(Number)
-  // Use UTC constructor so day-of-week is timezone-independent (no server/client mismatch)
   const d = new Date(Date.UTC(year, monthNum - 1, dayNum))
   const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
   const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
@@ -37,6 +36,20 @@ function formatEventDate(dateStr: string, timeStr: string, _timezone: string) {
   return out
 }
 
+interface NearbyEvent {
+  id: string
+  title: string
+  date: string
+  location: string
+  description: string
+  distance_miles: number
+  format: string
+  spots_left: number | null
+  url: string | null
+  score: number
+  category: string
+}
+
 interface Props {
   initialEvents: EventWithRsvp[]
 }
@@ -47,28 +60,35 @@ export default function EventsClient({ initialEvents }: Props) {
   const [toastMsg, setToastMsg] = useState<string | null>(null)
   const [waitlistedIds, setWaitlistedIds] = useState<Set<string>>(new Set())
   const [liveZip, setLiveZip] = useState('')
-  const [liveEvents, setLiveEvents] = useState<Array<{title:string;date:string;location:string;description:string;url:string;score:number;category:string}>>([])
+  const [liveRadius, setLiveRadius] = useState(25)
+  const [liveEvents, setLiveEvents] = useState<NearbyEvent[]>([])
   const [liveLoading, setLiveLoading] = useState(false)
-  const [liveError, setLiveError] = useState<string|null>(null)
-  const [liveCached, setLiveCached] = useState(false)
+  const [liveError, setLiveError] = useState<string | null>(null)
+  const [liveGeo, setLiveGeo] = useState<{ city: string; state: string } | null>(null)
 
   async function handleSearchEvents() {
     const z = liveZip.trim()
     if (z.length === 0) return
     setLiveLoading(true)
     setLiveError(null)
+    setLiveGeo(null)
     try {
       const res = await fetch('/api/events/search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ category: 'cultural', zip: z, radius: 25 }),
+        body: JSON.stringify({ zip: z, radius: liveRadius }),
       })
-      if (res.ok === false) throw new Error('Search failed (' + res.status + ')')
-      const json = await res.json()
+      if (!res.ok) throw new Error('Search failed (' + res.status + ')')
+      const json = await res.json() as {
+        events?: NearbyEvent[]
+        error?: string
+        geo?: { city: string; state: string }
+      }
+      if (json.error) { setLiveError(json.error); setLiveEvents([]); return }
       setLiveEvents(json.events ?? [])
-      setLiveCached(json.cached ?? false)
-    } catch(e) {
+      setLiveGeo(json.geo ?? null)
+    } catch (e) {
       setLiveError(e instanceof Error ? e.message : String(e))
     } finally {
       setLiveLoading(false)
@@ -88,14 +108,13 @@ export default function EventsClient({ initialEvents }: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ eventId, action }),
       })
-      const data = await res.json().catch(() => ({}))
+      const data = await res.json().catch(() => ({})) as { full?: boolean; error?: string }
 
       if (!res.ok) {
-        // Event full — offer the waitlist instead of a dead end.
         if (data.full && action === 'rsvp') {
           showToast('This event is full — you can join the waitlist and we\'ll notify you if a spot opens.')
         } else {
-          showToast(data.error || 'Could not complete action. Please try again.')
+          showToast(data.error ?? 'Could not complete action. Please try again.')
         }
         return
       }
@@ -111,7 +130,7 @@ export default function EventsClient({ initialEvents }: Props) {
         return
       }
 
-      setEvents(prev => prev.map((evt: any) => {
+      setEvents(prev => prev.map((evt: EventWithRsvp) => {
         if (evt.id !== eventId) return evt
         return {
           ...evt,
@@ -153,7 +172,9 @@ export default function EventsClient({ initialEvents }: Props) {
             letterSpacing: '0.06em', margin: '0 0 16px',
           }}>Happening Today</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {todayEvents.map((evt: any) => <EventCard key={evt.id} evt={evt} isToday={true} loadingId={loadingId} onRsvp={handleRsvp} isWaitlisted={waitlistedIds.has(evt.id)} />)}
+            {todayEvents.map((evt: EventWithRsvp) => (
+              <EventCard key={evt.id} evt={evt} isToday={true} loadingId={loadingId} onRsvp={handleRsvp} isWaitlisted={waitlistedIds.has(evt.id)} />
+            ))}
           </div>
         </div>
       )}
@@ -167,7 +188,9 @@ export default function EventsClient({ initialEvents }: Props) {
             letterSpacing: '0.06em', margin: '0 0 16px',
           }}>Upcoming Events</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {upcomingEvents.map((evt: any) => <EventCard key={evt.id} evt={evt} isToday={false} loadingId={loadingId} onRsvp={handleRsvp} isWaitlisted={waitlistedIds.has(evt.id)} />)}
+            {upcomingEvents.map((evt: EventWithRsvp) => (
+              <EventCard key={evt.id} evt={evt} isToday={false} loadingId={loadingId} onRsvp={handleRsvp} isWaitlisted={waitlistedIds.has(evt.id)} />
+            ))}
           </div>
         </div>
       )}
@@ -188,17 +211,21 @@ export default function EventsClient({ initialEvents }: Props) {
         </div>
       )}
 
-      {/* Live community event search */}
+      {/* ── Zip-radius community event search ── */}
       <div style={{ marginTop: '48px' }}>
         <h2 style={{
           fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600,
           color: 'var(--color-text-secondary)', textTransform: 'uppercase',
-          letterSpacing: '0.06em', margin: '0 0 16px',
-        }}>Find Events Near You</h2>
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
+          letterSpacing: '0.06em', margin: '0 0 6px',
+        }}>Find Community Events Near You</h2>
+        <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', margin: '0 0 16px' }}>
+          Search community events happening within a set distance of your zip code.
+        </p>
+
+        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap', alignItems: 'center' }}>
           <input
             type="text"
-            placeholder="Enter zip code"
+            placeholder="Zip code"
             value={liveZip}
             onChange={e => setLiveZip(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') handleSearchEvents() }}
@@ -206,52 +233,93 @@ export default function EventsClient({ initialEvents }: Props) {
             style={{
               padding: '10px 14px', borderRadius: '8px',
               border: '1px solid var(--color-border)',
-              fontFamily: 'var(--font-body)', fontSize: '15px', width: '140px',
+              fontFamily: 'var(--font-body)', fontSize: '15px', width: '120px',
             }}
           />
+          <select
+            value={liveRadius}
+            onChange={e => setLiveRadius(Number(e.target.value))}
+            style={{
+              padding: '10px 12px', borderRadius: '8px',
+              border: '1px solid var(--color-border)',
+              fontFamily: 'var(--font-body)', fontSize: '15px',
+              backgroundColor: 'white', cursor: 'pointer',
+            }}
+          >
+            <option value={5}>5 miles</option>
+            <option value={10}>10 miles</option>
+            <option value={25}>25 miles</option>
+            <option value={50}>50 miles</option>
+          </select>
           <button
             onClick={handleSearchEvents}
-            disabled={liveLoading}
+            disabled={liveLoading || !liveZip.trim()}
             style={{
               backgroundColor: 'var(--color-teal)', color: 'white',
-              border: 'none', borderRadius: '8px', padding: '10px 20px',
+              border: 'none', borderRadius: '8px', padding: '10px 22px',
               fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 600,
-              cursor: liveLoading ? 'not-allowed' : 'pointer',
-              opacity: liveLoading ? 0.6 : 1,
+              cursor: liveLoading || !liveZip.trim() ? 'not-allowed' : 'pointer',
+              opacity: liveLoading || !liveZip.trim() ? 0.6 : 1,
             }}
           >{liveLoading ? 'Searching…' : 'Search'}</button>
         </div>
+
         {liveError && (
-          <p style={{ color: '#c0392b', fontFamily: 'var(--font-body)', fontSize: '14px' }}>{liveError}</p>
+          <p style={{ color: '#c0392b', fontFamily: 'var(--font-body)', fontSize: '14px', marginBottom: '12px' }}>{liveError}</p>
         )}
-        {liveCached && liveEvents.length > 0 && (
-          <p style={{ color: 'var(--color-text-secondary)', fontFamily: 'var(--font-body)', fontSize: '12px', marginBottom: '12px' }}>Showing cached results</p>
+
+        {liveGeo && liveEvents.length > 0 && (
+          <p style={{ color: 'var(--color-text-secondary)', fontFamily: 'var(--font-body)', fontSize: '13px', marginBottom: '16px' }}>
+            Showing {liveEvents.length} event{liveEvents.length !== 1 ? 's' : ''} within {liveRadius} miles of {liveGeo.city}, {liveGeo.state}
+          </p>
         )}
+
         {liveEvents.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {liveEvents.map((evt: any, i: number) => (
-              <div key={i} style={{
+            {liveEvents.map((evt: NearbyEvent) => (
+              <div key={evt.id} style={{
                 backgroundColor: 'white', borderRadius: '16px', padding: '20px 24px',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                border: '1px solid var(--color-border)',
               }}>
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--color-navy)', margin: '0 0 6px', fontWeight: 600 }}>{evt.title}</p>
-                <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', margin: '0 0 4px' }}>{'📅'} {evt.date}</p>
-                {evt.location && <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', margin: '0 0 8px' }}>{'📍'} {evt.location}</p>}
-                <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-primary)', margin: '0 0 12px' }}>{evt.description}</p>
-                {evt.url && (
-                  <a href={evt.url} target="_blank" rel="noopener noreferrer" style={{
-                    display: 'inline-block', backgroundColor: 'var(--color-teal)', color: 'white',
-                    borderRadius: '8px', padding: '8px 16px',
-                    fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600,
-                    textDecoration: 'none',
-                  }}>View Event</a>
-                )}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px', flexWrap: 'wrap', marginBottom: '6px' }}>
+                  <p style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--color-navy)', margin: 0, fontWeight: 600 }}>{evt.title}</p>
+                  <span style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-teal)', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                    📍 {evt.distance_miles} mi away
+                  </span>
+                </div>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', margin: '0 0 4px' }}>📅 {evt.date}</p>
+                {evt.location && <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', margin: '0 0 8px' }}>🏠 {evt.location}</p>}
+                {evt.description && <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-primary)', margin: '0 0 10px', lineHeight: 1.5 }}>{evt.description}</p>}
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  {evt.format && (
+                    <span style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 600, padding: '3px 10px', borderRadius: '12px', backgroundColor: (FORMAT_COLORS[evt.format] ?? '#888') + '18', color: FORMAT_COLORS[evt.format] ?? '#888' }}>
+                      {FORMAT_LABELS[evt.format] ?? evt.format}
+                    </span>
+                  )}
+                  {evt.spots_left !== null && (
+                    <span style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: evt.spots_left < 5 ? '#B45309' : 'var(--color-text-secondary)' }}>
+                      {evt.spots_left === 0 ? 'Full' : `${evt.spots_left} spot${evt.spots_left !== 1 ? 's' : ''} left`}
+                    </span>
+                  )}
+                  {evt.url && (
+                    <a href={evt.url} target="_blank" rel="noopener noreferrer" style={{
+                      display: 'inline-block', backgroundColor: 'var(--color-teal)', color: 'white',
+                      borderRadius: '8px', padding: '6px 14px',
+                      fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600,
+                      textDecoration: 'none',
+                    }}>View Event</a>
+                  )}
+                </div>
               </div>
             ))}
           </div>
         )}
-        {liveLoading === false && liveEvents.length === 0 && liveZip.length > 0 && liveError === null && (
-          <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)' }}>No events found near {liveZip}. Try a nearby zip code.</p>
+
+        {!liveLoading && liveEvents.length === 0 && liveZip.length > 0 && !liveError && (
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--color-text-secondary)' }}>
+            No community events found within {liveRadius} miles of {liveZip}. Try a larger radius or check back soon.
+          </p>
         )}
       </div>
     </div>
