@@ -350,7 +350,8 @@ function QuickActions() {
     { label: 'Add-ons & upgrades', sub: 'Optional plan extras', href: '/dashboard/add-ons' },
     { label: 'Pets & companions', sub: 'Profiles & pet milestones', href: '/dashboard/pets' },
     { label: 'Call history', sub: 'All past conversations', href: '/dashboard/calls' },
-    { label: 'Update preferences', sub: 'Call times & topics', href: '/onboarding' },
+            { label: 'Update preferences', sub: 'Call times & topics', href: '/onboarding' },
+    { label: 'Community Partners', sub: 'Local services & resources', href: '/dashboard/partners' },
   ]
 
   return (
