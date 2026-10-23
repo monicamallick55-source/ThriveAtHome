@@ -4,9 +4,16 @@
 // POST — place a new gift order (free: direct insert; paid: Stripe PI)
 
 import { NextResponse } from 'next/server'
+import Stripe from 'stripe'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getGiftById } from '@/lib/gifts/catalog'
+import { requireServerEnv } from '@/lib/env'
+
+function getStripeClient(): Stripe {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return new (Stripe as any)(requireServerEnv('STRIPE_SECRET_KEY'))
+}
 
 export async function GET() {
   const supabase = await createClient()
@@ -21,9 +28,6 @@ export async function GET() {
   if (!member) return NextResponse.json({ error: 'Members only' }, { status: 403 })
 
   const admin = createAdminClient()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = admin as any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (admin as any)
     .from('gift_orders')
     .select('*')
@@ -41,7 +45,6 @@ export async function POST(req: Request) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
-  // Only members can send gifts (not family)
   const { data: member } = await supabase
     .from('members')
     .select('id')
@@ -65,8 +68,6 @@ export async function POST(req: Request) {
   }
 
   const admin = createAdminClient()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = admin as any
 
   if (gift.amountCents === null || gift.amountCents === 0) {
     // Free gift (digital card) — insert directly
@@ -89,7 +90,7 @@ export async function POST(req: Request) {
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-    // TODO: send digital card email in production
+    // TODO: send digital card email via Resend
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await (admin as any)
       .from('gift_orders')
@@ -99,9 +100,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, orderId: data.id, requiresPayment: false }, { status: 201 })
   }
 
-  // Paid gift — create a Stripe PaymentIntent
-  // For now, insert as 'pending' and return clientSecret placeholder
-  // In production: integrate with Stripe here
+  // Paid gift — insert as pending, create Stripe PaymentIntent
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (admin as any)
     .from('gift_orders')
@@ -121,18 +120,24 @@ export async function POST(req: Request) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // TODO: create Stripe PaymentIntent and store stripe_pi_id
-  // const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
-  // const pi = await stripe.paymentIntents.create({ amount: gift.amountCents, currency: 'usd', metadata: { order_id: data.id } })
-  // await db.from('gift_orders').update({ stripe_pi_id: pi.id }).eq('id', data.id)
-  // return NextResponse.json({ ok: true, orderId: data.id, requiresPayment: true, clientSecret: pi.client_secret })
+  const stripe = getStripeClient()
+  const pi = await stripe.paymentIntents.create({
+    amount: gift.amountCents,
+    currency: 'usd',
+    metadata: { order_id: data.id, member_id: member.id },
+  })
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (admin as any)
+    .from('gift_orders')
+    .update({ stripe_pi_id: pi.id })
+    .eq('id', data.id)
 
   return NextResponse.json({
     ok: true,
     orderId: data.id,
     requiresPayment: true,
     amountCents: gift.amountCents,
-    // clientSecret: pi.client_secret   ← enable when Stripe live
-    note: 'Stripe integration pending live keys',
+    clientSecret: pi.client_secret,
   }, { status: 201 })
 }

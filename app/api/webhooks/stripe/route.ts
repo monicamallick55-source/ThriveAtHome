@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import Stripe from 'stripe'
 import { requireServerEnv } from '@/lib/env'
 import {
@@ -199,7 +200,19 @@ async function handleStripeEvent(event: Stripe.Event) {
       console.log(`[webhook/stripe] Subscription cancelled: ${subscription.id}`)
       break
     }
-
+    case 'payment_intent.succeeded': {
+      const pi = event.data.object as Stripe.PaymentIntent
+      const orderId = pi.metadata?.order_id
+      if (!orderId) break
+      const admin = createAdminClient()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (admin as any)
+        .from('gift_orders')
+        .update({ status: 'paid' })
+        .eq('id', orderId)
+      console.log(`[webhook/stripe] Gift order ${orderId} marked paid`)
+      break
+    }
     default:
       // Unhandled event type — ignore silently
       break
