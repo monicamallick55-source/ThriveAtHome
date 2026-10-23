@@ -107,7 +107,7 @@ export const RESOURCE_TOPICS: ResourceTopic[] = [
 
   {
     slug: 'essential-legal-documents-seniors',
-    title: 'The 5 Legal Documents Every Senior Needs Before It's Too Late',
+    title: 'The 5 Legal Documents Every Senior Needs Before It Is Too Late',
     excerpt: 'Without these documents, your family could face costly court battles and impossible decisions during a crisis. Here's what to get in place now.',
     author: 'ThriveAtHome Legal Team',
     publishedAt: '2026-09-10',
