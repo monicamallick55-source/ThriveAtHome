@@ -200,17 +200,30 @@ async function handleStripeEvent(event: Stripe.Event) {
       console.log(`[webhook/stripe] Subscription cancelled: ${subscription.id}`)
       break
     }
-    case 'payment_intent.succeeded': {
+       case 'payment_intent.succeeded': {
       const pi = event.data.object as Stripe.PaymentIntent
-      const orderId = pi.metadata?.order_id
-      if (!orderId) break
       const admin = createAdminClient()
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (admin as any)
-        .from('gift_orders')
-        .update({ status: 'paid' })
-        .eq('id', orderId)
-      console.log(`[webhook/stripe] Gift order ${orderId} marked paid`)
+      // Celebration request payment
+      const requestId = pi.metadata?.request_id
+      if (requestId) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (admin as any)
+          .from('celebration_requests')
+          .update({ status: 'active' })
+          .eq('id', requestId)
+        console.log(`[webhook/stripe] Celebration request ${requestId} marked active`)
+        break
+      }
+      // Gift order payment
+      const orderId = pi.metadata?.order_id
+      if (orderId) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (admin as any)
+          .from('gift_orders')
+          .update({ status: 'paid' })
+          .eq('id', orderId)
+        console.log(`[webhook/stripe] Gift order ${orderId} marked paid`)
+      }
       break
     }
     default:
