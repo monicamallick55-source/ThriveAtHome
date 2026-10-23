@@ -264,22 +264,23 @@ function ReferralForm({
 }
 
 export default function PartnerDirectoryPage() {
-  const router = useRouter()
   const [checking, setChecking] = useState(true)
-
-  useEffect(() => {
-    fetch("/api/auth/me").then(r => {
-      if (!r.ok) router.replace("/login?next=/partner-directory")
-      else setChecking(false)
-    }).catch(() => router.replace("/login?next=/partner-directory"))
-  }, [])
-
-  if (checking) return <div style={{minHeight:"60vh",display:"flex",alignItems:"center",justifyContent:"center"}}>Loading...</div>
-
+  const [isMember, setIsMember] = useState(false)
   const [search, setSearch] = useState('')
   const [expanded, setExpanded] = useState<string | null>(null)
   const [referralCategory, setReferralCategory] = useState<string | null>(null)
   const [referralSent, setReferralSent] = useState<Record<string, boolean>>({})
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then(r => { if (r.ok) setIsMember(true); setChecking(false) })
+      .catch(() => setChecking(false))
+  }, [])
+
+  if (checking) return <div style={{minHeight:'60vh',display:'flex',alignItems:'center',justifyContent:'center'}}>Loading…</div>
+
+  const navigatorHref = isMember ? '/dashboard/messages' : '/signup'
+  const navigatorLabel = isMember ? 'Message my Navigator →' : 'Get a Navigator →' 
 
   const filtered = CATEGORIES.filter(cat => {
     if (!search.trim()) return true
@@ -290,8 +291,6 @@ export default function PartnerDirectoryPage() {
       cat.subcategories.some(s => s.toLowerCase().includes(q))
     )
   })
-
-  if (checking) return <div style={{minHeight:"60vh",display:"flex",alignItems:"center",justifyContent:"center"}}>Loading...</div>
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -358,10 +357,10 @@ export default function PartnerDirectoryPage() {
             </p>
           </div>
           <Link
-            href="/dashboard"
+            href={navigatorHref}
             className="shrink-0 bg-white text-teal-700 font-semibold px-5 py-2.5 rounded-xl hover:bg-teal-50 transition-colors text-sm"
           >
-            Message my Navigator →
+            {navigatorLabel}
           </Link>
         </div>
 
@@ -445,10 +444,10 @@ export default function PartnerDirectoryPage() {
                         Request a local referral
                       </button>
                       <Link
-                        href="/dashboard"
+                        href={navigatorHref}
                         className="border border-gray-200 text-gray-700 text-sm font-medium px-5 py-2.5 rounded-xl hover:bg-gray-50 transition-colors text-center"
                       >
-                        Message my Navigator
+                        {navigatorLabel}
                       </Link>
                     </div>
                   )}
