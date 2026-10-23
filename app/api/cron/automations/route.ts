@@ -43,8 +43,8 @@ export async function GET(req: NextRequest) {
       .from('family_members')
       .select('notification_prefs')
       .eq('member_id', memberId)
-    const optedOut = (fms ?? []).some(
-      (fm) => (fm.notification_prefs as Record<string, unknown>)?.automation_opt_out === true
+        const optedOut = (fms ?? []).some(
+      (fm: { notification_prefs: unknown }) => (fm.notification_prefs as Record<string, unknown>)?.automation_opt_out === true
     )
     if (optedOut) return false
 

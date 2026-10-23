@@ -117,7 +117,7 @@ export async function GET(req: NextRequest) {
 
   const memberIds = (memberRows ?? [])
     .map((r: any) => r.member_id)
-    .filter((id): id is string => id !== null && id !== undefined)
+    .filter((id: unknown): id is string => id !== null && id !== undefined)
 
   // 9. Compute aggregated call metrics for the last 30 days
   const periodStart = thirtyDaysAgo()
@@ -127,7 +127,8 @@ export async function GET(req: NextRequest) {
     .in('member_id', memberIds)
     .gte('created_at', `${periodStart}T00:00:00Z`)
 
-  const calls = callData ?? []
+    type CallRow = { status: string; mood_score: number | null; member_id: string }
+  const calls: CallRow[] = callData ?? []
   const totalCalls = calls.length
   const completedCalls = calls.filter(c => c.status === 'completed').length
   const callCompletionRate =
@@ -135,17 +136,17 @@ export async function GET(req: NextRequest) {
 
   const moodScores = calls
     .filter(c => c.mood_score !== null && c.mood_score !== undefined)
-    .map((c: any) => c.mood_score as number)
+    .map(c => c.mood_score as number)
   const avgMoodScore =
     moodScores.length > 0
-      ? Math.round((moodScores.reduce((a: any, b: any) => a + b, 0) / moodScores.length) * 10) / 10
+      ? Math.round((moodScores.reduce((a, b) => a + b, 0) / moodScores.length) * 10) / 10
       : null
 
   // Count unique members who had at least one completed call (engagement)
   const engagedMemberIds = new Set(
     calls
       .filter(c => c.status === 'completed')
-      .map((c: any) => c.member_id)
+      .map(c => c.member_id)
       .filter(Boolean)
   )
   const uniqueMembersEngaged = engagedMemberIds.size

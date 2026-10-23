@@ -111,7 +111,7 @@ export default async function DirectoryPage({ searchParams }: { searchParams: Se
       {/* Listings grid */}
       {listings && listings.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
-          {listings.map(p => {
+          {listings.map((p: { id: string; name: string; slug: string; bio?: string; category: string; city?: string; state?: string; phone?: string; logo_url?: string; featured?: boolean }) => {
             const cat = DIRECTORY_CATEGORIES.find(c => c.slug === p.category)
             return (
               <Link

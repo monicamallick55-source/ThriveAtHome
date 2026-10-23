@@ -74,7 +74,7 @@ export async function GET(req: NextRequest) {
         .eq('member_id', member.id)
 
       const emailRecipients = (familyMembers ?? []).filter(
-        (fm) => (fm.notification_prefs as { email: boolean })?.email !== false
+       (fm: { email: string; full_name: string; notification_prefs: unknown }) => (fm.notification_prefs as { email: boolean })?.email !== false
       )
 
       if (emailRecipients.length === 0) {

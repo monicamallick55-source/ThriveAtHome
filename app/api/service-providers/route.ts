@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
 
   // Deduplicate by company_name (or full_name when no company) to guard against duplicate DB rows
   const seen = new Set<string>()
-  const deduped = (data ?? []).filter(p => {
+  const deduped = (data ?? []).filter((p: { company_name?: string; full_name?: string }) => {
     const key = ((p.company_name ?? p.full_name) as string).toLowerCase().trim()
     if (seen.has(key)) return false
     seen.add(key)
