@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 
 const NO_NAV_PREFIXES = [
   '/dashboard','/member-portal','/admin','/employer-admin',
@@ -19,6 +19,13 @@ const B2C_LINKS = [
 const B2B_LINKS = [
   { label: 'For Employers', href: '/employers' },
   { label: 'For Partners', href: '/for-organizations' },
+]
+
+const RESOURCES_LINKS = [
+  { label: '📝 Blog', href: '/blog', desc: 'Articles on senior living' },
+  { label: '✅ Checklists & Guides', href: '/checklists', desc: '36 practical checklists' },
+  { label: '🗂️ Find Local Help', href: '/directory', desc: 'Partner directory near you' },
+  { label: '🗺️ Resources by State', href: '/resources/states', desc: 'State-specific programs' },
 ]
 
 const linkStyle: React.CSSProperties = {
@@ -61,6 +68,8 @@ const mobileGroupLabel: React.CSSProperties = {
 export default function SiteNav() {
   const pathname = usePathname()
   const [openOn, setOpenOn] = useState<string | null>(null)
+  const [resourcesOpen, setResourcesOpen] = useState(false)
+  const resourcesRef = useRef<HTMLDivElement>(null)
   const open = openOn === pathname
   const setOpen = (next: boolean | ((o: boolean) => boolean)) =>
     setOpenOn((typeof next === 'function' ? next(open) : next) ? pathname : null)
@@ -71,6 +80,16 @@ export default function SiteNav() {
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
   }, [open])
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (resourcesRef.current && !resourcesRef.current.contains(e.target as Node)) {
+        setResourcesOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
 
   const hide = NO_NAV_PREFIXES.some(p => pathname === p || pathname.startsWith(p + '/'))
   if (hide) return null
@@ -87,6 +106,37 @@ export default function SiteNav() {
           {B2C_LINKS.map(l => (
             <Link key={l.href} href={l.href} style={linkStyle}>{l.label}</Link>
           ))}
+
+          {/* Resources dropdown */}
+          <div ref={resourcesRef} style={{ position:'relative' }}>
+            <button
+              type="button"
+              onClick={() => setResourcesOpen(o => !o)}
+              style={{ ...linkStyle, background:'none', border:'none', cursor:'pointer', display:'flex', alignItems:'center', gap:'4px' }}
+            >
+              Resources
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ transition:'transform 0.15s', transform: resourcesOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+                <path d="M6 9l6 6 6-6"/>
+              </svg>
+            </button>
+            {resourcesOpen && (
+              <div style={{ position:'absolute',top:'calc(100% + 8px)',right:0,backgroundColor:'white',borderRadius:'12px',boxShadow:'0 8px 24px rgba(0,0,0,0.12)',border:'1px solid var(--color-warm-grey,#e8e4dc)',minWidth:'240px',padding:'8px',zIndex:100 }}>
+                {RESOURCES_LINKS.map(l => (
+                  <Link
+                    key={l.href}
+                    href={l.href}
+                    onClick={() => setResourcesOpen(false)}
+                    style={{ display:'block',padding:'10px 12px',borderRadius:'8px',textDecoration:'none',color:'var(--color-navy,#1e3a5f)' }}
+                    className="hover:bg-gray-50"
+                  >
+                    <div style={{ fontWeight:500, fontSize:'14px' }}>{l.label}</div>
+                    <div style={{ fontSize:'12px', color:'#64748b', marginTop:'2px' }}>{l.desc}</div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div style={{ width:'1px',height:'20px',backgroundColor:'var(--color-warm-grey,#e8e4dc)',margin:'0 8px',flexShrink:0 }} aria-hidden="true" />
           {B2B_LINKS.map(l => (
             <Link key={l.href} href={l.href} style={b2bLinkStyle}>{l.label}</Link>
@@ -122,6 +172,10 @@ export default function SiteNav() {
             <div style={mobileGroupLabel}>For You</div>
             {B2C_LINKS.map(l => (
               <Link key={l.href} href={l.href} style={mobileLinkStyle} onClick={() => setOpenOn(null)}>{l.label}</Link>
+            ))}
+            <div style={{ ...mobileGroupLabel, marginTop: '4px' }}>Resources</div>
+            {RESOURCES_LINKS.map(l => (
+              <Link key={l.href} href={l.href} style={{ ...mobileLinkStyle, fontSize:'16px' }} onClick={() => setOpenOn(null)}>{l.label}</Link>
             ))}
             <div style={{ ...mobileGroupLabel, marginTop: '4px' }}>For Organizations</div>
             {B2B_LINKS.map(l => (

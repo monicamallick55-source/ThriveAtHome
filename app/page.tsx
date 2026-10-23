@@ -408,7 +408,7 @@ export default function HomePage() {
               <p style={{ color: 'rgba(250,250,245,0.5)', fontSize: '14px', lineHeight: 1.6, margin: 0 }}>Senior independence platform combining AI, human care, and community.</p>
             </div>
             {[
-              { label: 'Resources', links: [['Checklists', '/checklists'], ['State Resources', '/resources/states'], ['Blog', '/blog'], ['Find Local Help', '/dashboard/find-local-help']] },
+              { label: 'Resources', links: [['Checklists', '/checklists'], ['State Resources', '/resources/states'], ['Blog', '/blog'], ['Find Local Help', '/directory']] },
               { label: 'Product', links: [['How It Works', '/how-it-works'], ['Pricing', '/pricing'], ['Communities', '/dashboard/communities'], ['For Families', '/for-families'], ['For Organizations', '/for-organizations']] },
               { label: 'Volunteer', links: [['Become a Buddy', '/for-volunteers'], ['College students', '/for-volunteers'], ['Corporate teams', '/for-volunteers'], ['K-12 programs', '/for-volunteers']] },
               { label: 'Company', links: [['About', '/about'], ['Privacy', '/privacy'], ['Terms', '/terms'], ['Contact', 'mailto:hello@thriveathome.app']] },
