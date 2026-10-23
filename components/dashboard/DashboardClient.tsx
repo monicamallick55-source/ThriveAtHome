@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { ToastProvider } from '@/components/ui/Toast'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { SectionError } from './SectionError'
-import { DashNav } from './DashNav'
+// DashNav now rendered by app/dashboard/layout.tsx
 import CrisisResourceBar from '@/components/shared/CrisisResourceBar'
 import { WellnessCard } from './WellnessCard'
 import { AlertsPanel } from './AlertsPanel'
@@ -598,13 +598,6 @@ function DashboardInner(props: DashboardClientProps) {
         paddingBottom: '80px',
       }}
     >
-      <DashNav
-        seniorName={member.preferred_name}
-        unreadCount={unreadCount}
-        onMarkAllRead={markAllRead}
-      />
-
-      {/* Co-branded agency strip — shows "Agency Name, Powered by ThriveAtHome" for agency-referred members */}
       {brandConfig && (brandConfig.agency_display_name || brandConfig.tagline) && (
         <div
           role="banner"
