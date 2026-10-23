@@ -303,6 +303,71 @@ export default function HomePage() {
           </div>
         </section>
 
+
+        {/* ── RESOURCES & GUIDES ── */}
+        <section style={sectionPadAlt}>
+          <div style={maxW}>
+            <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+              <div style={{ display: 'inline-block', backgroundColor: 'var(--color-teal)', color: 'white', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 12px', borderRadius: '20px', marginBottom: '16px' }}>Free Resources</div>
+              <h2 style={heading2}>Guides & checklists for every step</h2>
+              <p style={{ ...bodyText, maxWidth: '520px', margin: '16px auto 0' }}>Practical, printable guides for home safety, legal planning, caregiver support, and more — all free.</p>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px,100%),1fr))', gap: '20px', marginBottom: '36px' }}>
+              {[
+                { icon: '🏠', title: 'Home Safety Checklist', desc: '45-point safety audit for every room', href: '/checklists/senior-home-safety-checklist' },
+                { icon: '⚖️', title: 'Estate Planning Guide', desc: 'Wills, trusts, powers of attorney', href: '/checklists/estate-planning' },
+                { icon: '🤝', title: 'How to Hire a Caregiver', desc: 'Vetting, contracts, red flags to avoid', href: '/checklists/how-to-hire-a-caregiver' },
+                { icon: '🚨', title: 'Emergency Preparedness', desc: 'Evacuation plan, med list, contacts', href: '/checklists/emergency-preparedness-checklist' },
+                { icon: '💊', title: 'Medical Alert Systems', desc: 'Compare features, costs, and providers', href: '/checklists/medical-alert-systems' },
+                { icon: '📦', title: 'Moving & Downsizing', desc: 'Step-by-step guide for a smooth move', href: '/checklists/move-checklist' },
+              ].map(item => (
+                <Link key={item.href} href={item.href} style={{ ...card, textDecoration: 'none', display: 'block', transition: 'box-shadow 0.15s' }}>
+                  <div style={{ fontSize: '28px', marginBottom: '10px' }}>{item.icon}</div>
+                  <div style={{ fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: '15px', color: 'var(--color-navy)', marginBottom: '6px' }}>{item.title}</div>
+                  <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.5 }}>{item.desc}</p>
+                </Link>
+              ))}
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <Link href="/checklists" style={{ fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: '15px', color: 'var(--color-teal)', textDecoration: 'none' }}>Browse all checklists & guides →</Link>
+            </div>
+          </div>
+        </section>
+
+        {/* ── FIND LOCAL HELP ── */}
+        <section style={sectionPad}>
+          <div style={maxW}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '48px', alignItems: 'center' }}>
+              <div style={{ flex: '1 1 300px' }}>
+                <div style={{ display: 'inline-block', backgroundColor: '#f0f9f7', color: 'var(--color-teal)', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 12px', borderRadius: '20px', marginBottom: '16px' }}>Local Resources</div>
+                <h2 style={heading2}>Find help in your state</h2>
+                <p style={{ ...bodyText, margin: '16px 0 28px' }}>Every state has free programs seniors don&apos;t know about — Medicaid waivers, home-repair grants, meal delivery, legal aid. We&apos;ve mapped them all.</p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+                  <Link href="/resources/states" style={{ display: 'inline-block', backgroundColor: 'var(--color-navy)', color: 'var(--color-cream)', fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: '15px', padding: '12px 24px', borderRadius: '8px', textDecoration: 'none' }}>Browse state resources →</Link>
+                  <Link href="/blog" style={{ display: 'inline-block', border: '1.5px solid var(--color-warm-grey)', color: 'var(--color-navy)', fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: '15px', padding: '12px 24px', borderRadius: '8px', textDecoration: 'none' }}>Read our blog →</Link>
+                </div>
+              </div>
+              <div style={{ flex: '1 1 260px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                {[
+                  { label: 'Medicaid waivers', icon: '💊' },
+                  { label: 'Area Agency on Aging', icon: '🏛️' },
+                  { label: 'Home repair grants', icon: '🔧' },
+                  { label: 'Legal aid', icon: '⚖️' },
+                  { label: 'Meal delivery', icon: '🥗' },
+                  { label: 'Transportation', icon: '🚗' },
+                  { label: 'Caregiver respite', icon: '🤝' },
+                  { label: 'Mental health', icon: '💙' },
+                ].map(item => (
+                  <div key={item.label} style={{ ...card, display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 16px' }}>
+                    <span style={{ fontSize: '20px' }}>{item.icon}</span>
+                    <span style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 500, color: 'var(--color-navy)' }}>{item.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* ── 7. FINAL CTA ── */}
         <section style={{ ...sectionPadDark, textAlign: 'center' }}>
           <div style={{ maxWidth: '700px', margin: '0 auto' }}>
@@ -343,6 +408,7 @@ export default function HomePage() {
               <p style={{ color: 'rgba(250,250,245,0.5)', fontSize: '14px', lineHeight: 1.6, margin: 0 }}>Senior independence platform combining AI, human care, and community.</p>
             </div>
             {[
+              { label: 'Resources', links: [['Checklists', '/checklists'], ['State Resources', '/resources/states'], ['Blog', '/blog'], ['Find Local Help', '/dashboard/find-local-help']] },
               { label: 'Product', links: [['How It Works', '/how-it-works'], ['Pricing', '/pricing'], ['Communities', '/dashboard/communities'], ['For Families', '/for-families'], ['For Organizations', '/for-organizations']] },
               { label: 'Volunteer', links: [['Become a Buddy', '/for-volunteers'], ['College students', '/for-volunteers'], ['Corporate teams', '/for-volunteers'], ['K-12 programs', '/for-volunteers']] },
               { label: 'Company', links: [['About', '/about'], ['Privacy', '/privacy'], ['Terms', '/terms'], ['Contact', 'mailto:hello@thriveathome.app']] },
