@@ -61,15 +61,11 @@ export async function POST(req: NextRequest) {
 
   if (error) return NextResponse.json({ error }, { status: 500 })
 
-  const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = admin as any
+  const db = createAdminClient() as any
   const subtype = (booking_details as Record<string, string>).subtype ?? ''
 
   // ─── AUTO-DISPATCH: Transport ────────────────────────────────────────────
-  // Automatically dispatches via provider (Lyft Healthcare when key present,
-  // otherwise records confirmed booking + queues SMS confirmation without
-  // requiring navigator intervention).
   if (service_type === 'transport' && booking) {
     const details = booking_details as Record<string, string>
     const pickup = details.pickup_address ?? details.pickup ?? ''
@@ -88,7 +84,6 @@ export async function POST(req: NextRequest) {
         tripType,
         isRecurring,
       })
-      // Persist provider booking ID back onto the booking row
       await db
         .from('service_bookings')
         .update({
@@ -100,14 +95,13 @@ export async function POST(req: NextRequest) {
             auto_dispatched:     true,
           },
         })
-        .eq('id', booking.id)
+        .eq('id', String(booking.id))
 
-      // Queue SMS confirmation to member (fires if Twilio key present)
       const { data: member } = await db
         .from('members')
         .select('phone')
         .eq('id', memberId)
-        .maybeSingle() as any as { data: { phone?: string } | null }
+        .maybeSingle() as { data: { phone?: string } | null }
 
       if (member?.phone) {
         const timeLabel = dt ? new Date(dt).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' }) : 'your requested time'
@@ -116,10 +110,9 @@ export async function POST(req: NextRequest) {
           channel:   'sms',
           phone:     member.phone,
           message:   `Your ThriveAtHome ride is confirmed for ${timeLabel}. From: ${pickup}. To: ${dest}. Booking ref: ${ride.bookingId}. Reply CANCEL to cancel.`,
-        }).catch(() => null) // Non-fatal — queue may not exist yet
+        }).catch(() => null)
       }
     } catch (dispatchErr) {
-      // Dispatch failed — fall back to navigator task so no ride is lost
       console.error('[Transport] Auto-dispatch failed, creating navigator task:', dispatchErr)
       await db.from('navigator_tasks').insert({
         member_id: memberId,
@@ -131,27 +124,22 @@ export async function POST(req: NextRequest) {
   }
 
   // ─── AUTO-DISPATCH: Meals ────────────────────────────────────────────────
-  // Automatically confirmed — no navigator needed for standard meal delivery.
   if (service_type === 'meals' && booking) {
     await db
       .from('service_bookings')
       .update({ status: 'confirmed' })
-      .eq('id', booking.id)
-    // No navigator task created — meal bookings self-resolve via cron
+      .eq('id', String(booking.id))
   }
 
   // ─── AUTO-PROCEED: Companion visits ─────────────────────────────────────
-  // Low-risk — set confirmed immediately; Aria will confirm with member on next call.
   if ((service_type === 'companionship' || service_type === 'companion') && booking) {
     const companionId = (booking_details as Record<string, string>).companion_id
     if (companionId) {
-      // Matched companion — auto-confirm
       await db
         .from('service_bookings')
         .update({ status: 'confirmed' })
-        .eq('id', booking.id)
+        .eq('id', String(booking.id))
     } else {
-      // No companion selected yet — needs matching
       await db.from('navigator_tasks').insert({
         member_id: memberId,
         task_type: 'companion_matching',
@@ -166,8 +154,6 @@ export async function POST(req: NextRequest) {
   }
 
   // ─── NAVIGATOR TASKS: High-touch services ────────────────────────────────
-  // Tech help, mental health, travel, and roadside still route through navigator
-  // because they require human judgment, vetted matching, or emergency protocols.
   if (booking) {
     if (service_type === 'tech_help') {
       await db.from('navigator_tasks').insert({
