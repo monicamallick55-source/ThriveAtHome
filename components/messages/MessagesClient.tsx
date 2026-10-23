@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import type { ConversationSummary } from '@/lib/data/messages'
+import type { ConversationSummary } from '@/lib/data/member-messages'
 
 interface MessageRow {
   id: string
