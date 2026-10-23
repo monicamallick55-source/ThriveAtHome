@@ -27,6 +27,7 @@ export default function AdminCreateEventClient() {
     dial_in_code: '',
     video_link: '',
     location_address: '',
+    zip_code: '',          // ← new: for radius search
     max_capacity: '',
     is_recurring: false,
     recurrence_pattern: '',
@@ -55,12 +56,12 @@ export default function AdminCreateEventClient() {
         description: form.description || null,
         event_type: form.event_type,
         host_name: form.host_name || null,
-        event_date: form.event_date,
-        event_time: form.event_time,
+        event_date: `${form.event_date}T${form.event_time}`,
         timezone: form.timezone,
         duration_minutes: Number(form.duration_minutes),
         format: form.format,
         max_capacity: form.max_capacity ? Number(form.max_capacity) : null,
+        zip_code: form.zip_code.trim() || null,   // ← sent to API for geocoding
         is_recurring: form.is_recurring,
         recurrence_pattern: form.is_recurring ? form.recurrence_pattern || null : null,
       }
@@ -157,12 +158,12 @@ export default function AdminCreateEventClient() {
       <div>
         <label style={labelStyle}>Format *</label>
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-          {FORMAT_OPTIONS.map((opt: any) => (
+          {FORMAT_OPTIONS.map((opt) => (
             <label key={opt.value} style={{
               display: 'flex', alignItems: 'center', gap: '8px',
               padding: '10px 16px', borderRadius: '10px',
               border: `2px solid ${form.format === opt.value ? 'var(--color-teal)' : 'var(--color-warm-grey)'}`,
-              backgroundColor: form.format === opt.value ? 'var(--color-teal)' + '10' : 'white',
+              backgroundColor: form.format === opt.value ? 'rgba(0,150,136,0.08)' : 'white',
               cursor: 'pointer', fontFamily: 'var(--font-body)', fontSize: '15px',
               color: 'var(--color-navy)', fontWeight: form.format === opt.value ? 600 : 400,
             }}>
@@ -195,11 +196,33 @@ export default function AdminCreateEventClient() {
         </div>
       )}
 
-      {/* Address for in-person */}
+      {/* Address + Zip for in-person */}
       {form.format === 'in_person' && (
-        <div>
-          <label style={labelStyle} htmlFor="ev-addr">Location address</label>
-          <input id="ev-addr" style={inputStyle} value={form.location_address} onChange={e => update('location_address', e.target.value)} placeholder="e.g. 123 Main St, Springfield, IL" />
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px' }}>
+          <div>
+            <label style={labelStyle} htmlFor="ev-addr">Location address</label>
+            <input id="ev-addr" style={inputStyle} value={form.location_address} onChange={e => update('location_address', e.target.value)} placeholder="e.g. 123 Main St, Springfield, IL" />
+          </div>
+          <div>
+            <label style={labelStyle} htmlFor="ev-zip">Zip code</label>
+            <input id="ev-zip" style={inputStyle} value={form.zip_code} onChange={e => update('zip_code', e.target.value)}
+              placeholder="e.g. 94103" maxLength={5} pattern="[0-9]{5}" title="5-digit US zip" />
+            <span style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--color-text-secondary)', marginTop: '4px', display: 'block' }}>
+              Enables "events near me" search
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Zip for virtual events too (where event is based) */}
+      {form.format !== 'in_person' && (
+        <div style={{ maxWidth: '200px' }}>
+          <label style={labelStyle} htmlFor="ev-zip-v">Base zip code (optional)</label>
+          <input id="ev-zip-v" style={inputStyle} value={form.zip_code} onChange={e => update('zip_code', e.target.value)}
+            placeholder="e.g. 94103" maxLength={5} pattern="[0-9]{5}" title="5-digit US zip" />
+          <span style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--color-text-secondary)', marginTop: '4px', display: 'block' }}>
+            Enables "events near me" search
+          </span>
         </div>
       )}
 

@@ -4,6 +4,7 @@
 // and a searchable list of fellow members of the same community organization who
 // have opted in. Backed by /api/directory.
 import { useCallback, useEffect, useState } from 'react'
+import SendMessageButton from '@/components/messages/SendMessageButton'
 
 type DirMember = {
   id: string
@@ -142,22 +143,26 @@ export default function DirectoryClient() {
           </p>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '12px' }}>
-            {members.map((m: any) => (
-              <div key={m.id} style={{ backgroundColor: '#F9F6F0', borderRadius: '12px', padding: '16px' }}>
+            {members.map((m: DirMember) => (
+              <div key={m.id} style={{ backgroundColor: '#F9F6F0', borderRadius: '12px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <div style={{ fontFamily: 'var(--font-body)', fontSize: '16px', fontWeight: 600, color: 'var(--color-navy)' }}>{m.name}</div>
                 {(m.city || m.state) && (
-                  <div style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>
+                  <div style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)' }}>
                     {[m.city, m.state].filter(Boolean).join(', ')}
                   </div>
                 )}
-                {m.bio && <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: '8px 0 0', lineHeight: 1.5 }}>{m.bio}</p>}
+                {m.bio && <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: '2px 0 0', lineHeight: 1.5 }}>{m.bio}</p>}
                 {m.interests.length > 0 && (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '10px' }}>
-                    {m.interests.map((i: any) => (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '4px' }}>
+                    {m.interests.map((i: string) => (
                       <span key={i} style={{ fontFamily: 'var(--font-body)', fontSize: '11px', backgroundColor: 'white', border: '1px solid #E8E4DC', borderRadius: '10px', padding: '2px 8px', color: 'var(--color-text-secondary)' }}>{i}</span>
                     ))}
                   </div>
                 )}
+                {/* Message button — lets any viewer send a direct message */}
+                <div style={{ marginTop: '10px' }}>
+                  <SendMessageButton recipientId={m.id} recipientName={m.name} />
+                </div>
               </div>
             ))}
           </div>
