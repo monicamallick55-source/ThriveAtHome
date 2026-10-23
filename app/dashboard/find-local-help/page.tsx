@@ -9,44 +9,82 @@ export default async function FindLocalHelpPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const categories = [
-    { label: 'Home Care Agencies', icon: '🏠', q: 'home care agencies seniors' },
-    { label: 'Meal Delivery', icon: '🍽️', q: 'meal delivery seniors Meals on Wheels' },
-    { label: 'Transportation', icon: '🚗', q: 'senior transportation non-emergency medical' },
-    { label: 'Adult Day Programs', icon: '☀️', q: 'adult day care program seniors' },
-    { label: 'Caregiver Respite', icon: '⏸️', q: 'caregiver respite care seniors' },
-    { label: 'Legal Aid', icon: '⚖️', q: 'elder law legal aid seniors free' },
-    { label: 'Home Repair Help', icon: '🔨', q: 'home repair assistance seniors low income' },
-    { label: 'Mental Health', icon: '🧠', q: 'mental health counseling seniors' },
-    { label: 'Medicaid Waivers', icon: '📋', q: 'Medicaid home care waiver program' },
-    { label: 'Area Agency on Aging', icon: '🤝', q: 'Area Agency on Aging near me' },
-    { label: 'Senior Centers', icon: '🎭', q: 'senior center programs near me' },
-    { label: 'Food Assistance', icon: '🛒', q: 'SNAP food assistance seniors apply' },
+  const g6Services = [
+    {
+      label: 'Home Safety Program',
+      icon: '🏠',
+      desc: 'Free home safety inspection, grab bars, smoke alarms, earthquake prep — done by trained volunteers.',
+      href: '/dashboard/home-safety',
+      cta: 'Enroll in program',
+      color: 'border-teal-300 bg-teal-50',
+    },
+    {
+      label: 'Home Sharing',
+      icon: '🤝',
+      desc: 'Rent out a spare room or find affordable housing through vetted local programs like HIP Housing.',
+      href: '/dashboard/home-sharing',
+      cta: 'Explore home sharing',
+      color: 'border-blue-300 bg-blue-50',
+    },
+    {
+      label: 'Encore Careers',
+      icon: '💼',
+      desc: 'Volunteer leadership, part-time paid work, SCSEP paid training, or start something new.',
+      href: '/dashboard/encore-careers',
+      cta: 'Find opportunities',
+      color: 'border-purple-300 bg-purple-50',
+    },
+    {
+      label: 'Community Campaigns',
+      icon: '💛',
+      desc: 'Ask the ThriveAtHome community for help with a specific need — equipment, repairs, groceries.',
+      href: '/dashboard/campaigns',
+      cta: 'See campaigns',
+      color: 'border-yellow-300 bg-yellow-50',
+    },
+    {
+      label: 'Partner Directory',
+      icon: '🗂️',
+      desc: 'Browse vetted local service providers — home care, meal delivery, transportation, and more.',
+      href: '/directory',
+      cta: 'Browse directory',
+      color: 'border-gray-300 bg-gray-50',
+    },
+    {
+      label: 'Resources by State',
+      icon: '🗺️',
+      desc: 'Medicaid waivers, Area Agency on Aging, legal aid, and food assistance in your state.',
+      href: '/resources/states',
+      cta: 'View state resources',
+      color: 'border-green-300 bg-green-50',
+    },
   ]
 
   return (
     <main className="max-w-4xl mx-auto px-4 py-10">
       <Link href="/dashboard" className="text-sm text-teal-600 hover:text-teal-800 mb-6 inline-block">← Dashboard</Link>
       <h1 className="text-2xl font-bold text-gray-900 mb-2">Find Local Help</h1>
-      <p className="text-gray-600 mb-8">Click any category to search for services near you. Results open in Google so you can filter by your zip code.</p>
+      <p className="text-gray-600 mb-8">Programs and services ThriveAtHome has vetted for you — warm referrals, navigator support, and community help.</p>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-10">
-        {categories.map(cat => (
-          <a
-            key={cat.label}
-            href={`https://www.google.com/search?q=${encodeURIComponent(cat.q)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex flex-col items-center gap-2 border border-gray-200 rounded-xl p-5 hover:border-teal-300 hover:shadow-md transition-all text-center"
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
+        {g6Services.map(svc => (
+          <Link
+            key={svc.label}
+            href={svc.href}
+            className={`flex flex-col gap-2 border rounded-xl p-5 hover:shadow-md transition-all ${svc.color}`}
           >
-            <span className="text-3xl">{cat.icon}</span>
-            <span className="text-sm font-medium text-gray-800">{cat.label}</span>
-          </a>
+            <div className="flex items-center gap-3">
+              <span className="text-3xl">{svc.icon}</span>
+              <span className="font-semibold text-gray-900">{svc.label}</span>
+            </div>
+            <p className="text-sm text-gray-600">{svc.desc}</p>
+            <span className="text-sm font-medium text-teal-700 mt-auto">{svc.cta} →</span>
+          </Link>
         ))}
       </div>
 
-      <section className="bg-teal-50 rounded-xl p-6 mb-6">
-        <h2 className="font-semibold text-teal-900 mb-2">Free National Locators</h2>
+      <section className="bg-gray-50 rounded-xl p-6">
+        <h2 className="font-semibold text-gray-900 mb-3">National Resources</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
           {[
             { name: 'Eldercare Locator', url: 'https://eldercare.acl.gov', desc: 'Find local aging services' },
@@ -57,7 +95,7 @@ export default async function FindLocalHelpPage() {
             { name: '211 Helpline', url: 'https://www.211.org', desc: 'Local social services hotline' },
           ].map(r => (
             <a key={r.name} href={r.url} target="_blank" rel="noopener noreferrer"
-              className="flex items-start gap-2 p-3 bg-white rounded-lg border border-teal-100 hover:border-teal-300 transition-colors">
+              className="flex items-start gap-2 p-3 bg-white rounded-lg border border-gray-200 hover:border-teal-300 transition-colors">
               <div>
                 <p className="font-medium text-teal-700">{r.name}</p>
                 <p className="text-gray-500 text-xs">{r.desc}</p>
@@ -66,12 +104,6 @@ export default async function FindLocalHelpPage() {
           ))}
         </div>
       </section>
-
-      <div className="text-center">
-        <Link href="/directory" className="inline-block bg-teal-600 text-white font-medium px-6 py-3 rounded-lg hover:bg-teal-700 transition-colors">
-          Browse ThriveAtHome Partner Directory →
-        </Link>
-      </div>
     </main>
   )
 }
