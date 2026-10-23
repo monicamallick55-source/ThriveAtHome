@@ -1,74 +1,146 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { CHECKLISTS, getChecklistBySlug, CHECKLIST_CATEGORIES } from '@/lib/content/checklists'
-import type { Metadata } from 'next'
-interface Props { params: { slug: string } }
-export async function generateStaticParams() { return CHECKLISTS.map(c => ({ slug: c.slug })) }
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const cl = getChecklistBySlug(params.slug)
-  if (!cl) return { title: 'Not Found' }
-  return { title: `${cl.title} — ThriveAtHome`, description: cl.description }
+import { CHECKLISTS } from '@/lib/content/checklists'
+
+export async function generateStaticParams() {
+  return CHECKLISTS.map(c => ({ slug: c.slug }))
 }
-export default function ChecklistDetailPage({ params }: Props) {
-  const cl = getChecklistBySlug(params.slug)
-  if (!cl) notFound()
-  const catLabel = CHECKLIST_CATEGORIES.find(c => c.slug === cl.category)?.label ?? cl.category
-  const catIcon = CHECKLIST_CATEGORIES.find(c => c.slug === cl.category)?.icon ?? '📋'
-  const related = CHECKLISTS.filter(c => c.slug !== cl.slug && c.category === cl.category).slice(0, 3)
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  const checklist = CHECKLISTS.find(c => c.slug === slug)
+  if (!checklist) return {}
+  return {
+    title: `${checklist.title} | ThriveAtHome`,
+    description: checklist.description,
+  }
+}
+
+export default async function ChecklistPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  const checklist = CHECKLISTS.find(c => c.slug === slug)
+  if (!checklist) notFound()
+
+  const related = CHECKLISTS.filter(c => c.categorySlug === checklist.categorySlug && c.slug !== checklist.slug).slice(0, 3)
+
   return (
-    <div className="min-h-screen bg-[#fafaf5]">
-      <div className="bg-[#1e3a5f] text-white py-14 px-4">
-        <div className="max-w-3xl mx-auto">
-          <div className="text-white/50 text-[13px] mb-4"><Link href="/checklists" className="hover:text-white">← All checklists</Link></div>
-          <span className="inline-block bg-[#0d9488] text-white text-[11px] font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-4">{catIcon} {catLabel}</span>
-          <h1 className="font-display text-3xl md:text-4xl font-bold leading-tight mb-3">{cl.title}</h1>
-          <p className="text-white/75 text-lg max-w-xl">{cl.description}</p>
+    <main className="min-h-screen bg-[var(--color-cream)]">
+      {/* Breadcrumb */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-4xl mx-auto px-4 py-3 text-sm text-gray-500 flex items-center gap-2">
+          <Link href="/checklists" className="hover:text-[var(--color-teal)]">Checklists</Link>
+          <span>›</span>
+          <span className="text-gray-700">{checklist.category}</span>
         </div>
       </div>
-      <div className="max-w-3xl mx-auto px-4 py-10">
-        {cl.sections.map((section, si) => (
-          <div key={si} className="mb-8">
-            <h2 className="text-[17px] font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">{section.title}</h2>
-            <div className="flex flex-col gap-3">
-              {section.items.map((item, ii) => (
-                <div key={ii} className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-5 h-5 mt-0.5 border-2 border-teal-500 rounded" />
-                  <div>
-                    <span className="text-gray-800 text-[15px] leading-relaxed">{item.text}</span>
-                    {item.note && <p className="text-gray-400 text-[13px] mt-1 italic">{item.note}</p>}
+
+      <div className="max-w-4xl mx-auto px-4 py-10">
+        {/* Header */}
+        <div className="bg-white rounded-2xl border border-gray-200 p-8 mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <span className="text-4xl">{checklist.icon}</span>
+            <span className="text-sm font-medium text-[var(--color-teal)] bg-teal-50 px-3 py-1 rounded-full">
+              {checklist.category}
+            </span>
+          </div>
+          <h1 className="text-3xl font-bold text-[var(--color-navy)] mt-4 mb-3">{checklist.title}</h1>
+          <p className="text-gray-600 text-lg mb-4">{checklist.description}</p>
+          <div className="flex items-center gap-4 text-sm text-gray-500">
+            <span>✓ {checklist.items.length} items</span>
+            {checklist.timeToComplete && <span>⏱ {checklist.timeToComplete}</span>}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Checklist */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-2xl border border-gray-200 p-8">
+              <h2 className="text-xl font-bold text-[var(--color-navy)] mb-6">Checklist</h2>
+              <div className="space-y-4">
+                {checklist.items.map((item, i) => (
+                  <div key={item.id} className="flex gap-4">
+                    <div className="flex-shrink-0 w-6 h-6 rounded border-2 border-gray-300 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-gray-800">{item.text}</p>
+                      {item.note && (
+                        <p className="text-sm text-gray-500 mt-1 italic">{item.note}</p>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
+
+            {/* Tips */}
+            {checklist.tips && checklist.tips.length > 0 && (
+              <div className="bg-teal-50 border border-teal-200 rounded-2xl p-6 mt-6">
+                <h3 className="font-bold text-teal-800 mb-3">💡 Pro Tips</h3>
+                <ul className="space-y-2">
+                  {checklist.tips.map((tip, i) => (
+                    <li key={i} className="text-teal-700 text-sm flex gap-2">
+                      <span className="flex-shrink-0">•</span>
+                      <span>{tip}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
-        ))}
-        {cl.relatedLinks && cl.relatedLinks.length > 0 && (
-          <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 mb-8">
-            <h3 className="font-semibold text-gray-900 text-[14px] mb-3">Helpful resources</h3>
-            {cl.relatedLinks.map(link => (
-              <a key={link.url} href={link.url} target="_blank" rel="noopener noreferrer" className="block text-teal-600 text-[14px] hover:text-teal-800 mb-1">{link.label} →</a>
-            ))}
-          </div>
-        )}
-        {related.length > 0 && (
-          <div className="mb-8">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Related checklists</h3>
-            <div className="grid gap-3 sm:grid-cols-3">
-              {related.map(c => (
-                <Link key={c.slug} href={`/checklists/${c.slug}`} className="bg-white border border-gray-200 rounded-xl p-4 hover:border-teal-400 group">
-                  <h4 className="font-semibold text-gray-900 text-[14px] group-hover:text-teal-700 leading-snug">{c.title}</h4>
-                  <span className="text-teal-600 text-[13px] mt-2 inline-block">View →</span>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Resources */}
+            {checklist.resources && checklist.resources.length > 0 && (
+              <div className="bg-white rounded-2xl border border-gray-200 p-6">
+                <h3 className="font-bold text-[var(--color-navy)] mb-4">Helpful Resources</h3>
+                <ul className="space-y-3">
+                  {checklist.resources.map((r, i) => (
+                    <li key={i}>
+                      <a
+                        href={r.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[var(--color-teal)] hover:underline text-sm font-medium flex items-center gap-1"
+                      >
+                        {r.label} →
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Find local help */}
+            <div className="bg-[var(--color-navy)] text-white rounded-2xl p-6">
+              <h3 className="font-bold mb-2">Need local help?</h3>
+              <p className="text-blue-100 text-sm mb-4">Find vetted senior service providers in your area.</p>
+              <Link href="/directory" className="block text-center bg-[var(--color-teal)] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-teal-600 transition-colors">
+                Browse Directory
+              </Link>
+            </div>
+
+            {/* Related */}
+            {related.length > 0 && (
+              <div className="bg-white rounded-2xl border border-gray-200 p-6">
+                <h3 className="font-bold text-[var(--color-navy)] mb-4">Related Guides</h3>
+                <ul className="space-y-3">
+                  {related.map(r => (
+                    <li key={r.slug}>
+                      <Link href={`/checklists/${r.slug}`} className="text-sm text-gray-700 hover:text-[var(--color-teal)] flex gap-2">
+                        <span>{r.icon}</span>
+                        <span>{r.title}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/checklists" className="text-sm text-[var(--color-teal)] hover:underline mt-4 block">
+                  View all {checklist.category} guides →
                 </Link>
-              ))}
-            </div>
+              </div>
+            )}
           </div>
-        )}
-        <div className="bg-[#1e3a5f] rounded-2xl p-7 text-white">
-          <h3 className="text-lg font-bold mb-2">Need help taking action on this checklist?</h3>
-          <p className="text-white/75 text-[14px] mb-5">ThriveAtHome navigators can walk through any of these items with you — in person or by phone.</p>
-          <Link href="/signup" className="inline-block bg-[#0d9488] text-white font-semibold px-5 py-2.5 rounded-lg text-[14px]">Get a navigator →</Link>
         </div>
       </div>
-    </div>
+    </main>
   )
 }
