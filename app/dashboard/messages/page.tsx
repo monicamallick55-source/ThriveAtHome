@@ -1,6 +1,6 @@
 import { requireAuth } from '@/lib/auth'
-import { getFamilyMemberByAuthId } from '@/lib/data/family-members'
-import { getConversations } from '@/lib/data/messages'
+import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { getConversations } from '@/lib/data/member-messages'
 import MessagesClient from '@/components/messages/MessagesClient'
 
 export const dynamic = 'force-dynamic'

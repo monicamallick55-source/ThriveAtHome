@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
-import { getFamilyMemberByAuthId } from '@/lib/data/family-members'
-import { getThread } from '@/lib/data/messages'
+import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { getThread } from '@/lib/data/member-messages'
 
 export async function GET(req: NextRequest) {
   try {
