@@ -2,17 +2,19 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { STATES, CATEGORY_LABELS, getStateBySlug, STATE_SLUGS } from '@/lib/content/states'
 import type { Metadata } from 'next'
-interface Props { params: { state: string } }
+interface Props { params: Promise<{ state: string }> }
 export async function generateStaticParams() { return STATE_SLUGS.map(slug=>({state:slug})) }
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const s = getStateBySlug(params.state)
+  const { state } = await params
+  const s = getStateBySlug(state)
   if (!s) return { title: 'Not Found' }
   return { title: `${s.name} Senior Resources — ThriveAtHome`, description: `Medicaid waivers, Area Agency on Aging, legal aid, and senior programs in ${s.name}.` }
 }
 const CAT_ORDER=['aaa','medicaid','caregiver','legal','food','housing','transportation','mental-health']
 const CAT_ICONS:Record<string,string>={aaa:'🏛️',medicaid:'💊',housing:'🏠',legal:'⚖️',transportation:'🚗',food:'🥗',caregiver:'🤝','mental-health':'💙'}
-export default function StateResourcesPage({ params }: Props) {
-  const s = getStateBySlug(params.state)
+export default async function StateResourcesPage({ params }: Props) {
+  const { state } = await params
+  const s = getStateBySlug(state)
   if (!s) notFound()
   const byCategory:Record<string,typeof s.resources>={}
   s.resources.forEach(r=>{if(!byCategory[r.category])byCategory[r.category]=[];byCategory[r.category].push(r)})

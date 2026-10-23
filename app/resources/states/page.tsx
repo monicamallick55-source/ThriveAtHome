@@ -1,6 +1,5 @@
 'use client'
 
-import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { STATES, getStateByAbbr } from '@/lib/content/states'
 export const metadata = { title: 'Senior Resources by State — ThriveAtHome', description: 'Find Medicaid waivers, Area Agencies on Aging, legal aid, and senior programs in your state.' }
