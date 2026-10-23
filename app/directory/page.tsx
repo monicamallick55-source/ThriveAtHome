@@ -12,7 +12,7 @@ export const revalidate = 3600
 interface SearchParams { q?: string; category?: string; state?: string }
 
 export default async function DirectoryPage({ searchParams }: { searchParams: SearchParams }) {
-  const supabase = createClient()
+  const supabase = await createClient() as any
   const q = searchParams.q?.trim() ?? ''
   const category = searchParams.category ?? ''
   const state = searchParams.state ?? ''

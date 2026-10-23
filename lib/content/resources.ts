@@ -22,84 +22,132 @@ export interface BlogPost {
 export const RESOURCE_TOPICS: ResourceTopic[] = [
   {
     slug: 'caregiver-support',
+
+
     title: 'Caregiver Support',
+
+
     description: 'Resources for family members and professional caregivers supporting aging loved ones at home.',
     articleCount: 8,
     subtopics: ['Caregiver burnout', 'Long-distance caregiving', 'Respite care', 'Dementia caregiving', 'Self-care for caregivers'],
   },
   {
     slug: 'daily-living',
+
+
     title: 'Daily Living',
+
+
     description: 'Practical tips and tools for maintaining independence and quality of life at home.',
     articleCount: 10,
     subtopics: ['Adaptive equipment', 'Home routines', 'Cognitive health', 'Nutrition', 'Sleep'],
   },
   {
     slug: 'home-organization',
+
+
     title: 'Home Organization',
+
+
     description: 'Decluttering, downsizing, and organizing your home to make daily life safer and easier.',
     articleCount: 6,
     subtopics: ['Decluttering', 'Storage solutions', 'Aging-in-place modifications', 'Downsizing tips'],
   },
   {
     slug: 'in-home-care',
+
+
     title: 'In-Home Care',
+
+
     description: 'How to find, hire, and manage professional care at home — from homemakers to skilled nurses.',
     articleCount: 9,
     subtopics: ['Home health aides', 'Skilled nursing', 'Companion care', 'Hiring checklist', 'Medicare coverage'],
   },
   {
     slug: 'legal-planning',
+
+
     title: 'Legal Planning',
+
+
     description: 'Essential legal documents every senior needs — advance directives, power of attorney, wills, and trusts.',
     articleCount: 7,
     subtopics: ['Advance directives', 'Power of attorney', 'Wills & trusts', 'Medicaid planning', 'Elder law'],
   },
   {
     slug: 'public-assistance',
+
+
     title: 'Public Assistance',
+
+
     description: 'Benefits programs available to seniors — Medicare, Medicaid, SNAP, SSI, and local assistance.',
     articleCount: 8,
     subtopics: ['Medicare', 'Medicaid', 'SNAP', 'SSI', 'Property tax relief', 'LIHEAP'],
   },
   {
     slug: 'purpose-fulfillment',
+
+
     title: 'Purpose & Fulfillment',
+
+
     description: 'Staying engaged, connected, and purposeful in retirement through work, volunteering, and learning.',
     articleCount: 6,
     subtopics: ['Encore careers', 'Volunteering', 'Lifelong learning', 'Social connection', 'Spirituality'],
   },
   {
     slug: 'retirement-planning',
+
+
     title: 'Retirement Planning',
+
+
     description: 'Social Security, Medicare enrollment, budgeting, and financial planning for a secure retirement.',
     articleCount: 9,
     subtopics: ['Social Security timing', 'Medicare enrollment', 'Retirement budget', 'Required minimum distributions', 'Estate planning'],
   },
   {
     slug: 'senior-fitness',
+
+
     title: 'Senior Fitness',
+
+
     description: 'Safe and effective exercise programs for adults 65+ — balance, strength, cardio, and flexibility.',
     articleCount: 8,
     subtopics: ['Balance exercises', 'Strength training', 'Chair yoga', 'Walking programs', 'Fall prevention'],
   },
   {
     slug: 'home-safety',
+
+
     title: 'Home Safety',
+
+
     description: 'Fall prevention, emergency preparedness, and home modifications to keep you safe at home.',
     articleCount: 7,
     subtopics: ['Fall prevention', 'Bathroom safety', 'Kitchen safety', 'Emergency planning', 'Medication safety'],
   },
   {
     slug: 'smart-home-tech',
+
+
     title: 'Smart Home Technology',
+
+
     description: 'Devices and technology that help seniors live independently — from medical alerts to voice assistants.',
     articleCount: 6,
     subtopics: ['Medical alert systems', 'Voice assistants', 'Smart doorbells', 'Medication reminders', 'Telehealth'],
   },
   {
     slug: 'moving-downsizing',
+
+
     title: 'Moving & Downsizing',
+
+
     description: 'Planning a move, downsizing your home, and choosing the right living situation for your next chapter.',
     articleCount: 7,
     subtopics: ['Downsizing timeline', 'Senior move managers', '55+ communities', 'Assisted living vs. home care', 'Storage solutions'],
@@ -107,11 +155,23 @@ export const RESOURCE_TOPICS: ResourceTopic[] = [
 
   {
     slug: 'essential-legal-documents-seniors',
-    title: 'The 5 Legal Documents Every Senior Needs Before It Is Too Late',
-    excerpt: 'Without these documents, your family could face costly court battles and impossible decisions during a crisis. Here's what to get in place now.',
+
+
+    title: 'The 5 Legal Documents Every Senior Needs Before It\'s Too Late',
+
+
+    excerpt: 'Without these documents, your family could face costly court battles and impossible decisions during a crisis. Here\'s what to get in place now.',
+
+
     author: 'ThriveAtHome Legal Team',
+
+
     publishedAt: '2026-09-10',
+
+
     category: 'legal-planning',
+
+
     readTimeMinutes: 8,
     content: `Planning ahead is one of the greatest gifts you can give your family. These five legal documents protect your wishes and spare your loved ones from making impossible decisions under pressure.
 
@@ -148,11 +208,23 @@ export const RESOURCE_TOPICS: ResourceTopic[] = [
   },
   {
     slug: 'finding-purpose-retirement',
+
+
     title: 'Finding Purpose After Retirement: 8 Proven Paths That Work',
+
+
     excerpt: 'Retirement is the start of your next chapter — not the end of contribution. Here are eight ways seniors are finding meaning, joy, and connection.',
+
+
     author: 'ThriveAtHome Wellness Team',
+
+
     publishedAt: '2026-09-05',
+
+
     category: 'purpose-fulfillment',
+
+
     readTimeMinutes: 7,
     content: `Research consistently shows that having a sense of purpose is one of the strongest predictors of healthy aging. Seniors with strong purpose have lower rates of depression, dementia, and cardiovascular disease — and they live longer.
 
@@ -187,11 +259,23 @@ export const RESOURCE_TOPICS: ResourceTopic[] = [
   },
   {
     slug: 'smart-home-tech-seniors-guide',
-    title: 'Smart Home Technology for Seniors: What Actually Helps vs. What's Hype',
+
+
+    title: 'Smart Home Technology for Seniors: What Actually Helps vs. What\'s Hype',
+
+
     excerpt: 'The smart home market is full of promises. We cut through the noise to show you what technology genuinely helps seniors stay safe and independent.',
+
+
     author: 'ThriveAtHome Tech Team',
+
+
     publishedAt: '2026-10-03',
+
+
     category: 'smart-home-tech',
+
+
     readTimeMinutes: 9,
     content: `The smart home technology market has exploded — and so have the marketing claims. Here's an honest look at what actually makes a difference for seniors aging at home.
 
@@ -236,13 +320,25 @@ export const RESOURCE_TOPICS: ResourceTopic[] = [
   },
   {
     slug: 'senior-moving-planning-guide',
-    title: 'The Senior's Complete Moving Guide: How to Plan a Stress-Free Move',
-    excerpt: 'Moving after 65 is one of life's biggest transitions. This step-by-step guide helps you plan, downsize, and settle in — without the overwhelm.',
+
+
+    title: 'The Senior\'s Complete Moving Guide: How to Plan a Stress-Free Move',
+
+
+    excerpt: 'Moving after 65 is one of life\'s biggest transitions. This step-by-step guide helps you plan, downsize, and settle in — without the overwhelm.',
+
+
     author: 'ThriveAtHome Care Team',
+
+
     publishedAt: '2026-09-18',
+
+
     category: 'moving-downsizing',
+
+
     readTimeMinutes: 10,
-    content: `Moving later in life often means leaving a home filled with decades of memories. It's not just a logistical challenge — it's an emotional one. This guide addresses both.
+    content: `Moving later in life often means leaving a home filled with decades of memories. It\'s not just a logistical challenge — it's an emotional one. This guide addresses both.
 
 <h2>Step 1: Clarify Why You're Moving (6–12 months before)</h2>
 <p>The reason for your move shapes every decision that follows. Common reasons include:</p>
@@ -293,11 +389,23 @@ export const RESOURCE_TOPICS: ResourceTopic[] = [
   },
   {
     slug: 'hiring-home-care-checklist',
+
+
     title: 'How to Hire Home Care: A Step-by-Step Checklist for Families',
-    excerpt: 'Finding trustworthy in-home care is one of the most important decisions you'll make. This checklist walks you through every step — from assessment to first day.',
+
+
+    excerpt: 'Finding trustworthy in-home care is one of the most important decisions you\'ll make. This checklist walks you through every step — from assessment to first day.',
+
+
     author: 'ThriveAtHome Care Team',
+
+
     publishedAt: '2026-08-28',
+
+
     category: 'in-home-care',
+
+
     readTimeMinutes: 8,
     content: `Hiring someone to care for your parent at home is a significant decision. Done well, it extends independence and provides peace of mind. Done poorly, it creates new risks. Here's how to do it well.
 
@@ -347,11 +455,23 @@ export const RESOURCE_TOPICS: ResourceTopic[] = [
   },
   {
     slug: 'benefits-guide-seniors',
-    title: 'The Benefits Most Seniors Don't Know They Qualify For',
+
+
+    title: 'The Benefits Most Seniors Don\'t Know They Qualify For',
+
+
     excerpt: 'Billions of dollars in senior benefits go unclaimed every year. This guide walks through the programs most commonly missed — and how to apply.',
+
+
     author: 'ThriveAtHome Navigator Team',
+
+
     publishedAt: '2026-10-12',
+
+
     category: 'public-assistance',
+
+
     readTimeMinutes: 9,
     content: `According to the National Council on Aging, more than $30 billion in benefits for seniors go unclaimed every year — mostly because people don't know they qualify. Here's what to check.
 
@@ -389,15 +509,27 @@ export const RESOURCE_TOPICS: ResourceTopic[] = [
   },
   {
     slug: 'exercise-guide-seniors',
+
+
     title: 'The Best Exercises for Seniors: Safe, Effective, and Actually Enjoyable',
-    excerpt: 'Exercise is the single most powerful thing a senior can do for their health — but the wrong kind can cause injury. Here's what actually works.',
+
+
+    excerpt: 'Exercise is the single most powerful thing a senior can do for their health — but the wrong kind can cause injury. Here\'s what actually works.',
+
+
     author: 'ThriveAtHome Wellness Team',
+
+
     publishedAt: '2026-09-30',
+
+
     category: 'senior-fitness',
+
+
     readTimeMinutes: 7,
     content: `Exercise is the closest thing medicine has to a magic pill for aging. Regular physical activity reduces the risk of falls, heart disease, diabetes, depression, and cognitive decline — often more effectively than medication.
 
-<p>The key is finding activities that match your current fitness level and that you'll actually do consistently. Here's what the research supports.</p>
+<p>The key is finding activities that match your current fitness level and that you\'ll actually do consistently. Here\'s what the research supports.</p>
 
 <h2>The Four Types of Exercise Every Senior Needs</h2>
 
@@ -436,11 +568,23 @@ export const RESOURCE_TOPICS: ResourceTopic[] = [
   },
   {
     slug: 'adaptive-equipment-independence',
+
+
     title: 'Adaptive Equipment That Helps Seniors Stay Independent at Home',
+
+
     excerpt: 'The right tools can eliminate the need for full-time assistance. Here are the adaptive devices that make the biggest difference for aging at home.',
+
+
     author: 'ThriveAtHome OT Team',
+
+
     publishedAt: '2026-09-08',
+
+
     category: 'daily-living',
+
+
     readTimeMinutes: 6,
     content: `Occupational therapists call them "adaptive equipment" — tools and devices designed to help people with physical limitations perform daily tasks independently. The right equipment can eliminate the need for caregiver assistance for hours of daily tasks.
 
@@ -485,11 +629,23 @@ export const RESOURCE_TOPICS: ResourceTopic[] = [
   },
   {
     slug: 'nutrition-guide-seniors',
+
+
     title: 'Senior Nutrition: What to Eat After 65 (And What to Avoid)',
+
+
     excerpt: 'Nutritional needs change significantly after 65. This evidence-based guide explains what seniors actually need — and the common mistakes that undermine health.',
+
+
     author: 'ThriveAtHome Wellness Team',
+
+
     publishedAt: '2026-08-15',
+
+
     category: 'daily-living',
+
+
     readTimeMinutes: 7,
     content: `Nutrition after 65 is not the same as nutrition at 40. Metabolism slows, absorption changes, appetite often decreases, and medication interactions become a real concern. Here's what the evidence says.
 
@@ -527,19 +683,30 @@ export const RESOURCE_TOPICS: ResourceTopic[] = [
 <h2>Free Help</h2>
 <p>Registered dietitians specializing in senior nutrition are available through your doctor. SNAP-Ed provides free nutrition education. Many Area Agencies on Aging offer meal programs (Meals on Wheels) and nutrition counseling.</p>`,
   },
-]
 
-// Merge into BLOG_POSTS
+  // --- original posts below ---
 ]
 
 export const BLOG_POSTS: BlogPost[] = [
   {
     slug: 'fall-prevention-at-home',
+
+
     title: '12 Fall Prevention Tips Every Senior Should Know',
+
+
     excerpt: 'Falls are the leading cause of injury among adults 65+, but most are preventable. Here are 12 evidence-based tips to reduce your risk at home.',
+
+
     author: 'ThriveAtHome Team',
+
+
     publishedAt: '2026-09-15',
+
+
     category: 'home-safety',
+
+
     readTimeMinutes: 6,
     content: `Falls are the leading cause of injury-related death among adults 65 and older — but the good news is that most falls are preventable with simple home modifications and lifestyle changes.
 
@@ -583,11 +750,19 @@ If you'd like a free home safety assessment, our Care Navigators can connect you
   },
   {
     slug: 'medicare-enrollment-guide-2026',
+
+
     title: "Medicare Enrollment 2026: Deadlines, Costs, and What's New",
     excerpt: "Medicare's 2026 Open Enrollment runs October 15 – December 7. Here's everything you need to know about premiums, deadlines, and changes this year.",
     author: 'ThriveAtHome Team',
+
+
     publishedAt: '2026-10-01',
+
+
     category: 'retirement-planning',
+
+
     readTimeMinutes: 8,
     content: `Medicare Open Enrollment for 2026 runs from October 15 through December 7. During this period, you can switch Medicare Advantage plans, change Part D drug coverage, or move between Original Medicare and Medicare Advantage.
 
@@ -626,11 +801,19 @@ If you have questions about which plan is right for you, our Care Navigators can
   },
   {
     slug: 'having-the-conversation-aging-parents',
+
+
     title: "Having \"The Conversation\" With Your Aging Parents",
     excerpt: "Talking to a parent about driving, living arrangements, or legal planning is one of the hardest conversations adult children face. Here's how to approach it with care.",
     author: 'ThriveAtHome Team',
+
+
     publishedAt: '2026-08-20',
+
+
     category: 'caregiver-support',
+
+
     readTimeMinutes: 7,
     content: `One of the most common things adult children tell us is: "I know we need to talk about this, but I don't know how to start."
 
@@ -672,11 +855,23 @@ The ThriveAtHome For Families hub has additional guides on specific conversation
   // --- CAREGIVER SUPPORT ---
   {
     slug: 'preventing-caregiver-burnout',
+
+
     title: 'Preventing Caregiver Burnout: A Practical Guide',
+
+
     excerpt: 'Family caregivers are at high risk of exhaustion and depression. Here is how to spot the signs early and protect your own health.',
+
+
     author: 'ThriveAtHome Team',
+
+
     publishedAt: '2026-09-22',
+
+
     category: 'caregiver-support',
+
+
     readTimeMinutes: 7,
     content: `Caregiver burnout is a state of physical, emotional, and mental exhaustion that can happen when you focus all your energy on a loved one's care and neglect your own needs. It is more common than most people realize — studies show that more than 40% of family caregivers experience significant depression.
 
@@ -702,11 +897,23 @@ If you are a ThriveAtHome member or family member, your Care Navigator can help 
   },
   {
     slug: 'long-distance-caregiving-guide',
+
+
     title: 'Long-Distance Caregiving: How to Help When You\'re Not There',
+
+
     excerpt: 'Managing care from hundreds of miles away is stressful — but these strategies make it more manageable.',
+
+
     author: 'ThriveAtHome Team',
+
+
     publishedAt: '2026-10-01',
+
+
     category: 'caregiver-support',
+
+
     readTimeMinutes: 6,
     content: `An estimated 7 million Americans are long-distance caregivers — people who live an hour or more away from the person they care for. If that is you, the distance adds worry, guilt, and logistical complexity to an already challenging role.
 
@@ -734,11 +941,23 @@ Have a plan for emergencies before they happen. Know which hospital your loved o
   // --- DAILY LIVING ---
   {
     slug: 'adaptive-equipment-independence',
+
+
     title: 'Adaptive Equipment That Supports Independence at Home',
+
+
     excerpt: 'The right tools can make the difference between struggling and thriving. Here are the most useful adaptive devices for daily living.',
+
+
     author: 'ThriveAtHome Team',
+
+
     publishedAt: '2026-09-28',
+
+
     category: 'daily-living',
+
+
     readTimeMinutes: 5,
     content: `Adaptive equipment refers to tools and devices designed to help people with physical limitations perform daily tasks more safely and independently. Most are inexpensive, available without a prescription, and can be ordered online.
 
@@ -764,11 +983,23 @@ Many adaptive devices are available at pharmacies, medical supply stores, and on
   },
   {
     slug: 'nutrition-guide-seniors',
+
+
     title: 'Eating Well After 65: A Practical Nutrition Guide',
+
+
     excerpt: 'Nutritional needs change with age. Here is what to eat more of, what to watch out for, and how to make healthy eating easier.',
+
+
     author: 'ThriveAtHome Team',
+
+
     publishedAt: '2026-10-05',
+
+
     category: 'daily-living',
+
+
     readTimeMinutes: 6,
     content: `Good nutrition becomes both more important and more challenging as we age. Appetite often decreases, the ability to absorb certain nutrients declines, and conditions like diabetes or heart disease may require dietary changes. Here is what older adults most need to know.
 
@@ -796,11 +1027,23 @@ If cooking has become difficult: batch cook once or twice a week, stock easy-to-
   // --- HOME ORGANIZATION ---
   {
     slug: 'downsizing-seniors-guide',
+
+
     title: 'A Compassionate Guide to Downsizing Your Home',
+
+
     excerpt: 'Letting go of possessions accumulated over a lifetime is emotionally hard. This guide helps you approach it with intention — not overwhelm.',
+
+
     author: 'ThriveAtHome Team',
+
+
     publishedAt: '2026-09-19',
+
+
     category: 'home-organization',
+
+
     readTimeMinutes: 8,
     content: `Downsizing is one of the most emotionally and physically demanding tasks many older adults face. Decades of memories are attached to objects, and deciding what to keep, give away, or let go requires energy, time, and emotional support.
 
@@ -828,11 +1071,23 @@ A senior move manager or professional organiser can be invaluable. They are trai
   // --- IN-HOME CARE ---
   {
     slug: 'hiring-home-care-checklist',
+
+
     title: 'How to Hire Home Care: A Step-by-Step Checklist',
+
+
     excerpt: 'Whether you need a few hours of help per week or round-the-clock care, this checklist walks you through every step of hiring safely and well.',
+
+
     author: 'ThriveAtHome Team',
+
+
     publishedAt: '2026-09-25',
+
+
     category: 'in-home-care',
+
+
     readTimeMinutes: 7,
     content: `Hiring home care is a major decision. The person you bring into your home will be responsible for safety, comfort, and sometimes intimate personal care. Getting this right takes time, but this checklist makes it manageable.
 
@@ -861,11 +1116,23 @@ Start with a two-week trial. Be present as much as possible early on. Check in r
   // --- LEGAL PLANNING ---
   {
     slug: 'essential-legal-documents-seniors',
+
+
     title: 'The 5 Essential Legal Documents Every Senior Needs',
+
+
     excerpt: 'Having the right documents in place protects your wishes and spares your family enormous difficulty. Here are the five you cannot afford to skip.',
+
+
     author: 'ThriveAtHome Team',
+
+
     publishedAt: '2026-10-08',
+
+
     category: 'legal-planning',
+
+
     readTimeMinutes: 7,
     content: `Legal planning is one of the most important — and most postponed — tasks in preparing for later life. Without the right documents, your family may face court proceedings, conflict, and uncertainty at exactly the moment they need clarity and support.
 
@@ -895,11 +1162,23 @@ A POLST (Physician Orders for Life-Sustaining Treatment) is a medical order, not
   // --- PUBLIC ASSISTANCE ---
   {
     slug: 'benefits-guide-seniors',
+
+
     title: 'Benefits You May Not Know You Qualify For',
+
+
     excerpt: 'Millions of eligible seniors miss out on Medicare Savings Programmes, SNAP, and other benefits each year. Here is how to find what you are owed.',
+
+
     author: 'ThriveAtHome Team',
+
+
     publishedAt: '2026-09-30',
+
+
     category: 'public-assistance',
+
+
     readTimeMinutes: 7,
     content: `An estimated $50 billion in government benefits goes unclaimed each year, much of it by seniors who either do not know they qualify or find the application process too daunting. Here are the most valuable programmes and how to access them.
 
@@ -931,11 +1210,23 @@ BenefitsCheckUp.org (run by the National Council on Aging) is the most comprehen
   // --- PURPOSE & FULFILLMENT ---
   {
     slug: 'finding-purpose-retirement',
+
+
     title: 'Finding Purpose After Retirement: A Practical Guide',
+
+
     excerpt: 'Retirement can feel like freedom — or like loss. Here is how to build a life with meaning, connection, and forward momentum.',
+
+
     author: 'ThriveAtHome Team',
+
+
     publishedAt: '2026-10-03',
+
+
     category: 'purpose-fulfillment',
+
+
     readTimeMinutes: 6,
     content: `For many people, work provides more than income — it provides identity, structure, social connection, and a sense of contribution. When work ends, a vacuum can form. Studies show that people who proactively invest in purpose after retirement report higher wellbeing, better cognitive health, and longer lives.
 
@@ -963,11 +1254,23 @@ It often takes one to two years to find your post-retirement rhythm. If you are 
   // --- RETIREMENT PLANNING ---
   {
     slug: 'social-security-maximising-benefits',
+
+
     title: 'How to Maximise Your Social Security Benefits',
+
+
     excerpt: 'The timing of when you claim Social Security can mean a difference of hundreds of dollars per month. Here is how to make the best decision for your situation.',
+
+
     author: 'ThriveAtHome Team',
+
+
     publishedAt: '2026-09-12',
+
+
     category: 'retirement-planning',
+
+
     readTimeMinutes: 8,
     content: `Social Security is the foundation of retirement income for most Americans — and for many, maximising benefits is the single highest-impact financial decision in retirement. Yet most people do not fully understand how the timing of their claim affects their lifetime income.
 
@@ -995,11 +1298,23 @@ If you have serious health concerns, need the income now, or have a short life e
   // --- SENIOR FITNESS ---
   {
     slug: 'exercise-guide-seniors',
+
+
     title: 'The Senior Fitness Guide: Safe Exercise for Adults 65+',
+
+
     excerpt: 'Regular exercise is the closest thing we have to a fountain of youth. Here is how to build a safe, effective routine after 65.',
+
+
     author: 'ThriveAtHome Team',
+
+
     publishedAt: '2026-10-10',
+
+
     category: 'senior-fitness',
+
+
     readTimeMinutes: 7,
     content: `Regular physical activity is one of the most powerful interventions for healthy aging. Research consistently shows that exercise reduces the risk of falls, slows cognitive decline, improves mood, and extends life. The good news: it does not take much to get significant benefits.
 
@@ -1029,11 +1344,23 @@ Exercise you enjoy is exercise you will keep doing. Find a class, a walking grou
   // --- SMART HOME TECH ---
   {
     slug: 'smart-home-tech-seniors-guide',
+
+
     title: 'Smart Home Technology for Seniors: What Actually Helps',
+
+
     excerpt: 'Not all smart home gadgets are useful — but a few can meaningfully improve safety and independence. Here is what is worth considering.',
+
+
     author: 'ThriveAtHome Team',
+
+
     publishedAt: '2026-10-06',
+
+
     category: 'smart-home-tech',
+
+
     readTimeMinutes: 6,
     content: `Smart home technology has advanced enormously in recent years, and some devices genuinely support independent living for older adults. The key is knowing which are worth the investment and which are gimmicks.
 
@@ -1065,11 +1392,23 @@ Avoid devices that require complex setup, frequent updates, or fiddly small-butt
   // --- MOVING & DOWNSIZING ---
   {
     slug: 'senior-moving-planning-guide',
+
+
     title: 'Planning a Senior Move: Timeline and Checklist',
+
+
     excerpt: 'A well-planned move takes 3–6 months. Here is the complete timeline and checklist to make it as smooth as possible.',
+
+
     author: 'ThriveAtHome Team',
+
+
     publishedAt: '2026-10-12',
+
+
     category: 'moving-downsizing',
+
+
     readTimeMinutes: 8,
     content: `Moving later in life is one of the most significant transitions a person can make. Whether you are moving to a smaller home, closer to family, or to a different type of housing, a well-organised approach makes the process far less stressful.
 
@@ -1101,11 +1440,23 @@ Give yourself time to adjust — it typically takes three to six months to feel 
   // --- TECH TUTORIALS ---
   {
     slug: 'how-to-make-phone-calls',
+
+
     title: 'How to Make and Receive Phone Calls on Your Smartphone',
+
+
     excerpt: 'A simple, step-by-step guide to making calls, answering calls, and managing your contacts on iPhone and Android.',
+
+
     author: 'ThriveAtHome Tech Helpers',
+
+
     publishedAt: '2026-09-10',
+
+
     category: 'smart-home-tech',
+
+
     readTimeMinutes: 4,
     content: `This guide walks you through making and receiving calls on both iPhone and Android phones. Take it one step at a time — there is no rush.
 
@@ -1140,11 +1491,23 @@ Call our Tech Helpline at **(555) 987-6543**, Monday–Friday 9 AM–5 PM. A vol
   },
   {
     slug: 'how-to-video-call-facetime-zoom',
+
+
     title: 'How to Video Call Using FaceTime or Zoom',
+
+
     excerpt: 'See your family face to face from wherever you are. This guide covers FaceTime on iPhone and Zoom on any device.',
+
+
     author: 'ThriveAtHome Tech Helpers',
+
+
     publishedAt: '2026-09-14',
+
+
     category: 'smart-home-tech',
+
+
     readTimeMinutes: 5,
     content: `Video calls let you see and talk to family and friends just like being in the same room. Here is how to use the two most popular options.
 
@@ -1186,11 +1549,23 @@ You are now in the meeting. You can see everyone and they can see you.
   },
   {
     slug: 'recognising-phone-scams',
+
+
     title: 'How to Recognise and Avoid Phone Scams',
+
+
     excerpt: 'Scammers specifically target older adults. Learn the warning signs and what to do if you get a suspicious call.',
+
+
     author: 'ThriveAtHome Team',
+
+
     publishedAt: '2026-09-18',
+
+
     category: 'smart-home-tech',
+
+
     readTimeMinutes: 5,
     content: `Phone scams targeting older adults cost Americans over $3 billion per year. The good news: once you know the warning signs, they are much easier to spot and avoid.
 
@@ -1219,5 +1594,249 @@ You are now in the meeting. You can see everyone and they can see you.
 4. Report it to the FTC at reportfraud.ftc.gov or call 1-877-FTC-HELP.
 
 **Remember**: It is never rude to hang up on a suspicious caller. Your safety matters more than being polite.`,
+  },
+{
+    slug: "essential-legal-documents-seniors",
+    title: "The 5 Legal Documents Every Senior Needs Before It's Too Late",
+    excerpt: "Without these documents, your family could face costly court battles. Here's what to get in place now.",
+    author: "ThriveAtHome Legal Team",
+    publishedAt: "2026-09-10",
+    category: "legal-planning",
+    readTimeMinutes: 8,
+    content: `Planning ahead is one of the greatest gifts you can give your family.
+
+<h2>1. Durable Power of Attorney (Financial)</h2>
+<p>A durable power of attorney names someone you trust to manage your finances if you become incapacitated. Make sure yours says "durable" — a standard POA becomes void the moment you need it most.</p>
+
+<h2>2. Healthcare Power of Attorney</h2>
+<p>Names someone to make medical decisions for you if you can't make them yourself. Choose someone who knows your values and will advocate firmly on your behalf.</p>
+
+<h2>3. Advance Directive / Living Will</h2>
+<p>Tells doctors what treatments you do and don't want. Covers life-sustaining treatment, CPR preferences, comfort care, and organ donation. Without it, medical staff defaults to aggressive intervention.</p>
+
+<h2>4. Will</h2>
+<p>Directs how your assets are distributed, names an executor, and names a guardian for any minor children. Review beneficiary designations on retirement accounts and life insurance separately.</p>
+
+<h2>5. POLST / MOLST Form</h2>
+<p>A medical order signed by your doctor that travels with you. Unlike an advance directive, it is legally binding on emergency responders and hospital staff.</p>
+
+<h2>Getting Started</h2>
+<p>Contact an elder law attorney — many offer flat-fee packages. Your Area Agency on Aging can refer you to low-cost legal aid. Find attorneys at naela.org.</p>`,
+  },
+  {
+    slug: "finding-purpose-retirement",
+    title: "Finding Purpose After Retirement: 8 Proven Paths That Work",
+    excerpt: "Retirement is the start of your next chapter. Here are eight ways seniors are finding meaning, joy, and connection.",
+    author: "ThriveAtHome Wellness Team",
+    publishedAt: "2026-09-05",
+    category: "purpose-fulfillment",
+    readTimeMinutes: 7,
+    content: `Research shows that having a sense of purpose is one of the strongest predictors of healthy aging.
+
+<h2>1. Mentoring and Teaching</h2>
+<p>SCORE matches retired professionals with small business owners. Schools need tutors. Your local library likely has a literacy program looking for volunteers.</p>
+
+<h2>2. Encore Careers</h2>
+<p>Half of adults over 60 who return to work do so in a completely different field. Encore.org helps people transition into purpose-driven second careers.</p>
+
+<h2>3. Creative Expression</h2>
+<p>Painting, writing, woodworking, music — creative pursuits activate different parts of the brain. Many communities offer low-cost classes through senior centers and community colleges.</p>
+
+<h2>4. Advocacy and Civic Life</h2>
+<p>Local government committees, school boards, and neighborhood associations all need experienced voices. Local engagement gives many seniors a strong sense of impact.</p>
+
+<h2>5. Peer Support</h2>
+<p>One of the most meaningful things a senior can do is be present for another who is struggling. Volunteer visitor programs and telephone reassurance programs match seniors who want connection with those who need it.</p>
+
+<h2>Starting Small</h2>
+<p>Purpose tends to grow from action. Start with one small commitment — one morning a week, one phone call.</p>`,
+  },
+  {
+    slug: "smart-home-tech-seniors-guide",
+    title: "Smart Home Technology for Seniors: What Actually Helps vs. What's Hype",
+    excerpt: "The smart home market is full of promises. We cut through the noise to show what technology genuinely helps seniors stay safe.",
+    author: "ThriveAtHome Tech Team",
+    publishedAt: "2026-10-03",
+    category: "smart-home-tech",
+    readTimeMinutes: 9,
+    content: `The smart home technology market has exploded — and so have the marketing claims.
+
+<h2>High Impact: Worth the Investment</h2>
+
+<h3>Medical Alert Systems</h3>
+<p>Modern systems include fall detection, GPS tracking, and two-way voice. Top-rated options include Medical Guardian and Bay Alarm Medical. Monthly costs range from $25-$60.</p>
+
+<h3>Smart Lighting</h3>
+<p>Motion-activated night lights along the path from bedroom to bathroom eliminate the need to find a light switch in the dark. Cost: $15-$40 per light.</p>
+
+<h3>Video Doorbells</h3>
+<p>See and speak to anyone at your door without opening it. Reduces risk from strangers and door-to-door scammers. Cost: $100-$250.</p>
+
+<h2>Helpful for the Right Person</h2>
+
+<h3>Voice Assistants</h3>
+<p>Genuinely useful for medication reminders, music, phone calls, and controlling smart home devices. Works best when set up by a family member who also uses one.</p>
+
+<h3>Automatic Stove Shut-Off</h3>
+<p>Devices like Wallflower monitor the stove and shut it off automatically. Critical for seniors with memory concerns. Cost: $100-$200.</p>
+
+<h2>Before You Buy</h2>
+<p>Ask: Will I actually use this? Who helps me if it breaks? Does this solve a real problem I have right now? The best technology is the technology you use.</p>`,
+  },
+  {
+    slug: "senior-moving-planning-guide",
+    title: "The Senior's Complete Moving Guide: How to Plan a Stress-Free Move",
+    excerpt: "Moving after 65 is one of life's biggest transitions. This step-by-step guide helps you plan, downsize, and settle in.",
+    author: "ThriveAtHome Care Team",
+    publishedAt: "2026-09-18",
+    category: "moving-downsizing",
+    readTimeMinutes: 10,
+    content: `Moving later in life means leaving a home filled with decades of memories. It's not just a logistical challenge — it's an emotional one.
+
+<h2>Step 1: Clarify Why You're Moving</h2>
+<p>The reason shapes every decision. Common reasons: home becoming hard to maintain, wanting to be closer to family, health needs, financial reasons, or wanting more community.</p>
+
+<h2>Step 2: Explore Your Options</h2>
+<p>Options include aging in place with modifications, a smaller home, 55+ communities, continuing care retirement communities, or moving near family.</p>
+
+<h2>Step 3: Sort and Downsize</h2>
+<p>Most seniors need to reduce belongings by 50-70%. The four-pile method: Keep, Gift, Donate, Discard. Work one room at a time, no more than 2-3 hours per session. Consider a Senior Move Manager (nasmm.org).</p>
+
+<h2>Step 4: Handle Logistics</h2>
+<p>Get three mover quotes. Notify Medicare, Social Security, and insurance. Transfer prescriptions. Set up USPS mail forwarding at least two weeks before the move.</p>
+
+<h2>Step 5: Settle In</h2>
+<p>Introduce yourself to neighbors in the first week. Find your nearest senior center. Locate your Area Agency on Aging. Give yourself permission to grieve the old home while embracing the new.</p>`,
+  },
+  {
+    slug: "hiring-home-care-checklist",
+    title: "How to Hire Home Care: A Step-by-Step Checklist for Families",
+    excerpt: "Finding trustworthy in-home care is one of the most important decisions you'll make. This checklist walks you through every step.",
+    author: "ThriveAtHome Care Team",
+    publishedAt: "2026-08-28",
+    category: "in-home-care",
+    readTimeMinutes: 8,
+    content: `Hiring someone to care for your parent at home is a significant decision. Done well, it extends independence and provides peace of mind.
+
+<h2>Step 1: Assess What You Need</h2>
+<p>Companion care covers conversation and errands. Personal care aides help with bathing and dressing. Home health aides add health monitoring. Skilled nursing covers wound care and injections.</p>
+
+<h2>Step 2: Agency vs. Independent</h2>
+<p>Agencies are bonded, insured, and handle payroll — but cost 30-40% more. Independent caregivers offer flexibility and a consistent relationship, but you become the employer.</p>
+
+<h2>Step 3: Interview at Least Three</h2>
+<p>Ask agencies: Are caregivers employees or contractors? What background checks do you run? What happens if our caregiver calls in sick? Are you licensed in this state?</p>
+
+<h2>Step 4: Run Your Own Checks</h2>
+<p>Check your state's nurse aide registry. Call at least two professional references personally. Search the candidate's name plus your city online.</p>
+
+<h2>Step 5: Trial Period</h2>
+<p>Start with a 2-4 week paid trial. Drop by unannounced twice in the first month. Ask your parent how they feel — trust their instincts.</p>
+
+<h2>Financial Help</h2>
+<p>Home care costs $25-$40/hour. Assistance sources include Medicaid Home and Community-Based Services waivers, Veterans Aid and Attendance, and long-term care insurance.</p>`,
+  },
+  {
+    slug: "benefits-guide-seniors",
+    title: "The Benefits Most Seniors Don't Know They Qualify For",
+    excerpt: "Billions in senior benefits go unclaimed every year. This guide covers the programs most commonly missed — and how to apply.",
+    author: "ThriveAtHome Navigator Team",
+    publishedAt: "2026-10-12",
+    category: "public-assistance",
+    readTimeMinutes: 9,
+    content: `More than $30 billion in benefits for seniors go unclaimed every year — mostly because people don't know they qualify.
+
+<h2>SNAP (Food Assistance)</h2>
+<p>A single senior can qualify with income up to about $1,500/month. The average senior SNAP benefit is $105/month. Apply at benefits.gov or your local Department of Social Services.</p>
+
+<h2>Medicare Savings Programs</h2>
+<p>State-run programs that pay some or all of your Medicare premiums, deductibles, and copayments. Apply through your state Medicaid office.</p>
+
+<h2>Extra Help (Low Income Subsidy)</h2>
+<p>If you have Medicare Part D, Extra Help can reduce prescription costs to nearly zero. A single person with income under about $22,000/year likely qualifies. Apply at ssa.gov/extrahelp.</p>
+
+<h2>LIHEAP (Utility Assistance)</h2>
+<p>Helps with heating and cooling bills. A single senior with income under about $24,000/year often qualifies. Apply through your local community action agency.</p>
+
+<h2>Property Tax Relief</h2>
+<p>Most states offer property tax exemptions or deferrals for seniors. Worth thousands per year for homeowners. Contact your county tax assessor's office.</p>
+
+<h2>How to Find Everything You Qualify For</h2>
+<p>Use BenefitsCheckUp at benefitscheckup.org — a free tool from the National Council on Aging that screens for 2,500+ programs. Your Area Agency on Aging can also help you apply.</p>`,
+  },
+  {
+    slug: "exercise-guide-seniors",
+    title: "The Best Exercises for Seniors: Safe, Effective, and Actually Enjoyable",
+    excerpt: "Exercise is the single most powerful thing a senior can do for their health. Here's what actually works and how to start safely.",
+    author: "ThriveAtHome Wellness Team",
+    publishedAt: "2026-09-30",
+    category: "senior-fitness",
+    readTimeMinutes: 7,
+    content: `Exercise reduces the risk of falls, heart disease, diabetes, depression, and cognitive decline — often more effectively than medication.
+
+<h2>Balance Training (Most Important for Fall Prevention)</h2>
+<p>Single-leg stands, heel-to-toe walking, and Tai Chi. Multiple studies show Tai Chi reduces falls by up to 47%. Look for senior Tai Chi classes at your local senior center or YMCA.</p>
+
+<h2>Strength Training (Critical for Independence)</h2>
+<p>Chair squats (sit and stand from a chair 10 times) are the most functional strength exercise for seniors. Wall push-ups build upper body strength without getting on the floor. Resistance bands are inexpensive and effective.</p>
+
+<h2>Aerobic Exercise (Heart and Brain Health)</h2>
+<p>Aim for 150 minutes per week — 30 minutes five days a week, or even 10-minute walks three times daily. Walking, swimming, and stationary cycling are all excellent low-impact options.</p>
+
+<h2>Getting Started Safely</h2>
+<p>Check with your doctor before starting if you have heart disease, recent surgery, or fall risk. Ask for a referral to physical therapy for a program tailored to your needs.</p>
+
+<h2>Free Programs</h2>
+<p>SilverSneakers is included with many Medicare Advantage plans and provides free access to thousands of gyms. Many senior centers offer free or sliding-scale fitness classes.</p>`,
+  },
+  {
+    slug: "adaptive-equipment-independence",
+    title: "Adaptive Equipment That Helps Seniors Stay Independent at Home",
+    excerpt: "The right tools can eliminate the need for full-time assistance. Here are the devices that make the biggest difference for aging at home.",
+    author: "ThriveAtHome OT Team",
+    publishedAt: "2026-09-08",
+    category: "daily-living",
+    readTimeMinutes: 6,
+    content: `Adaptive equipment helps people with physical limitations perform daily tasks independently. The right equipment can eliminate the need for caregiver assistance for hours of daily tasks.
+
+<h2>Kitchen Independence</h2>
+<p>Electric jar opener ($30), cutting board with suction cups ($40), rocker knife ($20), long-handled dustpan ($20). These small tools restore independence in food preparation.</p>
+
+<h2>Bathroom Safety</h2>
+<p>Grab bars (professionally installed, $30-$80 each), shower chair ($40-$150), handheld showerhead ($30-$80), raised toilet seat ($30-$100). The bathroom is where most falls happen — these modifications matter most.</p>
+
+<h2>Dressing and Grooming</h2>
+<p>Dressing stick, long-handled shoehorn, elastic shoelaces, button hook, sock aid — all under $20 each. These restore the ability to dress independently without bending or fine motor skill.</p>
+
+<h2>Mobility Around the Home</h2>
+<p>Bed rail ($30-$80), recliner lift chair ($500-$1,500), wheeled walker with seat ($80-$200). A lift chair may be partially covered by Medicare with a doctor's order.</p>
+
+<h2>Getting Professional Guidance</h2>
+<p>An occupational therapist can assess your home and recommend exactly the right equipment. Ask your doctor for an OT referral — Medicare covers home OT evaluations.</p>`,
+  },
+  {
+    slug: "nutrition-guide-seniors",
+    title: "Senior Nutrition: What to Eat After 65 (And What to Avoid)",
+    excerpt: "Nutritional needs change significantly after 65. This guide explains what seniors actually need and the common mistakes that undermine health.",
+    author: "ThriveAtHome Wellness Team",
+    publishedAt: "2026-08-15",
+    category: "daily-living",
+    readTimeMinutes: 7,
+    content: `Nutrition after 65 is not the same as at 40. Metabolism slows, absorption changes, appetite often decreases, and medication interactions become a real concern.
+
+<h2>Protein: Most Underconsumed</h2>
+<p>Target 1.0-1.2 grams per kilogram of body weight daily. Best sources: eggs, fish, Greek yogurt, cottage cheese, legumes. Spread protein across meals — the body processes it more efficiently that way.</p>
+
+<h2>Calcium and Vitamin D</h2>
+<p>Adults over 70 need 1,200 mg of calcium and 800 IU of Vitamin D daily. Vitamin D deficiency is extremely common in seniors. Most need a supplement — ask your doctor to test your levels.</p>
+
+<h2>Vitamin B12</h2>
+<p>Up to 30% of adults over 50 have reduced ability to absorb B12 due to decreased stomach acid. Deficiency causes fatigue, memory problems, and nerve damage. Ask your doctor to check your B12 level.</p>
+
+<h2>Hydration</h2>
+<p>Seniors have a reduced sense of thirst and are at high risk for dehydration. Aim for 6-8 cups of fluid daily. Do not wait to feel thirsty. Coffee, tea, and water-rich foods all count.</p>
+
+<h2>Free Help</h2>
+<p>Registered dietitians specializing in senior nutrition are available through your doctor. Many Area Agencies on Aging offer Meals on Wheels and nutrition counseling.</p>`,
   },
 ]

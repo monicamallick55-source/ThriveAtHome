@@ -5,17 +5,7 @@ export const metadata = { title: 'Senior Resources by State — ThriveAtHome', d
 const US_STATES_LIST:[string,string][]=[['AL','Alabama'],['AK','Alaska'],['AZ','Arizona'],['AR','Arkansas'],['CA','California'],['CO','Colorado'],['CT','Connecticut'],['DE','Delaware'],['FL','Florida'],['GA','Georgia'],['HI','Hawaii'],['ID','Idaho'],['IL','Illinois'],['IN','Indiana'],['IA','Iowa'],['KS','Kansas'],['KY','Kentucky'],['LA','Louisiana'],['ME','Maine'],['MD','Maryland'],['MA','Massachusetts'],['MI','Michigan'],['MN','Minnesota'],['MS','Mississippi'],['MO','Missouri'],['MT','Montana'],['NE','Nebraska'],['NV','Nevada'],['NH','New Hampshire'],['NJ','New Jersey'],['NM','New Mexico'],['NY','New York'],['NC','North Carolina'],['ND','North Dakota'],['OH','Ohio'],['OK','Oklahoma'],['OR','Oregon'],['PA','Pennsylvania'],['RI','Rhode Island'],['SC','South Carolina'],['SD','South Dakota'],['TN','Tennessee'],['TX','Texas'],['UT','Utah'],['VT','Vermont'],['VA','Virginia'],['WA','Washington'],['WV','West Virginia'],['WI','Wisconsin'],['WY','Wyoming']]
 function abbrToSlug(abbr:string){return STATES.find(s=>s.abbr===abbr)?.slug??abbr.toLowerCase()}
 export default async function StatesHubPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
   let memberState:string|null=null,memberStateName:string|null=null,memberStateSlug:string|null=null
-  if (user) {
-    const { data: profile } = await supabase.from('members').select('state').eq('supabase_auth_id', user.id).maybeSingle()
-    if (profile?.state) {
-      const abbr = profile.state.length===2 ? profile.state.toUpperCase() : null
-      const sd = abbr ? getStateByAbbr(abbr) : STATES.find(s=>s.name.toLowerCase()===profile.state.toLowerCase())
-      if (sd) { memberState=sd.abbr; memberStateName=sd.name; memberStateSlug=sd.slug }
-    }
-  }
   return (
     <div className="min-h-screen bg-[#fafaf5]">
       <div className="bg-[#1e3a5f] text-white py-14 px-4">
