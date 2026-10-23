@@ -345,6 +345,7 @@ export default function HomePage() {
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
                   <Link href="/resources/states" style={{ display: 'inline-block', backgroundColor: 'var(--color-navy)', color: 'var(--color-cream)', fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: '15px', padding: '12px 24px', borderRadius: '8px', textDecoration: 'none' }}>Browse state resources →</Link>
                   <Link href="/blog" style={{ display: 'inline-block', border: '1.5px solid var(--color-warm-grey)', color: 'var(--color-navy)', fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: '15px', padding: '12px 24px', borderRadius: '8px', textDecoration: 'none' }}>Read our blog →</Link>
+                  <Link href="/directory" style={{ display: 'inline-block', border: '1.5px solid var(--color-teal)', color: 'var(--color-teal)', fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: '15px', padding: '12px 24px', borderRadius: '8px', textDecoration: 'none' }}>Browse partner directory →</Link>
                 </div>
               </div>
               <div style={{ flex: '1 1 260px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
