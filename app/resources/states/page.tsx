@@ -1,11 +1,10 @@
-'use client'
-
 import Link from 'next/link'
 import { STATES, getStateByAbbr } from '@/lib/content/states'
+import StateSearch from './StateSearch'
 export const metadata = { title: 'Senior Resources by State — ThriveAtHome', description: 'Find Medicaid waivers, Area Agencies on Aging, legal aid, and senior programs in your state.' }
 const US_STATES_LIST:[string,string][]=[['AL','Alabama'],['AK','Alaska'],['AZ','Arizona'],['AR','Arkansas'],['CA','California'],['CO','Colorado'],['CT','Connecticut'],['DE','Delaware'],['FL','Florida'],['GA','Georgia'],['HI','Hawaii'],['ID','Idaho'],['IL','Illinois'],['IN','Indiana'],['IA','Iowa'],['KS','Kansas'],['KY','Kentucky'],['LA','Louisiana'],['ME','Maine'],['MD','Maryland'],['MA','Massachusetts'],['MI','Michigan'],['MN','Minnesota'],['MS','Mississippi'],['MO','Missouri'],['MT','Montana'],['NE','Nebraska'],['NV','Nevada'],['NH','New Hampshire'],['NJ','New Jersey'],['NM','New Mexico'],['NY','New York'],['NC','North Carolina'],['ND','North Dakota'],['OH','Ohio'],['OK','Oklahoma'],['OR','Oregon'],['PA','Pennsylvania'],['RI','Rhode Island'],['SC','South Carolina'],['SD','South Dakota'],['TN','Tennessee'],['TX','Texas'],['UT','Utah'],['VT','Vermont'],['VA','Virginia'],['WA','Washington'],['WV','West Virginia'],['WI','Wisconsin'],['WY','Wyoming']]
 function abbrToSlug(abbr:string){return STATES.find(s=>s.abbr===abbr)?.slug??abbr.toLowerCase()}
-export default async function StatesHubPage() {
+export default function StatesHubPage() {
   let memberState:string|null=null,memberStateName:string|null=null,memberStateSlug:string|null=null
   return (
     <div className="min-h-screen bg-[#fafaf5]">
@@ -33,8 +32,7 @@ export default async function StatesHubPage() {
           </div>
         )}
         <h2 className="text-xl font-bold text-gray-900 mb-4">Browse all states</h2>
-        <input type="text" placeholder="Type a state name to filter…" className="w-full border border-gray-300 rounded-xl px-4 py-3 text-[15px] mb-6 focus:outline-none focus:ring-2 focus:ring-teal-500"
-          onInput={(e)=>{const v=(e.target as HTMLInputElement).value.toLowerCase();document.querySelectorAll<HTMLElement>('[data-scard]').forEach(el=>{el.style.display=(el.dataset.sname??'').toLowerCase().includes(v)?'':'none'})}} />
+        <StateSearch />
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
           {US_STATES_LIST.map(([abbr,name])=>(
             <Link key={abbr} href={`/resources/states/${abbrToSlug(abbr)}`} data-scard="" data-sname={name}
