@@ -14,7 +14,7 @@ interface DashNavProps {
 const NAV_LINKS = [
   { href: '/dashboard', label: 'Home', icon: '🏠' },
   { href: '/dashboard/history', label: 'History', icon: '📋' },
-  { href: '/dashboard/community', label: 'Community', icon: '👥' },
+  { href: '/dashboard/communities', label: 'Community', icon: '👥' },
   { href: '/dashboard/messages', label: 'Messages', icon: '✉️' },
   { href: '/dashboard/documents', label: 'Docs', icon: '📄' },
 ]
@@ -22,7 +22,7 @@ const NAV_LINKS = [
 const DESKTOP_LINKS = [
   { href: '/dashboard', label: 'Home' },
   { href: '/dashboard/history', label: 'History' },
-  { href: '/dashboard/community', label: 'Community' },
+  { href: '/dashboard/communities', label: 'Community' },
   { href: '/dashboard/family', label: 'Family' },
   { href: '/dashboard/messages', label: 'Messages' },
   { href: '/dashboard/buddy', label: 'Buddy' },
