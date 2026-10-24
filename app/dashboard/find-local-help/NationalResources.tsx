@@ -1,4 +1,3 @@
-cat > app/dashboard/find-local-help/NationalResources.tsx << 'ENDOFFILE'
 'use client'
 import { useState } from 'react'
 
