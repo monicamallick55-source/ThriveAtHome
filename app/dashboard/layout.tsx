@@ -15,7 +15,7 @@ export default async function DashboardLayout({
     ? await getUnreadCount(memberId)
     : { count: 0 }
   const seniorName = fm
-    ? `${fm.first_name ?? ''} ${fm.last_name ?? ''}`.trim() || 'Member'
+    ? fm.full_name?.split(' ')[0] || 'Member'
     : 'Member'
 
   return (
