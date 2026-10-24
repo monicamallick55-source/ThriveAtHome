@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 
+import { NationalResources } from './NationalResources'
 export const metadata = { title: 'Find Local Help | ThriveAtHome' }
 
 export default async function FindLocalHelpPage() {
@@ -82,28 +83,7 @@ export default async function FindLocalHelpPage() {
           </Link>
         ))}
       </div>
-
-      <section className="bg-gray-50 rounded-xl p-6">
-        <h2 className="font-semibold text-gray-900 mb-3">National Resources</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-          {[
-            { name: 'Eldercare Locator', url: 'https://eldercare.acl.gov', desc: 'Find local aging services' },
-            { name: 'BenefitsCheckUp', url: 'https://benefitscheckup.org', desc: 'Find benefits you qualify for' },
-            { name: 'AARP Local Resources', url: 'https://local.aarp.org', desc: 'Community programs near you' },
-            { name: 'Medicare Care Compare', url: 'https://www.medicare.gov/care-compare', desc: 'Compare local care providers' },
-            { name: 'VA Caregiver Support', url: 'https://www.caregiver.va.gov', desc: 'For veteran caregivers' },
-            { name: '211 Helpline', url: 'https://www.211.org', desc: 'Local social services hotline' },
-          ].map(r => (
-            <a key={r.name} href={r.url} target="_blank" rel="noopener noreferrer"
-              className="flex items-start gap-2 p-3 bg-white rounded-lg border border-gray-200 hover:border-teal-300 transition-colors">
-              <div>
-                <p className="font-medium text-teal-700">{r.name}</p>
-                <p className="text-gray-500 text-xs">{r.desc}</p>
-              </div>
-            </a>
-          ))}
-        </div>
-      </section>
+      <NationalResources />
     </main>
   )
 }
