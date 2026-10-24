@@ -2,15 +2,23 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { BLOG_POSTS } from '@/lib/content/resources'
 import type { Metadata } from 'next'
-interface Props { params: { slug: string } }
-export async function generateStaticParams() { return BLOG_POSTS.map(p => ({ slug: p.slug })) }
+
+interface Props { params: Promise<{ slug: string }> }
+
+export async function generateStaticParams() {
+  return BLOG_POSTS.map(p => ({ slug: p.slug }))
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const post = BLOG_POSTS.find(p => p.slug === params.slug)
+  const { slug } = await params
+  const post = BLOG_POSTS.find(p => p.slug === slug)
   if (!post) return { title: 'Post Not Found' }
   return { title: `${post.title} — ThriveAtHome`, description: post.excerpt }
 }
-export default function BlogPostPage({ params }: Props) {
-  const post = BLOG_POSTS.find(p => p.slug === params.slug)
+
+export default async function BlogPostPage({ params }: Props) {
+  const { slug } = await params
+  const post = BLOG_POSTS.find(p => p.slug === slug)
   if (!post) notFound()
   const related = BLOG_POSTS.filter(p => p.slug !== post.slug && p.category === post.category).slice(0, 3)
   return (
@@ -20,7 +28,9 @@ export default function BlogPostPage({ params }: Props) {
         <span className="inline-block bg-teal-100 text-teal-800 text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-4">{post.category}</span>
         <h1 className="font-display text-3xl md:text-4xl font-bold text-[#1e3a5f] leading-tight mb-4">{post.title}</h1>
         <div className="flex items-center gap-4 text-gray-400 text-[13px] mb-6 pb-6 border-b border-gray-200">
-          <span>{post.author}</span><span>·</span><span>{new Date(post.publishedAt).toLocaleDateString("en-US", {year:"numeric",month:"long",day:"numeric"})}</span><span>·</span><span>{post.readTimeMinutes} min read</span>
+          <span>{post.author}</span><span>·</span>
+          <span>{new Date(post.publishedAt).toLocaleDateString("en-US", {year:"numeric",month:"long",day:"numeric"})}</span>
+          <span>·</span><span>{post.readTimeMinutes} min read</span>
         </div>
         <p className="text-lg text-gray-600 mb-8 leading-relaxed font-medium">{post.excerpt}</p>
         <article className="prose prose-lg max-w-none prose-headings:text-[#1e3a5f] prose-a:text-teal-600"
