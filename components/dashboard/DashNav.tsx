@@ -25,6 +25,7 @@ const DESKTOP_LINKS = [
   { href: '/dashboard/community', label: 'Community' },
   { href: '/dashboard/family', label: 'Family' },
   { href: '/dashboard/messages', label: 'Messages' },
+  { href: '/dashboard/buddy', label: 'Buddy' },
   { href: '/dashboard/documents', label: 'Documents' },
   { href: '/dashboard/settings', label: 'Settings' },
 ]
