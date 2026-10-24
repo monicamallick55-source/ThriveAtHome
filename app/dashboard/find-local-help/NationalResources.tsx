@@ -84,5 +84,3 @@ export function NationalResources() {
     </section>
   )
 }
-ENDOFFILE
-echo "✓ Created NationalResources.tsx"
