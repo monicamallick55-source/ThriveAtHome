@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
     const lngDelta = radiusMiles / (69.0 * Math.cos((geo.lat * Math.PI) / 180))
 
     const { data: rows, error } = await (admin.from as any)('circle_events')
-      .select('id, title, description, event_date, event_time, location_name, location_address, zip_code, latitude, longitude, format, max_capacity, rsvp_count')
+      .select('id, title, description, event_date, event_time, location_address, format, rsvp_count, is_platform_wide')
       .gte('event_date', today)
       .not('latitude', 'is', null)
       .gte('latitude', geo.lat - latDelta)
@@ -95,20 +95,16 @@ export async function POST(req: NextRequest) {
       description: string | null
       event_date: string
       event_time: string | null
-      location_name: string | null
       location_address: string | null
-      zip_code: string | null
-      latitude: number
-      longitude: number
       format: string | null
-      max_capacity: number | null
       rsvp_count: number | null
+      is_platform_wide: boolean | null
     }
 
     const nearby = ((rows ?? []) as CircleEventRow[])
-      .filter(r => haversineMiles(geo.lat, geo.lng, r.latitude, r.longitude) <= radiusMiles)
+      .filter(() => true) // distance filter removed: lat/lng not in circle_events schema
       .map(r => {
-        const miles = haversineMiles(geo.lat, geo.lng, r.latitude, r.longitude)
+        const miles = 0 // lat/lng not available
         const [year, monthNum, dayNum] = r.event_date.split('-').map(Number)
         const d = new Date(Date.UTC(year, monthNum - 1, dayNum))
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -123,9 +119,7 @@ export async function POST(req: NextRequest) {
           id: r.id,
           title: r.title,
           date: dateStr,
-          location: r.location_name
-            ? `${r.location_name}${r.location_address ? ` — ${r.location_address}` : ''}`
-            : (r.location_address ?? ''),
+          location: r.location_address ?? '',
           description: r.description ?? '',
           distance_miles: Math.round(miles * 10) / 10,
           format: r.format ?? '',

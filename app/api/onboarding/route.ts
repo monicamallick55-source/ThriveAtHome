@@ -245,5 +245,25 @@ export async function POST(req: NextRequest) {
     console.log(`[STUB][Navigator] GRIEF PATH member enrolled: ${member.preferred_name} (${member.id})${lossSuffix} — buddy assignment SLA: 48 hours`)
   }
 
+
+  // Fire Aria welcome call via Retell
+  try {
+    const phone = body.phone?.trim()
+    if (phone && member.id) {
+      const { RetellCallProvider } = await import('@/lib/services/RetellCallProvider')
+      const provider = new RetellCallProvider()
+      await provider.scheduleCall(member.id, phone, {
+        agent: 'aria',
+        preferredName: member.preferred_name,
+        callType: 'onboarding',
+        interests: body.interests ? body.interests.split(',').map((s: string) => s.trim()) : [],
+        dynamicVariables: {},
+      })
+      console.log(`[api/onboarding] Aria welcome call scheduled for ${member.preferred_name} at ${phone}`)
+    }
+  } catch (retellErr) {
+    console.error('[api/onboarding] Retell call failed (non-fatal):', retellErr)
+  }
+
   return NextResponse.json({ success: true, preferred_name: member.preferred_name })
 }
