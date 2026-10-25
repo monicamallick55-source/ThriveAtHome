@@ -248,7 +248,7 @@ export async function POST(req: NextRequest) {
 
   // Fire Aria welcome call via Retell
   try {
-    const phone = body.phone?.trim()
+    const phone = body.phone_number?.trim()
     if (phone && member.id) {
       const { RetellCallProvider } = await import('@/lib/services/RetellCallProvider')
       const provider = new RetellCallProvider()
