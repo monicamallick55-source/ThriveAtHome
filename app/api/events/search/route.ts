@@ -123,7 +123,7 @@ export async function POST(req: NextRequest) {
           description: r.description ?? '',
           distance_miles: Math.round(miles * 10) / 10,
           format: r.format ?? '',
-          spots_left: r.max_capacity ? Math.max(0, r.max_capacity - (r.rsvp_count ?? 0)) : null,
+          spots_left: null,
           url: null,
           score: miles,
           category: 'community',
