@@ -259,7 +259,7 @@ export async function POST(req: NextRequest) {
         interests: body.topics_enjoy ? body.topics_enjoy.split(',').map((s: string) => s.trim()) : [],
         dynamicVariables: {},
         priorCallSummaries: [],
-        preferredLanguage: undefined,
+        preferredLanguage: body.preferred_language ?? 'en',
       })
       console.log(`[api/onboarding] Aria welcome call scheduled for ${member.preferred_name} at ${phone}`)
     }
