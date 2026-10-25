@@ -256,7 +256,7 @@ export async function POST(req: NextRequest) {
         agent: 'aria',
         preferredName: member.preferred_name,
         callType: 'onboarding',
-        interests: body.interests ? body.interests.split(',').map((s: string) => s.trim()) : [],
+        interests: body.topics_enjoy ? body.topics_enjoy.split(',').map((s: string) => s.trim()) : [],
         dynamicVariables: {},
         priorCallSummaries: [],
         preferredLanguage: undefined,
