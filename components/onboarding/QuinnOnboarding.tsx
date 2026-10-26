@@ -32,7 +32,7 @@ export default function QuinnOnboarding({ onComplete, onBack }: QuinnOnboardingP
       const res = await fetch('/api/retell/tools/web-call', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ agent: 'quinn' }),
+        body: JSON.stringify({ agent: 'quinn', dynamic_variables: { call_context: 'onboarding' } }),
       })
       if (!res.ok) throw new Error('Could not reach Quinn right now')
       const { access_token } = (await res.json()) as { access_token: string }
