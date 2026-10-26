@@ -47,18 +47,6 @@ export async function POST(req: Request) {
 
     const supabase = createAdminClient()
 
-    // Find the family_member row
-    const { data: fm, error: fmErr } = await supabase
-      .from('family_members')
-      .select('id, relationship')
-      .eq('supabase_auth_id', authUserId)
-      .single()
-
-    if (fmErr || !fm) {
-      console.error('[onboarding-submit] no family_member for', authUserId, fmErr)
-      return NextResponse.json({ success: false, error: 'Account not found' }, { status: 404 })
-    }
-
     const memberData = {
       full_name: payload.full_name ?? null,
       preferred_name: payload.preferred_name ?? (payload.full_name?.split(' ')[0] ?? null),
@@ -76,7 +64,7 @@ export async function POST(req: Request) {
     const { data: existingMember } = await supabase
       .from('members')
       .select('id')
-      .eq('family_member_id', fm.id)
+      .eq('supabase_auth_id', authUserId)
       .maybeSingle()
 
     let memberId: string
@@ -91,7 +79,7 @@ export async function POST(req: Request) {
     } else {
       const { data: newMember, error: insertErr } = await supabase
         .from('members')
-        .insert({ ...memberData, family_member_id: fm.id })
+        .insert({ ...memberData, supabase_auth_id: authUserId })
         .select('id')
         .single()
       if (insertErr || !newMember) throw insertErr
