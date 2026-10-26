@@ -6,6 +6,8 @@ import { Step2Preferences } from './Step2Preferences'
 import { Step3Safety } from './Step3Safety'
 import { Confirmation } from './Confirmation'
 import { type OnboardingFormData, EMPTY_FORM, STORAGE_KEY } from './types'
+import PathChoice from './PathChoice'
+import QuinnOnboarding from './QuinnOnboarding'
 
 const TOTAL_STEPS = 3
 const stepLabels = (isSelf: boolean) => [
@@ -72,6 +74,7 @@ function CheckIcon() {
 export function OnboardingForm({ isSelf = false }: { isSelf?: boolean }) {
   const STEP_LABELS = stepLabels(isSelf)
   const [step, setStep] = useState(1)
+  const [mode, setMode] = useState<'choose' | 'form' | 'voice'>('choose')
   const [formData, setFormData] = useState<OnboardingFormData>(EMPTY_FORM)
   const [errors, setErrors] = useState<ValidationErrors>({})
   const [submitting, setSubmitting] = useState(false)
@@ -207,6 +210,25 @@ export function OnboardingForm({ isSelf = false }: { isSelf?: boolean }) {
           />
         </div>
       </div>
+    )
+  }
+
+
+  if (mode === 'choose') {
+    return (
+      <PathChoice
+        onSelf={() => setMode('form')}
+        onVoice={() => setMode('voice')}
+      />
+    )
+  }
+
+  if (mode === 'voice') {
+    return (
+      <QuinnOnboarding
+        onComplete={(name) => setConfirmedName(name)}
+        onBack={() => setMode('choose')}
+      />
     )
   }
 
