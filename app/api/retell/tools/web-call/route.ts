@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Too many calls. Please wait a minute and try again.' }, { status: 429 })
   }
 
-  const body = await req.json().catch(() => ({})) as { agent?: string }
+  const body = await req.json().catch(() => ({})) as { agent?: string; dynamic_variables?: Record<string, string> }
   const agentName = (body.agent ?? 'quinn') as keyof typeof AGENTS
 
   if (!(agentName in AGENTS)) {
@@ -66,6 +66,7 @@ export async function POST(req: NextRequest) {
         retell_llm_dynamic_variables: {
           channel: 'web_widget',
           agent:   agentName,
+          ...(body.dynamic_variables ?? {}),
         },
       }),
     })
