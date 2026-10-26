@@ -35,7 +35,6 @@ export async function POST(req: Request) {
   try {
     const payload = (await req.json()) as QuinnPayload
 
-    // Authenticate via call_id → Retell API → auth_user_id dynamic variable
     const authUserId = payload.call_id
       ? await getUserIdFromCallId(payload.call_id)
       : null
@@ -47,46 +46,70 @@ export async function POST(req: Request) {
 
     const supabase = createAdminClient()
 
-    const memberData = {
-      full_name: payload.full_name ?? undefined,
-      preferred_name: payload.preferred_name ?? (payload.full_name?.split(' ')[0] ?? undefined),
-      date_of_birth: payload.date_of_birth ?? undefined,
-      phone_number: payload.phone_number ?? undefined,
-      topics_enjoy: payload.topics_enjoy ? payload.topics_enjoy.split(',').map((s: string) => s.trim()) : undefined,
-      preferred_language: payload.preferred_language ?? 'en',
-      aria_call_opted_in: (payload.aria_call_opt_in === 'daily' || payload.aria_call_opt_in === 'less_often') ? true : false,
-      lives_alone: payload.lives_alone ?? undefined,
-      emergency_contact_name: payload.emergency_contact_name ?? undefined,
-      emergency_contact_phone: payload.emergency_contact_phone ?? undefined,
-      onboarding_complete: true,
+    // Find the family_member row for this auth user
+    const { data: fm, error: fmErr } = await supabase
+      .from('family_members')
+      .select('id, member_id')
+      .eq('supabase_auth_id', authUserId)
+      .single()
+
+    if (fmErr || !fm) {
+      console.error('[onboarding-submit] no family_member for', authUserId, fmErr)
+      return NextResponse.json({ success: false, error: 'Account not found' }, { status: 404 })
     }
 
-    const { data: existingMember } = await supabase
-      .from('members')
-      .select('id')
-      .eq('supabase_auth_id', authUserId)
-      .maybeSingle()
+    const preferredName = payload.preferred_name ?? payload.full_name?.split(' ')[0] ?? 'there'
+    const topicsArray = payload.topics_enjoy
+      ? payload.topics_enjoy.split(',').map((s: string) => s.trim())
+      : []
 
     let memberId: string
 
-    if (existingMember) {
+    if (fm.member_id) {
+      // Member row already exists — update it
       const { error: updateErr } = await supabase
         .from('members')
-        .update(memberData)
-        .eq('id', existingMember.id)
+        .update({
+          full_name: payload.full_name ?? undefined,
+          preferred_name: preferredName,
+          date_of_birth: payload.date_of_birth ?? undefined,
+          phone_number: payload.phone_number ?? undefined,
+          topics_enjoy: topicsArray.length ? topicsArray : undefined,
+          preferred_language: payload.preferred_language ?? 'english',
+          lives_alone: payload.lives_alone ?? undefined,
+          emergency_contact_1_name: payload.emergency_contact_name ?? undefined,
+          emergency_contact_1_phone: payload.emergency_contact_phone ?? undefined,
+        })
+        .eq('id', fm.member_id)
       if (updateErr) throw updateErr
-      memberId = existingMember.id
+      memberId = fm.member_id
     } else {
+      // Create a new member row then link it
       const { data: newMember, error: insertErr } = await supabase
         .from('members')
-        .insert({ ...memberData, supabase_auth_id: authUserId })
+        .insert({
+          full_name: payload.full_name ?? 'Unknown',
+          preferred_name: preferredName,
+          date_of_birth: payload.date_of_birth ?? '1900-01-01',
+          phone_number: payload.phone_number ?? '',
+          preferred_language: payload.preferred_language ?? 'english',
+          topics_enjoy: topicsArray,
+          lives_alone: payload.lives_alone ?? undefined,
+          emergency_contact_1_name: payload.emergency_contact_name ?? undefined,
+          emergency_contact_1_phone: payload.emergency_contact_phone ?? undefined,
+        })
         .select('id')
         .single()
       if (insertErr || !newMember) throw insertErr
       memberId = newMember.id
-    }
 
-    const preferredName = memberData.preferred_name ?? 'there'
+      // Link family_member → member
+      const { error: linkErr } = await supabase
+        .from('family_members')
+        .update({ member_id: memberId })
+        .eq('id', fm.id)
+      if (linkErr) throw linkErr
+    }
 
     // Fire Aria welcome call (non-fatal)
     try {
@@ -98,7 +121,7 @@ export async function POST(req: Request) {
           agent: 'aria',
           preferredName,
           callType: 'onboarding',
-          interests: payload.topics_enjoy ? payload.topics_enjoy.split(',').map((s: string) => s.trim()) : [],
+          interests: topicsArray,
           dynamicVariables: {},
           priorCallSummaries: [],
           preferredLanguage: payload.preferred_language ?? 'en',
