@@ -48,16 +48,16 @@ export async function POST(req: Request) {
     const supabase = createAdminClient()
 
     const memberData = {
-      full_name: payload.full_name ?? null,
-      preferred_name: payload.preferred_name ?? (payload.full_name?.split(' ')[0] ?? null),
-      date_of_birth: payload.date_of_birth ?? null,
-      phone_number: payload.phone_number ?? null,
-      topics_enjoy: payload.topics_enjoy ?? null,
+      full_name: payload.full_name ?? undefined,
+      preferred_name: payload.preferred_name ?? (payload.full_name?.split(' ')[0] ?? undefined),
+      date_of_birth: payload.date_of_birth ?? undefined,
+      phone_number: payload.phone_number ?? undefined,
+      topics_enjoy: payload.topics_enjoy ?? undefined,
       preferred_language: payload.preferred_language ?? 'en',
       aria_call_opt_in: payload.aria_call_opt_in ?? 'no',
-      lives_alone: payload.lives_alone ?? null,
-      emergency_contact_name: payload.emergency_contact_name ?? null,
-      emergency_contact_phone: payload.emergency_contact_phone ?? null,
+      lives_alone: payload.lives_alone ?? undefined,
+      emergency_contact_name: payload.emergency_contact_name ?? undefined,
+      emergency_contact_phone: payload.emergency_contact_phone ?? undefined,
       onboarding_complete: true,
     }
 
