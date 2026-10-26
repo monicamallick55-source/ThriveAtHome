@@ -8,6 +8,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { AGENTS } from '@/lib/voice/agents'
+import { getCurrentUser } from '@/lib/auth'
 
 const RETELL_API_URL = 'https://api.retellai.com'
 
@@ -67,6 +68,7 @@ export async function POST(req: NextRequest) {
           channel: 'web_widget',
           agent:   agentName,
           ...(body.dynamic_variables ?? {}),
+          auth_user_id: (await getCurrentUser())?.id ?? '',
         },
       }),
     })

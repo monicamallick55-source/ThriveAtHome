@@ -163,11 +163,11 @@ export default function QuinnOnboarding({ onComplete, onBack }: QuinnOnboardingP
           <p style={{ fontFamily: 'var(--font-display)', fontSize: '24px', color: 'var(--color-navy)', fontWeight: 500, margin: 0 }}>Thrive@Home</p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', alignItems: 'start' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
           {/* Left: call card */}
-          <div style={{ backgroundColor: 'var(--color-warm-white)', borderRadius: 'var(--radius-xl)', boxShadow: 'var(--shadow-md)', padding: '32px 28px', textAlign: 'center' }}>
-            <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--color-navy) 0%, #1a4d6e 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', fontSize: '28px' }}>🎙️</div>
+          <div style={{ backgroundColor: 'var(--color-warm-white)', borderRadius: 'var(--radius-xl)', boxShadow: 'var(--shadow-md)', padding: '20px 24px' }}>
+            <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--color-navy) 0%, #1a4d6e 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '20px' }}>🎙️</div>
 
             {callState === 'connecting' && (
               <>
