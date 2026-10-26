@@ -20,7 +20,7 @@ export async function GET() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const from = createAdminClient().from as any
     const { data: memberRow } = await from('members').select('id').eq('supabase_auth_id', user.id).maybeSingle()
-    return NextResponse.json({ path: memberRow ? '/member-portal' : '/dashboard', multi: false, roles })
+    return NextResponse.json({ path: memberRow ? '/member-portal' : '/onboarding', multi: false, roles })
   }
 
   if (roles.length <= 1) {
