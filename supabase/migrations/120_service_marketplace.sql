@@ -1,11 +1,16 @@
+-- ============================================================
 -- Migration 120: Service Marketplace
--- Tables: service_partners, service_bookings, marketplace_transactions
--- marketplace_live: false — schema live, activation pending LLC
--- Fixed: profiles→members, role column→jwt app_metadata
+-- Adds service_partners, service_bookings, marketplace_transactions
+-- marketplace_live: false — schema applied now, activated later
+-- ============================================================
+-- NOTE: This file matches what was actually applied to the DB:
+--   • REFERENCES members(id) (not profiles)
+--   • RLS policies use JWT role checks (members table has no role column)
+-- ============================================================
 
 DROP TABLE IF EXISTS marketplace_transactions CASCADE;
-DROP TABLE IF EXISTS service_bookings CASCADE;
-DROP TABLE IF EXISTS service_partners CASCADE;
+DROP TABLE IF EXISTS service_bookings         CASCADE;
+DROP TABLE IF EXISTS service_partners         CASCADE;
 
 CREATE TABLE service_partners (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -72,18 +77,22 @@ CREATE TABLE marketplace_transactions (
   updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_service_partners_category  ON service_partners(category);
-CREATE INDEX idx_service_partners_is_active ON service_partners(is_active);
-CREATE INDEX idx_service_bookings_member    ON service_bookings(member_id);
-CREATE INDEX idx_service_bookings_partner   ON service_bookings(partner_id);
-CREATE INDEX idx_service_bookings_status    ON service_bookings(status);
-CREATE INDEX idx_mktx_booking              ON marketplace_transactions(booking_id);
-CREATE INDEX idx_mktx_member               ON marketplace_transactions(member_id);
+CREATE INDEX IF NOT EXISTS idx_service_partners_category   ON service_partners(category);
+CREATE INDEX IF NOT EXISTS idx_service_partners_is_active  ON service_partners(is_active);
+CREATE INDEX IF NOT EXISTS idx_service_bookings_member     ON service_bookings(member_id);
+CREATE INDEX IF NOT EXISTS idx_service_bookings_partner    ON service_bookings(partner_id);
+CREATE INDEX IF NOT EXISTS idx_service_bookings_status     ON service_bookings(status);
+CREATE INDEX IF NOT EXISTS idx_mktx_booking                ON marketplace_transactions(booking_id);
+CREATE INDEX IF NOT EXISTS idx_mktx_member                 ON marketplace_transactions(member_id);
 
 CREATE OR REPLACE FUNCTION update_updated_at()
 RETURNS TRIGGER LANGUAGE plpgsql AS $$
 BEGIN NEW.updated_at = NOW(); RETURN NEW; END;
 $$;
+
+DROP TRIGGER IF EXISTS trg_service_partners_updated_at ON service_partners;
+DROP TRIGGER IF EXISTS trg_service_bookings_updated_at ON service_bookings;
+DROP TRIGGER IF EXISTS trg_marketplace_transactions_updated_at ON marketplace_transactions;
 
 CREATE TRIGGER trg_service_partners_updated_at
   BEFORE UPDATE ON service_partners FOR EACH ROW EXECUTE FUNCTION update_updated_at();
@@ -96,18 +105,39 @@ ALTER TABLE service_partners         ENABLE ROW LEVEL SECURITY;
 ALTER TABLE service_bookings         ENABLE ROW LEVEL SECURITY;
 ALTER TABLE marketplace_transactions ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "public read active partners" ON service_partners FOR SELECT
+CREATE POLICY "public read active partners"
+  ON service_partners FOR SELECT
   USING (is_active = true AND is_vetted = true);
-CREATE POLICY "admin manage partners" ON service_partners FOR ALL
-  USING ((auth.jwt() -> 'app_metadata' ->> 'role') IN ('admin','navigator')
-      OR (auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin','navigator'));
-CREATE POLICY "member own bookings" ON service_bookings FOR ALL
-  USING (member_id = auth.uid());
-CREATE POLICY "navigator manage bookings" ON service_bookings FOR ALL
-  USING ((auth.jwt() -> 'app_metadata' ->> 'role') IN ('admin','navigator')
-      OR (auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin','navigator'));
-CREATE POLICY "member own transactions" ON marketplace_transactions FOR SELECT
-  USING (member_id = auth.uid());
-CREATE POLICY "admin manage transactions" ON marketplace_transactions FOR ALL
-  USING ((auth.jwt() -> 'app_metadata' ->> 'role') IN ('admin','navigator')
-      OR (auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin','navigator'));
+
+CREATE POLICY "admin manage partners"
+  ON service_partners FOR ALL
+  USING (
+    (auth.jwt() -> 'app_metadata' ->> 'role') IN ('admin','navigator')
+    OR (auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin','navigator')
+  );
+
+CREATE POLICY "member own bookings"
+  ON service_bookings FOR ALL
+  USING (member_id = (
+    SELECT id FROM members WHERE supabase_auth_id = auth.uid() LIMIT 1
+  ));
+
+CREATE POLICY "navigator manage bookings"
+  ON service_bookings FOR ALL
+  USING (
+    (auth.jwt() -> 'app_metadata' ->> 'role') IN ('admin','navigator')
+    OR (auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin','navigator')
+  );
+
+CREATE POLICY "member own transactions"
+  ON marketplace_transactions FOR SELECT
+  USING (member_id = (
+    SELECT id FROM members WHERE supabase_auth_id = auth.uid() LIMIT 1
+  ));
+
+CREATE POLICY "admin manage transactions"
+  ON marketplace_transactions FOR ALL
+  USING (
+    (auth.jwt() -> 'app_metadata' ->> 'role') IN ('admin','navigator')
+    OR (auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin','navigator')
+  );
