@@ -16,6 +16,10 @@ export interface CommunityOrgRow {
   state: string | null
   zip_code: string | null
   website_url: string | null
+  setup_completed_at: string | null
+  enrollment_status: string | null
+  mission_statement: string | null
+  org_size: string | null
   description: string | null
   service_area_description: string | null
   member_count: number

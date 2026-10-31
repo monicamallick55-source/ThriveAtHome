@@ -2,6 +2,7 @@
 // Community Organization Admin Portal — tabbed dashboard for village networks and community orgs.
 import { useState, useEffect } from 'react'
 import type { CommunityOrgRow, OrgProgramRow, MemberNeedRow, OrgMembershipRow, OrgStats, OrgMembershipTierRow, OrgDonationRow } from '@/lib/data/communityOrgs'
+import OrgSetupWizard from '@/components/org/OrgSetupWizard'
 
 const PROGRAM_TYPES = [
   { value: 'social', label: '🤝 Social & Companionship' },
@@ -178,6 +179,7 @@ function HvIntegrationSection({ orgId }: { orgId: string }) {
 
 export default function OrgAdminPortal({ org, programs: initialPrograms, memberNeeds: initialNeeds, memberships: initialMemberships, stats: initialStats, initialTiers }: Props) {
   const [activeTab, setActiveTab] = useState<'overview' | 'programs' | 'needs' | 'members' | 'dues' | 'settings' | 'donations' | 'email' | 'documents' | 'scheduling' | 'trends'>('overview')
+  const [wizardDone, setWizardDone] = useState(!!org.setup_completed_at)
   const [programs, setPrograms] = useState(initialPrograms)
   const [memberNeeds, setMemberNeeds] = useState(initialNeeds)
   const [memberships, setMemberships] = useState(initialMemberships)
@@ -612,6 +614,16 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
   const fulfilledNeeds = memberNeeds.filter(n => n.status === 'fulfilled')
 
   return (
+    <>
+    {!wizardDone && (
+      <OrgSetupWizard
+        orgId={org.id}
+        orgName={org.org_name}
+        contactName={org.contact_name}
+        contactEmail={org.contact_email}
+        onComplete={() => setWizardDone(true)}
+      />
+    )}
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-cream)', display: 'flex', flexDirection: 'column' }}>
       {/* Nav */}
       <nav style={{ backgroundColor: 'var(--color-navy)', padding: '0 32px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -1952,5 +1964,6 @@ function NeedCard({ need, onUpdateStatus, isUpdating }: {
         </div>
       )}
     </div>
+  </>
   )
 }
