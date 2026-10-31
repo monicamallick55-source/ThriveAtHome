@@ -5,9 +5,11 @@ import { getCurrentUser } from '@/lib/auth'
 export const metadata: Metadata = { title: 'Pricing — ThriveAtHome' }
 export const dynamic = 'force-dynamic'
 
+// Premier is built but hidden — not shown on public pricing page
+// Connect tier removed — final model is Basic ($39) / Complete ($79) only
 const PLANS = [
   {
-    tier: 'basics', name: 'Thrive Basics', monthlyPrice: 29, annualPrice: 23,
+    tier: 'basic', name: 'Thrive Basic', monthlyPrice: 39, annualPrice: 33,
     highlighted: false,
     tagline: 'Daily AI check-ins and family peace of mind',
     features: [
@@ -22,26 +24,14 @@ const PLANS = [
     ],
   },
   {
-    tier: 'connect', name: 'Thrive Connect', monthlyPrice: 49, annualPrice: 39,
-    highlighted: false,
-    tagline: 'Everything in Basics plus real human connection',
+    tier: 'complete', name: 'Thrive Complete', monthlyPrice: 79, annualPrice: 63,
+    highlighted: true,
+    tagline: 'Everything in Basic plus human connection and dedicated support',
     features: [
-      'Everything in Basics',
+      'Everything in Basic',
       'Matched Human Buddy (weekly calls)',
       '25+ communities access',
       'Community events & RSVP',
-      'Skill exchange & time banking',
-      'Benefits finder (15+ programs)',
-      'Cultural & heritage circles',
-      'Age-stage community groups',
-    ],
-  },
-  {
-    tier: 'complete', name: 'Thrive Complete', monthlyPrice: 99, annualPrice: 79,
-    highlighted: true,
-    tagline: 'Everything in Connect plus dedicated human support',
-    features: [
-      'Everything in Connect',
       'Dedicated navigator (2 hr/mo)',
       'Grief & transition support (9 pathways)',
       'Services marketplace access',
@@ -51,73 +41,50 @@ const PLANS = [
       'Priority fraud escalation',
     ],
   },
-  {
-    tier: 'premier', name: 'Thrive Premier', monthlyPrice: 199, annualPrice: 159,
-    highlighted: false,
-    tagline: 'Concierge-level care for complex needs',
-    features: [
-      'Everything in Complete',
-      'Priority navigator (8 hr/mo)',
-      'Bi-weekly priority Buddy calls',
-      'Thrive Device included',
-      'Concierge line (direct line)',
-      'Companion credits included',
-      'Medicare Advantage eligible',
-      'Corporate & employer billing',
-    ],
-  },
 ]
 
 type CellValue = boolean | string
 
 interface ComparisonRow {
   feature: string
-  basics: CellValue
-  connect: CellValue
+  basic: CellValue
   complete: CellValue
-  premier: CellValue
 }
 
 const COMPARISON: { category: string; rows: ComparisonRow[] }[] = [
   { category: 'AI & Automation', rows: [
-    { feature: 'Daily Aria check-in calls', basics: true, connect: true, complete: true, premier: true },
-    { feature: 'Mood, energy, sleep & pain tracking', basics: true, connect: true, complete: true, premier: true },
-    { feature: 'Medication reminders', basics: true, connect: true, complete: true, premier: true },
-    { feature: 'Missed call escalation protocol', basics: true, connect: true, complete: true, premier: true },
-    { feature: 'Aria call frequency (daily/3x/weekly)', basics: true, connect: true, complete: true, premier: true },
-    { feature: 'AI agents', basics: '3', connect: '6', complete: '10', premier: '12' },
+    { feature: 'Daily Aria check-in calls', basic: true, complete: true },
+    { feature: 'Mood, energy, sleep & pain tracking', basic: true, complete: true },
+    { feature: 'Medication reminders', basic: true, complete: true },
+    { feature: 'Missed call escalation protocol', basic: true, complete: true },
+    { feature: 'AI agents', basic: '3', complete: '10' },
   ]},
   { category: 'Safety & Fraud', rows: [
-    { feature: 'Fraud monitoring (7 categories)', basics: true, connect: true, complete: true, premier: true },
-    { feature: 'Family SMS fraud alerts', basics: true, connect: true, complete: true, premier: true },
-    { feature: 'Crisis phrase detection', basics: true, connect: true, complete: true, premier: true },
-    { feature: 'Large purchase alerts', basics: true, connect: true, complete: true, premier: true },
-    { feature: 'Priority navigator fraud escalation', basics: false, connect: false, complete: true, premier: true },
+    { feature: 'Fraud monitoring (7 categories)', basic: true, complete: true },
+    { feature: 'Family SMS fraud alerts', basic: true, complete: true },
+    { feature: 'Crisis phrase detection', basic: true, complete: true },
+    { feature: 'Large purchase alerts', basic: true, complete: true },
+    { feature: 'Priority navigator fraud escalation', basic: false, complete: true },
   ]},
   { category: 'Human Connection', rows: [
-    { feature: 'Matched Human Buddy', basics: false, connect: true, complete: true, premier: true },
-    { feature: 'Buddy call frequency', basics: '—', connect: 'Weekly', complete: 'Weekly', premier: 'Bi-weekly' },
-    { feature: 'Dedicated care navigator', basics: '—', connect: '—', complete: '2 hr/mo', premier: '8 hr/mo' },
-    { feature: 'Concierge line', basics: false, connect: false, complete: false, premier: true },
-  ]},
-  { category: 'Community', rows: [
-    { feature: '25+ communities access', basics: false, connect: true, complete: true, premier: true },
-    { feature: 'Community events & RSVP', basics: false, connect: true, complete: true, premier: true },
-    { feature: 'Skill exchange & time banking', basics: false, connect: true, complete: true, premier: true },
-    { feature: 'Benefits finder (15+ programs)', basics: false, connect: true, complete: true, premier: true },
+    { feature: 'Matched Human Buddy', basic: false, complete: true },
+    { feature: 'Buddy call frequency', basic: '—', complete: 'Weekly' },
+    { feature: 'Dedicated care navigator', basic: '—', complete: '2 hr/mo' },
+    { feature: '25+ communities access', basic: false, complete: true },
+    { feature: 'Community events & RSVP', basic: false, complete: true },
+    { feature: 'Skill exchange & time banking', basic: false, complete: true },
+    { feature: 'Benefits finder (15+ programs)', basic: false, complete: true },
   ]},
   { category: 'Family & Celebrations', rows: [
-    { feature: 'Family wellness dashboard', basics: true, connect: true, complete: true, premier: true },
-    { feature: 'Family Events Calendar', basics: false, connect: false, complete: true, premier: true },
-    { feature: 'Celebrations & gift sending', basics: false, connect: false, complete: true, premier: true },
-    { feature: 'Birthday/anniversary in Aria calls', basics: true, connect: true, complete: true, premier: true },
+    { feature: 'Family wellness dashboard', basic: true, complete: true },
+    { feature: 'Family Events Calendar', basic: false, complete: true },
+    { feature: 'Celebrations & gift sending', basic: false, complete: true },
+    { feature: 'Birthday/anniversary in Aria calls', basic: true, complete: true },
   ]},
-  { category: 'Services & Device', rows: [
-    { feature: 'Services marketplace', basics: false, connect: false, complete: true, premier: true },
-    { feature: 'Paid companion booking', basics: false, connect: false, complete: true, premier: true },
-    { feature: 'Companion credits', basics: false, connect: false, complete: false, premier: true },
-    { feature: 'Thrive Device', basics: false, connect: false, complete: false, premier: true },
-    { feature: 'Medicare Advantage eligible', basics: false, connect: false, complete: false, premier: true },
+  { category: 'Services', rows: [
+    { feature: 'Services marketplace', basic: false, complete: true },
+    { feature: 'Paid companion booking', basic: false, complete: true },
+    { feature: 'Grief & transition support', basic: false, complete: true },
   ]},
 ]
 
@@ -132,7 +99,7 @@ function Tick({ value }: { value: CellValue }) {
   return <span style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-navy)' }}>{value}</span>
 }
 
-const tiers = ['basics', 'connect', 'complete', 'premier'] as const
+const tiers = ['basic', 'complete'] as const
 type Tier = typeof tiers[number]
 
 export default async function PricingPage() {
@@ -160,11 +127,11 @@ export default async function PricingPage() {
 
       {/* ── PLAN CARDS ── */}
       <section style={{ padding: '0 24px 80px' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
           <p style={{ textAlign: 'center', fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', marginBottom: '40px' }}>
             Prices shown monthly · <span style={{ color: 'var(--color-teal)', fontWeight: 600 }}>Annual plan saves 20%</span> · Contact us for Medicare Advantage or employer billing
           </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(240px, 100%), 1fr))', gap: '20px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(300px, 100%), 1fr))', gap: '24px' }}>
             {PLANS.map(plan => (
               <div key={plan.tier} style={{
                 backgroundColor: plan.highlighted ? 'var(--color-navy)' : 'white',
@@ -220,7 +187,7 @@ export default async function PricingPage() {
 
       {/* ── COMPARISON TABLE ── */}
       <section style={{ padding: '0 24px 80px', backgroundColor: 'white' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', padding: '64px 0 48px' }}>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(26px, 3vw, 36px)', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '12px' }}>Full feature comparison</h2>
             <p style={{ fontFamily: 'var(--font-body)', fontSize: '17px', color: 'var(--color-text-secondary)' }}>Everything that&apos;s included in each plan.</p>
@@ -231,7 +198,7 @@ export default async function PricingPage() {
                 <tr>
                   <th style={{ textAlign: 'left', padding: '12px 16px', fontWeight: 600, fontSize: '14px', color: 'var(--color-text-muted)', borderBottom: '2px solid var(--color-warm-grey)', minWidth: '220px' }}>Feature</th>
                   {PLANS.map(p => (
-                    <th key={p.tier} style={{ textAlign: 'center', padding: '12px 16px', fontWeight: 700, fontSize: '15px', color: p.highlighted ? 'var(--color-teal)' : 'var(--color-navy)', borderBottom: '2px solid var(--color-warm-grey)', minWidth: '110px', whiteSpace: 'nowrap' }}>
+                    <th key={p.tier} style={{ textAlign: 'center', padding: '12px 16px', fontWeight: 700, fontSize: '15px', color: p.highlighted ? 'var(--color-teal)' : 'var(--color-navy)', borderBottom: '2px solid var(--color-warm-grey)', minWidth: '130px', whiteSpace: 'nowrap' }}>
                       {p.name.replace('Thrive ', '')}
                     </th>
                   ))}
@@ -241,7 +208,7 @@ export default async function PricingPage() {
                 {COMPARISON.map(group => (
                   <>
                     <tr key={group.category}>
-                      <td colSpan={5} style={{ padding: '20px 16px 8px', fontWeight: 700, fontSize: '12px', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-teal)', backgroundColor: 'rgba(0,139,130,0.04)' }}>
+                      <td colSpan={3} style={{ padding: '20px 16px 8px', fontWeight: 700, fontSize: '12px', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-teal)', backgroundColor: 'rgba(0,139,130,0.04)' }}>
                         {group.category}
                       </td>
                     </tr>
