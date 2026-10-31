@@ -75,6 +75,45 @@ async function handleStripeEvent(event: Stripe.Event) {
   switch (event.type) {
     case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session
+      // Org enrollment: one-time payment flow
+      if (session.mode === 'payment' && session.metadata?.flow === 'org_enrollment') {
+        const meta = session.metadata
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+        if (supabaseUrl && supabaseKey) {
+          const { createClient } = await import('@supabase/supabase-js')
+          const db = createClient(supabaseUrl, supabaseKey)
+          const stripeCustomerId = typeof session.customer === 'string' ? session.customer : (session.customer as any)?.id ?? ''
+          const stripePaymentIntentId = typeof session.payment_intent === 'string' ? session.payment_intent : (session.payment_intent as any)?.id ?? ''
+          // Update payment record to succeeded
+          await db.from('org_enrollment_payments')
+            .update({ status: 'succeeded', completed_at: new Date().toISOString(), stripe_pi_id: stripePaymentIntentId })
+            .eq('stripe_session_id', session.id)
+          // Create the community org record
+          const { data: org } = await db.from('community_orgs').insert({
+            org_name: meta.org_name,
+            org_type: meta.org_type,
+            contact_name: meta.contact_name,
+            contact_email: meta.contact_email,
+            contact_phone: meta.contact_phone ?? null,
+            city: meta.city ?? null,
+            state: meta.state ?? null,
+            website: meta.website ?? null,
+            org_size: meta.org_size ?? null,
+            mission_statement: meta.mission_statement ?? null,
+            enrollment_status: 'paid',
+            enrollment_paid_at: new Date().toISOString(),
+            stripe_customer_id: stripeCustomerId,
+            stripe_payment_intent_id: stripePaymentIntentId,
+          }).select('id').single()
+          // Link payment record to the new org
+          if (org?.id) {
+            await db.from('org_enrollment_payments').update({ org_id: org.id }).eq('stripe_session_id', session.id)
+          }
+          console.log('[webhook/stripe] org enrollment paid:', meta.org_name, org?.id)
+        }
+        break
+      }
       if (session.mode !== 'subscription') break
 
       const memberId = session.metadata?.member_id
