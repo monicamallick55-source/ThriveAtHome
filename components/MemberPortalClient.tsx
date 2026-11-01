@@ -149,7 +149,7 @@ function parseNeedText(text: string): { service_type: string; description: strin
   return { service_type: best, description: text.trim() }
 }
 
-type Tab = 'profile' | 'services' | 'requests' | 'community' | 'dates' | 'buddy' | 'life-story' | 'billing' | 'add-ons' | 'org' | 'notifications' | 'documents' | 'find-local-help'
+type Tab = 'profile' | 'services' | 'requests' | 'community' | 'dates' | 'buddy' | 'life-story' | 'billing' | 'add-ons' | 'org' | 'notifications' | 'documents' | 'find-local-help' | 'medicare'
 
 // ── Interfaces ──────────────────────────────────────────────────────────────
 
@@ -370,7 +370,7 @@ export default function MemberPortalClient({
 
   // Persist active tab in URL hash so refreshing or sharing a link preserves the tab
   useEffect(() => {
-    const VALID: Tab[] = ['profile','services','requests','community','dates','buddy','life-story','billing','add-ons','org','notifications','documents']
+    const VALID: Tab[] = ['profile','services','requests','community','dates','buddy','life-story','billing','add-ons','org','notifications','documents','medicare']
     const hash = window.location.hash.replace('#', '') as Tab
     if (VALID.includes(hash)) setActiveTab(hash)
   }, [])
@@ -382,6 +382,7 @@ export default function MemberPortalClient({
 
   function switchTab(t: Tab) {
     if (t === 'find-local-help') { window.location.href = '/dashboard/find-local-help'; return }
+    if (t === 'medicare') { window.location.href = '/dashboard/medicare'; return }
     setActiveTab(t)
     window.history.replaceState(null, '', `#${t}`)
   }
@@ -896,6 +897,7 @@ export default function MemberPortalClient({
     { id: 'notifications', label: 'Notifications & Privacy' },
     { id: 'documents', label: '📎 Documents' },
     { id: 'find-local-help', label: '🔍 Find Local Help' },
+    { id: 'medicare', label: '💊 Medicare Help' },
   ]
 
   // ── Styles ────────────────────────────────────────────────────────────────
