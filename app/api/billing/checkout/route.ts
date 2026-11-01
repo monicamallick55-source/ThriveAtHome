@@ -5,13 +5,13 @@ import { getMemberSubscription } from '@/lib/data/billing'
 import { billingProvider } from '@/lib/providers'
 import type { PlanTier } from '@/lib/interfaces/BillingProvider'
 
-const VALID_TIERS: PlanTier[] = ['basics', 'connect', 'complete', 'premier']
+const VALID_TIERS: PlanTier[] = ['basic', 'complete', 'premier']
 
 export async function POST(req: Request) {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  let body: { planTier?: string }
+  let body: { planTier?: string; billingInterval?: string }
   try {
     body = await req.json()
   } catch {
@@ -33,11 +33,13 @@ export async function POST(req: Request) {
   const existingCustomerId = existingSub?.stripe_customer_id ?? null
 
   try {
+    const billingInterval = body.billingInterval === 'annual' ? 'annual' : 'monthly'
     const checkoutUrl = await billingProvider.createCheckoutSession(
       planTier,
       member.id,
       user.id,
-      existingCustomerId
+      existingCustomerId,
+      billingInterval
     )
     return NextResponse.json({ checkoutUrl })
   } catch (e) {

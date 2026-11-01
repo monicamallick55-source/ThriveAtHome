@@ -13,10 +13,11 @@ export class StripeBillingProvider implements BillingProvider {
     planTier: PlanTier,
     memberId: string,
     familyMemberId: string,
-    existingStripeCustomerId?: string | null
+    existingStripeCustomerId?: string | null,
+    billingInterval: 'monthly' | 'annual' = 'monthly'
   ): Promise<string> {
     const stripe = getStripeClient()
-    const priceId = getStripePriceId(planTier)
+    const priceId = getStripePriceId(planTier, billingInterval)
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
 
     const session = await stripe.checkout.sessions.create({
