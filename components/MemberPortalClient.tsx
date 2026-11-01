@@ -880,7 +880,7 @@ export default function MemberPortalClient({
     .slice(0, 12)
 
   const planTierLabel = member.plan_tier.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
-  const hasBuddy = (member.plan_tier === 'connect' || member.plan_tier === 'complete' || member.plan_tier === 'premier')
+  const hasBuddy = (member.plan_tier === 'basic' || member.plan_tier === 'complete' || member.plan_tier === 'premier')
 
   const tabs: { id: Tab; label: string }[] = [
     { id: 'profile', label: 'My Profile' },
@@ -1884,8 +1884,8 @@ export default function MemberPortalClient({
                 </div>
               </div>
               {[
-                { plan: 'basics', price: '$19/month', features: ['Daily Aria morning catch-up calls', 'Wellness dashboard for family', 'Alert notifications', 'Community access'] },
-                { plan: 'connect', price: '$39/month', features: ['Everything in Basics', 'Assigned Human Buddy', 'Weekly buddy calls', 'Cultural circles', 'Virtual events'] },
+                { plan: 'basic', price: '$39/month', features: ['Daily Aria morning catch-up calls', 'Wellness dashboard for family', 'Alert notifications', 'Community access'] },
+                { plan: 'complete', price: '$79/month', features: ['Everything in Basic', 'Assigned Human Buddy', 'Navigator support', 'Rides & services', 'Member campaigns'] },
                 { plan: 'complete', price: '$69/month', features: ['Everything in Connect', 'Navigator case management', 'Service coordination', 'Services marketplace'] },
                 { plan: 'premier', price: '$129/month', features: ['Everything in Complete', 'Priority buddy matching (48h)', 'Unlimited navigator access', 'Premium services'] },
               ].filter(p => p.plan === member.plan_tier).map(p => (
