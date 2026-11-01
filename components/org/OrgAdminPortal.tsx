@@ -1965,6 +1965,5 @@ function NeedCard({ need, onUpdateStatus, isUpdating }: {
         </div>
       )}
     </div>
-  </>
   )
 }
