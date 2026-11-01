@@ -23,7 +23,7 @@ export function BillingClient({ currentTier, subscription, memberName }: Props) 
   const [upgradeLoading, setUpgradeLoading] = useState<PlanTier | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  const TIER_ORDER: PlanTier[] = ['basics', 'connect', 'complete', 'premier']
+  const TIER_ORDER: PlanTier[] = ['basic', 'complete', 'premier']
   const currentIndex = TIER_ORDER.indexOf(currentTier)
 
   async function handleManage() {

@@ -26,7 +26,7 @@ export default async function BillingPage() {
     ? (await getMemberSubscription(member.id)).data
     : null
 
-  const currentTier = (member?.plan_tier ?? 'basics') as PlanTier
+  const currentTier = (member?.plan_tier ?? 'basic') as PlanTier
   const memberName = member?.preferred_name ?? member?.full_name?.split(' ')[0] ?? 'your loved one'
 
   return (
