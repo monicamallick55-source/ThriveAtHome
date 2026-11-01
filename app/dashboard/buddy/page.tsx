@@ -11,7 +11,7 @@ export default async function BuddyPage() {
   const { data: member } = await getMemberForAuthUser(user.id)
   if (!member) redirect('/dashboard')
 
-  const planTier = (member as any).plan_tier ?? 'basics'
+  const planTier = (member as any).plan_tier ?? 'basic'
   const isPaidPlan = ['connect', 'complete', 'premier'].includes(planTier)
   const seniorName = (member as any).preferred_name ?? (member as any).first_name ?? 'your loved one'
 

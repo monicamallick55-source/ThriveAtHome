@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
 
   // Get member plan tier
   const { data: member } = await db.from('members').select('plan_tier').eq('id', memberId).maybeSingle()
-  const tier = (member as any)?.plan_tier ?? 'basics'
+  const tier = (member as any)?.plan_tier ?? 'basic'
   const ent = getEntitlements(tier)
 
   // Sum minutes this calendar month

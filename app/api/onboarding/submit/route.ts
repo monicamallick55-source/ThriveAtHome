@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
         email: onboarding.email,
         dob: onboarding.dob,
         address: onboarding.address,
-        plan_tier: 'basics',
+        plan_tier: 'basic',
         onboarding_complete: false,
       })
       .select('id')

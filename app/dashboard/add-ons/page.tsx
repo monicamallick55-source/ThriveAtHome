@@ -72,7 +72,7 @@ export default async function AddOnsPage() {
           catalog={(catalog ?? []) as any}
           memberAddons={(memberAddons ?? []) as any}
           memberAge={age}
-          planTier={member?.plan_tier ?? 'basics'}
+          planTier={member?.plan_tier ?? 'basic'}
           hasLongDistance={hasLongDistance}
           initialVideoDiary={videoDiary ?? []}
         />

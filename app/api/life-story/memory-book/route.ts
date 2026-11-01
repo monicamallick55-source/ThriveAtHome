@@ -25,7 +25,7 @@ export async function POST(req: Request) {
   if (!memberId) return NextResponse.json({ error: 'No member linked' }, { status: 404 })
 
   const { data: member } = await getMemberById(memberId)
-  const planTier = member?.plan_tier ?? 'basics'
+  const planTier = member?.plan_tier ?? 'basic'
   const isFree = planTier === 'complete' || planTier === 'premier'
 
   let body: {

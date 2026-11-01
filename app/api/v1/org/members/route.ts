@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
         city: city ?? null,
         state: state ?? null,
         preferred_language: preferred_language ?? 'english',
-        plan_tier: 'basics',
+        plan_tier: 'basic',
         check_in_frequency: 'daily',
       })
       .select('id')

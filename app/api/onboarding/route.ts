@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
   // and land on the member self-service portal.
   const isSelfEnrolment = fm.relationship === 'self'
 
-  // 5. Insert member row (plan_tier defaults to 'basics' in the database)
+  // 5. Insert member row (plan_tier defaults to 'basic' in the database)
   const topicsEnjoyArray = body.topics_enjoy
     ? body.topics_enjoy.split(',').map((t: any) => t.trim()).filter(Boolean)
     : []
@@ -133,7 +133,7 @@ export async function POST(req: NextRequest) {
       grief_welcome_path: body.grief_welcome_path === 'true',
       grief_enrolled_at: body.grief_welcome_path === 'true' ? new Date().toISOString() : null,
       grief_loss_type: body.grief_welcome_path === 'true' ? (body.grief_loss_type?.trim() || null) : null,
-      plan_tier: 'basics',
+      plan_tier: 'basic',
       status: 'active',
     })
     .select('id, preferred_name')
