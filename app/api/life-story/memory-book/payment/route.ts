@@ -20,7 +20,7 @@ function getPriceInCents(formatType: string, planTier: string, isMemorial: boole
   if (planTier === 'complete' || planTier === 'premier') return null
   const tiers = FORMAT_PRICING[formatType] ?? FORMAT_PRICING.memory_book
   if (isMemorial) return tiers[2]
-  return planTier === 'connect' ? tiers[0] : tiers[1]
+  return planTier === 'basic' ? tiers[0] : tiers[1]
 }
 
 // POST — returns pricing, regen info, or checkout URL

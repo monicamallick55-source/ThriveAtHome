@@ -44,7 +44,7 @@ function getPriceCents(formatType: FormatType, planTier: string, isMemorial: boo
   if (planTier === 'complete' || planTier === 'premier') return null
   const tiers = FORMAT_PRICING[formatType]
   if (isMemorial) return tiers[2]
-  return planTier === 'connect' ? tiers[0] : tiers[1]
+  return planTier === 'basic' ? tiers[0] : tiers[1]
 }
 
 function formatPrice(cents: number): string {
@@ -1347,7 +1347,7 @@ export default function MemoryBookBuilder({
           {showBuilder ? 'Close Builder' : 'Create Memory Keepsake'}
           {isFree
             ? <span style={{ backgroundColor: '#D1FAE5', color: '#065F46', borderRadius: '20px', padding: '2px 10px', fontSize: '12px', fontWeight: 700 }}>FREE</span>
-            : <span style={{ backgroundColor: '#FEF3C7', color: '#92400E', borderRadius: '20px', padding: '2px 10px', fontSize: '12px', fontWeight: 700 }}>from {formatPrice(FORMAT_PRICING[formatType][planTier === 'connect' ? 0 : 1])}</span>
+            : <span style={{ backgroundColor: '#FEF3C7', color: '#92400E', borderRadius: '20px', padding: '2px 10px', fontSize: '12px', fontWeight: 700 }}>from {formatPrice(FORMAT_PRICING[formatType][planTier === 'basic' ? 0 : 1])}</span>
           }
         </button>
       </div>

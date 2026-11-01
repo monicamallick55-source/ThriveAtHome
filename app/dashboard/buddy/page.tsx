@@ -12,7 +12,7 @@ export default async function BuddyPage() {
   if (!member) redirect('/dashboard')
 
   const planTier = (member as any).plan_tier ?? 'basic'
-  const isPaidPlan = ['connect', 'complete', 'premier'].includes(planTier)
+  const isPaidPlan = ['basic', 'complete', 'premier'].includes(planTier)
   const seniorName = (member as any).preferred_name ?? (member as any).first_name ?? 'your loved one'
 
   if (!isPaidPlan) {
