@@ -115,6 +115,24 @@ async function handleStripeEvent(event: Stripe.Event) {
         }
         break
       }
+      // Campaign donation: one-time payment flow
+      if (session.mode === 'payment' && session.metadata?.type === 'campaign_donation') {
+        const meta = session.metadata
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+        if (supabaseUrl && supabaseKey) {
+          const { createClient } = await import('@supabase/supabase-js')
+          const db = createClient(supabaseUrl, supabaseKey)
+          const stripePaymentIntentId = typeof session.payment_intent === 'string'
+            ? session.payment_intent
+            : (session.payment_intent as any)?.id ?? ''
+          await db.from('campaign_donations')
+            .update({ status: 'completed', stripe_payment_intent: stripePaymentIntentId })
+            .eq('stripe_session_id', session.id)
+          console.log('[webhook/stripe] campaign donation completed:', meta.campaign_id, session.id)
+        }
+        break
+      }
       if (session.mode !== 'subscription') break
 
       const memberId = session.metadata?.member_id
