@@ -87,7 +87,7 @@ export async function upsertSubscription(
       member_id: params.memberId,
       stripe_customer_id: params.stripeCustomerId,
       stripe_subscription_id: params.stripeSubscriptionId,
-      plan_tier: params.planTier,
+      plan_tier: params.planTier as any,
       status: params.status,
       current_period_start: params.currentPeriodStart ?? null,
       current_period_end: params.currentPeriodEnd ?? null,

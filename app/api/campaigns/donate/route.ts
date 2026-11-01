@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2024-06-20' })
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-04-22.dahlia' as any })
 
 export async function POST(req: Request) {
   const supabase = await createClient()
@@ -18,7 +18,7 @@ export async function POST(req: Request) {
 
   const db = createAdminClient()
   const { data: campaign } = await db
-    .from('member_campaigns')
+    .from('member_campaigns' as any)
     .select('id, title, status')
     .eq('id', campaign_id)
     .single()
@@ -29,7 +29,11 @@ export async function POST(req: Request) {
 
   let donor_member_id: string | null = null
   if (user) {
-    const { data: member } = await db.from('members').select('id').eq('user_id', user.id).single()
+    const { data: member } = await db
+      .from('members' as any)
+      .select('id')
+      .eq('supabase_auth_id', user.id)
+      .single()
     donor_member_id = member?.id ?? null
   }
 
@@ -61,7 +65,7 @@ export async function POST(req: Request) {
     },
   })
 
-  await db.from('campaign_donations').insert({
+  await db.from('campaign_donations' as any).insert({
     campaign_id,
     donor_member_id,
     amount_cents,
@@ -75,4 +79,3 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ url: session.url })
 }
-PYEOF_CONTENT

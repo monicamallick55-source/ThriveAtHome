@@ -7,9 +7,9 @@ export async function PATCH() {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { data: member } = await supabase
-    .from('family_members')
+    .from('family_members' as any)
     .select('org_id, role')
-    .eq('user_id', user.id)
+    .eq('supabase_auth_id', user.id)
     .in('role', ['org_admin', 'admin'])
     .single()
 
@@ -18,7 +18,7 @@ export async function PATCH() {
   }
 
   const { error } = await supabase
-    .from('community_orgs')
+    .from('community_orgs' as any)
     .update({ setup_completed_at: new Date().toISOString() })
     .eq('id', member.org_id)
 

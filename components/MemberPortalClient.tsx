@@ -880,7 +880,7 @@ export default function MemberPortalClient({
     .slice(0, 12)
 
   const planTierLabel = member.plan_tier.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
-  const hasBuddy = (member.plan_tier === 'basic' || member.plan_tier === 'complete' || member.plan_tier === 'premier')
+  const hasBuddy = ['basic','complete','premier'].includes(member.plan_tier as string)
 
   const tabs: { id: Tab; label: string }[] = [
     { id: 'profile', label: 'My Profile' },

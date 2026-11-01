@@ -6,8 +6,7 @@ import type { PlanTier } from '@/lib/interfaces/BillingProvider'
 import type { Subscription } from '@/lib/data/billing'
 
 const TIER_LABELS: Record<PlanTier, string> = {
-  basics: 'Thrive Basics',
-  connect: 'Thrive Connect',
+  basic: 'Thrive Basic',
   complete: 'Thrive Complete',
   premier: 'Thrive Premier',
 }
@@ -71,7 +70,7 @@ export function BillingClient({ currentTier, subscription, memberName }: Props) 
           {currentPlan.name}
         </h2>
         <p style={{ fontFamily: 'var(--font-body)', fontSize: '20px', color: 'var(--color-text-secondary)', marginBottom: '20px' }}>
-          ${currentPlan.price}/month for {memberName}
+          ${currentPlan.monthlyPrice}/month for {memberName}
         </p>
 
         {subscription?.current_period_end && (
@@ -120,7 +119,7 @@ export function BillingClient({ currentTier, subscription, memberName }: Props) 
                 <div key={tier} style={{ backgroundColor: 'white', borderRadius: 'var(--radius-lg)', border: '1.5px solid var(--color-warm-grey)', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
                   <div>
                     <p style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '4px' }}>{plan.name}</p>
-                    <p style={{ fontFamily: 'var(--font-body)', fontSize: '17px', color: 'var(--color-text-secondary)' }}>${plan.price}/month</p>
+                    <p style={{ fontFamily: 'var(--font-body)', fontSize: '17px', color: 'var(--color-text-secondary)' }}>${plan.monthlyPrice}/month</p>
                   </div>
                   <button
                     onClick={() => handleUpgrade(tier)}
