@@ -1,13 +1,13 @@
 // Single source of truth for plan entitlements.
 // Consumed by UI, APIs, and navigator console.
 
-export type PlanTier = 'basics' | 'standard' | 'premium' | 'concierge'
+export type PlanTier = 'basic' | 'complete' | 'premier'
 
 export interface PlanEntitlements {
   tier: PlanTier
   monthlyAiCallMinutes: number
   monthlyNavigatorSessions: number
-  navigatorHoursPerMonth: number  // sessions × 1hr approximation for display
+  navigatorHoursPerMonth: number
   buddyMatching: boolean
   culturalCircles: boolean
   familyAppSeats: number
@@ -16,11 +16,13 @@ export interface PlanEntitlements {
   volunteerMatching: boolean
   conciergeAccess: boolean
   fhirExport: boolean
+  campaigns: boolean
+  serviceMarketplace: boolean
 }
 
 export const ENTITLEMENTS: Record<PlanTier, PlanEntitlements> = {
-  basics: {
-    tier: 'basics',
+  basic: {
+    tier: 'basic',
     monthlyAiCallMinutes: 60,
     monthlyNavigatorSessions: 0,
     navigatorHoursPerMonth: 0,
@@ -32,23 +34,11 @@ export const ENTITLEMENTS: Record<PlanTier, PlanEntitlements> = {
     volunteerMatching: false,
     conciergeAccess: false,
     fhirExport: false,
+    campaigns: false,
+    serviceMarketplace: false,
   },
-  standard: {
-    tier: 'standard',
-    monthlyAiCallMinutes: 120,
-    monthlyNavigatorSessions: 1,
-    navigatorHoursPerMonth: 1,
-    buddyMatching: true,
-    culturalCircles: true,
-    familyAppSeats: 3,
-    trackedItemsLimit: 20,
-    crisisLineAccess: true,
-    volunteerMatching: true,
-    conciergeAccess: false,
-    fhirExport: false,
-  },
-  premium: {
-    tier: 'premium',
+  complete: {
+    tier: 'complete',
     monthlyAiCallMinutes: 300,
     monthlyNavigatorSessions: 2,
     navigatorHoursPerMonth: 2,
@@ -60,9 +50,11 @@ export const ENTITLEMENTS: Record<PlanTier, PlanEntitlements> = {
     volunteerMatching: true,
     conciergeAccess: false,
     fhirExport: true,
+    campaigns: true,
+    serviceMarketplace: true,
   },
-  concierge: {
-    tier: 'concierge',
+  premier: {
+    tier: 'premier',
     monthlyAiCallMinutes: 0,       // unlimited human-led
     monthlyNavigatorSessions: 4,
     navigatorHoursPerMonth: 4,
@@ -74,11 +66,13 @@ export const ENTITLEMENTS: Record<PlanTier, PlanEntitlements> = {
     volunteerMatching: true,
     conciergeAccess: true,
     fhirExport: true,
+    campaigns: true,
+    serviceMarketplace: true,
   },
 }
 
 export function getEntitlements(tier: string | null | undefined): PlanEntitlements {
-  return ENTITLEMENTS[(tier as PlanTier) ?? 'basics'] ?? ENTITLEMENTS.basics
+  return ENTITLEMENTS[(tier as PlanTier) ?? 'basic'] ?? ENTITLEMENTS.basic
 }
 
 /** Returns true if the member is at or over their family seat limit. */

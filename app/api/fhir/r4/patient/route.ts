@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
 
   const member = memberRaw as typeof memberRaw & { is_veteran?: boolean; medicare_number?: string }
 
-  if (!['premium', 'concierge'].includes(member.plan_tier ?? '')) {
+  if (!['complete', 'premier'].includes(member.plan_tier ?? '')) {
     return NextResponse.json({ resourceType: 'OperationOutcome', issue: [{ severity: 'error', code: 'forbidden', diagnostics: 'FHIR export requires Premium or Concierge plan' }] }, { status: 403 })
   }
 

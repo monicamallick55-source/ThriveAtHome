@@ -204,7 +204,7 @@ export async function getUnmatchedBuddyMembers(): Promise<{ data: Array<{ id: st
   const admin = createAdminClient()
   const { data, error } = await (admin.from as any)('members')
     .select('id, preferred_name, full_name, plan_tier, topics_enjoy, address, preferred_language, buddy_match_era, buddy_intro_note')
-    .in('plan_tier', ['connect', 'complete', 'premier'])
+    .in('plan_tier', ['basic', 'complete', 'premier'])
     .eq('has_active_buddy', false)
     .eq('status', 'active')
     .order('full_name')

@@ -16,7 +16,7 @@ const FREQUENCY_GAP_DAYS: Record<string, number> = {
   weekly: 7,
 }
 
-const ONBOARDING_TIERS = ['basics', 'connect'] as const
+const ONBOARDING_TIERS = ['basic', 'complete'] as const
 const DAY_MS = 24 * 60 * 60 * 1000
 
 type Admin = ReturnType<typeof createAdminClient>

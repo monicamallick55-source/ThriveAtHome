@@ -5,8 +5,8 @@ import { upsertSubscription } from '../data/billing'
 import type { PlanTier } from '../interfaces/BillingProvider'
 
 const AMOUNT_TO_TIER: Record<number, PlanTier> = {
-  1900: 'basics',
-  3900: 'connect',
+  3900: 'basic',
+  7900: 'complete',
   6900: 'complete',
   12900: 'premier',
 }
@@ -44,7 +44,7 @@ export async function syncMemberSubscription(memberId: string, email: string): P
 
       const item = sub.items.data[0]
       const amount = item?.price?.unit_amount ?? 0
-      const planTier: PlanTier = AMOUNT_TO_TIER[amount] ?? 'basics'
+      const planTier: PlanTier = AMOUNT_TO_TIER[amount] ?? 'basic'
 
       const periodStart = item?.current_period_start
         ? new Date(item.current_period_start * 1000).toISOString()

@@ -20,7 +20,7 @@ interface Props {
   initialVideoDiary: CaregiverVideoDiaryEntryRow[]
 }
 
-const PLAN_RANK: Record<PlanTier, number> = { free: 0, standard: 1, premier: 2, enterprise: 3 }
+const PLAN_RANK: Record<string, number> = { basic: 0, complete: 1, premier: 2 }
 const INTAKE_KEYS = new Set([
   'annual_care_planning',
   'benefits_maximizer_deep_dive',

@@ -30,15 +30,15 @@ function getInvoiceSubscriptionId(invoice: Stripe.Invoice): string | null {
 
 // Map monthly price amount (cents) → plan tier
 const AMOUNT_TO_TIER: Record<number, PlanTier> = {
-  2900: 'basics',
-  4900: 'connect',
+  3900: 'basic',
+  7900: 'complete',
   9900: 'complete',
   19900: 'premier',
 }
 
 function getPlanTierFromSubscription(subscription: Stripe.Subscription): PlanTier {
   const amount = subscription.items.data[0]?.price?.unit_amount ?? 0
-  return AMOUNT_TO_TIER[amount] ?? 'basics'
+  return AMOUNT_TO_TIER[amount] ?? 'basic'
 }
 
 function getStripeClient(): Stripe {
