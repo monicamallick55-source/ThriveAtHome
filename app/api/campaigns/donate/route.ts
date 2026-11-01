@@ -17,11 +17,11 @@ export async function POST(req: Request) {
   }
 
   const db = createAdminClient()
-  const { data: campaign } = await db
+  const { data: campaign } = (await db
     .from('member_campaigns' as any)
     .select('id, title, status')
     .eq('id', campaign_id)
-    .single()
+    .single()) as unknown as { data: { id: string; title: string; status: string } | null; error: unknown }
 
   if (!campaign || campaign.status !== 'active') {
     return NextResponse.json({ error: 'Campaign not found or not active' }, { status: 404 })
@@ -29,12 +29,12 @@ export async function POST(req: Request) {
 
   let donor_member_id: string | null = null
   if (user) {
-    const { data: member } = await db
+    const memberResult = await db
       .from('members' as any)
       .select('id')
       .eq('supabase_auth_id', user.id)
       .single()
-    donor_member_id = member?.id ?? null
+    donor_member_id = (memberResult as any).data?.id ?? null
   }
 
   const effectiveDonorEmail = donor_email || user?.email || ''

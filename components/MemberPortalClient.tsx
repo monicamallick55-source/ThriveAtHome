@@ -412,7 +412,7 @@ export default function MemberPortalClient({
     setBuddyLoaded(true)
   }, [buddyLoaded, member.id])
 
-  const memberHasBuddyPlan = member.plan_tier === 'basic' || member.plan_tier === 'complete' || member.plan_tier === 'premier'
+  const memberHasBuddyPlan = ['basic','complete','premier'].includes(member.plan_tier as string)
   useEffect(() => {
     if (activeTab === 'buddy' && memberHasBuddyPlan) loadBuddy()
   }, [activeTab, memberHasBuddyPlan, loadBuddy])

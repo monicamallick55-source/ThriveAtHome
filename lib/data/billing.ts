@@ -123,7 +123,7 @@ export async function upsertSubscription(
     // Sync member.plan_tier
     const { error: memberErr } = await admin
       .from('members')
-      .update({ plan_tier: params.planTier, status: 'active' })
+      .update({ plan_tier: params.planTier, status: 'active' } as any)
       .eq('id', params.memberId)
 
     if (memberErr) {
