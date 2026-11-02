@@ -5,7 +5,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { rankVolunteers } from '@/lib/volunteers/match'
+import { scoreVolunteerForMember as rankVolunteers } from '@/lib/volunteers/match'
 
 export async function GET(req: Request) {
   const supabase = await createClient()
