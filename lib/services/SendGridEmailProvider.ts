@@ -332,4 +332,15 @@ ${ctaButton('Learn more about ThriveAtHome', dashboardUrl().replace('/dashboard'
     })
     console.log(`[SendGrid] Org invite sent to ${to.substring(0, 6)}xxx for ${orgName}`)
   }
+
+  async sendOrgAdminInvite(to: string, orgName: string, inviterName: string, acceptUrl: string): Promise<void> {
+    this.init()
+    const subject = `You've been invited to co-admin ${orgName} on ThriveAtHome`
+    const body = `<p style="margin:0 0 16px;font-size:18px;line-height:1.6;"><strong>${inviterName}</strong> has invited you to help manage <strong>${orgName}</strong> on ThriveAtHome.</p>
+<p style="margin:0 0 24px;font-size:18px;line-height:1.6;">Click below to accept your invitation and set up your admin access.</p>
+${ctaButton('Accept invitation', acceptUrl)}`
+    await sgMail.send({ to, from: getFrom(), subject, html: baseTemplate(subject, body) })
+    console.log(`[SendGrid] Org co-admin invite sent to ${to.substring(0, 6)}xxx for ${orgName}`)
+  }
+
 }
