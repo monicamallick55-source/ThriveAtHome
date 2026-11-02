@@ -1,86 +1,88 @@
--- 100_volunteer_ecosystem.sql
--- G5.10 — Volunteer ecosystem completion
--- 1. VSO affiliation on volunteers
--- 2. Corporate volunteer program tiers
--- 3. Family reciprocity time-bank credits
+-- Migration 100: Volunteer Ecosystem (G5.10)
 
--- ── 1. VSO affiliation ────────────────────────────────────────────────────────
-
-DO $$ BEGIN
-  CREATE TYPE vso_affiliation AS ENUM ('vfw', 'american_legion', 'dav', 'amvets', 'moaa', 'uso', 'other', 'none');
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;
-
-ALTER TABLE volunteers
-  ADD COLUMN IF NOT EXISTS vso_affiliation vso_affiliation NOT NULL DEFAULT 'none',
-  ADD COLUMN IF NOT EXISTS vso_member_number text;   -- optional membership #
-
--- ── 2. Corporate volunteer tiers ─────────────────────────────────────────────
-
-DO $$ BEGIN
-  CREATE TYPE corp_volunteer_tier AS ENUM ('partner', 'champion', 'leader');
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;
-
--- Add tier + hour target to corporate_volunteer_programs if it exists
-DO $$ BEGIN
-  ALTER TABLE corporate_volunteer_programs
-    ADD COLUMN IF NOT EXISTS tier corp_volunteer_tier NOT NULL DEFAULT 'partner',
-    ADD COLUMN IF NOT EXISTS hour_target integer NOT NULL DEFAULT 200,
-    ADD COLUMN IF NOT EXISTS recognition_badge_url text;
-EXCEPTION WHEN undefined_table THEN NULL; END $$;
-
--- ── 3. Family reciprocity time-bank ──────────────────────────────────────────
-
--- Credits earned by family volunteers helping other seniors
-CREATE TABLE IF NOT EXISTS time_bank_credits (
-  id                uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  created_at        timestamptz DEFAULT now() NOT NULL,
-
-  -- Who earned it (a family_member volunteering for another senior)
-  earner_family_member_id uuid NOT NULL REFERENCES family_members(id) ON DELETE CASCADE,
-
-  -- The senior whose account benefits (the earner's own senior)
-  beneficiary_member_id   uuid NOT NULL REFERENCES members(id) ON DELETE CASCADE,
-
-  -- The volunteer service that was performed
-  service_booking_id      uuid REFERENCES service_bookings(id) ON DELETE SET NULL,
-
-  -- How many credits (1 credit = 1 hour by default)
-  credits               numeric(6,2) NOT NULL CHECK (credits > 0),
-  hours_served          numeric(6,2) NOT NULL CHECK (hours_served > 0),
-
-  -- What it was
-  service_type          text NOT NULL,  -- e.g. "Grocery run", "Companionship call"
-  performed_for_member_id uuid NOT NULL REFERENCES members(id) ON DELETE CASCADE, -- the OTHER senior
-
-  -- Redemption
-  redeemed_at           timestamptz,
-  redeemed_service_booking_id uuid REFERENCES service_bookings(id) ON DELETE SET NULL,
-
-  note                  text
+-- Volunteer profiles (linked to family_members or standalone)
+CREATE TABLE IF NOT EXISTS volunteers (
+  id                        uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at                timestamptz DEFAULT now() NOT NULL,
+  family_member_id          uuid REFERENCES family_members(id) ON DELETE SET NULL,
+  full_name                 text NOT NULL,
+  email                     text,
+  phone                     text,
+  metro_area_id             uuid REFERENCES metro_areas(id) ON DELETE SET NULL,
+  state                     text,
+  zip_code                  text,
+  skills                    text[] NOT NULL DEFAULT '{}',
+  languages                 text[] NOT NULL DEFAULT '{}',
+  availability_days         text[] NOT NULL DEFAULT '{}',
+  background_check_verified boolean NOT NULL DEFAULT false,
+  background_check_date     date,
+  training_completed        boolean NOT NULL DEFAULT false,
+  training_date             date,
+  status                    text NOT NULL DEFAULT 'pending', -- 'pending'|'active'|'inactive'|'suspended'
+  active_assignment_count   int NOT NULL DEFAULT 0,
+  total_hours               numeric(8,2) NOT NULL DEFAULT 0,
+  notes                     text
 );
+CREATE INDEX IF NOT EXISTS idx_volunteers_metro ON volunteers (metro_area_id, status);
+CREATE INDEX IF NOT EXISTS idx_volunteers_status ON volunteers (status);
 
--- Guard: earner's own senior may not be the same as performed_for_member_id
--- Enforced in API; DB-level check requires joining family_members which isn't possible here
+-- Volunteer assignments (volunteer ↔ member)
+CREATE TABLE IF NOT EXISTS volunteer_assignments (
+  id             uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at     timestamptz DEFAULT now() NOT NULL,
+  volunteer_id   uuid NOT NULL REFERENCES volunteers(id) ON DELETE CASCADE,
+  member_id      uuid NOT NULL REFERENCES members(id) ON DELETE CASCADE,
+  opportunity_id uuid REFERENCES volunteer_opportunities(id) ON DELETE SET NULL,
+  status         text NOT NULL DEFAULT 'active', -- 'active'|'completed'|'cancelled'
+  started_at     timestamptz NOT NULL DEFAULT now(),
+  ended_at       timestamptz,
+  notes          text
+);
+CREATE INDEX IF NOT EXISTS idx_vol_assignments_volunteer ON volunteer_assignments (volunteer_id, status);
+CREATE INDEX IF NOT EXISTS idx_vol_assignments_member ON volunteer_assignments (member_id, status);
 
-CREATE INDEX IF NOT EXISTS time_bank_credits_earner_idx ON time_bank_credits(earner_family_member_id);
-CREATE INDEX IF NOT EXISTS time_bank_credits_beneficiary_idx ON time_bank_credits(beneficiary_member_id);
+-- Volunteer hours log
+CREATE TABLE IF NOT EXISTS volunteer_hours (
+  id             uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at     timestamptz DEFAULT now() NOT NULL,
+  volunteer_id   uuid NOT NULL REFERENCES volunteers(id) ON DELETE CASCADE,
+  assignment_id  uuid REFERENCES volunteer_assignments(id) ON DELETE SET NULL,
+  member_id      uuid REFERENCES members(id) ON DELETE SET NULL,
+  hours          numeric(5,2) NOT NULL CHECK (hours > 0),
+  activity_date  date NOT NULL,
+  description    text,
+  verified       boolean NOT NULL DEFAULT false
+);
+CREATE INDEX IF NOT EXISTS idx_vol_hours_volunteer ON volunteer_hours (volunteer_id, activity_date DESC);
 
--- RLS
-ALTER TABLE time_bank_credits ENABLE ROW LEVEL SECURITY;
+-- Keep active_assignment_count current
+CREATE OR REPLACE FUNCTION update_volunteer_assignment_count()
+RETURNS TRIGGER LANGUAGE plpgsql AS $$
+BEGIN
+  IF TG_OP = 'INSERT' AND NEW.status = 'active' THEN
+    UPDATE volunteers SET active_assignment_count = active_assignment_count + 1 WHERE id = NEW.volunteer_id;
+  ELSIF TG_OP = 'UPDATE' AND OLD.status = 'active' AND NEW.status != 'active' THEN
+    UPDATE volunteers SET active_assignment_count = GREATEST(active_assignment_count - 1, 0) WHERE id = NEW.volunteer_id;
+  END IF;
+  RETURN NULL;
+END;
+$$;
+DROP TRIGGER IF EXISTS trg_vol_assignment_count ON volunteer_assignments;
+CREATE TRIGGER trg_vol_assignment_count
+  AFTER INSERT OR UPDATE OF status ON volunteer_assignments
+  FOR EACH ROW EXECUTE FUNCTION update_volunteer_assignment_count();
 
-CREATE POLICY "family member sees own credits"
-  ON time_bank_credits FOR SELECT
-  USING (earner_family_member_id IN (
-    SELECT id FROM family_members WHERE supabase_auth_id = auth.uid()
-  ));
-
-CREATE POLICY "beneficiary member sees credits on their account"
-  ON time_bank_credits FOR SELECT
-  USING (beneficiary_member_id = ANY(acting_member_ids()));
-
-CREATE POLICY "staff manages all time bank credits"
-  ON time_bank_credits FOR ALL
-  USING (is_staff());
-
--- ── Indexes on volunteers ─────────────────────────────────────────────────────
-CREATE INDEX IF NOT EXISTS volunteers_vso_idx ON volunteers(vso_affiliation);
+-- Keep total_hours current
+CREATE OR REPLACE FUNCTION update_volunteer_total_hours()
+RETURNS TRIGGER LANGUAGE plpgsql AS $$
+BEGIN
+  UPDATE volunteers
+    SET total_hours = (SELECT COALESCE(SUM(hours),0) FROM volunteer_hours WHERE volunteer_id = NEW.volunteer_id)
+    WHERE id = NEW.volunteer_id;
+  RETURN NULL;
+END;
+$$;
+DROP TRIGGER IF EXISTS trg_vol_total_hours ON volunteer_hours;
+CREATE TRIGGER trg_vol_total_hours
+  AFTER INSERT OR UPDATE OR DELETE ON volunteer_hours
+  FOR EACH ROW EXECUTE FUNCTION update_volunteer_total_hours();
