@@ -1,129 +1,215 @@
 // app/api/cron/birthday-arc/route.ts
-// G7.5 — Birthday arc: multi-step build-up for member birthdays
-// Arc: D-5 (preview), D-3 (mention), D-1 (family reminder), D+1 (follow-up)
-// Schedule: daily at 8am UTC
-// Cron expression: 0 8 * * *
+// G5.4 — Daily cron: fire birthday arc steps for all members
+// Vercel cron: "0 10 * * *" (10am UTC = 2am PT, well before any member's day starts)
 
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
-export const runtime = 'nodejs'
-export const maxDuration = 60
+const RESEND_API_KEY = process.env.RESEND_API_KEY
+const FROM_EMAIL = process.env.FROM_EMAIL ?? 'hello@thriveathome.com'
 
-interface ArcStep {
-  offset: number   // days relative to birthday (negative = before)
-  contextType: string
-  contentTemplate: (memberName: string, daysUntil: number) => string
-  navigatorNote: string | null
+async function sendEmail(to: string, subject: string, html: string) {
+  if (!RESEND_API_KEY) { console.log('[birthday-arc] No RESEND_API_KEY, skipping email to', to); return }
+  await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ from: FROM_EMAIL, to, subject, html }),
+  })
 }
 
-const ARC_STEPS: ArcStep[] = [
-  {
-    offset: -5,
-    contextType: 'birthday_arc_preview',
-    contentTemplate: (name, d) => `${name}'s birthday is coming up in ${d} days! Start weaving in warm, celebratory energy — ask if they have any plans, mention how much everyone who knows them cherishes them.`,
-    navigatorNote: null,
-  },
-  {
-    offset: -3,
-    contextType: 'birthday_arc_building',
-    contentTemplate: (name, d) => `${name}'s birthday is just ${d} days away! This is a great moment to ask what they'd love to do or hear on their special day. Let them feel how valued they are.`,
-    navigatorNote: null,
-  },
-  {
-    offset: -1,
-    contextType: 'birthday_arc_eve',
-    contentTemplate: (name) => `Tomorrow is ${name}'s birthday! Remind them how excited their family and care team are. This is a perfect call to express how much they mean to everyone. If they have any wishes, this is a great time to listen.`,
-    navigatorNote: `Birthday tomorrow — consider a personal message or call`,
-  },
-  {
-    offset: 1,
-    contextType: 'birthday_arc_followup',
-    contentTemplate: (name) => `${name}'s birthday was yesterday! Ask how they celebrated, what their favourite moment was, and if there's anything they're still wishing for. Let them relive the joy.`,
-    navigatorNote: null,
-  },
-]
+function daysUntilBirthday(dob: string): number {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const bday = new Date(dob)
+  const thisYear = new Date(today.getFullYear(), bday.getMonth(), bday.getDate())
+  if (thisYear < today) thisYear.setFullYear(today.getFullYear() + 1)
+  return Math.round((thisYear.getTime() - today.getTime()) / 86400000)
+}
 
-export async function GET(req: Request) {
-  const secret = req.headers.get('x-cron-secret')
-  if (secret !== process.env.CRON_SECRET) {
+function ageThisYear(dob: string): number {
+  const today = new Date()
+  const bday = new Date(dob)
+  return today.getFullYear() - bday.getFullYear()
+}
+
+export async function POST(req: Request) {
+  const cronSecret = process.env.CRON_SECRET
+  if (!cronSecret || req.headers.get('authorization') !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = admin as any
-  const today = new Date()
-  today.setUTCHours(12, 0, 0, 0)
+  const db = createAdminClient() as any
+  const year = new Date().getFullYear()
+  const fired: string[] = []
 
-  let totalContextsSet = 0
-  let totalSkipped = 0
+  // Fetch all active members with DOB, not opted out
+  const { data: members } = await db
+    .from('members')
+    .select('id, full_name, preferred_name, date_of_birth, celebration_opt_out')
+    .eq('status', 'active')
+    .eq('celebration_opt_out', false)
+    .not('date_of_birth', 'is', null)
 
-  for (const step of ARC_STEPS) {
-    const targetDate = new Date(today)
-    targetDate.setDate(targetDate.getDate() - step.offset)  // offset negative = birthday in future
+  for (const m of (members ?? [])) {
+    const days = daysUntilBirthday(m.date_of_birth)
+    const age = ageThisYear(m.date_of_birth)
+    const name = m.preferred_name ?? m.full_name ?? 'the member'
 
-    const mmdd = targetDate.toISOString().slice(5, 10)  // "MM-DD"
-
-    // Find members whose birthday falls on this date AND haven't opted out
-    // Members table stores dob as date; we match month+day regardless of year
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: members } = await (admin as any)
-      .from('members')
-      .select('id, full_name, celebration_opt_out')
-      .not('dob', 'is', null)
-      .ilike('dob', `%-${mmdd}`)  // matches any year with this month-day
-      .limit(100)
-
-    for (const member of (members ?? [])) {
-      // Skip if opted out of celebrations
-      if (member.celebration_opt_out) { totalSkipped++; continue }
-
-      // Skip if member has an active grief support request
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: grief } = await (admin as any)
-        .from('grief_support_requests')
-        .select('id')
-        .eq('member_id', member.id)
-        .eq('status', 'active')
-        .limit(1)
-
-      if ((grief?.length ?? 0) > 0) { totalSkipped++; continue }
-
-      const daysFromToday = Math.abs(step.offset)
-      const content = step.contentTemplate(member.full_name, daysFromToday)
-      const contextKey = `birthday_arc_${member.id}_${step.contextType}_${today.getFullYear()}`
-
-      // Inject Aria context
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (admin as any).from('aria_call_contexts').upsert({
-        member_id: member.id,
-        context_type: step.contextType,
-        context_key: contextKey,
-        content,
-        expires_at: new Date(today.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString(),
-      }, { onConflict: 'member_id,context_key' }).catch(() => null)
-
-      // Create navigator task for D-1 only
-      if (step.navigatorNote) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await (admin as any).from('navigator_tasks').insert({
-          member_id: member.id,
-          task_type: 'birthday_reminder',
-          priority: 'low',
-          description: `${member.full_name} — ${step.navigatorNote}`,
-          metadata: { arc_step: step.offset, birthday_mmdd: mmdd },
-        }).catch(() => null)
-      }
-
-      totalContextsSet++
+    // Determine which step fires today
+    let step: string | null = null
+    if (days === 7)  step = 'd_minus_7'
+    else if (days === 5) step = 'd_minus_5'
+    else if (days === 3) step = 'd_minus_3'
+    else if (days === 1) step = 'd_minus_1'
+    else if (days === 0) step = 'd_day'
+    else if (days === 364 || days === 365) {
+      // d+1: check if yesterday was their birthday
+      const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1)
+      const bday = new Date(m.date_of_birth)
+      const wasYesterday = yesterday.getMonth() === bday.getMonth() && yesterday.getDate() === bday.getDate()
+      if (wasYesterday) step = 'd_plus_1'
     }
+
+    if (!step) continue
+
+    // Idempotency check
+    const { data: existing } = await db
+      .from('birthday_arc_log')
+      .select('id')
+      .eq('member_id', m.id)
+      .eq('year', year)
+      .eq('step', step)
+      .maybeSingle()
+    if (existing) continue
+
+    // Fetch family contacts for emails
+    const { data: family } = await db
+      .from('family_members')
+      .select('email, full_name')
+      .eq('member_id', m.id)
+      .not('email', 'is', null)
+
+    const familyEmails: string[] = (family ?? []).map((f: { email: string }) => f.email).filter(Boolean)
+
+    // Fire the step
+    if (step === 'd_minus_7') {
+      // Email family with heads-up
+      for (const email of familyEmails) {
+        await sendEmail(email,
+          `${name}'s birthday is in 7 days 🎂`,
+          `<p>Hi! Just a reminder that ${name}'s birthday is coming up in one week.</p>
+           <p>Visit the <a href="${process.env.NEXT_PUBLIC_APP_URL ?? ''}/dashboard/celebrations">celebrations page</a> to leave a birthday wish or plan something special.</p>
+           <p>— The ThriveAtHome Team</p>`
+        )
+      }
+    }
+
+    if (step === 'd_minus_5') {
+      // Flag for Aria to mention in next check-in via navigator task
+      await db.from('navigator_tasks').insert({
+        type: 'birthday_aria_mention',
+        member_id: m.id,
+        priority: 'low',
+        title: `Aria birthday mention: ${name}`,
+        body: `${name}'s birthday is in 5 days. Aria should mention it warmly in the next check-in call.`,
+        metadata: { birthday_year: year, age_turning: age },
+        status: 'open',
+      })
+    }
+
+    if (step === 'd_minus_3') {
+      // Open community wishes — create navigator task to notify circle members
+      await db.from('navigator_tasks').insert({
+        type: 'birthday_wishes_open',
+        member_id: m.id,
+        priority: 'low',
+        title: `Birthday wishes open: ${name}`,
+        body: `${name}'s birthday is in 3 days. Community members can leave birthday wishes at /dashboard/celebrations.`,
+        metadata: { birthday_year: year },
+        status: 'open',
+      })
+    }
+
+    if (step === 'd_minus_1') {
+      // Reminder email to family with gift/card link
+      for (const email of familyEmails) {
+        await sendEmail(email,
+          `${name}'s birthday is tomorrow! 🎉`,
+          `<p>${name}'s birthday is tomorrow!</p>
+           <p><a href="${process.env.NEXT_PUBLIC_APP_URL ?? ''}/dashboard/celebrations">Click here</a> to send a card, leave a birthday wish, or coordinate a gift.</p>
+           <p>— The ThriveAtHome Team</p>`
+        )
+      }
+    }
+
+    if (step === 'd_day') {
+      // Trigger Joy call + create birthday banner task
+      await db.from('navigator_tasks').insert({
+        type: 'birthday_joy_call',
+        member_id: m.id,
+        priority: 'high',
+        title: `Birthday Joy call: ${name} turns ${age}`,
+        body: `Today is ${name}'s ${age}th birthday. Trigger Joy agent call and display birthday banner on dashboards.`,
+        metadata: { birthday_year: year, age_turning: age, joy_agent_id: process.env.RETELL_JOY_AGENT_ID },
+        status: 'open',
+      })
+
+      // Check for milestone age program
+      const { data: milestone } = await db
+        .from('milestone_birthday_programs')
+        .select('*')
+        .eq('age', age)
+        .maybeSingle()
+
+      if (milestone) {
+        await db.from('navigator_tasks').insert({
+          type: 'milestone_birthday',
+          member_id: m.id,
+          priority: 'high',
+          title: `Milestone birthday ${age}: ${name}`,
+          body: `${name} turns ${age} today. Program: ${milestone.title} — ${milestone.description}`,
+          metadata: { birthday_year: year, age, offering: milestone.offering, auto_create_event: milestone.auto_create_event },
+          status: 'open',
+        })
+      }
+    }
+
+    if (step === 'd_plus_1') {
+      // Thank-you: compile wishes into summary for family
+      const { data: wishes } = await db
+        .from('birthday_wishes')
+        .select('author_name, message')
+        .eq('member_id', m.id)
+        .eq('year', year)
+        .eq('is_approved', true)
+
+      const wishList = (wishes ?? []) as Array<{ author_name: string; message: string }>
+      const wishesHtml = wishList.length > 0
+        ? `<ul>${wishList.map(w => `<li><strong>${w.author_name}:</strong> ${w.message}</li>`).join('')}</ul>`
+        : '<p>No community wishes were recorded this year.</p>'
+
+      for (const email of familyEmails) {
+        await sendEmail(email,
+          `How was ${name}'s birthday? 🎂`,
+          `<p>We hope ${name} had a wonderful birthday!</p>
+           <p>Here are the birthday wishes from the ThriveAtHome community:</p>
+           ${wishesHtml}
+           <p>— The ThriveAtHome Team</p>`
+        )
+      }
+    }
+
+    // Log the step
+    await db.from('birthday_arc_log').insert({
+      member_id: m.id,
+      year,
+      step,
+      sent_at: new Date().toISOString(),
+    })
+
+    fired.push(`${m.full_name} (${step})`)
   }
 
-  return NextResponse.json({
-    ok: true,
-    totalContextsSet,
-    totalSkipped,
-    date: today.toISOString().slice(0, 10),
-  })
+  return NextResponse.json({ fired, count: fired.length, ran_at: new Date().toISOString() })
 }
