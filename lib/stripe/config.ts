@@ -33,7 +33,7 @@ export const STRIPE_PLANS: Record<PlanTier, StripePlanConfig> = {
   complete: {
     tier: 'complete',
     name: 'Thrive Complete',
-    monthlyPrice: 79,
+    monthlyPrice: 69,
     annualPrice: 63,
     annualTotal: 853,
     highlighted: true,
