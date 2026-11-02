@@ -140,29 +140,15 @@ async function sendSms(to: string | null | undefined, body: string): Promise<boo
   return true
 }
 
-// ─── Email via Resend ─────────────────────────────────────────────────────────
+// ─── Email via SendGrid (emailProvider) ──────────────────────────────────────
 async function sendEmail(to: string | null | undefined, subject: string, text: string): Promise<boolean> {
-  const key  = process.env.RESEND_API_KEY
-  const from = process.env.RESEND_FROM_EMAIL ?? 'ThriveAtHome <noreply@thriveathome.com>'
-
-  if (!key) {
-    console.log(`[notification-drain][email][STUB] to=${to} subject="${subject}" body="${text.slice(0, 80)}"`)
-    return true
-  }
   if (!to) return false
-
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${key}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ from, to, subject, text }),
-  })
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}))
-    console.error(`[notification-drain][email] Resend error ${res.status}:`, data)
+  try {
+    const { emailProvider } = await import('@/lib/providers')
+    await emailProvider.sendGeneric(to, subject, `<p style="font-family:sans-serif;font-size:16px;line-height:1.6">${text.replace(/\n/g, '<br>')}</p>`)
+    return true
+  } catch (e) {
+    console.error('[notification-drain][email] sendGeneric error:', e)
     return false
   }
-  return true
 }

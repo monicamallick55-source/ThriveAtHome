@@ -25,6 +25,7 @@ export interface EmailProvider {
   sendGriefSupportNotification(to: string, memberName: string, details: string): Promise<void>
   sendWeeklyDigest(to: string, memberName: string, content: string): Promise<void>
   sendMonthlySummary(to: string, memberName: string, content: string): Promise<void>
+  sendGeneric(to: string, subject: string, html: string): Promise<void>
   sendVolunteerApplicationNotification(to: string, applicantName: string, applicantEmail: string, city: string, serviceTypes: string[]): Promise<void>
   sendEmployeeInvitation(to: string, companyName: string, acceptUrl: string): Promise<void>
   sendOrgNewsletter(to: string, recipientName: string, orgName: string, subject: string, body: string): Promise<void>

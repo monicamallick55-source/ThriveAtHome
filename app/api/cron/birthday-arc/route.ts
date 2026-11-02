@@ -4,18 +4,7 @@
 
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-
-const RESEND_API_KEY = process.env.RESEND_API_KEY
-const FROM_EMAIL = process.env.FROM_EMAIL ?? 'hello@thriveathome.com'
-
-async function sendEmail(to: string, subject: string, html: string) {
-  if (!RESEND_API_KEY) { console.log('[birthday-arc] No RESEND_API_KEY, skipping email to', to); return }
-  await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: FROM_EMAIL, to, subject, html }),
-  })
-}
+import { emailProvider } from '@/lib/providers'
 
 function daysUntilBirthday(dob: string): number {
   const today = new Date()
@@ -96,8 +85,7 @@ export async function POST(req: Request) {
     if (step === 'd_minus_7') {
       // Email family with heads-up
       for (const email of familyEmails) {
-        await sendEmail(email,
-          `${name}'s birthday is in 7 days 🎂`,
+        await emailProvider.sendBirthdayReminder(email, name, 7,
           `<p>Hi! Just a reminder that ${name}'s birthday is coming up in one week.</p>
            <p>Visit the <a href="${process.env.NEXT_PUBLIC_APP_URL ?? ''}/dashboard/celebrations">celebrations page</a> to leave a birthday wish or plan something special.</p>
            <p>— The ThriveAtHome Team</p>`
@@ -134,8 +122,7 @@ export async function POST(req: Request) {
     if (step === 'd_minus_1') {
       // Reminder email to family with gift/card link
       for (const email of familyEmails) {
-        await sendEmail(email,
-          `${name}'s birthday is tomorrow! 🎉`,
+        await emailProvider.sendBirthdayReminder(email, name, 1,
           `<p>${name}'s birthday is tomorrow!</p>
            <p><a href="${process.env.NEXT_PUBLIC_APP_URL ?? ''}/dashboard/celebrations">Click here</a> to send a card, leave a birthday wish, or coordinate a gift.</p>
            <p>— The ThriveAtHome Team</p>`
@@ -190,8 +177,7 @@ export async function POST(req: Request) {
         : '<p>No community wishes were recorded this year.</p>'
 
       for (const email of familyEmails) {
-        await sendEmail(email,
-          `How was ${name}'s birthday? 🎂`,
+        await emailProvider.sendBirthdayReminder(email, name, -1,
           `<p>We hope ${name} had a wonderful birthday!</p>
            <p>Here are the birthday wishes from the ThriveAtHome community:</p>
            ${wishesHtml}

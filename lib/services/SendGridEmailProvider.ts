@@ -311,6 +311,12 @@ ${ctaButton('Accept invitation & create account', acceptUrl)}`
     console.log(`[SendGrid] Donation receipt PDF sent to ${to.substring(0, 6)}xxx`)
   }
 
+  async sendGeneric(to: string, subject: string, html: string): Promise<void> {
+    this.init()
+    await sgMail.send({ to, from: getFrom(), subject, html: baseTemplate(subject, html) })
+    console.log(`[SendGrid] Generic email sent to ${to.substring(0, 6)}xxx`)
+  }
+
   async sendOrgInvite(to: string, orgName: string, inviterName: string): Promise<void> {
     this.init()
     const body = `<p style="margin:0 0 16px;font-family:Georgia,serif;font-size:22px;line-height:1.4;">A ThriveAtHome member thinks you two should meet.</p>
