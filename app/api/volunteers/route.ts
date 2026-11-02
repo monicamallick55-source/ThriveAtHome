@@ -48,9 +48,7 @@ export async function GET(req: Request) {
         })),
         {
           metro_area_id: member?.metro_area_id ?? null,
-          needed_skills: [],
           preferred_languages: member?.preferred_languages ?? [],
-          preferred_days: [],
         }
       )
 
