@@ -25,7 +25,7 @@ export async function GET(req: Request) {
     if (memberId) {
       const { data: member } = await db
         .from('members')
-        .select('metro_area_id, preferred_language')
+        .select('*')
         .eq('id', memberId)
         .maybeSingle()
 
