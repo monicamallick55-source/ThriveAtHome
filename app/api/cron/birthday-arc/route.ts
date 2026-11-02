@@ -85,11 +85,10 @@ export async function POST(req: Request) {
     if (step === 'd_minus_7') {
       // Email family with heads-up
       for (const email of familyEmails) {
-        await emailProvider.sendBirthdayReminder(email, name, 7,
+        await emailProvider.sendGeneric(email, `${name}'s birthday is in 7 days 🎂`,
           `<p>Hi! Just a reminder that ${name}'s birthday is coming up in one week.</p>
            <p>Visit the <a href="${process.env.NEXT_PUBLIC_APP_URL ?? ''}/dashboard/celebrations">celebrations page</a> to leave a birthday wish or plan something special.</p>
-           <p>— The ThriveAtHome Team</p>`
-        )
+           <p>— The ThriveAtHome Team</p>`)
       }
     }
 
@@ -122,11 +121,10 @@ export async function POST(req: Request) {
     if (step === 'd_minus_1') {
       // Reminder email to family with gift/card link
       for (const email of familyEmails) {
-        await emailProvider.sendBirthdayReminder(email, name, 1,
+        await emailProvider.sendGeneric(email, `${name}'s birthday is tomorrow! 🎉`,
           `<p>${name}'s birthday is tomorrow!</p>
            <p><a href="${process.env.NEXT_PUBLIC_APP_URL ?? ''}/dashboard/celebrations">Click here</a> to send a card, leave a birthday wish, or coordinate a gift.</p>
-           <p>— The ThriveAtHome Team</p>`
-        )
+           <p>— The ThriveAtHome Team</p>`)
       }
     }
 
@@ -177,7 +175,7 @@ export async function POST(req: Request) {
         : '<p>No community wishes were recorded this year.</p>'
 
       for (const email of familyEmails) {
-        await emailProvider.sendBirthdayReminder(email, name, -1,
+        await emailProvider.sendGeneric(email, `How was ${name}'s birthday? 🎂`,
           `<p>We hope ${name} had a wonderful birthday!</p>
            <p>Here are the birthday wishes from the ThriveAtHome community:</p>
            ${wishesHtml}
