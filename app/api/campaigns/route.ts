@@ -1,110 +1,66 @@
-// app/api/campaigns/route.ts
-// G6.4 — Create a new Community Care Fund campaign
 import { NextRequest, NextResponse } from 'next/server'
-
 import { createClient } from '@/lib/supabase/server'
-
-export async function POST(req: NextRequest) {
-  try {
-    const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-    const body = await req.json()
-    const {
-      member_id,
-      title,
-      story,
-      need_category,
-      goal_amount_cents,
-      deadline,
-      payment_zelle,
-      payment_venmo,
-      payment_other,
-      navigator_notes,
-      member_consent,
-      status,
-    } = body
-
-    if (!title || !story || !need_category) {
-      return NextResponse.json({ error: 'title, story, and need_category are required' }, { status: 400 })
-    }
-
-    // Find the requesting family_member
-    const { data: fm } = await (supabase as any)
-      .from('family_members')
-      .select('id, member_id, role')
-      .eq('supabase_auth_id', user.id)
-      .single()
-    if (!fm) return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
-
-    // Determine effective member_id
-    const effectiveMemberId = member_id ?? fm.member_id
-
-    // Check permission: member/family submit for their own member; navigators/admins can specify any member_id
-    if (!['admin', 'navigator'].includes(fm.role) && member_id && member_id !== fm.member_id) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
-    const insertStatus = status ?? (member_consent ? 'active' : 'draft')
-    const { data, error } = await (supabase as any)
-      .from('member_campaigns')
-      .insert({
-        member_id:         effectiveMemberId,
-        created_by_fm_id:  fm.id,
-        navigator_id:      ['admin', 'navigator'].includes(fm.role) ? fm.id : null,
-        title,
-        story,
-        need_category,
-        goal_amount_cents: goal_amount_cents ?? null,
-        deadline:          deadline ?? null,
-        payment_zelle:     payment_zelle ?? null,
-        payment_venmo:     payment_venmo ?? null,
-        payment_other:     payment_other ?? null,
-        navigator_notes:   navigator_notes ?? null,
-        member_consent:    !!member_consent,
-        consent_date:      member_consent ? new Date().toISOString() : null,
-        status:            insertStatus,
-      })
-      .select()
-      .single()
-
-    if (error) {
-      console.error('[campaigns POST]', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
-
-    return NextResponse.json(data, { status: 201 })
-  } catch (err) {
-    console.error('[campaigns POST] unexpected', err)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-  }
-}
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function GET(req: NextRequest) {
-  try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const supabase = await createClient()
+  const admin = createAdminClient()
+  const { searchParams } = new URL(req.url)
+  const category = searchParams.get('category')
+  const myOnly = searchParams.get('my') === 'true'
+  const { data: { user } } = await supabase.auth.getUser()
 
-    const { searchParams } = new URL(req.url)
-    const statusFilter = searchParams.get('status')
+  let query = (admin as any).from('member_campaigns')
+    .select(`id, title, description, cause_category, goal_amount, raised_amount, donor_count, status, cover_image_url, end_date, is_featured, stripe_payment_link_url, created_at, members!inner(id, first_name, last_name)`)
+    .order('is_featured', { ascending: false })
+    .order('raised_amount', { ascending: false })
 
-    let query = (supabase as any)
-      .from('member_campaigns')
-      .select('*, members(first_name, last_name)')
-      .order('created_at', { ascending: false })
-
-    if (statusFilter) query = query.eq('status', statusFilter)
-
-    const { data, error } = await query
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-
-    return NextResponse.json(data)
-  } catch (err) {
-    console.error('[campaigns GET]', err)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  if (myOnly && user) {
+    const { data: member } = await (admin as any).from('members').select('id').eq('supabase_auth_id', user.id).single()
+    if (member) query = query.eq('member_id', member.id)
+  } else {
+    query = query.eq('status', 'active')
   }
+
+  if (category) query = query.eq('cause_category', category)
+  const { data, error } = await query.limit(50)
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json(data)
+}
+
+export async function POST(req: NextRequest) {
+  const supabase = await createClient()
+  const admin = createAdminClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const { data: member } = await (admin as any).from('members').select('id, plan, status').eq('supabase_auth_id', user.id).single()
+  if (!member) return NextResponse.json({ error: 'Member not found' }, { status: 404 })
+  if (member.status !== 'active') return NextResponse.json({ error: 'Active membership required' }, { status: 403 })
+  if (!['complete','premier'].includes(member.plan)) {
+    return NextResponse.json({ error: 'Complete or Premier plan required to create campaigns' }, { status: 403 })
+  }
+
+  const body = await req.json()
+  const { title, description, cause_category, goal_amount, end_date, cover_image_url } = body
+  if (!title || !description || !cause_category || !goal_amount) {
+    return NextResponse.json({ error: 'title, description, cause_category, goal_amount required' }, { status: 400 })
+  }
+
+  const { data: campaign, error } = await (admin as any).from('member_campaigns').insert({
+    member_id: member.id, title, description, cause_category,
+    goal_amount: parseFloat(goal_amount), end_date: end_date || null,
+    cover_image_url: cover_image_url || null, status: 'pending_review',
+  }).select().single()
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  const { data: task } = await (admin as any).from('navigator_tasks').insert({
+    member_id: member.id, task_type: 'campaign_review',
+    title: `Review campaign: "${title}"`,
+    description: `Member submitted a fundraising campaign. Category: ${cause_category}, Goal: $${goal_amount}. Review and approve or reject.`,
+    priority: 'normal', status: 'open', metadata: { campaign_id: campaign.id },
+  }).select('id').single()
+  if (task) await (admin as any).from('member_campaigns').update({ navigator_task_id: task.id }).eq('id', campaign.id)
+
+  return NextResponse.json(campaign, { status: 201 })
 }
