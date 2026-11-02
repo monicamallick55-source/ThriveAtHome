@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
   try { event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_CAMPAIGN_WEBHOOK_SECRET!) }
   catch { return NextResponse.json({ error: 'Invalid signature' }, { status: 400 }) }
   if (event.type !== 'checkout.session.completed') return NextResponse.json({ received: true })
-  const session = event.data.object as Stripe.CheckoutSession
+  const session = event.data.object as Stripe.Checkout.Session
   const campaignId = session.metadata?.campaign_id
   if (!campaignId) return NextResponse.json({ received: true })
   const admin = createAdminClient()
