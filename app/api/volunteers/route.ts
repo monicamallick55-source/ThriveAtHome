@@ -46,10 +46,7 @@ export async function GET(req: Request) {
           training_completed: v.training_completed,
           active_assignment_count: v.active_assignment_count,
         })),
-        {
-          metro_area_id: member?.metro_area_id ?? null,
-          preferred_language: member?.preferred_language ?? null,
-        }
+        member ?? ({} as any)
       )
 
       return NextResponse.json({ ranked, member_id: memberId })
