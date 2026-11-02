@@ -41,4 +41,7 @@ export class StubEmailProvider implements EmailProvider {
   async sendOrgAdminInvite(to: string, orgName: string, inviterName: string, acceptUrl: string): Promise<void> {
     console.log(`[STUB][Email] Org co-admin invite to ${to} for ${orgName} from ${inviterName}: ${acceptUrl}`)
   }
+  async sendGeneric(to: string, subject: string, _html: string): Promise<void> {
+    console.log(`[STUB][Email] Generic "${subject}" 2192 ${to}`)
+  }
 }
