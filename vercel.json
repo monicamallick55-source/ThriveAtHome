@@ -1,96 +1,30 @@
 {
   "crons": [
-    {
-      "path": "/api/cron/weekly-digest",
-      "schedule": "0 9 * * 0"
-    },
-    {
-      "path": "/api/cron/monthly-summary",
-      "schedule": "0 9 1 * *"
-    },
-    {
-      "path": "/api/cron/family-nudge",
-      "schedule": "0 10 * * *"
-    },
-    {
-      "path": "/api/cron/celebrations",
-      "schedule": "0 8 * * *"
-    },
-    {
-      "path": "/api/cron/milestones",
-      "schedule": "0 9 * * *"
-    },
-    {
-      "path": "/api/cron/grief-monitoring",
-      "schedule": "0 7 * * *"
-    },
-    {
-      "path": "/api/cron/seasonal-reminders",
-      "schedule": "0 9 1 1,4,7,10 *"
-    },
-    {
-      "path": "/api/cron/tracked-item-reminders",
-      "schedule": "0 8 * * *"
-    },
-    {
-      "path": "/api/cron/automations",
-      "schedule": "0 9 * * *"
-    },
-    {
-      "path": "/api/cron/smart-home-anomaly",
-      "schedule": "0 6 * * *"
-    },
-    {
-      "path": "/api/cron/ml-analytics",
-      "schedule": "0 6 * * *"
-    },
-    {
-      "path": "/api/cron/cultural-festivals",
-      "schedule": "0 8 * * *"
-    },
-    {
-      "path": "/api/cron/coordinator-calls",
-      "schedule": "0 9 1 * *"
-    },
-    {
-      "path": "/api/cron/pet-milestones",
-      "schedule": "0 8 * * *"
-    },
-    {
-      "path": "/api/cron/aria-calls",
-      "schedule": "0 13 * * *"
-    },
-    {
-      "path": "/api/cron/membership-renewal-reminders",
-      "schedule": "0 9 * * *"
-    },
-    {
-      "path": "/api/cron/recurring-bookings",
-      "schedule": "0 7 * * *"
-    },
-    {
-      "path": "/api/cron/birthday-arc",
-      "schedule": "0 8 * * *"
-    },
-    {
-      "path": "/api/cron/milestone-birthdays",
-      "schedule": "0 7 * * *"
-    },
-    {
-      "path": "/api/cron/family-event-reminders",
-      "schedule": "0 8 * * *"
-    },
-    {
-      "path": "/api/cron/family-summary",
-      "schedule": "0 18 * * *"
-    },
-    {
-      "path": "/api/cron/career-digest",
-      "schedule": "0 9 * * 1"
-    },
-    {
-      "path": "/api/cron/notification-drain",
-      "schedule": "0 9 * * *"
-    }
+    { "path": "/api/cron/weekly-digest",               "schedule": "0 9 * * 0" },
+    { "path": "/api/cron/monthly-summary",             "schedule": "0 9 1 * *" },
+    { "path": "/api/cron/family-nudge",                "schedule": "0 10 * * *" },
+    { "path": "/api/cron/celebrations",                "schedule": "0 8 * * *" },
+    { "path": "/api/cron/milestones",                  "schedule": "0 9 * * *" },
+    { "path": "/api/cron/grief-monitoring",            "schedule": "0 7 * * *" },
+    { "path": "/api/cron/seasonal-reminders",          "schedule": "0 9 1 1,4,7,10 *" },
+    { "path": "/api/cron/tracked-item-reminders",      "schedule": "0 8 * * *" },
+    { "path": "/api/cron/automations",                 "schedule": "0 9 * * *" },
+    { "path": "/api/cron/smart-home-anomaly",          "schedule": "0 6 * * *" },
+    { "path": "/api/cron/ml-analytics",                "schedule": "0 6 * * *" },
+    { "path": "/api/cron/cultural-festivals",          "schedule": "0 8 * * *" },
+    { "path": "/api/cron/coordinator-calls",           "schedule": "0 9 1 * *" },
+    { "path": "/api/cron/pet-milestones",              "schedule": "0 8 * * *" },
+    { "path": "/api/cron/aria-calls",                  "schedule": "0 13 * * *" },
+    { "path": "/api/cron/membership-renewal-reminders","schedule": "0 9 * * *" },
+    { "path": "/api/cron/recurring-bookings",          "schedule": "0 7 * * *" },
+    { "path": "/api/cron/birthday-arc",                "schedule": "0 10 * * *" },
+    { "path": "/api/cron/milestone-birthdays",         "schedule": "0 7 * * *" },
+    { "path": "/api/cron/family-event-reminders",      "schedule": "0 8 * * *" },
+    { "path": "/api/cron/family-summary",              "schedule": "0 18 * * *" },
+    { "path": "/api/cron/career-digest",               "schedule": "0 9 * * 1" },
+    { "path": "/api/cron/notification-drain",          "schedule": "0 9 * * *" },
+    { "path": "/api/cron/metro-activation",            "schedule": "0 9 * * 1" },
+    { "path": "/api/cron/transition-steps",            "schedule": "0 11 * * *" },
+    { "path": "/api/cron/navigator-usage",             "schedule": "0 6 1 * *" }
   ]
 }
