@@ -178,7 +178,7 @@ function HvIntegrationSection({ orgId }: { orgId: string }) {
 }
 
 export default function OrgAdminPortal({ org, programs: initialPrograms, memberNeeds: initialNeeds, memberships: initialMemberships, stats: initialStats, initialTiers }: Props) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'programs' | 'needs' | 'members' | 'dues' | 'settings' | 'donations' | 'email' | 'documents' | 'scheduling' | 'trends'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'programs' | 'needs' | 'members' | 'dues' | 'settings' | 'donations' | 'email' | 'documents' | 'scheduling' | 'trends' | 'team'>('overview')
   const [wizardDone, setWizardDone] = useState(!!org.setup_completed_at)
   const [programs, setPrograms] = useState(initialPrograms)
   const [memberNeeds, setMemberNeeds] = useState(initialNeeds)
@@ -349,6 +349,7 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
     { id: 'members', label: '👥 Members' },
     { id: 'scheduling', label: '🗓️ Scheduling' },
     { id: 'trends', label: '📈 Trends' },
+    { id: 'team', label: '👥 Team' },
     { id: 'dues', label: '💳 Membership Dues' },
     { id: 'donations', label: '🎁 Donations' },
     { id: 'email', label: '📧 Email Members' },
@@ -1649,6 +1650,7 @@ export default function OrgAdminPortal({ org, programs: initialPrograms, memberN
           <SchedulingTab orgMembers={orgMembers} />
         )}
 
+        {activeTab === 'team' && <TeamTab orgId={org.id} />}
         {activeTab === 'trends' && (
           <TrendsTab />
         )}
@@ -1964,6 +1966,105 @@ function NeedCard({ need, onUpdateStatus, isUpdating }: {
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+function TeamTab({ orgId }: { orgId: string }) {
+  const [invitations, setInvitations] = useState<Array<{
+    id: string; email: string; status: string; created_at: string; expires_at: string; invited_by_name: string
+  }>>([])
+  const [email, setEmail] = useState('')
+  const [sending, setSending] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (!orgId) return
+    fetch('/api/org-admin/invite')
+      .then(r => r.json())
+      .then(j => { setInvitations(j.invitations ?? []); setLoading(false) })
+      .catch(() => setLoading(false))
+  }, [orgId])
+
+  async function handleInvite(e: React.FormEvent) {
+    e.preventDefault()
+    setError(''); setSuccess(''); setSending(true)
+    const res = await fetch('/api/org-admin/invite', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.trim() }),
+    })
+    const j = await res.json().catch(() => ({}))
+    setSending(false)
+    if (!res.ok) { setError(j.error ?? 'Failed to send invitation'); return }
+    setSuccess(`Invitation sent to ${email.trim()}.${j.accept_url ? ` Accept link: ${j.accept_url}` : ''}`)
+    setEmail('')
+    fetch('/api/org-admin/invite').then(r => r.json()).then(j2 => setInvitations(j2.invitations ?? []))
+  }
+
+  async function handleRevoke(id: string) {
+    if (!confirm('Revoke this invitation?')) return
+    await fetch(`/api/org-admin/invite?id=${id}`, { method: 'DELETE' })
+    setInvitations(prev => prev.map(inv => inv.id === id ? { ...inv, status: 'revoked' } : inv))
+  }
+
+  const card: React.CSSProperties = { backgroundColor: 'white', borderRadius: '12px', border: '1px solid #E8E4DC', padding: '24px', marginBottom: '24px' }
+  const h3: React.CSSProperties = { fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '16px' }
+  const label: React.CSSProperties = { fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 700, color: 'var(--color-navy)', display: 'block', marginBottom: '6px' }
+  const input: React.CSSProperties = { width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #D1C9BC', fontFamily: 'var(--font-body)', fontSize: '14px', boxSizing: 'border-box' }
+  const btn: React.CSSProperties = { padding: '10px 20px', borderRadius: '8px', backgroundColor: 'var(--color-teal)', color: 'white', border: 'none', fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, cursor: 'pointer', marginTop: '12px' }
+
+  function badge(status: string): React.CSSProperties {
+    return {
+      display: 'inline-block', padding: '2px 8px', borderRadius: '12px', fontSize: '12px', fontFamily: 'var(--font-body)',
+      backgroundColor: status === 'pending' ? '#FEF3C7' : status === 'accepted' ? '#D1FAE5' : '#F3F4F6',
+      color: status === 'pending' ? '#92400E' : status === 'accepted' ? '#065F46' : '#6B7280',
+    }
+  }
+
+  return (
+    <div style={{ padding: '24px 0' }}>
+      <div style={card}>
+        <h3 style={h3}>Invite a Co-Admin</h3>
+        <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', marginBottom: '16px' }}>
+          Co-admins can manage programs, members, scheduling, and org settings.
+        </p>
+        {error && <p style={{ color: '#D62828', fontFamily: 'var(--font-body)', fontSize: '14px', marginBottom: '12px' }}>{error}</p>}
+        {success && <p style={{ color: '#15803D', fontFamily: 'var(--font-body)', fontSize: '14px', marginBottom: '12px' }}>{success}</p>}
+        <form onSubmit={handleInvite}>
+          <label style={label}>Email address</label>
+          <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="colleague@example.org" required style={input} />
+          <button type="submit" disabled={sending} style={btn}>{sending ? 'Sending…' : 'Send Invitation'}</button>
+        </form>
+      </div>
+
+      <div style={card}>
+        <h3 style={h3}>Pending & Past Invitations</h3>
+        {loading && <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)' }}>Loading…</p>}
+        {!loading && invitations.length === 0 && (
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)' }}>No invitations yet.</p>
+        )}
+        {invitations.map(inv => (
+          <div key={inv.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #F0EDE8' }}>
+            <div>
+              <div style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-navy)', fontWeight: 500 }}>{inv.email}</div>
+              <div style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>
+                Invited by {inv.invited_by_name} · {new Date(inv.created_at).toLocaleDateString()}
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={badge(inv.status)}>{inv.status}</span>
+              {inv.status === 'pending' && (
+                <button onClick={() => handleRevoke(inv.id)} style={{ background: 'none', border: 'none', color: '#D62828', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+                  Revoke
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

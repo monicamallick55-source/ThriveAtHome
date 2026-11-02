@@ -38,4 +38,7 @@ export class StubEmailProvider implements EmailProvider {
   async sendOrgInvite(to: string, orgName: string, inviterName: string): Promise<void> {
     console.log(`[STUB][Email] Org invite → ${to}: "${orgName}" invited by ${inviterName}`)
   }
+  async sendOrgAdminInvite(to: string, orgName: string, inviterName: string, acceptUrl: string): Promise<void> {
+    console.log(`[STUB][Email] Org co-admin invite to ${to} for ${orgName} from ${inviterName}: ${acceptUrl}`)
+  }
 }
