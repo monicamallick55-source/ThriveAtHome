@@ -1,21 +1,38 @@
-import type { Metadata } from 'next'
-import { redirect } from 'next/navigation'
-import { requireAuth } from '@/lib/auth'
-import { getFamilyMemberByAuthId } from '@/lib/data/family'
-import { getServiceBookingsForMember, type ServiceBooking } from '@/lib/data/services'
-import ServicesClient from '@/components/services/ServicesClient'
+import Link from 'next/link'
 
-export const metadata: Metadata = { title: 'Services — ThriveAtHome' }
+const services = [
+  { href: '/dashboard/services/transport', icon: '🚗', title: 'Transportation', desc: 'Rides to appointments, errands & outings' },
+  { href: '/dashboard/services/meals', icon: '🍽️', title: 'Meals & Nutrition', desc: 'Meal delivery, prep help & nutrition guidance' },
+  { href: '/dashboard/services/home', icon: '🏠', title: 'Home Services', desc: 'Cleaning, maintenance & home support' },
+  { href: '/dashboard/services/health', icon: '🩺', title: 'Health & Wellness', desc: 'Telehealth, medication help & wellness checks' },
+  { href: '/dashboard/services/legal-financial', icon: '⚖️', title: 'Legal & Financial', desc: 'Benefits, planning & elder law resources' },
+  { href: '/dashboard/services/tech-help', icon: '💻', title: 'Tech Help', desc: 'Phone, tablet, computer & device support' },
+  { href: '/dashboard/services/companionship', icon: '🤝', title: 'Companion Visits', desc: 'Friendly visits, chats & activity companions' },
+  { href: '/dashboard/services/travel', icon: '✈️', title: 'Travel Assistance', desc: 'Trip planning, companions & travel logistics' },
+]
 
-export default async function ServicesPage() {
-  const user = await requireAuth()
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-
-  let initialBookings: ServiceBooking[] = []
-  if (fm?.member_id) {
-    const { data } = await getServiceBookingsForMember(fm.member_id)
-    initialBookings = data ?? []
-  }
-
-  return <ServicesClient initialBookings={(initialBookings ?? []) as any} />
+export default function ServicesPage() {
+  return (
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold text-gray-900 mb-2">Services</h1>
+      <p className="text-gray-600 mb-8">
+        Request support across a range of services — all coordinated by your ThriveAtHome team.
+      </p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {services.map((s) => (
+          <Link
+            key={s.href}
+            href={s.href}
+            className="flex items-start gap-4 p-5 bg-white rounded-2xl border border-gray-200 hover:border-blue-400 hover:shadow-md transition group"
+          >
+            <span className="text-3xl">{s.icon}</span>
+            <div>
+              <div className="font-semibold text-gray-900 group-hover:text-blue-700 transition">{s.title}</div>
+              <div className="text-sm text-gray-500 mt-0.5">{s.desc}</div>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  )
 }
