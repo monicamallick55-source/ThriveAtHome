@@ -3,21 +3,23 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 // GET /api/campaigns/[id] — single campaign detail
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const admin = createAdminClient()
   const { data, error } = await admin.from('member_campaigns')
     .select(`
       *, members!inner(id, first_name, last_name),
       campaign_donations(id, amount, donor_name, message, is_anonymous, created_at)
     `)
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
   if (error) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   return NextResponse.json(data)
 }
 
 // PATCH /api/campaigns/[id] — staff approve/reject or member update
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createClient()
   const admin = createAdminClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -38,14 +40,14 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         reviewed_by: staff.id,
         reviewed_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-      }).eq('id', params.id)
+      }).eq('id', id)
       if (error) return NextResponse.json({ error: error.message }, { status: 500 })
       return NextResponse.json({ status: 'rejected' })
     }
 
     // approve — create Stripe payment link
     const { data: campaign } = await admin.from('member_campaigns')
-      .select('title, goal_amount').eq('id', params.id).single()
+      .select('title, goal_amount').eq('id', id).single()
 
     let paymentLinkUrl: string | null = null
     let paymentLinkId: string | null = null
@@ -62,9 +64,9 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         line_items: [{ price: price.id, quantity: 1 }],
         after_completion: {
           type: 'redirect',
-          redirect: { url: `${process.env.NEXT_PUBLIC_APP_URL}/campaigns/${params.id}?donated=true` },
+          redirect: { url: `${process.env.NEXT_PUBLIC_APP_URL}/campaigns/${id}?donated=true` },
         },
-        metadata: { campaign_id: params.id },
+        metadata: { campaign_id: id },
       })
       paymentLinkUrl = link.url
       paymentLinkId = link.id
@@ -79,7 +81,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       reviewed_by: staff.id,
       reviewed_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-    }).eq('id', params.id)
+    }).eq('id', id)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ status: 'active', payment_link_url: paymentLinkUrl })
   }
@@ -90,7 +92,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   if (!member) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const { data: campaign } = await admin.from('member_campaigns')
-    .select('member_id, status').eq('id', params.id).single()
+    .select('member_id, status').eq('id', id).single()
   if (!campaign || campaign.member_id !== member.id) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
@@ -104,7 +106,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     if (body[key] !== undefined) updates[key] = body[key]
   }
 
-  const { error } = await admin.from('member_campaigns').update(updates).eq('id', params.id)
+  const { error } = await admin.from('member_campaigns').update(updates).eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ updated: true })
 }
