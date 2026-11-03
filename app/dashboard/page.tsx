@@ -35,7 +35,7 @@ export default async function DashboardPage() {
     member = data
   }
 
-  const firstName = member?.first_name || fm?.first_name || 'Friend'
+  const firstName = member?.first_name || (fm?.full_name ? fm.full_name.split(' ')[0] : null) || 'Friend'
   const plan = (member?.plan as 'basics' | 'complete') || 'basics'
   const isComplete = plan === 'complete'
 
