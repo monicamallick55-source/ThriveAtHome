@@ -119,7 +119,8 @@ export async function PATCH(req: NextRequest) {
     }
 
     // Re-geocode if zip changed
-    const updates: Record<string, unknown> = { ...body }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const updates: any = { ...body }
     delete updates.id
 
     if (body.zip_code !== undefined) {
