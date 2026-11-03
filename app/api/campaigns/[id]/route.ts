@@ -25,8 +25,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: staff } = await (admin.from('staff') as any)
-    .select('id, role').eq('supabase_auth_id', user.id).single()
+  const { data: staff } = await admin.from('family_members')
+    .select('id, role').eq('supabase_auth_id', user.id).maybeSingle()
 
   const body = await req.json()
   const { action, rejection_reason } = body
