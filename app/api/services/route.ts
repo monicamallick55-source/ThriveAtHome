@@ -6,7 +6,10 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { transportProvider } from '@/lib/providers'
 
 const ALLOWED_SERVICE_TYPES = [
-  'transport', 'home_service', 'meals', 'telehealth', 'legal_financial', 'tech_help', 'companionship', 'companion', 'travel_assistance', 'roadside',
+  'transport', 'home_service', 'meals', 'telehealth', 'legal_financial', 'tech_help',
+  'companionship', 'companion', 'travel_assistance', 'roadside',
+  // FCV-gap volunteer services (Complete tier, no extra charge)
+  'fitness_class', 'walking_group', 'home_organizing', 'medical_companion', 'home_safety',
 ] as const
 type AllowedServiceType = (typeof ALLOWED_SERVICE_TYPES)[number]
 
@@ -61,8 +64,7 @@ export async function POST(req: NextRequest) {
 
   if (error) return NextResponse.json({ error }, { status: 500 })
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = createAdminClient() as any
+  const db = createAdminClient()
   const subtype = (booking_details as Record<string, string>).subtype ?? ''
 
   // ─── AUTO-DISPATCH: Transport ────────────────────────────────────────────
@@ -178,6 +180,54 @@ export async function POST(req: NextRequest) {
         task_type: 'travel_assistance',
         description: travelDesc,
         priority: subtype === 'travel_companion' ? 'medium' : 'low',
+      })
+    } else if (service_type === 'fitness_class') {
+      await db.from('navigator_tasks').insert({
+        member_id: memberId,
+        task_type: 'fitness_class_request',
+        description: `Member requested a volunteer fitness class — subtype: ${subtype || 'unspecified'}. ` +
+          `Coordinate volunteer instructor for chair yoga, stretching or strength session ` +
+          `(phone dial-in or video). Preferred time: ${requested_for ?? 'flexible'}.`,
+        priority: 'low',
+      })
+    } else if (service_type === 'walking_group') {
+      await db.from('navigator_tasks').insert({
+        member_id: memberId,
+        task_type: 'walking_group_signup',
+        description: `Member wants to join or be matched to a walking group. ` +
+          `Find their local chapter volunteer organizer and add them to the next walk. ` +
+          `Member location/zip: ${(booking_details as Record<string, string>).zip ?? 'check profile'}.`,
+        priority: 'low',
+      })
+    } else if (service_type === 'home_organizing') {
+      await db.from('navigator_tasks').insert({
+        member_id: memberId,
+        task_type: 'home_organizing_request',
+        description: `Member needs home organizing help — ${(booking_details as Record<string, string>).area ?? 'general decluttering'}. ` +
+          `Match with a volunteer who has organizing or home management skills. ` +
+          `Requested date: ${requested_for ?? 'flexible'}.`,
+        priority: 'medium',
+      })
+    } else if (service_type === 'medical_companion') {
+      const apptDetails = booking_details as Record<string, string>
+      await db.from('navigator_tasks').insert({
+        member_id: memberId,
+        task_type: 'medical_companion_request',
+        description: `Member needs a volunteer medical companion for an appointment. ` +
+          `Provider: ${apptDetails.provider ?? 'unspecified'}. ` +
+          `Location: ${apptDetails.location ?? 'unspecified'}. ` +
+          `Date/time: ${requested_for ?? 'unspecified'}. ` +
+          `Note: volunteer may relay appointment summary to family portal with member's consent.`,
+        priority: 'high',
+      })
+    } else if (service_type === 'home_safety') {
+      await db.from('navigator_tasks').insert({
+        member_id: memberId,
+        task_type: 'home_safety_program_signup',
+        description: `Member signed up for the Home Safety & Earthquake Preparedness program. ` +
+          `Enrol in the next cohort, assign a home safety volunteer, and schedule the training session. ` +
+          `Home type: ${(booking_details as Record<string, string>).home_type ?? 'unspecified'}.`,
+        priority: 'medium',
       })
     } else if (service_type === 'roadside') {
       const isEmergency = subtype === 'other_roadside'

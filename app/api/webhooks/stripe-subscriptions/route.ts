@@ -99,7 +99,7 @@ async function sendWelcomeEmail(email: string, firstName: string, plan: string) 
   }
 }
 
-async function provisionMember(session: Stripe.Checkout.Session) {
+async function provisionMember(session: Stripe.CheckoutSession) {
   // Get subscription to extract price info
   let plan: 'basics' | 'complete' | null = null
   let stripeSubscriptionId: string | null = null
@@ -138,7 +138,7 @@ async function provisionMember(session: Stripe.Checkout.Session) {
   }
 
   // Upsert member record
-  const { error: upsertError } = await (supabaseAdmin as any)
+  const { error: upsertError } = await supabaseAdmin
     .from('members')
     .upsert(
       {
@@ -175,7 +175,7 @@ async function handleSubscriptionUpdated(sub: Stripe.Subscription) {
   }
   if (plan) updates.plan = plan
 
-  const { error } = await (supabaseAdmin as any)
+  const { error } = await supabaseAdmin
     .from('members')
     .update(updates)
     .eq('stripe_customer_id', stripeCustomerId)
@@ -190,7 +190,7 @@ async function handleSubscriptionUpdated(sub: Stripe.Subscription) {
 async function handleSubscriptionDeleted(sub: Stripe.Subscription) {
   const stripeCustomerId = typeof sub.customer === 'string' ? sub.customer : sub.customer.id
 
-  const { error } = await (supabaseAdmin as any)
+  const { error } = await supabaseAdmin
     .from('members')
     .update({
       subscription_status: 'canceled',
@@ -211,7 +211,7 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
 
   if (!stripeCustomerId) return
 
-  const { error } = await (supabaseAdmin as any)
+  const { error } = await supabaseAdmin
     .from('members')
     .update({
       subscription_status: 'past_due',
@@ -263,7 +263,7 @@ export async function POST(req: NextRequest) {
   try {
     switch (event.type) {
       case 'checkout.session.completed': {
-        const session = event.data.object as Stripe.Checkout.Session
+        const session = event.data.object as Stripe.CheckoutSession
         if (session.mode === 'subscription') {
           await provisionMember(session)
         }

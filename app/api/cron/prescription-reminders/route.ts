@@ -15,7 +15,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const db = supabaseAdmin as any
 
   // Find members with prescriptions due for refill in next 3 days
   const now = new Date()
@@ -58,7 +57,7 @@ export async function POST(req: NextRequest) {
     const message = `Hi ${member.first_name}! Your ThriveAtHome prescription reminder: ${rx.medication_name} is due for refill ${urgency} (${rx.refill_due_date}). Call your pharmacy or reply HELP and your Care Navigator will assist.`
 
     // Queue SMS
-    await db.from('notification_queue').insert({
+    await supabaseAdmin.from('notification_queue').insert({
       member_id: member.id,
       channel: 'sms',
       phone: member.phone,

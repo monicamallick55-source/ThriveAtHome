@@ -82,7 +82,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'SendGrid not configured' }, { status: 503 })
   }
 
-  const db = supabaseAdmin as any
   const ago7 = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
 
   const { data: members, error } = await db
@@ -102,13 +101,13 @@ export async function POST(req: NextRequest) {
     try {
       // Fetch stats in parallel
       const [calls, services, events, messages] = await Promise.all([
-        db.from('call_logs').select('id', { count: 'exact', head: true })
+        supabaseAdmin.from('call_logs').select('id', { count: 'exact', head: true })
           .eq('member_id', member.id).in('status', ['completed', 'ended']).gte('created_at', ago7),
-        db.from('service_bookings').select('id', { count: 'exact', head: true })
+        supabaseAdmin.from('service_bookings').select('id', { count: 'exact', head: true })
           .eq('member_id', member.id).gte('created_at', ago7),
-        db.from('event_registrations').select('id', { count: 'exact', head: true })
+        supabaseAdmin.from('event_registrations').select('id', { count: 'exact', head: true })
           .eq('member_id', member.id).gte('created_at', ago7),
-        db.from('messages').select('id', { count: 'exact', head: true })
+        supabaseAdmin.from('messages').select('id', { count: 'exact', head: true })
           .eq('receiver_member_id', member.id).gte('created_at', ago7),
       ])
 

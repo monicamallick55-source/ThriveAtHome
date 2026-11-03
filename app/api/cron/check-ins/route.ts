@@ -15,7 +15,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const db = supabaseAdmin as any
   const today = new Date().toISOString().slice(0, 10)
 
   // Find active members who had no check-in call completed today
@@ -60,7 +59,7 @@ export async function POST(req: NextRequest) {
 
     if ((count ?? 0) > 0) continue
 
-    await db.from('navigator_tasks').insert({
+    await supabaseAdmin.from('navigator_tasks').insert({
       member_id: member.id,
       task_type: 'missed_checkin',
       description: `${member.first_name} ${member.last_name} missed their daily Aria check-in call on ${today}. Please call or SMS to confirm they are okay. Phone: ${member.phone}`,
@@ -69,7 +68,7 @@ export async function POST(req: NextRequest) {
 
     // Also queue an SMS to the member
     if (member.phone) {
-      await db.from('notification_queue').insert({
+      await supabaseAdmin.from('notification_queue').insert({
         member_id: member.id,
         channel: 'sms',
         phone: member.phone,

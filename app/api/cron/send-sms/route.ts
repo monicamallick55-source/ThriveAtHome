@@ -74,7 +74,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Twilio not configured', details: 'Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER in Vercel env vars' }, { status: 503 })
   }
 
-  const db = supabaseAdmin as any
 
   // Fetch pending SMS queue items
   const { data: rows, error: fetchError } = await db
@@ -135,8 +134,8 @@ export async function POST(req: NextRequest) {
     })
   )
 
-  const sent    = results.filter(r => r.status === 'fulfilled' && (r.value as any).success).length
-  const failed  = results.filter(r => r.status === 'fulfilled' && !(r.value as any).success).length
+  const sent    = results.filter(r => r.status === 'fulfilled' && ((r.value as { success: boolean; skipped?: boolean }) .success)).length
+  const failed  = results.filter(r => r.status === 'fulfilled' && !((r.value as { success: boolean; skipped?: boolean }) .success)).length
   const crashed = results.filter(r => r.status === 'rejected').length
 
   return NextResponse.json({

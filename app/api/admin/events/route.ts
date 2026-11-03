@@ -6,8 +6,7 @@ import { requireAuth } from '@/lib/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { geocodeZip } from './geocode'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const db = () => createAdminClient() as any
+const db = () => createAdminClient()
 
 async function requireAdmin() {
   const user = await requireAuth()

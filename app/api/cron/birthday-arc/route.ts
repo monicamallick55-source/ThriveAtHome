@@ -18,7 +18,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const db = supabaseAdmin as any
   const now = new Date()
   const todayMMDD = `${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
   const tomorrowDate = new Date(now.getTime() + 24 * 60 * 60 * 1000)
@@ -52,7 +51,7 @@ export async function POST(req: NextRequest) {
   // Day-before SMS
   for (const member of birthdayTomorrow) {
     if (!member.phone) continue
-    await db.from('notification_queue').insert({
+    await supabaseAdmin.from('notification_queue').insert({
       member_id: member.id,
       channel: 'sms',
       phone: member.phone,
@@ -91,7 +90,7 @@ export async function POST(req: NextRequest) {
 
       if (res.ok) {
         const callData = await res.json()
-        await db.from('call_logs').insert({
+        await supabaseAdmin.from('call_logs').insert({
           member_id: member.id,
           call_type: 'birthday',
           retell_call_id: callData.call_id,
@@ -106,7 +105,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Also notify family portal via navigator task
-    await db.from('navigator_tasks').insert({
+    await supabaseAdmin.from('navigator_tasks').insert({
       member_id: member.id,
       task_type: 'birthday_notification',
       description: `Today is ${member.first_name}'s birthday! Consider sending a family portal note or arranging a surprise if family is enrolled.`,

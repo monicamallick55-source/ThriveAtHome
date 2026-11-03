@@ -22,7 +22,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Retell not configured', details: 'Set RETELL_API_KEY and RETELL_ARIA_AGENT_ID in env vars' }, { status: 503 })
   }
 
-  const db = supabaseAdmin as any
 
   // Fetch active members with phone numbers who haven't had a call today
   const today = new Date().toISOString().slice(0, 10)
@@ -86,7 +85,7 @@ export async function POST(req: NextRequest) {
       const callData = await res.json()
 
       // Log the call
-      await db.from('call_logs').insert({
+      await supabaseAdmin.from('call_logs').insert({
         member_id: member.id,
         call_type: 'aria_checkin',
         retell_call_id: callData.call_id,
@@ -97,9 +96,9 @@ export async function POST(req: NextRequest) {
     })
   )
 
-  const initiated = results.filter(r => r.status === 'fulfilled' && (r.value as any).success).length
-  const skipped   = results.filter(r => r.status === 'fulfilled' && (r.value as any).skipped).length
-  const failed    = results.filter(r => r.status === 'fulfilled' && !(r.value as any).success && !(r.value as any).skipped).length
+  const initiated = results.filter(r => r.status === 'fulfilled' && ((r.value as { success: boolean; skipped: boolean }).success)).length
+  const skipped   = results.filter(r => r.status === 'fulfilled' && ((r.value as { success: boolean; skipped: boolean }).skipped)).length
+  const failed    = results.filter(r => r.status === 'fulfilled' && !((r.value as { success: boolean; skipped: boolean }).success) && !((r.value as { success: boolean; skipped: boolean }).skipped)).length
 
   return NextResponse.json({ total: members.length, initiated, skipped, failed })
 }

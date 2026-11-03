@@ -62,7 +62,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const db = supabaseAdmin as any
   const now = new Date()
   const ago7  = new Date(now.getTime() - 7  * 24 * 60 * 60 * 1000).toISOString()
   const ago30 = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString()
@@ -84,21 +83,21 @@ export async function POST(req: NextRequest) {
     try {
       // Parallel signal fetching
       const [missedCalls, serviceBookings, communityEvents, messages] = await Promise.all([
-        db.from('call_logs')
+        supabaseAdmin.from('call_logs')
           .select('id', { count: 'exact', head: true })
           .eq('member_id', member.id)
           .eq('call_type', 'aria_checkin')
           .in('status', ['no_answer', 'failed', 'busy'])
           .gte('created_at', ago7),
-        db.from('service_bookings')
+        supabaseAdmin.from('service_bookings')
           .select('id', { count: 'exact', head: true })
           .eq('member_id', member.id)
           .gte('created_at', ago30),
-        db.from('event_registrations')
+        supabaseAdmin.from('event_registrations')
           .select('id', { count: 'exact', head: true })
           .eq('member_id', member.id)
           .gte('created_at', ago30),
-        db.from('messages')
+        supabaseAdmin.from('messages')
           .select('id', { count: 'exact', head: true })
           .eq('sender_member_id', member.id)
           .gte('created_at', ago7),
@@ -116,7 +115,7 @@ export async function POST(req: NextRequest) {
       const { score, risk, flags } = computeWellbeingScore(signals)
 
       // Upsert weekly analytics record
-      await db.from('member_wellbeing_scores').upsert({
+      await supabaseAdmin.from('member_wellbeing_scores').upsert({
         member_id: member.id,
         week_of: weekStart,
         wellbeing_score: score,
@@ -128,7 +127,7 @@ export async function POST(req: NextRequest) {
 
       // Create navigator task for high-risk members
       if (risk === 'critical' || risk === 'high') {
-        await db.from('navigator_tasks').insert({
+        await supabaseAdmin.from('navigator_tasks').insert({
           member_id: member.id,
           task_type: 'wellbeing_alert',
           description: `Wellbeing score: ${score}/100 (${risk.toUpperCase()}). Flags: ${flags.join(', ')}. Review member activity and check in proactively.`,

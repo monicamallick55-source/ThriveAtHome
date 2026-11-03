@@ -61,11 +61,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Plan must be basics or complete' }, { status: 400 })
   }
 
-  const db = supabaseAdmin as any
-
   try {
     // 1. Create organization record
-    const { data: org, error: orgError } = await db
+    const { data: org, error: orgError } = await supabaseAdmin
       .from('organizations')
       .insert({
         name: org_name,
@@ -108,7 +106,7 @@ export async function POST(req: NextRequest) {
       console.error('[b2b-signup] Auth user creation error:', authError)
 
       // Roll back org creation if auth fails
-      await db.from('organizations').delete().eq('id', org.id)
+      await supabaseAdmin.from('organizations').delete().eq('id', org.id)
 
       if (authError.message?.includes('already registered')) {
         return NextResponse.json({ error: 'An account with this email already exists.' }, { status: 409 })
@@ -117,7 +115,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 3. Create org_members record linking admin to org
-    await db.from('org_members').insert({
+    await supabaseAdmin.from('org_members').insert({
       org_id: org.id,
       auth_id: authData.user.id,
       email: admin_email,
@@ -131,7 +129,7 @@ export async function POST(req: NextRequest) {
     })
 
     // 4. Seed b2b_platform_config with defaults
-    await db.from('b2b_platform_config').insert({
+    await supabaseAdmin.from('b2b_platform_config').insert({
       org_id: org.id,
       plan,
       seat_limit: member_count || 25,
