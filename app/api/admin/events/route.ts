@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
         title: body.title.trim(),
         description: body.description?.trim() ?? null,
         event_date: body.event_date,
-        location: body.location?.trim() ?? null,
+        location_address: body.location?.trim() ?? null,
         zip_code: body.zip_code?.trim() ?? null,
         latitude,
         longitude,
