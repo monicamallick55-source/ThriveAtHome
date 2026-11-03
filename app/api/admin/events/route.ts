@@ -44,13 +44,17 @@ export async function POST(req: NextRequest) {
       title: string
       description?: string
       event_date: string
+      event_time?: string
       location?: string
       zip_code?: string
-      max_attendees?: number
       circle_id?: string
-      event_type?: string
-      is_virtual?: boolean
-      meeting_link?: string
+      circle_ids?: string[]
+      format?: string
+      is_platform_wide?: boolean
+      is_recurring?: boolean
+      video_link?: string
+      dial_in_number?: string
+      dial_in_code?: string
     }
 
     if (!body.title?.trim()) {
@@ -77,15 +81,19 @@ export async function POST(req: NextRequest) {
         title: body.title.trim(),
         description: body.description?.trim() ?? null,
         event_date: body.event_date,
+        event_time: body.event_time ?? null,
         location_address: body.location?.trim() ?? null,
         zip_code: body.zip_code?.trim() ?? null,
         latitude,
         longitude,
-        max_attendees: body.max_attendees ?? null,
         circle_id: body.circle_id ?? null,
-        event_type: body.event_type ?? 'general',
-        is_virtual: body.is_virtual ?? false,
-        meeting_link: body.meeting_link?.trim() ?? null,
+        circle_ids: body.circle_ids ?? null,
+        format: body.format ?? 'phone_only',
+        is_platform_wide: body.is_platform_wide ?? false,
+        is_recurring: body.is_recurring ?? false,
+        video_link: body.video_link?.trim() ?? null,
+        dial_in_number: body.dial_in_number?.trim() ?? null,
+        dial_in_code: body.dial_in_code?.trim() ?? null,
       })
       .select('*')
       .maybeSingle()
