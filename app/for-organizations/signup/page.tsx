@@ -411,9 +411,14 @@ export default function B2BSignupPage() {
               </div>
 
               <div style={{ background: '#fff', borderRadius: '10px', padding: '14px 16px', border: '1px solid #e0e0e0', fontSize: '13px', color: '#666', marginBottom: '20px' }}>
-                <strong style={{ color: '#1a1a1a' }}>Per-member pricing</strong> (billed monthly after enrollment):<br />
-                Basics tier: <strong>$25/member/mo</strong> · Complete tier: <strong>$45/member/mo</strong><br />
-                Volume discounts available for 100+ members — contact partnerships@thriveathome.com
+                <strong style={{ color: '#1a1a1a' }}>Monthly SaaS</strong> (billed after 30-day free trial, based on active members):<br /><br />
+                <span style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 16px' }}>
+                  <span>≤ 60 active members</span><strong style={{ color: '#2d6a4f' }}>$50 flat/mo</strong>
+                  <span>61–250 active members</span><strong style={{ color: '#2d6a4f' }}>$75 + $1.25/member</strong>
+                  <span>250+ active members</span><strong style={{ color: '#2d6a4f' }}>$250 + $1.00/member</strong>
+                </span>
+                <br />AI metered usage billed in arrears (Aria calls $0.08, SMS $0.02, transcription $0.03).<br />
+                <strong>You set your own member-facing pricing</strong> — TAH earns the SaaS fee regardless.
               </div>
 
               <button onClick={handlePlanSubmit} style={{ width: '100%', padding: '14px', borderRadius: '10px', background: '#2d6a4f', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>

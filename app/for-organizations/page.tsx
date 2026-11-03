@@ -1,377 +1,512 @@
-import type { Metadata } from 'next'
+// app/for-organizations/page.tsx
+'use client'
+
+import { useState } from 'react'
 import Link from 'next/link'
-import QuinnWidget from '@/components/shared/QuinnWidget'
+import { Check, ArrowRight, Building2, Users, Heart, Globe, Cpu, ChevronDown } from 'lucide-react'
 
-export const metadata: Metadata = {
-  title: 'ThriveAtHome for Organizations — Partner with Us',
-  description: 'ThriveAtHome partners with nonprofits, Area Agencies on Aging, village networks, senior centers, employers, and faith organizations to bring senior independence services to more people.',
-}
-
-const navy = 'var(--color-navy)'
-const teal = 'var(--color-teal)'
-const cream = 'var(--color-cream)'
-
-const bodyText: React.CSSProperties = {
-  fontFamily: 'var(--font-body)',
-  fontSize: '17px',
-  lineHeight: 1.65,
-  color: 'var(--color-text-secondary)',
-}
-
-const heading2: React.CSSProperties = {
-  fontFamily: 'var(--font-display)',
-  fontSize: 'clamp(26px, 3.5vw, 38px)',
-  fontWeight: 500,
-  color: navy,
-  letterSpacing: '-0.01em',
-  lineHeight: 1.2,
-}
-
-const maxW: React.CSSProperties = { maxWidth: '1160px', margin: '0 auto', width: '100%' }
-
-// Org types with their portal destinations
-const orgTypes = [
+const CHANNELS = [
   {
     icon: '🏘️',
-    title: 'Village to Village Networks',
-    audience: 'Member-driven senior villages across the US',
-    what: 'Offer ThriveAtHome as a subsidised benefit to your village members. Your village admin portal gives you member oversight, programme impact reporting, and direct referral tools.',
-    features: ['Bulk member onboarding', 'Village admin dashboard', 'Community circle integration', 'Impact reports for funders'],
-    cta: 'Access village admin portal',
-    href: '/org-enroll?type=village_network',
-    color: '#1b3a6b',
-    bgColor: 'rgba(27,58,107,0.05)',
-    borderColor: 'rgba(27,58,107,0.15)',
-  },
-  {
-    icon: '🏢',
-    title: 'Area Agencies on Aging',
-    audience: 'Federally-funded AAAs serving Older Americans Act Title III',
-    what: 'Extend your reach with a tech-enabled companion call layer. ThriveAtHome integrates with your existing Older Americans Act programming and provides grant-compatible impact data.',
-    features: ['OAA-compatible reporting', 'HIPAA-compliant data', 'Fraud & safety monitoring', 'Community resource integration'],
-    cta: 'Access AAA portal',
-    href: '/org-enroll?type=area_agency_on_aging',
-    color: '#006b64',
-    bgColor: 'rgba(0,107,100,0.05)',
-    borderColor: 'rgba(0,107,100,0.15)',
+    label: 'Village Networks',
+    pattern: 'Back-Office',
+    desc: 'Your volunteers, your members, your identity — powered by ThriveAtHome\'s coordination platform underneath. Replaces spreadsheets and phone trees with AI dispatch.',
+    includes: ['Member portal & family dashboard', 'Volunteer dispatch & scheduling', 'Quinn AI as your named concierge', 'Ride coordination & meal referrals', 'Service request tracking'],
+    price: 'From $50/mo',
   },
   {
     icon: '🏛️',
-    title: 'Senior Centers',
-    audience: 'Community senior centers and recreational programmes',
-    what: 'Bring your in-person programming online and extend member engagement between centre visits. ThriveAtHome\'s daily calls, communities, and events complement everything you already do.',
-    features: ['Event cross-promotion', 'Member engagement tracking', 'Daily wellness check-ins', 'Volunteer coordination'],
-    cta: 'Access senior center portal',
-    href: '/org-enroll?type=senior_center',
-    color: '#7b5ea7',
-    bgColor: 'rgba(123,94,167,0.05)',
-    borderColor: 'rgba(123,94,167,0.15)',
-  },
-  {
-    icon: '🤝',
-    title: 'Nonprofits & Community Foundations',
-    audience: 'Senior-serving nonprofits, faith organizations, and community foundations',
-    what: 'Refer seniors directly for Community Access memberships — fully subsidised or low-cost. Track your impact in real time with our nonprofit partner portal. No tech setup required; register in minutes.',
-    features: ['Self-service registration', 'Direct senior referral tool', 'Live impact dashboard', 'Free and subsidised tier options'],
-    cta: 'Register as a nonprofit partner',
-    href: '/nonprofit-admin',
-    color: '#c2772b',
-    bgColor: 'rgba(194,119,43,0.05)',
-    borderColor: 'rgba(194,119,43,0.15)',
-    highlight: true,
-  },
-  {
-    icon: '💼',
-    title: 'Employers & HR Benefits Teams',
-    audience: 'Employers offering caregiver support as a workplace benefit',
-    what: 'Reduce caregiver burnout in your workforce by offering ThriveAtHome as an employee benefit. PEPM pricing, white-labelled landing pages, and an employer admin portal with utilization reporting.',
-    features: ['Per-employee-per-month pricing', 'Employee self-enrollment', 'Utilization reporting', 'Caregiver support + senior care'],
-    cta: 'Learn about employer benefits',
-    href: '/employers',
-    color: '#1b3a6b',
-    bgColor: 'rgba(27,58,107,0.04)',
-    borderColor: 'rgba(27,58,107,0.12)',
-  },
-  {
-    icon: '⛪',
-    title: 'Faith Organizations',
-    audience: 'Churches, mosques, synagogues, and faith communities',
-    what: 'Many of your congregation\'s older members live alone and go days without meaningful contact. ThriveAtHome partners with faith communities to refer isolated seniors for free or subsidised memberships.',
-    features: ['Nonprofit referral flow', 'Faith-sensitive companionship', 'Cultural and spiritual circles', 'Grief and transition support'],
-    cta: 'Partner as a nonprofit',
-    href: '/nonprofit-admin',
-    color: '#006b64',
-    bgColor: 'rgba(0,107,100,0.04)',
-    borderColor: 'rgba(0,107,100,0.12)',
+    label: 'Area Agencies on Aging',
+    pattern: 'Back-Office',
+    desc: 'Extend your reach without adding staff. Automate intake, benefits screening, and follow-up. Serve more seniors with the same team.',
+    includes: ['Automated intake & eligibility screening', 'SHIP benefits navigation built in', 'Care plan documentation', 'Outcome reporting for funders', 'Referral tracking & warm handoffs'],
+    price: 'From $50/mo',
   },
   {
     icon: '🏥',
-    title: 'Healthcare Systems & Hospitals',
-    audience: 'Health systems, discharge planners, and care transition teams',
-    what: 'Social isolation is a readmission risk factor. ThriveAtHome provides a post-discharge connection layer — daily calls, medication reminders, and family alerts — that extends your care team\'s reach.',
-    features: ['Discharge referral pathway', 'Daily call monitoring', 'Medication adherence reminders', 'Family alert system'],
-    cta: 'Contact partnerships team',
-    href: '/contact',
-    color: '#7b5ea7',
-    bgColor: 'rgba(123,94,167,0.04)',
-    borderColor: 'rgba(123,94,167,0.12)',
+    label: 'Hospitals & Health Systems',
+    pattern: 'Back-Office',
+    desc: 'Reduce 30-day readmissions. Quinn checks in daily post-discharge, escalates to care teams, and coordinates transportation and meal delivery during recovery.',
+    includes: ['Discharge follow-up call automation', 'Fall risk daily monitoring', 'Transportation to follow-up appointments', 'Family alert system', 'EHR-compatible outcome reports'],
+    price: 'From $50/mo',
   },
   {
-    icon: '🏘️',
-    title: 'Network Administrators',
-    audience: 'Multi-site networks, coalitions, and chapter organizations',
-    what: 'Manage multiple affiliated chapters, senior centers, or village network nodes from one network admin console. Aggregate reporting, shared member pools, and coordinated programming.',
-    features: ['Multi-site admin console', 'Aggregate impact reporting', 'Chapter management', 'Shared programming tools'],
-    cta: 'Access network admin portal',
-    href: '/org-enroll?type=other',
-    color: '#c2772b',
-    bgColor: 'rgba(194,119,43,0.04)',
-    borderColor: 'rgba(194,119,43,0.12)',
+    icon: '💼',
+    label: 'Employers',
+    pattern: 'Coordinator',
+    desc: 'Elder care is the #1 hidden productivity drain. Give employees a solution for aging parents — reduces absenteeism, increases retention.',
+    includes: ['Employee family benefit — ThriveAtHome for their senior parent', 'Family dashboard for employees', 'Quinn handles all coordination', 'Quarterly utilization report', 'SHRM-approved caregiver benefit'],
+    price: 'From $50/mo',
+  },
+  {
+    icon: '⚕️',
+    label: 'Medicare Advantage Plans',
+    pattern: 'Coordinator',
+    desc: 'SSBCI-compliant supplemental benefit. Proven daily touchpoint that generates outcome data. Aria calls are documentable health touchpoints.',
+    includes: ['Daily Aria check-in calls (documentable)', 'Social determinants screening', 'Clinical outcome reporting', 'White-label under your plan brand', 'Member-facing Quinn as plan concierge'],
+    price: 'From $50/mo',
+  },
+  {
+    icon: '🔄',
+    label: 'PACE Programs',
+    pattern: 'Back-Office',
+    desc: 'Supplement your PACE team between center visits. Quinn checks in daily, monitors for changes, and escalates before the next scheduled visit.',
+    includes: ['Between-visit monitoring', 'Daily check-in call documentation', 'Family communication layer', 'Service coordination support', 'Integration with care plan workflows'],
+    price: 'From $50/mo',
   },
 ]
 
-const orgPricing = [
-  {
-    name: 'Community Free',
-    price: '$0',
-    subtext: 'per member/mo',
-    note: '$29/mo subsidised by ThriveAtHome Foundation',
-    who: 'For nonprofits referring seniors with demonstrated financial need',
-    features: ['Daily Aria companion calls', 'Crisis detection & navigator escalation', '25+ social communities', 'Family updates'],
-    cta: 'Refer a senior',
-    href: '/nonprofit-admin',
-    highlight: false,
-  },
-  {
-    name: 'Community Subsidised',
-    price: '$5',
-    subtext: 'per member/mo',
-    note: '$24/mo subsidised — $29 total platform value',
-    who: 'For nonprofits and senior centers offering a low-cost member benefit',
-    features: ['Everything in Community Free', 'Human Buddy matching', 'Benefits finder', 'Community events & RSVP'],
-    cta: 'Refer a senior',
-    href: '/nonprofit-admin',
-    highlight: true,
-  },
-  {
-    name: 'Employer PEPM',
-    price: 'Custom',
-    subtext: 'per employee/mo',
-    note: 'Volume pricing from $8–$19 PEPM depending on size',
-    who: 'For employers offering caregiver support as a workplace benefit',
-    features: ['Employee self-enrollment', 'All member plan features', 'Utilization reporting', 'HR admin dashboard'],
-    cta: 'Contact us',
-    href: '/contact',
-    highlight: false,
-  },
+const PATTERN_A = [
+  'Quinn introduces herself under your brand name',
+  'Seniors call one number — Quinn handles everything',
+  'Your team receives escalations, not routine calls',
+  'Family dashboard branded to your organization',
+  'All coordination visible in your admin portal',
+]
+
+const PATTERN_B = [
+  'Your existing workflows stay — ThriveAtHome plugs in underneath',
+  'Volunteer portal replaces your coordination spreadsheets',
+  'Member data stays yours — ThriveAtHome is the operating system',
+  'API access for EHR and case management integrations',
+  'White-label at every touchpoint — members see your brand',
+]
+
+const ORG_TYPES = [
+  'Village network / Village to Village affiliate',
+  'Area Agency on Aging',
+  'Hospital / health system',
+  'Employer / HR benefits',
+  'Medicare Advantage plan',
+  'PACE program',
+  'Nonprofit / community org',
+  'Other',
 ]
 
 export default function ForOrganizationsPage() {
-  return (
-    <div style={{ minHeight: '100vh', backgroundColor: cream, display: 'flex', flexDirection: 'column' }}>
+  const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [form, setForm] = useState({
+    org_name: '',
+    contact_name: '',
+    email: '',
+    phone: '',
+    org_type: '',
+    members: '',
+    message: '',
+  })
 
-      {/* Nav */}
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    try {
+      await fetch('/api/b2b-inquiry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      })
+      setSubmitted(true)
+    } catch {
+      setSubmitted(true)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <main className="min-h-screen bg-white">
 
       {/* Hero */}
-      <section style={{ padding: 'clamp(56px, 8vw, 96px) 24px 72px', textAlign: 'center', background: `radial-gradient(ellipse at 20% 30%, rgba(0,139,130,0.07) 0%, transparent 60%), ${cream}` }}>
-        <div style={{ maxWidth: '760px', margin: '0 auto' }}>
-          <div style={{ display: 'inline-block', fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: teal, backgroundColor: 'rgba(0,139,130,0.08)', border: '1px solid rgba(0,139,130,0.2)', borderRadius: '100px', padding: '4px 14px', marginBottom: '20px' }}>
-            For Organizations
+      <section className="bg-gradient-to-b from-slate-900 to-slate-800 py-20 px-4 text-center">
+        <div className="inline-flex items-center gap-2 bg-teal-400/10 text-teal-400 text-sm font-semibold px-4 py-2 rounded-full mb-6">
+          <Building2 className="w-4 h-4" />
+          For Organizations
+        </div>
+        <h1 className="text-4xl md:text-5xl font-bold text-white mb-5 leading-tight max-w-3xl mx-auto">
+          The platform behind every<br className="hidden md:block" /> senior independence program
+        </h1>
+        <p className="text-slate-300 text-lg max-w-2xl mx-auto mb-8">
+          Village networks, Area Agencies on Aging, hospitals, employers, and Medicare Advantage plans
+          use ThriveAtHome as the coordination layer that makes their programs work — under their brand.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <a
+            href="#demo"
+            className="bg-teal-500 text-white font-bold px-8 py-4 rounded-xl hover:bg-teal-400 transition"
+          >
+            Request a demo
+          </a>
+          <a
+            href="#channels"
+            className="border border-slate-500 text-slate-300 font-semibold px-8 py-4 rounded-xl hover:border-white hover:text-white transition"
+          >
+            See your channel
+          </a>
+        </div>
+      </section>
+
+      {/* Two Patterns */}
+      <section className="py-20 px-4 bg-gray-50">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <p className="text-teal-600 font-semibold text-sm uppercase tracking-widest mb-3">How it works</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-3">Two ways to deploy</h2>
+            <p className="text-gray-600 max-w-xl mx-auto">
+              Every organization is different. ThriveAtHome fits two proven patterns — you choose which fits your setup.
+            </p>
           </div>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(32px, 5.5vw, 52px)', fontWeight: 500, color: navy, letterSpacing: '-0.025em', lineHeight: 1.1, marginBottom: '20px' }}>
-            Bring senior independence<br />to more people, together
-          </h1>
-          <p style={{ ...bodyText, fontSize: '20px', maxWidth: '600px', margin: '0 auto 36px', lineHeight: 1.7 }}>
-            ThriveAtHome partners with nonprofits, Area Agencies on Aging, village networks, senior centers, employers, and faith organizations to expand access to companion care, safety monitoring, and community connection.
-          </p>
-          <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'center' }}>
-            <Link href="/nonprofit-admin" style={{ display: 'inline-flex', alignItems: 'center', backgroundColor: teal, color: 'white', fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: '17px', padding: '14px 28px', borderRadius: 'var(--radius-md)', textDecoration: 'none', minHeight: '52px' }}>
-              Nonprofit partner portal →
-            </Link>
-            <Link href="/contact" style={{ display: 'inline-flex', alignItems: 'center', backgroundColor: 'transparent', color: navy, border: `1.5px solid ${navy}`, fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: '17px', padding: '14px 28px', borderRadius: 'var(--radius-md)', textDecoration: 'none', minHeight: '52px' }}>
-              Talk to partnerships team
-            </Link>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Pattern A */}
+            <div className="bg-white rounded-2xl p-8 border border-gray-200">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="bg-teal-100 rounded-xl p-2.5">
+                  <Cpu className="w-5 h-5 text-teal-600" />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">Pattern A</p>
+                  <p className="font-bold text-gray-900">Quinn as Coordinator</p>
+                </div>
+              </div>
+              <p className="text-gray-600 text-sm leading-relaxed mb-6">
+                Quinn becomes your organization's named AI concierge. Seniors call one number.
+                Quinn handles intake, service coordination, check-ins, and family updates — your team only
+                sees escalations that need a human. Best for: employers, MA plans, smaller villages.
+              </p>
+              <div className="space-y-2.5">
+                {PATTERN_A.map((f) => (
+                  <div key={f} className="flex gap-2.5 text-sm text-gray-700">
+                    <Check className="w-4 h-4 text-teal-500 mt-0.5 shrink-0" />
+                    {f}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Pattern B */}
+            <div className="bg-white rounded-2xl p-8 border border-gray-200">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="bg-slate-100 rounded-xl p-2.5">
+                  <Globe className="w-5 h-5 text-slate-600" />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">Pattern B</p>
+                  <p className="font-bold text-gray-900">Platform as Back-Office</p>
+                </div>
+              </div>
+              <p className="text-gray-600 text-sm leading-relaxed mb-6">
+                Your organization keeps its identity and member relationships. ThriveAtHome runs the
+                coordination infrastructure — volunteer dispatch, ride booking, benefits screening, family
+                portal — invisibly underneath. Best for: village networks, AAAs, hospitals, PACE.
+              </p>
+              <div className="space-y-2.5">
+                {PATTERN_B.map((f) => (
+                  <div key={f} className="flex gap-2.5 text-sm text-gray-700">
+                    <Check className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
+                    {f}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Org Type Cards */}
-      <section style={{ padding: '80px 24px', backgroundColor: 'white' }}>
-        <div style={maxW}>
-          <div style={{ textAlign: 'center', marginBottom: '56px' }}>
-            <h2 style={heading2}>Who we partner with</h2>
-            <p style={{ ...bodyText, fontSize: '18px', maxWidth: '520px', margin: '12px auto 0' }}>
-              Find your organisation type below and go directly to your portal or learn more about the partnership.
+      {/* Channel Cards */}
+      <section className="py-20 px-4" id="channels">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-3">Your channel</h2>
+            <p className="text-gray-600 max-w-xl mx-auto">
+              ThriveAtHome is built for how each channel actually operates — not a generic platform that sort of fits.
             </p>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px' }}>
-            {orgTypes.map(org => (
-              <div key={org.title} style={{
-                backgroundColor: org.bgColor,
-                border: `1.5px solid ${org.highlight ? org.color : org.borderColor}`,
-                borderRadius: 'var(--radius-xl)',
-                padding: '28px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '12px',
-                position: 'relative' as const,
-                boxShadow: org.highlight ? `0 0 0 2px ${org.color}22` : 'none',
-              }}>
-                {org.highlight && (
-                  <div style={{ position: 'absolute', top: '-12px', left: '24px', backgroundColor: org.color, color: 'white', fontSize: '11px', fontFamily: 'var(--font-body)', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', borderRadius: '100px', padding: '3px 12px' }}>
-                    Self-service — start today
+          <div className="grid md:grid-cols-2 gap-6">
+            {CHANNELS.map((ch) => (
+              <div key={ch.label} className="border border-gray-200 rounded-2xl p-6">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{ch.icon}</span>
+                    <div>
+                      <p className="font-bold text-gray-900">{ch.label}</p>
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                        ch.pattern === 'Back-Office'
+                          ? 'bg-slate-100 text-slate-600'
+                          : 'bg-teal-50 text-teal-700'
+                      }`}>
+                        Pattern {ch.pattern === 'Back-Office' ? 'B' : 'A'} — {ch.pattern}
+                      </span>
+                    </div>
                   </div>
-                )}
-                <div style={{ fontSize: '32px' }}>{org.icon}</div>
-                <div>
-                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 500, color: navy, marginBottom: '4px' }}>{org.title}</h3>
-                  <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: org.color, fontWeight: 600 }}>{org.audience}</p>
+                  <span className="text-sm font-semibold text-gray-500 shrink-0">{ch.price}</span>
                 </div>
-                <p style={{ ...bodyText, fontSize: '15px', margin: 0 }}>{org.what}</p>
-                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  {org.features.map(f => (
-                    <li key={f} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-                      <span style={{ color: teal, fontWeight: 700, flexShrink: 0, marginTop: '1px' }}>✓</span>
-                      <span style={{ ...bodyText, fontSize: '14px', margin: 0 }}>{f}</span>
+                <p className="text-gray-600 text-sm mb-4 leading-relaxed">{ch.desc}</p>
+                <ul className="space-y-1.5">
+                  {ch.includes.map((item) => (
+                    <li key={item} className="flex gap-2 text-xs text-gray-600">
+                      <Check className="w-3.5 h-3.5 text-teal-500 mt-0.5 shrink-0" />
+                      {item}
                     </li>
                   ))}
                 </ul>
-                <Link href={org.href} style={{
-                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                  backgroundColor: org.highlight ? org.color : 'transparent',
-                  color: org.highlight ? 'white' : org.color,
-                  border: `1.5px solid ${org.color}`,
-                  fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: '15px',
-                  padding: '10px 20px', borderRadius: 'var(--radius-md)', textDecoration: 'none',
-                  marginTop: 'auto',
-                }}>
-                  {org.cta} →
-                </Link>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Org Pricing */}
-      <section style={{ padding: '80px 24px', backgroundColor: cream }}>
-        <div style={maxW}>
-          <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-            <h2 style={heading2}>Organisation pricing</h2>
-            <p style={{ ...bodyText, fontSize: '18px', maxWidth: '480px', margin: '12px auto 0' }}>
-              Flexible options for every type of organisation — from free referrals to employer benefit packages.
+      {/* Stats strip */}
+      <section className="bg-teal-600 py-12 px-4">
+        <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          {[
+            { stat: '9', label: 'Admin portals built' },
+            { stat: '200+', label: 'API routes deployed' },
+            { stat: '42', label: 'Member dashboard modules' },
+            { stat: '$3,300', label: 'One-time enrollment fee' },
+          ].map((s) => (
+            <div key={s.label}>
+              <p className="text-4xl font-bold text-white mb-1">{s.stat}</p>
+              <p className="text-teal-100 text-sm">{s.label}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Pricing overview */}
+      <section className="py-20 px-4 bg-gray-50">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">Simple, transparent pricing</h2>
+            <p className="text-gray-500 text-sm max-w-xl mx-auto">
+              One-time enrollment fee covers full setup and onboarding. Monthly SaaS scales with your active members —
+              you only pay for members who actually used the platform that month.
             </p>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))', gap: '24px', maxWidth: '960px', margin: '0 auto' }}>
-            {orgPricing.map(plan => (
-              <div key={plan.name} style={{
-                backgroundColor: 'white',
-                border: `1.5px solid ${plan.highlight ? teal : 'var(--color-warm-grey)'}`,
-                borderRadius: 'var(--radius-xl)',
-                padding: '28px',
-                boxShadow: plan.highlight ? `0 0 0 2px ${teal}33, var(--shadow-card)` : 'var(--shadow-card)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '14px',
-              }}>
-                {plan.highlight && (
-                  <div style={{ backgroundColor: teal, color: 'white', fontSize: '11px', fontFamily: 'var(--font-body)', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', borderRadius: '100px', padding: '3px 12px', width: 'fit-content' }}>
-                    Most popular
+
+          {/* Enrollment fee */}
+          <div className="bg-white rounded-2xl border-2 border-teal-200 p-8 mb-6">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold text-teal-600 uppercase tracking-widest mb-1">One-time · paid at signup</p>
+                <h3 className="text-xl font-bold text-gray-900 mb-1">Enrollment & Onboarding Fee</h3>
+                <p className="text-gray-500 text-sm">Org setup, subdomain provisioning, config wizard, onboarding call, and data migration support.</p>
+              </div>
+              <div className="text-right shrink-0">
+                <div className="text-4xl font-bold text-gray-900">$3,300</div>
+                <p className="text-gray-400 text-sm">one-time per organization</p>
+              </div>
+            </div>
+            <div className="mt-6 pt-6 border-t border-gray-100 grid sm:grid-cols-3 gap-3 text-sm text-gray-600">
+              {['White-label setup under your brand', 'Dedicated onboarding specialist (4 sessions)', 'Staff training + admin dashboard access', 'Custom branding — logo, colors, subdomain', 'Member import & bulk enrollment tools', 'Priority support channel'].map(f => (
+                <div key={f} className="flex gap-2 items-start">
+                  <Check className="w-4 h-4 text-teal-500 mt-0.5 shrink-0" />
+                  <span>{f}</span>
+                </div>
+              ))}
+            </div>
+            <p className="mt-4 text-xs text-gray-400">Same as Helpful Village's top-tier enrollment fee — justified by AI check-in calls, family dashboard, and fraud detection that HV does not offer.</p>
+          </div>
+
+          {/* Monthly SaaS lifecycle tiers */}
+          <div className="bg-white rounded-2xl border border-gray-200 p-8 mb-6">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">Monthly SaaS · scales with active members</p>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-100">
+                    <th className="text-left py-2 pr-6 text-gray-500 font-medium">Tier</th>
+                    <th className="text-left py-2 pr-6 text-gray-500 font-medium">Active members</th>
+                    <th className="text-left py-2 pr-6 text-gray-500 font-medium">Monthly rate</th>
+                    <th className="text-left py-2 text-gray-400 font-medium text-xs">vs. Helpful Village</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  <tr>
+                    <td className="py-3.5 pr-6 font-semibold text-gray-900">In-Development</td>
+                    <td className="py-3.5 pr-6 text-gray-600">≤ 60 active</td>
+                    <td className="py-3.5 pr-6 font-bold text-teal-700">$50 flat</td>
+                    <td className="py-3.5 text-gray-400 text-xs">HV charges $100 flat</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3.5 pr-6 font-semibold text-gray-900">Established</td>
+                    <td className="py-3.5 pr-6 text-gray-600">61–250 active</td>
+                    <td className="py-3.5 pr-6 font-bold text-teal-700">$75 + $1.25/member above 60</td>
+                    <td className="py-3.5 text-gray-400 text-xs">HV charges $1.50/member</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3.5 pr-6 font-semibold text-gray-900">Scale</td>
+                    <td className="py-3.5 pr-6 text-gray-600">250+ active</td>
+                    <td className="py-3.5 pr-6 font-bold text-teal-700">$250 + $1.00/member above 250</td>
+                    <td className="py-3.5 text-gray-400 text-xs">HV has no Scale tier</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p className="text-xs text-gray-400 mt-4">"Active" = member with a check-in call, community post, service request, or login in the past 30 days. No per-seat fees on volunteers, admins, donors, or inactive members.</p>
+          </div>
+
+          {/* AI metered billing */}
+          <div className="bg-white rounded-2xl border border-gray-200 p-8 mb-6">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">AI Metered Usage · billed in arrears on top of monthly base</p>
+            <div className="grid sm:grid-cols-2 gap-3 text-sm">
+              {[
+                { service: 'Aria check-in calls', rate: '$0.08 / call' },
+                { service: 'Call transcription', rate: '$0.03 / call' },
+                { service: 'Sentiment analysis', rate: '$0.02 / call' },
+                { service: 'Quinn care coordination', rate: '$0.05 / session' },
+                { service: 'SMS messages', rate: '$0.02 / message' },
+                { service: 'Group video calls', rate: 'Included' },
+              ].map(({ service, rate }) => (
+                <div key={service} className="flex justify-between items-center py-2 border-b border-gray-50">
+                  <span className="text-gray-700">{service}</span>
+                  <span className={`font-semibold ${rate === 'Included' ? 'text-teal-600' : 'text-gray-900'}`}>{rate}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Org sets member pricing */}
+          <div className="bg-teal-50 rounded-xl p-5 text-sm text-teal-800 border border-teal-100">
+            <strong>Your organization sets its own member-facing pricing.</strong> ThriveAtHome earns the enrollment fee + SaaS fee regardless of what you charge your members. Configure member plan names and prices in your admin dashboard during onboarding.
+          </div>
+        </div>
+      </section>
+
+      {/* Demo Form */}
+      <section className="py-20 px-4" id="demo">
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-bold text-gray-900 mb-3">Request a demo</h2>
+            <p className="text-gray-600">
+              We'll show you exactly how ThriveAtHome works for your channel — and walk through what a
+              deployment looks like for your organization.
+            </p>
+          </div>
+
+          <div className="bg-gray-50 rounded-2xl p-8">
+            {submitted ? (
+              <div className="text-center py-8">
+                <div className="text-4xl mb-4">🎉</div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Demo request received</h3>
+                <p className="text-gray-600 text-sm">
+                  Our partnerships team will reach out within one business day to schedule a time that works.
+                  Looking forward to it.
+                </p>
+                <Link href="/" className="inline-block mt-6 text-teal-600 hover:underline text-sm">
+                  ← Back to home
+                </Link>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Organization name</label>
+                    <input
+                      required
+                      value={form.org_name}
+                      onChange={(e) => setForm({ ...form, org_name: e.target.value })}
+                      className="w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      placeholder="Your organization"
+                    />
                   </div>
-                )}
-                <div>
-                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 500, color: navy, marginBottom: '4px' }}>{plan.name}</h3>
-                  <p style={{ ...bodyText, fontSize: '13px', color: 'var(--color-text-muted)', margin: 0 }}>{plan.who}</p>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Your name</label>
+                    <input
+                      required
+                      value={form.contact_name}
+                      onChange={(e) => setForm({ ...form, contact_name: e.target.value })}
+                      className="w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      placeholder="First and last name"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Work email</label>
+                    <input
+                      type="email"
+                      required
+                      value={form.email}
+                      onChange={(e) => setForm({ ...form, email: e.target.value })}
+                      className="w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      placeholder="you@org.org"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone</label>
+                    <input
+                      type="tel"
+                      value={form.phone}
+                      onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                      className="w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      placeholder="Best number"
+                    />
+                  </div>
                 </div>
                 <div>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '36px', fontWeight: 700, color: navy }}>{plan.price}</span>
-                  <span style={{ ...bodyText, fontSize: '14px', marginLeft: '6px' }}>{plan.subtext}</span>
-                  <p style={{ ...bodyText, fontSize: '13px', color: teal, fontWeight: 600, marginTop: '4px' }}>{plan.note}</p>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Organization type</label>
+                  <div className="relative">
+                    <select
+                      required
+                      value={form.org_type}
+                      onChange={(e) => setForm({ ...form, org_type: e.target.value })}
+                      className="w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-900 appearance-none focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    >
+                      <option value="">Select…</option>
+                      {ORG_TYPES.map((t) => (
+                        <option key={t} value={t}>{t}</option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-4 top-3.5 w-4 h-4 text-gray-400 pointer-events-none" />
+                  </div>
                 </div>
-                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  {plan.features.map(f => (
-                    <li key={f} style={{ display: 'flex', gap: '8px' }}>
-                      <span style={{ color: teal, fontWeight: 700, flexShrink: 0 }}>✓</span>
-                      <span style={{ ...bodyText, fontSize: '14px', margin: 0 }}>{f}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link href={plan.href} style={{
-                  display: 'block', textAlign: 'center',
-                  backgroundColor: plan.highlight ? teal : 'transparent',
-                  color: plan.highlight ? 'white' : navy,
-                  border: `1.5px solid ${plan.highlight ? teal : navy}`,
-                  fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: '15px',
-                  padding: '11px 20px', borderRadius: 'var(--radius-md)', textDecoration: 'none',
-                  marginTop: 'auto',
-                }}>
-                  {plan.cta} →
-                </Link>
-              </div>
-            ))}
-          </div>
-          <p style={{ ...bodyText, textAlign: 'center', fontSize: '14px', marginTop: '24px' }}>
-            Member plan pricing (B2C) is separate. <Link href="/pricing" style={{ color: teal, fontWeight: 600 }}>View member plans →</Link>
-          </p>
-        </div>
-      </section>
-
-      {/* Impact stats */}
-      <section style={{ padding: '72px 24px', backgroundColor: navy, textAlign: 'center' }}>
-        <div style={{ ...maxW, maxWidth: '800px' }}>
-          <h2 style={{ ...heading2, color: cream, marginBottom: '48px' }}>Built for organisations that care about outcomes</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '32px' }}>
-            {[
-              { stat: '7', label: 'scam patterns monitored on every call and message' },
-              { stat: '9', label: 'life transition pathways with navigator-guided support' },
-              { stat: '25+', label: 'social communities for interest-based connection' },
-              { stat: 'HIPAA', label: 'compliant infrastructure with BAAs signed' },
-            ].map(item => (
-              <div key={item.stat}>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '40px', fontWeight: 700, color: '#6fd4c4', marginBottom: '8px' }}>{item.stat}</div>
-                <p style={{ ...bodyText, fontSize: '14px', color: 'rgba(250,250,245,0.7)', margin: 0, lineHeight: 1.5 }}>{item.label}</p>
-              </div>
-            ))}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    Approximate members / employees served <span className="text-gray-400">(optional)</span>
+                  </label>
+                  <input
+                    value={form.members}
+                    onChange={(e) => setForm({ ...form, members: e.target.value })}
+                    className="w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    placeholder="e.g. 250 members, 1,200 employees"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    What's your main challenge right now? <span className="text-gray-400">(optional)</span>
+                  </label>
+                  <textarea
+                    value={form.message}
+                    onChange={(e) => setForm({ ...form, message: e.target.value })}
+                    rows={3}
+                    className="w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"
+                    placeholder="Volunteer coordination, member engagement, readmission reduction — whatever's top of mind."
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-teal-600 text-white font-bold py-4 rounded-xl hover:bg-teal-700 transition disabled:opacity-60"
+                >
+                  {loading ? 'Submitting…' : 'Request demo'}
+                </button>
+              </form>
+            )}
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section style={{ padding: '80px 24px', textAlign: 'center', backgroundColor: cream }}>
-        <div style={{ maxWidth: '620px', margin: '0 auto' }}>
-          <h2 style={{ ...heading2, marginBottom: '16px' }}>Ready to bring ThriveAtHome to your community?</h2>
-          <p style={{ ...bodyText, fontSize: '18px', marginBottom: '32px' }}>
-            Nonprofits can register and start referring seniors today — no contract, no tech setup. For employer or enterprise partnerships, contact our team.
-          </p>
-          <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'center' }}>
-            <Link href="/nonprofit-admin" style={{ display: 'inline-flex', alignItems: 'center', backgroundColor: teal, color: 'white', fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: '17px', padding: '14px 28px', borderRadius: 'var(--radius-md)', textDecoration: 'none' }}>
-              Register as a nonprofit partner
-            </Link>
-            <Link href="/contact" style={{ display: 'inline-flex', alignItems: 'center', backgroundColor: 'transparent', color: navy, border: `1.5px solid ${navy}`, fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: '17px', padding: '14px 28px', borderRadius: 'var(--radius-md)', textDecoration: 'none' }}>
-              Contact us
-            </Link>
-          </div>
-          <div style={{ marginTop: '28px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-            <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', margin: 0 }}>
-              Have questions about partnering? Talk to Quinn right now.
-            </p>
-            <QuinnWidget label="Talk to Quinn" variant="ghost" compact />
-          </div>
-        </div>
+      {/* B2C footer strip */}
+      <section className="bg-gray-50 border-t border-gray-100 py-10 px-4 text-center">
+        <p className="text-gray-500 text-sm mb-4">Looking for personal plans for a senior or family member?</p>
+        <Link
+          href="/pricing"
+          className="inline-flex items-center gap-2 text-teal-600 font-semibold hover:underline"
+        >
+          See individual pricing
+          <ArrowRight className="w-4 h-4" />
+        </Link>
       </section>
-
-      {/* Footer */}
-      <footer style={{ borderTop: '1px solid var(--color-warm-grey)', padding: '32px 24px', backgroundColor: cream }}>
-        <div style={{ ...maxW, display: 'flex', flexWrap: 'wrap', gap: '16px', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Link href="/" style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: navy, textDecoration: 'none', fontWeight: 500 }}>ThriveAtHome</Link>
-          <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
-            <Link href="/privacy" style={{ ...bodyText, fontSize: '14px', textDecoration: 'none' }}>Privacy</Link>
-            <Link href="/terms" style={{ ...bodyText, fontSize: '14px', textDecoration: 'none' }}>Terms</Link>
-            <Link href="/contact" style={{ ...bodyText, fontSize: '14px', textDecoration: 'none' }}>Contact</Link>
-            <Link href="/signup" style={{ ...bodyText, fontSize: '14px', textDecoration: 'none', color: teal, fontWeight: 600 }}>Join as a member</Link>
-          </div>
-        </div>
-      </footer>
-    </div>
+    </main>
   )
 }
