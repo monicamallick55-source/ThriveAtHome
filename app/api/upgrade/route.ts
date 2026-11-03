@@ -113,7 +113,7 @@ export async function POST(req: NextRequest) {
       plan: targetPlan,
       billing: targetBilling,
       subscription_id: updatedSub.id,
-      current_period_end: updatedSub.current_period_end,
+      current_period_end: (updatedSub as any ).current_period_end,
     })
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err)
