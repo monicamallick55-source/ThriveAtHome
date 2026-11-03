@@ -1,6 +1,6 @@
 'use client'
 // app/signup/page.tsx — 3-step member onboarding wizard
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -63,7 +63,7 @@ function StepIndicator({ step, total }: { step: number; total: number }) {
   )
 }
 
-export default function SignupPage() {
+function SignupContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const supabase = createClient()
@@ -450,5 +450,17 @@ export default function SignupPage() {
 
       <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
     </div>
+  )
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={
+      <div style={{ minHeight: '100vh', background: '#f7faf7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ color: '#2d6a4f', fontSize: '16px' }}>Loading…</div>
+      </div>
+    }>
+      <SignupContent />
+    </Suspense>
   )
 }
