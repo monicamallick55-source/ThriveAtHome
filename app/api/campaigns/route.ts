@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: member } = await admin.from('members').select('id, plan, status').eq('supabase_auth_id', user.id).single()
+  const { data: member } = await (admin as any).from('members').select('id, plan, status').eq('supabase_auth_id', user.id).single()
   if (!member) return NextResponse.json({ error: 'Member not found' }, { status: 404 })
   if (member.status !== 'active') return NextResponse.json({ error: 'Active membership required' }, { status: 403 })
   if (!['complete', 'premier'].includes(member.plan)) return NextResponse.json({ error: 'Complete or Premier plan required' }, { status: 403 })
