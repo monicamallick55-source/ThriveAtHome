@@ -1,11 +1,11 @@
 'use client'
 // app/signup/success/page.tsx — post-Stripe-checkout landing page
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { CheckCircle, Loader2 } from 'lucide-react'
 
-export default function SignupSuccessPage() {
+function SignupSuccessContent() {
   const searchParams = useSearchParams()
   const plan = searchParams.get('plan') || 'basics'
   const billing = searchParams.get('billing') || 'monthly'
@@ -66,5 +66,17 @@ export default function SignupSuccessPage() {
         </p>
       </div>
     </div>
+  )
+}
+
+export default function SignupSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div style={{ minHeight: '100vh', background: '#f7faf7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ color: '#2d6a4f', fontSize: '16px' }}>Loading…</div>
+      </div>
+    }>
+      <SignupSuccessContent />
+    </Suspense>
   )
 }
