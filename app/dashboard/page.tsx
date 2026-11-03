@@ -1,139 +1,131 @@
-// Dashboard server component — fetches all data in parallel (8-second timeout per section).
-import { redirect } from 'next/navigation'
-import type { Metadata } from 'next'
-import { requireAuth, getUserRole } from '@/lib/auth'
-import { getMemberForAuthUser } from '@/lib/data/members'
-import { getCallsForMember } from '@/lib/data/calls'
-import { getAlertsForMember } from '@/lib/data/alerts'
-import { getNotificationsForMember } from '@/lib/data/notifications'
-import { getTasksForMember } from '@/lib/data/tasks'
+// app/dashboard/page.tsx
+// Main member dashboard home — shows plan-aware cards and upgrade CTA for Basics members
+import { requireAuth } from '@/lib/auth'
 import { getFamilyMemberByAuthId } from '@/lib/data/family'
-import { syncMemberSubscription } from '@/lib/stripe/sync'
-import { isTodayBirthday, getRecentCelebrationEvents } from '@/lib/data/celebrations'
-import { getUpcomingServiceBookings, getRecentCompletedServiceBookings } from '@/lib/data/services'
-import { getUpcomingTrackedItems } from '@/lib/data/tracked-items'
-import { getBrandConfigForMember } from '@/lib/data/brandConfigs'
-import { getDeviceSummaryForMember, type DeviceSummary } from '@/lib/data/devices'
-import { getMlSummaryForMember, type MlSummary } from '@/lib/data/ml'
-import DashboardClient from '@/components/dashboard/DashboardClient'
-import type { FamilyCall as CheckInCall } from '@/lib/data/calls'
-import type { Alert } from '@/lib/data/alerts'
-import type { RealtimeNotification } from '@/lib/data/notifications'
-import type { FamilyTaskItem } from '@/lib/data/tasks'
-import type { FamilyMember } from '@/lib/data/family'
-import type { CelebrationEvent } from '@/lib/data/celebrations'
-import type { ServiceBooking } from '@/lib/data/services'
-import type { TrackedItem } from '@/lib/data/tracked-items-types'
-import type { Tables } from '@/types/database'
-type BrandConfigRow = Tables<'brand_configs'>
+import { redirect } from 'next/navigation'
+import { createClient } from '@supabase/supabase-js'
+import { UpgradePlanCard } from '@/components/dashboard/UpgradePlanCard'
+import Link from 'next/link'
 
-export const metadata: Metadata = { title: 'Dashboard — ThriveAtHome' }
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
-async function withTimeout<T>(
-  promise: Promise<{ data: T | null; error: string | null }>
-): Promise<{ data: T | null; error: string | null }> {
-  const timeout = new Promise<{ data: T | null; error: string | null }>((resolve) =>
-    setTimeout(
-      () => resolve({ data: null, error: 'Request timed out. Please refresh this section.' }),
-      8000
-    )
-  )
-  return Promise.race([promise, timeout])
+export const metadata = {
+  title: 'My Dashboard | ThriveAtHome',
 }
 
-export default async function DashboardPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ subscribed?: string }>
-}) {
-  const [user, params] = await Promise.all([requireAuth(), searchParams])
-  const showSubscribedBanner = params.subscribed === 'true'
+export default async function DashboardPage() {
+  const user = await requireAuth().catch(() => null)
+  if (!user) redirect('/login')
 
-  // Route non-family roles to their correct portals so the family dashboard never
-  // tries to render for a navigator, volunteer, student, or university_admin.
-  const role = await getUserRole(user.id)
-  if (role === 'university_admin') redirect('/university-admin')
-  if (role === 'employer_admin') redirect('/employer-admin')
-  if (role === 'navigator') redirect('/navigator')
-  if (role === 'volunteer') redirect('/volunteer/dashboard')
-  if (role === 'student') redirect('/student')
+  const { data: fm } = await getFamilyMemberByAuthId(user.id)
+  const memberId = fm?.member_id ?? null
 
-  const { data: member, error: memberError } = await withTimeout(
-    getMemberForAuthUser(user.id)
-  )
-
-  if (!member) {
-    // Not found means onboarding is incomplete; any other error redirects to login for safety
-    if (memberError === 'Not found' || !memberError) {
-      redirect('/onboarding')
-    }
-    redirect('/onboarding')
+  // Fetch member record for plan info
+  let member: { first_name?: string; plan?: string; subscription_status?: string } | null = null
+  if (memberId) {
+    const db = supabaseAdmin as any
+    const { data } = await db
+      .from('members')
+      .select('first_name, plan, subscription_status')
+      .eq('id', memberId)
+      .maybeSingle()
+    member = data
   }
 
-  // A senior who enrolled themselves (members.supabase_auth_id === their auth id)
-  // sees the member self-service portal, not the family-proxy dashboard.
-  if (member.supabase_auth_id === user.id) {
-    redirect('/member-portal')
-  }
+  const firstName = member?.first_name || fm?.first_name || 'Friend'
+  const plan = (member?.plan as 'basics' | 'complete') || 'basics'
+  const isComplete = plan === 'complete'
 
-  // If redirected here after checkout, sync subscription from Stripe directly.
-  // This is a reliable fallback in case the Stripe webhook hasn't fired yet
-  // (e.g. STRIPE_WEBHOOK_SECRET not yet set in Vercel env vars).
-  if (showSubscribedBanner && user.email) {
-    await syncMemberSubscription(member.id, user.email)
-  }
-
-  const [
-    callsResult,
-    alertsResult,
-    notifResult,
-    tasksResult,
-    fmResult,
-    celebrationsResult,
-    servicesResult,
-    trackedItemsResult,
-    serviceHistoryResult,
-    brandConfigResult,
-    deviceSummaryResult,
-    mlSummaryResult,
-  ] = await Promise.all([
-    withTimeout<CheckInCall[]>(getCallsForMember(member.id, 90, 0, user.id)),
-    withTimeout<Alert[]>(getAlertsForMember(member.id)),
-    withTimeout<RealtimeNotification[]>(getNotificationsForMember(member.id)),
-    withTimeout<FamilyTaskItem[]>(getTasksForMember(member.id)),
-    withTimeout<FamilyMember>(getFamilyMemberByAuthId(user.id)),
-    withTimeout<CelebrationEvent[]>(getRecentCelebrationEvents(member.id, 3)),
-    withTimeout<ServiceBooking[]>(getUpcomingServiceBookings(member.id)),
-    withTimeout<TrackedItem[]>(getUpcomingTrackedItems(member.id)),
-    withTimeout<ServiceBooking[]>(getRecentCompletedServiceBookings(member.id, 3)),
-    withTimeout<BrandConfigRow>(getBrandConfigForMember(member.id)),
-    withTimeout<DeviceSummary>(getDeviceSummaryForMember(member.id)),
-    withTimeout<MlSummary>(getMlSummaryForMember(member.id)),
-  ])
-
-  const memberIsBirthday = member.date_of_birth ? isTodayBirthday(member.date_of_birth) : false
+  const quickLinks = [
+    { href: '/dashboard/wellness', emoji: '🏃', label: 'Fitness & Walking', available: isComplete },
+    { href: '/dashboard/volunteer-services', emoji: '🤝', label: 'Volunteer Services', available: isComplete },
+    { href: '/dashboard/messages', emoji: '✉️', label: 'Messages', available: true },
+    { href: '/dashboard/home-safety', emoji: '🏠', label: 'Home Safety', available: true },
+    { href: '/services', emoji: '🛎️', label: 'Book Services', available: isComplete },
+    { href: '/community', emoji: '🌍', label: 'Community', available: true },
+  ]
 
   return (
-    <DashboardClient
-      member={(member ?? []) as any}
-      familyMemberId={fmResult.data?.id ?? null}
-      initialCalls={callsResult.data ?? []}
-      callsError={callsResult.error}
-      initialAlerts={alertsResult.data ?? []}
-      alertsError={alertsResult.error}
-      initialNotifications={notifResult.data ?? []}
-      notifError={notifResult.error}
-      initialTasks={tasksResult.data ?? []}
-      tasksError={tasksResult.error}
-      showSubscribedBanner={showSubscribedBanner}
-      isBirthday={memberIsBirthday}
-      recentCelebrations={celebrationsResult.data ?? []}
-      upcomingServices={servicesResult.data ?? []}
-      upcomingTrackedItems={trackedItemsResult.data ?? []}
-      serviceHistory={serviceHistoryResult.data ?? []}
-      brandConfig={brandConfigResult.data ?? null}
-      deviceSummary={deviceSummaryResult.data ?? null}
-      mlSummary={mlSummaryResult.data as any ?? null}
-    />
+    <div style={{ maxWidth: '720px', margin: '0 auto', padding: '24px 20px' }}>
+      {/* Greeting */}
+      <div style={{ marginBottom: '24px' }}>
+        <h1 style={{ fontSize: '26px', fontWeight: 800, color: '#1a1a1a', margin: '0 0 4px' }}>
+          Good morning, {firstName} 🌿
+        </h1>
+        <p style={{ fontSize: '14px', color: '#777', margin: 0 }}>
+          {isComplete ? 'Thrive Complete' : 'Thrive Basics'} member
+        </p>
+      </div>
+
+      {/* Upgrade card — only shown for Basics members */}
+      {!isComplete && (
+        <div style={{ marginBottom: '24px' }}>
+          <UpgradePlanCard currentPlan="basics" memberName={firstName} />
+        </div>
+      )}
+
+      {/* Quick links grid */}
+      <div style={{ marginBottom: '24px' }}>
+        <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#444', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          Quick access
+        </h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+          {quickLinks.map(link => (
+            <Link
+              key={link.href}
+              href={link.available ? link.href : '#'}
+              style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                padding: '16px 8px', borderRadius: '12px', textDecoration: 'none',
+                background: link.available ? '#f7faf7' : '#f5f5f5',
+                border: `1px solid ${link.available ? '#d4edda' : '#e8e8e8'}`,
+                opacity: link.available ? 1 : 0.5,
+                cursor: link.available ? 'pointer' : 'default',
+                transition: 'background 0.15s',
+              }}
+            >
+              <span style={{ fontSize: '24px', marginBottom: '6px' }}>{link.emoji}</span>
+              <span style={{ fontSize: '12px', fontWeight: 600, color: '#444', textAlign: 'center', lineHeight: 1.3 }}>
+                {link.label}
+              </span>
+              {!link.available && (
+                <span style={{ fontSize: '10px', color: '#aaa', marginTop: '3px' }}>Complete only</span>
+              )}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Aria check-in card */}
+      <div style={{ background: 'linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%)', borderRadius: '14px', padding: '20px', border: '1px solid #c8e6c9', marginBottom: '16px' }}>
+        <div style={{ fontWeight: 700, fontSize: '16px', color: '#2d6a4f', marginBottom: '6px' }}>
+          📞 Aria check-in
+        </div>
+        <p style={{ fontSize: '14px', color: '#555', margin: '0 0 12px', lineHeight: 1.5 }}>
+          Your AI companion Aria calls each morning to check in. Miss a call? We'll follow up to make sure you're okay.
+        </p>
+        <div style={{ fontSize: '13px', color: '#2d6a4f', fontWeight: 600 }}>
+          Next call: Tomorrow at 9:00 AM ✓
+        </div>
+      </div>
+
+      {/* Family portal note */}
+      <div style={{ background: '#fff', borderRadius: '14px', padding: '18px', border: '1px solid #e8e8e8' }}>
+        <div style={{ fontWeight: 700, fontSize: '15px', color: '#333', marginBottom: '6px' }}>
+          👨‍👩‍👧 Family portal
+        </div>
+        <p style={{ fontSize: '13px', color: '#666', margin: '0 0 10px', lineHeight: 1.5 }}>
+          {isComplete
+            ? 'Up to 8 family members can follow along and stay connected through the family portal.'
+            : 'Up to 3 family members can follow along. Upgrade to Complete for 8 seats.'}
+        </p>
+        <Link href="/family" style={{ fontSize: '13px', color: '#2d6a4f', fontWeight: 600, textDecoration: 'none' }}>
+          Manage family access →
+        </Link>
+      </div>
+    </div>
   )
 }
