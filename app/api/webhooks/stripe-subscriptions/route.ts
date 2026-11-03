@@ -99,7 +99,7 @@ async function sendWelcomeEmail(email: string, firstName: string, plan: string) 
   }
 }
 
-async function provisionMember(session: Stripe.CheckoutSession) {
+async function provisionMember(session: Stripe.Checkout.Session) {
   // Get subscription to extract price info
   let plan: 'basics' | 'complete' | null = null
   let stripeSubscriptionId: string | null = null
@@ -263,7 +263,7 @@ export async function POST(req: NextRequest) {
   try {
     switch (event.type) {
       case 'checkout.session.completed': {
-        const session = event.data.object as Stripe.CheckoutSession
+        const session = event.data.object as Stripe.Checkout.Session
         if (session.mode === 'subscription') {
           await provisionMember(session)
         }
