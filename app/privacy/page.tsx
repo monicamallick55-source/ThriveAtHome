@@ -1,346 +1,227 @@
-import type { Metadata } from 'next'
+// app/privacy/page.tsx
 import Link from 'next/link'
 
-export const metadata: Metadata = {
-  title: 'Privacy Policy — ThriveAtHome',
-  description: 'How ThriveAtHome collects, uses, and protects your personal health information.',
+export const metadata = {
+  title: 'Privacy Policy | ThriveAtHome',
+  description: 'How ThriveAtHome collects, uses, and protects your personal information.',
 }
 
+const EFFECTIVE_DATE = 'November 3, 2026'
+const COMPANY = 'ThriveAtHome, Inc.'
+const EMAIL = 'privacy@thriveathome.com'
+const ADDRESS = 'San Francisco, CA'
+
 export default function PrivacyPage() {
-  const lastUpdated = 'May 23, 2026'
-  const contactEmail = 'privacy@thriveathome.com'
-
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-cream)' }}>
-      <nav style={{
-        backgroundColor: 'white',
-        borderBottom: '1px solid var(--color-warm-grey)',
-        padding: '0 32px',
-        height: '64px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        position: 'sticky',
-        top: 0,
-        zIndex: 10,
-      }}>
-        <Link href="/" style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: '22px',
-          color: 'var(--color-navy)',
-          textDecoration: 'none',
-          fontWeight: 500,
-        }}>
-          ThriveAtHome
+    <div style={{ maxWidth: '780px', margin: '0 auto', padding: '48px 24px 80px', fontFamily: 'Georgia, serif', color: '#1a1a1a', lineHeight: 1.8 }}>
+      <div style={{ marginBottom: '40px' }}>
+        <Link href="/" style={{ fontSize: '13px', color: '#2d6a4f', textDecoration: 'none', fontFamily: 'system-ui, sans-serif' }}>
+          ← ThriveAtHome
         </Link>
-        <Link href="/" style={{
-          fontFamily: 'var(--font-body)',
-          fontSize: '16px',
-          fontWeight: 500,
-          color: 'var(--color-navy)',
-          textDecoration: 'none',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px',
-        }}>
-          ← Back to home
-        </Link>
-      </nav>
+      </div>
 
-      <main style={{ maxWidth: '780px', margin: '0 auto', padding: '48px 32px 96px' }}>
-        <h1 style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: '48px',
-          fontWeight: 500,
-          color: 'var(--color-navy)',
-          marginBottom: '8px',
-          letterSpacing: '-0.01em',
-          lineHeight: 1.15,
-        }}>
-          Privacy Policy
-        </h1>
-        <p style={{
-          fontFamily: 'var(--font-body)',
-          fontSize: '16px',
-          color: 'var(--color-text-muted)',
-          marginBottom: '48px',
-        }}>
-          Last updated: {lastUpdated}
+      <h1 style={{ fontSize: '32px', fontWeight: 800, fontFamily: 'system-ui, sans-serif', marginBottom: '8px', color: '#111' }}>
+        Privacy Policy
+      </h1>
+      <p style={{ fontSize: '14px', color: '#888', fontFamily: 'system-ui, sans-serif', marginBottom: '40px' }}>
+        Effective date: {EFFECTIVE_DATE}
+      </p>
+
+      <p>
+        {COMPANY} ("ThriveAtHome," "we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform, website, mobile application, and related services (collectively, the "Services").
+      </p>
+
+      <p>
+        Please read this Privacy Policy carefully. By using our Services, you agree to the practices described here. If you do not agree, please do not use our Services.
+      </p>
+
+      <Section title="1. Information We Collect">
+        <SubSection title="Information You Provide">
+          <ul>
+            <li><strong>Account information:</strong> name, email address, phone number, date of birth, ZIP code, and password when you create an account.</li>
+            <li><strong>Profile information:</strong> health preferences, wellness goals, dietary needs, hobbies, and family contacts you choose to share.</li>
+            <li><strong>Communications:</strong> messages, notes, and content you send through the platform.</li>
+            <li><strong>Payment information:</strong> billing details processed securely through Stripe. We do not store full card numbers.</li>
+            <li><strong>Voice and call data:</strong> call recordings and transcripts from AI-assisted wellness calls, with your consent.</li>
+          </ul>
+        </SubSection>
+
+        <SubSection title="Information Collected Automatically">
+          <ul>
+            <li><strong>Usage data:</strong> pages visited, features used, actions taken, and time spent on the platform.</li>
+            <li><strong>Device data:</strong> IP address, browser type, operating system, and device identifiers.</li>
+            <li><strong>Log data:</strong> server logs, error reports, and performance data.</li>
+          </ul>
+        </SubSection>
+
+        <SubSection title="Information from Third Parties">
+          <ul>
+            <li>Family members or caregivers who invite you or share information about you.</li>
+            <li>Partner organizations (home care agencies, senior centers, employers) that provide your contact details for enrollment.</li>
+            <li>Service providers who confirm appointment completions or outcomes.</li>
+          </ul>
+        </SubSection>
+      </Section>
+
+      <Section title="2. How We Use Your Information">
+        <p>We use your information to:</p>
+        <ul>
+          <li>Provide, personalize, and improve our Services.</li>
+          <li>Connect you with AI wellness companions (Aria, Grace, Quinn, and others).</li>
+          <li>Coordinate care services and volunteer matching.</li>
+          <li>Send wellness check-ins, reminders, and alerts to you and your designated family members.</li>
+          <li>Process payments and manage your subscription.</li>
+          <li>Detect and prevent fraud, elder financial exploitation, and safety risks.</li>
+          <li>Generate anonymized and aggregated analytics to improve platform outcomes.</li>
+          <li>Comply with legal obligations.</li>
+          <li>Communicate with you about your account, updates, and new features.</li>
+        </ul>
+        <p>
+          We do not sell your personal information to third parties. We do not use your information for advertising targeting.
         </p>
+      </Section>
 
-        <Section title="Overview">
-          <p>
-            ThriveAtHome, Inc. (&quot;ThriveAtHome,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) is committed to protecting the
-            privacy and security of your personal and health information. This Privacy Policy describes
-            how we collect, use, disclose, and safeguard information when you use our platform,
-            including our web application, phone check-in services, and related services.
-          </p>
-          <p style={{ marginTop: '16px' }}>
-            ThriveAtHome is designed to comply with the Health Insurance Portability and Accountability
-            Act of 1996 (HIPAA) and its implementing regulations. We treat all health-related
-            information about your senior loved one as Protected Health Information (PHI) subject to
-            HIPAA&apos;s strict protections.
-          </p>
-          <p style={{ marginTop: '16px' }}>
-            By using ThriveAtHome, you agree to the terms of this Privacy Policy.
-          </p>
-        </Section>
+      <Section title="3. Sensitive Health Information">
+        <p>
+          ThriveAtHome handles health-related information with heightened care. We treat wellness data, medication information, and care notes as sensitive personal data. This information is:
+        </p>
+        <ul>
+          <li>Encrypted in transit and at rest.</li>
+          <li>Accessible only to you, your designated family members, and your assigned Care Navigator.</li>
+          <li>Never sold or shared with advertisers or data brokers.</li>
+          <li>Shared with partner healthcare providers only with your explicit consent.</li>
+        </ul>
+        <p>
+          ThriveAtHome is designed to be HIPAA-compliant for applicable data. We maintain Business Associate Agreements (BAAs) with key service providers.
+        </p>
+      </Section>
 
-        <Section title="What Data We Collect">
-          <Subsection title="Information you provide directly">
-            <ul>
-              <li>Account information: name, email address, phone number, relationship to senior</li>
-              <li>Senior member profile: name, date of birth, phone number, preferred language, health conditions, interests, emergency contacts</li>
-              <li>Medication schedules and preferences</li>
-              <li>Documents you upload to the Document Vault (medical records, insurance cards, care instructions)</li>
-              <li>Messages and tasks created within the Family Coordination tools</li>
-              <li>Navigator notes created by care navigators</li>
-            </ul>
-          </Subsection>
-          <Subsection title="Information generated by our services">
-            <ul>
-              <li>Call transcripts from daily AI check-in calls with your senior</li>
-              <li>Call recordings (audio) stored for up to 2 years</li>
-              <li>AI-generated call summaries and wellness scores (mood, energy, comfort, medication status)</li>
-              <li>Alerts generated by our system based on call content</li>
-              <li>Concierge call recordings and transcripts</li>
-            </ul>
-          </Subsection>
-          <Subsection title="Technical information">
-            <ul>
-              <li>Log data: IP address, browser type, pages visited, time of access</li>
-              <li>Cookies and session tokens used to maintain your logged-in session</li>
-              <li>Device information for mobile access</li>
-            </ul>
-          </Subsection>
-        </Section>
+      <Section title="4. How We Share Your Information">
+        <p>We share your information only in these circumstances:</p>
+        <ul>
+          <li><strong>With your consent:</strong> when you explicitly authorize sharing, such as inviting family members or authorizing a care provider.</li>
+          <li><strong>Service providers:</strong> vendors who help us operate the platform (Supabase for database, Stripe for payments, SendGrid for email, Twilio for SMS, Retell AI for voice, Vercel for hosting). All are bound by data processing agreements.</li>
+          <li><strong>Your organization:</strong> if you're enrolled through an employer, senior center, or care agency, your organization's administrator may see your enrollment status and aggregate wellness indicators, but not personal health notes or call transcripts.</li>
+          <li><strong>Safety exceptions:</strong> if we believe disclosure is necessary to prevent imminent harm to you or others, we may share information with emergency services.</li>
+          <li><strong>Legal requirements:</strong> when required by law, court order, or government authority.</li>
+          <li><strong>Business transfer:</strong> in the event of a merger, acquisition, or sale of assets, your information may be transferred. We will notify you in advance.</li>
+        </ul>
+      </Section>
 
-        <Section title="How We Use Your Information">
-          <p>We use information collected about you for the following purposes:</p>
-          <ul style={{ marginTop: '12px' }}>
-            <li><strong>Providing the service:</strong> Delivering daily AI check-in calls, generating wellness summaries, sending notifications to family members, and enabling care coordination.</li>
-            <li><strong>Safety and emergency response:</strong> Detecting crisis language during calls and alerting family members and care navigators when a senior may need immediate help.</li>
-            <li><strong>Care coordination:</strong> Sharing relevant health summaries with assigned care navigators to support proactive outreach.</li>
-            <li><strong>Communications:</strong> Sending call summaries, weekly digests, and important alerts via email and SMS (if opted in).</li>
-            <li><strong>Platform improvement:</strong> Analysing aggregate, de-identified usage data to improve our services. We never use individual PHI to train AI models without explicit consent.</li>
-            <li><strong>Billing:</strong> Processing subscription payments via our payment processor.</li>
-            <li><strong>Legal compliance:</strong> Meeting our obligations under HIPAA and other applicable laws.</li>
-          </ul>
-          <p style={{ marginTop: '16px' }}>
-            We do <strong>not</strong> sell your personal data or PHI to any third party. We do not use
-            your data for advertising purposes.
-          </p>
-        </Section>
+      <Section title="5. Communications and SMS Consent">
+        <p>
+          By providing your phone number and using our Services, you consent to receive:
+        </p>
+        <ul>
+          <li>Wellness check-in calls and reminders via AI voice agents.</li>
+          <li>SMS alerts for safety events, care coordination, and family notifications.</li>
+          <li>Transactional SMS messages about your account and services.</li>
+        </ul>
+        <p>
+          You may opt out of non-emergency SMS at any time by replying STOP to any message or updating your preferences in your account settings. Message and data rates may apply. Our SMS service operates through Twilio (10DLC registered).
+        </p>
+      </Section>
 
-        <Section title="Call Recordings — Storage and Access">
-          <p>
-            All phone call recordings (daily check-in calls and concierge calls) are stored
-            in encrypted cloud storage. Access is strictly controlled:
-          </p>
-          <ul style={{ marginTop: '12px' }}>
-            <li><strong>Family members</strong> linked to a senior can access summaries and, upon request, recordings of calls involving that senior.</li>
-            <li><strong>Care navigators</strong> assigned to a senior can access call summaries and recordings as part of their care coordination role.</li>
-            <li><strong>ThriveAtHome staff</strong> may access recordings only for quality assurance, safety investigations, or to fulfil a legal obligation. All access is logged.</li>
-            <li>Recordings are <strong>not accessible</strong> to unaffiliated third parties without a court order or equivalent legal process.</li>
-          </ul>
-          <p style={{ marginTop: '16px' }}>
-            <strong>Retention:</strong> Call recordings are retained for 2 years from the date of the call,
-            after which they are permanently deleted. Call transcripts and summaries may be retained
-            for up to 5 years to support continuity of care.
-          </p>
-        </Section>
+      <Section title="6. Data Retention">
+        <p>We retain your personal information for as long as your account is active or as needed to provide Services. Specifically:</p>
+        <ul>
+          <li><strong>Account data:</strong> retained while your account is active and for 7 years after closure for legal and audit purposes.</li>
+          <li><strong>Call recordings and transcripts:</strong> retained for 2 years, then deleted unless required for care continuity or legal purposes.</li>
+          <li><strong>Payment records:</strong> retained for 7 years per financial recordkeeping requirements.</li>
+          <li><strong>Aggregated analytics:</strong> may be retained indefinitely in de-identified form.</li>
+        </ul>
+        <p>You may request deletion of your personal data at any time (see Your Rights below). Some data may be retained if required by law.</p>
+      </Section>
 
-        <Section title="Data Sharing and Disclosure">
-          <p>We share your information only in the following circumstances:</p>
-          <ul style={{ marginTop: '12px' }}>
-            <li><strong>Service providers (Business Associates):</strong> We work with HIPAA Business Associates including Twilio (phone infrastructure), Retell AI (AI call processing), Anthropic (AI analysis), Supabase (database and storage), and SendGrid (email delivery). Each must sign a Business Associate Agreement (BAA) with us before handling PHI.</li>
-            <li><strong>Emergency situations:</strong> If we detect an immediate threat to life during a call, we may share information with emergency services.</li>
-            <li><strong>Legal requirements:</strong> We may disclose information if required by law, court order, or governmental authority.</li>
-            <li><strong>Business transfers:</strong> In the event of a merger or acquisition, your data may be transferred to the acquiring entity, subject to the same privacy protections.</li>
-          </ul>
-        </Section>
+      <Section title="7. Your Rights and Choices">
+        <p>Depending on your location, you may have the right to:</p>
+        <ul>
+          <li><strong>Access:</strong> request a copy of the personal information we hold about you.</li>
+          <li><strong>Correction:</strong> update or correct inaccurate information.</li>
+          <li><strong>Deletion:</strong> request deletion of your personal data ("right to be forgotten").</li>
+          <li><strong>Portability:</strong> receive your data in a machine-readable format.</li>
+          <li><strong>Opt-out:</strong> withdraw consent for non-essential communications or data processing.</li>
+          <li><strong>Restriction:</strong> request that we limit how we process your data.</li>
+        </ul>
+        <p>
+          To exercise these rights, contact us at <strong>{EMAIL}</strong>. We will respond within 30 days.
+        </p>
+        <p>
+          California residents have additional rights under the California Consumer Privacy Act (CCPA), including the right to know what personal information is collected, the right to opt out of sale (we do not sell data), and the right to non-discrimination.
+        </p>
+      </Section>
 
-        <Section title="Data Security">
-          <p>
-            ThriveAtHome implements industry-standard security measures to protect your information:
-          </p>
-          <ul style={{ marginTop: '12px' }}>
-            <li>All data is encrypted in transit using TLS 1.2 or higher</li>
-            <li>All data is encrypted at rest using AES-256</li>
-            <li>Access to PHI is controlled by role-based access policies</li>
-            <li>All access to health records is logged in an audit trail</li>
-            <li>Our infrastructure is hosted on SOC 2 Type II certified providers</li>
-            <li>We conduct regular security reviews and penetration testing</li>
-          </ul>
-          <p style={{ marginTop: '16px' }}>
-            In the event of a data breach affecting your PHI, we will notify you within 60 days
-            as required by HIPAA&apos;s Breach Notification Rule.
-          </p>
-        </Section>
+      <Section title="8. Security">
+        <p>
+          We implement industry-standard security measures including:
+        </p>
+        <ul>
+          <li>TLS encryption for all data in transit.</li>
+          <li>AES-256 encryption for sensitive data at rest.</li>
+          <li>Role-based access controls limiting staff access to personal data.</li>
+          <li>Regular security reviews and penetration testing.</li>
+          <li>Multi-factor authentication for administrative access.</li>
+        </ul>
+        <p>
+          No system is perfectly secure. If you believe your account has been compromised, contact us immediately at {EMAIL}.
+        </p>
+      </Section>
 
-        <Section title="Your Rights Under HIPAA">
-          <p>As a user of ThriveAtHome, you have the following rights regarding PHI:</p>
-          <ul style={{ marginTop: '12px' }}>
-            <li><strong>Right to access:</strong> You may request a copy of your senior&apos;s health information held by ThriveAtHome.</li>
-            <li><strong>Right to amend:</strong> You may request corrections to inaccurate or incomplete health information.</li>
-            <li><strong>Right to an accounting of disclosures:</strong> You may request a list of disclosures of PHI we have made.</li>
-            <li><strong>Right to restrict:</strong> You may request restrictions on certain uses and disclosures of PHI.</li>
-            <li><strong>Right to request confidential communications:</strong> You may request we communicate with you by a specific method.</li>
-          </ul>
-          <p style={{ marginTop: '16px' }}>
-            To exercise any of these rights, contact us at{' '}
-            <a href={`mailto:${contactEmail}`} style={{ color: 'var(--color-teal)' }}>{contactEmail}</a>.
-            We will respond within 30 days.
-          </p>
-        </Section>
+      <Section title="9. Children's Privacy">
+        <p>
+          Our Services are designed for adults 18 and older. We do not knowingly collect personal information from children under 13. Our K-12 volunteer program complies with COPPA and requires verifiable parental consent for minors. If you believe a child has provided us personal information, contact us at {EMAIL}.
+        </p>
+      </Section>
 
-        <Section title="Data Deletion">
-          <p>
-            You may request deletion of all data associated with your account and your senior&apos;s
-            profile at any time. Upon a verified deletion request:
-          </p>
-          <ul style={{ marginTop: '12px' }}>
-            <li>All member health data, call records, and documents will be permanently deleted</li>
-            <li>All family member accounts linked to that senior will be deactivated</li>
-            <li>Any active Stripe subscription will be cancelled</li>
-            <li>A final deletion confirmation will be emailed to you</li>
-          </ul>
-          <p style={{ marginTop: '16px' }}>
-            Note: Some information may be retained for up to 90 days in encrypted backups before
-            permanent deletion. Audit log records of the deletion itself are retained for 7 years
-            as required by HIPAA.
-          </p>
-          <p style={{ marginTop: '16px' }}>
-            To request deletion, email{' '}
-            <a href={`mailto:${contactEmail}`} style={{ color: 'var(--color-teal)' }}>{contactEmail}</a>{' '}
-            with subject line &quot;Data Deletion Request&quot; and include your account email and the name
-            of the senior member.
-          </p>
-        </Section>
+      <Section title="10. Third-Party Links and Services">
+        <p>
+          Our platform may link to third-party services (Lyft, Meals on Wheels, etc.). This Privacy Policy does not cover those services. We encourage you to review their privacy policies before sharing information with them.
+        </p>
+      </Section>
 
-        <Section title="Cookies and Tracking">
-          <p>
-            ThriveAtHome uses strictly necessary cookies to maintain your authenticated session.
-            We do not use advertising cookies, tracking pixels, or third-party analytics that
-            share your data with advertisers. We use aggregate, anonymous analytics only to
-            understand how the platform is used.
-          </p>
-        </Section>
+      <Section title="11. Changes to This Policy">
+        <p>
+          We may update this Privacy Policy periodically. We will notify you of material changes by email or prominent notice on our platform at least 30 days before changes take effect. Your continued use of the Services after that date constitutes acceptance of the updated policy.
+        </p>
+      </Section>
 
-        <Section title="Children&apos;s Privacy">
-          <p>
-            ThriveAtHome is not directed at children under the age of 18. We do not knowingly
-            collect personal information from children. If you believe a child has provided us
-            with personal information, please contact us immediately.
-          </p>
-        </Section>
+      <Section title="12. Contact Us">
+        <p>
+          For privacy questions, requests, or concerns:
+        </p>
+        <p>
+          <strong>{COMPANY}</strong><br />
+          {ADDRESS}<br />
+          Email: <strong>{EMAIL}</strong>
+        </p>
+        <p>
+          For urgent security concerns, please mark your email subject line: <strong>URGENT: Security</strong>
+        </p>
+      </Section>
 
-        <Section title="Changes to This Policy">
-          <p>
-            We may update this Privacy Policy from time to time. We will notify you of material
-            changes by posting the new policy on this page and, if the changes are significant,
-            by sending you an email notification. Your continued use of ThriveAtHome after
-            changes takes effect constitutes your acceptance of the revised policy.
-          </p>
-        </Section>
-
-        <Section title="Contact Us">
-          <p>
-            For privacy questions, data access requests, or to report a privacy concern:
-          </p>
-          <div style={{
-            marginTop: '16px',
-            padding: '24px',
-            backgroundColor: 'white',
-            border: '1px solid var(--color-warm-grey)',
-            borderRadius: 'var(--radius-lg)',
-          }}>
-            <p><strong>ThriveAtHome, Inc. — Privacy Team</strong></p>
-            <p>
-              Email:{' '}
-              <a href={`mailto:${contactEmail}`} style={{ color: 'var(--color-teal)' }}>{contactEmail}</a>
-            </p>
-            <p style={{ marginTop: '8px', fontSize: '15px', color: 'var(--color-text-muted)' }}>
-              Response time: within 30 days for HIPAA rights requests; within 5 business days for
-              general inquiries.
-            </p>
-          </div>
-        </Section>
-
-        <div style={{ marginTop: '64px', paddingTop: '32px', borderTop: '1px solid var(--color-warm-grey)' }}>
-          <Link href="/" style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            fontFamily: 'var(--font-body)',
-            fontSize: '18px',
-            fontWeight: 500,
-            color: 'var(--color-navy)',
-            textDecoration: 'none',
-            border: '1.5px solid var(--color-navy)',
-            borderRadius: 'var(--radius-md)',
-            padding: '12px 24px',
-            minHeight: '48px',
-            transition: 'all 0.2s',
-          }}>
-            ← Back to home
-          </Link>
-          <Link href="/terms" style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            fontFamily: 'var(--font-body)',
-            fontSize: '18px',
-            fontWeight: 500,
-            color: 'var(--color-navy)',
-            textDecoration: 'underline',
-            padding: '12px 8px',
-            minHeight: '48px',
-            marginLeft: '16px',
-          }}>
-            Terms of Service
-          </Link>
-        </div>
-      </main>
+      <div style={{ marginTop: '48px', paddingTop: '24px', borderTop: '1px solid #e8e8e8', display: 'flex', gap: '24px', fontSize: '13px', fontFamily: 'system-ui, sans-serif' }}>
+        <Link href="/terms" style={{ color: '#2d6a4f', textDecoration: 'none' }}>Terms of Service</Link>
+        <Link href="/" style={{ color: '#888', textDecoration: 'none' }}>← Home</Link>
+      </div>
     </div>
   )
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section style={{ marginBottom: '40px' }}>
-      <h2 style={{
-        fontFamily: 'var(--font-display)',
-        fontSize: '28px',
-        fontWeight: 500,
-        color: 'var(--color-navy)',
-        marginBottom: '16px',
-        letterSpacing: '-0.01em',
-      }}>
+    <div style={{ marginBottom: '36px' }}>
+      <h2 style={{ fontSize: '18px', fontWeight: 700, fontFamily: 'system-ui, sans-serif', color: '#111', marginBottom: '12px', marginTop: '36px' }}>
         {title}
       </h2>
-      <div style={{
-        fontFamily: 'var(--font-body)',
-        fontSize: '18px',
-        color: 'var(--color-text-primary)',
-        lineHeight: 1.7,
-      }}>
-        {children}
-      </div>
-    </section>
+      {children}
+    </div>
   )
 }
 
-function Subsection({ title, children }: { title: string; children: React.ReactNode }) {
+function SubSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div style={{ marginBottom: '20px' }}>
-      <h3 style={{
-        fontFamily: 'var(--font-body)',
-        fontSize: '18px',
-        fontWeight: 600,
-        color: 'var(--color-navy)',
-        marginBottom: '8px',
-      }}>
+    <div style={{ marginBottom: '16px' }}>
+      <h3 style={{ fontSize: '15px', fontWeight: 600, fontFamily: 'system-ui, sans-serif', color: '#333', marginBottom: '8px' }}>
         {title}
       </h3>
       {children}

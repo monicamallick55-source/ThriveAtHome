@@ -1,288 +1,297 @@
-import type { Metadata } from 'next'
+// app/terms/page.tsx
 import Link from 'next/link'
 
-export const metadata: Metadata = {
-  title: 'Terms of Service — ThriveAtHome',
-  description: 'The terms governing use of the ThriveAtHome platform, subscriptions, and AI check-in calls.',
+export const metadata = {
+  title: 'Terms of Service | ThriveAtHome',
+  description: 'Terms and conditions for using the ThriveAtHome platform.',
 }
 
+const EFFECTIVE_DATE = 'November 3, 2026'
+const COMPANY = 'ThriveAtHome, Inc.'
+const EMAIL = 'legal@thriveathome.com'
+
 export default function TermsPage() {
-  const lastUpdated = 'May 23, 2026'
-  const contactEmail = 'legal@thriveathome.com'
-
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-cream)' }}>
-      <nav style={{
-        backgroundColor: 'white',
-        borderBottom: '1px solid var(--color-warm-grey)',
-        padding: '0 32px',
-        height: '64px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        position: 'sticky',
-        top: 0,
-        zIndex: 10,
-      }}>
-        <Link href="/" style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: '22px',
-          color: 'var(--color-navy)',
-          textDecoration: 'none',
-          fontWeight: 500,
-        }}>
-          ThriveAtHome
+    <div style={{ maxWidth: '780px', margin: '0 auto', padding: '48px 24px 80px', fontFamily: 'Georgia, serif', color: '#1a1a1a', lineHeight: 1.8 }}>
+      <div style={{ marginBottom: '40px' }}>
+        <Link href="/" style={{ fontSize: '13px', color: '#2d6a4f', textDecoration: 'none', fontFamily: 'system-ui, sans-serif' }}>
+          ← ThriveAtHome
         </Link>
-        <Link href="/" style={{
-          fontFamily: 'var(--font-body)',
-          fontSize: '16px',
-          fontWeight: 500,
-          color: 'var(--color-navy)',
-          textDecoration: 'none',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px',
-        }}>
-          ← Back to home
-        </Link>
-      </nav>
+      </div>
 
-      <main style={{ maxWidth: '780px', margin: '0 auto', padding: '48px 32px 96px' }}>
-        <h1 style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: '48px',
-          fontWeight: 500,
-          color: 'var(--color-navy)',
-          marginBottom: '8px',
-          letterSpacing: '-0.01em',
-          lineHeight: 1.15,
-        }}>
-          Terms of Service
-        </h1>
-        <p style={{
-          fontFamily: 'var(--font-body)',
-          fontSize: '16px',
-          color: 'var(--color-text-muted)',
-          marginBottom: '48px',
-        }}>
-          Last updated: {lastUpdated}
+      <h1 style={{ fontSize: '32px', fontWeight: 800, fontFamily: 'system-ui, sans-serif', marginBottom: '8px', color: '#111' }}>
+        Terms of Service
+      </h1>
+      <p style={{ fontSize: '14px', color: '#888', fontFamily: 'system-ui, sans-serif', marginBottom: '40px' }}>
+        Effective date: {EFFECTIVE_DATE}
+      </p>
+
+      <p>
+        These Terms of Service ("Terms") govern your access to and use of the ThriveAtHome platform, website, mobile application, and related services (collectively, the "Services") provided by {COMPANY} ("ThriveAtHome," "we," "our," or "us"). By creating an account or using our Services, you agree to these Terms.
+      </p>
+
+      <p>
+        If you are using the Services on behalf of an organization, you represent that you have authority to bind that organization to these Terms.
+      </p>
+
+      <Section title="1. Eligibility">
+        <p>
+          You must be at least 18 years old to create an account and use our Services independently. Our platform is designed primarily for adults 65 and older, though family members and caregivers of any adult age may also access certain features. By using the Services, you represent that you meet these eligibility requirements.
         </p>
+        <p>
+          Our K-12 Volunteer Program allows minors to participate in certain volunteer activities with verifiable parental or guardian consent and under the supervision of their school or youth organization.
+        </p>
+      </Section>
 
-        <Section title="Agreement to Terms">
+      <Section title="2. Account Registration">
+        <p>
+          To access most features, you must create an account. You agree to:
+        </p>
+        <ul>
+          <li>Provide accurate, complete, and current information during registration.</li>
+          <li>Maintain the security of your account credentials.</li>
+          <li>Notify us promptly at {EMAIL} if you suspect unauthorized access to your account.</li>
+          <li>Not share your account or transfer it to another person without our written consent.</li>
+        </ul>
+        <p>
+          You are responsible for all activity that occurs under your account.
+        </p>
+      </Section>
+
+      <Section title="3. Services Description">
+        <SubSection title="B2C Services (Individual Members)">
           <p>
-            These Terms of Service (&quot;Terms&quot;) govern your access to and use of ThriveAtHome, Inc.&apos;s
-            (&quot;ThriveAtHome,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) platform, including our website, phone check-in
-            services, family dashboard, and related services (collectively, the &quot;Service&quot;). By creating an
-            account, enrolling a senior loved one, or using the Service in any way, you agree to be bound by
-            these Terms. If you do not agree, do not use the Service.
+            ThriveAtHome offers two individual membership tiers:
           </p>
-        </Section>
-
-        <Section title="Who May Use ThriveAtHome">
-          <p>
-            You must be at least 18 years old to create a ThriveAtHome account. If you are enrolling a senior
-            loved one, you represent that you have the authority to do so — as a family member, legal
-            representative, or with the senior&apos;s own informed consent. Seniors may also create their own
-            direct account.
-          </p>
-        </Section>
-
-        <Section title="Subscription Plans and Billing">
-          <p>ThriveAtHome offers several subscription tiers (Basics, Connect, Complete, Premier), each with different features and monthly pricing as described on our pricing page.</p>
-          <ul style={{ marginTop: '12px' }}>
-            <li>Subscriptions are billed monthly in advance via our payment processor (Stripe).</li>
-            <li>Prices are subject to change with at least 30 days&apos; notice by email before your next billing cycle.</li>
-            <li>Optional add-ons are billed separately and may be added or removed at any time; one-time purchases are billed once at checkout.</li>
-            <li>Failed payments may result in a temporary pause of check-in calls until payment is resolved; we will notify you by email before any pause.</li>
+          <ul>
+            <li><strong>ThriveAtHome Basics ($39/month or $421/year):</strong> AI wellness companion check-ins, safety monitoring, family portal access, volunteer connections, and community access.</li>
+            <li><strong>ThriveAtHome Complete ($79/month or $853/year):</strong> All Basics features plus concierge Care Navigators, premium volunteer matching, family celebrations support, fraud protection, and priority services.</li>
           </ul>
-        </Section>
+        </SubSection>
 
-        <Section title="Cancellation Policy">
-          <p>You may cancel your subscription at any time from your account&apos;s billing page or by contacting us.</p>
-          <ul style={{ marginTop: '12px' }}>
-            <li>Cancellation takes effect at the end of your current billing period — you will not be charged again, and the Service continues until that period ends.</li>
-            <li>We do not offer partial-month refunds for early cancellation, except where required by law.</li>
-            <li>Upon cancellation, daily check-in calls stop and family dashboard access ends at the end of the paid period. You may request full data deletion at any time, as described in our Privacy Policy.</li>
-            <li>You may reactivate your subscription at any time; your senior&apos;s profile data is retained for 90 days after cancellation to make reactivation seamless, then handled per our data retention policy.</li>
+        <SubSection title="B2B Services (Organizations)">
+          <p>
+            Organizations (home care agencies, senior centers, employers, housing communities) may enroll members through an organizational account. B2B pricing, features, and terms are governed by a separate Organization Agreement in addition to these Terms.
+          </p>
+        </SubSection>
+
+        <SubSection title="AI-Assisted Services">
+          <p>
+            Our platform uses artificial intelligence, including AI voice agents (Aria, Grace, Quinn, and others), to provide wellness check-ins, reminders, and companionship interactions. You acknowledge that:
+          </p>
+          <ul>
+            <li>AI agents are not licensed medical professionals and do not provide medical advice, diagnosis, or treatment.</li>
+            <li>AI interactions are recorded and may be reviewed by our team for quality assurance and safety monitoring.</li>
+            <li>AI responses may not always be accurate or appropriate for your specific situation.</li>
+            <li>In a medical emergency, you should call 911 or your local emergency services.</li>
           </ul>
-        </Section>
+        </SubSection>
+      </Section>
 
-        <Section title="AI Check-In Calls — Consent and Limitations">
+      <Section title="4. Payments and Subscriptions">
+        <SubSection title="Billing">
           <p>
-            A core part of the Service is a daily (or scheduled) phone call placed by our AI voice companion
-            (&quot;Aria&quot; and related agents) to the enrolled senior. By enrolling a senior in the Service, you and
-            the senior consent to:
+            Subscriptions are billed in advance on a monthly or annual basis. Payment is processed through Stripe. By providing payment information, you authorize us to charge your payment method for all fees.
           </p>
-          <ul style={{ marginTop: '12px' }}>
-            <li>Receiving automated AI-generated phone calls at the scheduled time and frequency you select.</li>
-            <li>The call being recorded, transcribed, and analyzed by AI to generate wellness scores, summaries, and alerts, as described in our Privacy Policy.</li>
-            <li>Aria&apos;s daily companion calls are opt-in and may be turned off at any time from the member portal — enrollment in the Service does not require them.</li>
+        </SubSection>
+
+        <SubSection title="Free Trial">
+          <p>
+            We may offer free trials for new members. At the end of the trial period, your subscription will automatically begin and you will be charged unless you cancel before the trial ends.
+          </p>
+        </SubSection>
+
+        <SubSection title="Cancellation and Refunds">
+          <p>
+            You may cancel your subscription at any time through your account settings or by contacting us at {EMAIL}. Cancellation takes effect at the end of the current billing period. We do not provide refunds for partial subscription periods, except:
+          </p>
+          <ul>
+            <li>Within 14 days of your initial subscription for new members (full refund).</li>
+            <li>Where required by applicable law.</li>
+            <li>At our discretion for extenuating circumstances.</li>
           </ul>
-          <p style={{ marginTop: '16px' }}>
-            <strong>Important limitation:</strong> ThriveAtHome&apos;s AI check-in calls, crisis-language detection,
-            and alerts are a wellness monitoring aid — they are <strong>not</strong> a medical device, a substitute
-            for professional medical care, and not a guaranteed emergency response system. Call attempts can
-            fail due to technical issues, and AI detection of a crisis is not perfect. If you or your senior
-            has a medical emergency, always call 911 (or your local emergency number) directly — do not rely
-            on ThriveAtHome as a primary emergency response method.
-          </p>
-        </Section>
+        </SubSection>
 
-        <Section title="Family Dashboard Access and Consent">
+        <SubSection title="Price Changes">
           <p>
-            When a senior is enrolled, designated family members are granted access to a shared dashboard
-            showing call summaries, wellness scores, and alerts about that senior. By enrolling in the Service,
-            the senior (or their authorized representative) consents to this information being shared with the
-            family members added to their account. Seniors or their representatives may request that a family
-            member&apos;s access be removed at any time by contacting us or the assigned care navigator.
+            We may change subscription prices with 30 days' advance notice. Price changes take effect at the start of your next billing period after the notice period.
           </p>
-        </Section>
+        </SubSection>
+      </Section>
 
-        <Section title="Acceptable Use">
-          <p>You agree not to:</p>
-          <ul style={{ marginTop: '12px' }}>
-            <li>Use the Service for any unlawful purpose or to violate any person&apos;s rights.</li>
-            <li>Attempt to access another family&apos;s account or data without authorization.</li>
-            <li>Interfere with, disrupt, or attempt to reverse-engineer the Service.</li>
-            <li>Enroll a senior without appropriate authority or informed consent.</li>
-            <li>Use the Service as a substitute for necessary emergency medical services.</li>
-          </ul>
-        </Section>
+      <Section title="5. Acceptable Use">
+        <p>You agree not to:</p>
+        <ul>
+          <li>Use the Services for any unlawful purpose or in violation of any applicable law.</li>
+          <li>Impersonate another person or misrepresent your identity or affiliation.</li>
+          <li>Attempt to gain unauthorized access to any part of the Services or our systems.</li>
+          <li>Transmit harmful, offensive, or fraudulent content through the platform.</li>
+          <li>Use the Services to facilitate elder financial exploitation or abuse.</li>
+          <li>Reverse engineer, decompile, or attempt to extract source code from our platform.</li>
+          <li>Use automated tools to access or scrape the Services without our permission.</li>
+          <li>Interfere with or disrupt the integrity or performance of the Services.</li>
+        </ul>
+        <p>
+          We reserve the right to suspend or terminate accounts that violate these terms.
+        </p>
+      </Section>
 
-        <Section title="Volunteers and Care Navigators">
+      <Section title="6. Volunteer Program">
+        <p>
+          ThriveAtHome connects seniors with volunteers for companionship, transportation, errands, and other services. Regarding volunteers:
+        </p>
+        <ul>
+          <li>Adult volunteers undergo background checks through our screening partner (Checkr). K-12 volunteers are supervised by their school or organization.</li>
+          <li>ThriveAtHome facilitates but does not guarantee the quality, safety, or outcome of volunteer interactions.</li>
+          <li>Members and volunteers must treat each other with respect. Abusive or harassing conduct is grounds for removal from the platform.</li>
+          <li>ThriveAtHome volunteers are not employees or agents of ThriveAtHome for purposes of their volunteer activities.</li>
+        </ul>
+      </Section>
+
+      <Section title="7. Care Navigator Services">
+        <p>
+          Complete plan members have access to Care Navigators — trained human coordinators who assist with care planning and service coordination. Care Navigators:
+        </p>
+        <ul>
+          <li>Provide guidance and coordination, not licensed medical or legal advice.</li>
+          <li>May refer you to appropriate professional resources when needed.</li>
+          <li>Are available during business hours; emergency situations should be directed to 911.</li>
+        </ul>
+      </Section>
+
+      <Section title="8. Communications Consent">
+        <p>
+          By providing your phone number and creating an account, you expressly consent to receive:
+        </p>
+        <ul>
+          <li>Automated telephone calls from AI voice agents for wellness check-ins and reminders.</li>
+          <li>SMS text messages for safety alerts, care coordination, and platform notifications.</li>
+          <li>Email communications about your account, Services, and wellness resources.</li>
+        </ul>
+        <p>
+          This consent is not a condition of purchase. You may opt out of non-emergency communications at any time. To opt out of SMS, reply STOP to any message. To opt out of calls, update your preferences in account settings or contact us. Standard message and data rates may apply.
+        </p>
+      </Section>
+
+      <Section title="9. Intellectual Property">
+        <p>
+          The Services and all content, features, and functionality — including software, text, graphics, logos, and audio — are owned by ThriveAtHome and protected by copyright, trademark, and other intellectual property laws. You may not reproduce, distribute, or create derivative works without our written permission.
+        </p>
+        <p>
+          You retain ownership of content you submit to the platform (profile information, messages, etc.) and grant ThriveAtHome a limited license to use that content to provide the Services.
+        </p>
+      </Section>
+
+      <Section title="10. Privacy">
+        <p>
+          Our <Link href="/privacy" style={{ color: '#2d6a4f' }}>Privacy Policy</Link> describes how we collect, use, and share your personal information and is incorporated into these Terms by reference. By using our Services, you agree to our Privacy Policy.
+        </p>
+      </Section>
+
+      <Section title="11. Disclaimer of Warranties">
+        <p style={{ textTransform: 'uppercase', fontSize: '13px', letterSpacing: '0.02em' }}>
+          The services are provided "as is" and "as available" without warranties of any kind, express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, or non-infringement. ThriveAtHome does not warrant that the services will be uninterrupted, error-free, or free of harmful components.
+        </p>
+        <p>
+          ThriveAtHome is a wellness and social connection platform. We are not a medical provider, home care agency, or emergency response service. Always contact emergency services (911) for medical emergencies.
+        </p>
+      </Section>
+
+      <Section title="12. Limitation of Liability">
+        <p style={{ textTransform: 'uppercase', fontSize: '13px', letterSpacing: '0.02em' }}>
+          To the maximum extent permitted by law, ThriveAtHome shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits, revenue, data, or goodwill, arising from your use of or inability to use the services.
+        </p>
+        <p>
+          Our total liability to you for any claim arising from these Terms or the Services shall not exceed the greater of (a) the amount you paid us in the 12 months preceding the claim, or (b) $100.
+        </p>
+        <p>
+          Some jurisdictions do not allow limitations on implied warranties or liability for certain damages, so the above limitations may not apply to you.
+        </p>
+      </Section>
+
+      <Section title="13. Indemnification">
+        <p>
+          You agree to indemnify and hold harmless ThriveAtHome, its officers, directors, employees, and agents from any claims, damages, or expenses (including reasonable attorneys' fees) arising from your use of the Services, your violation of these Terms, or your violation of any third-party rights.
+        </p>
+      </Section>
+
+      <Section title="14. Dispute Resolution">
+        <SubSection title="Informal Resolution">
           <p>
-            Volunteers and care navigators who use the Service to coordinate with seniors are subject to
-            additional program-specific terms provided during onboarding, including background check
-            requirements and confidentiality obligations regarding any senior information they access.
+            Before filing a formal claim, you agree to contact us at {EMAIL} and attempt to resolve the dispute informally for at least 30 days.
           </p>
-        </Section>
+        </SubSection>
 
-        <Section title="Intellectual Property">
+        <SubSection title="Arbitration">
           <p>
-            The Service, including its software, design, and content (excluding content you submit), is owned
-            by ThriveAtHome and protected by intellectual property laws. We grant you a limited,
-            non-transferable license to use the Service for its intended personal or family care-coordination
-            purpose. You retain ownership of any content you submit (e.g., life-story entries, documents), and
-            grant us a license to store and process it to provide the Service.
+            If informal resolution fails, disputes shall be resolved through binding individual arbitration under the American Arbitration Association's Consumer Arbitration Rules, not in court. You waive the right to participate in a class action lawsuit or class-wide arbitration.
           </p>
-        </Section>
+        </SubSection>
 
-        <Section title="Disclaimers">
+        <SubSection title="Exceptions">
           <p>
-            THE SERVICE IS PROVIDED &quot;AS IS&quot; AND &quot;AS AVAILABLE,&quot; WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR
-            IMPLIED, INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR
-            NON-INFRINGEMENT. WE DO NOT WARRANT THAT THE SERVICE WILL BE UNINTERRUPTED, ERROR-FREE, OR THAT
-            AI-GENERATED SUMMARIES, SCORES, OR ALERTS WILL BE ACCURATE OR COMPLETE IN EVERY CASE.
+            Either party may seek injunctive or other equitable relief in court for intellectual property violations or urgent safety matters. You may also bring claims in small claims court if they qualify.
           </p>
-        </Section>
+        </SubSection>
 
-        <Section title="Limitation of Liability">
+        <SubSection title="Governing Law">
           <p>
-            TO THE MAXIMUM EXTENT PERMITTED BY LAW, THRIVEATHOME AND ITS OFFICERS, EMPLOYEES, AND SERVICE
-            PROVIDERS SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE
-            DAMAGES, OR ANY LOSS OF LIFE, HEALTH, OR SAFETY, ARISING FROM OR RELATED TO YOUR USE OF (OR
-            INABILITY TO USE) THE SERVICE, INCLUDING A MISSED, DELAYED, OR FAILED CHECK-IN CALL OR ALERT. OUR
-            TOTAL AGGREGATE LIABILITY FOR ANY CLAIM ARISING FROM THE SERVICE SHALL NOT EXCEED THE AMOUNT YOU
-            PAID US IN THE 12 MONTHS PRECEDING THE CLAIM. NOTHING IN THESE TERMS LIMITS LIABILITY THAT CANNOT
-            BE LIMITED UNDER APPLICABLE LAW, INCLUDING LIABILITY FOR GROSS NEGLIGENCE OR WILLFUL MISCONDUCT.
+            These Terms are governed by the laws of the State of California, without regard to its conflict of law provisions.
           </p>
-        </Section>
+        </SubSection>
+      </Section>
 
-        <Section title="Indemnification">
-          <p>
-            You agree to indemnify and hold ThriveAtHome harmless from any claims, damages, or expenses
-            (including reasonable attorneys&apos; fees) arising from your violation of these Terms or your misuse
-            of the Service, except to the extent caused by our own negligence or misconduct.
-          </p>
-        </Section>
+      <Section title="15. Termination">
+        <p>
+          You may terminate your account at any time by contacting us or through your account settings. We may suspend or terminate your access to the Services at any time for any reason, including violation of these Terms, with or without notice.
+        </p>
+        <p>
+          Upon termination, your right to use the Services ends immediately. Sections that by their nature should survive termination (including intellectual property, disclaimers, limitation of liability, and dispute resolution) will survive.
+        </p>
+      </Section>
 
-        <Section title="Termination">
-          <p>
-            We may suspend or terminate your access to the Service if you violate these Terms, engage in
-            fraudulent or harmful activity, or if required by law. We will make reasonable efforts to notify
-            you before termination except where immediate action is necessary to protect the Service or its
-            users.
-          </p>
-        </Section>
+      <Section title="16. Changes to These Terms">
+        <p>
+          We may update these Terms periodically. We will notify you of material changes by email or prominent notice on our platform at least 30 days before changes take effect. Your continued use of the Services after that date constitutes acceptance of the updated Terms.
+        </p>
+      </Section>
 
-        <Section title="Governing Law and Disputes">
-          <p>
-            These Terms are governed by the laws of the State of California, without regard to conflict-of-law
-            principles. Any dispute arising from these Terms or the Service shall be resolved in the state or
-            federal courts located in California, and you consent to the personal jurisdiction of those courts.
-          </p>
-        </Section>
+      <Section title="17. Contact Us">
+        <p>
+          For questions about these Terms:
+        </p>
+        <p>
+          <strong>{COMPANY}</strong><br />
+          Email: <strong>{EMAIL}</strong>
+        </p>
+      </Section>
 
-        <Section title="Changes to These Terms">
-          <p>
-            We may update these Terms from time to time. We will notify you of material changes by posting the
-            updated Terms on this page and, for significant changes, by email. Your continued use of the
-            Service after changes take effect constitutes acceptance of the revised Terms.
-          </p>
-        </Section>
-
-        <Section title="Contact Us">
-          <p>Questions about these Terms:</p>
-          <div style={{
-            marginTop: '16px',
-            padding: '24px',
-            backgroundColor: 'white',
-            border: '1px solid var(--color-warm-grey)',
-            borderRadius: 'var(--radius-lg)',
-          }}>
-            <p><strong>ThriveAtHome, Inc. — Legal Team</strong></p>
-            <p>
-              Email:{' '}
-              <a href={`mailto:${contactEmail}`} style={{ color: 'var(--color-teal)' }}>{contactEmail}</a>
-            </p>
-          </div>
-        </Section>
-
-        <div style={{ marginTop: '64px', paddingTop: '32px', borderTop: '1px solid var(--color-warm-grey)' }}>
-          <Link href="/" style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            fontFamily: 'var(--font-body)',
-            fontSize: '18px',
-            fontWeight: 500,
-            color: 'var(--color-navy)',
-            textDecoration: 'none',
-            border: '1.5px solid var(--color-navy)',
-            borderRadius: 'var(--radius-md)',
-            padding: '12px 24px',
-            minHeight: '48px',
-            transition: 'all 0.2s',
-          }}>
-            ← Back to home
-          </Link>
-        </div>
-      </main>
+      <div style={{ marginTop: '48px', paddingTop: '24px', borderTop: '1px solid #e8e8e8', display: 'flex', gap: '24px', fontSize: '13px', fontFamily: 'system-ui, sans-serif' }}>
+        <Link href="/privacy" style={{ color: '#2d6a4f', textDecoration: 'none' }}>Privacy Policy</Link>
+        <Link href="/" style={{ color: '#888', textDecoration: 'none' }}>← Home</Link>
+      </div>
     </div>
   )
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section style={{ marginBottom: '40px' }}>
-      <h2 style={{
-        fontFamily: 'var(--font-display)',
-        fontSize: '28px',
-        fontWeight: 500,
-        color: 'var(--color-navy)',
-        marginBottom: '16px',
-        letterSpacing: '-0.01em',
-      }}>
+    <div style={{ marginBottom: '36px' }}>
+      <h2 style={{ fontSize: '18px', fontWeight: 700, fontFamily: 'system-ui, sans-serif', color: '#111', marginBottom: '12px', marginTop: '36px' }}>
         {title}
       </h2>
-      <div style={{
-        fontFamily: 'var(--font-body)',
-        fontSize: '18px',
-        color: 'var(--color-text-primary)',
-        lineHeight: 1.7,
-      }}>
-        {children}
-      </div>
-    </section>
+      {children}
+    </div>
+  )
+}
+
+function SubSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div style={{ marginBottom: '16px' }}>
+      <h3 style={{ fontSize: '15px', fontWeight: 600, fontFamily: 'system-ui, sans-serif', color: '#333', marginBottom: '8px' }}>
+        {title}
+      </h3>
+      {children}
+    </div>
   )
 }
