@@ -1,297 +1,94 @@
-// Human Buddy Programme — Phase 33a data layer. Server-side only.
-import { createAdminClient } from '../supabase/admin'
-import type { Tables } from '@/types/database'
-type BuddyAssignmentRow = Tables<'buddy_assignments'>
-type BuddyCallRow = Tables<'buddy_calls'>
-type BuddyCallInsert = any
+import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import type { BuddyAssignment, BuddyAssignmentInsert, BuddyCall, BuddyCallInsert, AriaBrief } from '@/types/buddy'
+import Anthropic from '@anthropic-ai/sdk'
 
-export type { BuddyAssignmentRow, BuddyCallRow }
+function supabase() { return createClient() }
+function admin() { return createAdminClient() }
 
-export interface CreateBuddyAssignmentParams {
-  member_id: string
-  volunteer_id: string
-  call_frequency?: 'weekly' | 'biweekly'
-  preferred_call_day?: string
-  preferred_call_time?: string
-  match_score: number
-  match_reasons: string[]
-  navigator_notes?: string
+export async function getActiveBuddyAssignment(memberId: string): Promise<{ data: BuddyAssignment | null; error: unknown }> {
+  const { data, error } = await (supabase() as any)
+    .from('buddy_assignments')
+    .select('*, volunteer:volunteers(id,first_name,last_name,buddy_bio,buddy_capacity,buddy_active_count,email), member:members(id,first_name,last_name,preferred_name,has_active_buddy)')
+    .eq('member_id', memberId).eq('status', 'active').single()
+  return { data: data as BuddyAssignment | null, error }
 }
 
-// Returns the active buddy assignment for a member (status = 'active').
-export async function getActiveBuddyAssignment(memberId: string): Promise<{ data: BuddyAssignmentRow | null; error: string | null }> {
-  const admin = createAdminClient()
-  const { data, error } = await (admin.from as any)('buddy_assignments')
-    .select('*')
-    .eq('member_id', memberId)
-    .eq('status', 'active')
-    .maybeSingle()
-  if (error) return { data: null, error: error.message }
-  return { data, error: null }
+export async function getBuddyAssignments(volunteerId: string): Promise<{ data: BuddyAssignment[]; error: unknown }> {
+  const { data, error } = await (supabase() as any)
+    .from('buddy_assignments')
+    .select('*, member:members(id,first_name,last_name,preferred_name,has_active_buddy), buddy_calls(id,started_at,duration_minutes,call_quality,concern_flag,milestone_flag,created_at)')
+    .eq('volunteer_id', volunteerId).in('status', ['active','paused','ending']).order('assigned_at', { ascending: false })
+  return { data: (data ?? []) as BuddyAssignment[], error }
 }
 
-// Returns a compact buddy summary for a member: active assignment + completed call count.
-// Used by the navigator console member detail panel — a single call instead of wiring
-// three separate fetches for one summary card.
-export async function getBuddySummaryForMember(memberId: string): Promise<{
-  data: { assignmentId: string; status: string; callFrequency: string; volunteerName: string | null; completedCallCount: number } | null
-  error: string | null
-}> {
-  const { data: assignment, error } = await getActiveBuddyAssignment(memberId)
-  if (error) return { data: null, error }
-  if (!assignment) return { data: null, error: null }
+export async function createBuddyAssignment(data: BuddyAssignmentInsert): Promise<{ data: BuddyAssignment | null; error: unknown }> {
+  const db = admin() as any
+  const { data: assignment, error: assignError } = await db.from('buddy_assignments').insert(data).select().single()
+  if (assignError || !assignment) return { data: null, error: assignError }
+  await db.from('volunteers').update({ buddy_active_count: db.rpc('greatest', {}) }).eq('id', data.volunteer_id)
+  await db.from('members').update({ has_active_buddy: true }).eq('id', data.member_id)
+  return { data: assignment as BuddyAssignment, error: null }
+}
 
-  const admin = createAdminClient()
-  const [{ data: volunteer }, { data: count, error: countError }] = await Promise.all([
-    (admin.from as any)('volunteers').select('full_name').eq('id', assignment.volunteer_id).maybeSingle(),
-    getCompletedBuddyCallCount(assignment.id),
-  ])
-  if (countError) return { data: null, error: countError }
-
-  return {
-    data: {
-      assignmentId: assignment.id,
-      status: assignment.status,
-      callFrequency: assignment.call_frequency,
-      volunteerName: volunteer?.full_name ?? null,
-      completedCallCount: count,
-    },
-    error: null,
+export async function endBuddyAssignment(assignmentId: string, reason: string): Promise<{ data: BuddyAssignment | null; error: unknown }> {
+  const db = admin() as any
+  const { data: existing } = await db.from('buddy_assignments').select('volunteer_id,member_id').eq('id', assignmentId).single()
+  const { data, error } = await db.from('buddy_assignments').update({ status: 'ended', ended_at: new Date().toISOString(), end_reason: reason }).eq('id', assignmentId).select().single()
+  if (error || !existing) return { data: null, error }
+  const { data: otherActive } = await db.from('buddy_assignments').select('id').eq('member_id', existing.member_id).eq('status', 'active').neq('id', assignmentId).limit(1)
+  if (!otherActive || otherActive.length === 0) {
+    await db.from('members').update({ has_active_buddy: false }).eq('id', existing.member_id)
   }
+  return { data: data as BuddyAssignment, error: null }
 }
 
-// Returns all buddy assignments for a member (all statuses).
-export async function getBuddyAssignments(memberId: string): Promise<{ data: BuddyAssignmentRow[] | null; error: string | null }> {
-  const admin = createAdminClient()
-  const { data, error } = await (admin.from as any)('buddy_assignments')
-    .select('*')
-    .eq('member_id', memberId)
-    .order('assigned_at', { ascending: false })
-  if (error) return { data: null, error: error.message }
-  return { data: data ?? [], error: null }
+export async function getBuddyCalls(assignmentId: string, limit = 20): Promise<{ data: BuddyCall[]; error: unknown }> {
+  const { data, error } = await (supabase() as any)
+    .from('buddy_calls')
+    .select('*, volunteer:volunteers(first_name,last_name), member:members(first_name,preferred_name)')
+    .eq('assignment_id', assignmentId).order('created_at', { ascending: false }).limit(limit)
+  return { data: (data ?? []) as BuddyCall[], error }
 }
 
-// Returns all active assignments for a volunteer.
-export async function getVolunteerBuddyAssignments(volunteerId: string): Promise<{ data: BuddyAssignmentRow[] | null; error: string | null }> {
-  const admin = createAdminClient()
-  const { data, error } = await (admin.from as any)('buddy_assignments')
-    .select('*, members(id, preferred_name, full_name, has_active_buddy, topics_enjoy, buddy_match_era, buddy_call_length_preference, buddy_intro_note, address)')
-    .eq('volunteer_id', volunteerId)
-    .in('status', ['active', 'paused', 'ending'])
-    .order('assigned_at', { ascending: true })
-  if (error) return { data: null, error: error.message }
-  return { data: data ?? [], error: null }
+export async function createBuddyCall(data: BuddyCallInsert): Promise<{ data: BuddyCall | null; error: unknown }> {
+  const { data: call, error } = await (supabase() as any).from('buddy_calls').insert(data).select().single()
+  return { data: call as BuddyCall | null, error }
 }
 
-// Creates a new buddy assignment and increments volunteer's active count.
-export async function createBuddyAssignment(params: CreateBuddyAssignmentParams): Promise<{ data: BuddyAssignmentRow | null; error: string | null }> {
-  const admin = createAdminClient()
-  const { data, error } = await (admin.from as any)('buddy_assignments').insert({
-    member_id: params.member_id,
-    volunteer_id: params.volunteer_id,
-    call_frequency: params.call_frequency ?? 'weekly',
-    preferred_call_day: params.preferred_call_day ?? null,
-    preferred_call_time: params.preferred_call_time ?? null,
-    match_score: params.match_score,
-    match_reasons: params.match_reasons,
-    navigator_notes: params.navigator_notes ?? null,
-    status: 'active',
-  }).select().single()
-  if (error) return { data: null, error: error.message }
-
-  // Increment volunteer buddy_active_count + set member has_active_buddy
-  await (admin.from as any)('volunteers').select('buddy_active_count').eq('id', params.volunteer_id).single().then(({ data: vol }: { data: { buddy_active_count: number } | null }) => {
-    if (vol) {
-      return (admin.from as any)('volunteers').update({ buddy_active_count: (vol.buddy_active_count ?? 0) + 1 }).eq('id', params.volunteer_id)
-    }
-  })
-  await (admin.from as any)('members').update({ has_active_buddy: true }).eq('id', params.member_id)
-
-  return { data, error: null }
+export async function getUnacknowledgedConcernFlags(navigatorId: string): Promise<{ data: BuddyCall[]; error: unknown }> {
+  const db = admin() as any
+  const { data: memberLinks } = await db.from('member_navigators').select('member_id').eq('navigator_id', navigatorId)
+  const memberIds = (memberLinks ?? []).map((m: { member_id: string }) => m.member_id)
+  if (memberIds.length === 0) return { data: [], error: null }
+  const { data, error } = await db.from('buddy_calls')
+    .select('*, volunteer:volunteers(first_name,last_name), member:members(first_name,preferred_name)')
+    .in('member_id', memberIds).eq('concern_flag', true).order('created_at', { ascending: false })
+  return { data: (data ?? []) as BuddyCall[], error }
 }
 
-// Ends a buddy assignment (sets status = 'ended', decrements volunteer count, clears member flag).
-export async function endBuddyAssignment(assignmentId: string, endReason: string, transitionBuddyId?: string): Promise<{ error: string | null }> {
-  const admin = createAdminClient()
-
-  const { data: assignment, error: fetchErr } = await (admin.from as any)('buddy_assignments')
-    .select('volunteer_id, member_id')
-    .eq('id', assignmentId)
-    .single()
-  if (fetchErr || !assignment) return { error: fetchErr?.message ?? 'Assignment not found' }
-
-  const { error } = await (admin.from as any)('buddy_assignments').update({
-    status: 'ended',
-    ended_at: new Date().toISOString(),
-    end_reason: endReason,
-    transition_buddy_id: transitionBuddyId ?? null,
-  }).eq('id', assignmentId)
-  if (error) return { error: error.message }
-
-  const { data: vol } = await (admin.from as any)('volunteers').select('buddy_active_count').eq('id', assignment.volunteer_id).single()
-  if (vol) {
-    await (admin.from as any)('volunteers').update({ buddy_active_count: Math.max(0, (vol.buddy_active_count ?? 1) - 1) }).eq('id', assignment.volunteer_id)
+export async function generateAriaBrief(memberId: string): Promise<{ data: AriaBrief | null; error: unknown }> {
+  const db = admin() as any
+  const { data: member, error: memberError } = await db.from('members').select('first_name,preferred_name').eq('id', memberId).single()
+  if (memberError || !member) return { data: null, error: memberError }
+  const memberName = member.preferred_name || member.first_name
+  const { data: calls } = await db.from('check_in_calls').select('summary,mood_score,energy_score,created_at').eq('member_id', memberId).not('summary', 'is', null).order('created_at', { ascending: false }).limit(2)
+  if (!calls || calls.length === 0) {
+    return { data: { memberId, memberName, briefText: `${memberName} is looking forward to your call! This will be a wonderful chance to get to know each other.`, generatedAt: new Date().toISOString(), sourceSummaryCount: 0 }, error: null }
   }
-  await (admin.from as any)('members').update({ has_active_buddy: false }).eq('id', assignment.member_id)
-
-  return { error: null }
-}
-
-// Returns buddy calls for an assignment, without concern_description (for family use).
-export async function getBuddyCallsForFamily(assignmentId: string): Promise<{ data: Omit<BuddyCallRow, 'concern_description'>[] | null; error: string | null }> {
-  const admin = createAdminClient()
-  const { data, error } = await (admin.from as any)('buddy_calls')
-    .select('id, created_at, assignment_id, member_id, volunteer_id, scheduled_at, started_at, duration_minutes, call_quality, buddy_notes, family_note, concern_flag, milestone_flag, milestone_description, aria_brief_shown, aria_context_snapshot')
-    .eq('assignment_id', assignmentId)
-    .order('created_at', { ascending: false })
-  if (error) return { data: null, error: error.message }
-  return { data: data ?? [], error: null }
-}
-
-// Returns buddy calls for an assignment, WITH concern_description (navigator use only).
-export async function getBuddyCalls(assignmentId: string): Promise<{ data: BuddyCallRow[] | null; error: string | null }> {
-  const admin = createAdminClient()
-  const { data, error } = await (admin.from as any)('buddy_calls')
-    .select('*')
-    .eq('assignment_id', assignmentId)
-    .order('created_at', { ascending: false })
-  if (error) return { data: null, error: error.message }
-  return { data: data ?? [], error: null }
-}
-
-// Returns the number of buddy calls that actually took place (started_at set) for an assignment.
-// A separate count query is used instead of calls.length so this stays accurate even where only
-// a summary is needed (e.g. dashboard tiles) without pulling every call row.
-export async function getCompletedBuddyCallCount(assignmentId: string): Promise<{ data: number; error: string | null }> {
-  const admin = createAdminClient()
-  const { count, error } = await (admin.from as any)('buddy_calls')
-    .select('id', { count: 'exact', head: true })
-    .eq('assignment_id', assignmentId)
-    .not('started_at', 'is', null)
-  if (error) return { data: 0, error: error.message }
-  return { data: count ?? 0, error: null }
-}
-
-// Creates a buddy call record.
-export async function createBuddyCall(call: BuddyCallInsert): Promise<{ data: BuddyCallRow | null; error: string | null }> {
-  const admin = createAdminClient()
-  const { data, error } = await (admin.from as any)('buddy_calls').insert(call).select().single()
-  if (error) return { data: null, error: error.message }
-  return { data, error: null }
-}
-
-// Returns all unacknowledged concern flags for a navigator's caseload.
-export async function getUnacknowledgedConcernFlags(navigatorId: string): Promise<{ data: Array<BuddyCallRow & { assignment: BuddyAssignmentRow }> | null; error: string | null }> {
-  const admin = createAdminClient()
-  // Get member IDs for this navigator
-  const { data: assignments } = await (admin.from as any)('navigator_assignments')
-    .select('member_id')
-    .eq('navigator_id', navigatorId)
-  const memberIds: string[] = (assignments ?? []).map((a: { member_id: string }) => a.member_id)
-  if (!memberIds.length) return { data: [], error: null }
-
-  const { data, error } = await (admin.from as any)('buddy_calls')
-    .select('*, buddy_assignments(*)')
-    .eq('concern_flag', true)
-    .in('member_id', memberIds)
-    .order('created_at', { ascending: false })
-  if (error) return { data: null, error: error.message }
-  return { data: data ?? [], error: null }
-}
-
-// Returns unmatched Connect+ members (no active buddy assignment).
-export async function getUnmatchedBuddyMembers(): Promise<{ data: Array<{ id: string; preferred_name: string; full_name: string; plan_tier: string; topics_enjoy: string[]; address: string | null; preferred_language: string; buddy_match_era: string | null; buddy_intro_note: string | null }> | null; error: string | null }> {
-  const admin = createAdminClient()
-  const { data, error } = await (admin.from as any)('members')
-    .select('id, preferred_name, full_name, plan_tier, topics_enjoy, address, preferred_language, buddy_match_era, buddy_intro_note')
-    .in('plan_tier', ['basic', 'complete', 'premier'])
-    .eq('has_active_buddy', false)
-    .eq('status', 'active')
-    .order('full_name')
-  if (error) return { data: null, error: error.message }
-  return { data: data ?? [], error: null }
-}
-
-// Scores an active volunteer for buddy matching.
-export function scoreBuddyVolunteer(
-  volunteer: { city: string | null; state?: string | null; metro_area_id?: string | null; interests: string[]; languages: string[]; buddy_capacity: number; buddy_active_count: number; buddy_preferences: Record<string, unknown> | null },
-  member: { address: string | null; state?: string | null; metro_area_id?: string | null; topics_enjoy: string[]; preferred_language: string; buddy_match_topics?: string[] }
-): { score: number; reasons: string[] } {
-  let score = 0
-  const reasons: string[] = []
-
-  const memberTopics = [
-    ...(member.topics_enjoy ?? []),
-    ...(member.buddy_match_topics ?? []),
-  ]
-
-  // Metro area match (+30), same state (+15), same city fallback (+20)
-  if (volunteer.metro_area_id && member.metro_area_id && volunteer.metro_area_id === member.metro_area_id) {
-    score += 30
-    reasons.push('Same metro area')
-  } else if (volunteer.state && member.state && volunteer.state === member.state) {
-    score += 15
-    reasons.push('Same state')
-  } else if (volunteer.city && member.address && member.address.toLowerCase().includes(volunteer.city.toLowerCase())) {
-    score += 20
-    reasons.push('Same city')
+  const callContext = calls.map((c: { created_at: string; summary: string; mood_score?: number }) => {
+    const date = new Date(c.created_at).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })
+    return `Call from ${date}: ${c.summary}${c.mood_score ? ` (Mood: ${c.mood_score}/5)` : ''}`
+  }).join('\n\n')
+  try {
+    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+    const response = await anthropic.messages.create({
+      model: 'claude-sonnet-4-20250514', max_tokens: 200,
+      messages: [{ role: 'user', content: `You are writing a warm, friendly briefing for a volunteer buddy about to call their senior friend named ${memberName}. In 2-3 sentences, summarise what has been happening with this person based on their recent AI check-in calls. Write as a caring friend, not a medical professional. Never use clinical language.\n\nRecent check-in data:\n${callContext}` }],
+    })
+    const briefText = response.content[0].type === 'text' ? response.content[0].text : `${memberName} has been chatting with our AI check-in recently. Have a warm conversation!`
+    return { data: { memberId, memberName, briefText, generatedAt: new Date().toISOString(), sourceSummaryCount: calls.length }, error: null }
+  } catch {
+    return { data: { memberId, memberName, briefText: `${memberName} will be happy to hear from you. Ask how their week has been going.`, generatedAt: new Date().toISOString(), sourceSummaryCount: calls.length }, error: null }
   }
-  // Shared interests (max 45)
-  const shared = volunteer.interests.filter(i => memberTopics.includes(i))
-  const interestPoints = Math.min(shared.length * 15, 45)
-  if (interestPoints > 0) {
-    score += interestPoints
-    reasons.push(`${shared.length} shared interest${shared.length > 1 ? 's' : ''}: ${shared.slice(0, 3).join(', ')}`)
-  }
-  // Language match
-  if (member.preferred_language !== 'english' && volunteer.languages.includes(member.preferred_language)) {
-    score += 20
-    reasons.push('Language match')
-  }
-  // Availability
-  if (volunteer.buddy_capacity > volunteer.buddy_active_count) {
-    score += 10
-    reasons.push('Has buddy capacity')
-  } else {
-    // At or over capacity
-    score -= 10
-  }
-
-  return { score, reasons }
-}
-
-// Generates a pre-call Aria brief for a buddy (stub — real Claude API call in production).
-export async function generateAriaBrief(memberId: string): Promise<{ brief: string; error: string | null }> {
-  const admin = createAdminClient()
-  const { data: member } = await (admin.from as any)('members')
-    .select('preferred_name, topics_enjoy, buddy_match_era, buddy_intro_note')
-    .eq('id', memberId)
-    .single()
-
-  if (!member) return { brief: '[STUB] Unable to generate Aria brief — member not found.', error: null }
-
-  // Stub implementation — replace with real Claude API call when ANTHROPIC_API_KEY is set
-  const topics = (member.topics_enjoy ?? []).slice(0, 3).join(', ') || 'general conversation'
-  const era = member.buddy_match_era ? ` who enjoys reminiscing about ${member.buddy_match_era}` : ''
-  const note = member.buddy_intro_note ? ` Note from family: "${member.buddy_intro_note}".` : ''
-
-  const brief = `[STUB] ${member.preferred_name} enjoys talking about ${topics}${era}.${note} This is a warm 2–3 sentence brief to help the buddy start the call naturally.`
-
-  return { brief, error: null }
-}
-
-// Returns all active buddy assignments across the platform (navigator overview).
-export async function getAllActiveBuddyAssignments(): Promise<{ data: Array<BuddyAssignmentRow & { member_name: string; volunteer_name: string }> | null; error: string | null }> {
-  const admin = createAdminClient()
-  const { data, error } = await (admin.from as any)('buddy_assignments')
-    .select('*, members(preferred_name, full_name), volunteers(full_name)')
-    .in('status', ['active', 'paused', 'ending'])
-    .order('assigned_at', { ascending: false })
-  if (error) return { data: null, error: error.message }
-  const mapped = (data ?? []).map((a: BuddyAssignmentRow & { members: { preferred_name: string; full_name: string } | null; volunteers: { full_name: string } | null }) => ({
-    ...a,
-    member_name: a.members?.preferred_name ?? a.members?.full_name ?? 'Unknown',
-    volunteer_name: a.volunteers?.full_name ?? 'Unknown',
-  }))
-  return { data: mapped, error: null }
 }
