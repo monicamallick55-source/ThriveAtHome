@@ -1,129 +1,46 @@
-// Next.js proxy — refreshes session cookies and enforces role-based routing.
-// In Next.js 16+, proxy.ts replaces middleware.ts. The exported function must be named "proxy".
-import { createServerClient } from '@supabase/ssr'
-import { NextResponse, type NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
-export async function proxy(request: NextRequest) {
-  let response = NextResponse.next({ request })
+export function proxy(request: NextRequest) {
+  const hostname = request.headers.get('host') || ''
+  const url = request.nextUrl.clone()
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => request.cookies.getAll(),
-        setAll: (toSet) => {
-          toSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          response = NextResponse.next({ request })
-          toSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options)
-          )
-        },
-      },
-    }
-  )
+  // Production: [org].thriveathome.app or [org].thriveathome.com
+  // Dev: [org].localhost:3000
+  const isProd = hostname.endsWith('.thriveathome.app') || hostname.endsWith('.thriveathome.com')
+  const isDev  = hostname.endsWith('.localhost:3000') || hostname.endsWith('.localhost')
 
-  const { data: { user } } = await supabase.auth.getUser()
-  const path = request.nextUrl.pathname
+  if (isProd || isDev) {
+    const rootDomain = isProd
+      ? hostname.replace(/\.thriveathome\.(app|com)$/, '')
+      : hostname.replace(/\.localhost(:\d+)?$/, '')
 
-  // Unauthenticated users: guard all protected areas
-  const isProtected = ['/dashboard', '/navigator', '/admin', '/onboarding', '/volunteer/dashboard', '/student'].some((p) =>
-    path.startsWith(p)
-  )
-  if (isProtected && !user) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/login'
-    return NextResponse.redirect(url)
-  }
+    // Skip www, app, api — only route org subdomains
+    const reserved = ['www', 'app', 'api', 'admin', 'mail']
+    if (rootDomain && !reserved.includes(rootDomain)) {
+      // Rewrite [org].thriveathome.app/* → /org-admin/* with slug in header
+      url.pathname = url.pathname.startsWith('/org-admin')
+        ? url.pathname
+        : `/org-admin${url.pathname}`
 
-  // Authenticated users: role-based routing
-  if (user) {
-    const { data: fm } = await supabase
-      .from('family_members')
-      .select('role')
-      .eq('supabase_auth_id', user.id)
-      .maybeSingle()
-
-    let role = (fm?.role ?? 'family') as
-      | 'family' | 'navigator' | 'admin' | 'volunteer' | 'student'
-      | 'university_admin' | 'employer_admin' | 'agency_admin' | 'aaa_admin'
-      | 'org_admin' | 'senior_center_admin' | 'network_admin'
-
-    // If no family_members row found, check volunteers or student_volunteers table
-    if (!fm) {
-      const { data: vol } = await supabase
-        .from('volunteers')
-        .select('id')
-        .eq('supabase_auth_id', user.id)
-        .maybeSingle()
-      if (vol) {
-        role = 'volunteer'
-      } else {
-        const { data: sv } = await supabase
-          .from('student_volunteers')
-          .select('id')
-          .eq('supabase_auth_id', user.id)
-          .maybeSingle()
-        if (sv) role = 'student'
-      }
-    }
-
-    // Family users cannot access /navigator, /admin, /volunteer/dashboard, or /student
-    if (role === 'family' && (path.startsWith('/navigator') || path.startsWith('/admin') || path.startsWith('/volunteer/dashboard') || path.startsWith('/student'))) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/dashboard'
-      return NextResponse.redirect(url)
-    }
-
-    // Navigator users landing on /dashboard root are redirected to /navigator
-    if (role === 'navigator' && path === '/dashboard') {
-      const url = request.nextUrl.clone()
-      url.pathname = '/navigator'
-      return NextResponse.redirect(url)
-    }
-
-    // Partner-portal admins landing on /dashboard root are sent to their own portal.
-    // This is a server-side safety net: the client login redirect can miss the
-    // right destination if the role read races the session cookie.
-    const PORTAL_HOME: Record<string, string> = {
-      university_admin: '/university-admin',
-      employer_admin: '/employer-admin',
-      agency_admin: '/agency-admin',
-      aaa_admin: '/aaa-admin',
-      org_admin: '/org-admin',
-      senior_center_admin: '/senior-center-admin',
-      network_admin: '/network-admin',
-    }
-    if (path === '/dashboard' && PORTAL_HOME[role]) {
-      const url = request.nextUrl.clone()
-      url.pathname = PORTAL_HOME[role]
-      return NextResponse.redirect(url)
-    }
-
-    // Volunteer users: redirect away from family/navigator/admin areas to their own portal
-    if (role === 'volunteer') {
-      if (path.startsWith('/dashboard') || path.startsWith('/navigator') || path.startsWith('/admin')) {
-        const url = request.nextUrl.clone()
-        url.pathname = '/volunteer/dashboard'
-        return NextResponse.redirect(url)
-      }
-    }
-
-    // Student users: redirect away from other protected areas to /student
-    if (role === 'student') {
-      if (path.startsWith('/dashboard') || path.startsWith('/navigator') || path.startsWith('/admin') || path.startsWith('/volunteer/dashboard')) {
-        const url = request.nextUrl.clone()
-        url.pathname = '/student'
-        return NextResponse.redirect(url)
-      }
+      const response = NextResponse.rewrite(url)
+      response.headers.set('x-org-slug', rootDomain)
+      return response
     }
   }
 
-  return response
+  return NextResponse.next()
 }
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    /*
+     * Match all request paths EXCEPT:
+     * - _next/static (static files)
+     * - _next/image (image optimisation)
+     * - favicon.ico
+     * - api routes (let them pass through normally)
+     */
+    '/((?!_next/static|_next/image|favicon.ico|api/).*)',
   ],
 }
