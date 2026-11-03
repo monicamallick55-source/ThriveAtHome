@@ -74,6 +74,11 @@ CREATE TRIGGER trg_marketplace_transactions_updated_at
 CREATE OR REPLACE FUNCTION refresh_provider_rating()
 RETURNS TRIGGER AS $$
 BEGIN
+  -- Only recalculate when a rating is present
+  IF NEW.member_rating IS NULL THEN
+    RETURN NEW;
+  END IF;
+
   UPDATE marketplace_providers
   SET
     rating = (
@@ -93,7 +98,7 @@ $$ LANGUAGE plpgsql;
 DROP TRIGGER IF EXISTS trg_refresh_provider_rating ON marketplace_transactions;
 CREATE TRIGGER trg_refresh_provider_rating
   AFTER INSERT OR UPDATE OF member_rating ON marketplace_transactions
-  FOR EACH ROW WHEN (NEW.member_rating IS NOT NULL)
+  FOR EACH ROW
   EXECUTE FUNCTION refresh_provider_rating();
 
 -- RLS
@@ -107,13 +112,13 @@ CREATE POLICY "Anyone can view active providers"
 CREATE POLICY "Members can view own transactions"
   ON marketplace_transactions FOR SELECT
   USING (
-    member_id IN (SELECT id FROM members WHERE auth_id = auth.uid())
+    member_id IN (SELECT id FROM members WHERE supabase_auth_id = auth.uid())
   );
 
 CREATE POLICY "Navigators can view all transactions"
   ON marketplace_transactions FOR SELECT
   USING (
-    EXISTS (SELECT 1 FROM members WHERE auth_id = auth.uid() AND role IN ('navigator', 'care_coordinator', 'platform_admin'))
+    EXISTS (SELECT 1 FROM members WHERE supabase_auth_id = auth.uid() AND role IN ('navigator', 'care_coordinator', 'platform_admin'))
   );
 
 -- Indexes

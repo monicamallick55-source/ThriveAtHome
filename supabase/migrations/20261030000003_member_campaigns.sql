@@ -115,13 +115,13 @@ CREATE POLICY "Public campaigns are visible to all"
 
 CREATE POLICY "Creators can manage their campaigns"
   ON campaigns FOR ALL
-  USING (creator_id IN (SELECT id FROM members WHERE auth_id = auth.uid()))
-  WITH CHECK (creator_id IN (SELECT id FROM members WHERE auth_id = auth.uid()));
+  USING (creator_id IN (SELECT id FROM members WHERE supabase_auth_id = auth.uid()))
+  WITH CHECK (creator_id IN (SELECT id FROM members WHERE supabase_auth_id = auth.uid()));
 
 CREATE POLICY "Platform admins can manage all campaigns"
   ON campaigns FOR ALL
-  USING (EXISTS (SELECT 1 FROM members WHERE auth_id = auth.uid() AND role IN ('platform_admin', 'care_coordinator')))
-  WITH CHECK (EXISTS (SELECT 1 FROM members WHERE auth_id = auth.uid() AND role IN ('platform_admin', 'care_coordinator')));
+  USING (EXISTS (SELECT 1 FROM members WHERE supabase_auth_id = auth.uid() AND role IN ('platform_admin', 'care_coordinator')))
+  WITH CHECK (EXISTS (SELECT 1 FROM members WHERE supabase_auth_id = auth.uid() AND role IN ('platform_admin', 'care_coordinator')));
 
 CREATE POLICY "Non-anonymous donations visible to campaign creator"
   ON campaign_donations FOR SELECT
@@ -129,17 +129,17 @@ CREATE POLICY "Non-anonymous donations visible to campaign creator"
     is_anonymous = FALSE
     AND campaign_id IN (
       SELECT id FROM campaigns
-      WHERE creator_id IN (SELECT id FROM members WHERE auth_id = auth.uid())
+      WHERE creator_id IN (SELECT id FROM members WHERE supabase_auth_id = auth.uid())
     )
   );
 
 CREATE POLICY "Donors can view own donations"
   ON campaign_donations FOR SELECT
-  USING (donor_member_id IN (SELECT id FROM members WHERE auth_id = auth.uid()));
+  USING (donor_member_id IN (SELECT id FROM members WHERE supabase_auth_id = auth.uid()));
 
 CREATE POLICY "Platform admins can view all donations"
   ON campaign_donations FOR SELECT
-  USING (EXISTS (SELECT 1 FROM members WHERE auth_id = auth.uid() AND role = 'platform_admin'));
+  USING (EXISTS (SELECT 1 FROM members WHERE supabase_auth_id = auth.uid() AND role = 'platform_admin'));
 
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_campaigns_status       ON campaigns(status);

@@ -58,7 +58,7 @@ CREATE POLICY "Platform admins can read all configs"
   USING (
     EXISTS (
       SELECT 1 FROM members
-      WHERE auth_id = auth.uid() AND role = 'platform_admin'
+      WHERE supabase_auth_id = auth.uid() AND role = 'platform_admin'
     )
   );
 

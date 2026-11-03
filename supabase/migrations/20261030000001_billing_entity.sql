@@ -52,7 +52,7 @@ CREATE POLICY "Members can read own billing"
   ON billing_entities FOR SELECT
   USING (
     member_id IN (
-      SELECT id FROM members WHERE auth_id = auth.uid()
+      SELECT id FROM members WHERE supabase_auth_id = auth.uid()
     )
   );
 
@@ -60,10 +60,10 @@ CREATE POLICY "Members can read own billing"
 CREATE POLICY "Platform admins full access"
   ON billing_entities FOR ALL
   USING (
-    EXISTS (SELECT 1 FROM members WHERE auth_id = auth.uid() AND role = 'platform_admin')
+    EXISTS (SELECT 1 FROM members WHERE supabase_auth_id = auth.uid() AND role = 'platform_admin')
   )
   WITH CHECK (
-    EXISTS (SELECT 1 FROM members WHERE auth_id = auth.uid() AND role = 'platform_admin')
+    EXISTS (SELECT 1 FROM members WHERE supabase_auth_id = auth.uid() AND role = 'platform_admin')
   );
 
 -- Indexes for Stripe webhook lookups
