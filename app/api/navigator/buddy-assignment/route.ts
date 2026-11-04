@@ -57,7 +57,7 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: 'assignment_id and end_reason are required' }, { status: 400 })
     }
 
-    const { error } = await endBuddyAssignment(assignment_id, end_reason, transition_buddy_id)
+    const { error } = await endBuddyAssignment(assignment_id, end_reason)
     if (error) return NextResponse.json({ error }, { status: 500 })
     return NextResponse.json({ ok: true })
   } catch (err) {
