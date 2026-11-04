@@ -48,7 +48,7 @@ export default async function AdminBuddyMatchingPage() {
 
       <main style={{ flex: 1, maxWidth: '1200px', margin: '0 auto', padding: '32px', width: '100%' }}>
         <AdminBuddyMatching
-          unmatchedMembers={unmatchedMembers ?? []}
+          unmatchedMembers={(unmatchedMembers ?? []) as any}
           volunteers={volunteers as any}
         />
       </main>
