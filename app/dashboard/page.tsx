@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
 import { UpgradePlanCard } from '@/components/dashboard/UpgradePlanCard'
 import Link from 'next/link'
+import BuddySection from '@/app/dashboard/_components/BuddySection'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -24,12 +25,12 @@ export default async function DashboardPage() {
   const memberId = fm?.member_id ?? null
 
   // Fetch member record for plan info
-  let member: { first_name?: string; plan?: string; subscription_status?: string } | null = null
+  let member: { first_name?: string; plan?: string; plan_tier?: string; subscription_status?: string; has_active_buddy?: boolean } | null = null
   if (memberId) {
     const db = supabaseAdmin as any
     const { data } = await db
       .from('members')
-      .select('first_name, plan, subscription_status')
+      .select('first_name, plan, plan_tier, subscription_status, has_active_buddy')
       .eq('id', memberId)
       .maybeSingle()
     member = data
@@ -111,6 +112,18 @@ export default async function DashboardPage() {
           Next call: Tomorrow at 9:00 AM ✓
         </div>
       </div>
+
+      {/* Buddy Programme */}
+      {memberId && isComplete && (
+        <div style={{ marginBottom: '16px' }}>
+          <BuddySection
+            memberId={memberId}
+            memberName={firstName}
+            planTier={member?.plan_tier ?? member?.plan ?? 'basics'}
+            hasActiveBuddy={member?.has_active_buddy ?? false}
+          />
+        </div>
+      )}
 
       {/* Family portal note */}
       <div style={{ background: '#fff', borderRadius: '14px', padding: '18px', border: '1px solid #e8e8e8' }}>
