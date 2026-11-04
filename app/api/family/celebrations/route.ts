@@ -31,22 +31,19 @@ export async function POST(req: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // Create navigator task for non-digital tiers
   if (tier !== 'digital') {
+    const dueDate = new Date(new Date(occasion_date).getTime() - 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
     await (supabase as any).from('navigator_tasks').insert({
       member_id,
       task_type: 'celebration_coordination',
       priority: 'medium',
-      title: `${tier.charAt(0).toUpperCase() + tier.slice(1)} celebration: ${occasion.replace('_',' ')} on ${occasion_date}`,
-      notes: notes_for_team || null,
-      status: 'open',
-      due_date: new Date(new Date(occasion_date).getTime() - 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      description: `${tier} celebration: ${occasion.replace('_',' ')} on ${occasion_date}.${notes_for_team ? ' Notes: ' + notes_for_team : ''}`,
+      due_date: dueDate,
     }).catch(() => {})
   }
 
-  // Log digital tier — Aria call would be scheduled here
   if (tier === 'digital') {
-    console.log(`[STUB][Celebrations] Digital celebration for member ${member_id} on ${occasion_date} — Aria call to be scheduled`)
+    console.log(`[STUB][Celebrations] Digital celebration for member ${member_id} on ${occasion_date}`)
   }
 
   return NextResponse.json({ data })
