@@ -119,7 +119,7 @@ export async function POST(req: Request) {
     body: `A ride has been requested for ${new Date(pickup_time).toLocaleString()}.`,
     severity: 'info',
     member_id,
-  }).then(({error: _e}) => { if (_e) console.warn(_e) })
+  }).then(({error: _e}: {error: unknown}) => { if (_e) console.warn(_e) })
 
   return NextResponse.json({ booking }, { status: 201 })
 }

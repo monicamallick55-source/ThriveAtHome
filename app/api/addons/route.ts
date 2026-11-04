@@ -123,7 +123,7 @@ export async function POST(req: Request) {
       priority: 'medium',
       description: `Family purchased ${quantity} navigator hour(s). Schedule and coordinate with member.`,
       metadata: { addon_id: addon.id, quantity },
-    }).then(({error: _e}) => { if (_e) console.warn(_e) })
+    }).then(({error: _e}: {error: unknown}) => { if (_e) console.warn(_e) })
   }
 
   const totalCents = skuRow.price_cents * quantity

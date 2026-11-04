@@ -68,7 +68,7 @@ export async function POST(req: Request) {
       body: 'Your Thrive@Home plan has been assigned or changed.',
       severity: 'info',
       member_id,
-    }).then(({error: _e}) => { if (_e) console.warn(_e) })
+    }).then(({error: _e}: {error: unknown}) => { if (_e) console.warn(_e) })
 
     return NextResponse.json({ assignment: data }, { status: 201 })
   }
@@ -93,7 +93,7 @@ export async function POST(req: Request) {
       body: 'A new service add-on has been added to your account.',
       severity: 'info',
       member_id,
-    }).then(({error: _e}) => { if (_e) console.warn(_e) })
+    }).then(({error: _e}: {error: unknown}) => { if (_e) console.warn(_e) })
 
     return NextResponse.json({ assignment: data }, { status: 201 })
   }

@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
     task_type: 'fraud_review',
     priority: taskPriority,
     description: `${severity === 'urgent' ? 'URGENT: ' : ''}Possible ${scamLabel} detected via ${source.replace(/_/g,' ')}.${matched_text ? ' Excerpt: "' + matched_text.slice(0, 100) + '"' : ''}`,
-  }).then(({error: _e}) => { if (_e) console.warn(_e) })
+  }).then(({error: _e}: {error: unknown}) => { if (_e) console.warn(_e) })
 
   return NextResponse.json({ data })
 }

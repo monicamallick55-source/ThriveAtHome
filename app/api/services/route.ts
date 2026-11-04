@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
           channel:   'sms',
           phone:     member.phone,
           message:   `Your ThriveAtHome ride is confirmed for ${timeLabel}. From: ${pickup}. To: ${dest}. Booking ref: ${ride.bookingId}. Reply CANCEL to cancel.`,
-        }).then(({error: _e}) => { if (_e) console.warn(_e) })
+        }).then(({error: _e}: {error: unknown}) => { if (_e) console.warn(_e) })
       }
     } catch (dispatchErr) {
       console.error('[Transport] Auto-dispatch failed, creating navigator task:', dispatchErr)

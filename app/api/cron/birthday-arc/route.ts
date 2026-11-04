@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
       channel: 'sms',
       phone: member.phone,
       message: `🎂 Hi ${member.first_name}! Tomorrow is your birthday and the whole ThriveAtHome community can't wait to celebrate you. Have a wonderful day — we'll be calling in the morning!`,
-    }).then(({error: _e}) => { if (_e) console.warn(_e) })
+    }).then(({error: _e}: {error: unknown}) => { if (_e) console.warn(_e) })
     smsQueued++
   }
 
@@ -95,7 +95,7 @@ export async function POST(req: NextRequest) {
           call_type: 'birthday',
           retell_call_id: callData.call_id,
           status: 'initiated',
-        }).then(({error: _e}) => { if (_e) console.warn(_e) })
+        }).then(({error: _e}: {error: unknown}) => { if (_e) console.warn(_e) })
         callsInitiated++
       } else {
         console.warn(`[birthday-arc] Call failed for ${member.id}:`, await res.text())
@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
       task_type: 'birthday_notification',
       description: `Today is ${member.first_name}'s birthday! Consider sending a family portal note or arranging a surprise if family is enrolled.`,
       priority: 'low',
-    }).then(({error: _e}) => { if (_e) console.warn(_e) })
+    }).then(({error: _e}: {error: unknown}) => { if (_e) console.warn(_e) })
   }
 
   return NextResponse.json({

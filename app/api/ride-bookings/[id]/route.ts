@@ -91,7 +91,7 @@ export async function PATCH(
       body: body_text,
       severity: updates.status === 'confirmed' ? 'success' : 'warning',
       member_id: data.member_id,
-    }).then(({error: _e}) => { if (_e) console.warn(_e) })
+    }).then(({error: _e}: {error: unknown}) => { if (_e) console.warn(_e) })
   }
 
   return NextResponse.json({ booking: data })

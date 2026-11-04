@@ -104,7 +104,7 @@ export async function POST(req: Request) {
     priority: 'medium',
     description: `New ${tier} listing application from ${advisor.name} (${advisor.category}). Annual fee: $${(TIER_FEES[tier] / 100).toLocaleString()}.`,
     metadata: { listing_id: listing.id, advisor_id: advisorId, tier, annual_fee_cents: TIER_FEES[tier] },
-  }).then(({error: _e}) => { if (_e) console.warn(_e) })
+  }).then(({error: _e}: {error: unknown}) => { if (_e) console.warn(_e) })
 
   return NextResponse.json({
     ok: true,

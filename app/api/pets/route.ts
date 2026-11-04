@@ -97,7 +97,7 @@ export async function POST(req: Request) {
     occurred_at: new Date().toISOString().split('T')[0],
     title: `${name} joined the family! 🐾`,
     shared_with_family: true,
-  }).then(({error: _e}) => { if (_e) console.warn(_e) })
+  }).then(({error: _e}: {error: unknown}) => { if (_e) console.warn(_e) })
 
   // Inject into Aria context for next call
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -107,7 +107,7 @@ export async function POST(req: Request) {
     context_key: `pet_${pet.id}`,
     content: `${name} the ${species} is a new furry family member!`,
     expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-  }, { onConflict: 'member_id,context_key' }).then(({error: _e}) => { if (_e) console.warn(_e) })
+  }, { onConflict: 'member_id,context_key' }).then(({error: _e}: {error: unknown}) => { if (_e) console.warn(_e) })
 
   return NextResponse.json({ ok: true, petId: pet.id }, { status: 201 })
 }
@@ -158,7 +158,7 @@ export async function PATCH(req: Request) {
       occurred_at: passedAt,
       title: `In loving memory of ${pet.name} 🌈`,
       shared_with_family: true,
-    }).then(({error: _e}) => { if (_e) console.warn(_e) })
+    }).then(({error: _e}: {error: unknown}) => { if (_e) console.warn(_e) })
 
     // Trigger grief pathway — create navigator task with high priority
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -168,7 +168,7 @@ export async function PATCH(req: Request) {
       priority: 'high',
       description: `Member lost their ${pet.species}, ${pet.name}. Consider checking in with a grief counselor referral. Pet loss can be profound for seniors.`,
       metadata: { pet_id: petId, pet_name: pet.name, species: pet.species, passed_at: passedAt },
-    }).then(({error: _e}) => { if (_e) console.warn(_e) })
+    }).then(({error: _e}: {error: unknown}) => { if (_e) console.warn(_e) })
 
     // Inject grief context into Aria for next 14 days
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -178,7 +178,7 @@ export async function PATCH(req: Request) {
       context_key: `pet_loss_${petId}`,
       content: `${pet.name} the ${pet.species} recently passed away. Member may be grieving. Acknowledge gently if they bring it up; do not proactively ask.`,
       expires_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-    }, { onConflict: 'member_id,context_key' }).then(({error: _e}) => { if (_e) console.warn(_e) })
+    }, { onConflict: 'member_id,context_key' }).then(({error: _e}: {error: unknown}) => { if (_e) console.warn(_e) })
 
     return NextResponse.json({ ok: true, griefTaskCreated: true })
   }

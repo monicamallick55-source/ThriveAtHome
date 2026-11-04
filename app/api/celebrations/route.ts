@@ -110,7 +110,7 @@ export async function POST(req: Request) {
       priority: 'medium',
       description: `Family requested a ${tier} celebration on ${celebrationDate} — member has an active grief support case. Please review before activating.`,
       metadata: { celebration_id: data.id, tier, celebration_date: celebrationDate },
-    }).then(({error: _e}) => { if (_e) console.warn(_e) })
+    }).then(({error: _e}: {error: unknown}) => { if (_e) console.warn(_e) })
   }
 
   // For basic tier (free): create an Aria context injection for the day
@@ -122,7 +122,7 @@ export async function POST(req: Request) {
       context_key: `celebration_${data.id}`,
       content: `Your family has planned a special celebration for you on ${celebrationDate}! ${specialMessage ? `They want you to know: "${specialMessage}"` : 'They love you and are thinking of you.'}`,
       expires_at: new Date(new Date(celebrationDate + 'T12:00:00Z').getTime() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-    }, { onConflict: 'member_id,context_key' }).then(({error: _e}) => { if (_e) console.warn(_e) })
+    }, { onConflict: 'member_id,context_key' }).then(({error: _e}: {error: unknown}) => { if (_e) console.warn(_e) })
   }
 
   const response: Record<string, unknown> = { ok: true, celebrationId: data.id, tier, amountCents, griefHold }
