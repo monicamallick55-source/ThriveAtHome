@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
       channel: 'sms',
       phone: member.phone,
       message,
-    }).then(({error: _e}) => { if (_e) console.warn(_e) }))
+    }).then(({error: _e}) => { if (_e) console.warn(_e) })
 
     // Mark reminder sent
     await supabaseAdmin
