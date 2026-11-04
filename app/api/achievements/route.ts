@@ -89,10 +89,9 @@ async function triggerHomeFromHospitalFlow(
   const buddyCallDue = new Date(now.getTime() + 48 * 60 * 60 * 1000)
   await supabase.from('navigator_tasks').insert({
     member_id: memberId,
-    title: 'Home from hospital — buddy call within 48 hours',
-    description: 'Member just returned home from hospital. Assign a buddy or check-in call within 48 hours to make sure they\'re settling in well.',
+    task_type: 'home_from_hospital',
+    notes: 'Home from hospital — buddy call within 48 hours. Assign a buddy or check-in call within 48 hours to make sure they\'re settling in well.',
     priority: 'high',
-    category: 'home_from_hospital',
     status: 'pending',
     due_date: buddyCallDue.toISOString().split('T')[0],
     metadata: { achievement_id: achievementId },
@@ -101,10 +100,9 @@ async function triggerHomeFromHospitalFlow(
   // 2. Meals offer — navigator task
   await supabase.from('navigator_tasks').insert({
     member_id: memberId,
-    title: 'Home from hospital — offer meals delivery',
-    description: 'Member is home from hospital. Consider whether a meal delivery service or volunteer meal would help for the first week.',
+    task_type: 'home_from_hospital',
+    notes: 'Home from hospital — offer meals delivery. Member is home from hospital. Consider whether a meal delivery service or volunteer meal would help for the first week.',
     priority: 'medium',
-    category: 'home_from_hospital',
     status: 'pending',
     due_date: now.toISOString().split('T')[0],
     metadata: { achievement_id: achievementId },
@@ -113,10 +111,9 @@ async function triggerHomeFromHospitalFlow(
   // 3. Home safety suggestion (G6.1 trigger)
   await supabase.from('navigator_tasks').insert({
     member_id: memberId,
-    title: 'Home from hospital — suggest home safety assessment',
-    description: 'Member returned from hospital — a good time to suggest a home safety assessment (G6.1) if not already enrolled.',
+    task_type: 'home_safety',
+    notes: 'Home from hospital — suggest home safety assessment. Member returned from hospital — a good time to suggest a home safety assessment (G6.1) if not already enrolled.',
     priority: 'low',
-    category: 'home_safety',
     status: 'pending',
     due_date: now.toISOString().split('T')[0],
     metadata: { achievement_id: achievementId, trigger: 'home_from_hospital' },
