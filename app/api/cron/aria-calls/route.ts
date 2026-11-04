@@ -95,9 +95,9 @@ export async function POST(req: NextRequest) {
     })
   )
 
-  const initiated = results.filter(r => r.status === 'fulfilled' && ((r.value as { success: boolean; skipped: boolean }).success)).length
-  const skipped   = results.filter(r => r.status === 'fulfilled' && ((r.value as { success: boolean; skipped: boolean }).skipped)).length
-  const failed    = results.filter(r => r.status === 'fulfilled' && !((r.value as { success: boolean; skipped: boolean }).success) && !((r.value as { success: boolean; skipped: boolean }).skipped)).length
+  const initiated = results.filter(r => r.status === 'fulfilled' && (((r.value as unknown) as { success?: boolean; skipped?: boolean; error?: string }).success)).length
+  const skipped   = results.filter(r => r.status === 'fulfilled' && (((r.value as unknown) as { success?: boolean; skipped?: boolean; error?: string }).skipped)).length
+  const failed    = results.filter(r => r.status === 'fulfilled' && !(((r.value as unknown) as { success?: boolean; skipped?: boolean; error?: string }).success) && !(((r.value as unknown) as { success?: boolean; skipped?: boolean; error?: string }).skipped)).length
 
   return NextResponse.json({ total: members.length, initiated, skipped, failed })
 }
