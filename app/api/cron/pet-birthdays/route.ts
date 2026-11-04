@@ -50,7 +50,7 @@ export async function POST(req: Request) {
       occurred_at: today.toISOString().split('T')[0],
       title: `Happy birthday, ${pet.name}! 🎂 (${age} year${age === 1 ? '' : 's'} old)`,
       shared_with_family: true,
-    }).catch(() => null)
+    }).then(({error: _e}) => { if (_e) console.warn(_e) })
 
     // Inject into Aria context for today's call
     const speciesWord = pet.species === 'dog' ? 'pup' : pet.species === 'cat' ? 'cat' : pet.species
@@ -61,7 +61,7 @@ export async function POST(req: Request) {
       context_key: `pet_bday_${pet.id}_${today.getUTCFullYear()}`,
       content: `Today is ${pet.name}'s birthday — the ${speciesWord} turns ${age}! Mention it warmly if it comes up naturally.`,
       expires_at: new Date(today.getTime() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-    }, { onConflict: 'member_id,context_key' }).catch(() => null)
+    }, { onConflict: 'member_id,context_key' }).then(({error: _e}) => { if (_e) console.warn(_e) })
 
     results.push({ petId: pet.id, petName: pet.name, memberId: pet.member_id, type: 'birthday' })
   }
@@ -88,7 +88,7 @@ export async function POST(req: Request) {
       occurred_at: today.toISOString().split('T')[0],
       title: `${pet.name}'s ${years}-year adoption anniversary! 🏠❤️`,
       shared_with_family: true,
-    }).catch(() => null)
+    }).then(({error: _e}) => { if (_e) console.warn(_e) })
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await (admin as any).from('aria_call_contexts').upsert({
@@ -97,7 +97,7 @@ export async function POST(req: Request) {
       context_key: `pet_anniv_${pet.id}_${today.getUTCFullYear()}`,
       content: `Today marks ${years} year${years === 1 ? '' : 's'} since ${pet.name} was adopted! A lovely milestone.`,
       expires_at: new Date(today.getTime() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-    }, { onConflict: 'member_id,context_key' }).catch(() => null)
+    }, { onConflict: 'member_id,context_key' }).then(({error: _e}) => { if (_e) console.warn(_e) })
 
     results.push({ petId: pet.id, petName: pet.name, memberId: pet.member_id, type: 'adoption_anniversary' })
   }

@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
       channel: 'sms',
       phone: member.phone,
       message,
-    }).catch((err: any) => console.warn('[prescription-reminders] queue insert warning:', err))
+    }).then(({error: _e}) => { if (_e) console.warn(_e) }))
 
     // Mark reminder sent
     await supabaseAdmin

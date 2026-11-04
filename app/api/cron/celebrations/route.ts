@@ -44,7 +44,7 @@ export async function GET(req: Request) {
       context_key: `family_event_${ev.id}`,
       content: `In 7 days: ${ev.title} (${ev.event_type}) on ${ev.event_date}. ${ev.notes ?? ''}`.trim(),
       expires_at: new Date(Date.now() + 8 * 24 * 60 * 60 * 1000).toISOString(),
-    }, { onConflict: 'member_id,context_key' }).catch(() => null)  // table may not exist yet — graceful
+    }, { onConflict: 'member_id,context_key' }).then(({error: _e}) => { if (_e) console.warn(_e) })  // table may not exist yet — graceful
 
     // Mark notified
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -61,7 +61,7 @@ export async function GET(req: Request) {
       priority: 'low',
       description: `${ev.title} in 7 days — consider a warm message or gift suggestion.`,
       metadata: { event_id: ev.id, event_type: ev.event_type, event_date: ev.event_date },
-    }).catch(() => null)
+    }).then(({error: _e}) => { if (_e) console.warn(_e) })
 
     totalAria++
   }
@@ -89,7 +89,7 @@ export async function GET(req: Request) {
       context_key: `family_event_today_${ev.id}`,
       content: `TODAY is ${ev.title}! This is a ${ev.event_type}. ${ev.notes ?? ''} Make sure to warmly celebrate this special day.`.trim(),
       expires_at: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-    }, { onConflict: 'member_id,context_key' }).catch(() => null)
+    }, { onConflict: 'member_id,context_key' }).then(({error: _e}) => { if (_e) console.warn(_e) })
 
     // Mark all notified
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -111,7 +111,7 @@ export async function GET(req: Request) {
         event_date: nextDate.toISOString().slice(0, 10),
         recurring: true,
         notes: ev.notes,
-      }).catch(() => null)
+      }).then(({error: _e}) => { if (_e) console.warn(_e) })
     }
 
     totalNotified++

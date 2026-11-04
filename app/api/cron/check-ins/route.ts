@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
         channel: 'sms',
         phone: member.phone,
         message: `Hi ${member.first_name}! We missed you on your ThriveAtHome check-in today. Just reply OK and we'll know you're well — or call us at 1-800-THRIVE1 and someone will call you right back.`,
-      }).catch(() => null)
+      }).then(({error: _e}) => { if (_e) console.warn(_e) })
     }
 
     flagged++

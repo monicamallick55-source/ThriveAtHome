@@ -75,7 +75,7 @@ export async function GET(req: Request) {
         birthday_date: target.toISOString().slice(0, 10),
         recommended_tier: program.celebrationTier,
       },
-    }).catch(() => null)
+    }).then(({error: _e}) => { if (_e) console.warn(_e) })
 
     // Inject Aria context starting now (active for 35 days)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -85,7 +85,7 @@ export async function GET(req: Request) {
       context_key: `milestone_${member.id}_${turningAge}`,
       content: `MILESTONE BIRTHDAY: ${member.full_name} is turning ${turningAge} in 30 days! ${program.ariaSpeech} Begin warmly building excitement in calls leading up to the day.`,
       expires_at: new Date(target.getTime() + 5 * 24 * 60 * 60 * 1000).toISOString(),
-    }, { onConflict: 'member_id,context_key' }).catch(() => null)
+    }, { onConflict: 'member_id,context_key' }).then(({error: _e}) => { if (_e) console.warn(_e) })
 
     milestonesFound++
     console.log(`[milestone-birthdays] ${member.full_name} turning ${turningAge} on ${target.toISOString().slice(0, 10)}`)
