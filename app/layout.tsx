@@ -18,6 +18,7 @@ const dmSans = DM_Sans({
   variable: '--font-dm-sans',
   display: 'swap',
   preload: false,
+  adjustFontFallback: false,
 })
 
 const dmMono = DM_Mono({
@@ -26,6 +27,7 @@ const dmMono = DM_Mono({
   variable: '--font-dm-mono',
   display: 'swap',
   preload: false,
+  adjustFontFallback: false,
 })
 
 export const metadata: Metadata = {
