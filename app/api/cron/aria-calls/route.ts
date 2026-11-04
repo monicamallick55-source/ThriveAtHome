@@ -90,8 +90,7 @@ export async function POST(req: NextRequest) {
         call_type: 'aria_checkin',
         retell_call_id: callData.call_id,
         status: 'initiated',
-      }).catch((err: any) => console.warn('[aria-calls] call_logs insert warning:', err))
-
+            }).then(({ error: logErr }) => { if (logErr) console.warn('[aria-calls] call_logs insert warning:', logErr) })
       return { id: member.id, success: true, call_id: callData.call_id }
     })
   )
