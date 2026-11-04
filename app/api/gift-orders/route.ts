@@ -69,7 +69,7 @@ export async function POST(req: Request) {
 
   const admin = createAdminClient()
 
-  if (gift.amountCents === null || gift.amountCents === 0) {
+  if (gift.price_cents === null || gift.price_cents === 0) {
     // Free gift (digital card) — insert directly
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (admin as any)
@@ -110,7 +110,7 @@ export async function POST(req: Request) {
       recipient_email: recipientEmail ?? null,
       gift_type: gift.type,
       gift_label: gift.label,
-      amount_cents: gift.amountCents,
+      amount_cents: gift.price_cents,
       message: typeof message === 'string' ? message.slice(0, 500) : null,
       status: 'pending',
       event_id: eventId ?? null,
@@ -122,7 +122,7 @@ export async function POST(req: Request) {
 
   const stripe = getStripeClient()
   const pi = await stripe.paymentIntents.create({
-    amount: gift.amountCents,
+    amount: gift.price_cents,
     currency: 'usd',
     metadata: { order_id: data.id, member_id: member.id },
   })
@@ -137,7 +137,7 @@ export async function POST(req: Request) {
     ok: true,
     orderId: data.id,
     requiresPayment: true,
-    amountCents: gift.amountCents,
+    amountCents: gift.price_cents,
     clientSecret: pi.client_secret,
   }, { status: 201 })
 }
