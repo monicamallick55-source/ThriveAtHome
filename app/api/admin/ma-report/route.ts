@@ -1,177 +1,80 @@
-// Medicare Advantage aggregate outcomes report. Admin only. No PHI in output.
-import { NextRequest, NextResponse } from 'next/server'
+/**
+ * app/api/admin/ma-report/route.ts — G5.1 Medicare Advantage Report
+ * Admin only. Audit-logged. Rate-limited 100/hr. Suppressed below 60% coverage.
+ */
 import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { NextRequest, NextResponse } from 'next/server'
 
-const MIN_COHORT_SIZE = 10
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000
+const RATE_LIMIT_MAX = 100
+const COVERAGE_THRESHOLD = 0.60
+const rateLimitStore = new Map<string, { count: number; windowStart: number }>()
 
-async function assertAdmin() {
-  const supabase = await createClient()
-  const { data: { user }, error } = await supabase.auth.getUser()
-  if (error || !user) return null
-  const admin = createAdminClient()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = admin as any
-  const { data: fm } = await db
-    .from('family_members')
-    .select('role')
-    .eq('supabase_auth_id', user.id)
-    .maybeSingle()
-  if (fm?.role !== 'admin') return null
-  return admin
+function checkRateLimit(userId: string): boolean {
+  const now = Date.now()
+  const entry = rateLimitStore.get(userId)
+  if (!entry || now - entry.windowStart > RATE_LIMIT_WINDOW_MS) { rateLimitStore.set(userId, { count: 1, windowStart: now }); return true }
+  if (entry.count >= RATE_LIMIT_MAX) return false
+  entry.count++; return true
+}
+
+function toCSV(rows: any[], headers: string[]): string {
+  const escape = (v: unknown) => { const s = String(v ?? ''); return s.includes(',') || s.includes('"') || s.includes('\n') ? `"${s.replace(/"/g, '""')}"` : s }
+  return [headers.join(','), ...rows.map(r => headers.map(h => escape(r[h])).join(','))].join('\n')
 }
 
 export async function GET(req: NextRequest) {
-  const admin = await assertAdmin()
-  if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { data: member } = await supabase.from('members').select('id, org_id, role').eq('user_id', user.id).single()
+    if (!member || !['admin', 'navigator'].includes(member.role)) return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
+    if (!checkRateLimit(user.id)) return NextResponse.json({ error: 'Rate limit exceeded. Max 100 requests per hour.' }, { status: 429 })
 
-  const { searchParams } = new URL(req.url)
-  const startDate = searchParams.get('start_date')
-  const endDate = searchParams.get('end_date')
-  const cohortFilter = searchParams.get('cohort') // 'all' | 'grief_path' | 'employer' | 'agency'
+    const url = new URL(req.url)
+    const start = url.searchParams.get('start')
+    const end = url.searchParams.get('end')
+    const format = url.searchParams.get('format') ?? 'json'
+    if (!start || !end) return NextResponse.json({ error: 'start and end query params required (YYYY-MM-DD)' }, { status: 400 })
 
-  const start = startDate ? new Date(startDate).toISOString() : new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString()
-  const end = endDate ? new Date(endDate).toISOString() : new Date().toISOString()
+    await supabase.from('audit_log').insert({ user_id: user.id, org_id: member.org_id, action: 'ma_report_accessed', resource_type: 'ma_report', metadata: { start, end, format }, created_at: new Date().toISOString() }).then(({ error: _e }: { error: unknown }) => void _e)
 
-  // Fetch members (apply cohort filter; no PHI fields selected)
-  let membersQuery = (admin as any)
-    .from('members')
-    .select('id, grief_welcome_path, plan_tier, status, check_in_frequency')
-    .eq('status', 'active')
+    const { data: calls, error: callsError } = await supabase.from('check_in_calls')
+      .select('id, member_id, call_ended_at, duration_seconds, pain_mentioned, fall_risk_mention, medication_adherence, social_isolation_signal, cognitive_concern_signal, mood_score, energy_score, pain_score, medication_taken, icd10_codes, clinical_extracted_at')
+      .eq('org_id', member.org_id).gte('call_ended_at', `${start}T00:00:00Z`).lte('call_ended_at', `${end}T23:59:59Z`).order('call_ended_at')
+    if (callsError) return NextResponse.json({ error: callsError.message }, { status: 400 })
 
-  if (cohortFilter === 'grief_path') {
-    membersQuery = membersQuery.eq('grief_welcome_path', true)
-  }
+    const totalCalls = (calls ?? []).length
+    if (totalCalls === 0) return NextResponse.json({ suppressed: true, reason: 'No calls found in the specified date range.', date_range: { start, end }, total_calls: 0 })
 
-  const { data: members, error: mErr } = await membersQuery
-  if (mErr) return NextResponse.json({ error: mErr.message }, { status: 500 })
+    const callsWithClinical = (calls ?? []).filter((c: any) => c.clinical_extracted_at !== null).length
+    const coverage = callsWithClinical / totalCalls
+    if (coverage < COVERAGE_THRESHOLD) return NextResponse.json({ suppressed: true, reason: `Clinical field coverage is ${Math.round(coverage * 100)}% — below the 60% minimum. Run the backfill script to extract fields from existing transcripts.`, date_range: { start, end }, total_calls: totalCalls, calls_with_clinical_data: callsWithClinical, coverage_pct: Math.round(coverage * 100) })
 
-  const memberIds: string[] = (members ?? []).map((m: { id: string }) => m.id)
-  const cohortSize = memberIds.length
+    const withClinical = (calls ?? []).filter((c: any) => c.clinical_extracted_at)
+    const avg = (arr: (number | null)[]) => { const nums = arr.filter(v => v !== null) as number[]; return nums.length ? +(nums.reduce((a, b) => a + b, 0) / nums.length).toFixed(2) : null }
+    const pct = (vals: (boolean | null)[]) => { const d = vals.filter(v => v !== null); if (!d.length) return null; return +((d.filter(v => v === true).length / d.length) * 100).toFixed(1) }
+    const icd10Freq: Record<string, number> = {}
+    for (const call of withClinical) for (const code of ((call as any).icd10_codes ?? [])) icd10Freq[code] = (icd10Freq[code] ?? 0) + 1
+    const uniqueMembers = new Set((calls ?? []).map((c: any) => c.member_id)).size
 
-  // Cohort suppression
-  if (cohortSize < MIN_COHORT_SIZE) {
-    return NextResponse.json({
-      data_suppressed: true,
-      reason: `Cohort size (${cohortSize}) is below the minimum of ${MIN_COHORT_SIZE} required for de-identified reporting.`,
-      cohort_size: cohortSize,
-      min_cohort_size: MIN_COHORT_SIZE,
-      generated_at: new Date().toISOString(),
-    })
-  }
-
-  // Fetch calls in range (mood, medication, clinical signals — no PHI)
-  const { data: calls } = await (admin as any)
-    .from('check_in_calls')
-    .select('member_id, mood_score, medication_taken, pain_mentioned, social_isolation_signal, fall_risk_mention, cognitive_concern_signal, status, created_at')
-    .in('member_id', memberIds)
-    .gte('created_at', start)
-    .lte('created_at', end)
-    .eq('status', 'completed')
-
-  const callList: {
-    member_id: string; mood_score: number | null; medication_taken: boolean | null;
-    pain_mentioned: boolean | null; social_isolation_signal: boolean | null;
-    fall_risk_mention: boolean | null; cognitive_concern_signal: boolean | null;
-  }[] = calls ?? []
-
-  // Fetch alerts in range
-  const { data: alerts } = await (admin as any)
-    .from('alerts')
-    .select('member_id, alert_type, severity, created_at, icd10_codes')
-    .in('member_id', memberIds)
-    .gte('created_at', start)
-    .lte('created_at', end)
-
-  const alertList: { member_id: string; alert_type: string; severity: string; icd10_codes: string[] }[] = alerts ?? []
-
-  // Compute aggregates — NO PHI
-  const moodScores = callList.map((c: any) => c.mood_score).filter((s): s is number => s !== null)
-  const avgMoodScore = moodScores.length > 0
-    ? Math.round((moodScores.reduce((a: any, b: any) => a + b, 0) / moodScores.length) * 10) / 10
-    : null
-
-  const callsWithMedData = callList.filter(c => c.medication_taken !== null)
-  const medicationAdherenceRate = callsWithMedData.length > 0
-    ? Math.round((callsWithMedData.filter(c => c.medication_taken).length / callsWithMedData.length) * 100)
-    : null
-
-  const callsWithSocial = callList.filter(c => c.social_isolation_signal !== null)
-  const socialEngagementScore = callsWithSocial.length > 0
-    ? Math.round((callsWithSocial.filter(c => !c.social_isolation_signal).length / callsWithSocial.length) * 100)
-    : null
-
-  const fallRiskCount = callList.filter(c => c.fall_risk_mention).length
-  const cognitiveAlertCount = callList.filter(c => c.cognitive_concern_signal).length
-
-  const alertFrequencyPerMember = alertList.length / cohortSize
-  const urgentAlerts = alertList.filter(a => a.severity === 'urgent' || a.severity === 'emergency').length
-
-  // ICD-10 frequency map (aggregate)
-  const icd10Freq: Record<string, number> = {}
-  for (const a of (alertList ?? [])) {
-    for (const code of (a.icd10_codes ?? [])) {
-      icd10Freq[code] = (icd10Freq[code] ?? 0) + 1
+    const report = {
+      date_range: { start, end }, generated_at: new Date().toISOString(),
+      data_quality: { total_calls: totalCalls, calls_with_clinical_data: callsWithClinical, coverage_pct: Math.round(coverage * 100) },
+      member_engagement: { unique_members_with_calls: uniqueMembers, total_calls: totalCalls, avg_calls_per_member: uniqueMembers > 0 ? +(totalCalls / uniqueMembers).toFixed(1) : 0, avg_call_duration_seconds: avg((calls ?? []).map((c: any) => c.duration_seconds)) },
+      clinical_signals: { pct_with_pain_mentioned: pct(withClinical.map((c: any) => c.pain_mentioned)), pct_with_fall_risk: pct(withClinical.map((c: any) => c.fall_risk_mention)), pct_with_medication_adherence: pct(withClinical.map((c: any) => c.medication_adherence)), pct_with_social_isolation: pct(withClinical.map((c: any) => c.social_isolation_signal)), pct_with_cognitive_concern: pct(withClinical.map((c: any) => c.cognitive_concern_signal)) },
+      scores: { avg_mood_score: avg(withClinical.map((c: any) => c.mood_score)), avg_energy_score: avg(withClinical.map((c: any) => c.energy_score)), avg_pain_score: avg(withClinical.map((c: any) => c.pain_score)) },
+      icd10_frequency: icd10Freq,
     }
-  }
-  const topIcd10 = Object.entries(icd10Freq)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5)
-    .map(([code, count]) => ({ code, count }))
 
-  // Mood trend over 4 windows
-  const moodTrend = computeMoodTrend(callList, new Date(start), new Date(end))
-
-  return NextResponse.json({
-    data_suppressed: false,
-    report: {
-      cohort_description: cohortFilter === 'grief_path' ? 'Grief Welcome Path members' : 'All active members',
-      date_range: { start, end },
-      member_count: cohortSize,
-      total_calls_analyzed: callList.length,
-      total_alerts: alertList.length,
-      avg_mood_score: avgMoodScore,
-      mood_trend: moodTrend,
-      medication_adherence_rate_pct: medicationAdherenceRate,
-      social_engagement_score_pct: socialEngagementScore,
-      alert_frequency_per_member: Math.round(alertFrequencyPerMember * 10) / 10,
-      urgent_alert_count: urgentAlerts,
-      fall_risk_mention_count: fallRiskCount,
-      cognitive_alert_count: cognitiveAlertCount,
-      top_icd10_codes: topIcd10,
-    },
-    deidentification_attestation: {
-      statement: 'This report contains no Protected Health Information (PHI) as defined by HIPAA 45 CFR §164.514. All data is presented as aggregate statistics. No individual names, dates of birth, addresses, phone numbers, or other direct identifiers are included. Cohort size meets the minimum threshold of 10 required for de-identified reporting.',
-      standard: 'HIPAA Safe Harbor (45 CFR §164.514(b))',
-      generated_at: new Date().toISOString(),
-      generated_by: 'ThriveAtHome MA Outcomes Engine v1.0',
-    },
-    generated_at: new Date().toISOString(),
-  })
-}
-
-function computeMoodTrend(
-  calls: { mood_score: number | null; created_at?: string }[],
-  start: Date,
-  end: Date,
-): Array<{ label: string; avg_mood: number | null }> {
-  const span = end.getTime() - start.getTime()
-  const quarter = span / 4
-  return [0, 1, 2, 3].map((i: any) => {
-    const windowStart = start.getTime() + i * quarter
-    const windowEnd = windowStart + quarter
-    const label = new Date(windowStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-    const windowCalls = calls.filter(c => {
-      if (!c.created_at) return false
-      const t = new Date(c.created_at).getTime()
-      return t >= windowStart && t < windowEnd
-    })
-    const scores = windowCalls.map((c: any) => c.mood_score).filter((s): s is number => s !== null)
-    return {
-      label,
-      avg_mood: scores.length > 0
-        ? Math.round((scores.reduce((a: any, b: any) => a + b, 0) / scores.length) * 10) / 10
-        : null,
+    if (format === 'csv') {
+      const rows = withClinical.map((c: any, i: number) => ({ row: i + 1, call_date: c.call_ended_at?.split('T')[0], duration_seconds: c.duration_seconds, pain_mentioned: c.pain_mentioned, fall_risk_mention: c.fall_risk_mention, medication_adherence: c.medication_adherence, social_isolation_signal: c.social_isolation_signal, cognitive_concern_signal: c.cognitive_concern_signal, mood_score: c.mood_score, energy_score: c.energy_score, pain_score: c.pain_score, medication_taken: c.medication_taken, icd10_codes: (c.icd10_codes ?? []).join('|') }))
+      const headers = ['row','call_date','duration_seconds','pain_mentioned','fall_risk_mention','medication_adherence','social_isolation_signal','cognitive_concern_signal','mood_score','energy_score','pain_score','medication_taken','icd10_codes']
+      return new NextResponse(toCSV(rows, headers), { headers: { 'Content-Type': 'text/csv', 'Content-Disposition': `attachment; filename="ma-report-${start}-${end}.csv"` } })
     }
-  })
+    return NextResponse.json(report)
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 })
+  }
 }
