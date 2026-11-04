@@ -38,7 +38,7 @@ export default function PlanCelebrationPage() {
   )
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      <div className="mb-6"><a href="/dashboard/celebrations" className="text-sm text-blue-600">← Back</a></div>
+      <div className="mb-6"><a href="/dashboard/celebrations" className="text-sm text-blue-600">Back to Celebrations</a></div>
       <h1 className="text-2xl font-bold mb-1">Plan a Celebration</h1>
       <div className="flex gap-2 mb-8">{[1,2,3].map(s=><div key={s} className={`flex-1 h-1.5 rounded-full ${step>=s?'bg-blue-500':'bg-gray-200'}`}/>)}</div>
       {step===1&&<div>
@@ -59,7 +59,10 @@ export default function PlanCelebrationPage() {
           <div><label className="block text-sm font-medium mb-2">Date</label><input type="date" value={occasionDate} onChange={e=>setOccasionDate(e.target.value)} className="w-full border rounded-lg px-3 py-2 text-sm" required/></div>
           <div><label className="block text-sm font-medium mb-2">Name (optional)</label><input type="text" value={title} onChange={e=>setTitle(e.target.value)} placeholder="e.g. Mom's 80th Birthday" maxLength={100} className="w-full border rounded-lg px-3 py-2 text-sm"/></div>
         </div>
-        <div className="flex gap-3"><button onClick={()=>setStep(1)} className="flex-1 border py-3 rounded-xl text-sm">Back</button><button disabled={!occasion||!occasionDate} onClick={()=>setStep(3)} className="flex-1 bg-blue-600 text-white py-3 rounded-xl font-medium disabled:opacity-50">Continue</button></div>
+        <div className="flex gap-3">
+          <button onClick={()=>setStep(1)} className="flex-1 border py-3 rounded-xl text-sm">Back</button>
+          <button disabled={!occasion||!occasionDate} onClick={()=>setStep(3)} className="flex-1 bg-blue-600 text-white py-3 rounded-xl font-medium disabled:opacity-50">Continue</button>
+        </div>
       </div>}
       {step===3&&<div>
         <h2 className="font-semibold text-lg mb-4">Review your celebration</h2>
@@ -72,7 +75,12 @@ export default function PlanCelebrationPage() {
         </div>
         <div><label className="block text-sm font-medium mb-2">Notes for navigator (optional)</label><textarea value={notes} onChange={e=>setNotes(e.target.value)} rows={3} maxLength={500} className="w-full border rounded-lg px-3 py-2 text-sm resize-none"/></div>
         {errorMsg&&<div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700 mt-4">{errorMsg}</div>}
-        <div className="flex gap-3 mt-6"><button onClick={()=>setStep(2)} className="flex-1 border py-3 rounded-xl text-sm">Back</button><button onClick={handleSubmit} disabled={status==='submitting'} className="flex-1 bg-blue-600 text-white py-3 rounded-xl font-medium disabled:opacity-50">{status==='submitting'?'Creating…':selectedTier?.price===0?'Create Celebration':`Pay $${selectedTier?.price} & Create`}</button></div>
+        <div className="flex gap-3 mt-6">
+          <button onClick={()=>setStep(2)} className="flex-1 border py-3 rounded-xl text-sm">Back</button>
+          <button onClick={handleSubmit} disabled={status==='submitting'} className="flex-1 bg-blue-600 text-white py-3 rounded-xl font-medium disabled:opacity-50">
+            {status==='submitting'?'Creating…':selectedTier?.price===0?'Create Celebration':`Pay $${selectedTier?.price} & Create`}
+          </button>
+        </div>
       </div>}
     </div>
   )
