@@ -1,65 +1,89 @@
-// M22 Phase 87 — update or disconnect one connected device.
+/**
+ * app/api/devices/[id]/route.ts — G4.5
+ *
+ * GET   /api/devices/[id]           — fetch device by id or token
+ * PATCH /api/devices/[id]           — update device (activate, suspend, retire, heartbeat)
+ *   body: { action?: 'activate'|'suspend'|'retire', label?, member_id?, mdm_device_id? }
+ *
+ * Also handles device heartbeat: PATCH with action='heartbeat' updates last_seen_at.
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth'
-import { resolveMemberContext } from '@/lib/data/members'
-import { createAdminClient } from '@/lib/supabase/admin'
-import { updateDevice, disconnectDevice } from '@/lib/data/devices'
+import { createClient } from '@/lib/supabase/server'
 
-export const runtime = 'nodejs'
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+  const supabase = await createClient()
 
-type Params = { params: Promise<{ id: string }> }
+  // Allow unauthenticated lookup by token (device kiosk self-identifies)
+  const { searchParams } = new URL(req.url)
+  const byToken = searchParams.get('by') === 'token'
 
-async function ownedDevice(userId: string, deviceId: string) {
-  const { memberId } = await resolveMemberContext(userId)
-  if (!memberId) return null
-  const admin = createAdminClient()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = admin as any
-  const { data } = await db
-    .from('member_devices')
-    .select('id, member_id')
-    .eq('id', deviceId)
-    .maybeSingle()
-  if (!data || data.member_id !== memberId) return null
-  return data
-}
+  if (byToken) {
+    const { data, error } = await supabase
+      .from('device_tokens')
+      .select('id, status, member_id, org_id, label, device_type')
+      .eq('token', params.id)
+      .single()
+    if (error) return NextResponse.json({ error: 'Device not found' }, { status: 404 })
+    return NextResponse.json({ device: data })
+  }
 
-export async function PATCH(req: NextRequest, { params }: Params) {
-  const { id } = await params
-  const user = await getCurrentUser()
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  if (!(await ownedDevice(user.id, id))) {
-    return NextResponse.json({ error: 'Not found' }, { status: 404 })
-  }
 
-  const body = await req.json().catch(() => null)
-  if (!body || typeof body !== 'object') {
-    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
-  }
-  const { device_name, status, settings, notes } = body as Record<string, unknown>
-  const patch: Record<string, unknown> = {}
-  if (typeof device_name === 'string') patch.device_name = device_name
-  if (typeof status === 'string' && ['pending', 'active', 'disconnected', 'error'].includes(status))
-    patch.status = status
-  if (settings && typeof settings === 'object') patch.settings = settings
-  if (typeof notes === 'string') patch.notes = notes
-  if (Object.keys(patch).length === 0) {
-    return NextResponse.json({ error: 'Nothing to update' }, { status: 400 })
-  }
+  const { data, error } = await supabase
+    .from('device_tokens')
+    .select('*')
+    .eq('id', params.id)
+    .single()
 
-  const { data, error } = await updateDevice(id, patch)
-  if (error) return NextResponse.json({ error }, { status: 500 })
+  if (error) return NextResponse.json({ error: error.message }, { status: 404 })
   return NextResponse.json({ device: data })
 }
 
-export async function DELETE(_req: NextRequest, { params }: Params) {
-  const { id } = await params
-  const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  if (!(await ownedDevice(user.id, id))) {
-    return NextResponse.json({ error: 'Not found' }, { status: 404 })
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+  const supabase = await createClient()
+  const body = await req.json()
+  const { action, token, ...fields } = body
+
+  // Heartbeat — device sends its token, no auth required
+  if (action === 'heartbeat' && token) {
+    const ip = req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? null
+    const { error } = await supabase
+      .from('device_tokens')
+      .update({ last_seen_at: new Date().toISOString(), last_seen_ip: ip })
+      .eq('token', token)
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ ok: true })
   }
-  const { error } = await disconnectDevice(id)
-  if (error) return NextResponse.json({ error }, { status: 500 })
-  return NextResponse.json({ ok: true })
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const updates: Record<string, unknown> = {}
+
+  if (action === 'activate') {
+    updates.status = 'active'
+    updates.activated_at = new Date().toISOString()
+    updates.activated_by = user.id
+  } else if (action === 'suspend') {
+    updates.status = 'suspended'
+  } else if (action === 'retire') {
+    updates.status = 'retired'
+  }
+
+  const allowedFields = ['label', 'member_id', 'org_id', 'mdm_device_id', 'os', 'device_type']
+  for (const field of allowedFields) {
+    if (fields[field] !== undefined) updates[field] = fields[field]
+  }
+
+  const { data, error } = await supabase
+    .from('device_tokens')
+    .update(updates)
+    .eq('id', params.id)
+    .select()
+    .single()
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json({ device: data })
 }

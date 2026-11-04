@@ -1,73 +1,56 @@
-// M22 Phase 87 — list and register a member's connected devices.
+/**
+ * app/api/devices/route.ts — G4.5 Thrive Device Kiosk
+ *
+ * GET  /api/devices?org_id=<id>   — list devices (staff only)
+ * POST /api/devices               — provision a new device token (staff only)
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth'
-import { resolveMemberContext } from '@/lib/data/members'
-import { getDevicesForMember, registerDevice } from '@/lib/data/devices'
+import { createClient } from '@/lib/supabase/server'
 
-export const runtime = 'nodejs'
-
-const CATEGORIES = ['companion_tablet', 'voice_assistant', 'smart_home', 'wearable'] as const
-const BILLING = ['none', 'one_time_99', 'monthly_15', 'free_with_commitment'] as const
-
-export async function GET() {
-  const user = await getCurrentUser()
+export async function GET(req: NextRequest) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { memberId } = await resolveMemberContext(user.id)
-  if (!memberId) {
-    return NextResponse.json({ error: 'Complete onboarding first.' }, { status: 400 })
-  }
+  const { searchParams } = new URL(req.url)
+  const orgId = searchParams.get('org_id')
+  const memberId = searchParams.get('member_id')
 
-  const { data, error } = await getDevicesForMember(memberId)
-  if (error) return NextResponse.json({ error }, { status: 500 })
-  return NextResponse.json({ devices: data })
+  let query = supabase
+    .from('device_tokens')
+    .select('*')
+    .order('created_at', { ascending: false })
+
+  if (orgId) query = query.eq('org_id', orgId)
+  if (memberId) query = query.eq('member_id', memberId)
+
+  const { data, error } = await query
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json({ devices: data ?? [] })
 }
 
 export async function POST(req: NextRequest) {
-  const user = await getCurrentUser()
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { memberId } = await resolveMemberContext(user.id)
-  if (!memberId) {
-    return NextResponse.json({ error: 'Complete onboarding first.' }, { status: 400 })
-  }
+  const body = await req.json()
+  const { member_id, org_id, label, device_type = 'tablet', os } = body
 
-  const body = await req.json().catch(() => null)
-  if (!body) return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+  const { data, error } = await supabase
+    .from('device_tokens')
+    .insert({
+      member_id: member_id ?? null,
+      org_id: org_id ?? null,
+      label: label ?? null,
+      device_type,
+      os: os ?? null,
+      status: 'pending',
+    })
+    .select()
+    .single()
 
-  const { device_category, device_type, device_name, provider, billing_option, settings } =
-    body as Record<string, unknown>
-
-  if (
-    typeof device_category !== 'string' ||
-    !(CATEGORIES as readonly string[]).includes(device_category)
-  ) {
-    return NextResponse.json({ error: 'Invalid device category' }, { status: 400 })
-  }
-  if (typeof device_type !== 'string' || device_type.trim() === '') {
-    return NextResponse.json({ error: 'A device type is required' }, { status: 400 })
-  }
-  if (
-    billing_option !== undefined &&
-    !(BILLING as readonly string[]).includes(String(billing_option))
-  ) {
-    return NextResponse.json({ error: 'Invalid billing option' }, { status: 400 })
-  }
-
-  const { data, error } = await registerDevice({
-    member_id: memberId,
-    device_category,
-    device_type: device_type.trim(),
-    device_name: typeof device_name === 'string' ? device_name : null,
-    provider: typeof provider === 'string' ? provider : null,
-    billing_option: billing_option ? String(billing_option) : 'none',
-    status: device_category === 'companion_tablet' ? 'pending' : 'active',
-    settings: (settings && typeof settings === 'object' ? settings : {}) as Record<string, unknown>,
-  })
-  if (error) return NextResponse.json({ error }, { status: 500 })
-
-  console.log(
-    `[STUB][Device] Registered ${device_type} (${device_category}) for member ${memberId}`
-  )
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ device: data }, { status: 201 })
 }

@@ -1,53 +1,163 @@
 'use client'
-import { useEffect, useState } from 'react'
-const TILES = [
-  {id:'buddy',label:'Call My Buddy',emoji:'👋',color:'#2d6a4f'},
-  {id:'aria',label:'Talk to Aria',emoji:'🤖',color:'#1565c0'},
-  {id:'events',label:"Today's Events",emoji:'📅',color:'#6a1b9a'},
-  {id:'family',label:'My Family',emoji:'❤️',color:'#c62828'},
-  {id:'help',label:'Get Help',emoji:'🙋',color:'#e65100'},
-  {id:'sos',label:'Emergency',emoji:'🚨',color:'#b71c1c'},
-]
-export default function DeviceKiosk() {
-  const [time,setTime]=useState('')
-  const [confirm,setConfirm]=useState<string|null>(null)
-  useEffect(()=>{
-    const u=()=>setTime(new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}))
-    u(); const t=setInterval(u,10000)
-    const hb=setInterval(()=>fetch('/api/device/heartbeat',{method:'POST',body:'{}',headers:{'Content-Type':'application/json'}}).catch(()=>{}),300000)
-    return ()=>{clearInterval(t);clearInterval(hb)}
-  },[])
-  function handleTile(tile:typeof TILES[0]){
-    if(tile.id==='sos'){setConfirm(tile.id);return}
-    fetch(`/api/device/action?action=${tile.id}`,{method:'POST'}).catch(()=>{})
+
+/**
+ * app/device/page.tsx — G4.5 Thrive Device Kiosk
+ *
+ * Runs on the tablet/kiosk assigned to a member.
+ * URL: /device?token=<device_token>
+ *
+ * Features:
+ * - Self-identifies using ?token= query param
+ * - Sends heartbeat every 5 minutes
+ * - Shows large-print member dashboard shortcut buttons
+ * - Calls Grace directly (opens Retell call widget)
+ * - Device must be in 'active' status to show dashboard
+ */
+
+import { useState, useEffect, useCallback } from 'react'
+
+type DeviceInfo = {
+  id: string
+  status: string
+  member_id?: string
+  label?: string
+  device_type: string
+}
+
+const HEARTBEAT_INTERVAL_MS = 5 * 60 * 1000 // 5 minutes
+
+export default function DevicePage() {
+  const [token, setToken] = useState<string | null>(null)
+  const [device, setDevice] = useState<DeviceInfo | null>(null)
+  const [status, setStatus] = useState<'loading' | 'active' | 'pending' | 'suspended' | 'error'>('loading')
+  const [time, setTime] = useState(new Date())
+
+  // Parse token from URL on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const t = params.get('token')
+    setToken(t)
+  }, [])
+
+  // Fetch device info when token is available
+  useEffect(() => {
+    if (!token) return
+    fetch(`/api/devices/${token}?by=token`)
+      .then((r) => r.json())
+      .then(({ device: d }) => {
+        if (!d) { setStatus('error'); return }
+        setDevice(d)
+        setStatus(d.status === 'active' ? 'active' : d.status === 'pending' ? 'pending' : 'suspended')
+      })
+      .catch(() => setStatus('error'))
+  }, [token])
+
+  // Heartbeat
+  const sendHeartbeat = useCallback(() => {
+    if (!token || !device) return
+    fetch(`/api/devices/${device.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'heartbeat', token }),
+    }).catch(() => {/* silent */})
+  }, [token, device])
+
+  useEffect(() => {
+    if (status !== 'active') return
+    sendHeartbeat()
+    const interval = setInterval(sendHeartbeat, HEARTBEAT_INTERVAL_MS)
+    return () => clearInterval(interval)
+  }, [status, sendHeartbeat])
+
+  // Clock
+  useEffect(() => {
+    const interval = setInterval(() => setTime(new Date()), 1000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const timeStr = time.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+  const dateStr = time.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+
+  if (status === 'loading') {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f0f9ff' }}>
+        <p style={{ fontSize: '1.5rem', color: '#6b7280' }}>Starting up…</p>
+      </div>
+    )
   }
+
+  if (status === 'pending') {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f0f9ff', padding: 32 }}>
+        <div style={{ fontSize: '4rem', marginBottom: 24 }}>⏳</div>
+        <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: 12, textAlign: 'center' }}>Device not yet activated</h1>
+        <p style={{ fontSize: '1.1rem', color: '#6b7280', textAlign: 'center', maxWidth: 400 }}>
+          Your ThriveAtHome device is set up and waiting to be activated by your navigator.
+          Please contact your navigator or call <strong>ThriveAtHome support</strong>.
+        </p>
+        <div style={{ marginTop: 24, fontSize: '0.85rem', color: '#9ca3af' }}>Device token: {token}</div>
+      </div>
+    )
+  }
+
+  if (status === 'suspended' || status === 'error') {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#fff1f2', padding: 32 }}>
+        <div style={{ fontSize: '4rem', marginBottom: 24 }}>🔒</div>
+        <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: 12 }}>Device unavailable</h1>
+        <p style={{ fontSize: '1.1rem', color: '#6b7280', textAlign: 'center', maxWidth: 400 }}>
+          Please contact your navigator or call ThriveAtHome for help.
+        </p>
+      </div>
+    )
+  }
+
+  // Active kiosk UI
   return (
-    <div style={{minHeight:'100dvh',background:'#f5f5f5',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',fontFamily:'system-ui,sans-serif',padding:24}}>
-      <div style={{fontSize:48,fontWeight:700,color:'#2d6a4f',marginBottom:8}}>{time}</div>
-      <div style={{fontSize:22,color:'#555',marginBottom:40}}>How can I help you today?</div>
-      <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:20,width:'100%',maxWidth:600}}>
-        {TILES.map(t=>(
-          <button key={t.id} onClick={()=>handleTile(t)}
-            style={{background:t.color,color:'#fff',border:'none',borderRadius:20,padding:'32px 16px',fontSize:22,fontWeight:700,cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',gap:12,minHeight:120}}>
-            <span style={{fontSize:44}}>{t.emoji}</span>{t.label}
-          </button>
+    <div style={{
+      minHeight: '100vh', background: 'linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%)',
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      padding: '40px 24px', fontFamily: 'system-ui, sans-serif',
+    }}>
+      {/* Header */}
+      <div style={{ textAlign: 'center', marginBottom: 48 }}>
+        <div style={{ fontSize: '1.1rem', color: '#6b7280', marginBottom: 4 }}>{dateStr}</div>
+        <div style={{ fontSize: '4rem', fontWeight: 700, color: '#1e3a5f', lineHeight: 1 }}>{timeStr}</div>
+        {device?.label && (
+          <div style={{ fontSize: '0.9rem', color: '#9ca3af', marginTop: 8 }}>{device.label}</div>
+        )}
+      </div>
+
+      {/* Main action buttons */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 20, width: '100%', maxWidth: 560, marginBottom: 32 }}>
+        {[
+          { emoji: '📞', label: 'Call Grace', sublabel: 'Your AI companion', color: '#6366f1', href: '/dashboard/call' },
+          { emoji: '🗓', label: 'My Schedule', sublabel: 'Today\'s activities', color: '#10b981', href: '/dashboard/calendar' },
+          { emoji: '💊', label: 'Medications', sublabel: 'Reminders & tracking', color: '#f59e0b', href: '/dashboard/health' },
+          { emoji: '🆘', label: 'Need Help', sublabel: 'Contact navigator', color: '#ef4444', href: '/dashboard/help' },
+        ].map((btn) => (
+          <a
+            key={btn.label}
+            href={btn.href}
+            style={{
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              padding: '32px 16px', borderRadius: 20,
+              background: '#fff', border: `3px solid ${btn.color}20`,
+              boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+              textDecoration: 'none', cursor: 'pointer',
+              transition: 'transform 0.1s',
+            }}>
+            <div style={{ fontSize: '3.5rem', marginBottom: 12 }}>{btn.emoji}</div>
+            <div style={{ fontSize: '1.4rem', fontWeight: 700, color: '#1f2937', marginBottom: 4 }}>{btn.label}</div>
+            <div style={{ fontSize: '0.9rem', color: '#6b7280' }}>{btn.sublabel}</div>
+          </a>
         ))}
       </div>
-      {confirm==='sos'&&(
-        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.7)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:100}}>
-          <div style={{background:'#fff',borderRadius:24,padding:40,textAlign:'center',maxWidth:400}}>
-            <div style={{fontSize:64}}>🚨</div>
-            <div style={{fontSize:28,fontWeight:700,margin:'16px 0'}}>Call for help?</div>
-            <div style={{fontSize:20,color:'#555',marginBottom:32}}>This will alert your navigator and emergency contact.</div>
-            <div style={{display:'flex',gap:16,justifyContent:'center'}}>
-              <button onClick={()=>{fetch('/api/device/action?action=sos',{method:'POST'}).catch(()=>{});setConfirm(null)}}
-                style={{background:'#b71c1c',color:'#fff',border:'none',borderRadius:12,padding:'16px 32px',fontSize:22,fontWeight:700,cursor:'pointer'}}>Yes, call now</button>
-              <button onClick={()=>setConfirm(null)}
-                style={{background:'#eee',color:'#333',border:'none',borderRadius:12,padding:'16px 32px',fontSize:22,fontWeight:700,cursor:'pointer'}}>Cancel</button>
-            </div>
-          </div>
-        </div>
-      )}
+
+      {/* Thrive branding */}
+      <div style={{ fontSize: '0.85rem', color: '#9ca3af', textAlign: 'center' }}>
+        🌿 ThriveAtHome · Keeping you independent at home
+      </div>
     </div>
   )
 }
