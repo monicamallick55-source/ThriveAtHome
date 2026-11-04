@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
 
 
   // Fetch pending SMS queue items
-  const { data: rows, error: fetchError } = await db
+  const { data: rows, error: fetchError } = await supabaseAdmin
     .from('notification_queue')
     .select('id, member_id, phone, message, channel, status')
     .eq('channel', 'sms')
@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
   const results = await Promise.allSettled(
     queue.map(async (row) => {
       // Mark as processing to prevent duplicate sends
-      await db
+      await supabaseAdmin
         .from('notification_queue')
         .update({ status: 'processing', updated_at: new Date().toISOString() })
         .eq('id', row.id)
@@ -108,7 +108,7 @@ export async function POST(req: NextRequest) {
 
       if (sendError) {
         console.error(`[send-sms] Failed row ${row.id}:`, sendError)
-        await db
+        await supabaseAdmin
           .from('notification_queue')
           .update({
             status: 'failed',
@@ -119,7 +119,7 @@ export async function POST(req: NextRequest) {
         return { id: row.id, success: false, error: sendError }
       }
 
-      await db
+      await supabaseAdmin
         .from('notification_queue')
         .update({
           status: 'sent',

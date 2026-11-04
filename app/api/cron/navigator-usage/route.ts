@@ -16,11 +16,11 @@ export async function POST(req: Request) {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = createAdminClient() as any
+  const supabaseAdmin = createAdminClient() as any
   const period = billingPeriod()
 
   // Get all members who have time logs this period
-  const { data: memberRows } = await db
+  const { data: memberRows } = await supabaseAdmin
     .from('navigator_time_log')
     .select('member_id')
     .eq('billing_period', period)
@@ -29,12 +29,12 @@ export async function POST(req: Request) {
   const updated: string[] = []
 
   for (const memberId of memberIds) {
-    const { data: member } = await db.from('members').select('plan_tier').eq('id', memberId).maybeSingle()
+    const { data: member } = await supabaseAdmin.from('members').select('plan_tier').eq('id', memberId).maybeSingle()
     const tier = member?.plan_tier ?? 'basic'
-    const { data: config } = await db.from('navigator_seat_config').select('monthly_minutes').eq('plan_tier', tier).maybeSingle()
+    const { data: config } = await supabaseAdmin.from('navigator_seat_config').select('monthly_minutes').eq('plan_tier', tier).maybeSingle()
     const allocated = config?.monthly_minutes ?? 30
 
-    const { data: logs } = await db
+    const { data: logs } = await supabaseAdmin
       .from('navigator_time_log')
       .select('duration_minutes')
       .eq('member_id', memberId)
@@ -44,14 +44,14 @@ export async function POST(req: Request) {
     const used = ((logs ?? []) as Array<{ duration_minutes: number }>).reduce((s, l) => s + l.duration_minutes, 0)
     const overage = Math.max(0, used - allocated)
 
-    await db.from('navigator_usage_summary').upsert(
+    await supabaseAdmin.from('navigator_usage_summary').upsert(
       { member_id: memberId, billing_period: period, plan_tier: tier, allocated_minutes: allocated, used_minutes: used, overage_minutes: overage, last_computed_at: new Date().toISOString() },
       { onConflict: 'member_id,billing_period' }
     )
 
     if (overage > 0) {
       // Create navigator task to review overage
-      const { data: existing } = await db
+      const { data: existing } = await supabaseAdmin
         .from('navigator_tasks')
         .select('id')
         .eq('type', 'navigator_overage')
@@ -59,7 +59,7 @@ export async function POST(req: Request) {
         .maybeSingle()
 
       if (!existing) {
-        await db.from('navigator_tasks').insert({
+        await supabaseAdmin.from('navigator_tasks').insert({
           type: 'navigator_overage',
           member_id: memberId,
           priority: 'medium',

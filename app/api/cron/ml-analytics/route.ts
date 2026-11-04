@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
   const ago30 = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString()
   const weekStart = now.toISOString().slice(0, 10)
 
-  const { data: members, error } = await db
+  const { data: members, error } = await supabaseAdmin
     .from('members')
     .select('id, first_name, last_name, plan, subscription_status')
     .eq('subscription_status', 'active')

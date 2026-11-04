@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
   const today = new Date().toISOString().slice(0, 10)
 
   // Find active members who had no check-in call completed today
-  const { data: activeMembers, error: membersErr } = await db
+  const { data: activeMembers, error: membersErr } = await supabaseAdmin
     .from('members')
     .select('id, first_name, last_name, phone, subscription_status')
     .eq('subscription_status', 'active')
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Get members who had a completed call today
-  const { data: calledToday } = await db
+  const { data: calledToday } = await supabaseAdmin
     .from('call_logs')
     .select('member_id')
     .eq('call_type', 'aria_checkin')
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
   let flagged = 0
   for (const member of missed) {
     // Check if already flagged today to avoid duplicates
-    const { count } = await db
+    const { count } = await supabaseAdmin
       .from('navigator_tasks')
       .select('id', { count: 'exact', head: true })
       .eq('member_id', member.id)

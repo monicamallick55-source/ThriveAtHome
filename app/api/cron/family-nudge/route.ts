@@ -18,11 +18,11 @@ export async function GET(req: NextRequest) {
 
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = admin as any
+  const supabaseAdmin = admin as any
   const nudgeThreshold = new Date(Date.now() - NUDGE_WINDOW_DAYS * 24 * 60 * 60 * 1000).toISOString()
   const dedupThreshold = new Date(Date.now() - DEDUP_WINDOW_HOURS * 60 * 60 * 1000).toISOString()
 
-  const { data: inactiveFamilyMembers, error } = await db
+  const { data: inactiveFamilyMembers, error } = await supabaseAdmin
     .from('family_members')
     .select('id, email, full_name, member_id, notification_prefs, last_login_at')
     .or(`last_login_at.is.null,last_login_at.lt.${nudgeThreshold}`)
@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
       if ((fm.notification_prefs as { email: boolean })?.email === false) continue
 
       // Only nudge if member has unacknowledged alerts
-      const { data: alerts } = await db
+      const { data: alerts } = await supabaseAdmin
         .from('alerts')
         .select('id')
         .eq('member_id', fm.member_id as string)
@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
       }
 
       // 7-day dedup: check notification_log for recent family_nudge
-      const { data: recentNudge } = await db
+      const { data: recentNudge } = await supabaseAdmin
         .from('realtime_notifications')
         .select('id')
         .eq('member_id', fm.member_id as string)
@@ -66,7 +66,7 @@ export async function GET(req: NextRequest) {
         continue
       }
 
-      const { data: member } = await db
+      const { data: member } = await supabaseAdmin
         .from('members')
         .select('preferred_name, full_name')
         .eq('id', fm.member_id as string)

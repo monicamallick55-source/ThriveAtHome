@@ -12,11 +12,11 @@ export async function POST(req: Request) {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = createAdminClient() as any
+  const supabaseAdmin = createAdminClient() as any
   const now = new Date().toISOString()
 
   // Find steps that are due and not yet completed/skipped
-  const { data: dueSteps } = await db
+  const { data: dueSteps } = await supabaseAdmin
     .from('life_transition_steps')
     .select('id, navigator_task_id, transition_id, step_key')
     .lte('scheduled_for', now)
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
   for (const step of (dueSteps ?? [])) {
     if (step.navigator_task_id) {
       // Flip scheduled → open
-      await db
+      await supabaseAdmin
         .from('navigator_tasks')
         .update({ status: 'open' })
         .eq('id', step.navigator_task_id)

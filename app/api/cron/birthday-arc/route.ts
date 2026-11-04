@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
   const tomorrowMMDD = `${String(tomorrowDate.getMonth() + 1).padStart(2, '0')}-${String(tomorrowDate.getDate()).padStart(2, '0')}`
 
   // Fetch active members
-  const { data: members, error } = await db
+  const { data: members, error } = await supabaseAdmin
     .from('members')
     .select('id, first_name, last_name, phone, date_of_birth, subscription_status')
     .eq('subscription_status', 'active')

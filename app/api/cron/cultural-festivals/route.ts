@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
 
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = admin as any
+  const supabaseAdmin = admin as any
   const festivals = await getFestivalsWithinDays(7)
   const results = { festivals: festivals.length, membersFlagged: 0, notified: 0, errors: 0 }
 
@@ -31,13 +31,13 @@ export async function GET(req: NextRequest) {
       // Members whose cultural circle matches this festival's circle_name.
       let memberIds: string[] = []
       if (festival.circle_name) {
-        const { data: circle } = await db
+        const { data: circle } = await supabaseAdmin
           .from('cultural_circles')
           .select('id')
           .eq('circle_name', festival.circle_name)
           .maybeSingle()
         if (circle) {
-          const { data: memberships } = await db
+          const { data: memberships } = await supabaseAdmin
             .from('circle_memberships')
             .select('member_id')
             .eq('circle_id', circle.id)
@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
         )
         results.membersFlagged++
 
-        const { data: fms } = await db
+        const { data: fms } = await supabaseAdmin
           .from('family_members')
           .select('id')
           .eq('member_id', memberId)

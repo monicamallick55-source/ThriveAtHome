@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
 
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = admin as any
+  const supabaseAdmin = admin as any
 
   const results = {
     first_call_milestones: 0,
@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
   }
 
   // Fetch all active members
-  const { data: members, error: membersError } = await db
+  const { data: members, error: membersError } = await supabaseAdmin
     .from('members')
     .select('id, preferred_name, full_name')
     .eq('status', 'active')
@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
       // --- Milestone 1: first completed call ---
       const firstCallExists = await getMilestoneExists(member.id, 'milestone_first_call')
       if (!firstCallExists) {
-        const { count } = await db
+        const { count } = await supabaseAdmin
           .from('check_in_calls')
           .select('*', { count: 'exact', head: true })
           .eq('member_id', member.id)

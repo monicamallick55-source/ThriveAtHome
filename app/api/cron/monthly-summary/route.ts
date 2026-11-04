@@ -44,10 +44,10 @@ export async function GET(req: NextRequest) {
 
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = admin as any
+  const supabaseAdmin = admin as any
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
 
-  const { data: members, error: membersError } = await db
+  const { data: members, error: membersError } = await supabaseAdmin
     .from('members')
     .select('*')
     .eq('status', 'active')
@@ -61,14 +61,14 @@ export async function GET(req: NextRequest) {
 
   for (const member of members ?? []) {
     try {
-      const { data: calls } = await db
+      const { data: calls } = await supabaseAdmin
         .from('check_in_calls')
         .select('*')
         .eq('member_id', member.id)
         .gte('created_at', thirtyDaysAgo)
         .order('created_at', { ascending: false })
 
-      const { data: familyMembers } = await db
+      const { data: familyMembers } = await supabaseAdmin
         .from('family_members')
         .select('email, full_name, notification_prefs')
         .eq('member_id', member.id)

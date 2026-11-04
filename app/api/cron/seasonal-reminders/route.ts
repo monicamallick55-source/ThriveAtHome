@@ -33,11 +33,11 @@ export async function GET(req: NextRequest) {
   }
 
   const admin = createAdminClient()
-  const db = admin as any
+  const supabaseAdmin = admin as any
   const month = String(new Date().getUTCMonth() + 1)
   const seasonTip = SEASON_TIPS[month] ?? 'seasonal home safety check'
 
-  const { data: members, error } = await db
+  const { data: members, error } = await supabaseAdmin
     .from('members')
     .select('id, full_name, date_of_birth')
     .eq('status', 'active')
@@ -64,7 +64,7 @@ export async function GET(req: NextRequest) {
     for (const member of eligibleMembers) {
       try {
         // Create a navigator task so no member is missed
-        await db.from('navigator_tasks').insert({
+        await supabaseAdmin.from('navigator_tasks').insert({
           member_id: member.id,
           type: 'medicare_open_enrollment',
           title: 'Medicare Open Enrollment reminder',

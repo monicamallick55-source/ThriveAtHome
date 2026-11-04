@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
   const now = new Date()
   const in3Days = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)
 
-  const { data: prescriptions, error } = await db
+  const { data: prescriptions, error } = await supabaseAdmin
     .from('member_prescriptions')
     .select(`
       id, member_id, medication_name, refill_due_date, days_supply,
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
     }).catch((err: any) => console.warn('[prescription-reminders] queue insert warning:', err))
 
     // Mark reminder sent
-    await db
+    await supabaseAdmin
       .from('member_prescriptions')
       .update({ reminder_sent_today: true })
       .eq('id', rx.id)
