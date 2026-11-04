@@ -58,3 +58,6 @@ export function requiresFamilyApproval(item: CatalogItem, totalCents: number, re
   if (totalCents > 7500) return true  // over $75
   return false
 }
+export function getGiftById(id: string): CatalogItem | undefined {
+  return GIFT_CATALOG.find(item => item.id === id)
+}
