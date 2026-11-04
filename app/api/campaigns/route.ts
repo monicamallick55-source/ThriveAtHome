@@ -50,7 +50,6 @@ export async function POST(req: NextRequest) {
   try {
     await admin.from('navigator_tasks').insert({
       member_id: member.id, task_type: 'campaign_review',
-      title: `Review campaign: "${title}"`,
       description: `Member submitted a fundraising campaign. Goal: $${goal_amount}.`,
       priority: 'medium',
     })
