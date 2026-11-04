@@ -93,7 +93,10 @@ export async function generateAriaBrief(memberId: string): Promise<{ data: AriaB
   }
 }
 
-export function scoreBuddyVolunteer(
+// scoreBuddyVolunteer moved to lib/buddy-scoring.ts
+export { scoreBuddyVolunteer } from '@/lib/buddy-scoring'
+// @ts-ignore duplicate — original below, kept for reference
+function _scoreBuddyVolunteer_orig(
   member: {
     city?: string | null
     languages_spoken?: string[] | null

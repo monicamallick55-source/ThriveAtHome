@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { scoreBuddyVolunteer } from '@/lib/data/buddies'
+import { scoreBuddyVolunteer } from '@/lib/buddy-scoring'
 
 interface UnmatchedMember {
   id: string
