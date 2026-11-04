@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     await (supabase as any).from('navigator_tasks').insert({
       member_id,
       task_type: 'celebration_coordination',
-      priority: 'normal',
+      priority: 'medium',
       title: `${tier.charAt(0).toUpperCase() + tier.slice(1)} celebration: ${occasion.replace('_',' ')} on ${occasion_date}`,
       notes: notes_for_team || null,
       status: 'open',
