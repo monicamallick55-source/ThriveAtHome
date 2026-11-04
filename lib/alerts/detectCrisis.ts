@@ -99,7 +99,7 @@ export async function handleCrisisDetection(params: CrisisDetectionParams): Prom
     const { error: taskError } = await admin.from('navigator_tasks').insert({
       member_id: memberId,
       task_type: 'crisis',
-      description: `CRISIS DETECTED: "${triggeredPhrase}" — immediate follow-up required.`,
+      notes: `CRISIS DETECTED: "${triggeredPhrase}" — immediate follow-up required.`,
       priority: 'critical',
     })
     if (taskError) {
@@ -120,7 +120,7 @@ export async function handleCrisisDetection(params: CrisisDetectionParams): Prom
     const { error: taskError } = await admin.from('navigator_tasks').insert({
       member_id: memberId,
       task_type: 'crisis_detection_failure',
-      description: 'Crisis detection failed — manual review required',
+      notes: 'Crisis detection failed — manual review required',
       priority: 'critical',
     })
     if (taskError) {

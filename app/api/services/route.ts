@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
       await db.from('navigator_tasks').insert({
         member_id: memberId,
         task_type: 'transport_dispatch_failed',
-        description: `Transport booking auto-dispatch failed for booking ${booking.id}. Manually book a ride: ${pickup} → ${dest} at ${dt}. Error: ${String(dispatchErr)}`,
+        notes: `Transport booking auto-dispatch failed for booking ${booking.id}. Manually book a ride: ${pickup} → ${dest} at ${dt}. Error: ${String(dispatchErr)}`,
         priority: 'high',
       })
     }
@@ -146,7 +146,7 @@ export async function POST(req: NextRequest) {
       await db.from('navigator_tasks').insert({
         member_id: memberId,
         task_type: 'companion_matching',
-        description: `Member requested companionship — no companion selected. Match and schedule a visit.`,
+        notes: `Member requested companionship — no companion selected. Match and schedule a visit.`,
         priority: 'medium',
       })
     }
@@ -162,14 +162,14 @@ export async function POST(req: NextRequest) {
       await db.from('navigator_tasks').insert({
         member_id: memberId,
         task_type: 'tech_help_request',
-        description: `Tech help request — subtype: ${subtype || 'unspecified'}. Coordinate volunteer or in-home visit.`,
+        notes: `Tech help request — subtype: ${subtype || 'unspecified'}. Coordinate volunteer or in-home visit.`,
         priority: 'medium',
       })
     } else if (service_type === 'telehealth' && subtype === 'mental_health_companion') {
       await db.from('navigator_tasks').insert({
         member_id: memberId,
         task_type: 'mental_health_referral',
-        description: 'Member requested mental health support. Review and provide a warm referral to appropriate professional.',
+        notes: 'Member requested mental health support. Review and provide a warm referral to appropriate professional.',
         priority: 'high',
       })
     } else if (service_type === 'travel_assistance') {
@@ -179,14 +179,14 @@ export async function POST(req: NextRequest) {
       await db.from('navigator_tasks').insert({
         member_id: memberId,
         task_type: 'travel_assistance',
-        description: travelDesc,
+        notes: travelDesc,
         priority: subtype === 'travel_companion' ? 'medium' : 'low',
       })
     } else if (service_type === 'fitness_class' as ServiceType) {
       await db.from('navigator_tasks').insert({
         member_id: memberId,
         task_type: 'fitness_class_request',
-        description: `Member requested a volunteer fitness class — subtype: ${subtype || 'unspecified'}. ` +
+        notes: `Member requested a volunteer fitness class — subtype: ${subtype || 'unspecified'}. ` +
           `Coordinate volunteer instructor for chair yoga, stretching or strength session ` +
           `(phone dial-in or video). Preferred time: ${requested_for ?? 'flexible'}.`,
         priority: 'low',
@@ -195,7 +195,7 @@ export async function POST(req: NextRequest) {
       await db.from('navigator_tasks').insert({
         member_id: memberId,
         task_type: 'walking_group_signup',
-        description: `Member wants to join or be matched to a walking group. ` +
+        notes: `Member wants to join or be matched to a walking group. ` +
           `Find their local chapter volunteer organizer and add them to the next walk. ` +
           `Member location/zip: ${(booking_details as Record<string, string>).zip ?? 'check profile'}.`,
         priority: 'low',
@@ -204,7 +204,7 @@ export async function POST(req: NextRequest) {
       await db.from('navigator_tasks').insert({
         member_id: memberId,
         task_type: 'home_organizing_request',
-        description: `Member needs home organizing help — ${(booking_details as Record<string, string>).area ?? 'general decluttering'}. ` +
+        notes: `Member needs home organizing help — ${(booking_details as Record<string, string>).area ?? 'general decluttering'}. ` +
           `Match with a volunteer who has organizing or home management skills. ` +
           `Requested date: ${requested_for ?? 'flexible'}.`,
         priority: 'medium',
@@ -214,7 +214,7 @@ export async function POST(req: NextRequest) {
       await db.from('navigator_tasks').insert({
         member_id: memberId,
         task_type: 'medical_companion_request',
-        description: `Member needs a volunteer medical companion for an appointment. ` +
+        notes: `Member needs a volunteer medical companion for an appointment. ` +
           `Provider: ${apptDetails.provider ?? 'unspecified'}. ` +
           `Location: ${apptDetails.location ?? 'unspecified'}. ` +
           `Date/time: ${requested_for ?? 'unspecified'}. ` +
@@ -225,7 +225,7 @@ export async function POST(req: NextRequest) {
       await db.from('navigator_tasks').insert({
         member_id: memberId,
         task_type: 'home_safety_program_signup',
-        description: `Member signed up for the Home Safety & Earthquake Preparedness program. ` +
+        notes: `Member signed up for the Home Safety & Earthquake Preparedness program. ` +
           `Enrol in the next cohort, assign a home safety volunteer, and schedule the training session. ` +
           `Home type: ${(booking_details as Record<string, string>).home_type ?? 'unspecified'}.`,
         priority: 'medium',
@@ -242,7 +242,7 @@ export async function POST(req: NextRequest) {
       await db.from('navigator_tasks').insert({
         member_id: memberId,
         task_type: isCarRepair ? 'car_repair_coordination' : 'roadside_assistance',
-        description: isCarRepair
+        notes: isCarRepair
           ? `Car repair: ${subtype.replace(/_/g, ' ')}. Coordinate vetted local shop.`
           : `Roadside help — ${subtype.replace(/_/g, ' ')}.${prefillNote} Use member's AAA or insurance coverage.`,
         priority: isEmergency ? 'critical' : isCarRepair ? 'low' : 'high',

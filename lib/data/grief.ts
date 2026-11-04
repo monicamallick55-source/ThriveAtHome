@@ -166,7 +166,7 @@ export async function createProlongedGriefTask(memberId: string): Promise<{ erro
   const { error } = await supabase.from('navigator_tasks').insert({
     member_id: memberId,
     task_type: 'prolonged_grief_review',
-    description: 'Review for prolonged grief support — member has shown low mood scores for 90+ days.',
+    notes: 'Review for prolonged grief support — member has shown low mood scores for 90+ days.',
     priority: 'high',
   })
   return { error: error?.message ?? null }

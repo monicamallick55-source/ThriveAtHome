@@ -151,8 +151,8 @@ export async function POST(req: NextRequest) {
   // Create navigator task
   await supabase.from('navigator_tasks').insert({
     member_id,
-    title: `Transition plan created: ${plan_type.replace(/_/g, ' ')}`,
-    description: `A ${plan_type.replace(/_/g, ' ')} transition plan has been created. Begin with benefits screening and ensure legal documents are in place.`,
+    task_type: 'transition_plan',
+    notes: `A ${plan_type.replace(/_/g, ' ')} transition plan has been created. Begin with benefits screening and ensure legal documents are in place.`,
     priority: 'high',
     category: 'transition',
     status: 'pending',

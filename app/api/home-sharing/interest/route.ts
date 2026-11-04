@@ -58,8 +58,8 @@ export async function POST(req: NextRequest) {
   // Create a navigator task for the warm handoff introduction
   await supabase.from('navigator_tasks').insert({
     member_id,
-    title: `Home sharing interest — ${role} in ${county}`,
-    description: `Member expressed interest in home sharing as a ${role}. Partners available: ${partners?.map((p: { name: string }) => p.name).join(', ')}. Present options and get member consent before making any referral.`,
+    task_type: 'home_sharing_interest',
+    notes: `Member expressed interest in home sharing as a ${role}. Partners available: ${partners?.map((p: { name: string }) => p.name).join(', ')}. Present options and get member consent before making any referral.`,
     priority: 'medium',
     category: 'home_sharing',
     status: 'pending',

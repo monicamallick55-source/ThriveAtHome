@@ -74,7 +74,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     .from('navigator_tasks')
     .insert({
       member_id,
-      title: 'Grief circle invitation sent — follow up',
+      task_type: 'grief_circle_followup',
       description: `Member was invited to a grief circle. Follow up to ensure they received the invitation and answer any questions.`,
       priority: 'low',
       category: 'wellbeing',

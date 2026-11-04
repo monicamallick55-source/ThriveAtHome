@@ -131,7 +131,7 @@ export async function POST(req: Request) {
   await db.from('navigator_tasks').insert({
     type: 'volunteer_application',
     priority: 'medium',
-    title: `New volunteer application: ${body.full_name}`,
+    task_type: 'volunteer_application',
     body: `${body.full_name} (${user.email}) applied to volunteer. Skills: ${(body.skills ?? []).join(', ') || 'none listed'}. Review and initiate background check.`,
     metadata: { volunteer_id: volunteer.id },
     status: 'open',

@@ -71,7 +71,7 @@ export async function POST(
     await db.from('navigator_tasks').insert({
       member_id,
       task_type: 'community_access_welcome',
-      description: `New Community Access member referred by ${referral.nonprofit_org_id}. Call within 24 hours for welcome onboarding.`,
+      notes: `New Community Access member referred by ${referral.nonprofit_org_id}. Call within 24 hours for welcome onboarding.`,
       priority: 'high',
     })
 

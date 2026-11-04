@@ -108,8 +108,8 @@ export async function POST(req: NextRequest) {
   if (griefFlagged) {
     await supabase.from('navigator_tasks').insert({
       member_id,
-      title: 'Review celebration request — grief anniversary proximity',
-      description: `A family member planned a ${tier} celebration for ${occasion} on ${occasion_date}. The date is within 30 days of a recorded loss anniversary. Please review before the celebration proceeds.`,
+      task_type: 'grief_anniversary_review',
+      notes: `A family member planned a ${tier} celebration for ${occasion} on ${occasion_date}. The date is within 30 days of a recorded loss anniversary. Please review before the celebration proceeds.`,
       priority: 'medium',
       category: 'check_in',
       status: 'pending',

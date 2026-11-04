@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
       await (createAdminClient() as any).from('navigator_tasks').insert({
         member_id: memberId,
         task_type: 'partner_referral_request',
-        title: `Partner referral request: ${category}`,
+        task_type: 'partner_referral_request',
         description: note
           ? `Member requested a local referral for ${category}.\n\nMember note: ${note}`
           : `Member requested a local referral for ${category}.`,

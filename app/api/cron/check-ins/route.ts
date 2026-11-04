@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
     await supabaseAdmin.from('navigator_tasks').insert({
       member_id: member.id,
       task_type: 'missed_checkin',
-      description: `${member.first_name} ${member.last_name} missed their daily Aria check-in call on ${today}. Please call or SMS to confirm they are okay. Phone: ${member.phone}`,
+      notes: `${member.first_name} ${member.last_name} missed their daily Aria check-in call on ${today}. Please call or SMS to confirm they are okay. Phone: ${member.phone}`,
       priority: 'high',
     })
 

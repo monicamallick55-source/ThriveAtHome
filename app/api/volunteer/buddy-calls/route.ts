@@ -66,7 +66,7 @@ export async function POST(req: Request) {
         await (admin.from as any)('navigator_tasks').insert({
           navigator_id: navAssignment.navigator_id,
           member_id,
-          title: 'Buddy concern flag — follow up required',
+          task_type: 'buddy_concern',
           description: `Buddy flagged a concern after a call. Notes: ${concern_description}`,
           priority: 'high',
           status: 'pending',

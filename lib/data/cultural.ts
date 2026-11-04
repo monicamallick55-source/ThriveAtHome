@@ -337,7 +337,7 @@ export async function createHeritageProject(input: {
   await admin.from('navigator_tasks').insert({
     member_id: input.memberId,
     task_type: 'heritage_project_match',
-    description: `A member offered to share a tradition ("${input.traditionTopic}") with a student for a school heritage project. Match with a participating student volunteer and schedule the interview.`,
+    notes: `A member offered to share a tradition ("${input.traditionTopic}") with a student for a school heritage project. Match with a participating student volunteer and schedule the interview.`,
     priority: 'low',
   })
   return { data, error: null }

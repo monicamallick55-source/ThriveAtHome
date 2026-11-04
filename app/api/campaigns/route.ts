@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
   try {
     await admin.from('navigator_tasks').insert({
       member_id: member.id, task_type: 'campaign_review',
-      description: `Member submitted a fundraising campaign. Goal: $${goal_amount}.`,
+      notes: `Member submitted a fundraising campaign. Goal: $${goal_amount}.`,
       priority: 'medium',
     })
   } catch (e) { console.error('Failed to create navigator task:', e) }

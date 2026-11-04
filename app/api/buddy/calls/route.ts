@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     const admin = createAdminClient() as any
     const { data: navLink } = await admin.from('member_navigators').select('navigator_id').eq('member_id', member_id).single()
     if (navLink) {
-      await admin.from('navigator_tasks').insert({ navigator_id: navLink.navigator_id, member_id, type: 'buddy_concern', priority: 'informational', title: 'Buddy flagged a concern', description: concern_description, related_id: call?.id, status: 'open' })
+      await admin.from('navigator_tasks').insert({ navigator_id: navLink.navigator_id, member_id, task_type: 'buddy_concern', priority: 'informational', notes: concern_description, related_id: call?.id, status: 'open' })
     }
   }
   return NextResponse.json(call, { status: 201 })

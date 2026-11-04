@@ -101,7 +101,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     await createAdminClient().from('navigator_tasks').insert({
       member_id: owned.item.member_id,
       task_type: 'appointment_rescheduled',
-      description: `Member rescheduled an appointment to ${rest.new_date}.`,
+      notes: `Member rescheduled an appointment to ${rest.new_date}.`,
       priority: 'low',
     }).then(() => null, () => null)
     return NextResponse.json({ item: data })
@@ -123,7 +123,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     await db.from('navigator_tasks').insert({
       member_id: owned.item.member_id,
       task_type: 'renewal_assistance',
-      description: desc,
+      notes: desc,
       priority: 'medium',
     }).then(() => null, () => null)
     return NextResponse.json({ success: true })

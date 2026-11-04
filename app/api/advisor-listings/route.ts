@@ -102,7 +102,7 @@ export async function POST(req: Request) {
   await (admin as any).from('navigator_tasks').insert({
     task_type: 'listing_review',
     priority: 'medium',
-    description: `New ${tier} listing application from ${advisor.name} (${advisor.category}). Annual fee: $${(TIER_FEES[tier] / 100).toLocaleString()}.`,
+    notes: `New ${tier} listing application from ${advisor.name} (${advisor.category}). Annual fee: $${(TIER_FEES[tier] / 100).toLocaleString()}.`,
     metadata: { listing_id: listing.id, advisor_id: advisorId, tier, annual_fee_cents: TIER_FEES[tier] },
   }).then(({error: _e}: {error: unknown}) => { if (_e) console.warn(_e) })
 

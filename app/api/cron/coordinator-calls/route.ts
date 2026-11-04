@@ -57,7 +57,7 @@ export async function GET(req: NextRequest) {
     const { error: taskErr } = await supabaseAdmin.from('navigator_tasks').insert({
       member_id: memberId,
       task_type: 'coordinator_call',
-      description:
+      notes:
         `Caregiver Family Plan: schedule this month's 30-minute family coordinator call for ` +
         `${member?.preferred_name ?? 'the member'}. Confirm attendees, review the shared task list, ` +
         `and send the consolidated monthly care summary afterward.`,

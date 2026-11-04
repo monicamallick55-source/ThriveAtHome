@@ -67,7 +67,7 @@ export async function GET(req: NextRequest) {
         await supabaseAdmin.from('navigator_tasks').insert({
           member_id: member.id,
           type: 'medicare_open_enrollment',
-          title: 'Medicare Open Enrollment reminder',
+          task_type: 'medicare_open_enrollment',
           description: `Medicare Open Enrollment runs Oct 15 – Dec 7. Ask ${member.full_name ?? 'this member'} if they want help reviewing their plan. Connect with HICAP if needed.`,
           priority: 'low',
           status: 'open',

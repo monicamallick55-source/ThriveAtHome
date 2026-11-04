@@ -65,8 +65,8 @@ export async function POST(req: NextRequest) {
   // Create navigator task for warm handoff
   await supabase.from('navigator_tasks').insert({
     member_id,
-    title: `Warm handoff to ${program_name}`,
-    description: `Member has consented to home-sharing referral to ${program_name}. Call the partner or help the member call to start their application. Check in at 14 days and 60 days.`,
+    task_type: 'home_sharing_referral',
+    notes: `Member has consented to home-sharing referral to ${program_name}. Call the partner or help the member call to start their application. Check in at 14 days and 60 days.`,
     priority: 'medium',
     category: 'home_sharing',
     status: 'pending',
@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
   await supabase.from('navigator_tasks').insert([
     {
       member_id,
-      title: `14-day check-in: Home sharing referral to ${program_name}`,
+      task_type: 'home_sharing_checkin',
       description: `Check in on the member's home-sharing referral status. Have they applied? Any issues?`,
       priority: 'low',
       category: 'home_sharing',

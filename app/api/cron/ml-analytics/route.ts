@@ -130,7 +130,7 @@ export async function POST(req: NextRequest) {
         await supabaseAdmin.from('navigator_tasks').insert({
           member_id: member.id,
           task_type: 'wellbeing_alert',
-          description: `Wellbeing score: ${score}/100 (${risk.toUpperCase()}). Flags: ${flags.join(', ')}. Review member activity and check in proactively.`,
+          notes: `Wellbeing score: ${score}/100 (${risk.toUpperCase()}). Flags: ${flags.join(', ')}. Review member activity and check in proactively.`,
           priority: risk === 'critical' ? 'critical' : 'high',
         })
 

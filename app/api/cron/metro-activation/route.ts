@@ -54,7 +54,7 @@ export async function POST(req: Request) {
         await db.from('navigator_tasks').insert({
           type: 'metro_activated',
           priority: 'medium',
-          title: `Metro chapter activated: ${metro.name}`,
+          task_type: 'metro_activated',
           body: `${metro.name} has reached 50+ active members and is now an official ThriveAtHome chapter. Coordinator assigned.`,
           metadata: { metro_id: metro.id, metro_slug: metro.slug, member_count: memberCount },
           status: 'open',
@@ -75,7 +75,7 @@ export async function POST(req: Request) {
           await db.from('navigator_tasks').insert({
             type: 'recruit_metro_coordinator',
             priority: 'high',
-            title: `Recruit coordinator: ${metro.name}`,
+            task_type: 'recruit_coordinator',
             body: `${metro.name} has ${memberCount} active members (≥50) but no coordinator assigned. Recruit a local coordinator to activate this chapter.`,
             metadata: { metro_id: metro.id, metro_slug: metro.slug, member_count: memberCount },
             status: 'open',
