@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
       rsvp_count: number | null
     }
 
-    const nearby = ((rows ?? []) as CircleEventRow[])
+    const nearby = ((rows ?? []) as unknown as CircleEventRow[])
       .filter(r => haversineMiles(geo.lat, geo.lng, r.latitude, r.longitude) <= radiusMiles)
       .map(r => {
         const miles = haversineMiles(geo.lat, geo.lng, r.latitude, r.longitude)
