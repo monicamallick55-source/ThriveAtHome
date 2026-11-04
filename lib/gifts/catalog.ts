@@ -1,144 +1,60 @@
 // lib/gifts/catalog.ts
-// G7.3 — Curated gift catalog for senior-to-family gift sending
-
-export interface GiftItem {
+export interface CatalogItem {
   id: string
-  type: string  // gift_orders.gift_type enum value
-  label: string
+  kind: 'note' | 'card' | 'flowers' | 'food' | 'book' | 'gift_card' | 'basket'
+  title: string
   description: string
-  amountCents: number | null  // null = free (just a card message)
-  emoji: string
-  category: 'card' | 'flowers' | 'food' | 'experience' | 'keepsake'
-  digitalDelivery: boolean
+  price_cents: number
+  platform_fee_pct: number // 0 for notes, 0 for cards (flat fee), 15 for goods
+  flat_fee_cents: number   // 499 for cards, 0 otherwise
+  partner: string
+  requires_address: boolean
+  requires_email: boolean
+  image_emoji: string
 }
 
-export const GIFT_CATALOG: GiftItem[] = [
-  {
-    id: 'greeting_card_free',
-    type: 'greeting_card',
-    label: 'Heartfelt card message',
-    description: 'Send a warm written message delivered to your family member\'s inbox.',
-    amountCents: null,
-    emoji: '💌',
-    category: 'card',
-    digitalDelivery: true,
-  },
-  {
-    id: 'greeting_card_physical',
-    type: 'greeting_card',
-    label: 'Physical greeting card',
-    description: 'A beautiful card printed and mailed to your family member.',
-    amountCents: 999,
-    emoji: '✉️',
-    category: 'card',
-    digitalDelivery: false,
-  },
-  {
-    id: 'flower_bouquet_classic',
-    type: 'flower_bouquet',
-    label: 'Classic flower bouquet',
-    description: 'A seasonal arrangement of fresh flowers delivered to their door.',
-    amountCents: 4999,
-    emoji: '💐',
-    category: 'flowers',
-    digitalDelivery: false,
-  },
-  {
-    id: 'flower_bouquet_premium',
-    type: 'flower_bouquet',
-    label: 'Premium bouquet with vase',
-    description: 'An elegant arrangement with a keepsake vase, delivered same-day when possible.',
-    amountCents: 7999,
-    emoji: '🌸',
-    category: 'flowers',
-    digitalDelivery: false,
-  },
-  {
-    id: 'gift_basket_sweet',
-    type: 'gift_basket',
-    label: 'Sweet treats basket',
-    description: 'Chocolates, cookies, and treats in a reusable basket.',
-    amountCents: 5999,
-    emoji: '🧺',
-    category: 'food',
-    digitalDelivery: false,
-  },
-  {
-    id: 'gift_basket_gourmet',
-    type: 'gift_basket',
-    label: 'Gourmet food basket',
-    description: 'Artisan cheeses, crackers, nuts, and preserves.',
-    amountCents: 8999,
-    emoji: '🍇',
-    category: 'food',
-    digitalDelivery: false,
-  },
-  {
-    id: 'meal_delivery',
-    type: 'meal_delivery',
-    label: 'Home-cooked meal delivery',
-    description: 'A chef-prepared meal delivered fresh for a family dinner.',
-    amountCents: 9999,
-    emoji: '🍱',
-    category: 'food',
-    digitalDelivery: false,
-  },
-  {
-    id: 'photo_book',
-    type: 'photo_book',
-    label: 'Family photo book',
-    description: 'A printed 20-page photo book — upload your own photos and we handle the rest.',
-    amountCents: 3999,
-    emoji: '📸',
-    category: 'keepsake',
-    digitalDelivery: false,
-  },
-  {
-    id: 'donation_in_honor',
-    type: 'donation_in_honor',
-    label: 'Donation in their honor',
-    description: 'We make a $25 donation to a cause they love in their name.',
-    amountCents: 2500,
-    emoji: '💝',
-    category: 'experience',
-    digitalDelivery: true,
-  },
-  {
-    id: 'amazon_gift_card_25',
-    type: 'amazon_gift_card',
-    label: 'Amazon gift card — $25',
-    description: 'Sent digitally to their email so they can choose exactly what they want.',
-    amountCents: 2500,
-    emoji: '🛍️',
-    category: 'experience',
-    digitalDelivery: true,
-  },
-  {
-    id: 'book',
-    type: 'book',
-    label: 'Book they\'ll love',
-    description: 'Tell us their interests and we\'ll pick a best-selling title and ship it to them.',
-    amountCents: 1999,
-    emoji: '📚',
-    category: 'keepsake',
-    digitalDelivery: false,
-  },
-  {
-    id: 'plant',
-    type: 'plant',
-    label: 'Live succulent or plant',
-    description: 'A low-maintenance plant that\'ll brighten their home for years.',
-    amountCents: 3499,
-    emoji: '🪴',
-    category: 'keepsake',
-    digitalDelivery: false,
-  },
+export const GIFT_CATALOG: CatalogItem[] = [
+  // Notes (free)
+  { id: 'note-email', kind: 'note', title: 'Personal Note', description: 'A heartfelt message delivered by email with a shareable link', price_cents: 0, platform_fee_pct: 0, flat_fee_cents: 0, partner: 'stub', requires_address: false, requires_email: true, image_emoji: '💌' },
+
+  // Cards ($4.99 flat, printed + mailed)
+  { id: 'card-birthday', kind: 'card', title: 'Birthday Card', description: 'Printed birthday card mailed with your message', price_cents: 499, platform_fee_pct: 0, flat_fee_cents: 499, partner: 'stub', requires_address: true, requires_email: false, image_emoji: '🎂' },
+  { id: 'card-thinking', kind: 'card', title: 'Thinking of You Card', description: 'Printed card mailed with your personal message', price_cents: 499, platform_fee_pct: 0, flat_fee_cents: 499, partner: 'stub', requires_address: true, requires_email: false, image_emoji: '💛' },
+  { id: 'card-anniversary', kind: 'card', title: 'Anniversary Card', description: 'Printed anniversary card mailed with your message', price_cents: 499, platform_fee_pct: 0, flat_fee_cents: 499, partner: 'stub', requires_address: true, requires_email: false, image_emoji: '💍' },
+
+  // Flowers
+  { id: 'flowers-classic', kind: 'flowers', title: 'Classic Bouquet', description: 'Cheerful mixed flowers delivered to their door', price_cents: 5999, platform_fee_pct: 15, flat_fee_cents: 0, partner: 'stub', requires_address: true, requires_email: false, image_emoji: '🌷' },
+  { id: 'flowers-garden', kind: 'flowers', title: 'Garden Arrangement', description: 'Lush garden-style arrangement with seasonal blooms', price_cents: 7999, platform_fee_pct: 15, flat_fee_cents: 0, partner: 'stub', requires_address: true, requires_email: false, image_emoji: '🌸' },
+
+  // Food
+  { id: 'food-cookies', kind: 'food', title: 'Cookie Gift Tin', description: 'Assorted gourmet cookies in a keepsake tin', price_cents: 3999, platform_fee_pct: 15, flat_fee_cents: 0, partner: 'stub', requires_address: true, requires_email: false, image_emoji: '🍪' },
+  { id: 'food-choc', kind: 'food', title: 'Chocolate Box', description: 'Artisan chocolates — something sweet to celebrate', price_cents: 4499, platform_fee_pct: 15, flat_fee_cents: 0, partner: 'stub', requires_address: true, requires_email: false, image_emoji: '🍫' },
+
+  // Books
+  { id: 'book-memoir', kind: 'book', title: 'Bestselling Memoir', description: 'Curated bestseller — we pick a highly-rated memoir', price_cents: 2499, platform_fee_pct: 15, flat_fee_cents: 0, partner: 'stub', requires_address: true, requires_email: false, image_emoji: '📖' },
+
+  // Gift cards (always trigger approval gate if recipient unknown)
+  { id: 'gc-amazon', kind: 'gift_card', title: 'Amazon Gift Card', description: 'Digital Amazon gift card emailed to recipient', price_cents: 2500, platform_fee_pct: 0, flat_fee_cents: 0, partner: 'stub', requires_address: false, requires_email: true, image_emoji: '🎁' },
+  { id: 'gc-starbucks', kind: 'gift_card', title: 'Starbucks Gift Card', description: 'Digital Starbucks gift card emailed to recipient', price_cents: 2500, platform_fee_pct: 0, flat_fee_cents: 0, partner: 'stub', requires_address: false, requires_email: true, image_emoji: '☕' },
+
+  // Baskets
+  { id: 'basket-comfort', kind: 'basket', title: 'Comfort & Care Basket', description: 'Tea, snacks, cozy socks, and a hand-written card', price_cents: 8999, platform_fee_pct: 15, flat_fee_cents: 0, partner: 'stub', requires_address: true, requires_email: false, image_emoji: '🧺' },
 ]
 
-export function getGiftById(id: string): GiftItem | undefined {
-  return GIFT_CATALOG.find((g) => g.id === id)
+export function calculateOrderTotals(item: CatalogItem, quantity = 1) {
+  const subtotal = item.price_cents * quantity
+  const platform_fee = item.flat_fee_cents > 0
+    ? item.flat_fee_cents
+    : Math.round(subtotal * item.platform_fee_pct / 100)
+  return {
+    subtotal_cents: subtotal,
+    platform_fee_cents: platform_fee,
+    total_cents: subtotal + platform_fee,
+  }
 }
 
-export function getGiftsByCategory(category: GiftItem['category']): GiftItem[] {
-  return GIFT_CATALOG.filter((g) => g.category === category)
+export function requiresFamilyApproval(item: CatalogItem, totalCents: number, recipientInFamily: boolean): boolean {
+  if (item.kind === 'gift_card' && !recipientInFamily) return true
+  if (totalCents > 7500) return true  // over $75
+  return false
 }
