@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
 
   let sent = 0
   for (const rx of prescriptions) {
-    const member = rx.members
+    const member = Array.isArray(rx.members) ? rx.members[0] : rx.members
     if (!member?.phone) continue
 
     const dueDate = new Date(rx.refill_due_date)
