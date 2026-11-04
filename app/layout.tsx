@@ -9,6 +9,7 @@ const cormorant = Cormorant_Garamond({
   variable: '--font-cormorant',
   display: 'swap',
   preload: false,
+  adjustFontFallback: false,
 })
 
 const dmSans = DM_Sans({
