@@ -134,3 +134,45 @@ export function scoreBuddyVolunteer(
 
   return { score, reasons }
 }
+
+// Alias: some routes import by this name
+export const getVolunteerBuddyAssignments = getBuddyAssignments
+
+export async function getCompletedBuddyCallCount(assignmentId: string): Promise<{ data: number; error: unknown }> {
+  const { data, error } = await (supabase() as any)
+    .from('buddy_calls')
+    .select('id', { count: 'exact', head: true })
+    .eq('assignment_id', assignmentId)
+  return { data: (data as any)?.count ?? 0, error }
+}
+
+export async function getBuddyCallsForFamily(memberId: string, limit = 10): Promise<{ data: BuddyCall[]; error: unknown }> {
+  // Family view: excludes concern_description (privacy)
+  const { data, error } = await (supabase() as any)
+    .from('buddy_calls')
+    .select('id,assignment_id,member_id,volunteer_id,started_at,duration_minutes,call_quality,family_note,milestone_flag,milestone_description,aria_brief_shown,created_at,volunteer:volunteers(first_name,last_name)')
+    .eq('member_id', memberId)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+  return { data: (data ?? []) as BuddyCall[], error }
+}
+
+export async function getBuddySummaryForMember(memberId: string): Promise<{ data: { assignment: BuddyAssignment | null; recentCalls: BuddyCall[]; callCount: number } | null; error: unknown }> {
+  const { data: assignment, error } = await getActiveBuddyAssignment(memberId)
+  if (error && (error as any).code !== 'PGRST116') return { data: null, error }
+  if (!assignment) return { data: { assignment: null, recentCalls: [], callCount: 0 }, error: null }
+  const { data: calls } = await getBuddyCallsForFamily(memberId, 5)
+  const { data: count } = await getCompletedBuddyCallCount(assignment.id)
+  return { data: { assignment, recentCalls: calls ?? [], callCount: count }, error: null }
+}
+
+export async function getUnmatchedBuddyMembers(): Promise<{ data: Array<{ id: string; first_name: string; last_name: string; preferred_name: string | null; plan_tier: string; city: string | null; state: string | null; languages_spoken: string[] | null; buddy_match_topics: string[] | null; buddy_match_era: string | null; buddy_call_length_preference: string | null; buddy_intro_note: string | null; created_at: string }>; error: unknown }> {
+  const { data, error } = await (admin() as any)
+    .from('members')
+    .select('id,first_name,last_name,preferred_name,plan_tier,city,state,languages_spoken,buddy_match_topics,buddy_match_era,buddy_call_length_preference,buddy_intro_note,created_at')
+    .in('plan_tier', ['connect','complete','premier'])
+    .eq('has_active_buddy', false)
+    .eq('status', 'active')
+    .order('created_at', { ascending: true })
+  return { data: data ?? [], error }
+}
