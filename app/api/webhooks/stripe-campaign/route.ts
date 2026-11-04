@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
   const admin = createAdminClient()
 
   if (event.type === 'checkout.session.completed') {
-    const session = event.data.object as Stripe.CheckoutSession
+    const session = event.data.object as Stripe.Checkout.Session
     const campaignId = session.metadata?.campaign_id
     if (!campaignId) return NextResponse.json({ received: true })
 
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
 
     // Check if donor is a member
     const { data: donor } = await admin.from('members')
-      .select('id').eq('email', customerEmail).maybeSingle()
+      .select('id').eq('supabase_auth_id', (customerEmail) ?? '').maybeSingle()
 
     await admin.from('campaign_donations').insert({
       campaign_id: campaignId,

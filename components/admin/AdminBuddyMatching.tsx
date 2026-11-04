@@ -54,7 +54,7 @@ export function AdminBuddyMatching({ unmatchedMembers, volunteers }: Props) {
     ? availableVolunteers
         .map((v: any) => ({
           volunteer: v,
-          ...scoreBuddyVolunteer(v, selectedMember),
+          ...scoreBuddyVolunteer(v as any, selectedMember as any),
         }))
         .sort((a, b) => b.score - a.score)
         .slice(0, 5)

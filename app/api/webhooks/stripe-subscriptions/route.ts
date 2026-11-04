@@ -99,7 +99,7 @@ async function sendWelcomeEmail(email: string, firstName: string, plan: string) 
   }
 }
 
-async function provisionMember(session: Stripe.CheckoutSession) {
+async function provisionMember(session: Stripe.Checkout.Session) {
   // Get subscription to extract price info
   let plan: 'basics' | 'complete' | null = null
   let stripeSubscriptionId: string | null = null
@@ -178,7 +178,7 @@ async function handleSubscriptionUpdated(sub: Stripe.Subscription) {
   const { error } = await supabaseAdmin
     .from('members')
     .update(updates)
-    .eq('stripe_customer_id', stripeCustomerId)
+    .eq('stripe_customer_id', stripeCustomerId ?? "")
 
   if (error) {
     console.error('[subscription-updated] DB error:', error)
@@ -197,7 +197,7 @@ async function handleSubscriptionDeleted(sub: Stripe.Subscription) {
       plan: null,
       updated_at: new Date().toISOString(),
     })
-    .eq('stripe_customer_id', stripeCustomerId)
+    .eq('stripe_customer_id', stripeCustomerId ?? "")
 
   if (error) {
     console.error('[subscription-deleted] DB error:', error)
@@ -217,7 +217,7 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
       subscription_status: 'past_due',
       updated_at: new Date().toISOString(),
     })
-    .eq('stripe_customer_id', stripeCustomerId)
+    .eq('stripe_customer_id', stripeCustomerId ?? "")
 
   if (error) {
     console.error('[payment-failed] DB error:', error)
@@ -263,7 +263,7 @@ export async function POST(req: NextRequest) {
   try {
     switch (event.type) {
       case 'checkout.session.completed': {
-        const session = event.data.object as Stripe.CheckoutSession
+        const session = event.data.object as Stripe.Checkout.Session
         if (session.mode === 'subscription') {
           await provisionMember(session)
         }

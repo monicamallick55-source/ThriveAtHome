@@ -152,8 +152,7 @@ export async function POST(req: NextRequest) {
         status: 'active',
         source: 'join_request',
       })
-      .onConflict('supabase_auth_id')
-      .ignore()
+      
   }
 
   // Mark approved

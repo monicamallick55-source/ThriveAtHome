@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
 
 
   // Look up member record
-  const { data: member, error: memberError } = await db
+  const { data: member, error: memberError } = await supabaseAdmin
     .from('members')
     .select('id, plan, stripe_subscription_id, stripe_customer_id, subscription_status')
     .eq('auth_id', user.id)
@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
 
     // Optimistically update the member record
     // (Stripe webhook will also update this, but immediate feedback is better UX)
-    await db
+    await supabaseAdmin
       .from('members')
       .update({
         plan: targetPlan,
@@ -112,7 +112,8 @@ export async function POST(req: NextRequest) {
       plan: targetPlan,
       billing: targetBilling,
       subscription_id: updatedSub.id,
-      current_period_end: updatedSub.current_period_end,
+      current_period_end: updatedSub
+    ,
     })
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err)

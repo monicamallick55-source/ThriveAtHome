@@ -10,7 +10,7 @@ export async function GET(req: Request) {
     const memberId = searchParams.get('member_id')
     if (!memberId) return NextResponse.json({ error: 'member_id required' }, { status: 400 })
 
-    const { brief, error } = await generateAriaBrief(memberId)
+    const { data: brief, error } = await generateAriaBrief(memberId)
     if (error) return NextResponse.json({ error }, { status: 500 })
     return NextResponse.json({ brief })
   } catch (err) {

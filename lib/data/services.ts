@@ -49,7 +49,7 @@ export async function getServiceBookingsForMember(
 
   const { data, error } = await query
   if (error) return { data: null, error: error.message }
-  return { data: data as ServiceBooking[], error: null }
+  return { data: (data as unknown) as ServiceBooking[], error: null }
 }
 
 export async function getUpcomingServiceBookings(
@@ -71,7 +71,7 @@ export async function getRecentCompletedServiceBookings(
     .order('created_at', { ascending: false })
     .limit(limit)
   if (error) return { data: null, error: error.message }
-  return { data: data as ServiceBooking[], error: null }
+  return { data: (data as unknown) as ServiceBooking[], error: null }
 }
 
 export async function createServiceBooking(
@@ -91,13 +91,13 @@ export async function createServiceBooking(
       requested_for: requestedFor,
       notes,
       status: 'requested',
-    })
+    } as never)
     .select()
     .limit(1)
     .maybeSingle()
 
   if (error) return { data: null, error: error.message }
-  return { data: data as ServiceBooking, error: null }
+  return { data: (data as unknown) as ServiceBooking, error: null }
 }
 
 export async function updateBookingStatus(
@@ -132,7 +132,7 @@ export async function getAllBookingsForNavigator(): Promise<{ data: (ServiceBook
   if (error) return { data: null, error: error.message }
 
   type RawRow = ServiceBooking & { members: { preferred_name: string; full_name: string; phone_number: string } }
-  const mapped = (data as RawRow[]).map((row: any) => ({
+  const mapped = ((data as unknown) as RawRow[]).map((row: any) => ({
     ...row,
     member_name: row.members.preferred_name,
     member_phone: row.members.phone_number,

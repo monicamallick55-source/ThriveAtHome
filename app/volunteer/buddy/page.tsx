@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import BuddyAssignmentCard from './_components/BuddyAssignmentCard'
 
 export default async function BuddyPortalPage() {
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
   const { data: volunteer } = await (supabase as any).from('volunteers').select('id,first_name,buddy_capacity,buddy_active_count').eq('supabase_auth_id', user.id).single()

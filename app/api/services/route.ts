@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import type { ServiceType } from '@/lib/data/services'
 import { getCurrentUser } from '@/lib/auth'
 import { resolveMemberContext } from '@/lib/data/members'
 import { createServiceBooking } from '@/lib/data/services'
@@ -9,7 +10,7 @@ const ALLOWED_SERVICE_TYPES = [
   'transport', 'home_service', 'meals', 'telehealth', 'legal_financial', 'tech_help',
   'companionship', 'companion', 'travel_assistance', 'roadside',
   // FCV-gap volunteer services (Complete tier, no extra charge)
-  'fitness_class', 'walking_group', 'home_organizing', 'medical_companion', 'home_safety',
+  'fitness_class' as ServiceType, 'walking_group', 'home_organizing', 'medical_companion', 'home_safety',
 ] as const
 type AllowedServiceType = (typeof ALLOWED_SERVICE_TYPES)[number]
 
@@ -56,7 +57,7 @@ export async function POST(req: NextRequest) {
 
   const { data: booking, error } = await createServiceBooking(
     memberId,
-    service_type as AllowedServiceType,
+    service_type as unknown as ServiceType,
     booking_details,
     requested_for ?? null,
     notes ?? null
@@ -95,7 +96,7 @@ export async function POST(req: NextRequest) {
             provider_booking_id: ride.bookingId,
             estimated_arrival:   ride.estimatedArrival ?? null,
             auto_dispatched:     true,
-          },
+          } as never,
         })
         .eq('id', String(booking.id))
 
@@ -181,7 +182,7 @@ export async function POST(req: NextRequest) {
         description: travelDesc,
         priority: subtype === 'travel_companion' ? 'medium' : 'low',
       })
-    } else if (service_type === 'fitness_class') {
+    } else if (service_type === 'fitness_class' as ServiceType) {
       await db.from('navigator_tasks').insert({
         member_id: memberId,
         task_type: 'fitness_class_request',

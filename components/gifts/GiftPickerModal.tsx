@@ -3,7 +3,7 @@
 // G7.3 — Modal for senior to choose and send a gift to family
 
 import { useState } from 'react'
-import { GIFT_CATALOG, type GiftItem } from '@/lib/gifts/catalog'
+import { GIFT_CATALOG, type CatalogItem } from '@/lib/gifts/catalog'
 
 const CATEGORIES = [
   { id: 'all',        label: 'All gifts' },
@@ -22,7 +22,7 @@ interface Props {
 
 export default function GiftPickerModal({ onClose, onSent, recipientSuggestion }: Props) {
   const [category, setCategory] = useState<string>('all')
-  const [selected, setSelected] = useState<GiftItem | null>(null)
+  const [selected, setSelected] = useState<CatalogItem | null>(null)
   const [recipientName, setRecipientName] = useState(recipientSuggestion ?? '')
   const [recipientEmail, setRecipientEmail] = useState('')
   const [message, setMessage] = useState('')
@@ -31,7 +31,7 @@ export default function GiftPickerModal({ onClose, onSent, recipientSuggestion }
 
   const filtered = category === 'all'
     ? GIFT_CATALOG
-    : GIFT_CATALOG.filter((g) => g.category === category)
+    : GIFT_CATALOG.filter((g) => g.kind === category)
 
   async function handleSend(e: React.FormEvent) {
     e.preventDefault()
@@ -52,7 +52,7 @@ export default function GiftPickerModal({ onClose, onSent, recipientSuggestion }
         const j = await res.json().catch(() => ({}))
         throw new Error(j?.error ?? 'Failed to place order')
       }
-      onSent(selected.label)
+      onSent(selected.title)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Error')
       setLoading(false)
@@ -117,11 +117,11 @@ export default function GiftPickerModal({ onClose, onSent, recipientSuggestion }
                   onMouseEnter={(e) => (e.currentTarget.style.borderColor = '#1d4ed8')}
                   onMouseLeave={(e) => (e.currentTarget.style.borderColor = '#e5e7eb')}
                 >
-                  <div style={{ fontSize: 28 }}>{gift.emoji}</div>
-                  <div style={{ fontWeight: 600, fontSize: 13 }}>{gift.label}</div>
+                  <div style={{ fontSize: 28 }}>{gift.image_emoji}</div>
+                  <div style={{ fontWeight: 600, fontSize: 13 }}>{gift.title}</div>
                   <div style={{ fontSize: 12, color: '#6b7280', flexGrow: 1 }}>{gift.description}</div>
-                  <div style={{ fontWeight: 700, color: gift.amountCents ? '#1d4ed8' : '#059669', fontSize: 14, marginTop: 4 }}>
-                    {gift.amountCents ? `$${(gift.amountCents / 100).toFixed(2)}` : 'Free'}
+                  <div style={{ fontWeight: 700, color: gift.price_cents ? '#1d4ed8' : '#059669', fontSize: 14, marginTop: 4 }}>
+                    {gift.price_cents ? `$${(gift.price_cents / 100).toFixed(2)}` : 'Free'}
                   </div>
                 </div>
               ))}
@@ -134,12 +134,12 @@ export default function GiftPickerModal({ onClose, onSent, recipientSuggestion }
               background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 10,
               padding: '14px 16px', marginBottom: 20, display: 'flex', gap: 12, alignItems: 'center',
             }}>
-              <div style={{ fontSize: 32 }}>{selected.emoji}</div>
+              <div style={{ fontSize: 32 }}>{selected.image_emoji}</div>
               <div>
-                <div style={{ fontWeight: 700 }}>{selected.label}</div>
+                <div style={{ fontWeight: 700 }}>{selected.title}</div>
                 <div style={{ fontSize: 13, color: '#6b7280' }}>{selected.description}</div>
                 <div style={{ fontWeight: 700, color: '#1d4ed8', marginTop: 4 }}>
-                  {selected.amountCents ? `$${(selected.amountCents / 100).toFixed(2)}` : 'Free'}
+                  {selected.price_cents ? `$${(selected.price_cents / 100).toFixed(2)}` : 'Free'}
                 </div>
               </div>
               <button
@@ -159,7 +159,7 @@ export default function GiftPickerModal({ onClose, onSent, recipientSuggestion }
               />
             </div>
 
-            {selected.digitalDelivery && (
+            {selected.requires_email && (
               <div style={{ marginBottom: 14 }}>
                 <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>
                   Their email address (for digital delivery)
@@ -198,7 +198,7 @@ export default function GiftPickerModal({ onClose, onSent, recipientSuggestion }
                   cursor: loading ? 'wait' : 'pointer', opacity: !recipientName ? 0.5 : 1,
                 }}
               >
-                {loading ? 'Sending…' : selected.amountCents ? `Pay & send — $${(selected.amountCents / 100).toFixed(2)}` : 'Send gift 🎁'}
+                {loading ? 'Sending…' : selected.price_cents ? `Pay & send — $${(selected.price_cents / 100).toFixed(2)}` : 'Send gift 🎁'}
               </button>
               <button
                 type="button" onClick={onClose}
@@ -206,7 +206,7 @@ export default function GiftPickerModal({ onClose, onSent, recipientSuggestion }
               >Cancel</button>
             </div>
 
-            {selected.amountCents && selected.amountCents > 0 && (
+            {selected.price_cents && selected.price_cents > 0 && (
               <p style={{ fontSize: 12, color: '#9ca3af', marginTop: 8, textAlign: 'center' }}>
                 Secure payment powered by Stripe. Your card is never stored.
               </p>
