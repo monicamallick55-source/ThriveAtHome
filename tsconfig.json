@@ -32,16 +32,12 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts",
-    "**/*.mts",
-    ".next/dev/types/app-router.d.ts",
-    ".next/dev/types/**/*.ts"
-, "app/page.tsx.old1", "app/admin/page.tsx.old"  ],
+    "**/*.mts"
+  ],
   "exclude": [
     "node_modules",
     "supabase/functions",
     "scripts",
-    ".next/dev/types/validator.ts",
-    ".next/dev/types/routes.d.ts"
+    ".next"
   ]
 }
