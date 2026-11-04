@@ -68,6 +68,36 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     }
   }
 
+  // Training gate — block apply if required training modules not completed
+  if (!volunteer.training_completed) {
+    const { data: requiredModules } = await supabase
+      .from('volunteer_training_requirements')
+      .select('module_id, volunteer_training_modules(name)')
+      .eq('opportunity_type', opp.opportunity_type ?? 'general')
+
+    if (requiredModules && requiredModules.length > 0) {
+      const moduleIds = requiredModules.map((r: any) => r.module_id)
+      const { data: completions } = await supabase
+        .from('volunteer_training_completions')
+        .select('module_id')
+        .eq('volunteer_id', volunteer_id)
+        .in('module_id', moduleIds)
+
+      const completedIds = new Set((completions ?? []).map((c: any) => c.module_id))
+      const incomplete = requiredModules.filter((r: any) => !completedIds.has(r.module_id))
+
+      if (incomplete.length > 0) {
+        const missing = incomplete
+          .map((r: any) => (r.volunteer_training_modules as any)?.name ?? r.module_id)
+          .join(', ')
+        return NextResponse.json(
+          { error: `Complete required training before applying: ${missing}`, missing_modules: incomplete.map((r: any) => r.module_id) },
+          { status: 400 }
+        )
+      }
+    }
+  }
+
   // Check for duplicate application
   const { data: existing } = await supabase
     .from('opportunity_applications')
@@ -106,10 +136,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   // Create navigator task to review and confirm
   await supabase.from('navigator_tasks').insert({
     member_id: opp.target_member_id ?? null,
-    title: `Review volunteer application: ${opp.title}`,
-    description: `Volunteer applied to "${opp.title}". Review and confirm, or reassign. Volunteer ID: ${volunteer_id}`,
+    task_type: 'volunteer',
+    notes: `Volunteer applied to "${opp.title}". Review and confirm, or reassign. Volunteer ID: ${volunteer_id}`,
     priority: 'medium',
-    category: 'volunteer',
     status: 'pending',
     due_date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     metadata: { opportunity_id: id, application_id: application.id, volunteer_id },
