@@ -24,3 +24,21 @@ export function scoreVolunteer(c: VolunteerCandidate, r: MatchRequest): number {
 export function rankVolunteers(candidates: VolunteerCandidate[], request: MatchRequest) {
   return [...candidates].sort((a,b)=>scoreVolunteer(b,request)-scoreVolunteer(a,request))
 }
+
+// Compatibility aliases for existing imports
+export const scoreVolunteerForMember = scoreVolunteer
+
+export interface MatchResult {
+  volunteer: VolunteerCandidate
+  score: number
+}
+
+export function getTopVolunteerMatchesFromList(
+  candidates: VolunteerCandidate[],
+  request: MatchRequest,
+  limit = 10
+): MatchResult[] {
+  return rankVolunteers(candidates, request)
+    .slice(0, limit)
+    .map(candidate => ({ volunteer: candidate, score: scoreVolunteer(candidate, request) }))
+}
