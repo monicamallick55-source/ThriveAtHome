@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
       member_id: member.id, task_type: 'campaign_review',
       title: `Review campaign: "${title}"`,
       description: `Member submitted a fundraising campaign. Goal: $${goal_amount}.`,
-      priority: 'medium', status: 'open', metadata: { campaign_id: campaign.id },
+      priority: 'medium',
     })
   } catch (e) { console.error('Failed to create navigator task:', e) }
 
