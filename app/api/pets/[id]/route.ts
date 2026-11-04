@@ -1,45 +1,50 @@
-// M27 Phase 117 — edit or delete a pet profile.
+/**
+ * app/api/pets/[id]/route.ts — G7.24
+ *
+ * PATCH /api/pets/[id]  — update pet profile
+ * DELETE /api/pets/[id] — remove pet profile
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth'
-import { resolveMemberContext } from '@/lib/data/members'
-import { updatePet, deletePet } from '@/lib/data/pets'
+import { createClient } from '@/lib/supabase/server'
 
-export const runtime = 'nodejs'
-
-export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
-  const user = await getCurrentUser()
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { memberId } = await resolveMemberContext(user.id)
-  if (!memberId) return NextResponse.json({ error: 'No member linked' }, { status: 400 })
 
-  const body = await req.json().catch(() => null)
-  if (!body || typeof body !== 'object') {
-    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+  const body = await req.json()
+  const allowedFields = [
+    'name', 'species', 'breed', 'age_years',
+    'vet_name', 'vet_phone', 'emergency_contact_name', 'emergency_contact_phone',
+    'care_notes', 'photo_url',
+  ]
+  const updates: Record<string, unknown> = {}
+  for (const field of allowedFields) {
+    if (body[field] !== undefined) updates[field] = body[field]
   }
-  const b = body as Record<string, unknown>
-  const { data, error } = await updatePet(id, memberId, {
-    name: typeof b.name === 'string' ? b.name : undefined,
-    species: typeof b.species === 'string' ? b.species : undefined,
-    breed: typeof b.breed === 'string' ? b.breed : undefined,
-    birthDate: b.birth_date === null || typeof b.birth_date === 'string' ? (b.birth_date as string | null) : undefined,
-    adoptionDate:
-      b.adoption_date === null || typeof b.adoption_date === 'string' ? (b.adoption_date as string | null) : undefined,
-    colorMarkings: typeof b.color_markings === 'string' ? b.color_markings : undefined,
-    notes: typeof b.notes === 'string' ? b.notes : undefined,
-  })
-  if (error) return NextResponse.json({ error }, { status: 400 })
+
+  const { data, error } = await supabase
+    .from('member_pets')
+    .update(updates)
+    .eq('id', params.id)
+    .select()
+    .single()
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ pet: data })
 }
 
-export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
-  const user = await getCurrentUser()
+export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { memberId } = await resolveMemberContext(user.id)
-  if (!memberId) return NextResponse.json({ error: 'No member linked' }, { status: 400 })
 
-  const { error } = await deletePet(id, memberId)
-  if (error) return NextResponse.json({ error }, { status: 400 })
-  return NextResponse.json({ ok: true })
+  const { error } = await supabase
+    .from('member_pets')
+    .delete()
+    .eq('id', params.id)
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json({ deleted: true })
 }

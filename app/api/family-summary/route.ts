@@ -154,6 +154,26 @@ export async function POST(req: Request) {
   const results: Array<{ member_id: string; status: string; error?: string }> = []
 
   for (const mid of memberIds) {
+    // ── Quiet hours: 9pm–8am in the member's timezone ────────────────────────
+    if (!dry_run) {
+      const { data: memberTz } = await db
+        .from('members')
+        .select('timezone')
+        .eq('id', mid)
+        .maybeSingle()
+
+      const tz: string = (memberTz?.timezone as string | null) ?? 'America/Los_Angeles'
+      const localHour = parseInt(
+        new Date().toLocaleString('en-US', { hour: 'numeric', hour12: false, timeZone: tz }),
+        10
+      )
+      // Quiet window: 21:00–07:59 in member's local time
+      if (localHour >= 21 || localHour < 8) {
+        results.push({ member_id: mid, status: 'queued', error: 'quiet hours — will send at 8am member time' })
+        continue
+      }
+    }
+
     // Check if already sent today
     const { data: existing } = await db
       .from('family_summary_log')
