@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { GIFT_CATALOG, needsFamilyApproval } from '@/lib/gifts/catalog'
+import { GIFT_CATALOG, requiresFamilyApproval } from '@/lib/gifts/catalog'
 
 type FamilyMember = { id: string; name: string; relationship: string }
 
@@ -18,7 +18,7 @@ export default function GiftSendPage() {
   }, [])
 
   const selectedGift = GIFT_CATALOG.find(i => i.id === selectedItem)
-  const needsApproval = selectedGift ? needsFamilyApproval(selectedGift) : false
+  const needsApproval = selectedGift ? requiresFamilyApproval(selectedGift) : false
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -72,7 +72,7 @@ export default function GiftSendPage() {
                     <div className="font-medium text-sm">{item.title}</div>
                     <div className="text-xs text-gray-500 mt-0.5">{item.description}</div>
                     <div className="text-sm font-semibold text-blue-600 mt-1">{item.price_cents===0?'Free':`$${(item.price_cents/100).toFixed(2)}`}</div>
-                    {needsFamilyApproval(item)&&<div className="text-xs text-amber-600 mt-1">⚠ Needs family approval</div>}
+                    {requiresFamilyApproval(item)&&<div className="text-xs text-amber-600 mt-1">⚠ Needs family approval</div>}
                   </div>
                 </div>
               </button>
