@@ -8,7 +8,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createFraudFlag } from '@/lib/fraud/flagService'
-import type { ScamType, Severity } from '@/lib/fraud/detect'
+import type { ScamType } from '@/lib/fraud/detect'
 
 const VALID_SCAM_TYPES: ScamType[] = [
   'gift_card', 'government_impersonation', 'grandparent', 'romance',
@@ -91,6 +91,7 @@ export async function POST(req: Request) {
   const memberIdTarget: string | null = typeof body?.memberId === 'string' ? body.memberId : null
   const scamType: unknown = body?.scamType
   const excerpt: unknown = body?.excerpt
+  type Severity = 'urgent' | 'concern'
   const severity: Severity = body?.severity === 'urgent' ? 'urgent' : 'concern'
   const notes: string | null = typeof body?.notes === 'string' ? body.notes.slice(0, 500) : null
 
