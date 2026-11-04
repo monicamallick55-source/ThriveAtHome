@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
 
   // Fetch active members with phone numbers who haven't had a call today
   const today = new Date().toISOString().slice(0, 10)
-  const { data: members, error } = await db
+  const { data: members, error } = await supabaseAdmin
     .from('members')
     .select('id, first_name, phone, timezone, plan, subscription_status')
     .eq('subscription_status', 'active')
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
   const results = await Promise.allSettled(
     members.map(async (member: any) => {
       // Check if already called today
-      const { count } = await db
+      const { count } = await supabaseAdmin
         .from('call_logs')
         .select('id', { count: 'exact', head: true })
         .eq('member_id', member.id)
