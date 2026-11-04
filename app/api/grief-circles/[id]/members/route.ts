@@ -10,7 +10,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -18,14 +19,15 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   const { data, error } = await supabase
     .from('grief_circle_members')
     .select('*, members(id, first_name, last_name)')
-    .eq('circle_id', params.id)
+    .eq('circle_id', id)
     .order('created_at')
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ members: data ?? [] })
 }
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -38,7 +40,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   const { data: circle } = await supabase
     .from('grief_circles')
     .select('max_members, status')
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (!circle) return NextResponse.json({ error: 'Circle not found' }, { status: 404 })
@@ -47,7 +49,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   const { count } = await supabase
     .from('grief_circle_members')
     .select('id', { count: 'exact', head: true })
-    .eq('circle_id', params.id)
+    .eq('circle_id', id)
     .eq('status', 'active')
 
   if ((count ?? 0) >= circle.max_members) {
@@ -57,7 +59,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   const { data, error } = await supabase
     .from('grief_circle_members')
     .insert({
-      circle_id: params.id,
+      circle_id: id,
       member_id,
       invited_by: user.id,
       status: 'invited',
@@ -83,7 +85,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   return NextResponse.json({ membership: data }, { status: 201 })
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -99,7 +102,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   const { data, error } = await supabase
     .from('grief_circle_members')
     .update(updates)
-    .eq('circle_id', params.id)
+    .eq('circle_id', id)
     .eq('member_id', member_id)
     .select()
     .single()

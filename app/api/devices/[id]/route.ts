@@ -11,7 +11,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createClient()
 
   // Allow unauthenticated lookup by token (device kiosk self-identifies)
@@ -22,7 +23,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     const { data, error } = await supabase
       .from('device_tokens')
       .select('id, status, member_id, org_id, label, device_type')
-      .eq('token', params.id)
+      .eq('token', id)
       .single()
     if (error) return NextResponse.json({ error: 'Device not found' }, { status: 404 })
     return NextResponse.json({ device: data })
@@ -34,14 +35,15 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   const { data, error } = await supabase
     .from('device_tokens')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 404 })
   return NextResponse.json({ device: data })
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createClient()
   const body = await req.json()
   const { action, token, ...fields } = body
@@ -80,7 +82,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   const { data, error } = await supabase
     .from('device_tokens')
     .update(updates)
-    .eq('id', params.id)
+    .eq('id', id)
     .select()
     .single()
 

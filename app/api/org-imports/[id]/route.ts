@@ -29,7 +29,8 @@ const HV_FIELD_SUGGESTIONS: Record<string, string> = {
   'Status':           'status',
 }
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -37,14 +38,15 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   const { data, error } = await supabase
     .from('org_import_jobs')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 404 })
   return NextResponse.json({ job: data, hv_field_suggestions: HV_FIELD_SUGGESTIONS })
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -56,7 +58,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   const { data: job, error: fetchErr } = await supabase
     .from('org_import_jobs')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (fetchErr || !job) return NextResponse.json({ error: 'Job not found' }, { status: 404 })
@@ -65,7 +67,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     const { data, error } = await supabase
       .from('org_import_jobs')
       .update({ status: 'cancelled' })
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single()
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -89,7 +91,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         dry_run_result: dryRunResult,
         started_at: new Date().toISOString(),
       })
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single()
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -107,7 +109,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         status: 'running',
         started_at: new Date().toISOString(),
       })
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single()
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -123,7 +125,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   const { data, error } = await supabase
     .from('org_import_jobs')
     .update(updates)
-    .eq('id', params.id)
+    .eq('id', id)
     .select()
     .single()
 

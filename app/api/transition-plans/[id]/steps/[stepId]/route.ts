@@ -10,8 +10,9 @@ import { createClient } from '@/lib/supabase/server'
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string; stepId: string } }
+  { params }: { params: Promise<{ id: string; stepId: string }> }
 ) {
+  const { id, stepId } = await params
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -30,8 +31,8 @@ export async function PATCH(
   const { data, error } = await supabase
     .from('transition_plan_steps')
     .update(updates)
-    .eq('id', params.stepId)
-    .eq('transition_plan_id', params.id)
+    .eq('id', stepId)
+    .eq('transition_plan_id', id)
     .select()
     .single()
 
@@ -41,14 +42,14 @@ export async function PATCH(
   const { data: allSteps } = await supabase
     .from('transition_plan_steps')
     .select('status')
-    .eq('transition_plan_id', params.id)
+    .eq('transition_plan_id', id)
 
   const allDone = (allSteps ?? []).every((s: { status: string }) => s.status === 'completed' || s.status === 'skipped')
   if (allDone) {
     await supabase
       .from('transition_plans')
       .update({ status: 'completed' })
-      .eq('id', params.id)
+      .eq('id', id)
   }
 
   return NextResponse.json({ step: data, plan_completed: allDone })

@@ -9,7 +9,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { goodsProvider } from '@/lib/gifts/provider'
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -17,14 +18,15 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   const { data: order, error } = await supabase
     .from('gift_orders')
     .select(`*, to_family_member:family_members(id,name,email)`)
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (error || !order) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   return NextResponse.json({ order })
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -35,7 +37,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   const { data: order, error: fetchErr } = await supabase
     .from('gift_orders')
     .select(`*, to_family_member:family_members(id,name,email,member_id)`)
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (fetchErr || !order) return NextResponse.json({ error: 'Not found' }, { status: 404 })
@@ -76,7 +78,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         tracking_number: result.trackingNumber ?? null,
         carrier: result.carrier ?? null,
       })
-      .eq('id', params.id)
+      .eq('id', id)
 
     return NextResponse.json({ success: true })
   }
@@ -89,7 +91,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     await supabase
       .from('gift_orders')
       .update({ status: 'cancelled' })
-      .eq('id', params.id)
+      .eq('id', id)
 
     return NextResponse.json({ success: true })
   }
@@ -98,7 +100,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     await supabase
       .from('gift_orders')
       .update({ status: 'fulfilled', delivered_at: new Date().toISOString() })
-      .eq('id', params.id)
+      .eq('id', id)
 
     return NextResponse.json({ success: true })
   }

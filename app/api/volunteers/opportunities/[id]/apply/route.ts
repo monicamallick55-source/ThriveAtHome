@@ -11,7 +11,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -27,7 +28,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   const { data: opp } = await supabase
     .from('opportunities')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (!opp) return NextResponse.json({ error: 'Opportunity not found' }, { status: 404 })
@@ -71,7 +72,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   const { data: existing } = await supabase
     .from('opportunity_applications')
     .select('id, status')
-    .eq('opportunity_id', params.id)
+    .eq('opportunity_id', id)
     .eq('volunteer_id', volunteer_id)
     .single()
 
@@ -83,7 +84,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   const { data: application, error } = await supabase
     .from('opportunity_applications')
     .insert({
-      opportunity_id: params.id,
+      opportunity_id: id,
       volunteer_id,
       notes: notes ?? null,
       status: 'pending',
@@ -100,7 +101,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   await supabase
     .from('opportunities')
     .update({ spots_filled: newFilled, status: newStatus })
-    .eq('id', params.id)
+    .eq('id', id)
 
   // Create navigator task to review and confirm
   await supabase.from('navigator_tasks').insert({
@@ -111,7 +112,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     category: 'volunteer',
     status: 'pending',
     due_date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    metadata: { opportunity_id: params.id, application_id: application.id, volunteer_id },
+    metadata: { opportunity_id: id, application_id: application.id, volunteer_id },
   }).then(({ error: _e }: { error: unknown }) => void _e)
 
   return NextResponse.json({ application }, { status: 201 })
