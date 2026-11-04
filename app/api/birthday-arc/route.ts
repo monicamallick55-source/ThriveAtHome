@@ -137,7 +137,7 @@ export async function POST(req: Request) {
     body: message.trim(),
     severity: 'info',
     member_id,
-  }).catch(() => null)
+  }).then(({error: _e}) => { if (_e) console.warn(_e) })
 
   // Award the 'welcome' achievement if it triggers birthday engagement — no-op if already awarded
   return NextResponse.json({ message: msg }, { status: 201 })

@@ -161,7 +161,7 @@ export async function POST(req: Request) {
     priority: 'high',
     description: `Facility move plan "${title}" created. 18-step, 6-week checklist generated.`,
     metadata: { plan_id: plan.id, target_date: targetDate },
-  }).catch(() => null)
+  }).then(({error: _e}) => { if (_e) console.warn(_e) })
 
   return NextResponse.json({ ok: true, planId: plan.id, stepsCreated: steps.length }, { status: 201 })
 }

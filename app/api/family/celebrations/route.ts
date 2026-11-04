@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
       priority: 'medium',
       description: `${tier} celebration: ${occasion.replace('_',' ')} on ${occasion_date}.${notes_for_team ? ' Notes: ' + notes_for_team : ''}`,
       due_date: dueDate,
-    }).catch(() => {})
+    }).then(({error: _e}) => { if (_e) console.warn(_e) })
   }
 
   if (tier === 'digital') {
