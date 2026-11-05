@@ -31,7 +31,7 @@ const ROLE_PORTAL_MAP: Array<{ key: keyof typeof ACCOUNTS; portal: string; label
   { key: 'agency',       portal: '/dashboard'  // /agency-admin — not yet in getAllRolesForAuth,        label: 'Agency Admin' },
   { key: 'employer',     portal: '/employer-admin',      label: 'Employer Admin' },
   { key: 'network',      portal: '/network-admin',       label: 'Network Admin' },
-  { key: 'seniorcenter', portal: '/senior-center-admin', label: 'Senior Center Admin' },
+  { key: 'seniorcenter', portal: '/dashboard'  /* /senior-center-admin not yet in getAllRolesForAuth */, label: 'Senior Center Admin' },
   { key: 'aaa',          portal: '/aaa-admin',           label: 'AAA Admin' },
   { key: 'orgadmin',     portal: '/org-admin',           label: 'Org Admin' },
   { key: 'vsoadmin',     portal: '/vso-admin',           label: 'VSO Admin' },
