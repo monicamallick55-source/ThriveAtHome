@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
   if (!fm) return NextResponse.json({ error: 'Family member not found' }, { status: 404 })
 
   const totalCents = item.price_cents * quantity
-  const requiresApproval = needsFamilyApproval(item)
+  const requiresApproval = requiresFamilyApproval(item)
   const status = requiresApproval ? 'needs_family_approval' : item.price_cents === 0 ? 'paid' : 'pending'
 
   // Create order row
