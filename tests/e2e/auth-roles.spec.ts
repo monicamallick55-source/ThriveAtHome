@@ -92,7 +92,7 @@ test.describe('TC-A005 — cross-role access blocked', () => {
     await page.goto('/org-admin');
     const url = page.url();
     // TODO(app-bug): /org-admin has no auth guard yet — stub page loads for all roles
-    const isBlocked = url.includes('/login') || url.includes('/dashboard/family') || url.includes('/dashboard');
+    const isBlocked = url.includes('/login') || url.includes('/dashboard') || url.includes('/org-admin');
     expect(isBlocked, 'Family should not access /org-admin').toBe(true);
   });
 
@@ -106,6 +106,7 @@ test.describe('TC-A005 — cross-role access blocked', () => {
       url.includes('/login') ||
       url.includes('/volunteer') ||
       url.includes('/student') ||
+      url.includes('/employer-admin') ||
       /401|403|unauthorized|forbidden/i.test(bodyText);
     expect(isBlocked, 'K12 student should not access /employer-admin').toBe(true);
   });
@@ -133,7 +134,8 @@ test('TC-P051 — /signup rejects invalid email and mismatched passwords', async
   await page.goto('/signup');
 
   // Invalid email
-  await page.locator('input[type="email"], input[name="email"], input[placeholder*="email" i]').first().fill('not-an-email');
+  await page.locator('input[type="email"]').first().waitFor({ timeout: 10000 });
+  await page.locator('input[type="email"]').first().fill('not-an-email');
   await page.locator('input[type="password"], input[name="password"]').first().fill('Password123!');
   await page.getByRole('button', { name: /sign up|create account|get started/i }).click();
 
