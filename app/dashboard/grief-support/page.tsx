@@ -12,12 +12,12 @@ export default async function GriefSupportPage() {
   if (!user) redirect('/login')
 
   const { data: fm } = await supabase
-    .from('family_members')
-    .select('id, member_id, role')
+    .from('members')
+    .select('id, plan_tier')
     .eq('supabase_auth_id', user.id)
     .maybeSingle()
 
-  if (!fm || !fm.member_id) redirect('/dashboard')
+  if (!fm) redirect('/dashboard')
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const admin = createAdminClient() as any
@@ -34,18 +34,18 @@ export default async function GriefSupportPage() {
   const { data: connections } = await admin
     .from('advisor_connections')
     .select('advisor_id, status')
-    .eq('member_id', fm.member_id)
+    .eq('member_id', fm.id)
 
   // Load active transition plans
   const { data: plans } = await admin
     .from('transition_plans')
     .select('id, title, status, family_can_view, target_move_date, facility_name')
-    .eq('member_id', fm.member_id)
+    .eq('member_id', fm.id)
     .eq('status', 'active')
 
   return (
     <GriefSupportClient
-      memberId={fm.member_id as string}
+      memberId={fm.id as string}
       advisors={advisors ?? []}
       connections={connections ?? []}
       transitionPlans={plans ?? []}
