@@ -144,7 +144,7 @@ test('TC-P051 — /signup rejects invalid email and mismatched passwords', async
   await page.locator('input[type="email"]').first().waitFor({ timeout: 10000 });
   await page.locator('input[type="email"]').first().fill('not-an-email');
   await page.locator('input[type="password"], input[name="password"]').first().fill('Password123!');
-  await page.getByRole('button', { name: /sign up|create account|get started/i }).click();
+  await page.getByRole('button', { name: /continue to payment|sign up|create account/i }).click();
 
   const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
   const hasError = /invalid|enter.*email|valid email/i.test(bodyText) ||
