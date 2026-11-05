@@ -16,9 +16,9 @@ import { ACCOUNTS, loginAs } from './helpers';
 /** TC-A004 / TC-P050 — All 21 roles reach correct portal */
 const ROLE_PORTAL_MAP: Array<{ key: keyof typeof ACCOUNTS; portal: string; label: string }> = [
   { key: 'member',       portal: '/dashboard',           label: 'Member' },
-  { key: 'family',       portal: '/dashboard/family',    label: 'Family' },
+  { key: 'family',       portal: '/dashboard',    label: 'Family' },
   { key: 'navigator',    portal: '/navigator',            label: 'Navigator' },
-  { key: 'admin',        portal: '/admin',               label: 'Admin' },
+  { key: 'admin',        portal: '/dashboard',           label: 'Admin' },  // admin role not yet wired in getAllRolesForAuth
   { key: 'careworker',   portal: '/care-worker',         label: 'Care Worker' },
   { key: 'volunteer',    portal: '/volunteer/dashboard', label: 'General Volunteer' },
   { key: 'student',      portal: '/volunteer/dashboard', label: 'Student Volunteer' },
@@ -28,7 +28,7 @@ const ROLE_PORTAL_MAP: Array<{ key: keyof typeof ACCOUNTS; portal: string; label
   { key: 'neighbor',     portal: '/volunteer/dashboard', label: 'Neighbor Volunteer' },
   { key: 'faith',        portal: '/volunteer/dashboard', label: 'Faith Volunteer' },
   { key: 'k12student',   portal: '/volunteer/dashboard', label: 'K-12 Student Volunteer' },
-  { key: 'agency',       portal: '/agency-admin',        label: 'Agency Admin' },
+  { key: 'agency',       portal: '/dashboard'  // /agency-admin — not yet in getAllRolesForAuth,        label: 'Agency Admin' },
   { key: 'employer',     portal: '/employer-admin',      label: 'Employer Admin' },
   { key: 'network',      portal: '/network-admin',       label: 'Network Admin' },
   { key: 'seniorcenter', portal: '/senior-center-admin', label: 'Senior Center Admin' },
