@@ -39,8 +39,7 @@ export const ACCOUNTS = {
 
 /**
  * Login via the /login form and wait for redirect.
- * Always uses BASE_URL so the session cookie is on the same origin
- * as subsequent page.goto() calls.
+ * Waits for networkidle after login to ensure Supabase auth cookies are fully set.
  */
 export async function loginAs(
   page: Page,
@@ -48,6 +47,7 @@ export async function loginAs(
   expectedPath?: string,
 ): Promise<void> {
   await page.goto(`${BASE_URL}/login`);
+  await page.waitForLoadState('networkidle');
   await page.locator('input[type="email"], input[name="email"], #email').first().fill(account.email);
   await page.locator('input[type="password"], input[name="password"], #password').first().fill(account.password);
   await page.getByRole('button', { name: /sign in|log in/i }).click();
@@ -57,8 +57,8 @@ export async function loginAs(
   } else {
     await page.waitForFunction(() => !window.location.pathname.startsWith('/login'), { timeout: 15_000 });
   }
-  // Extra settle time for Supabase to write auth cookies
-  await page.waitForTimeout(500);
+  // Wait for network to settle so Supabase auth cookies are fully written
+  await page.waitForLoadState('networkidle');
 }
 
 /**
