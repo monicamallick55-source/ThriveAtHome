@@ -137,6 +137,8 @@ test('TC-P051 — /signup rejects invalid email and mismatched passwords', async
   const page = await ctx.newPage();
   await page.goto('/signup');
 
+  // Step 1: select a plan (signup is multi-step)
+  await page.getByRole('button', { name: /continue with|get started|basics/i }).first().click();
   // Invalid email
   await page.locator('input[type="email"]').first().waitFor({ timeout: 10000 });
   await page.locator('input[type="email"]').first().fill('not-an-email');
