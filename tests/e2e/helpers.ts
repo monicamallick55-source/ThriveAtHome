@@ -39,7 +39,7 @@ export const ACCOUNTS = {
 
 /**
  * Login via the /login form and wait for redirect.
- * Uses storageState caching pattern when accounts match.
+ * Uses the password input specifically (not the show/hide toggle button).
  */
 export async function loginAs(
   page: Page,
@@ -47,36 +47,32 @@ export async function loginAs(
   expectedPath?: string,
 ): Promise<void> {
   await page.goto('/login');
-  await page.getByLabel(/email/i).fill(account.email);
-  await page.getByLabel(/password/i).fill(account.password);
+  await page.locator('input[type="email"], input[name="email"], #email').first().fill(account.email);
+  await page.locator('input[type="password"], input[name="password"], #password').first().fill(account.password);
   await page.getByRole('button', { name: /sign in|log in/i }).click();
 
   if (expectedPath) {
     await page.waitForURL(`**${expectedPath}**`, { timeout: 15_000 });
   } else {
-    // Wait for navigation away from /login
     await page.waitForFunction(() => !window.location.pathname.startsWith('/login'), { timeout: 15_000 });
   }
 }
 
 /**
  * Assert page loads (200) and no hard console errors.
- * Returns the response status code.
  */
 export async function assertPageLoads(page: Page, path: string): Promise<number> {
   const [response] = await Promise.all([
-    page.waitForResponse((r) => r.url().includes(path.replace('/', '')) || r.status() < 400),
+    page.waitForResponse((r) => r.url().includes(path.replace('/', '').split('/')[0]) || r.status() < 400),
     page.goto(path),
   ]);
   const status = response?.status() ?? 200;
-  // Allow 200 and meaningful redirects (3xx that resolve to real pages)
   expect([200, 301, 302, 307, 308].includes(status) || status === 404).toBeTruthy();
   return status;
 }
 
 /**
  * Assert no horizontal scroll at a given viewport width.
- * TC-P071, TC-PERF002
  */
 export async function assertNoHorizontalScroll(page: Page): Promise<void> {
   const hasHScroll = await page.evaluate(
