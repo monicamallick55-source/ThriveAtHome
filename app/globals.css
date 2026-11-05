@@ -40,7 +40,7 @@
   --color-mood-low:          #9B2D1A;
 
   /* ─── Typography ──────────────────────────────────────── */
-  --font-display:            var(--font-cormorant), Georgia, serif;
+  --font-display:            'Cormorant Garamond', Georgia, serif;
   --font-body:               var(--font-dm-sans), system-ui, sans-serif;
   --font-mono:               var(--font-dm-mono), monospace;
 
