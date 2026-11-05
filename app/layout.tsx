@@ -33,6 +33,16 @@ const dmMono = DM_Mono({
 export const metadata: Metadata = {
   title: 'ThriveAtHome',
   description: 'AI-powered senior care coordination for families.',
+  openGraph: {
+    title: 'ThriveAtHome — Where Seniors Thrive Together',
+    description: 'AI-powered senior care coordination for families.',
+    type: 'website',
+    siteName: 'ThriveAtHome',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'ThriveAtHome — Where Seniors Thrive Together',
+  },
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

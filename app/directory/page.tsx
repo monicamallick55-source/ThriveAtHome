@@ -29,7 +29,10 @@ export default async function DirectoryPage({ searchParams }: { searchParams: Se
   if (state) query = query.eq('state', state.toUpperCase())
   if (q) query = query.ilike('name', `%${q}%`)
 
-  const { data: listings } = await query
+  let listings: any[] = []
+  try {
+    const { data, error } = await query
+  } catch { /* table may not exist yet */ }
 
   const categoryObj = DIRECTORY_CATEGORIES.find(c => c.slug === category)
 

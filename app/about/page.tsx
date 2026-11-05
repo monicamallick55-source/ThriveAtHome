@@ -30,7 +30,7 @@ const VALUES = [
 
 export default function AboutPage() {
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-cream)' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-cream)', overflowX: 'hidden' }}>
       {/* Nav */}
 
       {/* Hero */}

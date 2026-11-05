@@ -265,10 +265,10 @@ export default function HomePage() {
                   name: 'Thrive Complete', price: '$99', period: '/mo', highlight: true,
                   features: ['Everything in Connect', 'Dedicated navigator (2 hr/mo)', 'Grief & transition support', 'Services marketplace', 'Celebrations & gift sending', 'Family Events Calendar'],
                 },
-                {
+                ...(process.env.NEXT_PUBLIC_PREMIER_LIVE === 'true' ? [{
                   name: 'Thrive Premier', price: '$199', period: '/mo',
                   features: ['Everything in Complete', 'Priority navigator (8 hr/mo)', 'Bi-weekly priority Buddy', 'Thrive Device included', 'Concierge line', 'Medicare Advantage eligible'],
-                },
+                }] : []),
               ].map(plan => (
                 <div key={plan.name} style={{
                   ...card,
