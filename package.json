@@ -6,7 +6,16 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "./scripts/run-tests.sh all",
+    "test:env": "npx tsx scripts/check-env.ts",
+    "test:db": "npx tsx tests/db/run-assertions.ts",
+    "test:api": "npx tsx tests/api/fhir.test.ts && npx tsx tests/api/cron.test.ts",
+    "test:e2e": "npx playwright test",
+    "test:e2e:quick": "npx playwright test tests/e2e/public-routes.spec.ts tests/e2e/feature-flags.spec.ts",
+    "test:e2e:member": "npx playwright test tests/e2e/member-pages.spec.ts tests/e2e/family-portal.spec.ts tests/e2e/navigator-portal.spec.ts",
+    "test:e2e:auth": "npx playwright test tests/e2e/auth-roles.spec.ts",
+    "test:e2e:report": "npx playwright show-report"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.128.0",
@@ -38,6 +47,7 @@
     "eslint-config-next": "16.2.6",
     "supabase": "^2.122.1",
     "tailwindcss": "^4",
+    "tsx": "^4.19.1",
     "typescript": "^5"
   }
 }

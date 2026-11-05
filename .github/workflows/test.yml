@@ -1,0 +1,210 @@
+name: ThriveAtHome — E2E & Integration Tests
+
+# ─── Triggers ────────────────────────────────────────────────────────────────
+on:
+  # Run after every push to main (Vercel deploys on push; this CI runs after)
+  push:
+    branches: [main]
+  # Run on pull requests to main
+  pull_request:
+    branches: [main]
+  # Allow manual trigger from GitHub Actions UI
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: 'Test suite to run (all | env | db | api | e2e | e2e:quick)'
+        required: false
+        default: 'all'
+
+# ─── Permissions ─────────────────────────────────────────────────────────────
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+# ─── Jobs ─────────────────────────────────────────────────────────────────────
+jobs:
+  # ── 1. Environment Variable Check ──────────────────────────────────────────
+  env-check:
+    name: 'TC-INF005 — Env Var Check'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check required env vars
+        env:
+          # Retell
+          RETELL_API_KEY: ${{ secrets.RETELL_API_KEY }}
+          RETELL_AGENT_ID: ${{ secrets.RETELL_AGENT_ID }}
+          RETELL_ROSA_AGENT_ID: ${{ secrets.RETELL_ROSA_AGENT_ID }}
+          RETELL_JOY_AGENT_ID: ${{ secrets.RETELL_JOY_AGENT_ID }}
+          RETELL_GRACE_AGENT_ID: ${{ secrets.RETELL_GRACE_AGENT_ID }}
+          RETELL_HOPE_AGENT_ID: ${{ secrets.RETELL_HOPE_AGENT_ID }}
+          RETELL_CLAIRE_AGENT_ID: ${{ secrets.RETELL_CLAIRE_AGENT_ID }}
+          RETELL_SAM_AGENT_ID: ${{ secrets.RETELL_SAM_AGENT_ID }}
+          RETELL_MORGAN_AGENT_ID: ${{ secrets.RETELL_MORGAN_AGENT_ID }}
+          RETELL_NOVA_AGENT_ID: ${{ secrets.RETELL_NOVA_AGENT_ID }}
+          RETELL_ALEX_AGENT_ID: ${{ secrets.RETELL_ALEX_AGENT_ID }}
+          RETELL_QUINN_AGENT_ID: ${{ secrets.RETELL_QUINN_AGENT_ID }}
+          RETELL_JORDAN_AGENT_ID: ${{ secrets.RETELL_JORDAN_AGENT_ID }}
+          # Twilio
+          TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+          TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+          TWILIO_PHONE_NUMBER: ${{ secrets.TWILIO_PHONE_NUMBER }}
+          TWILIO_INBOUND_NUMBER: ${{ secrets.TWILIO_INBOUND_NUMBER }}
+          # Anthropic
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Stripe
+          NEXT_PUBLIC_BASIC_PRICE_ID: ${{ secrets.NEXT_PUBLIC_BASIC_PRICE_ID }}
+          NEXT_PUBLIC_COMPLETE_PRICE_ID: ${{ secrets.NEXT_PUBLIC_COMPLETE_PRICE_ID }}
+          NEXT_PUBLIC_BASIC_ANNUAL_PRICE_ID: ${{ secrets.NEXT_PUBLIC_BASIC_ANNUAL_PRICE_ID }}
+          NEXT_PUBLIC_COMPLETE_ANNUAL_PRICE_ID: ${{ secrets.NEXT_PUBLIC_COMPLETE_ANNUAL_PRICE_ID }}
+          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          # Supabase
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          # Other
+          FHIR_API_KEY: ${{ secrets.FHIR_API_KEY }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+        run: npx tsx scripts/check-env.ts
+
+  # ── 2. Database Assertions ──────────────────────────────────────────────────
+  db-assertions:
+    name: 'DB Assertions — TC-INF002/M054/VOL061/REG001/PD001'
+    runs-on: ubuntu-latest
+    needs: env-check
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Run DB assertions
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: npx tsx tests/db/run-assertions.ts
+
+  # ── 3. API Tests ────────────────────────────────────────────────────────────
+  api-tests:
+    name: 'API Tests — TC-FH001/V010/INF003/CH003'
+    runs-on: ubuntu-latest
+    needs: env-check
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: FHIR R4 tests
+        env:
+          BASE_URL: https://thrive-at-home-pied.vercel.app
+          FHIR_API_KEY: ${{ secrets.FHIR_API_KEY }}
+        run: npx tsx tests/api/fhir.test.ts
+      - name: Cron endpoint tests
+        env:
+          BASE_URL: https://thrive-at-home-pied.vercel.app
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: npx tsx tests/api/cron.test.ts
+
+  # ── 4a. E2E — Public Routes & Feature Flags (no auth) ──────────────────────
+  e2e-public:
+    name: 'E2E — Public Routes & Feature Flags'
+    runs-on: ubuntu-latest
+    needs: [db-assertions, api-tests]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
+      - name: Run public route tests
+        env:
+          BASE_URL: https://thrive-at-home-pied.vercel.app
+        run: npx playwright test tests/e2e/public-routes.spec.ts --reporter=list,html
+      - name: Run feature flag tests
+        env:
+          BASE_URL: https://thrive-at-home-pied.vercel.app
+          # Need member accounts for some feature-flag tests
+          TEST_MEMBER_PASSWORD: ${{ secrets.TEST_MEMBER_PASSWORD }}
+        run: npx playwright test tests/e2e/feature-flags.spec.ts --reporter=list
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-public
+          path: playwright-report/
+          retention-days: 7
+
+  # ── 4b. E2E — Auth & Role Tests ─────────────────────────────────────────────
+  e2e-auth:
+    name: 'E2E — Auth & 21 Role Login Tests'
+    runs-on: ubuntu-latest
+    needs: [db-assertions]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
+      - name: Run auth/role tests
+        env:
+          BASE_URL: https://thrive-at-home-pied.vercel.app
+        run: |
+          npx playwright test \
+            tests/e2e/auth-roles.spec.ts \
+            tests/e2e/billing.spec.ts \
+            --reporter=list
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-auth
+          path: playwright-report/
+          retention-days: 7
+
+  # ── 4c. E2E — Member Dashboard Pages ───────────────────────────────────────
+  e2e-member:
+    name: 'E2E — Member Dashboard (TC-M001–M034)'
+    runs-on: ubuntu-latest
+    needs: [db-assertions]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
+      - name: Run member page tests
+        env:
+          BASE_URL: https://thrive-at-home-pied.vercel.app
+        run: |
+          npx playwright test \
+            tests/e2e/member-pages.spec.ts \
+            tests/e2e/family-portal.spec.ts \
+            tests/e2e/navigator-portal.spec.ts \
+            --reporter=list
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-member
+          path: playwright-report/
+          retention-days: 7
