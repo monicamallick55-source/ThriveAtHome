@@ -3,7 +3,7 @@
  */
 import { Page, expect } from '@playwright/test';
 
-export const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || process.env.BASE_URL || 'https://thrive-at-home-pied.vercel.app';
+export const BASE_URL = process.env.BASE_URL || 'https://thrive-at-home-pied.vercel.app';
 
 /** Seed test accounts — passwords must match what's seeded in Supabase */
 export const ACCOUNTS = {
@@ -39,30 +39,31 @@ export const ACCOUNTS = {
 
 /**
  * Login via the /login form and wait for redirect.
- * Waits for networkidle after login to ensure Supabase auth cookies are fully set.
+ * Uses the password input specifically (not the show/hide toggle button).
  */
 export async function loginAs(
   page: Page,
   account: { email: string; password: string },
   expectedPath?: string,
 ): Promise<void> {
-  await page.goto(`${BASE_URL}/login`);
-  await page.waitForLoadState('networkidle');
+  await page.goto('/login');
+  // Use the email input field
   await page.locator('input[type="email"], input[name="email"], #email').first().fill(account.email);
+  // Use the password input field — NOT the show/hide toggle button
   await page.locator('input[type="password"], input[name="password"], #password').first().fill(account.password);
   await page.getByRole('button', { name: /sign in|log in/i }).click();
 
   if (expectedPath) {
     await page.waitForURL(`**${expectedPath}**`, { timeout: 15_000 });
   } else {
+    // Wait for navigation away from /login
     await page.waitForFunction(() => !window.location.pathname.startsWith('/login'), { timeout: 15_000 });
   }
-  // Wait for network to settle so Supabase auth cookies are fully written
-  await page.waitForLoadState('networkidle');
 }
 
 /**
  * Assert page loads (200) and no hard console errors.
+ * Returns the response status code.
  */
 export async function assertPageLoads(page: Page, path: string): Promise<number> {
   const [response] = await Promise.all([
@@ -76,6 +77,7 @@ export async function assertPageLoads(page: Page, path: string): Promise<number>
 
 /**
  * Assert no horizontal scroll at a given viewport width.
+ * TC-P071, TC-PERF002
  */
 export async function assertNoHorizontalScroll(page: Page): Promise<void> {
   const hasHScroll = await page.evaluate(

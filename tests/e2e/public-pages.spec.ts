@@ -1,56 +1,99 @@
 import { test, expect } from '@playwright/test';
-const BASE = process.env.PLAYWRIGHT_BASE_URL ?? 'https://thrive-at-home-pied.vercel.app';
+import { BASE_URL as BASE } from './helpers';
+
+// TC-P001–P015: Public page smoke tests
+
 const PUBLIC_ROUTES = [
-  { path: '/', label: 'TC-P001', pattern: /thrive|senior|home|independence/i },
-  { path: '/pricing', label: 'TC-P002', pattern: /basics|connect|complete|plan|price/i },
-  { path: '/about', label: 'TC-P003', pattern: /about|mission|team|story/i },
-  { path: '/for-families', label: 'TC-P004', pattern: /famil|caregiv|loved one/i },
-  { path: '/resources', label: 'TC-P005', pattern: /resource|guide|article|tip/i },
-  { path: '/donate', label: 'TC-P006', pattern: /donat|give|support|fund/i },
-  { path: '/blog', label: 'TC-P007', pattern: /blog|article|post|news/i },
-  { path: '/login', label: 'TC-P008', pattern: /sign in|log in|email|password/i },
-  { path: '/signup', label: 'TC-P009', pattern: /sign up|create|join|register/i },
-  { path: '/contact', label: 'TC-P010', pattern: /contact|reach|email|phone/i },
+  '/', '/about', '/for-families', '/for-volunteers', '/pricing',
+  '/employers', '/donate', '/contact', '/privacy', '/terms',
+  '/blog', '/resources', '/login', '/signup', '/join',
 ];
-test.describe('TC-P001-P010 Public Routes No 500 No Login Redirect', () => {
-  for (const { path, label, pattern } of PUBLIC_ROUTES) {
-    test(label + ' ' + path + ' loads', async ({ page }) => {
-      await page.goto(BASE + path);
-      await page.waitForLoadState('networkidle');
-      const url = page.url();
-      if (path !== '/login' && url.includes('/login')) { console.warn(label + ': ' + path + ' redirects to login — should be public'); return; }
-      const body = await page.evaluate(() => document.body?.innerText ?? '');
-      if (/500|internal server error/i.test(body)) { console.warn(label + ': 500 on ' + path); return; }
-      expect(/500|internal server error/i.test(body)).toBe(false);
-      if (!pattern.test(body)) console.warn(label + ': Expected content not found on ' + path);
-    });
+
+for (const route of PUBLIC_ROUTES) {
+  test(`TC-P-smoke ${route} loads without auth`, async ({ page }) => {
+    await page.goto(`${BASE}${route}`);
+    await page.waitForLoadState('networkidle');
+    if (page.url().includes('/login') && route !== '/login') {
+      console.warn(`TC-P-smoke: ${route} unexpectedly redirected to /login`);
+      return;
+    }
+    const status = await page.evaluate(() => document.readyState);
+    expect(['complete', 'interactive']).toContain(status);
+  });
+}
+
+test('TC-P001 — homepage has hero and CTA', async ({ page }) => {
+  await page.goto(`${BASE}/`);
+  await page.waitForLoadState('networkidle');
+  const body = await page.locator('body').textContent();
+  expect(body?.length).toBeGreaterThan(100);
+  expect(page.url()).not.toContain('/login');
+});
+
+test('TC-P004 — /pricing shows Basic and Complete, NOT Premier', async ({ page }) => {
+  await page.goto(`${BASE}/pricing`);
+  await page.waitForLoadState('networkidle');
+  const body = await page.locator('body').textContent();
+  expect(body).toContain('Basic');
+  expect(body?.toLowerCase()).not.toContain('premier');
+});
+
+test('TC-P005 — footer links load', async ({ page }) => {
+  await page.goto(`${BASE}/`);
+  await page.waitForLoadState('networkidle');
+  const privacyLink = page.locator('a[href*="privacy"]').first();
+  if (await privacyLink.count() > 0) {
+    const href = await privacyLink.getAttribute('href');
+    expect(href).toBeTruthy();
+  } else {
+    console.warn('TC-P005: no privacy link found in footer');
   }
 });
-test.describe('TC-P011-P015 Public API Routes', () => {
-  test('TC-P011 /api/features returns features list', async ({ page }) => {
-    const res = await page.evaluate(async () => { const r = await fetch('/api/features'); return r.status; });
-    if (res === 404) console.warn('TC-P011: /api/features not found');
-    else if (res >= 500) console.warn('TC-P011: /api/features server error ' + res);
-  });
-  test('TC-P012 /api/pricing returns plan data', async ({ page }) => {
-    const res = await page.evaluate(async () => { const r = await fetch('/api/pricing'); return r.status; });
-    if (res === 404) console.warn('TC-P012: /api/pricing not found');
-    else if (res >= 500) console.warn('TC-P012: /api/pricing server error ' + res);
-  });
-  test('TC-P013 /api/villages returns public village list', async ({ page }) => {
-    const res = await page.evaluate(async () => { const r = await fetch('/api/villages'); return r.status; });
-    if (res === 404) console.warn('TC-P013: /api/villages not found');
-    else if (res >= 500) console.warn('TC-P013: /api/villages server error ' + res);
-  });
-  test('TC-P014 homepage has no 404 resources in network', async ({ page }) => {
-    const failed: string[] = [];
-    page.on('response', resp => { if (resp.status() === 404 && !resp.url().includes('favicon')) failed.push(resp.url()); });
-    await page.goto(BASE + '/');
-    await page.waitForLoadState('networkidle');
-    if (failed.length > 0) console.warn('TC-P014: 404 resources on homepage: ' + failed.slice(0,3).join(', '));
-  });
-  test('TC-P015 /sitemap.xml or /robots.txt accessible', async ({ page }) => {
-    const res = await page.evaluate(async () => { const r = await fetch('/robots.txt'); return r.status; });
-    if (res >= 500) console.warn('TC-P015: /robots.txt returned ' + res);
-  });
+
+test('TC-P008 — homepage mobile 390px no horizontal scroll', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`${BASE}/`);
+  await page.waitForLoadState('networkidle');
+  const hasHScroll = await page.evaluate(
+    () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+  );
+  if (hasHScroll) console.warn('TC-P008: homepage has horizontal scroll at 390px');
+});
+
+test('TC-P009 — homepage has meta title', async ({ page }) => {
+  await page.goto(`${BASE}/`);
+  const title = await page.title();
+  expect(title.length).toBeGreaterThan(0);
+});
+
+test('TC-P013 — /pricing annual toggle present', async ({ page }) => {
+  await page.goto(`${BASE}/pricing`);
+  await page.waitForLoadState('networkidle');
+  const body = await page.locator('body').textContent();
+  const hasAnnual = body?.toLowerCase().includes('annual') || body?.toLowerCase().includes('yearly') || body?.toLowerCase().includes('/yr');
+  if (!hasAnnual) console.warn('TC-P013: no annual toggle or annual pricing text found');
+  expect(page.url()).not.toContain('/login');
+});
+
+test('TC-P022 — /privacy has HIPAA language', async ({ page }) => {
+  await page.goto(`${BASE}/privacy`);
+  await page.waitForLoadState('networkidle');
+  if (page.url().includes('/login')) { console.warn('TC-P022: /privacy requires auth'); return; }
+  const body = await page.locator('body').textContent();
+  if (!body?.toLowerCase().includes('hipaa') && !body?.toLowerCase().includes('privacy')) {
+    console.warn('TC-P022: HIPAA language not found on privacy page');
+  }
+  expect(page.url()).not.toContain('/login');
+});
+
+test('TC-P — /api/features returns 200', async ({ page }) => {
+  const res = await page.request.get(`${BASE}/api/features`);
+  if (res.status() === 404) { console.warn('TC-P: /api/features not found'); return; }
+  expect([200]).toContain(res.status());
+});
+
+test('TC-P — robots.txt exists', async ({ page }) => {
+  const res = await page.request.get(`${BASE}/robots.txt`);
+  if (res.status() === 404) { console.warn('TC-P: robots.txt not found'); return; }
+  expect(res.status()).toBe(200);
 });

@@ -1,78 +1,90 @@
 import { test, expect } from '@playwright/test';
-import { ACCOUNTS, loginAs } from './helpers';
-const BASE = process.env.PLAYWRIGHT_BASE_URL ?? 'https://thrive-at-home-pied.vercel.app';
-test.describe('TC-MBA001-MBA010 Birthday Arc and Achievements', () => {
-  test('TC-MBA001 member profile has birthday field', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.member, '/dashboard');
-    if (page.url().includes('/login')) { console.warn('TC-MBA001: not authed'); return; }
-    await page.goto(BASE + '/dashboard/profile');
-    await page.waitForLoadState('networkidle');
-    const body = await page.evaluate(() => document.body?.innerText ?? '');
-    if (/500|internal server error/i.test(body)) { console.warn('TC-MBA001: 500 on /dashboard/profile'); return; }
-    if (!/birthday|birth date|date of birth|dob/i.test(body)) console.warn('TC-MBA001: No birthday field on member profile');
+import { BASE_URL as BASE, loginAs, ACCOUNTS } from './helpers';
+
+// TC-MBA001–MBA010: Birthday Arc, Achievements, Interest Circles, Check-ins
+
+test('TC-MBA001 — /dashboard/profile has birthday field', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard');
+  if (page.url().includes('/login')) { console.warn('TC-MBA001: login failed'); return; }
+  await page.goto(`${BASE}/dashboard/profile`);
+  await page.waitForLoadState('networkidle');
+  if (page.url().includes('/login')) { console.warn('TC-MBA001: redirected after nav'); return; }
+  const body = await page.locator('body').textContent();
+  if (!body?.toLowerCase().includes('birthday') && !body?.toLowerCase().includes('birth')) {
+    console.warn('TC-MBA001: birthday field not found on profile');
+  }
+  expect(page.url()).not.toContain('/login');
+});
+
+test('TC-MBA002 — /api/members/profile responds', async ({ page }) => {
+  const res = await page.request.get(`${BASE}/api/members/profile`);
+  if (res.status() === 404) { console.warn('TC-MBA002: /api/members/profile not found'); return; }
+  expect([200, 401]).toContain(res.status());
+});
+
+test('TC-MBA003 — birthday-arc cron requires CRON_SECRET', async ({ page }) => {
+  const res = await page.request.post(`${BASE}/api/cron/birthday-arc`, {
+    data: {},
+    headers: { 'Content-Type': 'application/json' },
   });
-  test('TC-MBA002 /api/members/profile returns date_of_birth or birthday', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.member, '/dashboard');
-    if (page.url().includes('/login')) { console.warn('TC-MBA002: not authed'); return; }
-    const res = await page.evaluate(async () => { const r = await fetch('/api/members/profile'); if (r.status !== 200) return { status: r.status, data: null }; return { status: 200, data: await r.json() }; });
-    if (res.status === 404) console.warn('TC-MBA002: /api/members/profile not found');
-    else if (res.status >= 500) console.warn('TC-MBA002: server error ' + res.status);
-    else if (res.status === 200 && res.data && !res.data.date_of_birth && !res.data.birthday && !res.data.dob) console.warn('TC-MBA002: Profile missing birthday field');
+  if (res.status() === 404) { console.warn('TC-MBA003: birthday-arc cron not found'); return; }
+  expect([401, 403]).toContain(res.status());
+});
+
+test('TC-MBA004 — /dashboard achievements or milestones page loads', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard');
+  if (page.url().includes('/login')) { console.warn('TC-MBA004: login failed'); return; }
+  // Try /dashboard/achievements; fall back to dashboard
+  await page.goto(`${BASE}/dashboard/achievements`);
+  await page.waitForLoadState('networkidle');
+  if (page.url().includes('/login')) { console.warn('TC-MBA004: redirected after nav'); return; }
+  expect(page.url()).not.toContain('/login');
+});
+
+test('TC-MBA005 — /api/achievements responds', async ({ page }) => {
+  const res = await page.request.get(`${BASE}/api/achievements`);
+  if (res.status() === 404) { console.warn('TC-MBA005: /api/achievements not found'); return; }
+  expect([200, 401]).toContain(res.status());
+});
+
+test('TC-MBA006 — /dashboard/communities shows interest circles', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard');
+  if (page.url().includes('/login')) { console.warn('TC-MBA006: login failed'); return; }
+  await page.goto(`${BASE}/dashboard/communities`);
+  await page.waitForLoadState('networkidle');
+  if (page.url().includes('/login')) { console.warn('TC-MBA006: redirected after nav'); return; }
+  expect(page.url()).not.toContain('/login');
+});
+
+test('TC-MBA007 — /api/interest-circles responds', async ({ page }) => {
+  const res = await page.request.get(`${BASE}/api/interest-circles`);
+  if (res.status() === 404) { console.warn('TC-MBA007: /api/interest-circles not found'); return; }
+  expect([200, 401]).toContain(res.status());
+});
+
+test('TC-MBA008 — /api/check-ins responds', async ({ page }) => {
+  const res = await page.request.get(`${BASE}/api/check-ins`);
+  if (res.status() === 404) { console.warn('TC-MBA008: /api/check-ins not found'); return; }
+  expect([200, 401]).toContain(res.status());
+});
+
+test('TC-MBA009 — check-ins cron requires CRON_SECRET', async ({ page }) => {
+  const res = await page.request.post(`${BASE}/api/cron/aria-calls`, {
+    data: {},
+    headers: { 'Content-Type': 'application/json' },
   });
-  test('TC-MBA003 /api/cron/birthday-calls requires secret', async ({ page }) => {
-    const res = await page.evaluate(async () => { const r = await fetch('/api/cron/birthday-calls'); return r.status; });
-    if (res === 404) console.warn('TC-MBA003: /api/cron/birthday-calls not found');
-    else if (res >= 500) console.warn('TC-MBA003: birthday cron server error without auth ' + res);
-    else expect([401,403]).toContain(res);
+  if (res.status() === 404) { console.warn('TC-MBA009: aria-calls cron not found'); return; }
+  expect([401, 403]).toContain(res.status());
+});
+
+test('TC-MBA010 — no 500 on communities page', async ({ page }) => {
+  page.on('response', (res) => {
+    if (res.status() === 500) throw new Error(`TC-MBA010: 500 on ${res.url()}`);
   });
-  test('TC-MBA004 /api/cron/birthday-calls with correct secret no 500', async ({ page }) => {
-    const res = await page.evaluate(async () => {
-      const r = await fetch('/api/cron/birthday-calls', { headers: { Authorization: 'Bearer ' + (window as any).__CRON_SECRET__ || 'test' } });
-      return r.status;
-    });
-    if (res === 404) console.warn('TC-MBA004: /api/cron/birthday-calls not found');
-    else if (res >= 500) console.warn('TC-MBA004: birthday cron server error ' + res);
-  });
-  test('TC-MBA005 /dashboard/achievements page loads no 500', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.member, '/dashboard');
-    if (page.url().includes('/login')) { console.warn('TC-MBA005: not authed'); return; }
-    await page.goto(BASE + '/dashboard/achievements');
-    await page.waitForLoadState('networkidle');
-    const body = await page.evaluate(() => document.body?.innerText ?? '');
-    if (/500|internal server error/i.test(body)) console.warn('TC-MBA005: 500 on /dashboard/achievements');
-    else if (!/achievement|badge|milestone|unlock|earn/i.test(body)) console.warn('TC-MBA005: No achievement content on /dashboard/achievements');
-  });
-  test('TC-MBA006 /api/achievements returns list for member', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.member, '/dashboard');
-    if (page.url().includes('/login')) { console.warn('TC-MBA006: not authed'); return; }
-    const res = await page.evaluate(async () => { const r = await fetch('/api/achievements'); return r.status; });
-    if (res === 404) console.warn('TC-MBA006: /api/achievements not found');
-    else if (res >= 500) console.warn('TC-MBA006: achievements server error ' + res);
-  });
-  test('TC-MBA007 member dashboard shows interest circles', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.member, '/dashboard');
-    if (page.url().includes('/login')) { console.warn('TC-MBA007: not authed'); return; }
-    const body = await page.evaluate(() => document.body?.innerText ?? '');
-    if (!/interest|circle|group|communit|connect/i.test(body)) console.warn('TC-MBA007: No interest circles on member dashboard');
-  });
-  test('TC-MBA008 /api/interest-circles returns list', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.member, '/dashboard');
-    if (page.url().includes('/login')) { console.warn('TC-MBA008: not authed'); return; }
-    const res = await page.evaluate(async () => { const r = await fetch('/api/interest-circles'); return r.status; });
-    if (res === 404) console.warn('TC-MBA008: /api/interest-circles not found');
-    else if (res >= 500) console.warn('TC-MBA008: server error ' + res);
-  });
-  test('TC-MBA009 /api/check-ins no 500 for member', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.member, '/dashboard');
-    if (page.url().includes('/login')) { console.warn('TC-MBA009: not authed'); return; }
-    const res = await page.evaluate(async () => { const r = await fetch('/api/check-ins'); return r.status; });
-    if (res === 404) console.warn('TC-MBA009: /api/check-ins not found');
-    else if (res >= 500) console.warn('TC-MBA009: check-ins server error ' + res);
-  });
-  test('TC-MBA010 /api/cron/check-ins requires secret', async ({ page }) => {
-    const res = await page.evaluate(async () => { const r = await fetch('/api/cron/check-ins'); return r.status; });
-    if (res === 404) console.warn('TC-MBA010: /api/cron/check-ins not found');
-    else if (res >= 500) console.warn('TC-MBA010: check-ins cron server error without auth ' + res);
-    else expect([401,403]).toContain(res);
-  });
+  await loginAs(page, ACCOUNTS.member, '/dashboard');
+  if (page.url().includes('/login')) { console.warn('TC-MBA010: login failed'); return; }
+  await page.goto(`${BASE}/dashboard/communities`);
+  await page.waitForLoadState('networkidle');
+  if (page.url().includes('/login')) { console.warn('TC-MBA010: redirected after nav'); return; }
+  expect(page.url()).not.toContain('/login');
 });

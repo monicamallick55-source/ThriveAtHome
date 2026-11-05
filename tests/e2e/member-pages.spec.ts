@@ -23,6 +23,7 @@ const MEMBER_PAGES = [
   { path: '/dashboard/trusted-advisors',      tc: 'TC-M011', key: ['advisor'] },
   { path: '/dashboard/fraud-protection',      tc: 'TC-M012', key: ['fraud', 'scam'] },
   { path: '/dashboard/benefits-finder',       tc: 'TC-M013', key: [] },
+  { path: '/dashboard/plan',                  tc: 'TC-M014', key: ['plan', 'billing'] },
   { path: '/dashboard/addons',                tc: 'TC-M015', key: ['add-on', 'addon'] },
   { path: '/dashboard/profile',               tc: 'TC-M016', key: ['name', 'zip'] },
   { path: '/dashboard/vault',                 tc: 'TC-M017', key: ['vault', 'document', 'story'] },
@@ -108,8 +109,6 @@ test('TC-M015 — /dashboard/addons has all 4 add-on SKUs', async ({ page }) => 
 test('TC-M008 — /dashboard/grief-support has all 9 pathways', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member, '/dashboard');
   await page.goto('/dashboard/grief-support');
-  await page.waitForSelector('[data-testid], h1, h2, .pathway, button', { timeout: 10000 }).catch(() => {});
-  await page.waitForLoadState('networkidle');
 
   const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
 

@@ -16,27 +16,27 @@ import { ACCOUNTS, loginAs } from './helpers';
 /** TC-A004 / TC-P050 — All 21 roles reach correct portal */
 const ROLE_PORTAL_MAP: Array<{ key: keyof typeof ACCOUNTS; portal: string; label: string }> = [
   { key: 'member',       portal: '/dashboard',           label: 'Member' },
-  { key: 'family',       portal: '/dashboard',    label: 'Family' },
+  { key: 'family',       portal: '/dashboard/family',    label: 'Family' },
   { key: 'navigator',    portal: '/navigator',            label: 'Navigator' },
-  { key: 'admin',        portal: '/dashboard',           label: 'Admin' },  // admin role not yet wired in getAllRolesForAuth
-  { key: 'careworker',   portal: '/dashboard',         label: 'Care Worker' },
+  { key: 'admin',        portal: '/admin',               label: 'Admin' },
+  { key: 'careworker',   portal: '/care-worker',         label: 'Care Worker' },
   { key: 'volunteer',    portal: '/volunteer/dashboard', label: 'General Volunteer' },
-  { key: 'student',      portal: '/student',   label: 'Student Volunteer' },
+  { key: 'student',      portal: '/volunteer/dashboard', label: 'Student Volunteer' },
   { key: 'veteran',      portal: '/volunteer/dashboard', label: 'Veteran Volunteer' },
   { key: 'retired_pro',  portal: '/volunteer/dashboard', label: 'Retired Pro Volunteer' },
   { key: 'corporate',    portal: '/volunteer/dashboard', label: 'Corporate Volunteer' },
   { key: 'neighbor',     portal: '/volunteer/dashboard', label: 'Neighbor Volunteer' },
   { key: 'faith',        portal: '/volunteer/dashboard', label: 'Faith Volunteer' },
-  { key: 'k12student',   portal: '/student',   label: 'K-12 Student Volunteer' },
-  { key: 'agency',       portal: '/dashboard',         label: 'Agency Admin' },
-  { key: 'employer',     portal: '/dashboard',      label: 'Employer Admin' },
-  { key: 'network',      portal: '/dashboard',       label: 'Network Admin' },
-  { key: 'seniorcenter', portal: '/dashboard', label: 'Senior Center Admin' },
-  { key: 'aaa',          portal: '/dashboard',           label: 'AAA Admin' },
-  { key: 'orgadmin',     portal: '/dashboard',           label: 'Org Admin' },
-  { key: 'vsoadmin',     portal: '/dashboard',           label: 'VSO Admin' },
-  { key: 'uniadmin',     portal: '/dashboard',    label: 'University Admin' },
-  { key: 'k12admin',     portal: '/dashboard',        label: 'K-12 Admin' },
+  { key: 'k12student',   portal: '/volunteer/dashboard', label: 'K-12 Student Volunteer' },
+  { key: 'agency',       portal: '/agency-admin',        label: 'Agency Admin' },
+  { key: 'employer',     portal: '/employer-admin',      label: 'Employer Admin' },
+  { key: 'network',      portal: '/network-admin',       label: 'Network Admin' },
+  { key: 'seniorcenter', portal: '/senior-center-admin', label: 'Senior Center Admin' },
+  { key: 'aaa',          portal: '/aaa-admin',           label: 'AAA Admin' },
+  { key: 'orgadmin',     portal: '/org-admin',           label: 'Org Admin' },
+  { key: 'vsoadmin',     portal: '/vso-admin',           label: 'VSO Admin' },
+  { key: 'uniadmin',     portal: '/university-admin',    label: 'University Admin' },
+  { key: 'k12admin',     portal: '/school-admin',        label: 'K-12 Admin' },
 ];
 
 test.describe('TC-A004 — 21 role login smoke tests', () => {
@@ -78,11 +78,9 @@ test.describe('TC-A005 — cross-role access blocked', () => {
     await page.goto('/admin');
     const url = page.url();
     const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
-    // TODO(app-bug): /admin has no auth guard yet — stub page loads for all roles
     const isBlocked =
       url.includes('/login') ||
       url.includes('/volunteer') ||
-      url.includes('/dashboard') ||
       /401|403|unauthorized|forbidden|access denied/i.test(bodyText);
     expect(isBlocked, 'Volunteer should not access /admin').toBe(true);
   });
@@ -91,8 +89,7 @@ test.describe('TC-A005 — cross-role access blocked', () => {
     await loginAs(page, ACCOUNTS.family);
     await page.goto('/org-admin');
     const url = page.url();
-    // TODO(app-bug): /org-admin has no auth guard yet — stub page loads for all roles
-    const isBlocked = url.includes('/login') || url.includes('/dashboard') || url.includes('/org-admin');
+    const isBlocked = url.includes('/login') || url.includes('/dashboard/family');
     expect(isBlocked, 'Family should not access /org-admin').toBe(true);
   });
 
@@ -101,13 +98,9 @@ test.describe('TC-A005 — cross-role access blocked', () => {
     await page.goto('/employer-admin');
     const url = page.url();
     const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
-    // TODO(app-bug): /employer-admin has no auth guard yet — stub page loads for all roles
     const isBlocked =
       url.includes('/login') ||
       url.includes('/volunteer') ||
-      url.includes('/student') ||
-      url.includes('/dashboard') ||
-      url.includes('/employer-admin') ||
       /401|403|unauthorized|forbidden/i.test(bodyText);
     expect(isBlocked, 'K12 student should not access /employer-admin').toBe(true);
   });
@@ -131,24 +124,16 @@ test('TC-A006 — /device kiosk loads with large-print UI', async ({ page }) => 
 });
 
 /** TC-P051 — /signup form validation */
-test('TC-P051 — /signup rejects invalid email and mismatched passwords', async ({ browser }) => {
-  // Use a fresh context with no session so /signup doesn't redirect away
-  const ctx = await browser.newContext();
-  const page = await ctx.newPage();
+test('TC-P051 — /signup rejects invalid email and mismatched passwords', async ({ page }) => {
   await page.goto('/signup');
 
-  // Step 1: select a plan (signup is multi-step)
-  await page.getByRole('button', { name: /continue with thrive/i }).first().click();
-  await page.waitForTimeout(1000);
   // Invalid email
-  await page.locator('input[type="email"]').first().waitFor({ timeout: 10000 });
-  await page.locator('input[type="email"]').first().fill('not-an-email');
-  await page.locator('input[type="password"], input[name="password"]').first().fill('Password123!');
-  await page.getByRole('button', { name: /continue to payment|sign up|create account/i }).click();
+  await page.getByLabel(/email/i).fill('not-an-email');
+  await page.getByLabel(/password/i).first().fill('Password123!');
+  await page.getByRole('button', { name: /sign up|create account|get started/i }).click();
 
   const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
   const hasError = /invalid|enter.*email|valid email/i.test(bodyText) ||
     await page.locator('[role="alert"], .error, [data-error]').isVisible().catch(() => false);
   expect(hasError, 'Should show validation error for invalid email').toBe(true);
-  await ctx.close();
 });

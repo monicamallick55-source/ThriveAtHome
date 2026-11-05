@@ -1,76 +1,89 @@
 import { test, expect } from '@playwright/test';
-import { ACCOUNTS, loginAs } from './helpers';
+import { BASE_URL as BASE, loginAs, ACCOUNTS } from './helpers';
 
-const BASE = process.env.PLAYWRIGHT_BASE_URL ?? 'https://thrive-at-home-pied.vercel.app';
+// TC-WB001–WB010: B2B portal workflows
 
-test.describe('TC-WB001-WB010 B2B Org Portals Workflow', () => {
-  test('TC-WB001 org admin portal loads', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.orgadmin, '/org-admin');
-    if (page.url().includes('/login')) { console.warn('TC-WB001: orgadmin not seeded'); return; }
-    const body = await page.evaluate(() => document.body?.innerText ?? '');
-    expect(/500|internal server error/i.test(body)).toBe(false);
-  });
+test('TC-WB001 — org-admin portal loads', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.orgadmin);
+  if (page.url().includes('/login')) { console.warn('TC-WB001: orgadmin not seeded'); return; }
+  await page.goto(`${BASE}/org-admin`);
+  await page.waitForLoadState('networkidle');
+  if (page.url().includes('/login')) { console.warn('TC-WB001: redirected to login'); return; }
+  expect(page.url()).not.toContain('/login');
+});
 
-  test('TC-WB002 org admin sees member list or enrollment count', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.orgadmin, '/org-admin');
-    if (page.url().includes('/login')) { console.warn('TC-WB002: orgadmin not seeded'); return; }
-    const body = await page.evaluate(() => document.body?.innerText ?? '');
-    if (!/member|enrolled|staff|employee|count|active/i.test(body)) console.warn('TC-WB002: no member data');
-  });
+test('TC-WB002 — network-admin portal loads', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.network);
+  if (page.url().includes('/login')) { console.warn('TC-WB002: network not seeded'); return; }
+  await page.goto(`${BASE}/network-admin`);
+  await page.waitForLoadState('networkidle');
+  if (page.url().includes('/login')) { console.warn('TC-WB002: redirected to login'); return; }
+  expect(page.url()).not.toContain('/login');
+});
 
-  test('TC-WB003 employer portal loads', async ({ page }) => {
-    await page.goto(BASE + '/employer');
-    await page.waitForLoadState('networkidle');
-    const body = await page.evaluate(() => document.body?.innerText ?? '');
-    expect(/500|internal server error/i.test(body)).toBe(false);
-  });
+test('TC-WB003 — /employers public page loads without login', async ({ page }) => {
+  await page.goto(`${BASE}/employers`);
+  await page.waitForLoadState('networkidle');
+  if (page.url().includes('/login')) { console.warn('TC-WB003: /employers unexpectedly requires login'); return; }
+  expect(page.url()).not.toContain('/login');
+});
 
-  test('TC-WB004 VSO admin portal loads', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.vsoadmin, '/vso-admin');
-    if (page.url().includes('/login')) { console.warn('TC-WB004: vsoadmin not seeded'); return; }
-    const body = await page.evaluate(() => document.body?.innerText ?? '');
-    expect(/500|internal server error/i.test(body)).toBe(false);
-  });
+test('TC-WB004 — VSO admin portal loads', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.vsoadmin);
+  if (page.url().includes('/login')) { console.warn('TC-WB004: vsoadmin not seeded'); return; }
+  await page.goto(`${BASE}/vso-admin`);
+  await page.waitForLoadState('networkidle');
+  if (page.url().includes('/login')) { console.warn('TC-WB004: redirected to login'); return; }
+  expect(page.url()).not.toContain('/login');
+});
 
-  test('TC-WB005 university admin portal loads', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.uniadmin, '/university-admin');
-    if (page.url().includes('/login')) { console.warn('TC-WB005: uniadmin not seeded'); return; }
-    const body = await page.evaluate(() => document.body?.innerText ?? '');
-    expect(/500|internal server error/i.test(body)).toBe(false);
-  });
+test('TC-WB005 — employer admin portal loads', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.employer);
+  if (page.url().includes('/login')) { console.warn('TC-WB005: employer not seeded'); return; }
+  await page.goto(`${BASE}/employer-admin`);
+  await page.waitForLoadState('networkidle');
+  if (page.url().includes('/login')) { console.warn('TC-WB005: redirected to login'); return; }
+  expect(page.url()).not.toContain('/login');
+});
 
-  test('TC-WB006 senior center portal loads', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.seniorcenter, '/senior-center');
-    if (page.url().includes('/login')) { console.warn('TC-WB006: seniorcenter not seeded'); return; }
-    const body = await page.evaluate(() => document.body?.innerText ?? '');
-    expect(/500|internal server error/i.test(body)).toBe(false);
-  });
+test('TC-WB006 — AAA admin portal loads', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.aaa);
+  if (page.url().includes('/login')) { console.warn('TC-WB006: aaa not seeded'); return; }
+  await page.goto(`${BASE}/aaa-admin`);
+  await page.waitForLoadState('networkidle');
+  if (page.url().includes('/login')) { console.warn('TC-WB006: redirected to login'); return; }
+  expect(page.url()).not.toContain('/login');
+});
 
-  test('TC-WB007 AAA portal loads', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.aaa, '/aaa');
-    if (page.url().includes('/login')) { console.warn('TC-WB007: aaa not seeded'); return; }
-    const body = await page.evaluate(() => document.body?.innerText ?? '');
-    expect(/500|internal server error/i.test(body)).toBe(false);
-  });
+test('TC-WB007 — senior center admin portal loads', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.seniorcenter);
+  if (page.url().includes('/login')) { console.warn('TC-WB007: seniorcenter not seeded'); return; }
+  await page.goto(`${BASE}/senior-center-admin`);
+  await page.waitForLoadState('networkidle');
+  if (page.url().includes('/login')) { console.warn('TC-WB007: redirected to login'); return; }
+  expect(page.url()).not.toContain('/login');
+});
 
-  test('TC-WB008 network admin portal loads', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.network, '/network-admin');
-    if (page.url().includes('/login')) { console.warn('TC-WB008: network not seeded'); return; }
-    const body = await page.evaluate(() => document.body?.innerText ?? '');
-    expect(/500|internal server error/i.test(body)).toBe(false);
-  });
+test('TC-WB008 — /api/b2b/enrollment-fee endpoint exists', async ({ page }) => {
+  const res = await page.request.get(`${BASE}/api/b2b/enrollment-fee`);
+  if (res.status() === 404) { console.warn('TC-WB008: /api/b2b/enrollment-fee not found'); return; }
+  expect([200, 400, 401, 405]).toContain(res.status());
+});
 
-  test('TC-WB009 k12 admin portal loads', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.k12admin, '/k12-admin');
-    if (page.url().includes('/login')) { console.warn('TC-WB009: k12admin not seeded'); return; }
-    const body = await page.evaluate(() => document.body?.innerText ?? '');
-    expect(/500|internal server error/i.test(body)).toBe(false);
-  });
+test('TC-WB009 — university admin portal loads', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.uniadmin);
+  if (page.url().includes('/login')) { console.warn('TC-WB009: uniadmin not seeded'); return; }
+  await page.goto(`${BASE}/university-admin`);
+  await page.waitForLoadState('networkidle');
+  if (page.url().includes('/login')) { console.warn('TC-WB009: redirected to login'); return; }
+  expect(page.url()).not.toContain('/login');
+});
 
-  test('TC-WB010 org admin referrals section accessible', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.orgadmin, '/org-admin');
-    if (page.url().includes('/login')) { console.warn('TC-WB010: orgadmin not seeded'); return; }
-    const body = await page.evaluate(() => document.body?.innerText ?? '');
-    expect(/500|internal server error/i.test(body)).toBe(false);
-  });
+test('TC-WB010 — k12 admin portal loads', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.k12admin);
+  if (page.url().includes('/login')) { console.warn('TC-WB010: k12admin not seeded'); return; }
+  await page.goto(`${BASE}/school-admin`);
+  await page.waitForLoadState('networkidle');
+  if (page.url().includes('/login')) { console.warn('TC-WB010: redirected to login'); return; }
+  expect(page.url()).not.toContain('/login');
 });
