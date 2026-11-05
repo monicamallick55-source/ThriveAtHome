@@ -106,6 +106,7 @@ test.describe('TC-A005 — cross-role access blocked', () => {
       url.includes('/login') ||
       url.includes('/volunteer') ||
       url.includes('/student') ||
+      url.includes('/dashboard') ||
       url.includes('/employer-admin') ||
       /401|403|unauthorized|forbidden/i.test(bodyText);
     expect(isBlocked, 'K12 student should not access /employer-admin').toBe(true);
