@@ -24,3 +24,8 @@ supabase/config.toml
 tsconfig.tsbuildinfo
 .env*
 .vercel
+
+# Playwright
+playwright-report/
+test-results/
+*.patch
