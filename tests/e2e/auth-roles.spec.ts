@@ -131,7 +131,10 @@ test('TC-A006 — /device kiosk loads with large-print UI', async ({ page }) => 
 });
 
 /** TC-P051 — /signup form validation */
-test('TC-P051 — /signup rejects invalid email and mismatched passwords', async ({ page }) => {
+test('TC-P051 — /signup rejects invalid email and mismatched passwords', async ({ browser }) => {
+  // Use a fresh context with no session so /signup doesn't redirect away
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
   await page.goto('/signup');
 
   // Invalid email
@@ -144,4 +147,5 @@ test('TC-P051 — /signup rejects invalid email and mismatched passwords', async
   const hasError = /invalid|enter.*email|valid email/i.test(bodyText) ||
     await page.locator('[role="alert"], .error, [data-error]').isVisible().catch(() => false);
   expect(hasError, 'Should show validation error for invalid email').toBe(true);
+  await ctx.close();
 });
