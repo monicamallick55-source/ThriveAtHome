@@ -8,7 +8,9 @@ import { ACCOUNTS, loginAs } from './helpers';
 
 test.describe('TC-F001–F007 — Family Portal', () => {
   test.beforeEach(async ({ page }) => {
-    await loginAs(page, ACCOUNTS.family, '/dashboard/family');
+    await loginAs(page, ACCOUNTS.family);
+    await page.goto(`${process.env.PLAYWRIGHT_BASE_URL ?? "https://thrive-at-home-pied.vercel.app"}/dashboard/family`);
+    await page.waitForLoadState("networkidle");
   });
 
   /** TC-F001 — Family main view */
