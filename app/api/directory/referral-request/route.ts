@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
         const { data: member } = await supabase
           .from('members')
           .select('id')
-          .eq('user_id', user.id)
+          .eq('supabase_auth_id', user.id)
           .single()
         memberId = member?.id ?? null
       }

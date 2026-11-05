@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    const { data: member } = await supabase.from('members').select('id, org_id, role').eq('user_id', user.id).single()
+    const { data: member } = await supabase.from('members').select('id, org_id, role').eq('supabase_auth_id', user.id).single()
     if (!member || !['admin', 'navigator'].includes(member.role)) return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
     if (!checkRateLimit(user.id)) return NextResponse.json({ error: 'Rate limit exceeded. Max 100 requests per hour.' }, { status: 429 })
 

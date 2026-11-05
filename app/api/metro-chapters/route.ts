@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     const { data: member } = await supabase
       .from('members')
       .select('id, org_id, zip_code, role')
-      .eq('user_id', user.id)
+      .eq('supabase_auth_id', user.id)
       .single()
 
     if (!member) return NextResponse.json({ error: 'Member not found' }, { status: 404 })
@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const { data: member } = await supabase
-      .from('members').select('id, org_id, role').eq('user_id', user.id).single()
+      .from('members').select('id, org_id, role').eq('supabase_auth_id', user.id).single()
 
     if (!member || !['admin', 'navigator'].includes(member.role))
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
@@ -116,7 +116,7 @@ export async function PATCH(req: NextRequest) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const { data: member } = await supabase
-      .from('members').select('id, org_id, role').eq('user_id', user.id).single()
+      .from('members').select('id, org_id, role').eq('supabase_auth_id', user.id).single()
 
     if (!member || !['admin', 'navigator'].includes(member.role))
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 })

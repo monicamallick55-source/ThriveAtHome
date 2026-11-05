@@ -18,7 +18,7 @@ export async function PATCH(
     const { data: self } = await supabase
       .from('org_admins')
       .select('org_id, role')
-      .eq('user_id', user.id)
+      .eq('supabase_auth_id', user.id)
       .single()
 
     if (!self) return NextResponse.json({ error: 'Not an org admin' }, { status: 403 })

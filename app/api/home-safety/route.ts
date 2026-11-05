@@ -9,7 +9,7 @@ export async function GET() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    const { data: member } = await supabase.from('members').select('id, org_id').eq('user_id', user.id).single()
+    const { data: member } = await supabase.from('members').select('id, org_id').eq('supabase_auth_id', user.id).single()
     if (!member) return NextResponse.json({ error: 'Member not found' }, { status: 404 })
     const { data: profile } = await supabase.from('home_safety_profiles').select('*').eq('member_id', member.id).single()
     const { data: items } = await supabase.from('home_safety_checklist_items').select('*').eq('member_id', member.id).order('category')
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    const { data: member } = await supabase.from('members').select('id, org_id').eq('user_id', user.id).single()
+    const { data: member } = await supabase.from('members').select('id, org_id').eq('supabase_auth_id', user.id).single()
     if (!member) return NextResponse.json({ error: 'Member not found' }, { status: 404 })
     const body = await req.json()
     const { home_type, floors, has_elevator, earthquake_zone, emergency_contact_name, emergency_contact_phone } = body
@@ -71,7 +71,7 @@ export async function PATCH(req: NextRequest) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    const { data: member } = await supabase.from('members').select('id').eq('user_id', user.id).single()
+    const { data: member } = await supabase.from('members').select('id').eq('supabase_auth_id', user.id).single()
     if (!member) return NextResponse.json({ error: 'Member not found' }, { status: 404 })
     const body = await req.json()
     const { item_id, completed } = body

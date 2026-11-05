@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
     const { data: staff } = await supabase
       .from('members')
       .select('org_id, role')
-      .eq('user_id', user.id)
+      .eq('supabase_auth_id', user.id)
       .single()
     if (!staff || staff.role !== 'admin') {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 })

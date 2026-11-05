@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    const { data: self } = await supabase.from('org_admins').select('org_id, role').eq('user_id', user.id).single()
+    const { data: self } = await supabase.from('org_admins').select('org_id, role').eq('supabase_auth_id', user.id).single()
     if (!self) return NextResponse.json({ error: 'Not an org admin' }, { status: 403 })
     if (self.role === 'viewer') return NextResponse.json({ error: 'Viewers cannot perform bulk operations' }, { status: 403 })
     const body = await req.json()

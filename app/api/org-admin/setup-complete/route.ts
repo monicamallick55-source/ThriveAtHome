@@ -10,7 +10,7 @@ export async function PATCH() {
   const { data: member } = await supabase
     .from('family_members')
     .select('org_id, role')
-    .eq('user_id', user.id)
+    .eq('supabase_auth_id', user.id)
     .in('role', ['org_admin', 'admin'])
     .single()
 

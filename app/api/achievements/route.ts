@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
     const { data: staff } = await supabase
       .from('members')
       .select('id, org_id, role')
-      .eq('user_id', user.id)
+      .eq('supabase_auth_id', user.id)
       .single()
     if (!staff || !['admin', 'navigator', 'staff'].includes(staff.role)) {
       return NextResponse.json({ error: 'Staff access required' }, { status: 403 })

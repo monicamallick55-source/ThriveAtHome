@@ -7,7 +7,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    const { data: member } = await supabase.from('members').select('id').eq('user_id', user.id).single()
+    const { data: member } = await supabase.from('members').select('id').eq('supabase_auth_id', user.id).single()
     if (!member) return NextResponse.json({ error: 'Member not found' }, { status: 404 })
     const { data: festival } = await supabase.from('cultural_festivals').select('id, rsvp_limit').eq('id', id).single()
     if (!festival) return NextResponse.json({ error: 'Festival not found' }, { status: 404 })
