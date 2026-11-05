@@ -3,7 +3,7 @@
  */
 import { Page, expect } from '@playwright/test';
 
-export const BASE_URL = process.env.BASE_URL || 'https://thrive-at-home-pied.vercel.app';
+export const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || process.env.BASE_URL || 'https://thrive-at-home-pied.vercel.app';
 
 /** Seed test accounts — passwords must match what's seeded in Supabase */
 export const ACCOUNTS = {
@@ -39,14 +39,15 @@ export const ACCOUNTS = {
 
 /**
  * Login via the /login form and wait for redirect.
- * Uses the password input specifically (not the show/hide toggle button).
+ * Always uses BASE_URL so the session cookie is on the same origin
+ * as subsequent page.goto() calls.
  */
 export async function loginAs(
   page: Page,
   account: { email: string; password: string },
   expectedPath?: string,
 ): Promise<void> {
-  await page.goto('/login');
+  await page.goto(`${BASE_URL}/login`);
   await page.locator('input[type="email"], input[name="email"], #email').first().fill(account.email);
   await page.locator('input[type="password"], input[name="password"], #password').first().fill(account.password);
   await page.getByRole('button', { name: /sign in|log in/i }).click();
@@ -56,6 +57,8 @@ export async function loginAs(
   } else {
     await page.waitForFunction(() => !window.location.pathname.startsWith('/login'), { timeout: 15_000 });
   }
+  // Extra settle time for Supabase to write auth cookies
+  await page.waitForTimeout(500);
 }
 
 /**
