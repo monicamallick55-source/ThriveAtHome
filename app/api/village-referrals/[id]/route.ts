@@ -1,5 +1,6 @@
 /**
  * app/api/village-referrals/[id]/route.ts
+ *
  * PATCH /api/village-referrals/[id] — accept or decline an incoming referral
  */
 import { createClient } from '@/lib/supabase/server'
@@ -29,6 +30,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'action must be accept or decline' }, { status: 400 })
     }
 
+    // Verify referral is incoming to us and pending
     const { data: referral } = await supabase
       .from('village_referrals')
       .select('id, status, referring_village_id, receiving_village_id, member_id')
@@ -45,18 +47,24 @@ export async function PATCH(
 
     const { data, error } = await supabase
       .from('village_referrals')
-      .update({ status: newStatus, responded_at: new Date().toISOString(), responded_by: user.id })
+      .update({
+        status: newStatus,
+        responded_at: new Date().toISOString(),
+        responded_by: user.id,
+      })
       .eq('id', id)
       .select()
       .single()
 
     if (error) return NextResponse.json({ error: error.message }, { status: 400 })
 
+    // If accepted, notify the referring village (create a notification)
     if (action === 'accept') {
+      // Queue navigator task to coordinate transfer
       await supabase.from('navigator_tasks').insert({
         task_type: 'village_transfer',
         member_id: referral.member_id,
-        notes: 'Village transfer coordination needed — member accepted by receiving village.',
+        notes: 'Village transfer coordination needed — member accepted by receiving village. Coordinate the transfer.',
         status: 'pending',
         priority: 'high',
       }).then(() => {})

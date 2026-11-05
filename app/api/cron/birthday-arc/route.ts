@@ -92,8 +92,8 @@ export async function GET(req: NextRequest) {
       // Create navigator task to send wish invitations to circle members
       await supabase.from('navigator_tasks').insert({
         member_id: member.id,
-        task_type: 'birthday_wishes',
-        notes: `${member.first_name}'s birthday is in 3 days. Send invitations to their circle members so wishes are ready for the big day. Members can leave messages at /dashboard/celebrations.`,
+        title: `Birthday in 3 days — invite circle members to leave wishes`,
+        description: `${member.first_name}'s birthday is in 3 days. Send invitations to their circle members so wishes are ready for the big day. Members can leave messages at /dashboard/celebrations.`,
         priority: 'low',
         category: 'birthday_arc',
         status: 'pending',
@@ -151,8 +151,8 @@ export async function GET(req: NextRequest) {
         // Queue navigator task to compile and send the thank-you card PDF
         await supabase.from('navigator_tasks').insert({
           member_id: member.id,
-          task_type: 'birthday_thankyou',
-          notes: `${wishCount} community wishes were left for ${member.first_name}'s birthday. Compile them into a thank-you card PDF and share it with the member.`,
+          title: `Compile birthday thank-you card for ${member.first_name}`,
+          description: `${wishCount} community wishes were left for ${member.first_name}'s birthday. Compile them into a thank-you card PDF and share it with the member.`,
           priority: 'low',
           category: 'birthday_arc',
           status: 'pending',
@@ -230,8 +230,8 @@ export async function GET(req: NextRequest) {
 
       await supabase.from('navigator_tasks').insert({
         member_id: member.id,
-        task_type: taskTitle,
-        notes: taskDesc,
+        title: taskTitle,
+        description: taskDesc,
         priority: milestone.age >= 90 ? 'high' : 'medium',
         category: 'milestone_birthday',
         status: 'pending',
@@ -245,4 +245,13 @@ export async function GET(req: NextRequest) {
   }
 
   return NextResponse.json({ ok: true, processed: results.length, results })
+}
+
+// POST is the standard Vercel cron invocation method.
+// Delegate to GET logic after auth check.
+export async function POST(req: NextRequest) {
+  if (req.headers.get('x-cron-secret') !== process.env.CRON_SECRET) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+  return GET(req)
 }

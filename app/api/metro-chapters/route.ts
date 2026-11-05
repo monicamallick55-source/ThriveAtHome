@@ -1,5 +1,9 @@
 /**
  * app/api/metro-chapters/route.ts — G5.3 Geographic Chapter Matching
+ *
+ * GET  /api/metro-chapters          — list metro chapters (admin: all; member: nearby by zip)
+ * POST /api/metro-chapters          — create chapter (admin only)
+ * PATCH /api/metro-chapters         — activate/deactivate chapter (admin only)
  */
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
@@ -33,11 +37,15 @@ export async function GET(req: NextRequest) {
     if (stateFilter) query = query.eq('state', stateFilter)
 
     const { data: chapters, error } = await query
+
     if (error) return NextResponse.json({ error: error.message }, { status: 400 })
 
+    // For members: annotate with distance if zip available
+    // For admins: return full chapter list with member counts
     const isAdmin = member.role === 'admin' || member.role === 'navigator'
 
     if (isAdmin) {
+      // Get member counts per chapter
       const chapterIds = (chapters ?? []).map((c: any) => c.id)
       const { data: memberships } = await supabase
         .from('member_chapter_assignments')
@@ -49,12 +57,15 @@ export async function GET(req: NextRequest) {
         countMap[m.chapter_id] = (countMap[m.chapter_id] ?? 0) + 1
       })
 
-      return NextResponse.json({
-        chapters: (chapters ?? []).map((c: any) => ({ ...c, member_count: countMap[c.id] ?? 0 })),
-        is_admin: true,
-      })
+      const enriched = (chapters ?? []).map((c: any) => ({
+        ...c,
+        member_count: countMap[c.id] ?? 0,
+      }))
+
+      return NextResponse.json({ chapters: enriched, is_admin: true })
     }
 
+    // Member view: check which chapter they're assigned to
     const { data: myAssignment } = await supabase
       .from('member_chapter_assignments')
       .select('chapter_id, assigned_at')
@@ -78,20 +89,28 @@ export async function POST(req: NextRequest) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const { data: member } = await supabase
-      .from('members').select('id, org_id, role').eq('supabase_auth_id', user.id).single()
+      .from('members')
+      .select('id, org_id, role')
+      .eq('supabase_auth_id', user.id)
+      .single()
 
-    if (!member || !['admin', 'navigator'].includes(member.role))
+    if (!member || !['admin', 'navigator'].includes(member.role)) {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
+    }
 
     const body = await req.json()
     const { city, state, zip_codes, service_radius_miles, coordinator_name, coordinator_email, notes } = body
 
-    if (!city || !state) return NextResponse.json({ error: 'city and state are required' }, { status: 400 })
+    if (!city || !state) {
+      return NextResponse.json({ error: 'city and state are required' }, { status: 400 })
+    }
 
     const { data: chapter, error } = await supabase
       .from('metro_chapters')
       .insert({
-        org_id: member.org_id, city, state,
+        org_id: member.org_id,
+        city,
+        state,
         zip_codes: zip_codes ?? [],
         service_radius_miles: service_radius_miles ?? 25,
         coordinator_name: coordinator_name ?? null,
@@ -100,7 +119,8 @@ export async function POST(req: NextRequest) {
         is_active: true,
         created_at: new Date().toISOString(),
       })
-      .select().single()
+      .select()
+      .single()
 
     if (error) return NextResponse.json({ error: error.message }, { status: 400 })
     return NextResponse.json({ chapter }, { status: 201 })
@@ -116,10 +136,14 @@ export async function PATCH(req: NextRequest) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const { data: member } = await supabase
-      .from('members').select('id, org_id, role').eq('supabase_auth_id', user.id).single()
+      .from('members')
+      .select('id, org_id, role')
+      .eq('supabase_auth_id', user.id)
+      .single()
 
-    if (!member || !['admin', 'navigator'].includes(member.role))
+    if (!member || !['admin', 'navigator'].includes(member.role)) {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
+    }
 
     const body = await req.json()
     const { chapter_id, is_active, coordinator_name, coordinator_email, zip_codes, notes } = body
@@ -138,7 +162,8 @@ export async function PATCH(req: NextRequest) {
       .update(updates)
       .eq('id', chapter_id)
       .eq('org_id', member.org_id)
-      .select().single()
+      .select()
+      .single()
 
     if (error) return NextResponse.json({ error: error.message }, { status: 400 })
     return NextResponse.json({ chapter })

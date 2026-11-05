@@ -1,59 +1,100 @@
-import { NextRequest, NextResponse } from 'next/server'
+/**
+ * app/api/campaigns/route.ts — G6.4 Member-in-Need Campaigns
+ *
+ * GET  /api/campaigns        — list active campaigns (filtered by RLS)
+ * POST /api/campaigns        — create a new campaign (navigator/staff)
+ *
+ * Schema (migration 095):
+ *   campaigns: id, member_id, title, description, goal_cents, raised_cents,
+ *              status (draft|active|funded|closed), created_by, created_at,
+ *              deadline, stripe_payment_link, is_public
+ */
+
 import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(req: NextRequest) {
-  const supabase = await createClient()
-  const admin = createAdminClient()
-  const { searchParams } = new URL(req.url)
-  const myOnly = searchParams.get('my') === 'true'
-  const { data: { user } } = await supabase.auth.getUser()
+  try {
+    const supabase = await createClient()
+    const { searchParams } = new URL(req.url)
+    const status   = searchParams.get('status') ?? 'active'
+    const memberId = searchParams.get('member_id')
+    const myOwn    = searchParams.get('mine') === 'true'
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let query: any = admin.from('campaigns')
-    .select('id, title, description, goal_cents, raised_cents, donor_count, status, image_url, ends_at, is_featured, is_public, campaign_type, created_at, creator_id')
-    .order('is_featured', { ascending: false })
-    .order('raised_cents', { ascending: false })
+    let query = supabase
+      .from('campaigns')
+      .select(`
+        id, title, description, goal_cents, raised_cents,
+        status, deadline, stripe_payment_link, is_public,
+        created_at,
+        member:members(id, first_name, last_name)
+      `)
+      .order('created_at', { ascending: false })
 
-  if (myOnly && user) { query = query.eq('creator_id', user.id) }
-  else { query = query.eq('status', 'active').eq('is_public', true) }
+    if (status !== 'all') query = query.eq('status', status)
+    if (memberId) query = query.eq('member_id', memberId)
+    if (myOwn) {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      query = query.eq('created_by', user.id)
+    }
 
-  const { data, error } = await query.limit(50)
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json(data)
+    const { data, error } = await query
+    if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+
+    return NextResponse.json({ campaigns: data ?? [] })
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 })
+  }
 }
 
 export async function POST(req: NextRequest) {
-  const supabase = await createClient()
-  const admin = createAdminClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  const { data: member } = await (admin as any).from('members').select('id, plan, status').eq('supabase_auth_id', user.id).single()
-  if (!member) return NextResponse.json({ error: 'Member not found' }, { status: 404 })
-  if (member.status !== 'active') return NextResponse.json({ error: 'Active membership required' }, { status: 403 })
-  if (!['complete', 'premier'].includes(member.plan)) return NextResponse.json({ error: 'Complete or Premier plan required' }, { status: 403 })
-
-  const body = await req.json()
-  const { title, description, story, goal_amount, ends_at, image_url, campaign_type } = body
-  if (!title || !goal_amount) return NextResponse.json({ error: 'title and goal_amount required' }, { status: 400 })
-
-  const { data: campaign, error } = await admin.from('campaigns').insert({
-    creator_id: user.id, title, description: description || null, story: story || null,
-    goal_cents: Math.round(parseFloat(goal_amount) * 100), ends_at: ends_at || null,
-    image_url: image_url || null, campaign_type: campaign_type || 'fundraiser',
-    status: 'draft', is_public: false, is_featured: false, metadata: {},
-  }).select().single()
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-
   try {
-    await admin.from('navigator_tasks').insert({
-      member_id: member.id, task_type: 'campaign_review',
-      notes: `Member submitted a fundraising campaign. Goal: $${goal_amount}.`,
-      priority: 'medium',
-    })
-  } catch (e) { console.error('Failed to create navigator task:', e) }
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  return NextResponse.json(campaign, { status: 201 })
+    const body = await req.json()
+    const {
+      member_id,
+      title,
+      description,
+      goal_cents,
+      deadline,
+      is_public = true,
+    } = body
+
+    if (!member_id || !title || !goal_cents) {
+      return NextResponse.json(
+        { error: 'member_id, title, and goal_cents are required' },
+        { status: 400 }
+      )
+    }
+
+    if (goal_cents < 100) {
+      return NextResponse.json({ error: 'Goal must be at least $1' }, { status: 400 })
+    }
+
+    const { data, error } = await supabase
+      .from('campaigns')
+      .insert({
+        member_id,
+        title,
+        description,
+        goal_cents,
+        raised_cents: 0,
+        status: 'draft',
+        created_by: user.id,
+        deadline: deadline ?? null,
+        is_public,
+      })
+      .select()
+      .single()
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+
+    return NextResponse.json({ campaign: data }, { status: 201 })
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 })
+  }
 }

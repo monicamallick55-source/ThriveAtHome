@@ -25,12 +25,19 @@ interface EntitlementData {
   subscription_status: string
   entitlements: Entitlement
   usage: Usage
-  limits_remaining: { buddy_calls: number; volunteer_requests: number }
+  limits_remaining: {
+    buddy_calls: number
+    volunteer_requests: number
+  }
 }
 
 const TIER_LABELS: Record<string, string> = {
-  basic: 'Basic', standard: 'Standard', premium: 'Premium', enterprise: 'Enterprise',
+  basic: 'Basic',
+  standard: 'Standard',
+  premium: 'Premium',
+  enterprise: 'Enterprise',
 }
+
 const TIER_COLORS: Record<string, string> = {
   basic: 'bg-gray-100 text-gray-700',
   standard: 'bg-teal-100 text-teal-800',
@@ -42,6 +49,7 @@ function UsageBar({ used, limit, label }: { used: number; limit: number; label: 
   const pct = limit >= 999 ? 0 : Math.min(100, Math.round((used / limit) * 100))
   const isUnlimited = limit >= 999
   const isNearLimit = pct >= 80
+
   return (
     <div className="mb-4">
       <div className="flex justify-between text-sm mb-1">
@@ -52,7 +60,10 @@ function UsageBar({ used, limit, label }: { used: number; limit: number; label: 
       </div>
       {!isUnlimited && (
         <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-          <div className={`h-full rounded-full transition-all ${isNearLimit ? 'bg-red-500' : 'bg-teal-500'}`} style={{ width: `${pct}%` }} />
+          <div
+            className={`h-full rounded-full transition-all ${isNearLimit ? 'bg-red-500' : 'bg-teal-500'}`}
+            style={{ width: `${pct}%` }}
+          />
         </div>
       )}
     </div>
@@ -62,7 +73,7 @@ function UsageBar({ used, limit, label }: { used: number; limit: number; label: 
 function FeatureBadge({ enabled, label }: { enabled: boolean; label: string }) {
   return (
     <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${enabled ? 'bg-teal-50 text-teal-700' : 'bg-gray-50 text-gray-400'}`}>
-      <span>{enabled ? '\u2713' : '\u2717'}</span>
+      <span>{enabled ? '✓' : '✗'}</span>
       <span>{label}</span>
     </div>
   )
@@ -76,7 +87,10 @@ export default function PlanEntitlementsPage() {
   useEffect(() => {
     fetch('/api/entitlements')
       .then(r => r.json())
-      .then(d => { if (d.error) setError(d.error); else setData(d) })
+      .then(d => {
+        if (d.error) setError(d.error)
+        else setData(d)
+      })
       .catch(e => setError(e.message))
       .finally(() => setLoading(false))
   }, [])
@@ -98,6 +112,7 @@ export default function PlanEntitlementsPage() {
   )
 
   if (!data) return null
+
   const { tier, subscription_status, entitlements: ent, usage } = data
   const tierLabel = TIER_LABELS[tier] ?? tier
   const tierColor = TIER_COLORS[tier] ?? 'bg-gray-100 text-gray-700'
@@ -109,52 +124,90 @@ export default function PlanEntitlementsPage() {
         <p className="text-gray-500 mt-1">Track your monthly usage and feature access</p>
       </div>
 
+      {/* Plan header */}
       <div className="bg-white border border-gray-200 rounded-xl p-5 mb-6 flex items-center justify-between">
         <div>
-          <div className={`inline-block px-3 py-1 rounded-full text-sm font-semibold mb-1 ${tierColor}`}>{tierLabel} Plan</div>
+          <div className={`inline-block px-3 py-1 rounded-full text-sm font-semibold mb-1 ${tierColor}`}>
+            {tierLabel} Plan
+          </div>
           <div className={`text-sm ${subscription_status === 'active' ? 'text-teal-600' : 'text-red-500'}`}>
-            {subscription_status === 'active' ? '\u25cf Active' : `\u25cf ${subscription_status}`}
+            {subscription_status === 'active' ? '● Active' : `● ${subscription_status}`}
           </div>
         </div>
         {tier !== 'premium' && tier !== 'enterprise' && (
-          <a href="/pricing" className="bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors">
+          <a
+            href="/pricing"
+            className="bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors"
+          >
             Upgrade Plan
           </a>
         )}
       </div>
 
+      {/* Monthly usage */}
       <div className="bg-white border border-gray-200 rounded-xl p-5 mb-6">
         <h2 className="font-semibold text-gray-800 mb-4">Monthly Usage</h2>
-        <UsageBar used={usage.buddy_calls_this_month} limit={ent.buddy_calls_per_month} label="Buddy Calls" />
-        <UsageBar used={usage.volunteer_requests_this_month} limit={ent.volunteer_requests_per_month} label="Volunteer Requests" />
-        <UsageBar used={usage.navigator_tasks_this_month} limit={ent.navigator_hours_per_month} label="Navigator Sessions" />
-        <UsageBar used={0} limit={ent.group_events_per_month} label="Group Events" />
-        <UsageBar used={0} limit={ent.ai_calls_per_month} label="AI Assistant Uses" />
+        <UsageBar
+          used={usage.buddy_calls_this_month}
+          limit={ent.buddy_calls_per_month}
+          label="Buddy Calls"
+        />
+        <UsageBar
+          used={usage.volunteer_requests_this_month}
+          limit={ent.volunteer_requests_per_month}
+          label="Volunteer Requests"
+        />
+        <UsageBar
+          used={usage.navigator_tasks_this_month}
+          limit={ent.navigator_hours_per_month}
+          label="Navigator Sessions"
+        />
+        <UsageBar
+          used={0}
+          limit={ent.group_events_per_month}
+          label="Group Events"
+        />
+        <UsageBar
+          used={0}
+          limit={ent.ai_calls_per_month}
+          label="AI Assistant Uses"
+        />
+
         <p className="text-xs text-gray-400 mt-2">Usage resets on the 1st of each month.</p>
       </div>
 
+      {/* Plan limits summary */}
       <div className="bg-white border border-gray-200 rounded-xl p-5 mb-6">
         <h2 className="font-semibold text-gray-800 mb-4">Plan Limits</h2>
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div className="bg-gray-50 rounded-lg p-3">
             <div className="text-xs text-gray-500 mb-1">Navigator Sessions/mo</div>
-            <div className="font-semibold text-gray-800">{ent.navigator_hours_per_month >= 999 ? 'Unlimited' : ent.navigator_hours_per_month}</div>
+            <div className="font-semibold text-gray-800">
+              {ent.navigator_hours_per_month >= 999 ? 'Unlimited' : ent.navigator_hours_per_month}
+            </div>
           </div>
           <div className="bg-gray-50 rounded-lg p-3">
             <div className="text-xs text-gray-500 mb-1">Buddy Calls/mo</div>
-            <div className="font-semibold text-gray-800">{ent.buddy_calls_per_month >= 999 ? 'Unlimited' : ent.buddy_calls_per_month}</div>
+            <div className="font-semibold text-gray-800">
+              {ent.buddy_calls_per_month >= 999 ? 'Unlimited' : ent.buddy_calls_per_month}
+            </div>
           </div>
           <div className="bg-gray-50 rounded-lg p-3">
             <div className="text-xs text-gray-500 mb-1">Group Events/mo</div>
-            <div className="font-semibold text-gray-800">{ent.group_events_per_month >= 999 ? 'Unlimited' : ent.group_events_per_month}</div>
+            <div className="font-semibold text-gray-800">
+              {ent.group_events_per_month >= 999 ? 'Unlimited' : ent.group_events_per_month}
+            </div>
           </div>
           <div className="bg-gray-50 rounded-lg p-3">
             <div className="text-xs text-gray-500 mb-1">Family Members</div>
-            <div className="font-semibold text-gray-800">{ent.family_members >= 999 ? 'Unlimited' : ent.family_members}</div>
+            <div className="font-semibold text-gray-800">
+              {ent.family_members >= 999 ? 'Unlimited' : ent.family_members}
+            </div>
           </div>
         </div>
       </div>
 
+      {/* Feature access */}
       <div className="bg-white border border-gray-200 rounded-xl p-5">
         <h2 className="font-semibold text-gray-800 mb-4">Feature Access</h2>
         <div className="grid grid-cols-1 gap-2">
@@ -162,6 +215,7 @@ export default function PlanEntitlementsPage() {
           <FeatureBadge enabled={ent.can_access_marketplace} label="Services Marketplace" />
           <FeatureBadge enabled={ent.can_access_encore_careers} label="Encore Careers" />
         </div>
+
         {tier === 'basic' && (
           <div className="mt-4 bg-teal-50 border border-teal-100 rounded-lg p-3 text-sm text-teal-700">
             Upgrade to <strong>Standard</strong> to unlock the Services Marketplace and Encore Careers.

@@ -150,8 +150,8 @@ export async function POST(req: NextRequest) {
     // Notify member's navigator
     await supabase.from('navigator_tasks').insert({
       member_id,
-      task_type: 'family_volunteer_credits',
-      notes: `A family member volunteered ${cappedHours}h and earned ${creditsAwarded} companion call credit(s) for the member.`,
+      title: `Family volunteer credits awarded`,
+      description: `A family member volunteered ${cappedHours}h and earned ${creditsAwarded} companion call credit(s) for the member.`,
       priority: 'low',
       category: 'volunteer',
       status: 'pending',

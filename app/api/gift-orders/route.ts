@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { getGiftById, requiresFamilyApproval } from '@/lib/gifts/catalog'
+import { getItem, requiresFamilyApproval } from '@/lib/gifts/catalog'
 import { goodsProvider } from '@/lib/gifts/provider'
 import Stripe from 'stripe'
 

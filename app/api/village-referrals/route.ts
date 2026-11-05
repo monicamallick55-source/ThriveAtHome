@@ -22,6 +22,7 @@ export async function GET(req: NextRequest) {
     if (!self) return NextResponse.json({ error: 'Not an org admin' }, { status: 403 })
 
     const direction = new URL(req.url).searchParams.get('direction') ?? 'outgoing'
+
     const field = direction === 'incoming' ? 'receiving_village_id' : 'referring_village_id'
 
     const { data, error } = await supabase
@@ -37,6 +38,7 @@ export async function GET(req: NextRequest) {
       .order('created_at', { ascending: false })
 
     if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+
     return NextResponse.json({ referrals: data ?? [] })
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 })
@@ -65,6 +67,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'member_id, receiving_village_id, and reason are required' }, { status: 400 })
     }
 
+    // Verify member belongs to our org
     const { data: member } = await supabase
       .from('members')
       .select('id')
@@ -74,6 +77,7 @@ export async function POST(req: NextRequest) {
 
     if (!member) return NextResponse.json({ error: 'Member not found in your organization' }, { status: 404 })
 
+    // Verify receiving village is a partner
     const { data: partner } = await supabase
       .from('village_partnerships')
       .select('id')
@@ -83,12 +87,13 @@ export async function POST(req: NextRequest) {
       .single()
 
     if (!partner) {
-      return NextResponse.json({ error: 'Receiving village is not a registered partner.' }, { status: 400 })
+      return NextResponse.json({ error: 'Receiving village is not a registered partner. Contact support to establish a partnership.' }, { status: 400 })
     }
 
+    // Check no active referral already exists for this member
     const { data: existing } = await supabase
       .from('village_referrals')
-      .select('id')
+      .select('id, status')
       .eq('member_id', member_id)
       .in('status', ['pending', 'accepted'])
       .single()
@@ -112,6 +117,7 @@ export async function POST(req: NextRequest) {
       .single()
 
     if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+
     return NextResponse.json({ referral: data }, { status: 201 })
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 })

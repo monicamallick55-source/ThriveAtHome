@@ -69,8 +69,8 @@ export async function GET(req: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
       await supabase.from('navigator_tasks').insert({
-        task_type: 'crisis_flag',
-        notes: 'A member or family member flagged a crisis concern by accessing the crisis page with flag=true. Please reach out immediately.',
+        title: 'URGENT: Member accessed crisis resources (flagged)',
+        description: 'A member or family member flagged a crisis concern by accessing the crisis page with flag=true. Please reach out immediately.',
         priority: 'urgent',
         category: 'crisis',
         status: 'pending',
@@ -102,8 +102,8 @@ export async function POST(req: NextRequest) {
   // Create urgent navigator task
   const { data: task, error } = await supabase.from('navigator_tasks').insert({
     member_id,
-    task_type: 'crisis_flag',
-    notes: description ?? 'A crisis concern has been flagged. Please reach out to the member immediately.',
+    title: `URGENT CRISIS FLAG: ${concern_type ?? 'General concern'}`,
+    description: description ?? 'A crisis concern has been flagged. Please reach out to the member immediately.',
     priority: 'urgent',
     category: 'crisis',
     status: 'pending',

@@ -79,7 +79,7 @@ WHERE supabase_auth_id = (SELECT id::text FROM auth.users WHERE email = 'premier
 -- Medicare member: ml_insights_opt_out = false (opted IN to insights)
 UPDATE members
 SET ml_insights_opt_out = false,
-    zip_code = '94103'
+    zip = '94103'
 WHERE supabase_auth_id = (SELECT id::text FROM auth.users WHERE email = 'medicare_member@test.com');
 
 -- Grief member: has active grief_support_requests row
@@ -131,7 +131,7 @@ JOIN auth.users u ON u.id::text = m.supabase_auth_id
 WHERE u.email = 'retired_pro@test.com' AND vp.member_id = m.id;
 
 UPDATE volunteer_profiles vp
-SET type = 'neighbor', home_zip_code = '94103', training_completed = true
+SET type = 'neighbor', home_zip = '94103', training_completed = true
 FROM members m
 JOIN auth.users u ON u.id::text = m.supabase_auth_id
 WHERE u.email = 'neighbor@test.com' AND vp.member_id = m.id;
