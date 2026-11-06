@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
   // ── Fetch members with birthdays who haven't opted out ────────────────────
   const { data: members, error } = await supabase
     .from('members')
-    .select('id, first_name, last_name, date_of_birth, supabase_auth_id, celebration_opt_out')
+    .select('id, full_name, date_of_birth, supabase_auth_id, celebration_opt_out')
     .not('date_of_birth', 'is', null)
     .eq('celebration_opt_out', false)
     .eq('status', 'active')
@@ -73,7 +73,7 @@ export async function GET(req: NextRequest) {
       // (or member metadata). We use a simple approach: upsert a row in
       // important_dates with a note type, so Aria picks it up via its existing context.
       // The main Aria context injection reads important_dates for upcoming events.
-      results.push(`D-5 arc: ${member.first_name} ${member.last_name}`)
+      results.push(`D-5 arc: ${member.full_name}`)
       // No additional DB action needed; the upcoming-birthday context is already
       // injected by the existing celebrations cron via important_dates. The D-5
       // step ensures Aria mentions it; a note is stored in member_metadata for
@@ -87,13 +87,13 @@ export async function GET(req: NextRequest) {
 
     // D-3: open community wishes — navigator task to invite circle members
     if (!inGrief && isBirthdayInNDays(member.date_of_birth, 3, today)) {
-      results.push(`D-3 arc (wishes open): ${member.first_name}`)
+      results.push(`D-3 arc (wishes open): ${member.full_name}`)
 
       // Create navigator task to send wish invitations to circle members
       await supabase.from('navigator_tasks').insert({
         member_id: member.id,
         title: `Birthday in 3 days — invite circle members to leave wishes`,
-        description: `${member.first_name}'s birthday is in 3 days. Send invitations to their circle members so wishes are ready for the big day. Members can leave messages at /dashboard/celebrations.`,
+        description: `${member.full_name}'s birthday is in 3 days. Send invitations to their circle members so wishes are ready for the big day. Members can leave messages at /dashboard/celebrations.`,
         priority: 'low',
         category: 'birthday_arc',
         status: 'pending',
@@ -103,7 +103,7 @@ export async function GET(req: NextRequest) {
 
     // D-1: family reminder with link to send a card/gift
     if (!inGrief && isBirthdayInNDays(member.date_of_birth, 1, today)) {
-      results.push(`D-1 arc (family reminder): ${member.first_name}`)
+      results.push(`D-1 arc (family reminder): ${member.full_name}`)
 
       // Get family members with SMS/email contact
       const { data: family } = await supabase
@@ -116,7 +116,7 @@ export async function GET(req: NextRequest) {
         await supabase.from('notifications').insert({
           user_id: fm.id,
           type: 'birthday_reminder',
-          title: `${member.first_name}'s birthday is tomorrow!`,
+          title: `${member.full_name}'s birthday is tomorrow!`,
           body: `Don't forget — you can send a card or gift from your family dashboard.`,
           metadata: {
             member_id: member.id,
@@ -130,7 +130,7 @@ export async function GET(req: NextRequest) {
 
     // D+1: compile thank-you card PDF from birthday wishes
     if (isBirthdayInNDays(member.date_of_birth, -1, today)) {
-      results.push(`D+1 arc (thank-you card): ${member.first_name}`)
+      results.push(`D+1 arc (thank-you card): ${member.full_name}`)
 
       // Count wishes collected
       const birthday = new Date(member.date_of_birth)
@@ -151,8 +151,8 @@ export async function GET(req: NextRequest) {
         // Queue navigator task to compile and send the thank-you card PDF
         await supabase.from('navigator_tasks').insert({
           member_id: member.id,
-          title: `Compile birthday thank-you card for ${member.first_name}`,
-          description: `${wishCount} community wishes were left for ${member.first_name}'s birthday. Compile them into a thank-you card PDF and share it with the member.`,
+          title: `Compile birthday thank-you card for ${member.full_name}`,
+          description: `${wishCount} community wishes were left for ${member.full_name}'s birthday. Compile them into a thank-you card PDF and share it with the member.`,
           priority: 'low',
           category: 'birthday_arc',
           status: 'pending',
@@ -191,7 +191,7 @@ export async function GET(req: NextRequest) {
 
       if (ageAtBirthday !== milestone.age) continue
 
-      results.push(`Milestone ${milestone.age}: ${member.first_name}`)
+      results.push(`Milestone ${milestone.age}: ${member.full_name}`)
 
       // Check if we already created this milestone task this year
       const { count: existing } = await supabase
@@ -209,22 +209,22 @@ export async function GET(req: NextRequest) {
       switch (milestone.action_type) {
         case 'navigator_task':
           taskTitle = `Age ${milestone.age} milestone — ${milestone.offering}`
-          taskDesc = `${member.first_name} turns ${milestone.age} in ${daysAhead} days. ${milestone.offering}`
+          taskDesc = `${member.full_name} turns ${milestone.age} in ${daysAhead} days. ${milestone.offering}`
           break
         case 'navigator_call':
-          taskTitle = `Schedule milestone call — ${member.first_name} turning ${milestone.age}`
-          taskDesc = `${member.first_name} turns ${milestone.age} in ${daysAhead} days. ${milestone.offering}`
+          taskTitle = `Schedule milestone call — ${member.full_name} turning ${milestone.age}`
+          taskDesc = `${member.full_name} turns ${milestone.age} in ${daysAhead} days. ${milestone.offering}`
           break
         case 'joy_call':
-          taskTitle = `Schedule Joy's milestone interview call — ${member.first_name} turning ${milestone.age}`
-          taskDesc = `${member.first_name} turns ${milestone.age} in ${daysAhead} days. Joy should call and ask life-story questions (with member consent). Recording saved to life story.`
+          taskTitle = `Schedule Joy's milestone interview call — ${member.full_name} turning ${milestone.age}`
+          taskDesc = `${member.full_name} turns ${milestone.age} in ${daysAhead} days. Joy should call and ask life-story questions (with member consent). Recording saved to life story.`
           break
         case 'community_event':
-          taskTitle = `Create community toast event — ${member.first_name} turning ${milestone.age}!`
-          taskDesc = `${member.first_name} is turning ${milestone.age}! Create a community toast event and optionally request a mayor/governor greeting letter. ${milestone.offering}`
+          taskTitle = `Create community toast event — ${member.full_name} turning ${milestone.age}!`
+          taskDesc = `${member.full_name} is turning ${milestone.age}! Create a community toast event and optionally request a mayor/governor greeting letter. ${milestone.offering}`
           break
         default:
-          taskTitle = `Milestone birthday — ${member.first_name} turning ${milestone.age}`
+          taskTitle = `Milestone birthday — ${member.full_name} turning ${milestone.age}`
           taskDesc = milestone.offering as string
       }
 
