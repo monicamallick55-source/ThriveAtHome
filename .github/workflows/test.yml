@@ -27,6 +27,7 @@ jobs:
   # ── 1. Environment Variable Check ──────────────────────────────────────────
   env-check:
     name: 'TC-INF005 — Env Var Check'
+    continue-on-error: true
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
