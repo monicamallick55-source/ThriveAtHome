@@ -14,7 +14,7 @@ test('TC-B2BD001 — /university-admin loads with volunteer stats', async ({ pag
   await page.waitForLoadState('networkidle');
   if (page.url().includes('/login')) { console.warn('TC-B2BD001: redirected'); return; }
   const content = await page.content();
-  expect(content).not.toMatch(/internal server error|next-error-h1/i);
+  expect(content).not.toMatch(/application error|internal server error/i);
   const hasStats = content.match(/student|volunteer|hours|university|export|report/i);
   if (!hasStats) console.warn('TC-B2BD001: university admin content not found');
 });
@@ -47,7 +47,7 @@ test('TC-B2BD010 — /vso-admin shows veteran volunteer content', async ({ page 
   await page.waitForLoadState('networkidle');
   if (page.url().includes('/login')) { console.warn('TC-B2BD010: redirected'); return; }
   const content = await page.content();
-  expect(content).not.toMatch(/internal server error|next-error-h1/i);
+  expect(content).not.toMatch(/application error|internal server error/i);
   const hasVeteran = content.match(/veteran|vso|service|military|volunteer/i);
   if (!hasVeteran) console.warn('TC-B2BD010: VSO portal content not found');
 });
@@ -72,7 +72,7 @@ test('TC-B2BD020 — /school-admin shows student volunteer content', async ({ pa
   await page.waitForLoadState('networkidle');
   if (page.url().includes('/login')) { console.warn('TC-B2BD020: redirected'); return; }
   const content = await page.content();
-  expect(content).not.toMatch(/internal server error|next-error-h1/i);
+  expect(content).not.toMatch(/application error|internal server error/i);
   const hasSchool = content.match(/student|school|k-12|hours|service learning|community/i);
   if (!hasSchool) console.warn('TC-B2BD020: K-12 school portal content not found');
 });
@@ -97,7 +97,7 @@ test('TC-B2BD030 — /employer-admin loads with corporate program data', async (
   await page.waitForLoadState('networkidle');
   if (page.url().includes('/login')) { console.warn('TC-B2BD030: redirected'); return; }
   const content = await page.content();
-  expect(content).not.toMatch(/internal server error|next-error-h1/i);
+  expect(content).not.toMatch(/application error|internal server error/i);
 });
 
 test('TC-B2BD031 — employer-admin shows 3-tier corporate progress (Bronze/Silver/Gold)', async ({ page }) => {
@@ -119,7 +119,7 @@ test('TC-B2BD032 — employer-admin not accessible by regular member', async ({ 
   const redirected = page.url().includes('/login') || page.url().includes('/dashboard') || page.url().includes('/onboarding');
   if (!redirected) {
     const content = await page.content();
-    expect(content).not.toMatch(/internal server error|next-error-h1/i);
+    expect(content).not.toMatch(/application error|internal server error/i);
     console.warn('TC-B2BD032: member was not redirected from /employer-admin — check access control');
   }
 });

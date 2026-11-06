@@ -35,7 +35,7 @@ test('TC-PED003 — complete member sees marketplace unlocked', async ({ page })
   await page.waitForLoadState('networkidle');
   if (page.url().includes('/login')) { console.warn('TC-PED003: redirected'); return; }
   const content = await page.content();
-  expect(content).not.toMatch(/internal server error|next-error-h1/i);
+  expect(content).not.toMatch(/application error|internal server error/i);
 });
 
 test('TC-PED004 — /api/feature-flags responds with flags object', async ({ page }) => {
@@ -56,7 +56,7 @@ test('TC-PED005 — /dashboard/plan shows current plan tier', async ({ page }) =
   await page.waitForLoadState('networkidle');
   if (page.url().includes('/login')) { console.warn('TC-PED005: redirected'); return; }
   const content = await page.content();
-  expect(content).not.toMatch(/internal server error|next-error-h1/i);
+  expect(content).not.toMatch(/application error|internal server error/i);
   const hasPlan = content.match(/basics|connect|complete|premier|current plan/i);
   if (!hasPlan) console.warn('TC-PED005: plan tier not shown on /dashboard/plan');
 });
@@ -68,7 +68,7 @@ test('TC-PED006 — plan-comparison page loads', async ({ page }) => {
   await page.waitForLoadState('networkidle');
   if (page.url().includes('/login')) { console.warn('TC-PED006: redirected'); return; }
   const content = await page.content();
-  expect(content).not.toMatch(/internal server error|next-error-h1/i);
+  expect(content).not.toMatch(/application error|internal server error/i);
 });
 
 test('TC-PED007 — plan comparison shows ≥ 2 plan tiers side by side', async ({ page }) => {

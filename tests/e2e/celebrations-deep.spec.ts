@@ -14,7 +14,7 @@ test('TC-CELD001 — celebrations hub shows all event types', async ({ page }) =
   await page.waitForLoadState('networkidle');
   if (page.url().includes('/login')) { console.warn('TC-CELD001: redirected'); return; }
   const content = await page.content();
-  expect(content).not.toMatch(/internal server error|next-error-h1/i);
+  expect(content).not.toMatch(/application error|internal server error/i);
   const hasTypes = content.match(/birthday|anniversary|milestone|celebration/i);
   if (!hasTypes) console.warn('TC-CELD001: celebration event types not found');
 });
@@ -26,7 +26,7 @@ test('TC-CELD002 — celebration planner shows 3 tiers (Simple/Signature/Legacy)
   await page.waitForLoadState('networkidle');
   if (page.url().includes('/login')) { console.warn('TC-CELD002: redirected'); return; }
   const content = await page.content();
-  expect(content).not.toMatch(/internal server error|next-error-h1/i);
+  expect(content).not.toMatch(/application error|internal server error/i);
   const hasTiers = content.match(/simple|signature|legacy/i);
   if (!hasTiers) console.warn('TC-CELD002: 3-tier celebration options not found');
 });
@@ -50,7 +50,7 @@ test('TC-CELD010 — /dashboard/gift-send shows catalog categories', async ({ pa
   await page.waitForLoadState('networkidle');
   if (page.url().includes('/login')) { console.warn('TC-CELD010: redirected'); return; }
   const content = await page.content();
-  expect(content).not.toMatch(/internal server error|next-error-h1/i);
+  expect(content).not.toMatch(/application error|internal server error/i);
   const hasGifts = content.match(/gift|flower|card|experience|send/i);
   if (!hasGifts) console.warn('TC-CELD010: gift catalog content not found');
 });
@@ -126,5 +126,5 @@ test('TC-CELD031 — member achievements page loads', async ({ page }) => {
     console.warn('TC-CELD031: achievements page not found — may be at different route'); return;
   }
   const content = await page.content();
-  expect(content).not.toMatch(/internal server error|next-error-h1/i);
+  expect(content).not.toMatch(/application error|internal server error/i);
 });

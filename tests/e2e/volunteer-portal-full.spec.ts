@@ -14,14 +14,14 @@ test('TC-VPF001 — /volunteer loads or redirects (no 500)', async ({ page }) =>
   await page.goto(`${BASE}/volunteer`);
   await page.waitForLoadState('networkidle');
   const content = await page.content();
-  expect(content).not.toMatch(/internal server error|next-error-h1/i);
+  expect(content).not.toMatch(/application error|internal server error/i);
 });
 
 test('TC-VPF002 — /volunteer/apply loads', async ({ page }) => {
   await page.goto(`${BASE}/volunteer/apply`);
   await page.waitForLoadState('networkidle');
   const content = await page.content();
-  expect(content).not.toMatch(/internal server error|next-error-h1/i);
+  expect(content).not.toMatch(/application error|internal server error/i);
   expect(page.url()).not.toContain('/500');
 });
 
@@ -31,7 +31,7 @@ test('TC-VPF003 — /volunteer/apply has application form', async ({ page }) => 
   const content = await page.content();
   const hasForm = content.match(/apply|volunteer|name|email|specialty|submit/i);
   if (!hasForm) console.warn('TC-VPF003: volunteer apply form content not found');
-  expect(content).not.toMatch(/internal server error|next-error-h1/i);
+  expect(content).not.toMatch(/application error|internal server error/i);
 });
 
 // ── Buddy portal ──────────────────────────────────────────────────────────────
@@ -44,7 +44,7 @@ test('TC-VPF010 — /volunteer/buddy requires auth', async ({ page }) => {
   if (!redirectedToLogin && !redirectedToOnboarding) {
     // If page loaded, must not be a 500
     const content = await page.content();
-    expect(content).not.toMatch(/internal server error|next-error-h1/i);
+    expect(content).not.toMatch(/application error|internal server error/i);
   }
 });
 
@@ -55,7 +55,7 @@ test('TC-VPF011 — /volunteer/buddy loads for volunteer', async ({ page }) => {
   await page.waitForLoadState('networkidle');
   if (page.url().includes('/login')) { console.warn('TC-VPF011: redirected to login'); return; }
   const content = await page.content();
-  expect(content).not.toMatch(/internal server error|next-error-h1/i);
+  expect(content).not.toMatch(/application error|internal server error/i);
 });
 
 test('TC-VPF012 — buddy portal shows buddy assignment cards or empty state', async ({ page }) => {
@@ -67,7 +67,7 @@ test('TC-VPF012 — buddy portal shows buddy assignment cards or empty state', a
   const content = await page.content();
   const hasContent = content.match(/buddy|assignment|member|call|log|no buddies|🤝/i);
   if (!hasContent) console.warn('TC-VPF012: buddy portal content not detected');
-  expect(content).not.toMatch(/internal server error|next-error-h1/i);
+  expect(content).not.toMatch(/application error|internal server error/i);
 });
 
 // ── Chaplaincy ────────────────────────────────────────────────────────────────
@@ -81,7 +81,7 @@ test('TC-VPF020 — /volunteer/chaplaincy loads', async ({ page }) => {
   await page.waitForLoadState('networkidle');
   if (page.url().includes('/login')) { console.warn('TC-VPF020: redirected to login'); return; }
   const content = await page.content();
-  expect(content).not.toMatch(/internal server error|next-error-h1/i);
+  expect(content).not.toMatch(/application error|internal server error/i);
 });
 
 test('TC-VPF021 — chaplaincy page shows spiritual/grief content', async ({ page }) => {
@@ -106,7 +106,7 @@ test('TC-VPF030 — /volunteer/neighbors loads', async ({ page }) => {
   await page.waitForLoadState('networkidle');
   if (page.url().includes('/login')) { console.warn('TC-VPF030: redirected to login'); return; }
   const content = await page.content();
-  expect(content).not.toMatch(/internal server error|next-error-h1/i);
+  expect(content).not.toMatch(/application error|internal server error/i);
 });
 
 test('TC-VPF031 — neighbors page shows zip-matched or match-pending content', async ({ page }) => {
@@ -132,7 +132,7 @@ test('TC-VPF040 — /volunteer/professionals loads', async ({ page }) => {
   await page.waitForLoadState('networkidle');
   if (page.url().includes('/login')) { console.warn('TC-VPF040: redirected'); return; }
   const content = await page.content();
-  expect(content).not.toMatch(/internal server error|next-error-h1/i);
+  expect(content).not.toMatch(/application error|internal server error/i);
 });
 
 test('TC-VPF041 — retired-pro page shows specialty/service cards', async ({ page }) => {
@@ -155,7 +155,7 @@ test('TC-VPF042 — retired-pro discovery surfaces in Legal/Financial Hub', asyn
   await page.waitForLoadState('networkidle');
   if (page.url().includes('/login')) { console.warn('TC-VPF042: redirected to login'); return; }
   const content = await page.content();
-  expect(content).not.toMatch(/internal server error|next-error-h1/i);
+  expect(content).not.toMatch(/application error|internal server error/i);
   // Should have retired professional content surfaced
   const hasRetiredPro = content.match(/retired|professional|attorney|financial advisor|doctor/i);
   if (!hasRetiredPro) console.warn('TC-VPF042: retired-pro content not surfaced on trusted advisors page');
@@ -170,7 +170,7 @@ test('TC-VPF050 — /employer-admin loads corporate tier content', async ({ page
   await page.waitForLoadState('networkidle');
   if (page.url().includes('/login')) { console.warn('TC-VPF050: redirected to login'); return; }
   const content = await page.content();
-  expect(content).not.toMatch(/internal server error|next-error-h1/i);
+  expect(content).not.toMatch(/application error|internal server error/i);
 });
 
 test('TC-VPF051 — employer-admin shows corporate volunteer tier progress', async ({ page }) => {

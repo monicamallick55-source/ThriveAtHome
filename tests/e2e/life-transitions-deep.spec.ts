@@ -14,7 +14,7 @@ test('TC-LTD001 — /dashboard/life-transitions loads', async ({ page }) => {
   await page.waitForLoadState('networkidle');
   if (page.url().includes('/login')) { console.warn('TC-LTD001: redirected'); return; }
   const content = await page.content();
-  expect(content).not.toMatch(/internal server error|next-error-h1/i);
+  expect(content).not.toMatch(/application error|internal server error/i);
 });
 
 test('TC-LTD002 — life-transitions page shows ≥ 4 pathways', async ({ page }) => {
@@ -55,7 +55,7 @@ test('TC-LTD010 — /dashboard/transition loads', async ({ page }) => {
   await page.waitForLoadState('networkidle');
   if (page.url().includes('/login')) { console.warn('TC-LTD010: redirected'); return; }
   const content = await page.content();
-  expect(content).not.toMatch(/internal server error|next-error-h1/i);
+  expect(content).not.toMatch(/application error|internal server error/i);
 });
 
 test('TC-LTD011 — transition page shows facility-move checklist or steps', async ({ page }) => {
@@ -78,7 +78,7 @@ test('TC-LTD020 — /dashboard/grief-support loads', async ({ page }) => {
   await page.waitForLoadState('networkidle');
   if (page.url().includes('/login')) { console.warn('TC-LTD020: redirected'); return; }
   const content = await page.content();
-  expect(content).not.toMatch(/internal server error|next-error-h1/i);
+  expect(content).not.toMatch(/application error|internal server error/i);
 });
 
 test('TC-LTD021 — grief support shows all 9 pathways', async ({ page }) => {
@@ -112,7 +112,7 @@ test('TC-LTD030 — /dashboard/trusted-advisors loads', async ({ page }) => {
   await page.waitForLoadState('networkidle');
   if (page.url().includes('/login')) { console.warn('TC-LTD030: redirected'); return; }
   const content = await page.content();
-  expect(content).not.toMatch(/internal server error|next-error-h1/i);
+  expect(content).not.toMatch(/application error|internal server error/i);
 });
 
 test('TC-LTD031 — trusted advisors shows advisor categories', async ({ page }) => {

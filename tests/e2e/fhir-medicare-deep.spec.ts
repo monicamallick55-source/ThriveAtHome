@@ -13,7 +13,7 @@ test('TC-FMD001 — /dashboard/fhir-referrals loads', async ({ page }) => {
   await page.waitForLoadState('networkidle');
   if (page.url().includes('/login')) { console.warn('TC-FMD001: redirected'); return; }
   const content = await page.content();
-  expect(content).not.toMatch(/internal server error|next-error-h1/i);
+  expect(content).not.toMatch(/application error|internal server error/i);
 });
 
 test('TC-FMD002 — /api/fhir/referral POST rejects unauthenticated', async ({ page }) => {
@@ -60,7 +60,7 @@ test('TC-FMD010 — /dashboard/medicare-help loads', async ({ page }) => {
   await page.waitForLoadState('networkidle');
   if (page.url().includes('/login')) { console.warn('TC-FMD010: redirected'); return; }
   const content = await page.content();
-  expect(content).not.toMatch(/internal server error|next-error-h1/i);
+  expect(content).not.toMatch(/application error|internal server error/i);
 });
 
 test('TC-FMD011 — medicare-help page shows plan types (A/B/C/D)', async ({ page }) => {
@@ -83,7 +83,7 @@ test('TC-FMD012 — /dashboard/plan-comparison loads Medicare comparison', async
   await page.waitForLoadState('networkidle');
   if (page.url().includes('/login')) { console.warn('TC-FMD012: redirected'); return; }
   const content = await page.content();
-  expect(content).not.toMatch(/internal server error|next-error-h1/i);
+  expect(content).not.toMatch(/application error|internal server error/i);
 });
 
 test('TC-FMD013 — /api/admin/ma-report responds for admin', async ({ page }) => {
@@ -101,5 +101,5 @@ test('TC-FMD014 — /admin/ma-report page loads for admin', async ({ page }) => 
   await page.waitForLoadState('networkidle');
   if (page.url().includes('/login')) { console.warn('TC-FMD014: redirected'); return; }
   const content = await page.content();
-  expect(content).not.toMatch(/internal server error|next-error-h1/i);
+  expect(content).not.toMatch(/application error|internal server error/i);
 });

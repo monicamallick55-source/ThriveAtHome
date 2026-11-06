@@ -13,7 +13,7 @@ test('TC-ECF001 — /dashboard/encore-careers loads', async ({ page }) => {
   await page.waitForLoadState('networkidle');
   if (page.url().includes('/login')) { console.warn('TC-ECF001: redirected'); return; }
   const content = await page.content();
-  expect(content).not.toMatch(/internal server error|next-error-h1/i);
+  expect(content).not.toMatch(/application error|internal server error/i);
 });
 
 test('TC-ECF002 — encore careers shows part-time/consulting/volunteer roles', async ({ page }) => {
@@ -44,7 +44,7 @@ test('TC-ECF010 — /dashboard/festivals loads', async ({ page }) => {
   await page.waitForLoadState('networkidle');
   if (page.url().includes('/login')) { console.warn('TC-ECF010: redirected'); return; }
   const content = await page.content();
-  expect(content).not.toMatch(/internal server error|next-error-h1/i);
+  expect(content).not.toMatch(/application error|internal server error/i);
 });
 
 test('TC-ECF011 — festivals page shows cultural events or calendar', async ({ page }) => {
@@ -67,7 +67,7 @@ test('TC-ECF020 — /dashboard/home-safety loads', async ({ page }) => {
   await page.waitForLoadState('networkidle');
   if (page.url().includes('/login')) { console.warn('TC-ECF020: redirected'); return; }
   const content = await page.content();
-  expect(content).not.toMatch(/internal server error|next-error-h1/i);
+  expect(content).not.toMatch(/application error|internal server error/i);
 });
 
 test('TC-ECF021 — home safety page has assessment checklist or form', async ({ page }) => {

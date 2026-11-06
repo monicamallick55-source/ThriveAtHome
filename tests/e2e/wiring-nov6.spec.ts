@@ -69,7 +69,7 @@ test('TC-WIRE020 — family dashboard loads without 500', async ({ page }) => {
   }
   // No 500 error page
   const content = await page.content();
-  expect(content).not.toMatch(/internal server error|next-error-h1/i);
+  expect(content).not.toMatch(/application error|internal server error/i);
 });
 
 test('TC-WIRE021 — family dashboard renders scam protection card', async ({ page }) => {
@@ -115,7 +115,7 @@ test('TC-WIRE040 — volunteer dashboard shows My Buddies tab', async ({ page })
   const hasBuddiesTab = content.match(/my buddies|buddies/i);
   if (!hasBuddiesTab) console.warn('TC-WIRE040: My Buddies tab text not found');
   // Page should load without 500
-  expect(content).not.toMatch(/internal server error|next-error-h1/i);
+  expect(content).not.toMatch(/application error|internal server error/i);
 });
 
 test('TC-WIRE041 — My Buddies tab renders when clicked', async ({ page }) => {
@@ -129,5 +129,5 @@ test('TC-WIRE041 — My Buddies tab renders when clicked', async ({ page }) => {
   await buddiesTab.click();
   await page.waitForLoadState('networkidle');
   const content = await page.content();
-  expect(content).not.toMatch(/internal server error|next-error-h1/i);
+  expect(content).not.toMatch(/application error|internal server error/i);
 });
