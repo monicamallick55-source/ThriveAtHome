@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect } from 'react'
-import { GIFT_CATALOG, needsFamilyApproval } from '@/lib/gifts/catalog'
+import { GIFT_CATALOG, requiresFamilyApproval as needsFamilyApproval } from "@/lib/gifts/catalog"
 
 type FamilyMember = {
   id: string
