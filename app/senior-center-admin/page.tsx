@@ -18,7 +18,7 @@ export default async function SeniorCenterAdminPage() {
   const role = await getUserRole(user.id)
 
   if (role !== 'senior_center_admin' && role !== 'admin') {
-    redirect('/dashboard')
+    redirect('/login')
   }
 
   const { data: center, error: centerError } = await getSeniorCenterForAdmin(user.id)

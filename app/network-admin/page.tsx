@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: 'Network Admin — ThriveAtHome' }
 export default async function NetworkAdminPage() {
   const user = await requireAuth()
   const role = await getUserRole(user.id)
-  if (role !== 'network_admin' && role !== 'admin') redirect('/dashboard')
+  if (role !== 'network_admin' && role !== 'admin') redirect('/login')
 
   const { data: network, error: networkError } = await getNetworkForAdmin(user.id)
   if (!network || networkError) {

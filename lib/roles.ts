@@ -7,7 +7,7 @@ import type { UserRole } from './auth'
 
 /** Every role and the path it should land on after signing in. */
 export const ROLE_HOME: Record<UserRole, string> = {
-  family: '/dashboard',
+  family: '/dashboard/family',
   navigator: '/navigator',
   admin: '/admin',
   volunteer: '/volunteer/dashboard',

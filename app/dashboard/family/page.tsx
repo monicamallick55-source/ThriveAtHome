@@ -25,18 +25,30 @@ export default async function FamilyPage() {
     getFamilyMemberByAuthId(user.id),
   ])
 
-  if (!memberResult.data) redirect('/onboarding')
-
   const member = memberResult.data
   const familyMember = familyMemberResult.data
 
+  // Redirect to onboarding only if there's no family_members row at all.
+  // A family observer whose member_id is not yet set still stays on this page.
   if (!familyMember) redirect('/onboarding')
 
-  const [tasksResult, messagesResult, callsResult] = await Promise.all([
+  const [tasksResult, messagesResult, callsResult] = member ? await Promise.all([
     getTasksForMember(member.id),
     getMessagesForMember(member.id, 50),
     getCallsForMember(member.id, 90, 0),
-  ])
+  ]) : [{ data: [] }, { data: [] }, { data: [] }]
+
+  // If no member is linked yet, show a simple pending state
+  if (!member) {
+    return (
+      <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-cream)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-body)' }}>
+        <div style={{ textAlign: 'center', padding: '48px 24px' }}>
+          <h1 style={{ fontSize: '24px', fontWeight: 600, marginBottom: '16px' }}>Family Portal</h1>
+          <p style={{ color: 'var(--color-text-secondary)' }}>Your family account is being set up. Please check back soon or contact support.</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <ToastProvider>

@@ -1,180 +1,136 @@
-import { notFound } from 'next/navigation'
-import Link from 'next/link'
+/**
+ * app/blog/page.tsx — public blog index
+ * Server Component; no auth guard.
+ */
 import type { Metadata } from 'next'
-import { BLOG_POSTS } from '@/lib/content/resources'
+import Link from 'next/link'
 
-interface Props {
-  params: { slug: string }
+export const metadata: Metadata = {
+  title: 'Blog — ThriveAtHome',
+  description: 'Guides, tips, and expert advice for seniors and their families on living independently with confidence.',
 }
 
-export function generateStaticParams() {
-  return BLOG_POSTS.map((post: any) => ({ slug: post.slug }))
+// Keep in sync with BLOG_POSTS in lib/content/resources.ts
+const POSTS = [
+  { slug: 'preventing-caregiver-burnout',       title: 'Preventing Caregiver Burnout',              date: 'Sep 2026', category: 'Caregiving' },
+  { slug: 'long-distance-caregiving-guide',      title: 'The Long-Distance Caregiving Guide',         date: 'Sep 2026', category: 'Caregiving' },
+  { slug: 'having-the-conversation-aging-parents', title: 'Having the Conversation with Aging Parents', date: 'Aug 2026', category: 'Family' },
+  { slug: 'adaptive-equipment-independence',     title: 'Adaptive Equipment for Independence',        date: 'Aug 2026', category: 'Daily Living' },
+  { slug: 'nutrition-guide-seniors',             title: 'Nutrition Guide for Seniors',                date: 'Aug 2026', category: 'Health' },
+  { slug: 'downsizing-seniors-guide',            title: 'Downsizing: A Practical Senior Guide',       date: 'Jul 2026', category: 'Housing' },
+  { slug: 'hiring-home-care-checklist',          title: 'How to Hire In-Home Care: a Checklist',      date: 'Jul 2026', category: 'Care' },
+  { slug: 'essential-legal-documents-seniors',   title: 'Essential Legal Documents Every Senior Needs', date: 'Jun 2026', category: 'Legal' },
+  { slug: 'benefits-guide-seniors',              title: 'Benefits Guide: Medicare, SNAP, and More',   date: 'Jun 2026', category: 'Benefits' },
+  { slug: 'finding-purpose-retirement',          title: 'Finding Purpose in Retirement',              date: 'Jun 2026', category: 'Wellbeing' },
+  { slug: 'social-security-maximising-benefits', title: 'Maximising Your Social Security Benefits',   date: 'May 2026', category: 'Finance' },
+  { slug: 'medicare-enrollment-guide-2026',      title: 'Medicare Enrollment Guide 2026',             date: 'May 2026', category: 'Benefits' },
+  { slug: 'exercise-guide-seniors',              title: 'Exercise Guide for Seniors: Move More, Safely', date: 'Apr 2026', category: 'Fitness' },
+  { slug: 'fall-prevention-at-home',             title: 'Fall Prevention at Home',                    date: 'Apr 2026', category: 'Safety' },
+  { slug: 'smart-home-tech-seniors-guide',       title: 'Smart Home Tech for Seniors',                date: 'Mar 2026', category: 'Technology' },
+  { slug: 'senior-moving-planning-guide',        title: 'Planning a Senior Move: Step by Step',       date: 'Mar 2026', category: 'Housing' },
+]
+
+const CATEGORIES = Array.from(new Set(POSTS.map((p) => p.category))).sort()
+
+const CATEGORY_COLORS: Record<string, string> = {
+  Caregiving: '#3b82f6', Family: '#8b5cf6', 'Daily Living': '#f59e0b',
+  Health: '#10b981', Housing: '#ef4444', Care: '#06b6d4',
+  Legal: '#6366f1', Benefits: '#ec4899', Wellbeing: '#14b8a6',
+  Finance: '#f97316', Fitness: '#84cc16', Safety: '#dc2626',
+  Technology: '#0ea5e9',
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const post = BLOG_POSTS.find((p: any) => p.slug === params.slug)
-  if (!post) return {}
-  return {
-    title: `${post.title} | ThriveAtHome Blog`,
-    description: post.excerpt,
-    openGraph: {
-      title: post.title,
-      description: post.excerpt,
-      type: 'article',
-      publishedTime: post.publishedAt,
-      authors: [post.author],
-    },
-  }
-}
-
-// Render markdown-style headings and paragraphs as HTML
-function renderContent(content: string) {
-  const lines = content.split('\n')
-  const elements: React.ReactNode[] = []
-  let key = 0
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim()
-    if (!line) continue
-
-    if (line.startsWith('## ')) {
-      elements.push(
-        <h2 key={key++} className="text-2xl font-semibold text-gray-900 mt-8 mb-3">
-          {line.slice(3)}
-        </h2>
-      )
-    } else if (line.startsWith('# ')) {
-      elements.push(
-        <h1 key={key++} className="text-3xl font-bold text-gray-900 mt-8 mb-4">
-          {line.slice(2)}
-        </h1>
-      )
-    } else if (line.startsWith('**') && line.endsWith('**')) {
-      elements.push(
-        <p key={key++} className="font-semibold text-gray-800 mt-4 mb-1">
-          {line.slice(2, -2)}
-        </p>
-      )
-    } else {
-      elements.push(
-        <p key={key++} className="text-gray-700 leading-relaxed mb-4">
-          {line}
-        </p>
-      )
-    }
-  }
-
-  return elements
-}
-
-export default function BlogPostPage({ params }: Props) {
-  const post = BLOG_POSTS.find((p: any) => p.slug === params.slug)
-  if (!post) notFound()
-
-  const relatedPosts = BLOG_POSTS.filter((p: any) => p.slug !== post.slug).slice(0, 2)
-
+export default function BlogPage() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div style={{ minHeight: '100vh', backgroundColor: '#fafaf7', fontFamily: 'var(--font-body, system-ui, sans-serif)' }}>
+      {/* Nav */}
+      <nav style={{ backgroundColor: '#1b2a4a', padding: '0 32px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Link href="/" style={{ fontFamily: 'var(--font-display, Georgia, serif)', fontSize: '22px', color: '#fafaf7', fontWeight: 500, textDecoration: 'none' }}>
+          ThriveAtHome
+        </Link>
+        <Link href="/resources" style={{ color: 'rgba(250,250,247,0.75)', fontSize: '15px', textDecoration: 'none' }}>Resources</Link>
+      </nav>
+
       {/* Header */}
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="text-lg font-semibold text-teal-700">ThriveAtHome</Link>
-          <nav className="flex items-center gap-6 text-sm">
-            <Link href="/blog" className="text-gray-600 hover:text-teal-700">← All Articles</Link>
-            <Link href="/signup" className="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 font-medium">
-              Sign up free
-            </Link>
-          </nav>
-        </div>
-      </header>
-
-      <main className="max-w-3xl mx-auto px-4 py-12">
-        {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-sm text-gray-500 mb-8">
-          <Link href="/blog" className="hover:text-teal-600">Blog</Link>
-          <span>›</span>
-          <span className="capitalize">{post.category.replace('-', ' ')}</span>
-        </nav>
-
-        {/* Category + read time */}
-        <div className="flex items-center gap-3 mb-4">
-          <span className="text-xs font-medium bg-teal-50 text-teal-700 px-3 py-1 rounded-full capitalize">
-            {post.category.replace(/-/g, ' ')}
-          </span>
-          <span className="text-sm text-gray-400">{post.readTimeMinutes} min read</span>
-        </div>
-
-        {/* Title */}
-        <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight mb-4">
-          {post.title}
+      <section style={{ backgroundColor: '#1b2a4a', padding: '56px 32px 64px', textAlign: 'center' }}>
+        <h1 style={{ fontFamily: 'var(--font-display, Georgia, serif)', fontSize: 'clamp(26px, 4vw, 42px)', fontWeight: 500, color: '#fafaf7', marginBottom: '12px' }}>
+          ThriveAtHome Blog
         </h1>
-
-        {/* Meta */}
-        <div className="flex items-center gap-2 text-sm text-gray-500 mb-8 pb-8 border-b border-gray-200">
-          <span>By <span className="font-medium text-gray-700">{post.author}</span></span>
-          <span>·</span>
-          <time dateTime={post.publishedAt}>
-            {new Date(post.publishedAt).toLocaleDateString('en-US', {
-              month: 'long', day: 'numeric', year: 'numeric',
-            })}
-          </time>
-        </div>
-
-        {/* Excerpt / lead */}
-        <p className="text-lg text-gray-600 leading-relaxed mb-8 font-medium">
-          {post.excerpt}
+        <p style={{ fontSize: '18px', color: 'rgba(250,250,247,0.75)', maxWidth: '520px', margin: '0 auto', lineHeight: 1.6 }}>
+          Guides and expert advice to help seniors and families navigate life at home with confidence.
         </p>
+      </section>
 
-        {/* Article body */}
-        <article className="prose-content">
-          {renderContent(post.content)}
-        </article>
-
-        {/* CTA banner */}
-        <div className="mt-12 bg-teal-700 rounded-2xl p-8 text-white">
-          <h2 className="text-2xl font-bold mb-2">Want personalised support?</h2>
-          <p className="text-teal-100 mb-6 leading-relaxed">
-            ThriveAtHome gives you a daily AI companion call, a real human buddy, and a Care Navigator who handles the hard stuff — so you can age at home on your own terms.
-          </p>
-          <Link
-            href="/signup"
-            className="inline-block bg-white text-teal-700 font-semibold px-6 py-3 rounded-xl hover:bg-teal-50 transition-colors"
-          >
-            Start free today →
-          </Link>
+      {/* Categories */}
+      <section style={{ maxWidth: '900px', margin: '0 auto', padding: '32px 32px 0' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+          {CATEGORIES.map((cat) => (
+            <span
+              key={cat}
+              style={{
+                display: 'inline-block',
+                backgroundColor: CATEGORY_COLORS[cat] ?? '#6b7280',
+                color: '#fff',
+                borderRadius: '20px',
+                padding: '4px 14px',
+                fontSize: '13px',
+                fontWeight: 600,
+              }}
+            >
+              {cat}
+            </span>
+          ))}
         </div>
+      </section>
 
-        {/* Related articles */}
-        {relatedPosts.length > 0 && (
-          <section className="mt-12">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">More Articles</h2>
-            <div className="grid sm:grid-cols-2 gap-6">
-              {relatedPosts.map((related: any) => (
-                <Link
-                  key={related.slug}
-                  href={`/blog/${related.slug}`}
-                  className="group border border-gray-200 rounded-xl p-5 hover:shadow-md hover:border-teal-300 transition-all bg-white"
+      {/* Post grid */}
+      <section style={{ maxWidth: '900px', margin: '0 auto', padding: '32px 32px 72px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
+          {POSTS.map((post) => (
+            <Link
+              key={post.slug}
+              href={`/blog/${post.slug}`}
+              style={{ textDecoration: 'none', display: 'block' }}
+            >
+              <div
+                style={{
+                  backgroundColor: '#fff',
+                  borderRadius: '12px',
+                  border: '1px solid #e8e4de',
+                  padding: '24px',
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
+                  height: '100%',
+                  transition: 'box-shadow 0.15s',
+                }}
+              >
+                <span
+                  style={{
+                    display: 'inline-block',
+                    backgroundColor: CATEGORY_COLORS[post.category] ?? '#6b7280',
+                    color: '#fff',
+                    borderRadius: '12px',
+                    padding: '2px 10px',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    marginBottom: '10px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                  }}
                 >
-                  <span className="text-xs font-medium bg-teal-50 text-teal-700 px-2 py-1 rounded-full capitalize mb-3 inline-block">
-                    {related.category.replace(/-/g, ' ')}
-                  </span>
-                  <h3 className="font-semibold text-gray-900 group-hover:text-teal-700 leading-snug mb-2">
-                    {related.title}
-                  </h3>
-                  <p className="text-sm text-gray-500">{related.readTimeMinutes} min read</p>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
-      </main>
+                  {post.category}
+                </span>
+                <h2 style={{ fontFamily: 'var(--font-display, Georgia, serif)', fontSize: '17px', fontWeight: 500, color: '#1b2a4a', lineHeight: 1.4, marginBottom: '10px' }}>
+                  {post.title}
+                </h2>
+                <p style={{ fontSize: '13px', color: '#9ca3af' }}>{post.date}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
 
-      {/* Footer */}
-      <footer className="border-t border-gray-200 mt-16 py-8 text-center text-sm text-gray-400">
-        <Link href="/privacy" className="hover:text-gray-600 mx-3">Privacy</Link>
-        <Link href="/terms" className="hover:text-gray-600 mx-3">Terms</Link>
-        <Link href="/contact" className="hover:text-gray-600 mx-3">Contact</Link>
-        <p className="mt-3">© 2026 ThriveAtHome. All rights reserved.</p>
+      <footer style={{ borderTop: '1px solid #e8e4de', padding: '28px 32px', textAlign: 'center', color: '#9ca3af', fontSize: '14px' }}>
+        © {new Date().getFullYear()} ThriveAtHome · <Link href="/privacy" style={{ color: '#9ca3af' }}>Privacy</Link> · <Link href="/terms" style={{ color: '#9ca3af' }}>Terms</Link>
       </footer>
     </div>
   )

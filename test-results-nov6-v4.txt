@@ -1,0 +1,2053 @@
+
+Running 712 tests using 1 worker
+
+[1/712] [chromium] › tests/e2e/admin-portal-deep.spec.ts:57:1 › TC-AD002 — /admin/ma-report loads without 500
+[2/712] [chromium] › tests/e2e/admin-portal-deep.spec.ts:65:1 › TC-AD003 — /admin/metro-activation loads without 500
+[3/712] [chromium] › tests/e2e/admin-portal-deep.spec.ts:73:1 › TC-AD004 — /admin/community-partners loads without 500
+[4/712] [chromium] › tests/e2e/admin-portal-deep.spec.ts:81:1 › TC-AD005 — /admin/grief-circles loads without 500
+[5/712] [chromium] › tests/e2e/admin-portal-deep.spec.ts:89:1 › TC-AD006 — /admin/devices loads without 500
+[6/712] [chromium] › tests/e2e/admin-portal-deep.spec.ts:97:1 › TC-AD007 — /admin/org-imports loads without 500
+[7/712] [chromium] › tests/e2e/admin-portal-deep.spec.ts:105:1 › TC-AD008 — /admin/campaigns loads without 500
+[8/712] [chromium] › tests/e2e/admin-portal-deep.spec.ts:113:1 › TC-AD009 — Partner listings RLS (manual check)
+[chromium] › tests/e2e/admin-portal-deep.spec.ts:113:1 › TC-AD009 — Partner listings RLS (manual check)
+TC-AD009: RLS verified via Supabase SQL; manual check only — cannot test service-role bypass from E2E
+
+[9/712] [chromium] › tests/e2e/admin-portal-deep.spec.ts:125:1 › TC-AD010 — /admin has feature flag controls
+[chromium] › tests/e2e/admin-portal-deep.spec.ts:125:1 › TC-AD010 — /admin has feature flag controls
+TC-AD010: No feature flag UI found on /admin — may be on a subpage
+
+[10/712] [chromium] › tests/e2e/admin-portal-deep.spec.ts:143:1 › TC-N004 — /navigator loads for navigator role
+[chromium] › tests/e2e/admin-portal-deep.spec.ts:143:1 › TC-N004 — /navigator loads for navigator role
+TC-N004: /navigator redirected to /login
+
+[11/712] [chromium] › tests/e2e/admin-portal-deep.spec.ts:161:1 › TC-N006 — /navigator loads; home-from-hospital requires seeded data
+[chromium] › tests/e2e/admin-portal-deep.spec.ts:161:1 › TC-N006 — /navigator loads; home-from-hospital requires seeded data
+TC-N006: /navigator redirected to /login
+
+[12/712] [chromium] › tests/e2e/admin-portal-deep.spec.ts:177:1 › TC-N007 — /navigator loads; campaign approval requires flag on
+[chromium] › tests/e2e/admin-portal-deep.spec.ts:177:1 › TC-N007 — /navigator loads; campaign approval requires flag on
+TC-N007: /navigator redirected to /login
+
+[13/712] [chromium] › tests/e2e/admin-portal-deep.spec.ts:193:1 › TC-B2B002 — /org-admin/village-referrals loads without 500
+[14/712] [chromium] › tests/e2e/admin-portal-deep.spec.ts:201:1 › TC-B2B003 — /org-admin loads with org context
+[15/712] [chromium] › tests/e2e/admin-portal-deep.spec.ts:219:1 › TC-B2B004 — /org-admin feature config loads
+[chromium] › tests/e2e/admin-portal-deep.spec.ts:219:1 › TC-B2B004 — /org-admin feature config loads
+TC-B2B004: feature toggle requires org_configs row; check via admin portal or Supabase directly
+
+[16/712] [chromium] › tests/e2e/admin-portal-deep.spec.ts:235:1 › TC-B2B012 — /employer-admin loads with invite UI
+[chromium] › tests/e2e/admin-portal-deep.spec.ts:235:1 › TC-B2B012 — /employer-admin loads with invite UI
+TC-B2B012: No invite UI found on /employer-admin
+
+[17/712] [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — member@test.com routes to /dashboard
+[18/712] [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — family@test.com routes to /dashboard/family
+  1) [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — family@test.com routes to /dashboard/family 
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected substring: "/dashboard/family"
+    Received string:    "https://thrive-at-home-pied.vercel.app/dashboard"
+
+      25 |       return;
+      26 |     }
+    > 27 |     expect(page.url()).toContain(expectedPath);
+         |                        ^
+      28 |   });
+      29 | }
+      30 |
+        at /workspaces/ThriveAtHome/tests/e2e/auth-flows.spec.ts:27:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/auth-flows-TC-A001-—-famil-2fb33--routes-to-dashboard-family-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/auth-flows-TC-A001-—-famil-2fb33--routes-to-dashboard-family-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/auth-flows-TC-A001-—-famil-2fb33--routes-to-dashboard-family-chromium/error-context.md
+
+
+[19/712] [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — navigator@test.com routes to /navigator
+[chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — navigator@test.com routes to /navigator
+TC-A001: navigator@test.com login failed — not seeded or rate limited
+
+[20/712] [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — admin@test.com routes to /admin
+  2) [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — admin@test.com routes to /admin ────
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected substring: "/admin"
+    Received string:    "https://thrive-at-home-pied.vercel.app/dashboard"
+
+      25 |       return;
+      26 |     }
+    > 27 |     expect(page.url()).toContain(expectedPath);
+         |                        ^
+      28 |   });
+      29 | }
+      30 |
+        at /workspaces/ThriveAtHome/tests/e2e/auth-flows.spec.ts:27:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/auth-flows-TC-A001-—-admin-test-com-routes-to-admin-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/auth-flows-TC-A001-—-admin-test-com-routes-to-admin-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/auth-flows-TC-A001-—-admin-test-com-routes-to-admin-chromium/error-context.md
+
+
+[21/712] [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — volunteer@test.com routes to /volunteer
+[22/712] [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — orgadmin@test.com routes to /org-admin
+  3) [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — orgadmin@test.com routes to /org-admin 
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected substring: "/org-admin"
+    Received string:    "https://thrive-at-home-pied.vercel.app/dashboard"
+
+      25 |       return;
+      26 |     }
+    > 27 |     expect(page.url()).toContain(expectedPath);
+         |                        ^
+      28 |   });
+      29 | }
+      30 |
+        at /workspaces/ThriveAtHome/tests/e2e/auth-flows.spec.ts:27:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/auth-flows-TC-A001-—-orgadmin-test-com-routes-to-org-admin-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/auth-flows-TC-A001-—-orgadmin-test-com-routes-to-org-admin-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/auth-flows-TC-A001-—-orgadmin-test-com-routes-to-org-admin-chromium/error-context.md
+
+
+[23/712] [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — employer@test.com routes to /employer-admin
+  4) [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — employer@test.com routes to /employer-admin 
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected substring: "/employer-admin"
+    Received string:    "https://thrive-at-home-pied.vercel.app/dashboard"
+
+      25 |       return;
+      26 |     }
+    > 27 |     expect(page.url()).toContain(expectedPath);
+         |                        ^
+      28 |   });
+      29 | }
+      30 |
+        at /workspaces/ThriveAtHome/tests/e2e/auth-flows.spec.ts:27:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/auth-flows-TC-A001-—-emplo-0d841-om-routes-to-employer-admin-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/auth-flows-TC-A001-—-emplo-0d841-om-routes-to-employer-admin-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/auth-flows-TC-A001-—-emplo-0d841-om-routes-to-employer-admin-chromium/error-context.md
+
+
+[24/712] [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — uniadmin@test.com routes to /university-admin
+  5) [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — uniadmin@test.com routes to /university-admin 
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected substring: "/university-admin"
+    Received string:    "https://thrive-at-home-pied.vercel.app/dashboard"
+
+      25 |       return;
+      26 |     }
+    > 27 |     expect(page.url()).toContain(expectedPath);
+         |                        ^
+      28 |   });
+      29 | }
+      30 |
+        at /workspaces/ThriveAtHome/tests/e2e/auth-flows.spec.ts:27:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/auth-flows-TC-A001-—-uniad-e2856--routes-to-university-admin-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/auth-flows-TC-A001-—-uniad-e2856--routes-to-university-admin-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/auth-flows-TC-A001-—-uniad-e2856--routes-to-university-admin-chromium/error-context.md
+
+
+[25/712] [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — vsoadmin@test.com routes to /vso-admin
+  6) [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — vsoadmin@test.com routes to /vso-admin 
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected substring: "/vso-admin"
+    Received string:    "https://thrive-at-home-pied.vercel.app/org-admin"
+
+      25 |       return;
+      26 |     }
+    > 27 |     expect(page.url()).toContain(expectedPath);
+         |                        ^
+      28 |   });
+      29 | }
+      30 |
+        at /workspaces/ThriveAtHome/tests/e2e/auth-flows.spec.ts:27:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/auth-flows-TC-A001-—-vsoadmin-test-com-routes-to-vso-admin-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/auth-flows-TC-A001-—-vsoadmin-test-com-routes-to-vso-admin-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/auth-flows-TC-A001-—-vsoadmin-test-com-routes-to-vso-admin-chromium/error-context.md
+
+
+[26/712] [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — k12admin@test.com routes to /school-admin
+  7) [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — k12admin@test.com routes to /school-admin 
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected substring: "/school-admin"
+    Received string:    "https://thrive-at-home-pied.vercel.app/org-admin"
+
+      25 |       return;
+      26 |     }
+    > 27 |     expect(page.url()).toContain(expectedPath);
+         |                        ^
+      28 |   });
+      29 | }
+      30 |
+        at /workspaces/ThriveAtHome/tests/e2e/auth-flows.spec.ts:27:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/auth-flows-TC-A001-—-k12ad-ff900--com-routes-to-school-admin-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/auth-flows-TC-A001-—-k12ad-ff900--com-routes-to-school-admin-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/auth-flows-TC-A001-—-k12ad-ff900--com-routes-to-school-admin-chromium/error-context.md
+
+
+[27/712] [chromium] › tests/e2e/auth-flows.spec.ts:31:1 › TC-A002 — /signup page loads
+[28/712] [chromium] › tests/e2e/auth-flows.spec.ts:39:1 › TC-A004 — member cannot reach admin after login
+[29/712] [chromium] › tests/e2e/auth-flows.spec.ts:47:1 › TC-A005 — member cannot reach navigator after login
+[30/712] [chromium] › tests/e2e/auth-flows.spec.ts:55:1 › TC-A006 — /login page has email and password fields
+[31/712] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Member (member@test.com) → /dashboard
+[32/712] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Family (family@test.com) → /dashboard/family
+  8) [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Family (family@test.com) → /dashboard/family 
+
+    Error: expect(page).toHaveURL(expected) failed
+
+    Expected pattern: /\/dashboard\/family.*/
+    Received string:  "https://thrive-at-home-pied.vercel.app/dashboard"
+    Timeout: 15000ms
+
+    Call log:
+      - Expect "toHaveURL" with timeout 15000ms
+        34 × locator resolved to <html lang="en" class="h-full">…</html>
+           - unexpected value "https://thrive-at-home-pied.vercel.app/dashboard"
+
+
+      46 |
+      47 |       // Should land on the expected portal (or a sub-path of it)
+    > 48 |       await expect(page).toHaveURL(new RegExp(portal.replace('/', '\\/').replace('-', '\\-') + '.*'), { timeout: 15_000 });
+         |                          ^
+      49 |
+      50 |       // No 500 error on the portal page
+      51 |       const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
+        at /workspaces/ThriveAtHome/tests/e2e/auth-roles.spec.ts:48:26
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A004-—-21-ro-f0b05-test-com-→-dashboard-family-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A004-—-21-ro-f0b05-test-com-→-dashboard-family-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/auth-roles-TC-A004-—-21-ro-f0b05-test-com-→-dashboard-family-chromium/error-context.md
+
+
+[33/712] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Navigator (navigator@test.com) → /navigator
+[34/712] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Admin (admin@test.com) → /admin
+  9) [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Admin (admin@test.com) → /admin 
+
+    Error: expect(page).toHaveURL(expected) failed
+
+    Expected pattern: /\/admin.*/
+    Received string:  "https://thrive-at-home-pied.vercel.app/dashboard"
+    Timeout: 15000ms
+
+    Call log:
+      - Expect "toHaveURL" with timeout 15000ms
+        34 × locator resolved to <html lang="en" class="h-full">…</html>
+           - unexpected value "https://thrive-at-home-pied.vercel.app/dashboard"
+
+
+      46 |
+      47 |       // Should land on the expected portal (or a sub-path of it)
+    > 48 |       await expect(page).toHaveURL(new RegExp(portal.replace('/', '\\/').replace('-', '\\-') + '.*'), { timeout: 15_000 });
+         |                          ^
+      49 |
+      50 |       // No 500 error on the portal page
+      51 |       const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
+        at /workspaces/ThriveAtHome/tests/e2e/auth-roles.spec.ts:48:26
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A004-—-21-ro-949da-dmin-admin-test-com-→-admin-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A004-—-21-ro-949da-dmin-admin-test-com-→-admin-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/auth-roles-TC-A004-—-21-ro-949da-dmin-admin-test-com-→-admin-chromium/error-context.md
+
+
+[35/712] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Care Worker (careworker@test.com) → /care-worker
+  10) [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Care Worker (careworker@test.com) → /care-worker 
+
+    Error: expect(page).toHaveURL(expected) failed
+
+    Expected pattern: /\/care\-worker.*/
+    Received string:  "https://thrive-at-home-pied.vercel.app/dashboard"
+    Timeout: 15000ms
+
+    Call log:
+      - Expect "toHaveURL" with timeout 15000ms
+        34 × locator resolved to <html lang="en" class="h-full">…</html>
+           - unexpected value "https://thrive-at-home-pied.vercel.app/dashboard"
+
+
+      46 |
+      47 |       // Should land on the expected portal (or a sub-path of it)
+    > 48 |       await expect(page).toHaveURL(new RegExp(portal.replace('/', '\\/').replace('-', '\\-') + '.*'), { timeout: 15_000 });
+         |                          ^
+      49 |
+      50 |       // No 500 error on the portal page
+      51 |       const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
+        at /workspaces/ThriveAtHome/tests/e2e/auth-roles.spec.ts:48:26
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A004-—-21-ro-d028c-rker-test-com-→-care-worker-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A004-—-21-ro-d028c-rker-test-com-→-care-worker-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/auth-roles-TC-A004-—-21-ro-d028c-rker-test-com-→-care-worker-chromium/error-context.md
+
+
+[36/712] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › General Volunteer (volunteer@test.com) → /volunteer/dashboard
+[37/712] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Student Volunteer (student@test.com) → /volunteer/dashboard
+  11) [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Student Volunteer (student@test.com) → /volunteer/dashboard 
+
+    Error: expect(page).toHaveURL(expected) failed
+
+    Expected pattern: /\/volunteer\/dashboard.*/
+    Received string:  "https://thrive-at-home-pied.vercel.app/student"
+    Timeout: 15000ms
+
+    Call log:
+      - Expect "toHaveURL" with timeout 15000ms
+        34 × locator resolved to <html lang="en" class="h-full">…</html>
+           - unexpected value "https://thrive-at-home-pied.vercel.app/student"
+
+
+      46 |
+      47 |       // Should land on the expected portal (or a sub-path of it)
+    > 48 |       await expect(page).toHaveURL(new RegExp(portal.replace('/', '\\/').replace('-', '\\-') + '.*'), { timeout: 15_000 });
+         |                          ^
+      49 |
+      50 |       // No 500 error on the portal page
+      51 |       const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
+        at /workspaces/ThriveAtHome/tests/e2e/auth-roles.spec.ts:48:26
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A004-—-21-ro-8973b-t-com-→-volunteer-dashboard-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A004-—-21-ro-8973b-t-com-→-volunteer-dashboard-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/auth-roles-TC-A004-—-21-ro-8973b-t-com-→-volunteer-dashboard-chromium/error-context.md
+
+
+[38/712] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Veteran Volunteer (veteran@test.com) → /volunteer/dashboard
+[39/712] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Retired Pro Volunteer (retired_pro@test.com) → /volunteer/dashboard
+[40/712] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Corporate Volunteer (corporate@test.com) → /volunteer/dashboard
+[41/712] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Neighbor Volunteer (neighbor@test.com) → /volunteer/dashboard
+[42/712] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Faith Volunteer (faith@test.com) → /volunteer/dashboard
+[43/712] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › K-12 Student Volunteer (k12student@test.com) → /volunteer/dashboard
+  12) [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › K-12 Student Volunteer (k12student@test.com) → /volunteer/dashboard 
+
+    Error: expect(page).toHaveURL(expected) failed
+
+    Expected pattern: /\/volunteer\/dashboard.*/
+    Received string:  "https://thrive-at-home-pied.vercel.app/student"
+    Timeout: 15000ms
+
+    Call log:
+      - Expect "toHaveURL" with timeout 15000ms
+        34 × locator resolved to <html lang="en" class="h-full">…</html>
+           - unexpected value "https://thrive-at-home-pied.vercel.app/student"
+
+
+      46 |
+      47 |       // Should land on the expected portal (or a sub-path of it)
+    > 48 |       await expect(page).toHaveURL(new RegExp(portal.replace('/', '\\/').replace('-', '\\-') + '.*'), { timeout: 15_000 });
+         |                          ^
+      49 |
+      50 |       // No 500 error on the portal page
+      51 |       const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
+        at /workspaces/ThriveAtHome/tests/e2e/auth-roles.spec.ts:48:26
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A004-—-21-ro-07ce1-t-com-→-volunteer-dashboard-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A004-—-21-ro-07ce1-t-com-→-volunteer-dashboard-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/auth-roles-TC-A004-—-21-ro-07ce1-t-com-→-volunteer-dashboard-chromium/error-context.md
+
+
+[44/712] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Agency Admin (agency@test.com) → /agency-admin
+  13) [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Agency Admin (agency@test.com) → /agency-admin 
+
+    Error: expect(page).toHaveURL(expected) failed
+
+    Expected pattern: /\/agency\-admin.*/
+    Received string:  "https://thrive-at-home-pied.vercel.app/dashboard"
+    Timeout: 15000ms
+
+    Call log:
+      - Expect "toHaveURL" with timeout 15000ms
+        34 × locator resolved to <html lang="en" class="h-full">…</html>
+           - unexpected value "https://thrive-at-home-pied.vercel.app/dashboard"
+
+
+      46 |
+      47 |       // Should land on the expected portal (or a sub-path of it)
+    > 48 |       await expect(page).toHaveURL(new RegExp(portal.replace('/', '\\/').replace('-', '\\-') + '.*'), { timeout: 15_000 });
+         |                          ^
+      49 |
+      50 |       // No 500 error on the portal page
+      51 |       const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
+        at /workspaces/ThriveAtHome/tests/e2e/auth-roles.spec.ts:48:26
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A004-—-21-ro-00fc7-ncy-test-com-→-agency-admin-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A004-—-21-ro-00fc7-ncy-test-com-→-agency-admin-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/auth-roles-TC-A004-—-21-ro-00fc7-ncy-test-com-→-agency-admin-chromium/error-context.md
+
+
+[45/712] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Employer Admin (employer@test.com) → /employer-admin
+  14) [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Employer Admin (employer@test.com) → /employer-admin 
+
+    Error: expect(page).toHaveURL(expected) failed
+
+    Expected pattern: /\/employer\-admin.*/
+    Received string:  "https://thrive-at-home-pied.vercel.app/dashboard"
+    Timeout: 15000ms
+
+    Call log:
+      - Expect "toHaveURL" with timeout 15000ms
+        34 × locator resolved to <html lang="en" class="h-full">…</html>
+           - unexpected value "https://thrive-at-home-pied.vercel.app/dashboard"
+
+
+      46 |
+      47 |       // Should land on the expected portal (or a sub-path of it)
+    > 48 |       await expect(page).toHaveURL(new RegExp(portal.replace('/', '\\/').replace('-', '\\-') + '.*'), { timeout: 15_000 });
+         |                          ^
+      49 |
+      50 |       // No 500 error on the portal page
+      51 |       const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
+        at /workspaces/ThriveAtHome/tests/e2e/auth-roles.spec.ts:48:26
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A004-—-21-ro-5e30f-r-test-com-→-employer-admin-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A004-—-21-ro-5e30f-r-test-com-→-employer-admin-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/auth-roles-TC-A004-—-21-ro-5e30f-r-test-com-→-employer-admin-chromium/error-context.md
+
+
+[46/712] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Network Admin (network@test.com) → /network-admin
+  15) [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Network Admin (network@test.com) → /network-admin 
+
+    Error: expect(page).toHaveURL(expected) failed
+
+    Expected pattern: /\/network\-admin.*/
+    Received string:  "https://thrive-at-home-pied.vercel.app/dashboard"
+    Timeout: 15000ms
+
+    Call log:
+      - Expect "toHaveURL" with timeout 15000ms
+        34 × locator resolved to <html lang="en" class="h-full">…</html>
+           - unexpected value "https://thrive-at-home-pied.vercel.app/dashboard"
+
+
+      46 |
+      47 |       // Should land on the expected portal (or a sub-path of it)
+    > 48 |       await expect(page).toHaveURL(new RegExp(portal.replace('/', '\\/').replace('-', '\\-') + '.*'), { timeout: 15_000 });
+         |                          ^
+      49 |
+      50 |       // No 500 error on the portal page
+      51 |       const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
+        at /workspaces/ThriveAtHome/tests/e2e/auth-roles.spec.ts:48:26
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A004-—-21-ro-c612d-rk-test-com-→-network-admin-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A004-—-21-ro-c612d-rk-test-com-→-network-admin-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/auth-roles-TC-A004-—-21-ro-c612d-rk-test-com-→-network-admin-chromium/error-context.md
+
+
+[47/712] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Senior Center Admin (seniorcenter@test.com) → /senior-center-admin
+  16) [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Senior Center Admin (seniorcenter@test.com) → /senior-center-admin 
+
+    Error: expect(page).toHaveURL(expected) failed
+
+    Expected pattern: /\/senior\-center-admin.*/
+    Received string:  "https://thrive-at-home-pied.vercel.app/dashboard"
+    Timeout: 15000ms
+
+    Call log:
+      - Expect "toHaveURL" with timeout 15000ms
+        34 × locator resolved to <html lang="en" class="h-full">…</html>
+           - unexpected value "https://thrive-at-home-pied.vercel.app/dashboard"
+
+
+      46 |
+      47 |       // Should land on the expected portal (or a sub-path of it)
+    > 48 |       await expect(page).toHaveURL(new RegExp(portal.replace('/', '\\/').replace('-', '\\-') + '.*'), { timeout: 15_000 });
+         |                          ^
+      49 |
+      50 |       // No 500 error on the portal page
+      51 |       const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
+        at /workspaces/ThriveAtHome/tests/e2e/auth-roles.spec.ts:48:26
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A004-—-21-ro-1a53a-t-com-→-senior-center-admin-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A004-—-21-ro-1a53a-t-com-→-senior-center-admin-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/auth-roles-TC-A004-—-21-ro-1a53a-t-com-→-senior-center-admin-chromium/error-context.md
+
+
+[48/712] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › AAA Admin (aaa@test.com) → /aaa-admin
+  17) [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › AAA Admin (aaa@test.com) → /aaa-admin 
+
+    Error: expect(page).toHaveURL(expected) failed
+
+    Expected pattern: /\/aaa\-admin.*/
+    Received string:  "https://thrive-at-home-pied.vercel.app/dashboard"
+    Timeout: 15000ms
+
+    Call log:
+      - Expect "toHaveURL" with timeout 15000ms
+        34 × locator resolved to <html lang="en" class="h-full">…</html>
+           - unexpected value "https://thrive-at-home-pied.vercel.app/dashboard"
+
+
+      46 |
+      47 |       // Should land on the expected portal (or a sub-path of it)
+    > 48 |       await expect(page).toHaveURL(new RegExp(portal.replace('/', '\\/').replace('-', '\\-') + '.*'), { timeout: 15_000 });
+         |                          ^
+      49 |
+      50 |       // No 500 error on the portal page
+      51 |       const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
+        at /workspaces/ThriveAtHome/tests/e2e/auth-roles.spec.ts:48:26
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A004-—-21-ro-6681b-in-aaa-test-com-→-aaa-admin-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A004-—-21-ro-6681b-in-aaa-test-com-→-aaa-admin-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/auth-roles-TC-A004-—-21-ro-6681b-in-aaa-test-com-→-aaa-admin-chromium/error-context.md
+
+
+[49/712] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Org Admin (orgadmin@test.com) → /org-admin
+  18) [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Org Admin (orgadmin@test.com) → /org-admin 
+
+    Error: expect(page).toHaveURL(expected) failed
+
+    Expected pattern: /\/org\-admin.*/
+    Received string:  "https://thrive-at-home-pied.vercel.app/dashboard"
+    Timeout: 15000ms
+
+    Call log:
+      - Expect "toHaveURL" with timeout 15000ms
+        34 × locator resolved to <html lang="en" class="h-full">…</html>
+           - unexpected value "https://thrive-at-home-pied.vercel.app/dashboard"
+
+
+      46 |
+      47 |       // Should land on the expected portal (or a sub-path of it)
+    > 48 |       await expect(page).toHaveURL(new RegExp(portal.replace('/', '\\/').replace('-', '\\-') + '.*'), { timeout: 15_000 });
+         |                          ^
+      49 |
+      50 |       // No 500 error on the portal page
+      51 |       const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
+        at /workspaces/ThriveAtHome/tests/e2e/auth-roles.spec.ts:48:26
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A004-—-21-ro-cbdaf-gadmin-test-com-→-org-admin-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A004-—-21-ro-cbdaf-gadmin-test-com-→-org-admin-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/auth-roles-TC-A004-—-21-ro-cbdaf-gadmin-test-com-→-org-admin-chromium/error-context.md
+
+
+[50/712] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › VSO Admin (vsoadmin@test.com) → /vso-admin
+  19) [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › VSO Admin (vsoadmin@test.com) → /vso-admin 
+
+    Error: expect(page).toHaveURL(expected) failed
+
+    Expected pattern: /\/vso\-admin.*/
+    Received string:  "https://thrive-at-home-pied.vercel.app/org-admin"
+    Timeout: 15000ms
+
+    Call log:
+      - Expect "toHaveURL" with timeout 15000ms
+        34 × locator resolved to <html lang="en" class="h-full">…</html>
+           - unexpected value "https://thrive-at-home-pied.vercel.app/org-admin"
+
+
+      46 |
+      47 |       // Should land on the expected portal (or a sub-path of it)
+    > 48 |       await expect(page).toHaveURL(new RegExp(portal.replace('/', '\\/').replace('-', '\\-') + '.*'), { timeout: 15_000 });
+         |                          ^
+      49 |
+      50 |       // No 500 error on the portal page
+      51 |       const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
+        at /workspaces/ThriveAtHome/tests/e2e/auth-roles.spec.ts:48:26
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A004-—-21-ro-3ecaa-oadmin-test-com-→-vso-admin-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A004-—-21-ro-3ecaa-oadmin-test-com-→-vso-admin-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/auth-roles-TC-A004-—-21-ro-3ecaa-oadmin-test-com-→-vso-admin-chromium/error-context.md
+
+
+[51/712] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › University Admin (uniadmin@test.com) → /university-admin
+  20) [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › University Admin (uniadmin@test.com) → /university-admin 
+
+    Error: expect(page).toHaveURL(expected) failed
+
+    Expected pattern: /\/university\-admin.*/
+    Received string:  "https://thrive-at-home-pied.vercel.app/dashboard"
+    Timeout: 15000ms
+
+    Call log:
+      - Expect "toHaveURL" with timeout 15000ms
+        34 × locator resolved to <html lang="en" class="h-full">…</html>
+           - unexpected value "https://thrive-at-home-pied.vercel.app/dashboard"
+
+
+      46 |
+      47 |       // Should land on the expected portal (or a sub-path of it)
+    > 48 |       await expect(page).toHaveURL(new RegExp(portal.replace('/', '\\/').replace('-', '\\-') + '.*'), { timeout: 15_000 });
+         |                          ^
+      49 |
+      50 |       // No 500 error on the portal page
+      51 |       const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
+        at /workspaces/ThriveAtHome/tests/e2e/auth-roles.spec.ts:48:26
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A004-—-21-ro-6ccec-test-com-→-university-admin-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A004-—-21-ro-6ccec-test-com-→-university-admin-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/auth-roles-TC-A004-—-21-ro-6ccec-test-com-→-university-admin-chromium/error-context.md
+
+
+[52/712] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › K-12 Admin (k12admin@test.com) → /school-admin
+  21) [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › K-12 Admin (k12admin@test.com) → /school-admin 
+
+    Error: expect(page).toHaveURL(expected) failed
+
+    Expected pattern: /\/school\-admin.*/
+    Received string:  "https://thrive-at-home-pied.vercel.app/org-admin"
+    Timeout: 15000ms
+
+    Call log:
+      - Expect "toHaveURL" with timeout 15000ms
+        34 × locator resolved to <html lang="en" class="h-full">…</html>
+           - unexpected value "https://thrive-at-home-pied.vercel.app/org-admin"
+
+
+      46 |
+      47 |       // Should land on the expected portal (or a sub-path of it)
+    > 48 |       await expect(page).toHaveURL(new RegExp(portal.replace('/', '\\/').replace('-', '\\-') + '.*'), { timeout: 15_000 });
+         |                          ^
+      49 |
+      50 |       // No 500 error on the portal page
+      51 |       const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
+        at /workspaces/ThriveAtHome/tests/e2e/auth-roles.spec.ts:48:26
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A004-—-21-ro-9cb2b-min-test-com-→-school-admin-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A004-—-21-ro-9cb2b-min-test-com-→-school-admin-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/auth-roles-TC-A004-—-21-ro-9cb2b-min-test-com-→-school-admin-chromium/error-context.md
+
+
+[53/712] [chromium] › tests/e2e/auth-roles.spec.ts:63:3 › TC-A005 — cross-role access blocked › member cannot access /navigator
+[54/712] [chromium] › tests/e2e/auth-roles.spec.ts:76:3 › TC-A005 — cross-role access blocked › volunteer cannot access /admin
+  22) [chromium] › tests/e2e/auth-roles.spec.ts:76:3 › TC-A005 — cross-role access blocked › volunteer cannot access /admin 
+
+    Error: Volunteer should not access /admin
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      83 |       url.includes('/volunteer') ||
+      84 |       /401|403|unauthorized|forbidden|access denied/i.test(bodyText);
+    > 85 |     expect(isBlocked, 'Volunteer should not access /admin').toBe(true);
+         |                                                             ^
+      86 |   });
+      87 |
+      88 |   test('family cannot access /org-admin', async ({ page }) => {
+        at /workspaces/ThriveAtHome/tests/e2e/auth-roles.spec.ts:85:61
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A005-—-cross-dcb20-lunteer-cannot-access-admin-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A005-—-cross-dcb20-lunteer-cannot-access-admin-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/auth-roles-TC-A005-—-cross-dcb20-lunteer-cannot-access-admin-chromium/error-context.md
+
+
+[55/712] [chromium] › tests/e2e/auth-roles.spec.ts:88:3 › TC-A005 — cross-role access blocked › family cannot access /org-admin
+  23) [chromium] › tests/e2e/auth-roles.spec.ts:88:3 › TC-A005 — cross-role access blocked › family cannot access /org-admin 
+
+    Error: Family should not access /org-admin
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      91 |     const url = page.url();
+      92 |     const isBlocked = url.includes('/login') || url.includes('/dashboard/family');
+    > 93 |     expect(isBlocked, 'Family should not access /org-admin').toBe(true);
+         |                                                              ^
+      94 |   });
+      95 |
+      96 |   test('k12student cannot access /employer-admin', async ({ page }) => {
+        at /workspaces/ThriveAtHome/tests/e2e/auth-roles.spec.ts:93:62
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A005-—-cross-ef971-ily-cannot-access-org-admin-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A005-—-cross-ef971-ily-cannot-access-org-admin-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/auth-roles-TC-A005-—-cross-ef971-ily-cannot-access-org-admin-chromium/error-context.md
+
+
+[56/712] [chromium] › tests/e2e/auth-roles.spec.ts:96:3 › TC-A005 — cross-role access blocked › k12student cannot access /employer-admin
+  24) [chromium] › tests/e2e/auth-roles.spec.ts:96:3 › TC-A005 — cross-role access blocked › k12student cannot access /employer-admin 
+
+    Error: K12 student should not access /employer-admin
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      103 |       url.includes('/volunteer') ||
+      104 |       /401|403|unauthorized|forbidden/i.test(bodyText);
+    > 105 |     expect(isBlocked, 'K12 student should not access /employer-admin').toBe(true);
+          |                                                                        ^
+      106 |   });
+      107 | });
+      108 |
+        at /workspaces/ThriveAtHome/tests/e2e/auth-roles.spec.ts:105:72
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A005-—-cross-ae50a-annot-access-employer-admin-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A005-—-cross-ae50a-annot-access-employer-admin-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/auth-roles-TC-A005-—-cross-ae50a-annot-access-employer-admin-chromium/error-context.md
+
+
+[57/712] [chromium] › tests/e2e/auth-roles.spec.ts:110:1 › TC-A006 — /device kiosk loads with large-print UI
+[chromium] › tests/e2e/auth-roles.spec.ts:110:1 › TC-A006 — /device kiosk loads with large-print UI
+TC-A006: Aria call button not found on /device
+
+[58/712] [chromium] › tests/e2e/auth-roles.spec.ts:127:1 › TC-P051 — /signup rejects invalid email and mismatched passwords
+  25) [chromium] › tests/e2e/auth-roles.spec.ts:127:1 › TC-P051 — /signup rejects invalid email and mismatched passwords 
+
+    TimeoutError: locator.fill: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for getByLabel(/email/i)
+
+
+      129 |
+      130 |   // Invalid email
+    > 131 |   await page.getByLabel(/email/i).fill('not-an-email');
+          |                                   ^
+      132 |   await page.getByLabel(/password/i).first().fill('Password123!');
+      133 |   await page.getByRole('button', { name: /sign up|create account|get started/i }).click();
+      134 |
+        at /workspaces/ThriveAtHome/tests/e2e/auth-roles.spec.ts:131:35
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-P051-—-signu-1496e-il-and-mismatched-passwords-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-P051-—-signu-1496e-il-and-mismatched-passwords-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/auth-roles-TC-P051-—-signu-1496e-il-and-mismatched-passwords-chromium/error-context.md
+
+
+[59/712] [chromium] › tests/e2e/b2b-billing-deep.spec.ts:14:1 › TC-B021 — B2B in-development billing tier endpoint
+[chromium] › tests/e2e/b2b-billing-deep.spec.ts:14:1 › TC-B021 — B2B in-development billing tier endpoint
+TC-B021: /api/billing/b2b-invoice not yet built — verify $50 flat tier in Stripe manually
+
+[60/712] [chromium] › tests/e2e/b2b-billing-deep.spec.ts:33:1 › TC-B022 — B2B established billing tier (100 members → $125)
+[chromium] › tests/e2e/b2b-billing-deep.spec.ts:33:1 › TC-B022 — B2B established billing tier (100 members → $125)
+TC-B022: /api/billing/b2b-invoice not yet built — verify $75 + $1.25/member tier manually
+
+[61/712] [chromium] › tests/e2e/b2b-billing-deep.spec.ts:51:1 › TC-B023 — B2B metered AI billing endpoint (Aria calls)
+[chromium] › tests/e2e/b2b-billing-deep.spec.ts:51:1 › TC-B023 — B2B metered AI billing endpoint (Aria calls)
+TC-B023: /api/billing/metered not yet built — verify $0.08/call Aria metering in Stripe manually
+
+[62/712] [chromium] › tests/e2e/b2b-billing-deep.spec.ts:69:1 › TC-B024 — /org-admin shows community module option
+[63/712] [chromium] › tests/e2e/b2b-billing-deep.spec.ts:90:1 › TC-B031 — /donate page loads; recurring option present
+[64/712] [chromium] › tests/e2e/b2b-billing-deep.spec.ts:104:1 › TC-B031 — POST /api/checkout/donate recurring does not 500
+[chromium] › tests/e2e/b2b-billing-deep.spec.ts:104:1 › TC-B031 — POST /api/checkout/donate recurring does not 500
+TC-B031: /api/checkout/donate not found — verify endpoint exists
+
+[65/712] [chromium] › tests/e2e/b2b-billing-deep.spec.ts:119:1 › TC-B040 — /dashboard/celebrations/plan shows Enhanced $25 tier
+[66/712] [chromium] › tests/e2e/b2b-billing-deep.spec.ts:139:1 › TC-B041 — /dashboard/celebrations/plan shows Premier $75 tier
+[67/712] [chromium] › tests/e2e/b2b-billing-deep.spec.ts:159:1 › TC-B042 — /dashboard/gift-send shows paid gift options
+[68/712] [chromium] › tests/e2e/b2b-billing-deep.spec.ts:180:1 › TC-BILL001 — B2B enrollment fee: env var and onboarding page
+[chromium] › tests/e2e/b2b-billing-deep.spec.ts:180:1 › TC-BILL001 — B2B enrollment fee: env var and onboarding page
+TC-BILL001: B2B enrollment fee requires STRIPE_B2B_ENROLLMENT_PRICE_ID in Vercel env; verify manually in Stripe dashboard
+
+[69/712] [chromium] › tests/e2e/b2b-billing-deep.spec.ts:192:1 › TC-BILL002 — B2B in-development monthly tier (Stripe manual verification)
+[chromium] › tests/e2e/b2b-billing-deep.spec.ts:192:1 › TC-BILL002 — B2B in-development monthly tier (Stripe manual verification)
+TC-BILL002: Requires Stripe test subscription with in_development tier price ID; verify manually in Stripe dashboard
+
+[70/712] [chromium] › tests/e2e/b2b-billing-deep.spec.ts:208:1 › TC-BILL003 — B2B established monthly tier (Stripe manual verification)
+[chromium] › tests/e2e/b2b-billing-deep.spec.ts:208:1 › TC-BILL003 — B2B established monthly tier (Stripe manual verification)
+TC-BILL003: Requires Stripe test subscription with established tier price ID; verify manually in Stripe dashboard
+
+[71/712] [chromium] › tests/e2e/b2b-portals-deep.spec.ts:10:1 › TC-B2BD001 — /university-admin loads with volunteer stats
+[72/712] [chromium] › tests/e2e/b2b-portals-deep.spec.ts:22:1 › TC-B2BD002 — /university-admin has CSV/PDF export
+[chromium] › tests/e2e/b2b-portals-deep.spec.ts:22:1 › TC-B2BD002 — /university-admin has CSV/PDF export
+TC-B2BD002: CSV/PDF export option not found on university admin
+
+[73/712] [chromium] › tests/e2e/b2b-portals-deep.spec.ts:33:1 › TC-B2BD003 — /api/university-admin/volunteers responds
+[74/712] [chromium] › tests/e2e/b2b-portals-deep.spec.ts:43:1 › TC-B2BD010 — /vso-admin shows veteran volunteer content
+[75/712] [chromium] › tests/e2e/b2b-portals-deep.spec.ts:55:1 › TC-B2BD011 — /vso-admin has export functionality
+[chromium] › tests/e2e/b2b-portals-deep.spec.ts:55:1 › TC-B2BD011 — /vso-admin has export functionality
+TC-B2BD011: export not found on VSO admin
+
+[76/712] [chromium] › tests/e2e/b2b-portals-deep.spec.ts:68:1 › TC-B2BD020 — /school-admin shows student volunteer content
+[77/712] [chromium] › tests/e2e/b2b-portals-deep.spec.ts:80:1 › TC-B2BD021 — /school-admin has hours tracking
+[78/712] [chromium] › tests/e2e/b2b-portals-deep.spec.ts:93:1 › TC-B2BD030 — /employer-admin loads with corporate program data
+[79/712] [chromium] › tests/e2e/b2b-portals-deep.spec.ts:103:1 › TC-B2BD031 — employer-admin shows 3-tier corporate progress (Bronze/Silver/Gold)
+[80/712] [chromium] › tests/e2e/b2b-portals-deep.spec.ts:114:1 › TC-B2BD032 — employer-admin not accessible by regular member
+[chromium] › tests/e2e/b2b-portals-deep.spec.ts:114:1 › TC-B2BD032 — employer-admin not accessible by regular member
+TC-B2BD032: member was not redirected from /employer-admin — check access control
+
+[81/712] [chromium] › tests/e2e/b2b-portals.spec.ts:4:1 › TC-B2B001 — /org-admin loads
+[82/712] [chromium] › tests/e2e/b2b-portals.spec.ts:13:1 › TC-B2B010 — /employer-admin loads
+[83/712] [chromium] › tests/e2e/b2b-portals.spec.ts:22:1 › TC-B2B011 — /employers public page loads
+[84/712] [chromium] › tests/e2e/b2b-portals.spec.ts:29:1 › TC-B2B020 — /senior-center-admin loads
+[85/712] [chromium] › tests/e2e/b2b-portals.spec.ts:38:1 › TC-B2B025 — /aaa-admin loads
+[86/712] [chromium] › tests/e2e/b2b-portals.spec.ts:47:1 › TC-B2B030 — /network-admin loads
+[87/712] [chromium] › tests/e2e/b2b-portals.spec.ts:56:1 › TC-B2B035 — /agency-admin loads
+[88/712] [chromium] › tests/e2e/billing-stripe.spec.ts:6:1 › TC-B001 — /pricing page loads with Basic and Complete
+[89/712] [chromium] › tests/e2e/billing-stripe.spec.ts:15:1 › TC-B002 — /pricing shows monthly prices
+[90/712] [chromium] › tests/e2e/billing-stripe.spec.ts:24:1 › TC-B003 — /dashboard/plan shows current plan
+[91/712] [chromium] › tests/e2e/billing-stripe.spec.ts:33:1 › TC-B004 — /api/create-checkout-session responds
+[chromium] › tests/e2e/billing-stripe.spec.ts:33:1 › TC-B004 — /api/create-checkout-session responds
+TC-B004: checkout session endpoint not found
+
+[92/712] [chromium] › tests/e2e/billing-stripe.spec.ts:42:1 › TC-B005 — /api/stripe/webhook returns 400 without signature
+[chromium] › tests/e2e/billing-stripe.spec.ts:42:1 › TC-B005 — /api/stripe/webhook returns 400 without signature
+TC-B005: stripe webhook endpoint not found
+
+[93/712] [chromium] › tests/e2e/billing-stripe.spec.ts:51:1 › TC-B006 — /api/stripe/portal responds
+[chromium] › tests/e2e/billing-stripe.spec.ts:51:1 › TC-B006 — /api/stripe/portal responds
+TC-B006: stripe portal endpoint not found
+
+[94/712] [chromium] › tests/e2e/billing-stripe.spec.ts:60:1 › TC-B007 — /dashboard/plan no 500
+  26) [chromium] › tests/e2e/billing-stripe.spec.ts:60:1 › TC-B007 — /dashboard/plan no 500 ────────
+
+    Error: TC-B007: 500 on https://thrive-at-home-pied.vercel.app/api/auth/resolve-landing
+
+      60 | test('TC-B007 — /dashboard/plan no 500', async ({ page }) => {
+      61 |   page.on('response', (res) => {
+    > 62 |     if (res.status() === 500) throw new Error(`TC-B007: 500 on ${res.url()}`);
+         |                                     ^
+      63 |   });
+      64 |   await loginAs(page, ACCOUNTS.member, '/dashboard');
+      65 |   if (page.url().includes('/login')) { console.warn('TC-B007: login failed'); return; }
+        at _Page.<anonymous> (/workspaces/ThriveAtHome/tests/e2e/billing-stripe.spec.ts:62:37)
+
+    Error: page.waitForURL: Test ended.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard**" until "load"
+    ============================================================
+
+       at helpers.ts:57
+
+      55 |
+      56 |   if (expectedPath) {
+    > 57 |     await page.waitForURL(`**${expectedPath}**`, { timeout: 15_000 });
+         |                ^
+      58 |   } else {
+      59 |     // Wait for navigation away from /login
+      60 |     await page.waitForFunction(() => !window.location.pathname.startsWith('/login'), { timeout: 15_000 });
+        at loginAs (/workspaces/ThriveAtHome/tests/e2e/helpers.ts:57:16)
+        at /workspaces/ThriveAtHome/tests/e2e/billing-stripe.spec.ts:64:3
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/billing-stripe-TC-B007-—-dashboard-plan-no-500-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/billing-stripe-TC-B007-—-dashboard-plan-no-500-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/billing-stripe-TC-B007-—-dashboard-plan-no-500-chromium/error-context.md
+
+
+[95/712] [chromium] › tests/e2e/billing-stripe.spec.ts:72:1 › TC-B008 — /donate page loads with form
+[96/712] [chromium] › tests/e2e/billing-stripe.spec.ts:81:1 › TC-B009 — Premier plan NOT in checkout flow
+[chromium] › tests/e2e/billing-stripe.spec.ts:81:1 › TC-B009 — Premier plan NOT in checkout flow
+TC-B009: checkout endpoint not found
+
+[97/712] [chromium] › tests/e2e/billing-stripe.spec.ts:91:1 › TC-B010 — /dashboard/addons loads
+[98/712] [chromium] › tests/e2e/billing.spec.ts:38:1 › TC-B001 — Basic checkout flow ($39/mo)
+[99/712] [chromium] › tests/e2e/billing.spec.ts:58:1 › TC-B003/B004 — annual pricing toggle
+[100/712] [chromium] › tests/e2e/billing.spec.ts:81:1 › TC-B005 — Premier plan not on /pricing
+[101/712] [chromium] › tests/e2e/billing.spec.ts:90:3 › TC-B009 — Stripe webhook handler › subscription.updated → 200 or 400 (not 500)
+[chromium] › tests/e2e/billing.spec.ts:90:3 › TC-B009 — Stripe webhook handler › subscription.updated → 200 or 400 (not 500)
+TC-B009: webhook handler returned 404
+
+[102/712] [chromium] › tests/e2e/billing.spec.ts:108:3 › TC-B009 — Stripe webhook handler › invoice.payment_failed → not 500
+[103/712] [chromium] › tests/e2e/billing.spec.ts:117:3 › TC-B009 — Stripe webhook handler › subscription.deleted → not 500
+[104/712] [chromium] › tests/e2e/billing.spec.ts:128:1 › TC-B020 — B2B onboarding wizard loads enrollment fee step
+[chromium] › tests/e2e/billing.spec.ts:128:1 › TC-B020 — B2B onboarding wizard loads enrollment fee step
+TC-B020: Enrollment fee $3,300 not visible in B2B onboarding — check b2b_new_org@test.com flow
+
+[105/712] [chromium] › tests/e2e/billing.spec.ts:143:1 › TC-B030 — /donate shows donation form + not tax-deductible note
+[chromium] › tests/e2e/billing.spec.ts:143:1 › TC-B030 — /donate shows donation form + not tax-deductible note
+TC-B030: Donation form not found on /donate
+
+[106/712] [chromium] › tests/e2e/celebrations-deep.spec.ts:10:1 › TC-CELD001 — celebrations hub shows all event types
+[107/712] [chromium] › tests/e2e/celebrations-deep.spec.ts:22:1 › TC-CELD002 — celebration planner shows 3 tiers (Simple/Signature/Legacy)
+[chromium] › tests/e2e/celebrations-deep.spec.ts:22:1 › TC-CELD002 — celebration planner shows 3 tiers (Simple/Signature/Legacy)
+TC-CELD002: 3-tier celebration options not found
+
+[108/712] [chromium] › tests/e2e/celebrations-deep.spec.ts:34:1 › TC-CELD003 — /api/celebrations POST responds
+[109/712] [chromium] › tests/e2e/celebrations-deep.spec.ts:46:1 › TC-CELD010 — /dashboard/gift-send shows catalog categories
+[110/712] [chromium] › tests/e2e/celebrations-deep.spec.ts:58:1 › TC-CELD011 — /api/gifts/catalog responds with items
+[111/712] [chromium] › tests/e2e/celebrations-deep.spec.ts:70:1 › TC-CELD012 — /api/gifts/send POST requires auth
+  27) [chromium] › tests/e2e/celebrations-deep.spec.ts:70:1 › TC-CELD012 — /api/gifts/send POST requires auth 
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected value: 404
+    Received array: [401, 403]
+
+      72 |     data: { giftId: 'test', recipientId: 'test' },
+      73 |   });
+    > 74 |   expect([401, 403]).toContain(res.status());
+         |                      ^
+      75 | });
+      76 |
+      77 | // ── Birthday arc ──────────────────────────────────────────────────────────────
+        at /workspaces/ThriveAtHome/tests/e2e/celebrations-deep.spec.ts:74:22
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/celebrations-deep-TC-CELD0-1dbc6-fts-send-POST-requires-auth-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/celebrations-deep-TC-CELD0-1dbc6-fts-send-POST-requires-auth-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/celebrations-deep-TC-CELD0-1dbc6-fts-send-POST-requires-auth-chromium/error-context.md
+
+
+[112/712] [chromium] › tests/e2e/celebrations-deep.spec.ts:79:1 › TC-CELD020 — birthday arc cron exists and requires auth
+[113/712] [chromium] › tests/e2e/celebrations-deep.spec.ts:86:1 › TC-CELD021 — birthday arc cron accepts correct CRON_SECRET
+[114/712] [chromium] › tests/e2e/celebrations-deep.spec.ts:94:1 › TC-CELD022 — member profile has birthday field
+[115/712] [chromium] › tests/e2e/celebrations-deep.spec.ts:107:1 › TC-CELD030 — /api/cron/birthday-arc returns milestones data
+[116/712] [chromium] › tests/e2e/celebrations-deep.spec.ts:120:1 › TC-CELD031 — member achievements page loads
+[117/712] [chromium] › tests/e2e/celebrations-gifts.spec.ts:17:1 › TC-CG001 — /dashboard/celebrations loads
+[118/712] [chromium] › tests/e2e/celebrations-gifts.spec.ts:23:1 › TC-CG002 — /dashboard/celebrations/plan loads
+[119/712] [chromium] › tests/e2e/celebrations-gifts.spec.ts:29:1 › TC-CG003 — /dashboard/gift-send loads
+[120/712] [chromium] › tests/e2e/celebrations-gifts.spec.ts:35:1 › TC-CG004 — /dashboard/gifts loads
+[121/712] [chromium] › tests/e2e/celebrations-gifts.spec.ts:41:1 › TC-CG005 — /api/celebrations responds
+[122/712] [chromium] › tests/e2e/celebrations-gifts.spec.ts:47:1 › TC-CG006 — /api/gift-orders responds
+[123/712] [chromium] › tests/e2e/community-care-fund.spec.ts:6:1 › TC-CCF001 — /community-care-fund public page loads
+[124/712] [chromium] › tests/e2e/community-care-fund.spec.ts:22:1 › TC-CCF002 — /api/community-care-fund endpoint exists
+[chromium] › tests/e2e/community-care-fund.spec.ts:22:1 › TC-CCF002 — /api/community-care-fund endpoint exists
+TC-CCF002: /api/community-care-fund not implemented yet
+
+[125/712] [chromium] › tests/e2e/community-care-fund.spec.ts:31:1 › TC-CCF003 — member can view care fund status on dashboard
+[126/712] [chromium] › tests/e2e/community-features.spec.ts:4:1 › TC-COM001 — /dashboard/communities loads
+[127/712] [chromium] › tests/e2e/community-features.spec.ts:13:1 › TC-COM002 — /api/communities returns list
+[128/712] [chromium] › tests/e2e/community-features.spec.ts:23:1 › TC-COM003 — /dashboard/events loads
+[129/712] [chromium] › tests/e2e/community-features.spec.ts:32:1 › TC-COM004 — /dashboard/skill-exchange loads
+[130/712] [chromium] › tests/e2e/community-features.spec.ts:41:1 › TC-COM005 — /dashboard/grief-circles loads
+[131/712] [chromium] › tests/e2e/debug-login.spec.ts:4:1 › debug login flow
+[chromium] › tests/e2e/debug-login.spec.ts:4:1 › debug login flow
+INPUTS: [{"type":"email","name":"","id":"email"},{"type":"password","name":"","id":"password"}]
+
+BUTTONS: [{"type":"button","text":""},{"type":"submit","text":"Sign in"}]
+
+URL AFTER: https://thrive-at-home-pied.vercel.app/dashboard
+
+COOKIES: sb-qdniskppkfqjmtpkftdt-auth-token
+
+[132/712] [chromium] › tests/e2e/debug-login.spec.ts:27:1 › debug home-safety after login
+[chromium] › tests/e2e/debug-login.spec.ts:27:1 › debug home-safety after login
+After login URL: https://thrive-at-home-pied.vercel.app/dashboard
+
+Home safety URL: https://thrive-at-home-pied.vercel.app/dashboard/home-safety
+
+Body preview: ThriveAtHome
+Home
+History
+Community
+Family
+Messages
+Buddy
+Documents
+Settings
+Member
+Home Safety Program
+
+Fall prevention, earthquake preparedness, fire safety, and emergency readiness — all in one pla
+
+[133/712] [chromium] › tests/e2e/device-kiosk.spec.ts:6:1 › TC-DV001 — /kiosk route loads or redirects gracefully
+[134/712] [chromium] › tests/e2e/device-kiosk.spec.ts:19:1 › TC-DV002 — /api/device endpoint exists
+[chromium] › tests/e2e/device-kiosk.spec.ts:19:1 › TC-DV002 — /api/device endpoint exists
+TC-DV002: /api/device not implemented yet
+
+[135/712] [chromium] › tests/e2e/encore-careers-festivals.spec.ts:9:1 › TC-ECF001 — /dashboard/encore-careers loads
+[136/712] [chromium] › tests/e2e/encore-careers-festivals.spec.ts:19:1 › TC-ECF002 — encore careers shows part-time/consulting/volunteer roles
+[137/712] [chromium] › tests/e2e/encore-careers-festivals.spec.ts:30:1 › TC-ECF003 — /api/encore-careers responds
+[138/712] [chromium] › tests/e2e/encore-careers-festivals.spec.ts:40:1 › TC-ECF010 — /dashboard/festivals loads
+[139/712] [chromium] › tests/e2e/encore-careers-festivals.spec.ts:50:1 › TC-ECF011 — festivals page shows cultural events or calendar
+[140/712] [chromium] › tests/e2e/encore-careers-festivals.spec.ts:63:1 › TC-ECF020 — /dashboard/home-safety loads
+[141/712] [chromium] › tests/e2e/encore-careers-festivals.spec.ts:73:1 › TC-ECF021 — home safety page has assessment checklist or form
+[142/712] [chromium] › tests/e2e/encore-careers-festivals.spec.ts:84:1 › TC-ECF022 — /api/home-safety/assessment POST responds
+[143/712] [chromium] › tests/e2e/family-portal.spec.ts:15:3 › TC-F001–F007 — Family Portal › TC-F001 — /dashboard/family loads with member wellness summary
+[chromium] › tests/e2e/family-portal.spec.ts:15:3 › TC-F001–F007 — Family Portal › TC-F001 — /dashboard/family loads with member wellness summary
+TC-F001: unexpected URL https://thrive-at-home-pied.vercel.app/dashboard
+
+[144/712] [chromium] › tests/e2e/family-portal.spec.ts:34:3 › TC-F001–F007 — Family Portal › TC-F002 — family events calendar visible + add event form
+[chromium] › tests/e2e/family-portal.spec.ts:34:3 › TC-F001–F007 — Family Portal › TC-F002 — family events calendar visible + add event form
+TC-F002: Family Events Calendar tab not visible
+
+TC-F002: "Add event" button not found
+
+[145/712] [chromium] › tests/e2e/family-portal.spec.ts:51:3 › TC-F001–F007 — Family Portal › TC-F004 — mood timeline visible
+[chromium] › tests/e2e/family-portal.spec.ts:51:3 › TC-F001–F007 — Family Portal › TC-F004 — mood timeline visible
+TC-F004: Mood timeline not found on /dashboard/family
+
+[146/712] [chromium] › tests/e2e/family-portal.spec.ts:58:3 › TC-F001–F007 — Family Portal › TC-F006 — family can access celebration planner
+[147/712] [chromium] › tests/e2e/family-portal.spec.ts:71:1 › TC-A003 — basic plan blocks 4th family invite with upgrade prompt
+[chromium] › tests/e2e/family-portal.spec.ts:71:1 › TC-A003 — basic plan blocks 4th family invite with upgrade prompt
+TC-A003: 4th invite correctly rejected with 403
+
+[148/712] [chromium] › tests/e2e/feature-flags.spec.ts:17:3 › TC-B005/REG002 — Premier plan hidden › premier not shown on /pricing (public)
+[149/712] [chromium] › tests/e2e/feature-flags.spec.ts:26:3 › TC-B005/REG002 — Premier plan hidden › premier not shown on home /pricing section
+[150/712] [chromium] › tests/e2e/feature-flags.spec.ts:41:3 › TC-B005/REG002 — Premier plan hidden › direct navigation to premier checkout blocked
+[151/712] [chromium] › tests/e2e/feature-flags.spec.ts:56:3 › TC-REG005/M080 — member campaigns feature flag off › complete plan member sees no campaign button
+[152/712] [chromium] › tests/e2e/feature-flags.spec.ts:70:3 › TC-REG005/M080 — member campaigns feature flag off › basic plan member sees no campaign button
+[153/712] [chromium] › tests/e2e/feature-flags.spec.ts:87:1 › TC-REG006/M019 — /dashboard/marketplace is locked or coming soon
+[chromium] › tests/e2e/feature-flags.spec.ts:87:1 › TC-REG006/M019 — /dashboard/marketplace is locked or coming soon
+TC-REG006: marketplace_live: false confirmed via API
+
+[154/712] [chromium] › tests/e2e/fhir-medicare-deep.spec.ts:9:1 › TC-FMD001 — /dashboard/fhir-referrals loads
+[155/712] [chromium] › tests/e2e/fhir-medicare-deep.spec.ts:19:1 › TC-FMD002 — /api/fhir/referral POST rejects unauthenticated
+[156/712] [chromium] › tests/e2e/fhir-medicare-deep.spec.ts:27:1 › TC-FMD003 — /api/fhir/referral POST returns OperationOutcome on bad JSON
+[157/712] [chromium] › tests/e2e/fhir-medicare-deep.spec.ts:38:1 › TC-FMD004 — /api/fhir/referral accepts valid FHIR ServiceRequest
+[158/712] [chromium] › tests/e2e/fhir-medicare-deep.spec.ts:56:1 › TC-FMD010 — /dashboard/medicare-help loads
+[159/712] [chromium] › tests/e2e/fhir-medicare-deep.spec.ts:66:1 › TC-FMD011 — medicare-help page shows plan types (A/B/C/D)
+[160/712] [chromium] › tests/e2e/fhir-medicare-deep.spec.ts:77:1 › TC-FMD012 — /dashboard/plan-comparison loads Medicare comparison
+[161/712] [chromium] › tests/e2e/fhir-medicare-deep.spec.ts:89:1 › TC-FMD013 — /api/admin/ma-report responds for admin
+[162/712] [chromium] › tests/e2e/fhir-medicare-deep.spec.ts:97:1 › TC-FMD014 — /admin/ma-report page loads for admin
+[163/712] [chromium] › tests/e2e/fhir-medicare.spec.ts:7:1 › TC-FH001 — FHIR inbound referral endpoint exists
+[164/712] [chromium] › tests/e2e/fhir-medicare.spec.ts:16:1 › TC-FH002 — FHIR endpoint rejects unauthenticated request
+[165/712] [chromium] › tests/e2e/fhir-medicare.spec.ts:25:1 › TC-FH003 — FHIR endpoint returns OperationOutcome on bad JSON
+[166/712] [chromium] › tests/e2e/fhir-medicare.spec.ts:37:1 › TC-MED001 — /api/check-in-calls endpoint exists
+[167/712] [chromium] › tests/e2e/fhir-medicare.spec.ts:43:1 › TC-MED002 — Retell call-ended webhook endpoint exists
+[168/712] [chromium] › tests/e2e/fhir-medicare.spec.ts:52:1 › TC-MED003 — /api/admin/ma-report requires auth
+[169/712] [chromium] › tests/e2e/fhir-medicare.spec.ts:58:1 › TC-MED004 — no 500 on call-ended webhook with empty body
+[170/712] [chromium] › tests/e2e/fraud-safety.spec.ts:6:1 › TC-FS001 — /dashboard/fraud-protection no 500
+[171/712] [chromium] › tests/e2e/fraud-safety.spec.ts:19:1 › TC-FS002 — /api/fraud-flags responds
+[172/712] [chromium] › tests/e2e/fraud-safety.spec.ts:25:1 › TC-FS003 — /dashboard/home-safety loads
+[173/712] [chromium] › tests/e2e/fraud-safety.spec.ts:41:1 › TC-FS004 — /api/home-safety responds
+[174/712] [chromium] › tests/e2e/fraud-safety.spec.ts:47:1 › TC-FS005 — fraud detection API endpoint
+[175/712] [chromium] › tests/e2e/infrastructure.spec.ts:7:1 › TC-INF001 — supabase_auth_id column used (no 500 on member login)
+[176/712] [chromium] › tests/e2e/infrastructure.spec.ts:13:1 › TC-INF002 — /dashboard requires auth
+[177/712] [chromium] › tests/e2e/infrastructure.spec.ts:19:1 › TC-INF003 — cron endpoints require CRON_SECRET
+[chromium] › tests/e2e/infrastructure.spec.ts:19:1 › TC-INF003 — cron endpoints require CRON_SECRET
+TC-INF003: /api/cron/chapter-activation not found
+
+[178/712] [chromium] › tests/e2e/infrastructure.spec.ts:31:1 › TC-INF004 — member cannot access admin routes
+[179/712] [chromium] › tests/e2e/infrastructure.spec.ts:39:1 › TC-INF005 — Premier plan hidden from /pricing
+[180/712] [chromium] › tests/e2e/infrastructure.spec.ts:46:1 › TC-INF006 — /api/features returns feature flags
+[181/712] [chromium] › tests/e2e/infrastructure.spec.ts:56:1 › TC-PERF001 — homepage loads under 5s
+[182/712] [chromium] › tests/e2e/infrastructure.spec.ts:65:1 › TC-PERF002 — dashboard loads under 5s
+[183/712] [chromium] › tests/e2e/infrastructure.spec.ts:76:1 › TC-PERF003 — homepage no horizontal scroll at 390px
+[184/712] [chromium] › tests/e2e/life-transitions-deep.spec.ts:10:1 › TC-LTD001 — /dashboard/life-transitions loads
+[185/712] [chromium] › tests/e2e/life-transitions-deep.spec.ts:20:1 › TC-LTD002 — life-transitions page shows ≥ 4 pathways
+[186/712] [chromium] › tests/e2e/life-transitions-deep.spec.ts:31:1 › TC-LTD003 — /api/life-transitions GET responds
+[187/712] [chromium] › tests/e2e/life-transitions-deep.spec.ts:39:1 › TC-LTD004 — /api/life-transitions POST creates transition plan
+[188/712] [chromium] › tests/e2e/life-transitions-deep.spec.ts:51:1 › TC-LTD010 — /dashboard/transition loads
+[189/712] [chromium] › tests/e2e/life-transitions-deep.spec.ts:61:1 › TC-LTD011 — transition page shows facility-move checklist or steps
+[190/712] [chromium] › tests/e2e/life-transitions-deep.spec.ts:74:1 › TC-LTD020 — /dashboard/grief-support loads
+[191/712] [chromium] › tests/e2e/life-transitions-deep.spec.ts:84:1 › TC-LTD021 — grief support shows all 9 pathways
+[chromium] › tests/e2e/life-transitions-deep.spec.ts:84:1 › TC-LTD021 — grief support shows all 9 pathways
+TC-LTD021: only 0 sections found — expected 9 grief pathways
+
+[192/712] [chromium] › tests/e2e/life-transitions-deep.spec.ts:94:1 › TC-LTD022 — chaplain not shown proactively (member must request)
+[193/712] [chromium] › tests/e2e/life-transitions-deep.spec.ts:108:1 › TC-LTD030 — /dashboard/trusted-advisors loads
+[194/712] [chromium] › tests/e2e/life-transitions-deep.spec.ts:118:1 › TC-LTD031 — trusted advisors shows advisor categories
+[195/712] [chromium] › tests/e2e/life-transitions-deep.spec.ts:129:1 › TC-LTD032 — /api/trusted-advisors responds
+[196/712] [chromium] › tests/e2e/life-transitions.spec.ts:11:1 › TC-LT001 — /dashboard/grief-support loads
+[197/712] [chromium] › tests/e2e/life-transitions.spec.ts:20:1 › TC-LT002 — /dashboard/life-transitions loads
+[198/712] [chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-retirement pathway no 500
+[chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-retirement pathway no 500
+TC-LT003-retirement: pathway API not found
+
+[199/712] [chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-widow pathway no 500
+[chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-widow pathway no 500
+TC-LT003-widow: pathway API not found
+
+[200/712] [chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-diagnosis pathway no 500
+[chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-diagnosis pathway no 500
+TC-LT003-diagnosis: pathway API not found
+
+[201/712] [chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-moving pathway no 500
+[chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-moving pathway no 500
+TC-LT003-moving: pathway API not found
+
+[202/712] [chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-caregiving pathway no 500
+[chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-caregiving pathway no 500
+TC-LT003-caregiving: pathway API not found
+
+[203/712] [chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-divorce pathway no 500
+[chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-divorce pathway no 500
+TC-LT003-divorce: pathway API not found
+
+[204/712] [chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-loss pathway no 500
+[chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-loss pathway no 500
+TC-LT003-loss: pathway API not found
+
+[205/712] [chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-financial pathway no 500
+[chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-financial pathway no 500
+TC-LT003-financial: pathway API not found
+
+[206/712] [chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-independence pathway no 500
+[chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-independence pathway no 500
+TC-LT003-independence: pathway API not found
+
+[207/712] [chromium] › tests/e2e/life-transitions.spec.ts:42:1 › TC-LT004 — /api/life-transitions endpoint exists
+[208/712] [chromium] › tests/e2e/life-transitions.spec.ts:48:1 › TC-LT005 — transition plan task creation works
+[209/712] [chromium] › tests/e2e/life-transitions.spec.ts:57:1 › TC-LT006 — /dashboard/trusted-advisors loads
+[210/712] [chromium] › tests/e2e/member-birthday-arc.spec.ts:6:1 › TC-MBA001 — /dashboard/profile has birthday field
+[211/712] [chromium] › tests/e2e/member-birthday-arc.spec.ts:19:1 › TC-MBA002 — /api/members/profile responds
+[212/712] [chromium] › tests/e2e/member-birthday-arc.spec.ts:25:1 › TC-MBA003 — birthday-arc cron requires CRON_SECRET
+[213/712] [chromium] › tests/e2e/member-birthday-arc.spec.ts:34:1 › TC-MBA004 — /dashboard achievements or milestones page loads
+[214/712] [chromium] › tests/e2e/member-birthday-arc.spec.ts:44:1 › TC-MBA005 — /api/achievements responds
+[215/712] [chromium] › tests/e2e/member-birthday-arc.spec.ts:50:1 › TC-MBA006 — /dashboard/communities shows interest circles
+[216/712] [chromium] › tests/e2e/member-birthday-arc.spec.ts:59:1 › TC-MBA007 — /api/interest-circles responds
+[217/712] [chromium] › tests/e2e/member-birthday-arc.spec.ts:65:1 › TC-MBA008 — /api/check-ins responds
+[218/712] [chromium] › tests/e2e/member-birthday-arc.spec.ts:71:1 › TC-MBA009 — check-ins cron requires CRON_SECRET
+[219/712] [chromium] › tests/e2e/member-birthday-arc.spec.ts:80:1 › TC-MBA010 — no 500 on communities page
+  28) [chromium] › tests/e2e/member-birthday-arc.spec.ts:80:1 › TC-MBA010 — no 500 on communities page 
+
+    Error: TC-MBA010: 500 on https://thrive-at-home-pied.vercel.app/api/auth/resolve-landing
+
+      80 | test('TC-MBA010 — no 500 on communities page', async ({ page }) => {
+      81 |   page.on('response', (res) => {
+    > 82 |     if (res.status() === 500) throw new Error(`TC-MBA010: 500 on ${res.url()}`);
+         |                                     ^
+      83 |   });
+      84 |   await loginAs(page, ACCOUNTS.member, '/dashboard');
+      85 |   if (page.url().includes('/login')) { console.warn('TC-MBA010: login failed'); return; }
+        at _Page.<anonymous> (/workspaces/ThriveAtHome/tests/e2e/member-birthday-arc.spec.ts:82:37)
+
+    Error: page.waitForURL: Test ended.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard**" until "load"
+    ============================================================
+
+       at helpers.ts:57
+
+      55 |
+      56 |   if (expectedPath) {
+    > 57 |     await page.waitForURL(`**${expectedPath}**`, { timeout: 15_000 });
+         |                ^
+      58 |   } else {
+      59 |     // Wait for navigation away from /login
+      60 |     await page.waitForFunction(() => !window.location.pathname.startsWith('/login'), { timeout: 15_000 });
+        at loginAs (/workspaces/ThriveAtHome/tests/e2e/helpers.ts:57:16)
+        at /workspaces/ThriveAtHome/tests/e2e/member-birthday-arc.spec.ts:84:3
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/member-birthday-arc-TC-MBA010-—-no-500-on-communities-page-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/member-birthday-arc-TC-MBA010-—-no-500-on-communities-page-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/member-birthday-arc-TC-MBA010-—-no-500-on-communities-page-chromium/error-context.md
+
+
+[220/712] [chromium] › tests/e2e/member-features-deep.spec.ts:33:1 › TC-M040 — Birthday arc cron: POST /api/cron/birthday-arc → 200/207
+[221/712] [chromium] › tests/e2e/member-features-deep.spec.ts:43:1 › TC-M041 — Birthday arc grief skip: grief_member dashboard loads, no arc banner
+[222/712] [chromium] › tests/e2e/member-features-deep.spec.ts:59:1 › TC-M042 — Birthday arc opt-out skip: opt_out_member sees no birthday banner
+[223/712] [chromium] › tests/e2e/member-features-deep.spec.ts:74:1 › TC-M043 — Milestone birthday cron: POST /api/cron/birthday-arc → 200
+[chromium] › tests/e2e/member-features-deep.spec.ts:74:1 › TC-M043 — Milestone birthday cron: POST /api/cron/birthday-arc → 200
+TC-M043: Full milestone test requires date-mocked member DOB; verifying cron endpoint only
+
+[224/712] [chromium] › tests/e2e/member-features-deep.spec.ts:82:1 › TC-M044 — Milestone deduplication: cron twice → no crash either run
+[225/712] [chromium] › tests/e2e/member-features-deep.spec.ts:91:1 › TC-M045 — member_achievements: dashboard loads; cron fires cleanly
+[chromium] › tests/e2e/member-features-deep.spec.ts:91:1 › TC-M045 — member_achievements: dashboard loads; cron fires cleanly
+TC-M045: Full achievement test requires seeded achievement rows; verifying page + cron
+
+[226/712] [chromium] › tests/e2e/member-features-deep.spec.ts:104:1 › TC-M050 — Interest circles: /dashboard/communities loads with circle content
+[227/712] [chromium] › tests/e2e/member-features-deep.spec.ts:119:1 › TC-M051 — LGBTQ+ circle visibility: communities page loads, no 500
+[228/712] [chromium] › tests/e2e/member-features-deep.spec.ts:133:1 › TC-M052 — Veterans circle: volunteer can access communities page
+[chromium] › tests/e2e/member-features-deep.spec.ts:133:1 › TC-M052 — Veterans circle: volunteer can access communities page
+TC-M052: veteran@test.com not in ACCOUNTS; using volunteer@test.com as proxy
+
+[229/712] [chromium] › tests/e2e/member-features-deep.spec.ts:148:1 › TC-M053 — Professional Identity circle: communities page loads, no 500
+[230/712] [chromium] › tests/e2e/member-features-deep.spec.ts:162:1 › TC-M054 — All 20 communities: page has substantial content
+[chromium] › tests/e2e/member-features-deep.spec.ts:162:1 › TC-M054 — All 20 communities: page has substantial content
+TC-M054: Full 20-community count requires DB query; verify via Supabase: SELECT COUNT(*) FROM communities
+
+[231/712] [chromium] › tests/e2e/member-features-deep.spec.ts:175:1 › TC-M055 — Community post member name (P0): post author is not anonymous
+[chromium] › tests/e2e/member-features-deep.spec.ts:175:1 › TC-M055 — Community post member name (P0): post author is not anonymous
+TC-M055: /api/community/posts endpoint not found (404) — may be at different path
+
+[232/712] [chromium] › tests/e2e/member-features-deep.spec.ts:210:1 › TC-M056 — Cultural content: member dashboard loads after cultural preference set
+[chromium] › tests/e2e/member-features-deep.spec.ts:210:1 › TC-M056 — Cultural content: member dashboard loads after cultural preference set
+TC-M056: Full cultural content test requires member with cultural_preference=latinx seeded
+
+[233/712] [chromium] › tests/e2e/member-features-deep.spec.ts:221:1 › TC-M060 — Basic plan: /dashboard/navigator loads, shows hours or navigator info
+[chromium] › tests/e2e/member-features-deep.spec.ts:221:1 › TC-M060 — Basic plan: /dashboard/navigator loads, shows hours or navigator info
+TC-M060: Navigator hours content not found on /dashboard/navigator
+
+[234/712] [chromium] › tests/e2e/member-features-deep.spec.ts:235:1 › TC-M061 — Complete plan: /dashboard/navigator loads for complete member
+[chromium] › tests/e2e/member-features-deep.spec.ts:235:1 › TC-M061 — Complete plan: /dashboard/navigator loads for complete member
+TC-M061: Navigator hours not shown for complete plan member
+
+[235/712] [chromium] › tests/e2e/member-features-deep.spec.ts:249:1 › TC-M062 — Basic plan: /dashboard/marketplace shows locked or coming soon
+[236/712] [chromium] › tests/e2e/member-features-deep.spec.ts:264:1 › TC-M063 — Complete plan: dashboard loads with all feature access
+[237/712] [chromium] › tests/e2e/member-features-deep.spec.ts:276:1 › TC-M064 — member_campaigns_live=false: no campaign CTA for complete member
+[238/712] [chromium] › tests/e2e/member-features-deep.spec.ts:293:1 › TC-M070 — Family summary SMS cron: fires without 500
+[239/712] [chromium] › tests/e2e/member-features-deep.spec.ts:307:1 › TC-M071 — Event ride booking: /dashboard/events loads with event content
+[240/712] [chromium] › tests/e2e/member-features-deep.spec.ts:321:1 › TC-M080 — Campaigns off by default: complete member sees no campaign button
+[241/712] [chromium] › tests/e2e/member-features-deep.spec.ts:336:1 › TC-M081 — Campaign launch: MANUAL — requires member_campaigns_live=true
+[chromium] › tests/e2e/member-features-deep.spec.ts:336:1 › TC-M081 — Campaign launch: MANUAL — requires member_campaigns_live=true
+TC-M081: MANUAL TEST — Set member_campaigns_live=true via admin, then verify complete member can create a campaign at /dashboard
+
+[242/712] [chromium] › tests/e2e/member-features-deep.spec.ts:343:1 › TC-M082 — Campaign donation: MANUAL — requires active campaign + Stripe
+[chromium] › tests/e2e/member-features-deep.spec.ts:343:1 › TC-M082 — Campaign donation: MANUAL — requires active campaign + Stripe
+TC-M082: MANUAL TEST — Create active campaign, open /campaign/[share_url] incognito, donate $20 via Stripe test card
+
+[243/712] [chromium] › tests/e2e/member-features-deep.spec.ts:349:1 › TC-M083 — Campaign moderation: MANUAL — requires campaign in navigator queue
+[chromium] › tests/e2e/member-features-deep.spec.ts:349:1 › TC-M083 — Campaign moderation: MANUAL — requires campaign in navigator queue
+TC-M083: MANUAL TEST — Report campaign as suspicious, verify navigator sees review task, approve/reject flow
+
+[244/712] [chromium] › tests/e2e/member-features-deep.spec.ts:355:1 › TC-M084 — B2B org campaign dashboard: /org-admin loads for orgadmin
+[245/712] [chromium] › tests/e2e/member-health-care.spec.ts:17:1 › TC-MHC001 — /dashboard/health loads
+[246/712] [chromium] › tests/e2e/member-health-care.spec.ts:26:1 › TC-MHC002 — /dashboard/benefits-finder loads
+[247/712] [chromium] › tests/e2e/member-health-care.spec.ts:35:1 › TC-MHC003 — /dashboard/medicare-help loads
+[248/712] [chromium] › tests/e2e/member-health-care.spec.ts:44:1 › TC-MHC004 — /dashboard/grief-support loads with 9 pathways
+[249/712] [chromium] › tests/e2e/member-health-care.spec.ts:53:1 › TC-MHC005 — /dashboard/trusted-advisors loads
+[250/712] [chromium] › tests/e2e/member-health-care.spec.ts:62:1 › TC-MHC006 — /dashboard/fraud-protection loads
+[251/712] [chromium] › tests/e2e/member-health-care.spec.ts:71:1 › TC-MHC007 — /dashboard/vault loads
+[252/712] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M001 — /dashboard
+[chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M001 — /dashboard
+TC-M001: expected keyword "member name" not found on /dashboard
+
+TC-M001: expected keyword "plan badge" not found on /dashboard
+
+[253/712] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M002 — /dashboard/health
+[chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M002 — /dashboard/health
+TC-M002: expected keyword "mood" not found on /dashboard/health
+
+[254/712] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M003 — /dashboard/family
+[255/712] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M004 — /dashboard/buddy
+[256/712] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M005 — /dashboard/communities
+[257/712] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M006 — /dashboard/events
+[258/712] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M007 — /dashboard/skill-exchange
+[259/712] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M008 — /dashboard/grief-support
+[chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M008 — /dashboard/grief-support
+TC-M008: expected keyword "navigator" not found on /dashboard/grief-support
+
+[260/712] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M009 — /dashboard/grief-circles
+[261/712] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M010 — /dashboard/life-transitions
+[262/712] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M011 — /dashboard/trusted-advisors
+[263/712] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M012 — /dashboard/fraud-protection
+[chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M012 — /dashboard/fraud-protection
+TC-M012: expected keyword "fraud" not found on /dashboard/fraud-protection
+
+TC-M012: expected keyword "scam" not found on /dashboard/fraud-protection
+
+[264/712] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M013 — /dashboard/benefits-finder
+[265/712] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M014 — /dashboard/plan
+[chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M014 — /dashboard/plan
+TC-M014: expected keyword "billing" not found on /dashboard/plan
+
+[266/712] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M015 — /dashboard/addons
+[chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M015 — /dashboard/addons
+TC-M015: expected keyword "addon" not found on /dashboard/addons
+
+[267/712] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M016 — /dashboard/profile
+[chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M016 — /dashboard/profile
+TC-M016: expected keyword "name" not found on /dashboard/profile
+
+TC-M016: expected keyword "zip" not found on /dashboard/profile
+
+[268/712] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M017 — /dashboard/vault
+[chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M017 — /dashboard/vault
+TC-M017: expected keyword "vault" not found on /dashboard/vault
+
+TC-M017: expected keyword "document" not found on /dashboard/vault
+
+TC-M017: expected keyword "story" not found on /dashboard/vault
+
+[269/712] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M018 — /dashboard/navigator
+[chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M018 — /dashboard/navigator
+TC-M018: expected keyword "navigator" not found on /dashboard/navigator
+
+[270/712] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M019 — /dashboard/marketplace
+[271/712] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M020 — /dashboard/home-safety
+[272/712] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M021 — /dashboard/home-sharing
+[273/712] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M022 — /dashboard/encore-careers
+[274/712] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M023 — /dashboard/medicare-help
+[275/712] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M024 — /dashboard/plan-comparison
+[276/712] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M025 — /dashboard/fhir-referrals
+[277/712] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M026 — /dashboard/festivals
+[278/712] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M027 — /dashboard/training
+[279/712] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M028 — /dashboard/volunteer-opportunities
+[280/712] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M029 — /dashboard/transition
+[281/712] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M030 — /dashboard/pets
+[282/712] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M031 — /dashboard/gift-send
+[283/712] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M032 — /dashboard/gifts
+[284/712] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M033 — /dashboard/celebrations
+[285/712] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M034 — /dashboard/celebrations/plan
+[286/712] [chromium] › tests/e2e/member-pages.spec.ts:82:1 › TC-M015 — /dashboard/addons has all 4 add-on SKUs
+[chromium] › tests/e2e/member-pages.spec.ts:82:1 › TC-M015 — /dashboard/addons has all 4 add-on SKUs
+TC-M015: SKU not found: extra.*navigator.*hours|navigator.*hours.*block
+
+TC-M015: SKU not found: premium.*content|content.*access
+
+TC-M015: SKU not found: enhanced.*fraud|fraud.*monitoring
+
+TC-M015: 3/4 add-on SKUs not found — verify names in /dashboard/addons
+
+[287/712] [chromium] › tests/e2e/member-pages.spec.ts:109:1 › TC-M008 — /dashboard/grief-support has all 9 pathways
+[288/712] [chromium] › tests/e2e/member-pages.spec.ts:136:1 › TC-M011 — trusted advisors: chaplain not shown proactively
+[chromium] › tests/e2e/member-pages.spec.ts:136:1 › TC-M011 — trusted advisors: chaplain not shown proactively
+TC-M011: "Request an introduction" button not found
+
+TC-M011: Chaplain may be proactively shown — spec says it should require member request
+
+[289/712] [chromium] › tests/e2e/member-pages.spec.ts:157:1 › TC-M005 — /dashboard/communities shows ≥ 20 circles
+[chromium] › tests/e2e/member-pages.spec.ts:157:1 › TC-M005 — /dashboard/communities shows ≥ 20 circles
+TC-M005: Found 0 community elements
+
+TC-M005: Expected ≥ 20 circles, found 0 — check markup
+
+[290/712] [chromium] › tests/e2e/metro-chapters.spec.ts:6:1 › TC-CH001 — /api/metro-areas returns list
+[291/712] [chromium] › tests/e2e/metro-chapters.spec.ts:16:1 › TC-CH002 — /api/metro-areas?zip=94103 returns Bay Area
+[292/712] [chromium] › tests/e2e/metro-chapters.spec.ts:22:1 › TC-CH003 — chapter activation cron requires CRON_SECRET
+[chromium] › tests/e2e/metro-chapters.spec.ts:22:1 › TC-CH003 — chapter activation cron requires CRON_SECRET
+TC-CH003: cron endpoint not found
+
+[293/712] [chromium] › tests/e2e/metro-chapters.spec.ts:31:1 › TC-CH004 — /chapter/bay-area loads or returns graceful 404
+[294/712] [chromium] › tests/e2e/metro-chapters.spec.ts:39:1 › TC-CH005 — member dashboard shows local chapter content
+[295/712] [chromium] › tests/e2e/navigator-portal.spec.ts:30:3 › TC-N001–N008 — Navigator Portal › TC-N001 — /navigator loads with task queue and caseload
+[chromium] › tests/e2e/navigator-portal.spec.ts:30:3 › TC-N001–N008 — Navigator Portal › TC-N001 — /navigator loads with task queue and caseload
+TC-N001: Task queue or caseload not visible
+
+[296/712] [chromium] › tests/e2e/navigator-portal.spec.ts:40:3 › TC-N001–N008 — Navigator Portal › TC-N002 — task queue UI is visible
+[chromium] › tests/e2e/navigator-portal.spec.ts:40:3 › TC-N001–N008 — Navigator Portal › TC-N002 — task queue UI is visible
+TC-N002: Found task types in UI: none
+
+TC-N002: No task types visible — ensure navigator@test.com has seeded tasks
+
+[297/712] [chromium] › tests/e2e/navigator-portal.spec.ts:52:3 › TC-N001–N008 — Navigator Portal › TC-N003 — mark task complete button exists
+[chromium] › tests/e2e/navigator-portal.spec.ts:52:3 › TC-N001–N008 — Navigator Portal › TC-N003 — mark task complete button exists
+TC-N003: "Mark complete" button not found — check task queue UI
+
+[298/712] [chromium] › tests/e2e/navigator-portal.spec.ts:60:3 › TC-N001–N008 — Navigator Portal › TC-N005 — facility-move plan can be started
+[chromium] › tests/e2e/navigator-portal.spec.ts:60:3 › TC-N001–N008 — Navigator Portal › TC-N005 — facility-move plan can be started
+TC-N005: "Start transition plan" button not found — may be inside member detail
+
+[299/712] [chromium] › tests/e2e/navigator-portal.spec.ts:68:3 › TC-N001–N008 — Navigator Portal › TC-N008 — navigator hours tracking visible
+[chromium] › tests/e2e/navigator-portal.spec.ts:68:3 › TC-N001–N008 — Navigator Portal › TC-N008 — navigator hours tracking visible
+TC-N008: Navigator hours tracking not visible in main dashboard
+
+[300/712] [chromium] › tests/e2e/navigator-portal.spec.ts:76:1 › TC-AD001 — /admin loads with member count + stats
+[301/712] [chromium] › tests/e2e/new-sections.spec.ts:17:1 › TC-SVC001 — Complete member: /dashboard/marketplace loads
+[302/712] [chromium] › tests/e2e/new-sections.spec.ts:25:1 › TC-SVC005 — Agency admin: /agency-admin loads
+[303/712] [chromium] › tests/e2e/new-sections.spec.ts:34:1 › TC-SVC006 — Care worker: /care-worker loads
+[304/712] [chromium] › tests/e2e/new-sections.spec.ts:43:1 › TC-SVC009 — Basic member: /dashboard/marketplace shows locked/coming soon
+[305/712] [chromium] › tests/e2e/new-sections.spec.ts:54:1 › TC-SVC010 — Navigator: /navigator loads (marketplace oversight)
+[chromium] › tests/e2e/new-sections.spec.ts:54:1 › TC-SVC010 — Navigator: /navigator loads (marketplace oversight)
+TC-SVC010: /navigator redirected
+
+[306/712] [chromium] › tests/e2e/new-sections.spec.ts:67:1 › TC-GR001 — Admin: /admin/grant-reports loads or soft-warns
+[307/712] [chromium] › tests/e2e/new-sections.spec.ts:78:1 › TC-GR003 — Admin: community_access tier manual note
+[chromium] › tests/e2e/new-sections.spec.ts:78:1 › TC-GR003 — Admin: community_access tier manual note
+TC-GR003: community_access tier requires manual admin action via /admin; no automated flow yet.
+
+[308/712] [chromium] › tests/e2e/new-sections.spec.ts:87:1 › TC-GR004 — Admin: /admin/campaigns loads
+[309/712] [chromium] › tests/e2e/new-sections.spec.ts:102:1 › TC-CVP001 — Employer admin: /employer-admin shows volunteer/hours content
+[310/712] [chromium] › tests/e2e/new-sections.spec.ts:114:1 › TC-CVP002 — Volunteer dashboard: hours logging UI present
+[311/712] [chromium] › tests/e2e/new-sections.spec.ts:129:1 › TC-PEPM001 — /employer/acme-corp public page loads
+[312/712] [chromium] › tests/e2e/new-sections.spec.ts:137:1 › TC-PEPM002 — Employer admin: /employer-admin shows member count
+[313/712] [chromium] › tests/e2e/new-sections.spec.ts:150:1 › TC-NOTIF001 — Aria cron fires without 500 (triggers Resend emails)
+[314/712] [chromium] › tests/e2e/new-sections.spec.ts:163:1 › TC-NOTIF005 — SPF/DKIM manual verification note
+[chromium] › tests/e2e/new-sections.spec.ts:163:1 › TC-NOTIF005 — SPF/DKIM manual verification note
+TC-NOTIF005: SPF/DKIM verification requires checking email headers; use mail-tester.com or Resend dashboard to confirm domain authentication.
+
+[315/712] [chromium] › tests/e2e/new-sections.spec.ts:171:1 › TC-SEC001 — /api/member-data: cross-member access returns 403/404, not 500
+[316/712] [chromium] › tests/e2e/new-sections.spec.ts:186:1 › TC-SEC005 — Webhooks reject missing/invalid auth
+[317/712] [chromium] › tests/e2e/new-sections.spec.ts:213:1 › TC-SEC006 — Auth rate limiting: manual note
+[chromium] › tests/e2e/new-sections.spec.ts:213:1 › TC-SEC006 — Auth rate limiting: manual note
+TC-SEC006: Rate limiting on auth endpoints requires load test; skip in automated E2E. Verify via middleware or upstash/rate-limit config.
+
+[318/712] [chromium] › tests/e2e/new-sections.spec.ts:221:1 › TC-A11Y001 — /dashboard: main and nav landmarks present
+[319/712] [chromium] › tests/e2e/new-sections.spec.ts:233:1 › TC-A11Y003 — Accessibility audit: manual/axe note
+[chromium] › tests/e2e/new-sections.spec.ts:233:1 › TC-A11Y003 — Accessibility audit: manual/axe note
+TC-A11Y003: Run axe-core audit: install @axe-core/playwright and add to playwright config. Target score ≥85 on Lighthouse a11y.
+
+[320/712] [chromium] › tests/e2e/new-sections.spec.ts:237:1 › TC-A11Y004 — /device kiosk: page loads without 500
+[321/712] [chromium] › tests/e2e/new-sections.spec.ts:249:1 › TC-RT001 — Family dashboard loads; Realtime subscription note
+[chromium] › tests/e2e/new-sections.spec.ts:249:1 › TC-RT001 — Family dashboard loads; Realtime subscription note
+TC-RT001: Realtime update requires live Supabase subscription; test manually by triggering an Aria call and observing /dashboard/family.
+
+[322/712] [chromium] › tests/e2e/new-sections.spec.ts:258:1 › TC-RT002 — Navigator dashboard loads; Realtime fraud badge note
+[chromium] › tests/e2e/new-sections.spec.ts:258:1 › TC-RT002 — Navigator dashboard loads; Realtime fraud badge note
+TC-RT002: /navigator redirected
+
+[323/712] [chromium] › tests/e2e/new-sections.spec.ts:268:1 › TC-RT003 — Navigator task queue: Realtime update note
+[chromium] › tests/e2e/new-sections.spec.ts:268:1 › TC-RT003 — Navigator task queue: Realtime update note
+TC-RT003: Realtime task queue update requires live navigator_task insert; test manually.
+
+[324/712] [chromium] › tests/e2e/new-sections.spec.ts:277:1 › TC-RT004 — Realtime connection scaling: manual note
+[chromium] › tests/e2e/new-sections.spec.ts:277:1 › TC-RT004 — Realtime connection scaling: manual note
+TC-RT004: 100 simultaneous Realtime connections require load testing tool (k6, artillery); skip in E2E. Check Supabase plan connection limits.
+
+[325/712] [chromium] › tests/e2e/new-sections.spec.ts:285:1 › TC-OB001 — /onboarding unauthenticated: redirects to /login (no 500)
+[326/712] [chromium] › tests/e2e/new-sections.spec.ts:295:1 › TC-OB005 — Aria cron fires; welcome task creation note
+[chromium] › tests/e2e/new-sections.spec.ts:295:1 › TC-OB005 — Aria cron fires; welcome task creation note
+TC-OB005: welcome_call navigator_task creation verified during TC-A001 full funnel; onboarding completion triggers task via onboarding API route.
+
+[327/712] [chromium] › tests/e2e/new-sections.spec.ts:313:1 › TC-GC001 — /dashboard/gift-send: catalog loads with content
+[328/712] [chromium] › tests/e2e/new-sections.spec.ts:323:1 › TC-GC005 — Grief guard: celebrations/plan shows guard for grief member
+[329/712] [chromium] › tests/e2e/new-sections.spec.ts:334:1 › TC-GC007 — /dashboard/gifts: gift history loads with pagination
+[330/712] [chromium] › tests/e2e/new-sections.spec.ts:346:1 › TC-COM001 — /dashboard/events: event list with Register button
+[331/712] [chromium] › tests/e2e/new-sections.spec.ts:357:1 › TC-COM003 — /dashboard/communities: community posts load
+[332/712] [chromium] › tests/e2e/new-sections.spec.ts:365:1 › TC-COM005 — /dashboard/skill-exchange: skill exchange loads
+[333/712] [chromium] › tests/e2e/new-sections.spec.ts:377:1 › TC-MOB001 — Home page at 390px: no horizontal scroll
+[334/712] [chromium] › tests/e2e/new-sections.spec.ts:385:1 › TC-MOB002 — Home page at 390px: hamburger menu present
+[335/712] [chromium] › tests/e2e/new-sections.spec.ts:399:1 › TC-VLT001 — /dashboard/vault: loads without 500
+[336/712] [chromium] › tests/e2e/new-sections.spec.ts:409:1 › TC-VLT004 — /dashboard/vault: privacy/sharing controls present
+[337/712] [chromium] › tests/e2e/org-admin.spec.ts:4:1 › TC-OA001 — org-admin can view member count
+[338/712] [chromium] › tests/e2e/org-admin.spec.ts:15:1 › TC-OA002 — /api/org-configs responds for org admin
+[339/712] [chromium] › tests/e2e/org-admin.spec.ts:21:1 › TC-OA003 — /org-admin/village-referrals loads
+[340/712] [chromium] › tests/e2e/partner-directory.spec.ts:6:1 › TC-PD001 — /partners public page loads
+[341/712] [chromium] › tests/e2e/partner-directory.spec.ts:17:1 › TC-PD002 — /api/partners returns list
+[342/712] [chromium] › tests/e2e/partner-directory.spec.ts:30:1 › TC-PD003 — /api/partners filters by category
+[343/712] [chromium] › tests/e2e/partner-directory.spec.ts:39:1 › TC-PD004 — partner detail page loads
+[344/712] [chromium] › tests/e2e/plan-entitlements-deep.spec.ts:8:1 › TC-PED001 — /api/entitlements returns plan_tier for member
+[345/712] [chromium] › tests/e2e/plan-entitlements-deep.spec.ts:20:1 › TC-PED002 — basics plan blocks premium features with upgrade prompt
+[346/712] [chromium] › tests/e2e/plan-entitlements-deep.spec.ts:31:1 › TC-PED003 — complete member sees marketplace unlocked
+[347/712] [chromium] › tests/e2e/plan-entitlements-deep.spec.ts:41:1 › TC-PED004 — /api/feature-flags responds with flags object
+[348/712] [chromium] › tests/e2e/plan-entitlements-deep.spec.ts:52:1 › TC-PED005 — /dashboard/plan shows current plan tier
+[349/712] [chromium] › tests/e2e/plan-entitlements-deep.spec.ts:64:1 › TC-PED006 — plan-comparison page loads
+[350/712] [chromium] › tests/e2e/plan-entitlements-deep.spec.ts:74:1 › TC-PED007 — plan comparison shows ≥ 2 plan tiers side by side
+[chromium] › tests/e2e/plan-entitlements-deep.spec.ts:74:1 › TC-PED007 — plan comparison shows ≥ 2 plan tiers side by side
+TC-PED007: only 1 plan tiers found — expected ≥ 2
+
+[351/712] [chromium] › tests/e2e/plan-entitlements.spec.ts:6:1 › TC-PE001 — /api/entitlements returns plan_tier
+[352/712] [chromium] › tests/e2e/plan-entitlements.spec.ts:18:1 › TC-PE002 — basic plan member sees navigator hours limit
+[353/712] [chromium] › tests/e2e/plan-entitlements.spec.ts:27:1 › TC-PE003 — /api/feature-flags responds
+[354/712] [chromium] › tests/e2e/plan-entitlements.spec.ts:33:1 › TC-PE004 — Premier hidden from /pricing
+[355/712] [chromium] › tests/e2e/plan-entitlements.spec.ts:40:1 › TC-PE005 — /api/plan-features responds
+[356/712] [chromium] › tests/e2e/plan-entitlements.spec.ts:46:1 › TC-PE006 — member_campaigns feature flag is off by default
+[357/712] [chromium] › tests/e2e/plan-entitlements.spec.ts:58:1 › TC-PE007 — /api/navigator/schedule responds
+[358/712] [chromium] › tests/e2e/plan-entitlements.spec.ts:64:1 › TC-PE008 — /dashboard/navigator loads for member
+[359/712] [chromium] › tests/e2e/plan-entitlements.spec.ts:73:1 › TC-PE009 — /dashboard/profile loads and shows plan tier
+[360/712] [chromium] › tests/e2e/plan-entitlements.spec.ts:82:1 › TC-PE010 — marketplace locked when feature off
+[361/712] [chromium] › tests/e2e/plan-upgrade.spec.ts:4:1 › TC-PU001 — /dashboard/plan loads for member
+[362/712] [chromium] › tests/e2e/plan-upgrade.spec.ts:13:1 › TC-PU002 — upgrade page shows Basic and Complete plans
+[363/712] [chromium] › tests/e2e/plan-upgrade.spec.ts:25:1 › TC-PU003 — Premier plan NOT shown on upgrade page
+[364/712] [chromium] › tests/e2e/plan-upgrade.spec.ts:35:1 › TC-PU004 — /api/create-checkout-session responds
+[chromium] › tests/e2e/plan-upgrade.spec.ts:35:1 › TC-PU004 — /api/create-checkout-session responds
+TC-PU004: checkout endpoint not found
+
+[365/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:24:1 › TC-P003 — Home: 6 feature cards visible
+[366/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:34:1 › TC-P006 — B2C funnel: / → /signup lands without error
+[367/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:51:1 › TC-P007 — Family funnel: /for-families has family signup CTA
+[368/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:78:3 › TC-P010 — /about loads with content
+[369/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:78:3 › TC-P011 — /for-families loads with content
+[370/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:78:3 › TC-P012 — /for-volunteers loads with content
+[371/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:78:3 › TC-P014 — /employers loads with content
+[372/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:78:3 › TC-P015 — /outcomes loads with content
+[373/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:78:3 › TC-P016 — /team loads with content
+[chromium] › tests/e2e/public-pages-deep.spec.ts:78:3 › TC-P016 — /team loads with content
+TC-P: /team redirected to /login — skipping
+
+TC-P016: /team redirected to /login
+
+[374/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:78:3 › TC-P017 — /advisors loads with content
+[375/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:78:3 › TC-P018 — /advisors/apply loads with content
+[376/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:78:3 › TC-P019 — /k12 loads with content
+[377/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:78:3 › TC-P020 — /donate loads with content
+[378/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:78:3 › TC-P021 — /contact loads with content
+[379/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:78:3 › TC-P023 — /terms loads with content
+[380/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:78:3 › TC-P024 — /join loads with content
+[381/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:78:3 › TC-P025 — /careers/navigator loads with content
+[382/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:87:1 › TC-P020 — /donate has not-tax-deductible disclaimer
+[383/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:97:1 › TC-P030 — /blog index has at least 1 post card
+[chromium] › tests/e2e/public-pages-deep.spec.ts:97:1 › TC-P030 — /blog index has at least 1 post card
+TC-P030: No /blog/[slug] links found — blog may be empty
+
+[384/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:107:1 › TC-P031 — /blog/[slug] article page loads with content
+[chromium] › tests/e2e/public-pages-deep.spec.ts:107:1 › TC-P031 — /blog/[slug] article page loads with content
+TC-P031: No blog articles found to test
+
+[385/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:120:1 › TC-P032 — /resources lists at least 8 topic cards
+[386/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:136:3 › TC-P033 — /resources/caregiver-support loads with real content
+[387/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:136:3 › TC-P033 — /resources/daily-living loads with real content
+[388/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:136:3 › TC-P033 — /resources/home-organization loads with real content
+[389/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:136:3 › TC-P033 — /resources/in-home-care loads with real content
+[390/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:136:3 › TC-P033 — /resources/legal-planning loads with real content
+[391/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:136:3 › TC-P033 — /resources/public-assistance loads with real content
+[392/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:136:3 › TC-P033 — /resources/purpose loads with real content
+[393/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:136:3 › TC-P033 — /resources/retirement-planning loads with real content
+[394/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:136:3 › TC-P033 — /resources/senior-fitness loads with real content
+[395/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:136:3 › TC-P033 — /resources/home-safety loads with real content
+[396/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:136:3 › TC-P033 — /resources/smart-home-tech loads with real content
+[397/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:136:3 › TC-P033 — /resources/moving-downsizing loads with real content
+[398/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:146:1 › TC-P040 — /directory loads without auth redirect
+[399/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:153:1 › TC-P041 — /directory/california loads with state content
+[400/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:159:1 › TC-P042 — /chapter/bay-area loads without 500
+[401/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:167:1 › TC-P043 — /org/[slug] loads without 500
+[402/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:175:1 › TC-P044 — /employer/[slug] loads without 500
+[403/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:184:1 › TC-P052 — /onboarding loads for authenticated member
+[404/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:194:1 › TC-P053 — /select-role loads and has role options
+[405/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:203:1 › TC-P060 — /invite/[token] page renders accept form
+[406/712] [chromium] › tests/e2e/public-pages-deep.spec.ts:214:1 › TC-P061 — /employer-admin/invite/[token] renders without 500
+[407/712] [chromium] › tests/e2e/public-pages.spec.ts:13:3 › TC-P-smoke / loads without auth
+[408/712] [chromium] › tests/e2e/public-pages.spec.ts:13:3 › TC-P-smoke /about loads without auth
+[409/712] [chromium] › tests/e2e/public-pages.spec.ts:13:3 › TC-P-smoke /for-families loads without auth
+[410/712] [chromium] › tests/e2e/public-pages.spec.ts:13:3 › TC-P-smoke /for-volunteers loads without auth
+[411/712] [chromium] › tests/e2e/public-pages.spec.ts:13:3 › TC-P-smoke /pricing loads without auth
+[412/712] [chromium] › tests/e2e/public-pages.spec.ts:13:3 › TC-P-smoke /employers loads without auth
+[413/712] [chromium] › tests/e2e/public-pages.spec.ts:13:3 › TC-P-smoke /donate loads without auth
+[414/712] [chromium] › tests/e2e/public-pages.spec.ts:13:3 › TC-P-smoke /contact loads without auth
+[415/712] [chromium] › tests/e2e/public-pages.spec.ts:13:3 › TC-P-smoke /privacy loads without auth
+[416/712] [chromium] › tests/e2e/public-pages.spec.ts:13:3 › TC-P-smoke /terms loads without auth
+[417/712] [chromium] › tests/e2e/public-pages.spec.ts:13:3 › TC-P-smoke /blog loads without auth
+[418/712] [chromium] › tests/e2e/public-pages.spec.ts:13:3 › TC-P-smoke /resources loads without auth
+[419/712] [chromium] › tests/e2e/public-pages.spec.ts:13:3 › TC-P-smoke /login loads without auth
+[420/712] [chromium] › tests/e2e/public-pages.spec.ts:13:3 › TC-P-smoke /signup loads without auth
+[421/712] [chromium] › tests/e2e/public-pages.spec.ts:13:3 › TC-P-smoke /join loads without auth
+[422/712] [chromium] › tests/e2e/public-pages.spec.ts:25:1 › TC-P001 — homepage has hero and CTA
+[423/712] [chromium] › tests/e2e/public-pages.spec.ts:33:1 › TC-P004 — /pricing shows Basic and Complete, NOT Premier
+[424/712] [chromium] › tests/e2e/public-pages.spec.ts:41:1 › TC-P005 — footer links load
+[425/712] [chromium] › tests/e2e/public-pages.spec.ts:53:1 › TC-P008 — homepage mobile 390px no horizontal scroll
+[426/712] [chromium] › tests/e2e/public-pages.spec.ts:63:1 › TC-P009 — homepage has meta title
+[427/712] [chromium] › tests/e2e/public-pages.spec.ts:69:1 › TC-P013 — /pricing annual toggle present
+[428/712] [chromium] › tests/e2e/public-pages.spec.ts:78:1 › TC-P022 — /privacy has HIPAA language
+[429/712] [chromium] › tests/e2e/public-pages.spec.ts:89:1 › TC-P — /api/features returns 200
+[430/712] [chromium] › tests/e2e/public-pages.spec.ts:95:1 › TC-P — robots.txt exists
+[chromium] › tests/e2e/public-pages.spec.ts:95:1 › TC-P — robots.txt exists
+TC-P: robots.txt not found
+
+[431/712] [chromium] › tests/e2e/public-routes.spec.ts:44:1 › TC-P001 — home page loads with key elements
+[432/712] [chromium] › tests/e2e/public-routes.spec.ts:62:1 › TC-P002 — mission strip is visible
+[433/712] [chromium] › tests/e2e/public-routes.spec.ts:71:1 › TC-P004 — /pricing shows Basic and Complete, Premier hidden
+[434/712] [chromium] › tests/e2e/public-routes.spec.ts:80:1 › TC-P005 — footer privacy + terms links work
+[435/712] [chromium] › tests/e2e/public-routes.spec.ts:89:1 › TC-P009 — home page has SEO meta tags
+[436/712] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET / → 200
+[437/712] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /about → 200
+[438/712] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /for-families → 200
+[439/712] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /for-volunteers → 200
+[440/712] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /pricing → 200
+[441/712] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /employers → 200
+[chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /employers → 200
+TC-P070: /employers returned a server error — fix required
+
+[442/712] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /outcomes → 200
+[443/712] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /team → 200
+[chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /team → 200
+TC-P070: /team redirects to /login (auth-required or not built yet)
+
+[444/712] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /blog → 200
+[chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /blog → 200
+TC-P070: /blog returned 404 (expected until page is built)
+
+[445/712] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /advisors → 200
+[446/712] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /advisors/apply → 200
+[447/712] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /k12 → 200
+[448/712] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /donate → 200
+[449/712] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /contact → 200
+[450/712] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /directory → 200
+[451/712] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /resources → 200
+[452/712] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /privacy → 200
+[453/712] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /terms → 200
+[454/712] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /join → 200
+[455/712] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /careers/navigator → 200
+[456/712] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /login → 200
+[457/712] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /signup → 200
+[458/712] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /nonprofit-admin → 200
+[459/712] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /resources/senior-fitness → 200
+[chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /resources/senior-fitness → 200
+TC-P070: /resources/senior-fitness returned 404 (expected until page is built)
+
+[460/712] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /resources/caregiver-support → 200
+[chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /resources/caregiver-support → 200
+TC-P070: /resources/caregiver-support returned 404 (expected until page is built)
+
+[461/712] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /chapter/bay-area → 200
+[chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /chapter/bay-area → 200
+TC-P070: /chapter/bay-area returned 404 (expected until page is built)
+
+[462/712] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /directory/california → 200
+[463/712] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /onboarding → 200
+[chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /onboarding → 200
+TC-P070: /onboarding redirects to /login (auth-required or not built yet)
+
+[464/712] [chromium] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › / — no horizontal scroll at 390px
+[465/712] [chromium] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /about — no horizontal scroll at 390px
+[466/712] [chromium] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /for-families — no horizontal scroll at 390px
+[467/712] [chromium] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /for-volunteers — no horizontal scroll at 390px
+[468/712] [chromium] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /pricing — no horizontal scroll at 390px
+[469/712] [chromium] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /outcomes — no horizontal scroll at 390px
+[470/712] [chromium] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /blog — no horizontal scroll at 390px
+[471/712] [chromium] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /advisors — no horizontal scroll at 390px
+[472/712] [chromium] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /advisors/apply — no horizontal scroll at 390px
+[473/712] [chromium] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /k12 — no horizontal scroll at 390px
+[474/712] [chromium] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /donate — no horizontal scroll at 390px
+[475/712] [chromium] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /contact — no horizontal scroll at 390px
+[476/712] [chromium] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /resources — no horizontal scroll at 390px
+[477/712] [chromium] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /privacy — no horizontal scroll at 390px
+[478/712] [chromium] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /terms — no horizontal scroll at 390px
+[479/712] [chromium] › tests/e2e/public-routes.spec.ts:201:1 › TC-P008 — home page mobile 390px: CTA above fold, no horizontal scroll
+[480/712] [chromium] › tests/e2e/role-access-control.spec.ts:6:1 › TC-RAC001 — member cannot access /navigator
+[481/712] [chromium] › tests/e2e/role-access-control.spec.ts:14:1 › TC-RAC002 — volunteer cannot access /admin
+[482/712] [chromium] › tests/e2e/role-access-control.spec.ts:22:1 › TC-RAC003 — family cannot access /org-admin
+  29) [chromium] › tests/e2e/role-access-control.spec.ts:22:1 › TC-RAC003 — family cannot access /org-admin 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard/family**" until "load"
+      navigated to "https://thrive-at-home-pied.vercel.app/dashboard"
+    ============================================================
+
+       at helpers.ts:57
+
+      55 |
+      56 |   if (expectedPath) {
+    > 57 |     await page.waitForURL(`**${expectedPath}**`, { timeout: 15_000 });
+         |                ^
+      58 |   } else {
+      59 |     // Wait for navigation away from /login
+      60 |     await page.waitForFunction(() => !window.location.pathname.startsWith('/login'), { timeout: 15_000 });
+        at loginAs (/workspaces/ThriveAtHome/tests/e2e/helpers.ts:57:16)
+        at /workspaces/ThriveAtHome/tests/e2e/role-access-control.spec.ts:23:3
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/role-access-control-TC-RAC-0d17e-ily-cannot-access-org-admin-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/role-access-control-TC-RAC-0d17e-ily-cannot-access-org-admin-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/role-access-control-TC-RAC-0d17e-ily-cannot-access-org-admin-chromium/error-context.md
+
+
+[483/712] [chromium] › tests/e2e/role-access-control.spec.ts:30:1 › TC-RAC004 — member cannot access /employer-admin
+  30) [chromium] › tests/e2e/role-access-control.spec.ts:30:1 › TC-RAC004 — member cannot access /employer-admin 
+
+    Error: expect(received).not.toContain(expected) // indexOf
+
+    Expected substring: not "/employer-admin"
+    Received string:        "https://thrive-at-home-pied.vercel.app/employer-admin"
+
+      33 |   await page.goto(`${BASE}/employer-admin`);
+      34 |   await page.waitForLoadState('networkidle');
+    > 35 |   expect(page.url()).not.toContain('/employer-admin');
+         |                          ^
+      36 | });
+      37 |
+        at /workspaces/ThriveAtHome/tests/e2e/role-access-control.spec.ts:35:26
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/role-access-control-TC-RAC-853ad-annot-access-employer-admin-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/role-access-control-TC-RAC-853ad-annot-access-employer-admin-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/role-access-control-TC-RAC-853ad-annot-access-employer-admin-chromium/error-context.md
+
+
+[484/712] [chromium] › tests/e2e/service-marketplace.spec.ts:10:1 › TC-MKT001 — /dashboard/marketplace loads (locked/coming soon state)
+[485/712] [chromium] › tests/e2e/service-marketplace.spec.ts:23:1 › TC-MKT002 — /dashboard/marketplace no 500
+  31) [chromium] › tests/e2e/service-marketplace.spec.ts:23:1 › TC-MKT002 — /dashboard/marketplace no 500 
+
+    Error: TC-MKT002: 500 on https://thrive-at-home-pied.vercel.app/api/auth/resolve-landing
+
+      23 | test('TC-MKT002 — /dashboard/marketplace no 500', async ({ page }) => {
+      24 |   page.on('response', (res) => {
+    > 25 |     if (res.status() === 500) throw new Error(`TC-MKT002: 500 on ${res.url()}`);
+         |                                     ^
+      26 |   });
+      27 |   await loginAs(page, ACCOUNTS.member, '/dashboard');
+      28 |   if (page.url().includes('/login')) { console.warn('TC-MKT002: login failed'); return; }
+        at _Page.<anonymous> (/workspaces/ThriveAtHome/tests/e2e/service-marketplace.spec.ts:25:37)
+
+    Error: page.waitForURL: Test ended.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard**" until "load"
+    ============================================================
+
+       at helpers.ts:57
+
+      55 |
+      56 |   if (expectedPath) {
+    > 57 |     await page.waitForURL(`**${expectedPath}**`, { timeout: 15_000 });
+         |                ^
+      58 |   } else {
+      59 |     // Wait for navigation away from /login
+      60 |     await page.waitForFunction(() => !window.location.pathname.startsWith('/login'), { timeout: 15_000 });
+        at loginAs (/workspaces/ThriveAtHome/tests/e2e/helpers.ts:57:16)
+        at /workspaces/ThriveAtHome/tests/e2e/service-marketplace.spec.ts:27:3
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/service-marketplace-TC-MKT002-—-dashboard-marketplace-no-500-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/service-marketplace-TC-MKT002-—-dashboard-marketplace-no-500-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/service-marketplace-TC-MKT002-—-dashboard-marketplace-no-500-chromium/error-context.md
+
+
+[486/712] [chromium] › tests/e2e/service-marketplace.spec.ts:35:1 › TC-MKT003 — /api/marketplace returns 200 or locked response (not 500)
+[chromium] › tests/e2e/service-marketplace.spec.ts:35:1 › TC-MKT003 — /api/marketplace returns 200 or locked response (not 500)
+TC-MKT003: /api/marketplace not found
+
+[487/712] [chromium] › tests/e2e/service-marketplace.spec.ts:54:3 › TC-MKT004-transport — /api/marketplace/transport no 500
+[chromium] › tests/e2e/service-marketplace.spec.ts:54:3 › TC-MKT004-transport — /api/marketplace/transport no 500
+TC-MKT004-transport: /api/marketplace/transport not found — category stub not built yet
+
+[488/712] [chromium] › tests/e2e/service-marketplace.spec.ts:54:3 › TC-MKT004-home-services — /api/marketplace/home-services no 500
+[chromium] › tests/e2e/service-marketplace.spec.ts:54:3 › TC-MKT004-home-services — /api/marketplace/home-services no 500
+TC-MKT004-home-services: /api/marketplace/home-services not found — category stub not built yet
+
+[489/712] [chromium] › tests/e2e/service-marketplace.spec.ts:54:3 › TC-MKT004-meals — /api/marketplace/meals no 500
+[chromium] › tests/e2e/service-marketplace.spec.ts:54:3 › TC-MKT004-meals — /api/marketplace/meals no 500
+TC-MKT004-meals: /api/marketplace/meals not found — category stub not built yet
+
+[490/712] [chromium] › tests/e2e/service-marketplace.spec.ts:54:3 › TC-MKT004-health — /api/marketplace/health no 500
+[chromium] › tests/e2e/service-marketplace.spec.ts:54:3 › TC-MKT004-health — /api/marketplace/health no 500
+TC-MKT004-health: /api/marketplace/health not found — category stub not built yet
+
+[491/712] [chromium] › tests/e2e/service-marketplace.spec.ts:54:3 › TC-MKT004-legal-financial — /api/marketplace/legal-financial no 500
+[chromium] › tests/e2e/service-marketplace.spec.ts:54:3 › TC-MKT004-legal-financial — /api/marketplace/legal-financial no 500
+TC-MKT004-legal-financial: /api/marketplace/legal-financial not found — category stub not built yet
+
+[492/712] [chromium] › tests/e2e/service-marketplace.spec.ts:54:3 › TC-MKT004-tech-help — /api/marketplace/tech-help no 500
+[chromium] › tests/e2e/service-marketplace.spec.ts:54:3 › TC-MKT004-tech-help — /api/marketplace/tech-help no 500
+TC-MKT004-tech-help: /api/marketplace/tech-help not found — category stub not built yet
+
+[493/712] [chromium] › tests/e2e/service-marketplace.spec.ts:54:3 › TC-MKT004-companionship — /api/marketplace/companionship no 500
+[chromium] › tests/e2e/service-marketplace.spec.ts:54:3 › TC-MKT004-companionship — /api/marketplace/companionship no 500
+TC-MKT004-companionship: /api/marketplace/companionship not found — category stub not built yet
+
+[494/712] [chromium] › tests/e2e/service-marketplace.spec.ts:65:1 › TC-MKT005 — /api/marketplace/providers responds (schema live check)
+[chromium] › tests/e2e/service-marketplace.spec.ts:65:1 › TC-MKT005 — /api/marketplace/providers responds (schema live check)
+TC-MKT005: /api/marketplace/providers not found
+
+[495/712] [chromium] › tests/e2e/service-marketplace.spec.ts:72:1 › TC-MKT006 — marketplace booking endpoint exists (stub)
+[chromium] › tests/e2e/service-marketplace.spec.ts:72:1 › TC-MKT006 — marketplace booking endpoint exists (stub)
+TC-MKT006: /api/marketplace/book not found — stub not built
+
+[496/712] [chromium] › tests/e2e/service-marketplace.spec.ts:83:1 › TC-MKT007 — marketplace locked for Basic plan member (marketplace_live: false)
+[497/712] [chromium] › tests/e2e/service-marketplace.spec.ts:100:1 › TC-MKT008 — /api/marketplace/transactions responds (schema live)
+[chromium] › tests/e2e/service-marketplace.spec.ts:100:1 › TC-MKT008 — /api/marketplace/transactions responds (schema live)
+TC-MKT008: transactions endpoint not found
+
+[498/712] [chromium] › tests/e2e/voice-pipeline.spec.ts:45:1 › TC-V001 — Env vars present: wrong CRON_SECRET → 401 (endpoint exists)
+[499/712] [chromium] › tests/e2e/voice-pipeline.spec.ts:62:1 › TC-V002 — All 12 agent IDs: correct CRON_SECRET → 200/207 (not 500)
+[500/712] [chromium] › tests/e2e/voice-pipeline.spec.ts:78:1 › TC-V010 — Aria outbound cron: 200/207, called count ≥ 0
+[501/712] [chromium] › tests/e2e/voice-pipeline.spec.ts:91:1 › TC-V011 — Aria clinical extraction: webhook accepts call-ended payload
+[chromium] › tests/e2e/voice-pipeline.spec.ts:91:1 › TC-V011 — Aria clinical extraction: webhook accepts call-ended payload
+TC-V011: /api/webhooks/retell returned auth error — Retell signature verification required in prod
+
+[502/712] [chromium] › tests/e2e/voice-pipeline.spec.ts:114:1 › TC-V012 — Family events context: GET /api/family-events not 500
+[503/712] [chromium] › tests/e2e/voice-pipeline.spec.ts:125:1 › TC-V013 — Fraud detection: webhook with scam transcript not 500
+[chromium] › tests/e2e/voice-pipeline.spec.ts:125:1 › TC-V013 — Fraud detection: webhook with scam transcript not 500
+TC-V013: Retell webhook requires signature auth — manual test required for fraud detection
+
+[504/712] [chromium] › tests/e2e/voice-pipeline.spec.ts:147:1 › TC-V014 — Crisis detection: webhook with crisis transcript not 500
+[chromium] › tests/e2e/voice-pipeline.spec.ts:147:1 › TC-V014 — Crisis detection: webhook with crisis transcript not 500
+TC-V014: Crisis webhook requires Retell signature — manual test required
+
+[505/712] [chromium] › tests/e2e/voice-pipeline.spec.ts:169:1 › TC-V015 — Missed call handling: aria cron runs without crash
+[506/712] [chromium] › tests/e2e/voice-pipeline.spec.ts:181:1 › TC-V016 — Call summary email: aria cron completes without crash
+[507/712] [chromium] › tests/e2e/voice-pipeline.spec.ts:194:1 › TC-V020 — Grace reminder cron: 200/404, NOT 500
+[chromium] › tests/e2e/voice-pipeline.spec.ts:194:1 › TC-V020 — Grace reminder cron: 200/404, NOT 500
+TC-V020: Grace reminder cron endpoint not found (404) — not yet built
+
+[508/712] [chromium] › tests/e2e/voice-pipeline.spec.ts:217:1 › TC-V025 — Joy birthday call: birthday-arc cron 200/207, not 500
+[509/712] [chromium] › tests/e2e/voice-pipeline.spec.ts:227:1 › TC-V026 — Joy milestone interview: birthday-arc cron handles milestone members
+[510/712] [chromium] › tests/e2e/voice-pipeline.spec.ts:244:1 › TC-V030 — Rosa inbound: Twilio webhook endpoint not 500
+[chromium] › tests/e2e/voice-pipeline.spec.ts:244:1 › TC-V030 — Rosa inbound: Twilio webhook endpoint not 500
+TC-V030: /api/webhooks/twilio not found
+
+[511/712] [chromium] › tests/e2e/voice-pipeline.spec.ts:270:1 › TC-V035 — Hope crisis line: crisis webhook endpoint not 500
+[chromium] › tests/e2e/voice-pipeline.spec.ts:270:1 › TC-V035 — Hope crisis line: crisis webhook endpoint not 500
+TC-V035: No crisis webhook endpoint found (404) — may route through main Twilio webhook
+
+[512/712] [chromium] › tests/e2e/voice-pipeline.spec.ts:298:1 › TC-V040 — Claire family support: admin panel loads without crash
+[chromium] › tests/e2e/voice-pipeline.spec.ts:298:1 › TC-V040 — Claire family support: admin panel loads without crash
+TC-V040: Claire full E2E requires real inbound call to Claire number — manual verification needed
+
+[513/712] [chromium] › tests/e2e/voice-pipeline.spec.ts:311:1 › TC-V045 — Sam volunteer support: admin panel loads without crash
+[chromium] › tests/e2e/voice-pipeline.spec.ts:311:1 › TC-V045 — Sam volunteer support: admin panel loads without crash
+TC-V045: Sam full E2E requires real inbound call to Sam number — manual verification needed
+
+[514/712] [chromium] › tests/e2e/voice-pipeline.spec.ts:323:1 › TC-V050 — Morgan buddy support: admin panel loads without crash
+[chromium] › tests/e2e/voice-pipeline.spec.ts:323:1 › TC-V050 — Morgan buddy support: admin panel loads without crash
+TC-V050: Morgan full E2E requires real inbound call to Morgan number — manual verification needed
+
+[515/712] [chromium] › tests/e2e/voice-pipeline.spec.ts:335:1 › TC-V055 — Nova navigator assist: admin panel loads without crash
+[chromium] › tests/e2e/voice-pipeline.spec.ts:335:1 › TC-V055 — Nova navigator assist: admin panel loads without crash
+TC-V055: Nova full E2E requires real inbound call to Nova number — manual verification needed
+
+[516/712] [chromium] › tests/e2e/voice-pipeline.spec.ts:347:1 › TC-V060 — Alex staff support: admin panel loads without crash
+[chromium] › tests/e2e/voice-pipeline.spec.ts:347:1 › TC-V060 — Alex staff support: admin panel loads without crash
+TC-V060: Alex full E2E requires real inbound call to Alex number — manual verification needed
+
+[517/712] [chromium] › tests/e2e/voice-pipeline.spec.ts:363:1 › TC-V065 — Quinn deferred: aria cron still returns 200 without Quinn agent ID
+[chromium] › tests/e2e/voice-pipeline.spec.ts:363:1 › TC-V065 — Quinn deferred: aria cron still returns 200 without Quinn agent ID
+TC-V065: Quinn deferred to M9 — RETELL_QUINN_AGENT_ID not required for launch
+
+[518/712] [chromium] › tests/e2e/voice-pipeline.spec.ts:378:1 › TC-V070 — Jordan B2B support: org admin portal loads without crash
+[chromium] › tests/e2e/voice-pipeline.spec.ts:378:1 › TC-V070 — Jordan B2B support: org admin portal loads without crash
+TC-V070: Jordan full E2E requires real inbound call to Jordan number — manual verification needed
+
+[519/712] [chromium] › tests/e2e/voice-pipeline.spec.ts:398:1 › TC-V080 — Family crisis SMS: Twilio env present, cron endpoint responds
+[chromium] › tests/e2e/voice-pipeline.spec.ts:398:1 › TC-V080 — Family crisis SMS: Twilio env present, cron endpoint responds
+TC-V080: Full Twilio SMS delivery requires real phone number and 10DLC registration — manual verification needed
+
+[520/712] [chromium] › tests/e2e/voice-pipeline.spec.ts:412:1 › TC-V081 — 10DLC registration status: MANUAL CHECK REQUIRED
+[chromium] › tests/e2e/voice-pipeline.spec.ts:412:1 › TC-V081 — 10DLC registration status: MANUAL CHECK REQUIRED
+TC-V081 MANUAL CHECK REQUIRED: Verify 10DLC registration in Twilio Console → Messaging → Regulatory Compliance. Brand + Campaign must be APPROVED before sending SMS to real users. This is a P0 blocker (2–3 week approval lead time).
+
+[521/712] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:17:1 › TC-VOL011 — VSO admin: /vso-admin loads with veteran/export content
+[522/712] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:31:1 › TC-VOL021 — K-12 admin: /school-admin loads with student/hours content
+[523/712] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:45:1 › TC-VOL040 — Volunteer dashboard shows hours/tier/progress
+[524/712] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:60:1 › TC-VOL050 — Neighbor volunteer: /volunteer/dashboard loads
+[chromium] › tests/e2e/volunteer-portal-deep.spec.ts:60:1 › TC-VOL050 — Neighbor volunteer: /volunteer/dashboard loads
+TC-VOL050: Zip enforcement requires neighbor@test.com seeded with home_zip. Full zip-radius filter test must be run manually.
+
+[525/712] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:73:1 › TC-VOL061 — Training gate: API health responds; migration note
+[chromium] › tests/e2e/volunteer-portal-deep.spec.ts:73:1 › TC-VOL061 — Training gate: API health responds; migration note
+TC-VOL061: Verify training_completed column via Supabase SQL: SELECT column_name FROM information_schema.columns WHERE table_name='volunteer_profiles' AND column_name='training_completed';
+
+[526/712] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:85:1 › TC-VOL070 — Volunteer dashboard loads; reciprocity credits manual note
+[chromium] › tests/e2e/volunteer-portal-deep.spec.ts:85:1 › TC-VOL070 — Volunteer dashboard loads; reciprocity credits manual note
+TC-VOL070: reciprocity_credits table requires family volunteer action; test manually.
+
+[527/712] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:96:1 › TC-SCH001 — Admin dashboard loads; schema fix verified
+[chromium] › tests/e2e/volunteer-portal-deep.spec.ts:96:1 › TC-SCH001 — Admin dashboard loads; schema fix verified
+TC-SCH001: Verify Vercel build log has 0 navigator_tasks column errors after commit 43bd382
+
+[528/712] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:110:1 › TC-SCH002 — Aria cron fires without 500; task schema valid
+[chromium] › tests/e2e/volunteer-portal-deep.spec.ts:110:1 › TC-SCH002 — Aria cron fires without 500; task schema valid
+TC-SCH002: Full task type coverage (welcome_call, crisis_followup, etc.) requires seeded data for each task_type; run navigator flow manually.
+
+[529/712] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:126:1 › TC-MED005 — /admin/ma-report loads; data quality gate present
+[530/712] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:140:1 › TC-MED006 — /admin/ma-report loads; PDF export noted
+[chromium] › tests/e2e/volunteer-portal-deep.spec.ts:140:1 › TC-MED006 — /admin/ma-report loads; PDF export noted
+TC-MED006: PDF export requires ≥60% clinical coverage; test with seeded call data.
+
+[531/712] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:155:1 › TC-MED007 — /admin/ma-report: 3 rapid requests do not 429
+[chromium] › tests/e2e/volunteer-portal-deep.spec.ts:155:1 › TC-MED007 — /admin/ma-report: 3 rapid requests do not 429
+TC-MED007: Rate limit (429) triggers at >10 req/hr; full rate-limit test requires 11 rapid requests.
+
+[532/712] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:169:1 › TC-MED008 — Backfill script: manual note only
+[chromium] › tests/e2e/volunteer-portal-deep.spec.ts:169:1 › TC-MED008 — Backfill script: manual note only
+TC-MED008: Run `npx tsx scripts/backfill-clinical-fields.ts` on staging to verify backfill; skip in automated E2E.
+
+[533/712] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:175:1 › TC-REG001 — /api/family-members returns 200/401, not 500; no cross-member data
+[chromium] › tests/e2e/volunteer-portal-deep.spec.ts:175:1 › TC-REG001 — /api/family-members returns 200/401, not 500; no cross-member data
+TC-REG001: RLS cross-member isolation verified via Supabase policy (supabase_auth_id = auth.uid()); manual SQL audit recommended.
+
+[534/712] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:194:1 › TC-REG003 — Deploy method is git push origin main
+[chromium] › tests/e2e/volunteer-portal-deep.spec.ts:194:1 › TC-REG003 — Deploy method is git push origin main
+TC-REG003: Deploy method is git push origin main — NEVER npx vercel --prod. Verified via git log and Vercel deployment history.
+
+[535/712] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:200:1 › TC-REG004 — Old Resend API key is revoked
+[536/712] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:219:1 › TC-INF007 — 10DLC registration: manual check required
+[chromium] › tests/e2e/volunteer-portal-deep.spec.ts:219:1 › TC-INF007 — 10DLC registration: manual check required
+TC-INF007: MANUAL CHECK — Verify 10DLC brand+campaign registration in Twilio Console. This is P0 for SMS to real users.
+
+[537/712] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:225:1 › TC-F003 — Family dashboard: aria_can_mention toggle present
+[538/712] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:239:1 › TC-F005 — Family dashboard: pending gift approval UI present
+[chromium] › tests/e2e/volunteer-portal-deep.spec.ts:239:1 › TC-F005 — Family dashboard: pending gift approval UI present
+TC-F005: pending gift approval UI not visible — requires a pending_approval gift_order seeded
+
+[539/712] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:253:1 › TC-F007 — Family dashboard: transition plan visible if sharing enabled
+[chromium] › tests/e2e/volunteer-portal-deep.spec.ts:253:1 › TC-F007 — Family dashboard: transition plan visible if sharing enabled
+TC-F007: Transition plan visibility requires navigator to have started a plan and member.vault_sharing allows family; test manually.
+
+[540/712] [chromium] › tests/e2e/volunteer-portal-full.spec.ts:11:1 › TC-VPF001 — /volunteer loads or redirects (no 500)
+[541/712] [chromium] › tests/e2e/volunteer-portal-full.spec.ts:20:1 › TC-VPF002 — /volunteer/apply loads
+[542/712] [chromium] › tests/e2e/volunteer-portal-full.spec.ts:28:1 › TC-VPF003 — /volunteer/apply has application form
+[543/712] [chromium] › tests/e2e/volunteer-portal-full.spec.ts:39:1 › TC-VPF010 — /volunteer/buddy requires auth
+[544/712] [chromium] › tests/e2e/volunteer-portal-full.spec.ts:51:1 › TC-VPF011 — /volunteer/buddy loads for volunteer
+[545/712] [chromium] › tests/e2e/volunteer-portal-full.spec.ts:61:1 › TC-VPF012 — buddy portal shows buddy assignment cards or empty state
+[546/712] [chromium] › tests/e2e/volunteer-portal-full.spec.ts:75:1 › TC-VPF020 — /volunteer/chaplaincy loads
+[547/712] [chromium] › tests/e2e/volunteer-portal-full.spec.ts:87:1 › TC-VPF021 — chaplaincy page shows spiritual/grief content
+[548/712] [chromium] › tests/e2e/volunteer-portal-full.spec.ts:100:1 › TC-VPF030 — /volunteer/neighbors loads
+[549/712] [chromium] › tests/e2e/volunteer-portal-full.spec.ts:112:1 › TC-VPF031 — neighbors page shows zip-matched or match-pending content
+[550/712] [chromium] › tests/e2e/volunteer-portal-full.spec.ts:126:1 › TC-VPF040 — /volunteer/professionals loads
+[551/712] [chromium] › tests/e2e/volunteer-portal-full.spec.ts:138:1 › TC-VPF041 — retired-pro page shows specialty/service cards
+[552/712] [chromium] › tests/e2e/volunteer-portal-full.spec.ts:150:1 › TC-VPF042 — retired-pro discovery surfaces in Legal/Financial Hub
+[553/712] [chromium] › tests/e2e/volunteer-portal-full.spec.ts:166:1 › TC-VPF050 — /employer-admin loads corporate tier content
+[554/712] [chromium] › tests/e2e/volunteer-portal-full.spec.ts:176:1 › TC-VPF051 — employer-admin shows corporate volunteer tier progress
+[555/712] [chromium] › tests/e2e/volunteer-portal-full.spec.ts:187:1 › TC-VPF052 — /api/corporate-volunteer/progress responds
+[556/712] [chromium] › tests/e2e/volunteer-portal.spec.ts:4:1 › TC-VOL001 — volunteer dashboard loads
+[557/712] [chromium] › tests/e2e/volunteer-portal.spec.ts:11:1 › TC-VOL002 — /volunteer/dashboard loads content
+[558/712] [chromium] › tests/e2e/volunteer-portal.spec.ts:20:1 › TC-VOL010 — /university-admin loads
+[559/712] [chromium] › tests/e2e/volunteer-portal.spec.ts:29:1 › TC-VOL020 — /vso-admin loads
+[560/712] [chromium] › tests/e2e/volunteer-portal.spec.ts:38:1 › TC-VOL030 — /school-admin loads
+[561/712] [chromium] › tests/e2e/volunteer-portal.spec.ts:47:1 › TC-VOL060 — /api/volunteer/training-status responds
+[chromium] › tests/e2e/volunteer-portal.spec.ts:47:1 › TC-VOL060 — /api/volunteer/training-status responds
+TC-VOL060: training-status endpoint not found
+
+[562/712] [chromium] › tests/e2e/wiring-nov6.spec.ts:12:1 › TC-WIRE001 — /api/circles/posts POST requires auth
+[563/712] [chromium] › tests/e2e/wiring-nov6.spec.ts:19:1 › TC-WIRE002 — /api/circles/posts POST rejects scam content (422)
+[564/712] [chromium] › tests/e2e/wiring-nov6.spec.ts:29:1 › TC-WIRE003 — /api/circles/posts POST with safe content returns 201 or 200
+[565/712] [chromium] › tests/e2e/wiring-nov6.spec.ts:42:1 › TC-WIRE010 — /api/volunteers/[id]/buddies requires auth
+[566/712] [chromium] › tests/e2e/wiring-nov6.spec.ts:47:1 › TC-WIRE011 — /api/volunteers/[id]/buddies returns assignments array
+[567/712] [chromium] › tests/e2e/wiring-nov6.spec.ts:62:1 › TC-WIRE020 — family dashboard loads without 500
+[568/712] [chromium] › tests/e2e/wiring-nov6.spec.ts:75:1 › TC-WIRE021 — family dashboard renders scam protection card
+[569/712] [chromium] › tests/e2e/wiring-nov6.spec.ts:91:1 › TC-WIRE030 — /api/cron/celebrations requires CRON_SECRET
+[570/712] [chromium] › tests/e2e/wiring-nov6.spec.ts:98:1 › TC-WIRE031 — /api/cron/celebrations accepts correct CRON_SECRET
+  32) [chromium] › tests/e2e/wiring-nov6.spec.ts:98:1 › TC-WIRE031 — /api/cron/celebrations accepts correct CRON_SECRET 
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected value: 401
+    Received array: [200, 207]
+
+      101 |     headers: { authorization: `Bearer ${secret}` },
+      102 |   });
+    > 103 |   expect([200, 207]).toContain(res.status());
+          |                      ^
+      104 | });
+      105 |
+      106 | // ── My Buddies tab in volunteer dashboard ────────────────────────────────────
+        at /workspaces/ThriveAtHome/tests/e2e/wiring-nov6.spec.ts:103:22
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/wiring-nov6-TC-WIRE031-—-a-9e3a9-accepts-correct-CRON-SECRET-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/wiring-nov6-TC-WIRE031-—-a-9e3a9-accepts-correct-CRON-SECRET-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/wiring-nov6-TC-WIRE031-—-a-9e3a9-accepts-correct-CRON-SECRET-chromium/error-context.md
+
+
+[571/712] [chromium] › tests/e2e/wiring-nov6.spec.ts:108:1 › TC-WIRE040 — volunteer dashboard shows My Buddies tab
+[572/712] [chromium] › tests/e2e/wiring-nov6.spec.ts:121:1 › TC-WIRE041 — My Buddies tab renders when clicked

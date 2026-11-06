@@ -20,7 +20,7 @@ export default async function AgencyAdminPage() {
 
   const role = await getUserRole(user.id)
   if (role !== 'agency_admin' && role !== 'admin') {
-    redirect('/dashboard')
+    redirect('/login')
   }
 
   const { data: agency, error: agencyError } = await getAgencyForAdmin(user.id)
