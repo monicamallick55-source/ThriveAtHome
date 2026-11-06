@@ -43,7 +43,9 @@ test('TC-B001 — Basic checkout flow ($39/mo)', async ({ page }) => {
     page.getByRole('link', { name: /get started|choose basic|subscribe/i }).nth(1)
   ).first();
   await basicCTA.click();
-  await page.waitForLoadState('networkidle');
+  // Wait for navigation away from /pricing
+  await page.waitForURL(url => !url.pathname.endsWith('/pricing'), { timeout: 15_000 }).catch(() => {});
+  await page.waitForLoadState('domcontentloaded');
 
   const url = page.url();
   // Either goes to /signup (unauthenticated) or Stripe Checkout
