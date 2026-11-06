@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import CorporateTierProgress from '@/components/volunteer/CorporateTierProgress'
 
 interface Employee {
   id: string
@@ -615,6 +616,25 @@ export default function EmployerDashboardClient({ account, employees, invitation
               </div>
 
               {/* Volunteer roster */}
+                            {/* G7.11 — Corporate volunteer tier progress bar */}
+              {corpProgram.summaries.length > 0 && (
+                <div style={{ marginBottom: '28px' }}>
+                  <CorporateTierProgress
+                    companyName={account?.company_name ?? ''}
+                    volunteers={corpProgram.summaries.map((s: any) => {
+                      const nameParts = (s.volunteer_name ?? '').split(' ')
+                      return {
+                        id: s.volunteer_id,
+                        first_name: nameParts[0] ?? 'Volunteer',
+                        last_initial: nameParts[1]?.[0] ?? '',
+                        total_hours: s.total_hours ?? 0,
+                        status: s.verified_hours > 0 ? 'active' : 'pending',
+                        volunteer_category: 'corporate',
+                      }
+                    })}
+                  />
+                </div>
+              )}
               {corpProgram.summaries.length === 0 ? (
                 <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: '#7A7268', fontStyle: 'italic' }}>
                   No volunteer hours logged yet. Employees can sign up to volunteer at <a href="/volunteer/apply" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-navy)' }}>/volunteer/apply</a>.

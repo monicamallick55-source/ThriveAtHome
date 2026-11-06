@@ -1,5 +1,6 @@
 import ServiceBookingForm from '../_components/ServiceBookingForm'
 import Link from 'next/link'
+import RetiredProsSection from './RetiredProsSection'
 
 export default function LegalFinancialPage() {
   return (
@@ -54,6 +55,9 @@ export default function LegalFinancialPage() {
           },
         ]}
       />
+
+      {/* G7.10 — Retired professional volunteer advisors */}
+      <RetiredProsSection />
     </div>
   )
 }
