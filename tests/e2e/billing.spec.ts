@@ -38,11 +38,12 @@ async function fillStripeCard(page: import('@playwright/test').Page): Promise<vo
 test('TC-B001 — Basic checkout flow ($39/mo)', async ({ page }) => {
   await page.goto('/pricing');
 
-  // Click Basic plan CTA
-  const basicCTA = page.getByRole('link', { name: /get started|choose basic|subscribe/i }).first().or(
-    page.getByRole('button', { name: /get started|choose basic/i }).first()
-  );
+  // Click Basic plan CTA (scoped to pricing card, not nav)
+  const basicCTA = page.getByTestId('plan-cta-basic').or(
+    page.getByRole('link', { name: /get started|choose basic|subscribe/i }).nth(1)
+  ).first();
   await basicCTA.click();
+  await page.waitForLoadState('networkidle');
 
   const url = page.url();
   // Either goes to /signup (unauthenticated) or Stripe Checkout

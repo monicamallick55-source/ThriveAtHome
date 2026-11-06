@@ -114,6 +114,7 @@ export default function PlanCards({ signedIn }: { signedIn: boolean }) {
                 ))}
               </ul>
               <Link
+                data-testid={`plan-cta-${plan.tier}`}
                 href={signedIn ? `/dashboard/billing?plan=${plan.tier}&billing=${annual ? 'annual' : 'monthly'}` : `/signup?plan=${plan.tier}&billing=${annual ? 'annual' : 'monthly'}`}
                 style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
