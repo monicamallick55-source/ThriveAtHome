@@ -123,7 +123,7 @@ export default function PlanCards({ signedIn }: { signedIn: boolean }) {
                   backgroundColor: plan.highlighted ? 'white' : 'var(--color-teal)',
                   color: plan.highlighted ? 'var(--color-navy)' : 'white',
                 }}>
-                {signedIn ? 'Choose this plan' : 'Start free trial'}
+                {signedIn ? 'Choose this plan' : 'Get Started'}
               </Link>
             </div>
           ))}

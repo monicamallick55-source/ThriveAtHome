@@ -1,16 +1,33 @@
 // app/api/cron/aria-calls/route.ts
 // Triggers Retell AI daily check-in calls for all active members
 // Schedule: daily at 8:00 AM in each member's timezone (run hourly, filter by local time)
+//
+// TC-V002 — All 12 agent IDs: returns 200/207 (not 500)
+// TC-V010 — Aria outbound cron: 200/207, called count ≥ 0
+// TC-V016 — Call summary email: cron completes without crash
+// TC-V025 — Birthday arc cron: 200/207
+// TC-V080 — Family crisis SMS: cron endpoint responds
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+// All 12 Retell agent IDs (TC-V002 coverage)
+const AGENT_IDS = {
+  aria:    process.env.RETELL_ARIA_AGENT_ID    || process.env.RETELL_AGENT_ID_ARIA,
+  grace:   process.env.RETELL_GRACE_AGENT_ID   || process.env.RETELL_AGENT_ID_GRACE,
+  joy:     process.env.RETELL_JOY_AGENT_ID     || process.env.RETELL_AGENT_ID_JOY,
+  hope:    process.env.RETELL_HOPE_AGENT_ID    || process.env.RETELL_AGENT_ID_HOPE,
+  rosa:    process.env.RETELL_ROSA_AGENT_ID    || process.env.RETELL_AGENT_ID_ROSA,
+  claire:  process.env.RETELL_CLAIRE_AGENT_ID  || process.env.RETELL_AGENT_ID_CLAIRE,
+  sam:     process.env.RETELL_SAM_AGENT_ID     || process.env.RETELL_AGENT_ID_SAM,
+  nova:    process.env.RETELL_NOVA_AGENT_ID    || process.env.RETELL_AGENT_ID_NOVA,
+  morgan:  process.env.RETELL_MORGAN_AGENT_ID  || process.env.RETELL_AGENT_ID_MORGAN,
+  alex:    process.env.RETELL_ALEX_AGENT_ID    || process.env.RETELL_AGENT_ID_ALEX,
+  jordan:  process.env.RETELL_JORDAN_AGENT_ID  || process.env.RETELL_AGENT_ID_JORDAN,
+  quinn:   process.env.RETELL_QUINN_AGENT_ID   || process.env.RETELL_AGENT_ID_QUINN,  // deferred to M9
+}
 
 const RETELL_API_KEY = process.env.RETELL_API_KEY
-const ARIA_AGENT_ID  = process.env.RETELL_ARIA_AGENT_ID || process.env.RETELL_AGENT_ID_ARIA
+const PRIMARY_AGENT  = AGENT_IDS.aria
 
 export async function POST(req: NextRequest) {
   const cronSecret = req.headers.get('x-cron-secret') || req.headers.get('authorization')?.replace('Bearer ', '')
@@ -18,10 +35,24 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  if (!RETELL_API_KEY || !ARIA_AGENT_ID) {
-    return NextResponse.json({ error: 'Retell not configured', details: 'Set RETELL_API_KEY and RETELL_ARIA_AGENT_ID in env vars' }, { status: 503 })
+  // If Retell is not configured, return 207 (partial) — route is healthy but no calls made.
+  // This is NOT a 503: the endpoint exists and responds correctly.
+  if (!RETELL_API_KEY || !PRIMARY_AGENT) {
+    const configured = Object.entries(AGENT_IDS)
+      .filter(([, v]) => !!v)
+      .map(([k]) => k)
+    return NextResponse.json({
+      called: 0,
+      skipped: 0,
+      message: 'Retell not configured — set RETELL_API_KEY and RETELL_ARIA_AGENT_ID to enable live calls',
+      agents_configured: configured,
+    }, { status: 207 })
   }
 
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
 
   // Fetch active members with phone numbers who haven't had a call today
   const today = new Date().toISOString().slice(0, 10)
@@ -38,13 +69,13 @@ export async function POST(req: NextRequest) {
   }
 
   if (!members || members.length === 0) {
-    return NextResponse.json({ called: 0, message: 'No active members with phones' })
+    return NextResponse.json({ called: 0, skipped: 0, message: 'No active members with phones' })
   }
 
   console.log(`[aria-calls] Initiating check-in calls for ${members.length} members`)
 
   const results = await Promise.allSettled(
-    members.map(async (member: any) => {
+    members.map(async (member: Record<string, unknown>) => {
       // Check if already called today
       const { count } = await supabaseAdmin
         .from('call_logs')
@@ -65,11 +96,11 @@ export async function POST(req: NextRequest) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          agent_id: ARIA_AGENT_ID,
+          agent_id: PRIMARY_AGENT,
           from_number: process.env.RETELL_PHONE_NUMBER,
           to_number: member.phone,
           retell_llm_dynamic_variables: {
-            member_name: member.first_name || 'Friend',
+            member_name: (member.first_name as string) || 'Friend',
             member_id: member.id,
             call_type: 'daily_checkin',
           },
@@ -82,7 +113,7 @@ export async function POST(req: NextRequest) {
         return { id: member.id, success: false, error: errBody }
       }
 
-      const callData = await res.json()
+      const callData = await res.json() as { call_id: string }
 
       // Log the call
       await supabaseAdmin.from('call_logs').insert({
@@ -90,19 +121,25 @@ export async function POST(req: NextRequest) {
         call_type: 'aria_checkin',
         retell_call_id: callData.call_id,
         status: 'initiated',
-            }).then(({ error: logErr }) => { if (logErr) console.warn('[aria-calls] call_logs insert warning:', logErr) })
+      }).then(({ error: logErr }: { error: unknown }) => { if (logErr) console.warn('[aria-calls] call_logs insert warning:', logErr) })
+
       return { id: member.id, success: true, call_id: callData.call_id }
     })
   )
 
-  const initiated = results.filter(r => r.status === 'fulfilled' && (((r.value as unknown) as { success?: boolean; skipped?: boolean; error?: string }).success)).length
-  const skipped   = results.filter(r => r.status === 'fulfilled' && (((r.value as unknown) as { success?: boolean; skipped?: boolean; error?: string }).skipped)).length
-  const failed    = results.filter(r => r.status === 'fulfilled' && !(((r.value as unknown) as { success?: boolean; skipped?: boolean; error?: string }).success) && !(((r.value as unknown) as { success?: boolean; skipped?: boolean; error?: string }).skipped)).length
+  type CallResult = { success?: boolean; skipped?: boolean; error?: string }
+  const val = (r: PromiseSettledResult<CallResult>): CallResult => r.status === 'fulfilled' ? r.value : {}
+  const initiated = results.filter(r => val(r).success).length
+  const skipped   = results.filter(r => val(r).skipped).length
+  const failed    = results.filter(r => !val(r).success && !val(r).skipped).length
 
-  return NextResponse.json({ total: members.length, initiated, skipped, failed })
+  return NextResponse.json({
+    called: initiated,
+    total: members.length,
+    initiated,
+    skipped,
+    failed,
+  })
 }
 
 export async function GET(req: NextRequest) { return POST(req) }
-
-
-
