@@ -4,6 +4,66 @@ import type { Volunteer, PrivateMemberView, VolunteerVisit } from '@/lib/data/vo
 import type { Tables } from '@/types/database'
 type VisitType = any
 import VolunteerAvailability from '@/components/volunteer/VolunteerAvailability'
+import Link from 'next/link'
+
+// G7 — My Buddies inline tab component
+function BuddiesTab({ volunteerId }: { volunteerId: string }) {
+  const [assignments, setAssignments] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch(`/api/volunteers/${volunteerId}/buddies`)
+      .then(r => r.ok ? r.json() : { assignments: [] })
+      .then(d => setAssignments(d.assignments ?? []))
+      .catch(() => setAssignments([]))
+      .finally(() => setLoading(false))
+  }, [volunteerId])
+
+  if (loading) return <p style={{ color: 'var(--color-text-secondary)', textAlign: 'center', paddingTop: 48 }}>Loading your buddies…</p>
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+        <div>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: 'var(--color-navy)', margin: 0 }}>My Buddies</h2>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', marginTop: 4 }}>Seniors you call weekly — your most important relationship on the platform</p>
+        </div>
+        <Link href="/volunteer/buddy" style={{ padding: '8px 18px', background: 'var(--color-teal)', color: '#fff', borderRadius: 8, fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>
+          Full Buddy Portal →
+        </Link>
+      </div>
+
+      {assignments.length === 0 ? (
+        <div style={{ textAlign: 'center', paddingTop: 48, color: 'var(--color-text-secondary)' }}>
+          <div style={{ fontSize: '3rem', marginBottom: 12 }}>🤝</div>
+          <p style={{ fontFamily: 'var(--font-body)', fontWeight: 600, color: 'var(--color-navy)' }}>No buddy assignments yet</p>
+          <p style={{ fontSize: '0.88rem', marginTop: 6 }}>Your coordinator will assign seniors to you once matched.</p>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {assignments.map((a: any) => (
+            <div key={a.id} style={{ border: '1.5px solid var(--color-warm-grey)', borderRadius: 14, padding: '18px 22px', background: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+              <div>
+                <div style={{ fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: '1rem', color: 'var(--color-navy)' }}>{a.member_first_name} {a.member_last_initial}.</div>
+                <div style={{ fontSize: '0.82rem', color: 'var(--color-text-secondary)', marginTop: 3 }}>
+                  {a.last_call_date ? `Last call: ${new Date(a.last_call_date).toLocaleDateString()}` : 'No calls logged yet'}
+                  {a.call_frequency ? ` · ${a.call_frequency}` : ''}
+                </div>
+              </div>
+              <Link href="/volunteer/buddy" style={{ padding: '7px 16px', background: '#ede9fe', color: '#5b21b6', borderRadius: 8, fontSize: '0.82rem', fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap' }}>
+                Log a Call
+              </Link>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div style={{ marginTop: 28, padding: '14px 18px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 12, fontSize: '0.82rem', color: '#065f46' }}>
+        💡 <strong>Tip:</strong> Head to the <Link href="/volunteer/buddy" style={{ color: '#065f46', fontWeight: 700 }}>full Buddy Portal</Link> to log calls, view Aria briefs, and see your buddy's full history.
+      </div>
+    </div>
+  )
+}
 
 interface CorporateProgramData {
   program_name: string
@@ -155,7 +215,7 @@ type OpenRequest = {
 }
 
 export function VolunteerDashboard({ volunteer, matchedMembers, recentVisits: initialVisits, membersHelpedCount }: Props) {
-  const [activeTab, setActiveTab] = useState<'my-work' | 'open-requests'>('my-work')
+  const [activeTab, setActiveTab] = useState<'my-work' | 'my-buddies' | 'open-requests'>('my-work')
   const [visits, setVisits] = useState<VolunteerVisit[]>(initialVisits)
   const [totalHours, setTotalHours] = useState(Number(volunteer.total_hours_logged ?? 0))
   const [membersHelped, setMembersHelped] = useState(membersHelpedCount)
@@ -448,12 +508,13 @@ export function VolunteerDashboard({ volunteer, matchedMembers, recentVisits: in
         <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 32px', display: 'flex', gap: '32px' }}>
           {[
             { id: 'my-work', label: 'My Work' },
+            { id: 'my-buddies', label: 'My Buddies' },
             { id: 'open-requests', label: 'Open Requests' },
           ].map(tab => (
             <button
               key={tab.id}
               onClick={() => {
-                setActiveTab(tab.id as 'my-work' | 'open-requests')
+                setActiveTab(tab.id as 'my-work' | 'my-buddies' | 'open-requests')
                 if (tab.id === 'open-requests' && openRequests.length === 0 && !openReqLoading) loadOpenRequests()
               }}
               style={{
@@ -554,6 +615,11 @@ export function VolunteerDashboard({ volunteer, matchedMembers, recentVisits: in
               )
             })}
           </div>
+        )}
+
+        {/* ── MY BUDDIES TAB ─────────────────────── */}
+        {activeTab === 'my-buddies' && (
+          <BuddiesTab volunteerId={volunteer.id} />
         )}
 
         {/* ── MY WORK TAB ─────────────────────── */}
