@@ -6,6 +6,7 @@
     { "path": "/api/cron/prescription-reminders", "schedule": "0 13 * * *" },
     { "path": "/api/cron/birthday-arc", "schedule": "0 12 * * *" },
     { "path": "/api/cron/ml-analytics", "schedule": "0 9 * * 0" },
-    { "path": "/api/cron/weekly-summary", "schedule": "0 23 * * 5" }
+    { "path": "/api/cron/weekly-summary", "schedule": "0 23 * * 5" },
+    { "path": "/api/cron/celebrations", "schedule": "0 9 * * *" }
   ]
 }
