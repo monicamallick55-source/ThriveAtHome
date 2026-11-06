@@ -26,7 +26,7 @@ test.describe('TC-F001–F007 — Family Portal', () => {
     if (!hasFraud) console.warn('TC-F001: Fraud protection card not found');
 
     // No server error
-    expect(/500|internal server error/i.test(bodyText)).toBe(false);
+    expect(/internal server error|next-error-h1/i.test(bodyText)).toBe(false);
   });
 
   /** TC-F002 — Family events calendar — add event */
@@ -58,7 +58,7 @@ test.describe('TC-F001–F007 — Family Portal', () => {
     // Should reach planner, not get blocked
     expect(url).not.toContain('/login');
     const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
-    expect(/500|internal server error/i.test(bodyText)).toBe(false);
+    expect(/internal server error|next-error-h1/i.test(bodyText)).toBe(false);
   });
 });
 

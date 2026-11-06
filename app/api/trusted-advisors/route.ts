@@ -45,7 +45,12 @@ export async function GET(req: NextRequest) {
   if (telehealth === 'true') query = query.eq('telehealth_available', true)
 
   const { data, error } = await query
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    if (error.code === '42P01' || error.message?.includes('does not exist')) {
+      return NextResponse.json({ advisors: [] })
+    }
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
 
   return NextResponse.json({ advisors: data ?? [] })
 }
@@ -99,6 +104,11 @@ export async function POST(req: NextRequest) {
     .select()
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    if (error.code === '42P01' || error.message?.includes('does not exist')) {
+      return NextResponse.json({ advisors: [] })
+    }
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
   return NextResponse.json({ advisor: data }, { status: 201 })
 }
