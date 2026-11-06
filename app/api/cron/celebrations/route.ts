@@ -129,3 +129,6 @@ export async function GET(req: Request) {
     date: today,
   })
 }
+
+// POST alias — test suite uses POST
+export async function POST(req: Request) { return GET(req) }
