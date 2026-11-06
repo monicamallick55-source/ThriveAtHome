@@ -1,180 +1,99 @@
 'use client'
+import { useState } from 'react'
 
-/**
- * app/dashboard/grief-support/page.tsx — Grief Support & Pathways
- * TC-LT001, TC-M008, TC-MHC004
- * Must contain all 9 grief pathway keywords.
- */
+const PATHWAYS = [
+  {
+    id: 'loss',
+    title: 'Loss of a Loved One',
+    description: 'Losing someone you love is one of life\'s most difficult experiences. Find compassionate support for grief and healing.',
+    icon: '🕊️',
+  },
+  {
+    id: 'diagnosis',
+    title: 'Major Health Diagnosis',
+    description: 'Receiving a serious health diagnosis can be overwhelming. Connect with others who understand what you\'re facing.',
+    icon: '🏥',
+  },
+  {
+    id: 'life-change',
+    title: 'Major Life Change',
+    description: 'Life transitions — retirement, moving, losing independence — bring grief too. Support is here for every kind of loss.',
+    icon: '🌱',
+  },
+  {
+    id: 'caregiver',
+    title: 'Caregiver Support',
+    description: 'Caring for a loved one is both meaningful and exhausting. Find support for caregiver burnout and emotional wellbeing.',
+    icon: '🤝',
+  },
+  {
+    id: 'divorce',
+    title: 'Divorce & Separation',
+    description: 'The end of a long relationship brings profound grief. Compassionate support for navigating this painful transition.',
+    icon: '💔',
+  },
+  {
+    id: 'driving',
+    title: 'Loss of Driving & Independence',
+    description: 'Giving up driving or losing independence is a significant loss. We help you navigate this transition with dignity.',
+    icon: '🚗',
+  },
+  {
+    id: 'dementia',
+    title: 'Dementia & MCI Diagnosis',
+    description: 'A dementia or MCI diagnosis changes everything. Support for members and families navigating cognitive changes.',
+    icon: '🧠',
+  },
+  {
+    id: 'housing',
+    title: 'Housing Insecurity & Forced Move',
+    description: 'Facing housing insecurity or a forced move is deeply stressful. Find resources and emotional support here.',
+    icon: '🏠',
+  },
+  {
+    id: 'adult-child',
+    title: 'Adult Child Moving Away',
+    description: 'When an adult child moves away, the distance can feel profound. Connect with others who understand this transition.',
+    icon: '👨‍👩‍👦',
+  },
+]
 
 export default function GriefSupportPage() {
-  const PATHWAYS = [
-    {
-      id: 'loss',
-      icon: '🕊️',
-      title: 'Loss of a Loved One',
-      keywords: 'loss of a loved one',
-      description: 'Compassionate support after the death of a spouse, partner, family member, or close friend. Connect with others who understand.',
-      color: '#7c3aed',
-    },
-    {
-      id: 'diagnosis',
-      icon: '🏥',
-      title: 'Major Health Diagnosis',
-      keywords: 'major health diagnosis',
-      description: 'Navigating a serious health diagnosis — your own or a loved one\'s. Find resources, peer support, and guided next steps.',
-      color: '#dc2626',
-    },
-    {
-      id: 'life-change',
-      icon: '🔄',
-      title: 'Major Life Change',
-      keywords: 'major life change',
-      description: 'Big transitions — moving, retirement, the end of a career — can bring unexpected grief. You are not alone.',
-      color: '#d97706',
-    },
-    {
-      id: 'caregiver',
-      icon: '🤝',
-      title: 'Caregiver Support',
-      keywords: 'caregiver support',
-      description: 'Supporting someone you love is deeply meaningful — and deeply exhausting. Find support for yourself as a caregiver.',
-      color: '#16a34a',
-    },
-    {
-      id: 'divorce',
-      icon: '💔',
-      title: 'Divorce & Separation',
-      keywords: 'divorce',
-      description: 'The end of a long marriage or partnership brings its own kind of grief. Connect with others navigating this path.',
-      color: '#e11d48',
-    },
-    {
-      id: 'independence',
-      icon: '🏠',
-      title: 'Loss of Independence',
-      keywords: 'loss of independence',
-      description: 'Adjusting to needing more help — with mobility, driving, or daily tasks — can be difficult. Support is here.',
-      color: '#0891b2',
-    },
-    {
-      id: 'anticipatory',
-      icon: '⏳',
-      title: 'Anticipatory Grief',
-      keywords: 'anticipatory grief',
-      description: 'Grieving a loss before it happens — a terminal diagnosis, a loved one\'s decline — is real and valid. Find guidance here.',
-      color: '#6366f1',
-    },
-    {
-      id: 'financial',
-      icon: '💼',
-      title: 'Financial Loss & Hardship',
-      keywords: 'financial loss',
-      description: 'Major financial changes — job loss, retirement income shifts, or unexpected costs — can trigger grief and anxiety.',
-      color: '#059669',
-    },
-    {
-      id: 'pet',
-      icon: '🐾',
-      title: 'Pet Loss',
-      keywords: 'pet loss',
-      description: 'Losing a beloved animal companion is a real and significant loss. Connect with others who understand the depth of this grief.',
-      color: '#c2410c',
-    },
-  ]
+  const [selected, setSelected] = useState<string | null>(null)
 
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto', padding: '24px 0' }}>
-      <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>Grief Support</h1>
-      <p style={{ color: '#6b7280', fontSize: 15, marginBottom: 32, lineHeight: 1.6 }}>
-        Grief takes many forms. ThriveAtHome offers compassionate support for each of life&apos;s most
-        difficult transitions. Choose a pathway that resonates with where you are right now.
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold text-gray-900 mb-2">Grief & Life Transitions Support</h1>
+      <p className="text-gray-600 mb-8">
+        Every loss deserves acknowledgment. Choose your pathway to find tailored resources and community support.
       </p>
 
-      <div style={{ display: 'grid', gap: 16 }}>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {PATHWAYS.map(pathway => (
-          <div
+          <button
             key={pathway.id}
-            style={{
-              background: '#fff',
-              border: '1px solid #e5e7eb',
-              borderLeft: `4px solid ${pathway.color}`,
-              borderRadius: 10,
-              padding: 20,
-              display: 'flex',
-              gap: 16,
-              alignItems: 'flex-start',
-            }}
+            onClick={() => setSelected(selected === pathway.id ? null : pathway.id)}
+            className={`text-left p-4 rounded-xl border-2 transition-all ${
+              selected === pathway.id
+                ? 'border-purple-500 bg-purple-50'
+                : 'border-gray-200 hover:border-purple-300 hover:bg-gray-50'
+            }`}
           >
-            <span style={{ fontSize: 28, flexShrink: 0 }}>{pathway.icon}</span>
-            <div style={{ flex: 1 }}>
-              <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 6, color: '#111827' }}>
-                {pathway.title}
-              </h2>
-              <p style={{ fontSize: 13, color: '#6b7280', margin: 0, lineHeight: 1.6 }}>
-                {pathway.description}
-              </p>
-              <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+            <div className="text-2xl mb-2">{pathway.icon}</div>
+            <h3 className="font-semibold text-gray-900 mb-1">{pathway.title}</h3>
+            <p className="text-sm text-gray-600">{pathway.description}</p>
+            {selected === pathway.id && (
+              <div className="mt-3 pt-3 border-t border-purple-200">
                 <a
                   href={`/dashboard/grief-support/${pathway.id}`}
-                  style={{
-                    padding: '6px 14px',
-                    background: pathway.color,
-                    color: '#fff',
-                    borderRadius: 6,
-                    fontSize: 12,
-                    fontWeight: 500,
-                    textDecoration: 'none',
-                  }}
+                  className="text-purple-600 font-medium text-sm hover:underline"
                 >
-                  Explore Pathway
-                </a>
-                <a
-                  href="/dashboard/grief-circles"
-                  style={{
-                    padding: '6px 14px',
-                    background: '#f3f4f6',
-                    color: '#374151',
-                    borderRadius: 6,
-                    fontSize: 12,
-                    fontWeight: 500,
-                    textDecoration: 'none',
-                  }}
-                >
-                  Join a Circle
+                  Connect with navigator →
                 </a>
               </div>
-            </div>
-          </div>
+            )}
+          </button>
         ))}
-      </div>
-
-      <div style={{
-        marginTop: 32,
-        background: '#f0fdf4',
-        border: '1px solid #bbf7d0',
-        borderRadius: 12,
-        padding: 20,
-        textAlign: 'center',
-      }}>
-        <p style={{ fontSize: 14, color: '#15803d', fontWeight: 500, margin: 0 }}>
-          🤝 Need immediate support? Your Navigator is here to help.
-        </p>
-        <a
-          href="/dashboard/navigator"
-          style={{
-            display: 'inline-block',
-            marginTop: 10,
-            padding: '8px 20px',
-            background: '#16a34a',
-            color: '#fff',
-            borderRadius: 8,
-            fontSize: 13,
-            fontWeight: 600,
-            textDecoration: 'none',
-          }}
-        >
-          Talk to My Navigator
-        </a>
       </div>
     </div>
   )
