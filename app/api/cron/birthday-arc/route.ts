@@ -35,7 +35,7 @@ function ageOnDate(birthday: string, date: Date): number {
 }
 
 export async function GET(req: NextRequest) {
-  if (req.headers.get('x-cron-secret') !== process.env.CRON_SECRET) {
+  if (req.headers.get('x-cron-secret') !== process.env.CRON_SECRET && req.headers.get('authorization')?.replace('Bearer ', '') !== process.env.CRON_SECRET) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
@@ -250,7 +250,7 @@ export async function GET(req: NextRequest) {
 // POST is the standard Vercel cron invocation method.
 // Delegate to GET logic after auth check.
 export async function POST(req: NextRequest) {
-  if (req.headers.get('x-cron-secret') !== process.env.CRON_SECRET) {
+  if (req.headers.get('x-cron-secret') !== process.env.CRON_SECRET && req.headers.get('authorization')?.replace('Bearer ', '') !== process.env.CRON_SECRET) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
   return GET(req)
