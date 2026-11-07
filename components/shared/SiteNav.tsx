@@ -24,7 +24,6 @@ const B2B_LINKS = [
 const RESOURCES_LINKS = [
   { label: '📝 Blog', href: '/blog', desc: 'Articles on senior living' },
   { label: '✅ Checklists & Guides', href: '/checklists', desc: '36 practical checklists' },
-  { label: '🗂️ Find Local Help', href: '/directory', desc: 'Partner directory near you' },
   { label: '🗺️ Resources by State', href: '/resources/states', desc: 'State-specific programs' },
 ]
 
