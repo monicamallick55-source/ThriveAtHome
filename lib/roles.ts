@@ -7,6 +7,7 @@ import type { UserRole } from './auth'
 
 /** Every role and the path it should land on after signing in. */
 export const ROLE_HOME: Record<UserRole, string> = {
+  member: '/dashboard',
   family: '/dashboard/family',
   navigator: '/navigator',
   admin: '/admin',
@@ -19,10 +20,14 @@ export const ROLE_HOME: Record<UserRole, string> = {
   org_admin: '/org-admin',
   senior_center_admin: '/senior-center-admin',
   network_admin: '/network-admin',
+  care_worker: '/care-worker',
+  vso_admin: '/vso-admin',
+  school_admin: '/school-admin',
 }
 
 /** Human-readable label for a role, for UI copy. */
 export const ROLE_LABEL: Record<UserRole, string> = {
+  member: 'Member',
   family: 'Family member',
   navigator: 'Care Navigator',
   admin: 'Platform Admin',
@@ -35,6 +40,9 @@ export const ROLE_LABEL: Record<UserRole, string> = {
   org_admin: 'Community Org Admin',
   senior_center_admin: 'Senior Center Admin',
   network_admin: 'Network Admin',
+  care_worker: 'Care Worker',
+  vso_admin: 'VSO Admin',
+  school_admin: 'School Admin',
 }
 
 /**
@@ -46,7 +54,7 @@ export const INVITABLE_BY: Partial<Record<UserRole, UserRole[]>> = {
   admin: [
     'navigator', 'admin', 'org_admin', 'agency_admin', 'aaa_admin',
     'senior_center_admin', 'network_admin', 'university_admin', 'employer_admin',
-    'volunteer',
+    'volunteer', 'care_worker', 'vso_admin', 'school_admin',
   ],
   navigator: ['volunteer'],
   org_admin: ['volunteer'],
