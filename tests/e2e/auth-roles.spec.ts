@@ -125,12 +125,14 @@ test('TC-A006 — /device kiosk loads with large-print UI', async ({ page }) => 
 
 /** TC-P051 — /signup form validation */
 test('TC-P051 — /signup rejects invalid email and mismatched passwords', async ({ page }) => {
-  await page.goto('/signup');
+  // ?plan=basics skips step 0 (plan picker) and lands directly on step 1 (account info)
+  await page.goto('/signup?plan=basics');
 
-  // Invalid email
+  // Fill invalid email and password on step 1
   await page.getByLabel(/email/i).fill('not-an-email');
   await page.getByLabel(/password/i).first().fill('Password123!');
-  await page.getByRole('button', { name: /sign up|create account|get started/i }).click();
+  // Step 1 submit button says "Continue to Payment"
+  await page.getByRole('button', { name: /continue to payment/i }).click();
 
   const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
   const hasError = /invalid|enter.*email|valid email/i.test(bodyText) ||
