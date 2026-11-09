@@ -128,9 +128,9 @@ test('TC-P051 — /signup rejects invalid email and mismatched passwords', async
   // ?plan=basics skips step 0 (plan picker) and lands directly on step 1 (account info)
   await page.goto('/signup?plan=basics');
 
-  // Fill invalid email and password on step 1
-  await page.getByLabel(/email/i).fill('not-an-email');
-  await page.getByLabel(/password/i).first().fill('Password123!');
+ // Email label is a <div>, not a <label>, so use type selector
+    await page.locator('input[type="email"]').fill('not-an-email');
+  await page.locator('input[type="password"]').first().fill('Password123!');
   // Step 1 submit button says "Continue to Payment"
   await page.getByRole('button', { name: /continue to payment/i }).click();
 
