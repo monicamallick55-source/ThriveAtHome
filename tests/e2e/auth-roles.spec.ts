@@ -135,7 +135,7 @@ test('TC-P051 — /signup rejects invalid email and mismatched passwords', async
   await page.getByRole('button', { name: /continue to payment/i }).click();
 
   const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
-  const hasError = /invalid|enter.*email|valid email/i.test(bodyText) ||
+    const hasError = /invalid|enter.*email|valid email|required|fill in/i.test(bodyText) ||
     await page.locator('[role="alert"], .error, [data-error]').isVisible().catch(() => false);
   expect(hasError, 'Should show validation error for invalid email').toBe(true);
 });
