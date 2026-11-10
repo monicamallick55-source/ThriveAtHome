@@ -3,15 +3,10 @@
 import { requireAuth } from '@/lib/auth'
 import { getFamilyMemberByAuthId } from '@/lib/data/family'
 import { redirect } from 'next/navigation'
-import { createClient } from '@supabase/supabase-js'
 import { UpgradePlanCard } from '@/components/dashboard/UpgradePlanCard'
 import Link from 'next/link'
 import BuddySection from '@/app/dashboard/_components/BuddySection'
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
 
 export const metadata = {
   title: 'My Dashboard | ThriveAtHome',
@@ -20,6 +15,12 @@ export const metadata = {
 export default async function DashboardPage() {
   const user = await requireAuth().catch(() => null)
   if (!user) redirect('/login')
+
+  const { createClient } = await import('@supabase/supabase-js')
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
 
   const { data: fm } = await getFamilyMemberByAuthId(user.id)
   const memberId = fm?.member_id ?? null
@@ -53,7 +54,7 @@ export default async function DashboardPage() {
     <div style={{ maxWidth: '720px', margin: '0 auto', padding: '24px 20px' }}>
       {/* Greeting */}
       <div style={{ marginBottom: '24px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}><span data-testid="member-name" style={{ fontWeight: 700 }}>{profile?.full_name ?? user?.email}</span><span data-testid="plan-badge" style={{ fontSize: '0.72rem', background: '#eff6ff', color: '#4f46e5', padding: '2px 8px', borderRadius: 20, fontWeight: 700, textTransform: 'uppercase' }}>{member?.plan ?? 'Basic'}</span></div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}><span data-testid="member-name" style={{ fontWeight: 700 }}>{user?.email}</span><span data-testid="plan-badge" style={{ fontSize: '0.72rem', background: '#eff6ff', color: '#4f46e5', padding: '2px 8px', borderRadius: 20, fontWeight: 700, textTransform: 'uppercase' }}>{member?.plan ?? 'Basic'}</span></div>
       <h1 style={{ fontSize: '26px', fontWeight: 800, color: '#1a1a1a', margin: '0 0 4px' }}>
           Good morning, {firstName} 🌿
         </h1>
