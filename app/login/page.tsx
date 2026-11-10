@@ -2,20 +2,17 @@
 import { useState } from 'react'
 
 const ROLE_REDIRECTS: Record<string, string> = {
-  employer:     '/employer-admin',
-  k12admin:     '/school-admin',
-  admin:        '/admin',
-  super_admin:  '/admin',
-  navigator:    '/navigator',
-  volunteer:    '/volunteer',
-  orgadmin:     '/org-admin',
-  vsoadmin:     '/vso-admin',
-  uniadmin:     '/university-admin',
-  network:      '/network-admin',
-  seniorcenter: '/senior-center-admin',
-  aaa:          '/aaa-admin',
-  agency:       '/agency-admin',
-  family:       '/dashboard/family',
+  employer: '/employer-admin', k12admin: '/school-admin',
+  admin: '/admin', super_admin: '/admin', navigator: '/navigator',
+  volunteer: '/volunteer/dashboard', orgadmin: '/org-admin',
+  vsoadmin: '/vso-admin', uniadmin: '/university-admin',
+  network: '/network-admin', seniorcenter: '/senior-center-admin',
+  aaa: '/aaa-admin', agency: '/agency-admin', family: '/dashboard/family',
+  member: '/dashboard', k12student: '/volunteer/dashboard',
+  careworker: '/care-worker', student: '/volunteer/dashboard',
+  veteran: '/volunteer/dashboard', retired_pro: '/volunteer/dashboard',
+  corporate: '/volunteer/dashboard', neighbor: '/volunteer/dashboard',
+  faith: '/volunteer/dashboard',
 }
 
 export default function LoginPage() {
@@ -30,15 +27,14 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
     try {
-      const { createClient } = await import('@supabase/supabase-js')
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
-      const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password })
-      if (authError) { setError(authError.message); setLoading(false); return }
-      const role = data.user?.app_metadata?.role ?? data.user?.user_metadata?.role ?? 'member'
-      window.location.href = ROLE_REDIRECTS[role] ?? '/dashboard'
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error ?? 'Sign in failed'); setLoading(false); return }
+      window.location.assign(data.redirect ?? '/dashboard')
     } catch {
       setError('Something went wrong. Please try again.')
       setLoading(false)
