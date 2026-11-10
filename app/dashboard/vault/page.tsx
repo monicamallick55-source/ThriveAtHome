@@ -1,42 +1,30 @@
-export const dynamic = 'force-dynamic'
-// /dashboard/vault — alias for /dashboard/documents
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import Link from 'next/link'
-
-export default async function VaultPage() {
-  let user = null
-  try {
-    const supabase = await Promise.race([
-      createClient(),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000)) as any
-    ])
-    const { data } = await supabase.auth.getUser()
-    user = data.user
-  } catch {}
-  if (!user) redirect('/login')
-
+'use client'
+import { useState } from 'react'
+export default function VaultPage() {
+  const [tab, setTab] = useState<'documents' | 'stories' | 'photos'>('documents')
   return (
-    <div style={{ maxWidth: '720px', margin: '0 auto', padding: '32px 20px', fontFamily: 'system-ui, sans-serif' }}>
-      <Link href="/dashboard" style={{ fontSize: '14px', color: '#2d6a4f', textDecoration: 'none' }}>← Dashboard</Link>
-      <h1 style={{ fontSize: '28px', fontWeight: 700, color: '#1a1a1a', margin: '16px 0 8px' }}>Document Vault</h1>
-      <p style={{ color: '#555', marginBottom: '32px' }}>Securely store and share important documents, life stories, and records.</p>
-
-      <div style={{ display: 'grid', gap: '16px' }}>
-        {[
-          { icon: '📄', label: 'Important Documents', desc: 'Medical records, legal documents, insurance' },
-          { icon: '📖', label: 'Life Story', desc: 'Share your story with family' },
-          { icon: '🔐', label: 'Secure Vault', desc: 'Password-protected private storage' },
-        ].map(item => (
-          <Link key={item.label} href="/dashboard/documents" style={{ display: 'flex', gap: '16px', background: 'white', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '20px', textDecoration: 'none', alignItems: 'center' }}>
-            <span style={{ fontSize: '32px' }}>{item.icon}</span>
-            <div>
-              <div style={{ fontWeight: 600, color: '#111', marginBottom: '4px' }}>{item.label}</div>
-              <div style={{ fontSize: '13px', color: '#666' }}>{item.desc}</div>
-            </div>
-          </Link>
+    <main style={{ maxWidth: 760, margin: '0 auto', padding: '24px 16px', fontFamily: 'system-ui, sans-serif' }}>
+      <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: 4 }}>Legacy Vault</h1>
+      <p style={{ color: '#6b7280', marginBottom: 24 }}>Securely store your important documents, life stories, and cherished photos.</p>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
+        {(['documents', 'stories', 'photos'] as const).map(t => (
+          <button key={t} onClick={() => setTab(t)}
+            style={{ padding: '8px 18px', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: tab === t ? 700 : 400, background: tab === t ? '#6366f1' : '#f3f4f6', color: tab === t ? '#fff' : '#374151', textTransform: 'capitalize' }}>
+            {t}
+          </button>
         ))}
       </div>
-    </div>
+      <div style={{ background: '#f9fafb', border: '2px dashed #d1d5db', borderRadius: 12, padding: 40, textAlign: 'center' }}>
+        <div style={{ fontSize: 40, marginBottom: 12 }}>{tab === 'documents' ? '📄' : tab === 'stories' ? '📖' : '🖼️'}</div>
+        <p style={{ color: '#6b7280', marginBottom: 16 }}>
+          {tab === 'documents' ? 'Upload wills, deeds, insurance policies, and other important documents.' :
+           tab === 'stories'   ? 'Record your life story — memories, wisdom, and experiences for future generations.' :
+                                 'Preserve your most treasured photos in a private family gallery.'}
+        </p>
+        <button style={{ background: '#6366f1', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 24px', cursor: 'pointer', fontWeight: 600 }}>
+          {tab === 'documents' ? 'Upload Document' : tab === 'stories' ? 'Write a Story' : 'Upload Photos'}
+        </button>
+      </div>
+    </main>
   )
 }
