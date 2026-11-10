@@ -1,0 +1,20 @@
+nohup: ignoring input
+TC-A001: employer@test.com login failed — not seeded or rate limited
+[163/793] [chromium] › tests/e2e/billing.spec.ts:108:3 › TC-B009 — Stripe webhook handler › invoice.payment_failed → not 500
+    test-results/community-features-TC-COM003-—-dashboard-events-loads-chromium/test-failed-1.png
+    test-results/debug-login-debug-home-safety-after-login-chromium/test-failed-1.png
+    test-results/encore-careers-festivals-T-5756b--consulting-volunteer-roles-chromium/test-failed-1.png
+    test-results/encore-careers-festivals-T-703d4-cultural-events-or-calendar-chromium/test-failed-1.png
+    test-results/fhir-medicare-deep-TC-FMD0-d0a1c-perationOutcome-on-bad-JSON-chromium/test-failed-1.png
+    test-results/fhir-medicare-deep-TC-FMD0-89291-n-loads-Medicare-comparison-chromium/test-failed-1.png
+    test-results/infrastructure-TC-INF001-—-ba9b9-sed-no-500-on-member-login--chromium/test-failed-1.png
+    test-results/life-transitions-deep-TC-L-38b0f-rs-shows-advisor-categories-chromium/test-failed-1.png
+    test-results/life-transitions-TC-LT001-—-dashboard-grief-support-loads-chromium/test-failed-1.png
+    test-results/member-features-deep-TC-M0-2aabf-cron-birthday-arc-→-200-207-chromium/test-failed-1.png
+    test-results/member-health-care-TC-MHC003-—-dashboard-medicare-help-loads-chromium/test-failed-1.png
+    test-results/member-pages-TC-M001–M034--c823b--TC-M006-—-dashboard-events-chromium/test-failed-1.png
+    test-results/member-pages-TC-M001–M034--dc2ec-9-—-dashboard-grief-circles-chromium/test-failed-1.png
+    test-results/member-pages-TC-M001–M034--a8152--dashboard-trusted-advisors-chromium/test-failed-1.png
+    test-results/member-pages-TC-M001–M034--6d644-019-—-dashboard-marketplace-chromium/test-failed-1.png
+    test-results/member-pages-TC-M001–M034--c6615--M031-—-dashboard-gift-send-chromium/test-failed-1.png
+    test-results/new-sections-TC-A11Y001-—--1b4ab-n-and-nav-landmarks-present-chromium/test-failed-1.png
