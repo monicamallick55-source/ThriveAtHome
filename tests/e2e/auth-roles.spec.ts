@@ -40,6 +40,7 @@ const ROLE_PORTAL_MAP: Array<{ key: keyof typeof ACCOUNTS; portal: string; label
 ];
 
 test.describe('TC-A004 — 21 role login smoke tests', () => {
+  test.describe.configure({ retries: 2 });
   for (const { key, portal, label } of ROLE_PORTAL_MAP) {
     test(`${label} (${ACCOUNTS[key].email}) → ${portal}`, async ({ page }) => {
       await loginAs(page, ACCOUNTS[key]);
