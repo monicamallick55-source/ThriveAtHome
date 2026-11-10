@@ -1,27 +1,18 @@
-import { requireAuth } from '@/lib/auth'
-import { getFamilyMemberByAuthId } from '@/lib/data/family'
-import { getUnreadCount } from '@/lib/data/member-messages'
-import { DashNavClient } from '@/components/dashboard/DashNavClient'
+import type { ReactNode } from 'react'
 
-export default async function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  const user = await requireAuth()
-  const { data: fm } = await getFamilyMemberByAuthId(user.id)
-  const memberId = fm?.member_id ?? null
-  const { count: unreadMessages } = memberId
-    ? await getUnreadCount(memberId)
-    : { count: 0 }
-  const seniorName = fm
-    ? fm.full_name?.split(' ')[0] || 'Member'
-    : 'Member'
-
+export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-bg, #fafaf8)' }}>
-      <DashNavClient seniorName={seniorName} unreadMessages={unreadMessages} />
-      <main style={{ paddingBottom: '80px' }}>{children}</main>
+    <div className="dashboard-shell">
+      <nav aria-label="Main navigation" role="navigation" style={{ padding: '1rem', borderBottom: '1px solid #e5e7eb', background: '#fff' }}>
+        <a href="/dashboard" style={{ fontWeight: 'bold', marginRight: '1rem' }}>Thrive@Home</a>
+        <a href="/dashboard/health" style={{ marginRight: '1rem' }}>Health</a>
+        <a href="/dashboard/communities" style={{ marginRight: '1rem' }}>Communities</a>
+        <a href="/dashboard/family" style={{ marginRight: '1rem' }}>Family</a>
+        <a href="/dashboard/vault" style={{ marginRight: '1rem' }}>Vault</a>
+      </nav>
+      <main id="main-content" style={{ padding: '1.5rem' }}>
+        {children}
+      </main>
     </div>
   )
 }
