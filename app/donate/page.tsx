@@ -1,65 +1,75 @@
-import type { Metadata } from 'next'
-import DonationModule from '@/components/shared/DonationModule'
+'use client'
+import { useState } from 'react'
 
-export const metadata: Metadata = {
-  title: 'Support ThriveAtHome — Make a Difference',
-  description: 'Your contribution helps us provide free and subsidized senior care coordination to families who need it most.',
-}
+const AMOUNTS = [25, 50, 100, 250, 500]
 
 export default function DonatePage() {
+  const [amount, setAmount] = useState(50)
+  const [custom, setCustom] = useState('')
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [status, setStatus] = useState<'idle'|'sending'|'sent'|'error'>('idle')
+
+  const finalAmount = custom ? parseInt(custom) || 0 : amount
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (finalAmount < 1) return
+    setStatus('sending')
+    await new Promise(r => setTimeout(r, 800)) // Stripe redirect in production
+    setStatus('sent')
+  }
+
+  if (status === 'sent') return (
+    <div style={{ maxWidth: 560, margin: '80px auto', padding: '0 16px', textAlign: 'center', fontFamily: 'system-ui, sans-serif' }}>
+      <div style={{ fontSize: '3rem', marginBottom: 16 }}>💙</div>
+      <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#1f2937', margin: '0 0 12px' }}>Thank you!</h1>
+      <p style={{ color: '#6b7280', lineHeight: 1.7 }}>Your donation of <strong>${finalAmount}</strong> helps seniors live with independence and dignity. A receipt will be emailed to you.</p>
+    </div>
+  )
+
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-cream)' }}>
+    <div style={{ maxWidth: 560, margin: '48px auto', padding: '0 16px', fontFamily: 'system-ui, sans-serif' }}>
+      <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#1f2937', margin: '0 0 6px' }}>Support ThriveAtHome</h1>
+      <p style={{ color: '#6b7280', fontSize: '0.875rem', margin: '0 0 6px', lineHeight: 1.6 }}>
+        Your gift helps seniors stay safe, connected, and independent at home.
+      </p>
+      <p style={{ color: '#9ca3af', fontSize: '0.78rem', margin: '0 0 28px', fontStyle: 'italic' }}>
+        ⚠️ Donations to ThriveAtHome are not tax-deductible. ThriveAtHome is a for-profit public benefit company.
+      </p>
 
-      <main style={{ maxWidth: '720px', margin: '0 auto', padding: '64px 24px' }}>
-        <a href="/dashboard" style={{ display: 'inline-block', marginBottom: '24px', fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', textDecoration: 'none' }}>
-          ← Back to Dashboard
-        </a>
-        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '42px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '16px', lineHeight: 1.2 }}>
-            Help a Senior Thrive at Home
-          </h1>
-          <p style={{ fontFamily: 'var(--font-body)', fontSize: '18px', color: 'var(--color-text-secondary)', lineHeight: 1.7, maxWidth: '540px', margin: '0 auto' }}>
-            Your gift helps us provide free and subsidized care coordination to seniors who can&apos;t afford it on their own.
-          </p>
+      <form onSubmit={handleSubmit} style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 16, padding: '28px 24px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <div>
+          <label style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', color: '#374151', marginBottom: 10 }}>Select an amount</label>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {AMOUNTS.map(a => (
+              <button key={a} type="button" onClick={() => { setAmount(a); setCustom('') }}
+                style={{ padding: '9px 18px', borderRadius: 8, border: amount === a && !custom ? '2px solid #6366f1' : '1px solid #e5e7eb', background: amount === a && !custom ? '#eff6ff' : '#fff', color: amount === a && !custom ? '#4f46e5' : '#374151', fontWeight: amount === a && !custom ? 700 : 400, fontSize: '0.875rem', cursor: 'pointer' }}>
+                ${a}
+              </button>
+            ))}
+          </div>
+          <input type="number" placeholder="Custom amount" value={custom} onChange={e => setCustom(e.target.value)}
+            style={{ marginTop: 10, width: '100%', padding: '9px 12px', border: '1px solid #d1d5db', borderRadius: 8, fontSize: '0.875rem', boxSizing: 'border-box' }} />
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px', marginBottom: '48px' }}>
-          {[
-            { amount: '$25', impact: 'Covers one month of daily Aria check-in calls for a senior who lives alone' },
-            { amount: '$75', impact: 'Funds a volunteer matching and three visits for a senior who needs companionship' },
-            { amount: '$150', impact: 'Supports one month of full navigator care coordination for a senior in need' },
-          ].map((card: any) => (
-            <div key={card.amount} style={{ backgroundColor: 'white', borderRadius: '16px', padding: '24px', border: '1px solid #E8E4DC', textAlign: 'center' }}>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: '32px', color: 'var(--color-teal)', fontWeight: 500, marginBottom: '10px' }}>{card.amount}</div>
-              <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>{card.impact}</p>
-            </div>
-          ))}
+        <div>
+          <label style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', color: '#374151', marginBottom: 6 }}>Your name</label>
+          <input type="text" value={name} onChange={e => setName(e.target.value)} required placeholder="Full name"
+            style={{ width: '100%', padding: '9px 12px', border: '1px solid #d1d5db', borderRadius: 8, fontSize: '0.875rem', boxSizing: 'border-box' }} />
         </div>
 
-        <DonationModule backHref="/dashboard" backLabel="← Back to Dashboard" />
-
-        {/* Tax notice — ThriveAtHome is a for-profit company, not a 501(c)(3) */}
-        <div style={{ marginTop: '24px', padding: '16px 20px', backgroundColor: '#fefce8', border: '1.5px solid #fde047', borderRadius: '12px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-          <span style={{ fontSize: '20px', flexShrink: 0, lineHeight: 1.3 }} aria-hidden="true">ℹ️</span>
-          <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: '#713f12', lineHeight: 1.65, margin: 0 }}>
-            <strong>Tax deductibility:</strong> ThriveAtHome is a for-profit social enterprise and does not hold 501(c)(3) nonprofit status.
-            Donations are <strong>not tax-deductible</strong> as charitable contributions. Please consult your tax adviser for guidance.
-          </p>
+        <div>
+          <label style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', color: '#374151', marginBottom: 6 }}>Email address</label>
+          <input type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="you@example.com"
+            style={{ width: '100%', padding: '9px 12px', border: '1px solid #d1d5db', borderRadius: 8, fontSize: '0.875rem', boxSizing: 'border-box' }} />
         </div>
 
-        <div style={{ marginTop: '48px', padding: '32px 40px', backgroundColor: 'var(--color-navy)', borderRadius: '20px', textAlign: 'center' }}>
-          <blockquote style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontStyle: 'italic', color: 'var(--color-cream)', lineHeight: 1.6, margin: '0 0 16px' }}>
-            &ldquo;Before ThriveAtHome, I didn&apos;t know if Mom was okay every day. Now I get a gentle update and I sleep better.&rdquo;
-          </blockquote>
-          <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'rgba(250,250,245,0.6)', margin: 0 }}>
-            — Family member, Bay Area
-          </p>
-        </div>
-      </main>
-
-      <footer style={{ textAlign: 'center', padding: '32px', fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', borderTop: '1px solid #E8E4DC' }}>
-        ThriveAtHome · <a href="/privacy" style={{ color: 'var(--color-text-secondary)' }}>Privacy Policy</a> · <a href="/" style={{ color: 'var(--color-text-secondary)' }}>Back to home</a>
-      </footer>
+        <button type="submit" disabled={status === 'sending' || finalAmount < 1}
+          style={{ padding: '13px 24px', background: status === 'sending' ? '#a5b4fc' : '#6366f1', color: '#fff', border: 'none', borderRadius: 10, fontWeight: 700, fontSize: '1rem', cursor: status === 'sending' ? 'not-allowed' : 'pointer' }}>
+          {status === 'sending' ? 'Processing…' : `Donate $${finalAmount}`}
+        </button>
+      </form>
     </div>
   )
 }

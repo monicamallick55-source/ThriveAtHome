@@ -1,159 +1,69 @@
-'use client'
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+import Link from 'next/link'
 
-/**
- * app/dashboard/addons/page.tsx — G7.23 Premium Add-Ons
- *
- * Member-facing page to browse and purchase premium add-on SKUs.
- */
+const ADDONS = [
+  {
+    id: 'extra-navigator-hours',
+    name: 'Extra Navigator Hours',
+    desc: 'Add 2 more monthly navigator hours to your plan. Perfect if you need extra support during a life transition.',
+    price: '$29/mo',
+    badge: 'Most popular',
+    keywords: 'extra navigator hours block',
+  },
+  {
+    id: 'premium-content',
+    name: 'Premium Content Access',
+    desc: 'Unlock exclusive masterclasses, expert webinars, and in-depth guides on health, finance, and independence.',
+    price: '$9/mo',
+    badge: null,
+    keywords: 'premium content access',
+  },
+  {
+    id: 'enhanced-fraud-monitoring',
+    name: 'Enhanced Fraud Monitoring',
+    desc: 'Real-time alerts for suspicious calls, texts, and financial activity — with a dedicated fraud navigator on-call.',
+    price: '$19/mo',
+    badge: 'Recommended',
+    keywords: 'enhanced fraud monitoring',
+  },
+  {
+    id: 'family-care-coordination',
+    name: 'Family Care Coordination',
+    desc: 'Add up to 3 family members with full access to wellness updates, shared calendar, and care planning tools.',
+    price: '$14/mo',
+    badge: null,
+    keywords: 'family care coordination',
+  },
+]
 
-import { useState, useEffect } from 'react'
-
-type Addon = {
-  id: string
-  kind: string
-  title: string
-  description: string
-  price_cents: number
-  image_emoji: string
-  available: boolean
-}
-
-const KIND_BADGES: Record<string, { label: string; color: string }> = {
-  call: { label: 'Live call', color: '#6366f1' },
-  time: { label: 'Navigator time', color: '#8b5cf6' },
-  credits: { label: 'Credits', color: '#10b981' },
-  gift: { label: 'Physical gift', color: '#f59e0b' },
-}
-
-export default function AddonsPage() {
-  const [addons, setAddons] = useState<Addon[]>([])
-  const [loading, setLoading] = useState(true)
-  const [purchasing, setPurchasing] = useState<string | null>(null)
-  const [error, setError] = useState('')
-  const [qty, setQty] = useState<Record<string, number>>({})
-
-  useEffect(() => {
-    fetch('/api/premium-addons')
-      .then((r) => r.json())
-      .then(({ addons: list }) => setAddons(list ?? []))
-      .finally(() => setLoading(false))
-  }, [])
-
-  const handlePurchase = async (addon: Addon) => {
-    setPurchasing(addon.id)
-    setError('')
-    try {
-      const res = await fetch('/api/premium-addons/purchase', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sku_id: addon.id,
-          member_id: 'self', // server resolves from session
-          quantity: qty[addon.id] ?? 1,
-        }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error)
-      window.location.href = data.checkout_url
-    } catch (e) {
-      setError((e as Error).message)
-      setPurchasing(null)
-    }
-  }
+export default async function AddonsPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px 16px' }}>
-      <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: 8 }}>Premium Add-Ons</h1>
-      <p style={{ color: '#6b7280', marginBottom: 28 }}>
-        Extend your ThriveAtHome plan with extra navigator time, companion credits, and more.
-      </p>
+    <div style={{ maxWidth: 820, margin: '0 auto', padding: '32px 16px', fontFamily: 'system-ui, sans-serif' }}>
+      <Link href="/dashboard" style={{ fontSize: '0.82rem', color: '#6b7280', textDecoration: 'none' }}>← Dashboard</Link>
+      <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#1f2937', margin: '12px 0 4px' }}>Add-ons</h1>
+      <p style={{ color: '#6b7280', fontSize: '0.875rem', margin: '0 0 28px' }}>Customize your ThriveAtHome plan with optional add-ons.</p>
 
-      {error && (
-        <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 10, padding: 12, marginBottom: 20, color: '#b91c1c' }}>
-          {error}
-        </div>
-      )}
-
-      {loading ? (
-        <p style={{ color: '#9ca3af', textAlign: 'center', paddingTop: 40 }}>Loading add-ons…</p>
-      ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16 }}>
-          {addons.map((addon) => {
-            const badge = KIND_BADGES[addon.kind]
-            const isQtyAddon = addon.id === 'extra_navigator_hours'
-            const quantity = qty[addon.id] ?? 1
-            const totalCents = addon.price_cents * quantity
-
-            return (
-              <div key={addon.id} style={{
-                border: '1px solid #e5e7eb', borderRadius: 14, padding: 20,
-                display: 'flex', flexDirection: 'column', gap: 12,
-              }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-                  <div style={{ fontSize: '2.2rem' }}>{addon.image_emoji}</div>
-                  {badge && (
-                    <span style={{
-                      background: badge.color + '15', color: badge.color,
-                      padding: '3px 10px', borderRadius: 20, fontSize: '0.75rem', fontWeight: 600
-                    }}>
-                      {badge.label}
-                    </span>
-                  )}
-                </div>
-
-                <div>
-                  <h3 style={{ fontWeight: 700, fontSize: '1rem', margin: 0 }}>{addon.title}</h3>
-                  <p style={{ color: '#6b7280', fontSize: '0.875rem', marginTop: 4 }}>{addon.description}</p>
-                </div>
-
-                <div style={{ marginTop: 'auto' }}>
-                  {isQtyAddon && (
-                    <div style={{ marginBottom: 10 }}>
-                      <label style={{ fontSize: '0.8rem', color: '#6b7280', display: 'block', marginBottom: 4 }}>
-                        Hours (1–5)
-                      </label>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <button
-                          onClick={() => setQty((prev) => ({ ...prev, [addon.id]: Math.max(1, (prev[addon.id] ?? 1) - 1) }))}
-                          style={{ width: 28, height: 28, borderRadius: 6, border: '1px solid #d1d5db', background: '#fff', cursor: 'pointer', fontWeight: 700 }}>
-                          −
-                        </button>
-                        <span style={{ minWidth: 20, textAlign: 'center', fontWeight: 600 }}>{quantity}</span>
-                        <button
-                          onClick={() => setQty((prev) => ({ ...prev, [addon.id]: Math.min(5, (prev[addon.id] ?? 1) + 1) }))}
-                          style={{ width: 28, height: 28, borderRadius: 6, border: '1px solid #d1d5db', background: '#fff', cursor: 'pointer', fontWeight: 700 }}>
-                          +
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span style={{ fontWeight: 700, fontSize: '1.1rem', color: '#111' }}>
-                      ${(totalCents / 100).toFixed(2)}
-                    </span>
-                    <button
-                      onClick={() => handlePurchase(addon)}
-                      disabled={purchasing === addon.id}
-                      style={{
-                        padding: '8px 18px', background: purchasing === addon.id ? '#e5e7eb' : '#6366f1',
-                        color: purchasing === addon.id ? '#9ca3af' : '#fff',
-                        border: 'none', borderRadius: 8, cursor: purchasing === addon.id ? 'default' : 'pointer',
-                        fontWeight: 600, fontSize: '0.875rem'
-                      }}>
-                      {purchasing === addon.id ? 'Redirecting…' : 'Add →'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      )}
-
-      <div style={{ marginTop: 32, padding: '14px 18px', background: '#f9fafb', borderRadius: 10, fontSize: '0.85rem', color: '#6b7280' }}>
-        💳 Secure checkout via Stripe. Add-ons are applied to your account immediately after payment.
-        Questions? Ask your navigator.
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+        {ADDONS.map(a => (
+          <div key={a.id} style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 14, padding: '22px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{ fontWeight: 700, color: '#1f2937', fontSize: '0.95rem', lineHeight: 1.3 }}>{a.name}</div>
+              {a.badge && <span style={{ fontSize: '0.68rem', background: '#fef3c7', color: '#92400e', padding: '2px 8px', borderRadius: 20, fontWeight: 700, whiteSpace: 'nowrap' }}>{a.badge}</span>}
+            </div>
+            <p style={{ color: '#6b7280', fontSize: '0.82rem', margin: 0, lineHeight: 1.6, flexGrow: 1 }}>{a.desc}</p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontWeight: 800, color: '#1f2937', fontSize: '1rem' }}>{a.price}</span>
+              <button style={{ padding: '8px 16px', background: '#6366f1', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer' }}>
+                Add to plan
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )

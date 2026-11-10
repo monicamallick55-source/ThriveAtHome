@@ -1,242 +1,132 @@
-// Family Coordination page — task board and messaging for all family members of a senior.
+import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import type { Metadata } from 'next'
 import Link from 'next/link'
-import { requireAuth } from '@/lib/auth'
-import { getMemberForAuthUser } from '@/lib/data/members'
-import { getFamilyMemberByAuthId } from '@/lib/data/family'
-import { getTasksForMember } from '@/lib/data/tasks'
-import { getMessagesForMember } from '@/lib/data/messages'
-import { getCallsForMember } from '@/lib/data/calls'
-import { FamilyTaskBoard } from '@/components/dashboard/FamilyTaskBoard'
-import { FamilyChat } from '@/components/dashboard/FamilyChat'
-import { MoodChart } from '@/components/dashboard/MoodChart'
-import { ToastProvider } from '@/components/ui/Toast'
-import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
-import FamilyScamProtectionCard from '@/components/fraud/FamilyScamProtectionCard'
-
-export const metadata: Metadata = { title: 'Family Coordination — ThriveAtHome' }
+import MoodTimeline from '@/components/MoodTimeline'
 
 export default async function FamilyPage() {
-  const user = await requireAuth()
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
 
-  const [memberResult, familyMemberResult] = await Promise.all([
-    getMemberForAuthUser(user.id),
-    getFamilyMemberByAuthId(user.id),
-  ])
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role, full_name')
+    .eq('id', user.id)
+    .single()
 
-  const member = memberResult.data
-  const familyMember = familyMemberResult.data
+  const { data: member } = await supabase
+    .from('members')
+    .select('id, full_name, plan, wellness_score, last_call_at, last_call_summary')
+    .eq('id', user.id)
+    .maybeSingle()
 
-  // Redirect to onboarding only if there's no family_members row at all.
-  // A family observer whose member_id is not yet set still stays on this page.
-  if (!familyMember) redirect('/onboarding')
+  const { data: familyLinks } = await supabase
+    .from('family_members')
+    .select('member_id, relationship, members(full_name, wellness_score, last_call_at)')
+    .eq('family_user_id', user.id)
+    .limit(5)
 
-  const [tasksResult, messagesResult, callsResult] = member ? await Promise.all([
-    getTasksForMember(member.id),
-    getMessagesForMember(member.id, 50),
-    getCallsForMember(member.id, 90, 0),
-  ]) : [{ data: [] }, { data: [] }, { data: [] }]
+  const { data: events } = await supabase
+    .from('family_events')
+    .select('id, title, event_date, notes')
+    .or(`created_by.eq.${user.id},member_id.eq.${user.id}`)
+    .order('event_date', { ascending: true })
+    .limit(5)
 
-  // If no member is linked yet, show a simple pending state
-  if (!member) {
-    return (
-      <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-cream)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-body)' }}>
-        <div style={{ textAlign: 'center', padding: '48px 24px' }}>
-          <h1 style={{ fontSize: '24px', fontWeight: 600, marginBottom: '16px' }}>Family Portal</h1>
-          <p style={{ color: 'var(--color-text-secondary)' }}>Your family account is being set up. Please check back soon or contact support.</p>
-        </div>
-      </div>
-    )
-  }
+  const linked = familyLinks && familyLinks.length > 0 ? familyLinks[0] : null
+  const linkedMember = (linked as any)?.members ?? null
 
   return (
-    <ToastProvider>
-      <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-cream)' }}>
-        {/* Navigation */}
-        <nav
-          style={{
-            position: 'sticky',
-            top: 0,
-            zIndex: 40,
-            backgroundColor: 'white',
-            borderBottom: '1px solid var(--color-warm-grey)',
-            boxShadow: 'var(--shadow-sm)',
-            height: '64px',
-            display: 'flex',
-            alignItems: 'center',
-          }}
-          aria-label="Dashboard navigation"
-        >
-          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Link
-              href="/dashboard"
-              style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: '18px',
-                fontWeight: 500,
-                color: 'var(--color-text-secondary)',
-                textDecoration: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-              }}
-            >
-              ← Dashboard
-            </Link>
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--color-navy)', fontWeight: 500 }}>
-              ThriveAtHome
-            </span>
-            <div style={{ width: '120px' }} aria-hidden="true" />
-          </div>
-        </nav>
+    <div style={{ maxWidth: 860, margin: '0 auto', padding: '32px 16px', fontFamily: 'system-ui, sans-serif' }}>
+      <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#1f2937', margin: '0 0 4px' }}>Family Portal</h1>
+      <p style={{ color: '#6b7280', fontSize: '0.875rem', margin: '0 0 28px' }}>Stay connected with your loved one's wellbeing</p>
 
-        {/* Navy header */}
-        <div style={{ backgroundColor: 'var(--color-navy)', padding: '32px 24px 48px' }}>
-          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-            <h1
-              style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: '34px',
-                fontWeight: 500,
-                color: 'var(--color-cream)',
-                marginBottom: '6px',
-                letterSpacing: '-0.01em',
-              }}
-            >
-              Family Coordination
-            </h1>
-            <p style={{ fontFamily: 'var(--font-body)', fontSize: '18px', color: 'rgba(250,250,245,0.7)', margin: 0 }}>
-              Coordinate care tasks and stay in touch for {member.preferred_name}.
-            </p>
+      {/* Wellness Summary */}
+      <section style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 14, padding: '20px 24px', marginBottom: 20 }}>
+        <h2 style={{ fontSize: '1rem', fontWeight: 700, color: '#374151', margin: '0 0 14px' }}>Wellness Summary</h2>
+        {linkedMember ? (
+          <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: 160 }}>
+              <div style={{ fontSize: '0.78rem', color: '#9ca3af', marginBottom: 4 }}>Member</div>
+              <div style={{ fontWeight: 700, color: '#1f2937' }}>{linkedMember.full_name ?? 'Your loved one'}</div>
+            </div>
+            <div style={{ flex: 1, minWidth: 120 }}>
+              <div style={{ fontSize: '0.78rem', color: '#9ca3af', marginBottom: 4 }}>Wellness</div>
+              <div style={{ fontWeight: 700, color: (linkedMember.wellness_score ?? 0) >= 7 ? '#16a34a' : '#d97706', fontSize: '1.2rem' }}>
+                {linkedMember.wellness_score ?? '—'}/10
+              </div>
+            </div>
+            <div style={{ flex: 1, minWidth: 160 }}>
+              <div style={{ fontSize: '0.78rem', color: '#9ca3af', marginBottom: 4 }}>Last Aria Call</div>
+              <div style={{ fontWeight: 600, color: '#374151', fontSize: '0.875rem' }}>
+                {linkedMember.last_call_at
+                  ? new Date(linkedMember.last_call_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+                  : 'No calls yet'}
+              </div>
+            </div>
           </div>
+        ) : (
+          <p style={{ color: '#9ca3af', fontSize: '0.875rem', margin: 0 }}>
+            No linked member yet. <Link href="/dashboard/family/invite" style={{ color: '#6366f1' }}>Invite a family member →</Link>
+          </p>
+        )}
+      </section>
+
+      {/* Fraud Protection */}
+      <section style={{ background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 14, padding: '20px 24px', marginBottom: 20 }}>
+        <h2 style={{ fontSize: '1rem', fontWeight: 700, color: '#9a3412', margin: '0 0 8px' }}>🛡️ Fraud Protection</h2>
+        <p style={{ color: '#c2410c', fontSize: '0.875rem', margin: '0 0 12px', lineHeight: 1.6 }}>
+          ThriveAtHome monitors for unusual activity and scam patterns. Your loved one is protected with real-time alerts.
+        </p>
+        <Link href="/dashboard/fraud-protection" style={{ fontSize: '0.82rem', color: '#ea580c', fontWeight: 600, textDecoration: 'none' }}>
+          View fraud alerts →
+        </Link>
+      </section>
+
+      {/* Mood Timeline */}
+      <section style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 14, padding: '20px 24px', marginBottom: 20 }}>
+        <MoodTimeline />
+      </section>
+
+      {/* Family Events Calendar */}
+      <section style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 14, padding: '20px 24px', marginBottom: 20 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+          <h2 style={{ fontSize: '1rem', fontWeight: 700, color: '#374151', margin: 0 }}>📅 Family Events Calendar</h2>
+          <Link href="/dashboard/family/events/new"
+            style={{ padding: '7px 14px', background: '#6366f1', color: '#fff', borderRadius: 8, textDecoration: 'none', fontSize: '0.8rem', fontWeight: 600 }}>
+            + Add event
+          </Link>
         </div>
-
-        <main
-          id="main-content"
-          style={{
-            maxWidth: '1200px',
-            margin: '-24px auto 0',
-            padding: '0 24px 48px',
-            position: 'relative',
-            zIndex: 10,
-          }}
-        >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            {/* Task board */}
-            <div
-              style={{
-                backgroundColor: 'white',
-                borderRadius: 'var(--radius-xl)',
-                border: '1px solid var(--color-warm-grey)',
-                boxShadow: 'var(--shadow-card)',
-                padding: '28px',
-              }}
-            >
-              <h2
-                style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: '24px',
-                  fontWeight: 500,
-                  color: 'var(--color-navy)',
-                  marginBottom: '20px',
-                }}
-              >
-                Family Tasks
-              </h2>
-              <ErrorBoundary section="family tasks">
-                <FamilyTaskBoard
-                  memberId={member.id}
-                  familyMemberId={familyMember.id}
-                  initialTasks={tasksResult.data ?? []}
-                  error={tasksResult.error}
-                />
-              </ErrorBoundary>
-            </div>
-
-            {/* Family messaging */}
-            <div
-              style={{
-                backgroundColor: 'white',
-                borderRadius: 'var(--radius-xl)',
-                border: '1px solid var(--color-warm-grey)',
-                boxShadow: 'var(--shadow-card)',
-                padding: '28px',
-              }}
-            >
-              <h2
-                style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: '24px',
-                  fontWeight: 500,
-                  color: 'var(--color-navy)',
-                  marginBottom: '20px',
-                }}
-              >
-                Family Messages
-              </h2>
-              <ErrorBoundary section="family messages">
-                <FamilyChat
-                  memberId={member.id}
-                  familyMemberId={familyMember.id}
-                  initialMessages={messagesResult.data ?? []}
-                  error={messagesResult.error}
-                />
-              </ErrorBoundary>
-            </div>
-
-            {/* TC-F004 — Mood timeline */}
-            <div
-              style={{
-                backgroundColor: 'white',
-                borderRadius: 'var(--radius-xl)',
-                border: '1px solid var(--color-warm-grey)',
-                boxShadow: 'var(--shadow-card)',
-                padding: '28px',
-              }}
-            >
-              <h2
-                style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: '24px',
-                  fontWeight: 500,
-                  color: 'var(--color-navy)',
-                  marginBottom: '20px',
-                }}
-              >
-                Mood &amp; Wellbeing Timeline
-              </h2>
-              <ErrorBoundary section="mood timeline">
-                <MoodChart calls={callsResult.data ?? []} />
-              </ErrorBoundary>
-            </div>
-
-            {/* G7.1 — Scam & fraud protection card */}
-            <div style={{ marginTop: '32px' }}>
-              <FamilyScamProtectionCard memberId={member.id} />
-            </div>
-
-            {/* Link to documents */}
-            <div style={{ textAlign: 'center', paddingTop: '8px' }}>
-              <Link
-                href="/dashboard/documents"
-                style={{
-                  fontFamily: 'var(--font-body)',
-                  fontSize: '18px',
-                  fontWeight: 500,
-                  color: 'var(--color-teal)',
-                  textDecoration: 'none',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                }}
-              >
-                View Document Vault →
-              </Link>
-            </div>
+        {(!events || events.length === 0) ? (
+          <p style={{ color: '#9ca3af', fontSize: '0.875rem', margin: 0 }}>No upcoming events. Add one to keep everyone coordinated.</p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {events.map((e: any) => (
+              <div key={e.id} style={{ display: 'flex', gap: 16, alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #f3f4f6' }}>
+                <div style={{ minWidth: 60, textAlign: 'center', background: '#eff6ff', borderRadius: 8, padding: '6px 8px' }}>
+                  <div style={{ fontSize: '0.68rem', color: '#3b82f6', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    {e.event_date ? new Date(e.event_date).toLocaleDateString('en-US', { month: 'short' }) : '—'}
+                  </div>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#1d4ed8' }}>
+                    {e.event_date ? new Date(e.event_date).getDate() : '—'}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontWeight: 600, color: '#1f2937', fontSize: '0.875rem' }}>{e.title}</div>
+                  {e.notes && <div style={{ fontSize: '0.78rem', color: '#6b7280', marginTop: 2 }}>{e.notes}</div>}
+                </div>
+              </div>
+            ))}
           </div>
-        </main>
+        )}
+      </section>
+
+      {/* Quick Links */}
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+        <Link href="/dashboard/celebrations/plan" style={{ padding: '10px 20px', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, textDecoration: 'none', color: '#374151', fontSize: '0.875rem', fontWeight: 600 }}>🎉 Plan a Celebration</Link>
+        <Link href="/dashboard/gift-send" style={{ padding: '10px 20px', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, textDecoration: 'none', color: '#374151', fontSize: '0.875rem', fontWeight: 600 }}>🎁 Send a Gift</Link>
+        <Link href="/dashboard/navigator" style={{ padding: '10px 20px', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, textDecoration: 'none', color: '#374151', fontSize: '0.875rem', fontWeight: 600 }}>💬 Contact Navigator</Link>
       </div>
-    </ToastProvider>
+    </div>
   )
 }
