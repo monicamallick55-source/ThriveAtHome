@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase-admin'
-import { Resend } from 'resend'
+import { createAdminClient } from '@/lib/supabase/admin'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
 const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL ?? 'support@thrivathome.com'
 
 const SLA_HOURS: Record<string, number> = {
