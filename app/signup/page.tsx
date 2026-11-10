@@ -4,8 +4,6 @@ import Link from 'next/link'
 
 export default function SignupPage() {
   const [plan, setPlan] = useState<string | null>(null)
-  useEffect(() => { setPlan(new URLSearchParams(window.location.search).get('plan')) }, [])
-  const [plan, setPlan] = useState<string | null>(null)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     setPlan(params.get('plan'))
