@@ -69,7 +69,7 @@ export default function SignupPage() {
 
         <button type="submit" disabled={!email || !password || !name}
           style={{ padding: '12px 24px', background: !email || !password || !name ? '#e5e7eb' : '#6366f1', color: !email || !password || !name ? '#9ca3af' : '#fff', border: 'none', borderRadius: 10, fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer' }}>
-          Create account
+          {plan ? 'Continue to Payment' : 'Create account'}
         </button>
 
         <p style={{ textAlign: 'center', fontSize: '0.82rem', color: '#6b7280', margin: 0 }}>
