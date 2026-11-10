@@ -69,7 +69,7 @@ export async function getAllRolesForAuth(authUserId: string): Promise<UserRole[]
 
   const { data: memberRow } = await db.from('members')
     .select('id').eq('supabase_auth_id', authUserId).maybeSingle()
-  if (memberRow) roles.add('family')
+  if (memberRow && roles.size === 0) roles.add('member')
 
   const { data: nav } = await db.from('care_navigators')
     .select('id').eq('supabase_auth_id', authUserId).maybeSingle()
