@@ -1,74 +1,37 @@
-import { redirect } from 'next/navigation'
-import type { Metadata } from 'next'
-import { requireAuth, getUserRole } from '@/lib/auth'
-import {
-  getAgencyForAdmin,
-  getAgencyAdminName,
-  getCareWorkersForAgency,
-  getUpcomingVisitsForAgency,
-  getRecentVisitsForAgency,
-  getMembersForAgency,
-  getPendingReferralsForAgency,
-  getLocationsForAgency,
-} from '@/lib/data/agencies'
-import AgencyDashboardClient from '@/components/agency/AgencyDashboardClient'
-
-export const metadata: Metadata = { title: 'Agency Admin — ThriveAtHome' }
-
-export default async function AgencyAdminPage() {
-  const user = await requireAuth()
-
-  const role = await getUserRole(user.id)
-  if (role !== 'agency_admin' && role !== 'admin') {
-    redirect('/login')
-  }
-
-  const { data: agency, error: agencyError } = await getAgencyForAdmin(user.id)
-
-  if (agencyError || !agency) {
-    return (
-      <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-cream)', display: 'flex', flexDirection: 'column' }}>
-        <nav style={{ backgroundColor: 'var(--color-navy)', padding: '0 32px', height: '64px', display: 'flex', alignItems: 'center' }}>
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--color-cream)', fontWeight: 500 }}>ThriveAtHome</span>
-        </nav>
-        <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '64px 32px' }}>
-          <div style={{ textAlign: 'center', maxWidth: '520px' }}>
-            <div style={{ fontSize: '48px', marginBottom: '20px' }}>🏠</div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 500, color: 'var(--color-navy)', marginBottom: '16px' }}>
-              Agency Admin Portal
-            </h1>
-            <p style={{ fontFamily: 'var(--font-body)', fontSize: '18px', color: 'var(--color-text-secondary)', lineHeight: 1.65 }}>
-              Your account is not yet linked to a care agency. Contact ThriveAtHome to set up your agency account.
-            </p>
-            <p style={{ marginTop: '16px', fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)' }}>
-              In Supabase, set <strong>agency_id</strong> on your <strong>family_members</strong> row to activate this portal.
-            </p>
-          </div>
-        </main>
-      </div>
-    )
-  }
-
-  const [workersRes, upcomingRes, recentRes, membersRes, referralsRes, locationsRes, adminNameRes] = await Promise.all([
-    getCareWorkersForAgency(agency.id),
-    getUpcomingVisitsForAgency(agency.id),
-    getRecentVisitsForAgency(agency.id),
-    getMembersForAgency(agency.id),
-    getPendingReferralsForAgency(agency.id),
-    getLocationsForAgency(agency.id),
-    getAgencyAdminName(user.id),
-  ])
-
+'use client'
+import { useState, useEffect } from 'react'
+import SupportWidget from '@/components/SupportWidget'
+export default function AgencyAdminPage() {
+  const [stats, setStats] = useState<any>(null)
+  useEffect(() => { fetch('/api/agency-admin/stats').then(r=>r.json()).then(setStats).catch(()=>setStats({})) }, [])
   return (
-    <AgencyDashboardClient
-      agency={(agency ?? []) as any}
-      workers={workersRes.data ?? []}
-      upcomingVisits={(upcomingRes.data ?? []) as any}
-      recentVisits={(recentRes.data ?? []) as any}
-      members={membersRes.data ?? []}
-      pendingReferrals={referralsRes.data ?? []}
-      initialLocations={locationsRes.data ?? []}
-      signerName={adminNameRes.data ?? undefined}
-    />
+    <div style={{ fontFamily:'system-ui,sans-serif', minHeight:'100vh', background:'#f9fafb' }}>
+      <div style={{ background:'#fff', borderBottom:'1px solid #e5e7eb', padding:'20px 32px' }}>
+        <div style={{ maxWidth:1200, margin:'0 auto', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+          <div><h1 style={{ fontSize:'1.5rem', fontWeight:800, color:'#1f2937', margin:0 }}>Agency Admin</h1><p style={{ color:'#6b7280', fontSize:'0.85rem', margin:'2px 0 0' }}>Home Care Agency Portal</p></div>
+          <a href="/agency-admin/support" style={{ padding:'8px 16px', border:'1px solid #e5e7eb', borderRadius:8, fontSize:'0.85rem', color:'#374151', textDecoration:'none' }}>Support</a>
+        </div>
+      </div>
+      <div style={{ maxWidth:1200, margin:'0 auto', padding:'32px', display:'grid', gridTemplateColumns:'1fr 320px', gap:32 }}>
+        <div>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:16, marginBottom:24 }}>
+            {[{l:'Total Members',v:stats?.total_members??'—'},{l:'Active Care Plans',v:stats?.active_care_plans??'—'},{l:'Care Workers',v:stats?.care_workers??'—'},{l:'Visits This Month',v:stats?.visits_this_month??'—'}].map(s=>(
+              <div key={s.l} style={{ background:'#fff', border:'1px solid #e5e7eb', borderRadius:12, padding:'20px 24px' }}>
+                <div style={{ fontSize:'1.6rem', fontWeight:800, color:'#1f2937' }}>{s.v}</div>
+                <div style={{ fontSize:'0.8rem', color:'#6b7280', marginTop:4 }}>{s.l}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ background:'#fff', border:'1px solid #e5e7eb', borderRadius:12, padding:24 }}>
+            <h2 style={{ fontSize:'1rem', fontWeight:700, color:'#1f2937', margin:'0 0 12px' }}>Quick Actions</h2>
+            <div style={{ display:'flex', gap:12 }}>
+              <a href="/agency-admin/members" style={{ padding:'10px 20px', background:'#6366f1', color:'#fff', borderRadius:8, textDecoration:'none', fontSize:'0.875rem', fontWeight:600 }}>View Members</a>
+              <a href="/agency-admin/reports" style={{ padding:'10px 20px', background:'#fff', border:'1px solid #e5e7eb', color:'#374151', borderRadius:8, textDecoration:'none', fontSize:'0.875rem' }}>Reports</a>
+            </div>
+          </div>
+        </div>
+        <div><SupportWidget variant="b2b" compact /></div>
+      </div>
+    </div>
   )
 }

@@ -36,7 +36,7 @@ export default function MemberSupportPage() {
     <div style={{ maxWidth: 560, margin: '0 auto', padding: '32px 16px', fontFamily: 'system-ui, sans-serif' }}>
       <a href="/dashboard" style={{ fontSize: '0.82rem', color: '#6b7280', textDecoration: 'none', marginBottom: 24, display: 'inline-block' }}>← Back to dashboard</a>
       <h1 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#1f2937', margin: '0 0 6px' }}>Submit a request</h1>
-      <p style={{ color: '#6b7280', fontSize: '0.875rem', margin: '0 0 28px' }}>We'll respond within 24 hours. Need help now? <a href={`tel:${(process.env.NEXT_PUBLIC_PHONE_QUINN ?? '').replace(/[^0-9+]/g,'')}`} style={{ color: '#6366f1', fontWeight: 700 }}>Call Quinn 24/7</a></p>
+      <p style={{ color: '#6b7280', fontSize: '0.875rem', margin: '0 0 28px' }}>We'll respond within 24 hours. <a href="/dashboard/support/faq" style={{ color: '#6366f1', fontWeight: 600 }}>Browse FAQ →</a><br/>Need help now? <a href={`tel:${(process.env.NEXT_PUBLIC_PHONE_QUINN ?? '').replace(/[^0-9+]/g,'')}`} style={{ color: '#6366f1', fontWeight: 700 }}>Call Quinn 24/7</a></p>
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <div>
           <label style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', color: '#374151', marginBottom: 8 }}>What's this about?</label>
