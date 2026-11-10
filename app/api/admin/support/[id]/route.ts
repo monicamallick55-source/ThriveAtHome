@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase-admin'
+import { createAdminClient } from '@/lib/supabase/admin'
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const { status, assigned_to, resolution_notes } = await req.json()

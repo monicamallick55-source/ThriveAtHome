@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase-admin'
+import { createAdminClient } from '@/lib/supabase/admin'
 export async function GET(req: NextRequest) {
   try {
     const status = req.nextUrl.searchParams.get('status') ?? 'open'
