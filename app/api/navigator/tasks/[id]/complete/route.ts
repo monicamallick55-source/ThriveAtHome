@@ -1,36 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser, isNavigatorOrAdmin } from '@/lib/auth'
+import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
-export async function POST(
-  _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params
-  const user = await getCurrentUser()
+mkdir -p "app/api/navigator/tasks/[id]/complete"
+cat > "app/api/navigator/tasks/[id]/complete/route.ts" << 'EOF'
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  if (!(await isNavigatorOrAdmin(user.id))) {
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  if (!['navigator', 'admin', 'super_admin'].includes(profile?.role ?? '')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
   const admin = createAdminClient()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = admin as any
-  const { data, error } = await db
+  const { error } = await admin
     .from('navigator_tasks')
-    .update({
-      completed: true,
-      completed_at: new Date().toISOString(),
-    })
-    .eq('id', id)
-    .select('*')
-    .maybeSingle()
+    .update({ status: 'completed', completed_at: new Date().toISOString() })
+    .eq('id', params.id)
+    .eq('navigator_id', user.id)
 
-  if (error) {
-    console.error('[api/navigator/tasks/complete]', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
-  if (!data) return NextResponse.json({ error: 'Not found' }, { status: 404 })
-  return NextResponse.json({ data })
+  return NextResponse.json({ ok: !error, task_id: params.id, status: 'completed' })
 }
