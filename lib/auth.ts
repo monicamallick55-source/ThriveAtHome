@@ -73,7 +73,10 @@ export async function getAllRolesForAuth(authUserId: string): Promise<UserRole[]
   // First check app_metadata.role (set for admin/employer/navigator/vso etc test users)
   const { data: { user: authUser } } = await admin.auth.admin.getUserById(authUserId)
   const metaRole = (authUser?.app_metadata?.role ?? authUser?.user_metadata?.role) as UserRole | undefined
-  if (metaRole) roles.add(metaRole)
+  if (metaRole) {
+    roles.add(metaRole)
+    return [...roles]  // short-circuit: skip all DB queries for role-tagged users
+  }
 
   const { data: fm } = await db.from('family_members')
     .select('role').eq('supabase_auth_id', authUserId).maybeSingle()
