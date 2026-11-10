@@ -63,6 +63,11 @@ export async function getAllRolesForAuth(authUserId: string): Promise<UserRole[]
   const db = admin as any
   const roles = new Set<UserRole>()
 
+  // First check app_metadata.role (set for admin/employer/navigator/vso etc test users)
+  const { data: { user: authUser } } = await admin.auth.admin.getUserById(authUserId)
+  const metaRole = (authUser?.app_metadata?.role ?? authUser?.user_metadata?.role) as UserRole | undefined
+  if (metaRole) roles.add(metaRole)
+
   const { data: fm } = await db.from('family_members')
     .select('role').eq('supabase_auth_id', authUserId).maybeSingle()
   if (fm?.role) roles.add(fm.role as UserRole)
