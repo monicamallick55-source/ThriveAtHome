@@ -7,8 +7,9 @@ export default async function NavigatorPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase.from('profiles').select('role, full_name').eq('id', user.id).single()
-  if (!['navigator', 'admin', 'super_admin'].includes(profile?.role ?? '')) redirect('/dashboard')
+  const role = (user.user_metadata?.role ?? user.app_metadata?.role ?? '') as string
+const fullName = (user.user_metadata?.full_name ?? user.user_metadata?.name ?? '') as string
+if (!['navigator', 'admin', 'super_admin'].includes(role)) redirect('/dashboard')
 
   const { data: tasks } = await supabase
     .from('navigator_tasks')
@@ -49,7 +50,7 @@ export default async function NavigatorPage() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
         <div>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#1f2937', margin: 0 }}>Navigator Portal</h1>
-          <p style={{ color: '#6b7280', fontSize: '0.875rem', margin: '4px 0 0' }}>Welcome back, {profile?.full_name ?? 'Navigator'}</p>
+          <p style={{ color: '#6b7280', fontSize: '0.875rem', margin: '4px 0 0' }}>Welcome back, {fullName || 'Navigator'}</p>
         </div>
         <Link href="/navigator/start-transition-plan"
           style={{ padding: '9px 18px', background: '#6366f1', color: '#fff', borderRadius: 10, textDecoration: 'none', fontWeight: 700, fontSize: '0.875rem' }}>
