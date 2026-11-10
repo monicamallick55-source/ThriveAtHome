@@ -1,37 +1,50 @@
-'use client'
-import { useState, useEffect } from 'react'
-
-type Advisor = { id: string; name: string; specialty: string; bio: string; telehealth: boolean }
-
-const SPECIALTY_LABELS: Record<string, string> = {
-  elder_law_attorney: 'Elder Law Attorney',
-  financial_planner: 'Financial Planner',
-  geriatric_care_manager: 'Geriatric Care Manager',
-  licensed_therapist: 'Licensed Therapist',
-  chaplain: 'Chaplain / Spiritual Care',
-}
-
 export default function TrustedAdvisorsPage() {
-  const [advisors, setAdvisors] = useState<Advisor[]>([])
-  useEffect(() => {
-    fetch('/api/trusted-advisors').then(r => r.json()).then(d => setAdvisors(d.advisors || [])).catch(() => {})
-  }, [])
+  const advisors = [
+    { name: 'Sarah Mitchell, Esq.', specialty: 'Elder Law Attorney', bio: 'Elder law specialist with 20 years experience.', telehealth: true },
+    { name: 'Robert Chen, CFP', specialty: 'Financial Planner', bio: 'Certified financial planner focused on retirement planning.', telehealth: true },
+    { name: 'Dr. Angela Torres', specialty: 'Geriatric Care Manager', bio: 'Geriatric care manager specializing in aging in place.', telehealth: false },
+    { name: 'Dr. Lisa Nguyen', specialty: 'Licensed Therapist', bio: 'Licensed therapist specializing in life transitions and grief.', telehealth: true },
+  ]
+
   return (
-    <main className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-2">Trusted Advisors</h1>
-      <p className="text-gray-600 mb-6">Connect with vetted professionals who specialize in elder care and senior support.</p>
-      <div className="grid gap-4 sm:grid-cols-2">
-        {advisors.map(a => (
-          <div key={a.id} className="border border-gray-200 rounded-lg p-4">
-            <h2 className="font-semibold">{a.name}</h2>
-            <p className="text-sm text-blue-600 mb-2">{SPECIALTY_LABELS[a.specialty] || a.specialty}</p>
-            <p className="text-sm text-gray-600">{a.bio}</p>
-            {a.telehealth && <span className="mt-2 inline-block text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Telehealth available</span>}
-            <button className="mt-3 w-full bg-blue-600 text-white rounded px-3 py-2 text-sm">Request Consultation</button>
+    <div style={{ padding: '1.5rem', maxWidth: '900px', margin: '0 auto' }}>
+      <h1>Trusted Advisors</h1>
+      <p>Connect with vetted professionals who specialize in elder care and senior support.</p>
+
+      <div style={{ display: 'grid', gap: '1rem', marginTop: '1.5rem' }}>
+        {advisors.map((a, i) => (
+          <div key={i} style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1rem' }}>
+            <h2 style={{ margin: 0 }}>{a.name}</h2>
+            <p style={{ color: '#2563eb', fontSize: '0.9rem', margin: '0.25rem 0' }}>{a.specialty}</p>
+            <p style={{ color: '#4b5563', fontSize: '0.9rem' }}>{a.bio}</p>
+            {a.telehealth && <span style={{ fontSize: '0.75rem', background: '#d1fae5', color: '#065f46', padding: '2px 8px', borderRadius: '4px' }}>Telehealth available</span>}
+            <button style={{ marginTop: '0.75rem', display: 'block', width: '100%', background: '#2563eb', color: 'white', border: 'none', borderRadius: '6px', padding: '0.5rem', cursor: 'pointer' }}>
+              Request Consultation
+            </button>
           </div>
         ))}
-        {advisors.length === 0 && <p className="text-gray-400 col-span-2">Loading advisors...</p>}
       </div>
-    </main>
+
+      <section style={{ marginTop: '2rem', padding: '1rem', background: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
+        <h2>On-Request Specialists</h2>
+        <p>These specialists are available by request only. Contact your navigator to be connected.</p>
+        <div style={{ display: 'grid', gap: '0.75rem', marginTop: '1rem' }}>
+          <div style={{ padding: '0.75rem', background: 'white', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
+            <strong>Chaplain / Spiritual Care</strong>
+            <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: '0.25rem 0' }}>Non-denominational chaplain and grief counselor available for spiritual support.</p>
+            <button style={{ marginTop: '0.5rem', background: 'white', border: '1px solid #2563eb', color: '#2563eb', borderRadius: '4px', padding: '0.4rem 1rem', cursor: 'pointer' }}>
+              Request an introduction
+            </button>
+          </div>
+          <div style={{ padding: '0.75rem', background: 'white', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
+            <strong>Grief Counselor</strong>
+            <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: '0.25rem 0' }}>Specialized grief counselor for loss, transitions, and bereavement support.</p>
+            <button style={{ marginTop: '0.5rem', background: 'white', border: '1px solid #2563eb', color: '#2563eb', borderRadius: '4px', padding: '0.4rem 1rem', cursor: 'pointer' }}>
+              Request an introduction
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
   )
 }

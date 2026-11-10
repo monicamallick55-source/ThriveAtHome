@@ -18,7 +18,7 @@ export const metadata = {
 }
 
 export default async function DashboardPage() {
-  const user = await requireAuth().catch(() => null)
+  const user = await requireAuth().catch((e) => { if (e const user = await requireAuth().catch(() => null)const user = await requireAuth().catch(() => null) typeof e === "object" const user = await requireAuth().catch(() => null)const user = await requireAuth().catch(() => null) "digest" in e) throw e; return null })
   if (!user) redirect('/login')
 
   const { data: fm } = await getFamilyMemberByAuthId(user.id)
