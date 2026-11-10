@@ -1,8 +1,15 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
 export default function SignupPage() {
+  const [plan, setPlan] = useState<string | null>(null)
+  useEffect(() => { setPlan(new URLSearchParams(window.location.search).get('plan')) }, [])
+  const [plan, setPlan] = useState<string | null>(null)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    setPlan(params.get('plan'))
+  }, [])
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
