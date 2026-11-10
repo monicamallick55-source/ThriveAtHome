@@ -20,14 +20,6 @@ const PLANS = [
     badge: 'Most Popular',
     features: ['Everything in Basic', 'Dedicated navigator', 'Life transition support', 'Family portal access', 'Trusted advisor network', 'Priority support'],
   },
-  {
-    id: 'premier',
-    name: 'Premier',
-    price: '$79',
-    period: '/mo',
-    color: '#f59e0b',
-    features: ['Everything in Complete', 'Unlimited navigator hours', 'Concierge care coordination', 'Home safety assessment', 'Medicare guidance', 'White-glove onboarding'],
-  },
 ]
 
 export default async function PlanPage() {
@@ -36,8 +28,8 @@ export default async function PlanPage() {
   if (!user) redirect('/login')
 
   return (
-    <div style={{ maxWidth: 900, margin: '48px auto', padding: '0 16px', fontFamily: 'system-ui, sans-serif' }}>
-      <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#1f2937', textAlign: 'center', marginBottom: 8 }}>Choose Your Plan</h1>
+    <div style={{ maxWidth: 700, margin: '48px auto', padding: '0 16px', fontFamily: 'system-ui, sans-serif' }}>
+      <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#1f2937', textAlign: 'center', marginBottom: 8 }}>Your Plan</h1>
       <p style={{ color: '#6b7280', textAlign: 'center', marginBottom: 36 }}>Upgrade anytime. Cancel anytime.</p>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20 }}>
@@ -63,14 +55,17 @@ export default async function PlanPage() {
               ))}
             </ul>
             <button style={{ marginTop: 'auto', padding: '10px 20px', background: plan.color, color: '#fff', border: 'none', borderRadius: 10, fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem' }}>
-              {plan.id === 'basic' ? 'Current plan' : `Upgrade to ${plan.name}`}
+              {plan.id === 'basic' ? 'Current plan' : 'Upgrade to Complete'}
             </button>
           </div>
         ))}
       </div>
 
       <p style={{ textAlign: 'center', marginTop: 24 }}>
-        <Link href="/dashboard" style={{ color: '#6366f1', fontSize: '0.875rem' }}>← Back to dashboard</Link>
+        <Link href="/dashboard/plan-comparison" style={{ color: '#6366f1', fontSize: '0.875rem' }}>Compare all plans →</Link>
+      </p>
+      <p style={{ textAlign: 'center', marginTop: 8 }}>
+        <Link href="/dashboard" style={{ color: '#9ca3af', fontSize: '0.8rem' }}>← Back to dashboard</Link>
       </p>
     </div>
   )
