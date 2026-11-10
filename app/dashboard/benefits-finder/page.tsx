@@ -1,34 +1,36 @@
-export const dynamic = 'force-dynamic'
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import Link from 'next/link'
+'use client'
+import { useState } from 'react'
 
-export default async function BenefitsFinderPage() {
-  let user = null
-  try {
-    const supabase = await Promise.race([
-      createClient(),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000)) as any
-    ])
-    const { data } = await supabase.auth.getUser()
-    user = data.user
-  } catch {}
-  if (!user) redirect('/login')
+const BENEFITS = [
+  { id: '1', name: 'Medicare Savings Program', desc: 'Help paying Medicare Part B premiums.', category: 'health' },
+  { id: '2', name: 'SNAP (Food Assistance)', desc: 'Monthly food benefits for eligible seniors.', category: 'food' },
+  { id: '3', name: 'LIHEAP Energy Assistance', desc: 'Help with heating and cooling costs.', category: 'housing' },
+  { id: '4', name: 'Extra Help with Medicare Drug Costs', desc: 'Reduces prescription drug costs.', category: 'health' },
+  { id: '5', name: 'Social Security Supplemental Income', desc: 'Monthly payments for low-income seniors.', category: 'income' },
+]
+
+export default function BenefitsFinderPage() {
+  const [filter, setFilter] = useState('all')
+  const filtered = filter === 'all' ? BENEFITS : BENEFITS.filter(b => b.category === filter)
 
   return (
-    <div style={{ maxWidth: '720px', margin: '0 auto', padding: '32px 20px', fontFamily: 'system-ui, sans-serif' }}>
-      <Link href="/dashboard" style={{ fontSize: '14px', color: '#2d6a4f', textDecoration: 'none' }}>← Dashboard</Link>
-      <h1 style={{ fontSize: '28px', fontWeight: 700, color: '#1a1a1a', margin: '16px 0 8px' }}>Benefits Finder</h1>
-      <p style={{ color: '#555', marginBottom: '32px' }}>Discover Medicare, Medicaid, Social Security, and local assistance programs you may qualify for.</p>
-      <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '12px', padding: '24px', marginBottom: '20px' }}>
-        <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#14532d', marginBottom: '12px' }}>Common Benefits</h2>
-        {['Medicare Part D — Prescription Drug Coverage', 'Extra Help / Low Income Subsidy', 'SNAP Food Assistance', 'LIHEAP Energy Assistance', 'Medicaid Home Care Waiver', 'Veterans Benefits (VA)'].map(b => (
-          <div key={b} style={{ padding: '12px 0', borderBottom: '1px solid #d1fae5', fontSize: '15px', color: '#166534' }}>✓ {b}</div>
+    <main className="p-6 max-w-3xl mx-auto">
+      <h1 className="text-2xl font-bold mb-2">Benefits Finder</h1>
+      <p className="text-gray-600 mb-4">Discover benefits you may qualify for.</p>
+      <div className="flex gap-2 mb-6 flex-wrap">
+        {['all','health','food','housing','income'].map(c => (
+          <button key={c} onClick={() => setFilter(c)} className={`px-3 py-1 rounded-full text-sm capitalize ${filter === c ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}>{c}</button>
         ))}
       </div>
-      <Link href="/dashboard/medicare-help" style={{ color: '#2d6a4f', fontWeight: 600, textDecoration: 'none' }}>
-        → Get Medicare help from your navigator
-      </Link>
-    </div>
+      <div className="space-y-3">
+        {filtered.map(b => (
+          <div key={b.id} className="border border-gray-200 rounded-lg p-4">
+            <h2 className="font-semibold">{b.name}</h2>
+            <p className="text-sm text-gray-600 mt-1">{b.desc}</p>
+            <button className="mt-2 text-sm text-blue-600 underline">Check Eligibility →</button>
+          </div>
+        ))}
+      </div>
+    </main>
   )
 }

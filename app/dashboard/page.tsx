@@ -53,7 +53,8 @@ export default async function DashboardPage() {
     <div style={{ maxWidth: '720px', margin: '0 auto', padding: '24px 20px' }}>
       {/* Greeting */}
       <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '26px', fontWeight: 800, color: '#1a1a1a', margin: '0 0 4px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}><span data-testid="member-name" style={{ fontWeight: 700 }}>{profile?.full_name ?? user?.email}</span><span data-testid="plan-badge" style={{ fontSize: '0.72rem', background: '#eff6ff', color: '#4f46e5', padding: '2px 8px', borderRadius: 20, fontWeight: 700, textTransform: 'uppercase' }}>{member?.plan ?? 'Basic'}</span></div>
+      <h1 style={{ fontSize: '26px', fontWeight: 800, color: '#1a1a1a', margin: '0 0 4px' }}>
           Good morning, {firstName} 🌿
         </h1>
         <p style={{ fontSize: '14px', color: '#777', margin: 0 }}>

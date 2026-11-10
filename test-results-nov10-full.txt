@@ -1,0 +1,1075 @@
+
+Running 726 tests using 1 worker
+
+[1/726] [chromium] › tests/e2e/admin-portal-deep.spec.ts:57:1 › TC-AD002 — /admin/ma-report loads without 500
+[2/726] [chromium] › tests/e2e/admin-portal-deep.spec.ts:65:1 › TC-AD003 — /admin/metro-activation loads without 500
+[3/726] [chromium] › tests/e2e/admin-portal-deep.spec.ts:73:1 › TC-AD004 — /admin/community-partners loads without 500
+[4/726] [chromium] › tests/e2e/admin-portal-deep.spec.ts:81:1 › TC-AD005 — /admin/grief-circles loads without 500
+[5/726] [chromium] › tests/e2e/admin-portal-deep.spec.ts:89:1 › TC-AD006 — /admin/devices loads without 500
+[6/726] [chromium] › tests/e2e/admin-portal-deep.spec.ts:97:1 › TC-AD007 — /admin/org-imports loads without 500
+[7/726] [chromium] › tests/e2e/admin-portal-deep.spec.ts:105:1 › TC-AD008 — /admin/campaigns loads without 500
+[8/726] [chromium] › tests/e2e/admin-portal-deep.spec.ts:113:1 › TC-AD009 — Partner listings RLS (manual check)
+[chromium] › tests/e2e/admin-portal-deep.spec.ts:113:1 › TC-AD009 — Partner listings RLS (manual check)
+TC-AD009: RLS verified via Supabase SQL; manual check only — cannot test service-role bypass from E2E
+
+[9/726] [chromium] › tests/e2e/admin-portal-deep.spec.ts:125:1 › TC-AD010 — /admin has feature flag controls
+[chromium] › tests/e2e/admin-portal-deep.spec.ts:125:1 › TC-AD010 — /admin has feature flag controls
+TC-AD010: No feature flag UI found on /admin — may be on a subpage
+
+[10/726] [chromium] › tests/e2e/admin-portal-deep.spec.ts:143:1 › TC-N004 — /navigator loads for navigator role
+[11/726] [chromium] › tests/e2e/admin-portal-deep.spec.ts:161:1 › TC-N006 — /navigator loads; home-from-hospital requires seeded data
+[chromium] › tests/e2e/admin-portal-deep.spec.ts:161:1 › TC-N006 — /navigator loads; home-from-hospital requires seeded data
+TC-N006: home_from_hospital achievement requires seeded member; test via navigator UI manually
+
+[12/726] [chromium] › tests/e2e/admin-portal-deep.spec.ts:177:1 › TC-N007 — /navigator loads; campaign approval requires flag on
+[chromium] › tests/e2e/admin-portal-deep.spec.ts:177:1 › TC-N007 — /navigator loads; campaign approval requires flag on
+TC-N007: campaign approval requires member_campaigns_live=true; manual test
+
+[13/726] [chromium] › tests/e2e/admin-portal-deep.spec.ts:193:1 › TC-B2B002 — /org-admin/village-referrals loads without 500
+[14/726] [chromium] › tests/e2e/admin-portal-deep.spec.ts:201:1 › TC-B2B003 — /org-admin loads with org context
+[15/726] [chromium] › tests/e2e/admin-portal-deep.spec.ts:219:1 › TC-B2B004 — /org-admin feature config loads
+[chromium] › tests/e2e/admin-portal-deep.spec.ts:219:1 › TC-B2B004 — /org-admin feature config loads
+TC-B2B004: feature toggle requires org_configs row; check via admin portal or Supabase directly
+
+[16/726] [chromium] › tests/e2e/admin-portal-deep.spec.ts:235:1 › TC-B2B012 — /employer-admin loads with invite UI
+[chromium] › tests/e2e/admin-portal-deep.spec.ts:235:1 › TC-B2B012 — /employer-admin loads with invite UI
+TC-B2B012: /employer-admin redirected to /login
+
+[17/726] [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — member@test.com routes to /dashboard
+[18/726] [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — family@test.com routes to /dashboard/family
+[19/726] [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — navigator@test.com routes to /navigator
+[20/726] [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — admin@test.com routes to /admin
+[21/726] [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — volunteer@test.com routes to /volunteer
+[22/726] [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — orgadmin@test.com routes to /org-admin
+[23/726] [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — employer@test.com routes to /employer-admin
+[chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — employer@test.com routes to /employer-admin
+TC-A001: employer@test.com login failed — not seeded or rate limited
+
+[24/726] [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — uniadmin@test.com routes to /university-admin
+[25/726] [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — vsoadmin@test.com routes to /vso-admin
+[26/726] [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — k12admin@test.com routes to /school-admin
+[27/726] [chromium] › tests/e2e/auth-flows.spec.ts:31:1 › TC-A002 — /signup page loads
+  1) [chromium] › tests/e2e/auth-flows.spec.ts:31:1 › TC-A002 — /signup page loads ─────────────────
+
+    Error: expect(received).toMatch(expected)
+
+    Expected pattern: /sign up|create account|register/
+    Received string:  "thrive@home123choose planyour infopaymentchoose your planstart with what fits — upgrade anytime.monthlyannual (save 10%)thrive basics$39/mo quinn ai concierge — 24/7 by phone aria daily check-in calls emergency alerts to family family portal — 3 seatsthrive complete$79/mo everything in basics volunteer rides & transportation meals coordination friendly visits & companionshipcontinue with thrive basics already a member? sign insome medicare advantage plans may cover thriveathome. ask quinn to check your plan.@keyframes spin { to { transform: rotate(360deg) } }(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,\"1:\\\"$sreact.fragment\\\"\\n2:i[985571,[\\\"/_next/static/chunks/0flddrkle7k6q.js\\\",\\\"/_next/static/chunks/0i.l9589uvx0j.js\\\"],\\\"default\\\"]\\n3:i[339756,[\\\"/_next/static/chunks/0flddrkle7k6q.js\\\",\\\"/_next/static/chunks/0i.l9589uvx0j.js\\\"],\\\"default\\\"]\\n4:i[408821,[\\\"/_next/static/chunks/0flddrkle7k6q.js\\\",\\\"/_next/static/chunks/0i.l9589uvx0j.js\\\",\\\"/_next/static/chunks/0nqx9t32s__fn.js\\\"],\\\"default\\\"]\\n5:i[837457,[\\\"/_next/static/chunks/0flddrkle7k6q.js\\\",\\\"/_next/static/chunks/0i.l9589uvx0j.js\\\"],\\\"default\\\"]\\n6:i[347257,[\\\"/_next/static/chunks/0flddrkle7k6q.js\\\",\\\"/_next/static/chunks/0i.l9589uvx0j.js\\\"],\\\"clientpageroot\\\"]\\n7:i[82306,[\\\"/_next/static/chunks/0flddrkle7k6q.js\\\",\\\"/_next/static/chunks/0i.l9589uvx0j.js\\\",\\\"/_next/static/chunks/10h~3u67lf5zy.js\\\",\\\"/_next/static/chunks/0yy9t3-427u8p.js\\\"],\\\"default\\\"]\\na:i[897367,[\\\"/_next/static/chunks/0flddrkle7k6q.js\\\",\\\"/_next/static/chunks/0i.l9589uvx0j.js\\\"],\\\"outletboundary\\\"]\\nb:\\\"$sreact.suspense\\\"\\ne:i[897367,[\\\"/_next/static/chunks/0flddrkle7k6q.js\\\",\\\"/_next/static/chunks/0i.l9589uvx0j.js\\\"],\\\"viewportboundary\\\"]\\n10:i[897367,[\\\"/_next/static/chunks/0flddrkle7k6q.js\\\",\\\"/_next/static/chunks/0i.l9589uvx0j.js\\\"],\\\"metadataboundary\\\"]\\n12:i[168027,[\\\"/_next/static/chunks/0flddrkle7k6q.js\\\",\\\"/_next/static/chunks/0i.l9589uvx0j.js\\\"],\\\"default\\\",1]\\n:hl[\\\"/_next/static/chunks/0pt_qy03twui5.css\\\",\\\"style\\\"]\\n:hc[\\\"/\\\",\\\"\\\"]\\n\"])self.__next_f.push([1,\"0:{\\\"p\\\":null,\\\"c\\\":[\\\"\\\",\\\"signup\\\"],\\\"q\\\":\\\"\\\",\\\"i\\\":false,\\\"f\\\":[[[\\\"\\\",{\\\"children\\\":[\\\"signup\\\",{\\\"children\\\":[\\\"__page__\\\",{}]}]},\\\"$undefined\\\",\\\"$undefined\\\",16],[[\\\"$\\\",\\\"$1\\\",\\\"c\\\",{\\\"children\\\":[[[\\\"$\\\",\\\"link\\\",\\\"0\\\",{\\\"rel\\\":\\\"stylesheet\\\",\\\"href\\\":\\\"/_next/static/chunks/0pt_qy03twui5.css\\\",\\\"precedence\\\":\\\"next\\\",\\\"crossorigin\\\":\\\"$undefined\\\",\\\"nonce\\\":\\\"$undefined\\\"}],[\\\"$\\\",\\\"script\\\",\\\"script-0\\\",{\\\"src\\\":\\\"/_next/static/chunks/0flddrkle7k6q.js\\\",\\\"async\\\":true,\\\"nonce\\\":\\\"$undefined\\\"}],[\\\"$\\\",\\\"script\\\",\\\"script-1\\\",{\\\"src\\\":\\\"/_next/static/chunks/0i.l9589uvx0j.js\\\",\\\"async\\\":true,\\\"nonce\\\":\\\"$undefined\\\"}]],[\\\"$\\\",\\\"html\\\",null,{\\\"lang\\\":\\\"en\\\",\\\"classname\\\":\\\"h-full\\\",\\\"children\\\":[\\\"$\\\",\\\"body\\\",null,{\\\"classname\\\":\\\"dm_sans_710f0650-module__lt2yhg__variable dm_mono_2c78b75d-module__kaj_ca__variable min-h-full flex flex-col antialiased\\\",\\\"children\\\":[[\\\"$\\\",\\\"$l2\\\",null,{}],[\\\"$\\\",\\\"$l3\\\",null,{\\\"parallelrouterkey\\\":\\\"children\\\",\\\"error\\\":\\\"$4\\\",\\\"errorstyles\\\":[],\\\"errorscripts\\\":[[\\\"$\\\",\\\"script\\\",\\\"script-0\\\",{\\\"src\\\":\\\"/_next/static/chunks/0nqx9t32s__fn.js\\\",\\\"async\\\":true}]],\\\"template\\\":[\\\"$\\\",\\\"$l5\\\",null,{}],\\\"templatestyles\\\":\\\"$undefined\\\",\\\"templatescripts\\\":\\\"$undefined\\\",\\\"notfound\\\":[[[\\\"$\\\",\\\"title\\\",null,{\\\"children\\\":\\\"404: this page could not be found.\\\"}],[\\\"$\\\",\\\"div\\\",null,{\\\"style\\\":{\\\"fontfamily\\\":\\\"system-ui,\\\\\\\"segoe ui\\\\\\\",roboto,helvetica,arial,sans-serif,\\\\\\\"apple color emoji\\\\\\\",\\\\\\\"segoe ui emoji\\\\\\\"\\\",\\\"height\\\":\\\"100vh\\\",\\\"textalign\\\":\\\"center\\\",\\\"display\\\":\\\"flex\\\",\\\"flexdirection\\\":\\\"column\\\",\\\"alignitems\\\":\\\"center\\\",\\\"justifycontent\\\":\\\"center\\\"},\\\"children\\\":[\\\"$\\\",\\\"div\\\",null,{\\\"children\\\":[[\\\"$\\\",\\\"style\\\",null,{\\\"dangerouslysetinnerhtml\\\":{\\\"__html\\\":\\\"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}\\\"}}],[\\\"$\\\",\\\"h1\\\",null,{\\\"classname\\\":\\\"next-error-h1\\\",\\\"style\\\":{\\\"display\\\":\\\"inline-block\\\",\\\"margin\\\":\\\"0 20px 0 0\\\",\\\"padding\\\":\\\"0 23px 0 0\\\",\\\"fontsize\\\":24,\\\"fontweight\\\":500,\\\"verticalalign\\\":\\\"top\\\",\\\"lineheight\\\":\\\"49px\\\"},\\\"children\\\":404}],[\\\"$\\\",\\\"div\\\",null,{\\\"style\\\":{\\\"display\\\":\\\"inline-block\\\"},\\\"children\\\":[\\\"$\\\",\\\"h2\\\",null,{\\\"style\\\":{\\\"fontsize\\\":14,\\\"fontweight\\\":400,\\\"lineheight\\\":\\\"49px\\\",\\\"margin\\\":0},\\\"children\\\":\\\"this page could not be found.\\\"}]}]]}]}]],[]],\\\"forbidden\\\":\\\"$undefined\\\",\\\"unauthorized\\\":\\\"$undefined\\\"}]]}]}]]}],{\\\"children\\\":[[\\\"$\\\",\\\"$1\\\",\\\"c\\\",{\\\"children\\\":[null,[\\\"$\\\",\\\"$l3\\\",null,{\\\"parallelrouterkey\\\":\\\"children\\\",\\\"error\\\":\\\"$undefined\\\",\\\"errorstyles\\\":\\\"$undefined\\\",\\\"errorscripts\\\":\\\"$undefined\\\",\\\"template\\\":[\\\"$\\\",\\\"$l5\\\",null,{}],\\\"templatestyles\\\":\\\"$undefined\\\",\\\"templatescripts\\\":\\\"$undefined\\\",\\\"notfound\\\":\\\"$undefined\\\",\\\"forbidden\\\":\\\"$undefined\\\",\\\"unauthorized\\\":\\\"$undefined\\\"}]]}],{\\\"children\\\":[[\\\"$\\\",\\\"$1\\\",\\\"c\\\",{\\\"children\\\":[[\\\"$\\\",\\\"$l6\\\",null,{\\\"component\\\":\\\"$7\\\",\\\"serverprovidedparams\\\":{\\\"searchparams\\\":{},\\\"params\\\":{},\\\"promises\\\":[\\\"$@8\\\",\\\"$@9\\\"]}}],[[\\\"$\\\",\\\"script\\\",\\\"script-0\\\",{\\\"src\\\":\\\"/_next/static/chunks/10h~3u67lf5zy.js\\\",\\\"async\\\":true,\\\"nonce\\\":\\\"$undefined\\\"}],[\\\"$\\\",\\\"script\\\",\\\"script-1\\\",{\\\"src\\\":\\\"/_next/static/chunks/0yy9t3-427u8p.js\\\",\\\"async\\\":true,\\\"nonce\\\":\\\"$undefined\\\"}]],[\\\"$\\\",\\\"$la\\\",null,{\\\"children\\\":[\\\"$\\\",\\\"$b\\\",null,{\\\"name\\\":\\\"next.metadataoutlet\\\",\\\"children\\\":\\\"$@c\\\"}]}]]}],{},null,false,null]},null,false,\\\"$@d\\\"]},null,false,null],[\\\"$\\\",\\\"$1\\\",\\\"h\\\",{\\\"children\\\":[null,[\\\"$\\\",\\\"$le\\\",null,{\\\"children\\\":\\\"$lf\\\"}],[\\\"$\\\",\\\"div\\\",null,{\\\"hidden\\\":true,\\\"children\\\":[\\\"$\\\",\\\"$l10\\\",null,{\\\"children\\\":[\\\"$\\\",\\\"$b\\\",null,{\\\"name\\\":\\\"next.metadata\\\",\\\"children\\\":\\\"$l11\\\"}]}]}],[\\\"$\\\",\\\"meta\\\",null,{\\\"name\\\":\\\"next-size-adjust\\\",\\\"content\\\":\\\"\\\"}]]}],false]],\\\"m\\\":\\\"$undefined\\\",\\\"g\\\":[\\\"$12\\\",[[\\\"$\\\",\\\"link\\\",\\\"0\\\",{\\\"rel\\\":\\\"stylesheet\\\",\\\"href\\\":\\\"/_next/static/chunks/0pt_qy03twui5.css\\\",\\\"precedence\\\":\\\"next\\\",\\\"crossorigin\\\":\\\"$undefined\\\",\\\"nonce\\\":\\\"$undefined\\\"}]]],\\\"s\\\":true,\\\"h\\\":null,\\\"s\\\":\\\"$undefined\\\",\\\"l\\\":\\\"$undefined\\\",\\\"p\\\":\\\"$undefined\\\",\\\"d\\\":\\\"$undefined\\\",\\\"b\\\":\\\"7drrycppjqv1rgudxh15j\\\"}\\n\"])self.__next_f.push([1,\"13:[]\\nd:\\\"$w13\\\"\\n8:{}\\n9:\\\"$0:f:0:1:1:children:1:children:0:props:children:0:props:serverprovidedparams:params\\\"\\n\"])self.__next_f.push([1,\"f:[[\\\"$\\\",\\\"meta\\\",\\\"0\\\",{\\\"charset\\\":\\\"utf-8\\\"}],[\\\"$\\\",\\\"meta\\\",\\\"1\\\",{\\\"name\\\":\\\"viewport\\\",\\\"content\\\":\\\"width=device-width, initial-scale=1\\\"}]]\\n\"])self.__next_f.push([1,\"14:i[27201,[\\\"/_next/static/chunks/0flddrkle7k6q.js\\\",\\\"/_next/static/chunks/0i.l9589uvx0j.js\\\"],\\\"iconmark\\\"]\\nc:null\\n11:[[\\\"$\\\",\\\"title\\\",\\\"0\\\",{\\\"children\\\":\\\"thriveathome\\\"}],[\\\"$\\\",\\\"meta\\\",\\\"1\\\",{\\\"name\\\":\\\"description\\\",\\\"content\\\":\\\"ai-powered senior care coordination for families.\\\"}],[\\\"$\\\",\\\"meta\\\",\\\"2\\\",{\\\"property\\\":\\\"og:title\\\",\\\"content\\\":\\\"thriveathome — where seniors thrive together\\\"}],[\\\"$\\\",\\\"meta\\\",\\\"3\\\",{\\\"property\\\":\\\"og:description\\\",\\\"content\\\":\\\"ai-powered senior care coordination for families.\\\"}],[\\\"$\\\",\\\"meta\\\",\\\"4\\\",{\\\"property\\\":\\\"og:site_name\\\",\\\"content\\\":\\\"thriveathome\\\"}],[\\\"$\\\",\\\"meta\\\",\\\"5\\\",{\\\"property\\\":\\\"og:type\\\",\\\"content\\\":\\\"website\\\"}],[\\\"$\\\",\\\"meta\\\",\\\"6\\\",{\\\"name\\\":\\\"twitter:card\\\",\\\"content\\\":\\\"summary_large_image\\\"}],[\\\"$\\\",\\\"meta\\\",\\\"7\\\",{\\\"name\\\":\\\"twitter:title\\\",\\\"content\\\":\\\"thriveathome — where seniors thrive together\\\"}],[\\\"$\\\",\\\"meta\\\",\\\"8\\\",{\\\"name\\\":\\\"twitter:description\\\",\\\"content\\\":\\\"ai-powered senior care coordination for families.\\\"}],[\\\"$\\\",\\\"link\\\",\\\"9\\\",{\\\"rel\\\":\\\"icon\\\",\\\"href\\\":\\\"/favicon.ico?favicon.0x3dzn~oxb6tn.ico\\\",\\\"sizes\\\":\\\"256x256\\\",\\\"type\\\":\\\"image/x-icon\\\"}],[\\\"$\\\",\\\"$l14\\\",\\\"10\\\",{}]]\\n\"])"
+
+      34 |   expect(page.url()).not.toContain('/login');
+      35 |   const body = await page.locator('body').textContent();
+    > 36 |   expect(body?.toLowerCase()).toMatch(/sign up|create account|register/);
+         |                               ^
+      37 | });
+      38 |
+      39 | test('TC-A004 — member cannot reach admin after login', async ({ page }) => {
+        at /workspaces/ThriveAtHome/tests/e2e/auth-flows.spec.ts:36:31
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/auth-flows-TC-A002-—-signup-page-loads-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/auth-flows-TC-A002-—-signup-page-loads-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/auth-flows-TC-A002-—-signup-page-loads-chromium/error-context.md
+
+
+[28/726] [chromium] › tests/e2e/auth-flows.spec.ts:39:1 › TC-A004 — member cannot reach admin after login
+[29/726] [chromium] › tests/e2e/auth-flows.spec.ts:47:1 › TC-A005 — member cannot reach navigator after login
+[30/726] [chromium] › tests/e2e/auth-flows.spec.ts:55:1 › TC-A006 — /login page has email and password fields
+[31/726] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Member (member@test.com) → /dashboard
+[32/726] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Family (family@test.com) → /dashboard/family
+[33/726] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Navigator (navigator@test.com) → /navigator
+[34/726] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Admin (admin@test.com) → /admin
+[35/726] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Care Worker (careworker@test.com) → /care-worker
+[36/726] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › General Volunteer (volunteer@test.com) → /volunteer/dashboard
+[37/726] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Student Volunteer (student@test.com) → /student
+[38/726] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Veteran Volunteer (veteran@test.com) → /volunteer/dashboard
+[39/726] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Retired Pro Volunteer (retired_pro@test.com) → /volunteer/dashboard
+[40/726] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Corporate Volunteer (corporate@test.com) → /volunteer/dashboard
+[41/726] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Neighbor Volunteer (neighbor@test.com) → /volunteer/dashboard
+[42/726] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Faith Volunteer (faith@test.com) → /volunteer/dashboard
+[43/726] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › K-12 Student Volunteer (k12student@test.com) → /student
+[44/726] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Agency Admin (agency@test.com) → /agency-admin
+[45/726] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Employer Admin (employer@test.com) → /employer-admin
+[46/726] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Network Admin (network@test.com) → /network-admin
+[47/726] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Senior Center Admin (seniorcenter@test.com) → /senior-center-admin
+[48/726] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › AAA Admin (aaa@test.com) → /aaa-admin
+[49/726] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Org Admin (orgadmin@test.com) → /org-admin
+[50/726] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › VSO Admin (vsoadmin@test.com) → /vso-admin
+[51/726] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › University Admin (uniadmin@test.com) → /university-admin
+[52/726] [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › K-12 Admin (k12admin@test.com) → /school-admin
+[53/726] [chromium] › tests/e2e/auth-roles.spec.ts:63:3 › TC-A005 — cross-role access blocked › member cannot access /navigator
+[54/726] [chromium] › tests/e2e/auth-roles.spec.ts:76:3 › TC-A005 — cross-role access blocked › volunteer cannot access /admin
+[55/726] [chromium] › tests/e2e/auth-roles.spec.ts:88:3 › TC-A005 — cross-role access blocked › family cannot access /org-admin
+[56/726] [chromium] › tests/e2e/auth-roles.spec.ts:96:3 › TC-A005 — cross-role access blocked › k12student cannot access /employer-admin
+[57/726] [chromium] › tests/e2e/auth-roles.spec.ts:110:1 › TC-A006 — /device kiosk loads with large-print UI
+[chromium] › tests/e2e/auth-roles.spec.ts:110:1 › TC-A006 — /device kiosk loads with large-print UI
+TC-A006: Aria call button not found on /device
+
+[58/726] [chromium] › tests/e2e/auth-roles.spec.ts:127:1 › TC-P051 — /signup rejects invalid email and mismatched passwords
+[59/726] [chromium] › tests/e2e/b2b-billing-deep.spec.ts:14:1 › TC-B021 — B2B in-development billing tier endpoint
+[chromium] › tests/e2e/b2b-billing-deep.spec.ts:14:1 › TC-B021 — B2B in-development billing tier endpoint
+TC-B021: /api/billing/b2b-invoice not yet built — verify $50 flat tier in Stripe manually
+
+[60/726] [chromium] › tests/e2e/b2b-billing-deep.spec.ts:33:1 › TC-B022 — B2B established billing tier (100 members → $125)
+[chromium] › tests/e2e/b2b-billing-deep.spec.ts:33:1 › TC-B022 — B2B established billing tier (100 members → $125)
+TC-B022: /api/billing/b2b-invoice not yet built — verify $75 + $1.25/member tier manually
+
+[61/726] [chromium] › tests/e2e/b2b-billing-deep.spec.ts:51:1 › TC-B023 — B2B metered AI billing endpoint (Aria calls)
+[chromium] › tests/e2e/b2b-billing-deep.spec.ts:51:1 › TC-B023 — B2B metered AI billing endpoint (Aria calls)
+TC-B023: /api/billing/metered not yet built — verify $0.08/call Aria metering in Stripe manually
+
+[62/726] [chromium] › tests/e2e/b2b-billing-deep.spec.ts:69:1 › TC-B024 — /org-admin shows community module option
+[63/726] [chromium] › tests/e2e/b2b-billing-deep.spec.ts:90:1 › TC-B031 — /donate page loads; recurring option present
+[64/726] [chromium] › tests/e2e/b2b-billing-deep.spec.ts:104:1 › TC-B031 — POST /api/checkout/donate recurring does not 500
+[chromium] › tests/e2e/b2b-billing-deep.spec.ts:104:1 › TC-B031 — POST /api/checkout/donate recurring does not 500
+TC-B031: /api/checkout/donate not found — verify endpoint exists
+
+[65/726] [chromium] › tests/e2e/b2b-billing-deep.spec.ts:119:1 › TC-B040 — /dashboard/celebrations/plan shows Enhanced $25 tier
+[66/726] [chromium] › tests/e2e/b2b-billing-deep.spec.ts:139:1 › TC-B041 — /dashboard/celebrations/plan shows Premier $75 tier
+[67/726] [chromium] › tests/e2e/b2b-billing-deep.spec.ts:159:1 › TC-B042 — /dashboard/gift-send shows paid gift options
+[68/726] [chromium] › tests/e2e/b2b-billing-deep.spec.ts:180:1 › TC-BILL001 — B2B enrollment fee: env var and onboarding page
+[chromium] › tests/e2e/b2b-billing-deep.spec.ts:180:1 › TC-BILL001 — B2B enrollment fee: env var and onboarding page
+TC-BILL001: B2B enrollment fee requires STRIPE_B2B_ENROLLMENT_PRICE_ID in Vercel env; verify manually in Stripe dashboard
+
+[69/726] [chromium] › tests/e2e/b2b-billing-deep.spec.ts:192:1 › TC-BILL002 — B2B in-development monthly tier (Stripe manual verification)
+[chromium] › tests/e2e/b2b-billing-deep.spec.ts:192:1 › TC-BILL002 — B2B in-development monthly tier (Stripe manual verification)
+TC-BILL002: Requires Stripe test subscription with in_development tier price ID; verify manually in Stripe dashboard
+
+[70/726] [chromium] › tests/e2e/b2b-billing-deep.spec.ts:208:1 › TC-BILL003 — B2B established monthly tier (Stripe manual verification)
+[chromium] › tests/e2e/b2b-billing-deep.spec.ts:208:1 › TC-BILL003 — B2B established monthly tier (Stripe manual verification)
+TC-BILL003: Requires Stripe test subscription with established tier price ID; verify manually in Stripe dashboard
+
+[71/726] [chromium] › tests/e2e/b2b-portals-deep.spec.ts:10:1 › TC-B2BD001 — /university-admin loads with volunteer stats
+[72/726] [chromium] › tests/e2e/b2b-portals-deep.spec.ts:22:1 › TC-B2BD002 — /university-admin has CSV/PDF export
+[chromium] › tests/e2e/b2b-portals-deep.spec.ts:22:1 › TC-B2BD002 — /university-admin has CSV/PDF export
+TC-B2BD002: CSV/PDF export option not found on university admin
+
+[73/726] [chromium] › tests/e2e/b2b-portals-deep.spec.ts:33:1 › TC-B2BD003 — /api/university-admin/volunteers responds
+[74/726] [chromium] › tests/e2e/b2b-portals-deep.spec.ts:43:1 › TC-B2BD010 — /vso-admin shows veteran volunteer content
+[75/726] [chromium] › tests/e2e/b2b-portals-deep.spec.ts:55:1 › TC-B2BD011 — /vso-admin has export functionality
+[chromium] › tests/e2e/b2b-portals-deep.spec.ts:55:1 › TC-B2BD011 — /vso-admin has export functionality
+TC-B2BD011: export not found on VSO admin
+
+[76/726] [chromium] › tests/e2e/b2b-portals-deep.spec.ts:68:1 › TC-B2BD020 — /school-admin shows student volunteer content
+[77/726] [chromium] › tests/e2e/b2b-portals-deep.spec.ts:80:1 › TC-B2BD021 — /school-admin has hours tracking
+[78/726] [chromium] › tests/e2e/b2b-portals-deep.spec.ts:93:1 › TC-B2BD030 — /employer-admin loads with corporate program data
+[chromium] › tests/e2e/b2b-portals-deep.spec.ts:93:1 › TC-B2BD030 — /employer-admin loads with corporate program data
+TC-B2BD030: redirected
+
+[79/726] [chromium] › tests/e2e/b2b-portals-deep.spec.ts:103:1 › TC-B2BD031 — employer-admin shows 3-tier corporate progress (Bronze/Silver/Gold)
+[chromium] › tests/e2e/b2b-portals-deep.spec.ts:103:1 › TC-B2BD031 — employer-admin shows 3-tier corporate progress (Bronze/Silver/Gold)
+TC-B2BD031: redirected
+
+[80/726] [chromium] › tests/e2e/b2b-portals-deep.spec.ts:114:1 › TC-B2BD032 — employer-admin not accessible by regular member
+[81/726] [chromium] › tests/e2e/b2b-portals.spec.ts:4:1 › TC-B2B001 — /org-admin loads
+[82/726] [chromium] › tests/e2e/b2b-portals.spec.ts:13:1 › TC-B2B010 — /employer-admin loads
+[chromium] › tests/e2e/b2b-portals.spec.ts:13:1 › TC-B2B010 — /employer-admin loads
+TC-B2B010: redirected to login
+
+[83/726] [chromium] › tests/e2e/b2b-portals.spec.ts:22:1 › TC-B2B011 — /employers public page loads
+[84/726] [chromium] › tests/e2e/b2b-portals.spec.ts:29:1 › TC-B2B020 — /senior-center-admin loads
+[85/726] [chromium] › tests/e2e/b2b-portals.spec.ts:38:1 › TC-B2B025 — /aaa-admin loads
+[86/726] [chromium] › tests/e2e/b2b-portals.spec.ts:47:1 › TC-B2B030 — /network-admin loads
+[87/726] [chromium] › tests/e2e/b2b-portals.spec.ts:56:1 › TC-B2B035 — /agency-admin loads
+[88/726] [chromium] › tests/e2e/billing-stripe.spec.ts:6:1 › TC-B001 — /pricing page loads with Basic and Complete
+[89/726] [chromium] › tests/e2e/billing-stripe.spec.ts:15:1 › TC-B002 — /pricing shows monthly prices
+[90/726] [chromium] › tests/e2e/billing-stripe.spec.ts:24:1 › TC-B003 — /dashboard/plan shows current plan
+[91/726] [chromium] › tests/e2e/billing-stripe.spec.ts:33:1 › TC-B004 — /api/create-checkout-session responds
+[chromium] › tests/e2e/billing-stripe.spec.ts:33:1 › TC-B004 — /api/create-checkout-session responds
+TC-B004: checkout session endpoint not found
+
+[92/726] [chromium] › tests/e2e/billing-stripe.spec.ts:42:1 › TC-B005 — /api/stripe/webhook returns 400 without signature
+[chromium] › tests/e2e/billing-stripe.spec.ts:42:1 › TC-B005 — /api/stripe/webhook returns 400 without signature
+TC-B005: stripe webhook endpoint not found
+
+[93/726] [chromium] › tests/e2e/billing-stripe.spec.ts:51:1 › TC-B006 — /api/stripe/portal responds
+[chromium] › tests/e2e/billing-stripe.spec.ts:51:1 › TC-B006 — /api/stripe/portal responds
+TC-B006: stripe portal endpoint not found
+
+[94/726] [chromium] › tests/e2e/billing-stripe.spec.ts:60:1 › TC-B007 — /dashboard/plan no 500
+[95/726] [chromium] › tests/e2e/billing-stripe.spec.ts:72:1 › TC-B008 — /donate page loads with form
+[96/726] [chromium] › tests/e2e/billing-stripe.spec.ts:81:1 › TC-B009 — Premier plan NOT in checkout flow
+[chromium] › tests/e2e/billing-stripe.spec.ts:81:1 › TC-B009 — Premier plan NOT in checkout flow
+TC-B009: checkout endpoint not found
+
+[97/726] [chromium] › tests/e2e/billing-stripe.spec.ts:91:1 › TC-B010 — /dashboard/addons loads
+[98/726] [chromium] › tests/e2e/billing.spec.ts:38:1 › TC-B001 — Basic checkout flow ($39/mo)
+[99/726] [chromium] › tests/e2e/billing.spec.ts:58:1 › TC-B003/B004 — annual pricing toggle
+[100/726] [chromium] › tests/e2e/billing.spec.ts:81:1 › TC-B005 — Premier plan not on /pricing
+[101/726] [chromium] › tests/e2e/billing.spec.ts:90:3 › TC-B009 — Stripe webhook handler › subscription.updated → 200 or 400 (not 500)
+[chromium] › tests/e2e/billing.spec.ts:90:3 › TC-B009 — Stripe webhook handler › subscription.updated → 200 or 400 (not 500)
+TC-B009: webhook handler returned 404
+
+[102/726] [chromium] › tests/e2e/billing.spec.ts:108:3 › TC-B009 — Stripe webhook handler › invoice.payment_failed → not 500
+[103/726] [chromium] › tests/e2e/billing.spec.ts:117:3 › TC-B009 — Stripe webhook handler › subscription.deleted → not 500
+[104/726] [chromium] › tests/e2e/billing.spec.ts:128:1 › TC-B020 — B2B onboarding wizard loads enrollment fee step
+[chromium] › tests/e2e/billing.spec.ts:128:1 › TC-B020 — B2B onboarding wizard loads enrollment fee step
+TC-B020: Enrollment fee $3,300 not visible in B2B onboarding — check b2b_new_org@test.com flow
+
+[105/726] [chromium] › tests/e2e/billing.spec.ts:143:1 › TC-B030 — /donate shows donation form + not tax-deductible note
+[chromium] › tests/e2e/billing.spec.ts:143:1 › TC-B030 — /donate shows donation form + not tax-deductible note
+TC-B030: Donation form not found on /donate
+
+[106/726] [chromium] › tests/e2e/celebrations-deep.spec.ts:10:1 › TC-CELD001 — celebrations hub shows all event types
+[107/726] [chromium] › tests/e2e/celebrations-deep.spec.ts:22:1 › TC-CELD002 — celebration planner shows 3 tiers (Simple/Signature/Legacy)
+[chromium] › tests/e2e/celebrations-deep.spec.ts:22:1 › TC-CELD002 — celebration planner shows 3 tiers (Simple/Signature/Legacy)
+TC-CELD002: 3-tier celebration options not found
+
+[108/726] [chromium] › tests/e2e/celebrations-deep.spec.ts:34:1 › TC-CELD003 — /api/celebrations POST responds
+[109/726] [chromium] › tests/e2e/celebrations-deep.spec.ts:46:1 › TC-CELD010 — /dashboard/gift-send shows catalog categories
+[110/726] [chromium] › tests/e2e/celebrations-deep.spec.ts:58:1 › TC-CELD011 — /api/gifts/catalog responds with items
+[111/726] [chromium] › tests/e2e/celebrations-deep.spec.ts:70:1 › TC-CELD012 — /api/gifts/send POST requires auth
+[112/726] [chromium] › tests/e2e/celebrations-deep.spec.ts:79:1 › TC-CELD020 — birthday arc cron exists and requires auth
+[113/726] [chromium] › tests/e2e/celebrations-deep.spec.ts:86:1 › TC-CELD021 — birthday arc cron accepts correct CRON_SECRET
+[114/726] [chromium] › tests/e2e/celebrations-deep.spec.ts:94:1 › TC-CELD022 — member profile has birthday field
+[115/726] [chromium] › tests/e2e/celebrations-deep.spec.ts:107:1 › TC-CELD030 — /api/cron/birthday-arc returns milestones data
+[116/726] [chromium] › tests/e2e/celebrations-deep.spec.ts:120:1 › TC-CELD031 — member achievements page loads
+[117/726] [chromium] › tests/e2e/celebrations-gifts.spec.ts:17:1 › TC-CG001 — /dashboard/celebrations loads
+[118/726] [chromium] › tests/e2e/celebrations-gifts.spec.ts:23:1 › TC-CG002 — /dashboard/celebrations/plan loads
+[119/726] [chromium] › tests/e2e/celebrations-gifts.spec.ts:29:1 › TC-CG003 — /dashboard/gift-send loads
+[120/726] [chromium] › tests/e2e/celebrations-gifts.spec.ts:35:1 › TC-CG004 — /dashboard/gifts loads
+[121/726] [chromium] › tests/e2e/celebrations-gifts.spec.ts:41:1 › TC-CG005 — /api/celebrations responds
+[122/726] [chromium] › tests/e2e/celebrations-gifts.spec.ts:47:1 › TC-CG006 — /api/gift-orders responds
+[123/726] [chromium] › tests/e2e/community-care-fund.spec.ts:6:1 › TC-CCF001 — /community-care-fund public page loads
+[124/726] [chromium] › tests/e2e/community-care-fund.spec.ts:22:1 › TC-CCF002 — /api/community-care-fund endpoint exists
+[chromium] › tests/e2e/community-care-fund.spec.ts:22:1 › TC-CCF002 — /api/community-care-fund endpoint exists
+TC-CCF002: /api/community-care-fund not implemented yet
+
+[125/726] [chromium] › tests/e2e/community-care-fund.spec.ts:31:1 › TC-CCF003 — member can view care fund status on dashboard
+[126/726] [chromium] › tests/e2e/community-features.spec.ts:4:1 › TC-COM001 — /dashboard/communities loads
+[127/726] [chromium] › tests/e2e/community-features.spec.ts:13:1 › TC-COM002 — /api/communities returns list
+[128/726] [chromium] › tests/e2e/community-features.spec.ts:23:1 › TC-COM003 — /dashboard/events loads
+[129/726] [chromium] › tests/e2e/community-features.spec.ts:32:1 › TC-COM004 — /dashboard/skill-exchange loads
+[130/726] [chromium] › tests/e2e/community-features.spec.ts:41:1 › TC-COM005 — /dashboard/grief-circles loads
+[131/726] [chromium] › tests/e2e/debug-login.spec.ts:4:1 › debug login flow
+[chromium] › tests/e2e/debug-login.spec.ts:4:1 › debug login flow
+INPUTS: [{"type":"email","name":"","id":"email"},{"type":"password","name":"","id":"password"}]
+
+BUTTONS: [{"type":"button","text":""},{"type":"submit","text":"Sign in"}]
+
+URL AFTER: https://thrive-at-home-pied.vercel.app/dashboard
+
+COOKIES: sb-qdniskppkfqjmtpkftdt-auth-token
+
+[132/726] [chromium] › tests/e2e/debug-login.spec.ts:27:1 › debug home-safety after login
+[chromium] › tests/e2e/debug-login.spec.ts:27:1 › debug home-safety after login
+After login URL: https://thrive-at-home-pied.vercel.app/dashboard
+
+Home safety URL: https://thrive-at-home-pied.vercel.app/dashboard/home-safety
+
+Body preview: ThriveAtHome
+Home
+History
+Community
+Family
+Messages
+Buddy
+Documents
+Settings
+member@test.com
+Home Safety Program
+
+Fall prevention, earthquake preparedness, fire safety, and emergency readiness — all i
+
+[133/726] [chromium] › tests/e2e/device-kiosk.spec.ts:6:1 › TC-DV001 — /kiosk route loads or redirects gracefully
+[134/726] [chromium] › tests/e2e/device-kiosk.spec.ts:19:1 › TC-DV002 — /api/device endpoint exists
+[chromium] › tests/e2e/device-kiosk.spec.ts:19:1 › TC-DV002 — /api/device endpoint exists
+TC-DV002: /api/device not implemented yet
+
+[135/726] [chromium] › tests/e2e/encore-careers-festivals.spec.ts:9:1 › TC-ECF001 — /dashboard/encore-careers loads
+[136/726] [chromium] › tests/e2e/encore-careers-festivals.spec.ts:19:1 › TC-ECF002 — encore careers shows part-time/consulting/volunteer roles
+[137/726] [chromium] › tests/e2e/encore-careers-festivals.spec.ts:30:1 › TC-ECF003 — /api/encore-careers responds
+[138/726] [chromium] › tests/e2e/encore-careers-festivals.spec.ts:40:1 › TC-ECF010 — /dashboard/festivals loads
+[139/726] [chromium] › tests/e2e/encore-careers-festivals.spec.ts:50:1 › TC-ECF011 — festivals page shows cultural events or calendar
+[140/726] [chromium] › tests/e2e/encore-careers-festivals.spec.ts:63:1 › TC-ECF020 — /dashboard/home-safety loads
+[141/726] [chromium] › tests/e2e/encore-careers-festivals.spec.ts:73:1 › TC-ECF021 — home safety page has assessment checklist or form
+[142/726] [chromium] › tests/e2e/encore-careers-festivals.spec.ts:84:1 › TC-ECF022 — /api/home-safety/assessment POST responds
+[143/726] [chromium] › tests/e2e/family-portal.spec.ts:15:3 › TC-F001–F007 — Family Portal › TC-F001 — /dashboard/family loads with member wellness summary
+[chromium] › tests/e2e/family-portal.spec.ts:15:3 › TC-F001–F007 — Family Portal › TC-F001 — /dashboard/family loads with member wellness summary
+TC-F001: Wellness summary not found
+
+TC-F001: Fraud protection card not found
+
+[144/726] [chromium] › tests/e2e/family-portal.spec.ts:34:3 › TC-F001–F007 — Family Portal › TC-F002 — family events calendar visible + add event form
+[chromium] › tests/e2e/family-portal.spec.ts:34:3 › TC-F001–F007 — Family Portal › TC-F002 — family events calendar visible + add event form
+TC-F002: Family Events Calendar tab not visible
+
+TC-F002: "Add event" button not found
+
+[145/726] [chromium] › tests/e2e/family-portal.spec.ts:51:3 › TC-F001–F007 — Family Portal › TC-F004 — mood timeline visible
+[chromium] › tests/e2e/family-portal.spec.ts:51:3 › TC-F001–F007 — Family Portal › TC-F004 — mood timeline visible
+TC-F004: Mood timeline not found on /dashboard/family
+
+[146/726] [chromium] › tests/e2e/family-portal.spec.ts:58:3 › TC-F001–F007 — Family Portal › TC-F006 — family can access celebration planner
+[147/726] [chromium] › tests/e2e/family-portal.spec.ts:71:1 › TC-A003 — basic plan blocks 4th family invite with upgrade prompt
+[chromium] › tests/e2e/family-portal.spec.ts:71:1 › TC-A003 — basic plan blocks 4th family invite with upgrade prompt
+TC-A003: 4th invite correctly rejected with 403
+
+[148/726] [chromium] › tests/e2e/feature-flags.spec.ts:17:3 › TC-B005/REG002 — Premier plan hidden › premier not shown on /pricing (public)
+[149/726] [chromium] › tests/e2e/feature-flags.spec.ts:26:3 › TC-B005/REG002 — Premier plan hidden › premier not shown on home /pricing section
+[150/726] [chromium] › tests/e2e/feature-flags.spec.ts:41:3 › TC-B005/REG002 — Premier plan hidden › direct navigation to premier checkout blocked
+[151/726] [chromium] › tests/e2e/feature-flags.spec.ts:56:3 › TC-REG005/M080 — member campaigns feature flag off › complete plan member sees no campaign button
+[152/726] [chromium] › tests/e2e/feature-flags.spec.ts:70:3 › TC-REG005/M080 — member campaigns feature flag off › basic plan member sees no campaign button
+[153/726] [chromium] › tests/e2e/feature-flags.spec.ts:87:1 › TC-REG006/M019 — /dashboard/marketplace is locked or coming soon
+[chromium] › tests/e2e/feature-flags.spec.ts:87:1 › TC-REG006/M019 — /dashboard/marketplace is locked or coming soon
+TC-REG006: marketplace_live: false confirmed via API
+
+[154/726] [chromium] › tests/e2e/fhir-medicare-deep.spec.ts:9:1 › TC-FMD001 — /dashboard/fhir-referrals loads
+[155/726] [chromium] › tests/e2e/fhir-medicare-deep.spec.ts:19:1 › TC-FMD002 — /api/fhir/referral POST rejects unauthenticated
+[156/726] [chromium] › tests/e2e/fhir-medicare-deep.spec.ts:27:1 › TC-FMD003 — /api/fhir/referral POST returns OperationOutcome on bad JSON
+[157/726] [chromium] › tests/e2e/fhir-medicare-deep.spec.ts:38:1 › TC-FMD004 — /api/fhir/referral accepts valid FHIR ServiceRequest
+[158/726] [chromium] › tests/e2e/fhir-medicare-deep.spec.ts:56:1 › TC-FMD010 — /dashboard/medicare-help loads
+[159/726] [chromium] › tests/e2e/fhir-medicare-deep.spec.ts:66:1 › TC-FMD011 — medicare-help page shows plan types (A/B/C/D)
+[160/726] [chromium] › tests/e2e/fhir-medicare-deep.spec.ts:77:1 › TC-FMD012 — /dashboard/plan-comparison loads Medicare comparison
+[161/726] [chromium] › tests/e2e/fhir-medicare-deep.spec.ts:89:1 › TC-FMD013 — /api/admin/ma-report responds for admin
+[162/726] [chromium] › tests/e2e/fhir-medicare-deep.spec.ts:97:1 › TC-FMD014 — /admin/ma-report page loads for admin
+[163/726] [chromium] › tests/e2e/fhir-medicare.spec.ts:7:1 › TC-FH001 — FHIR inbound referral endpoint exists
+[164/726] [chromium] › tests/e2e/fhir-medicare.spec.ts:16:1 › TC-FH002 — FHIR endpoint rejects unauthenticated request
+[165/726] [chromium] › tests/e2e/fhir-medicare.spec.ts:25:1 › TC-FH003 — FHIR endpoint returns OperationOutcome on bad JSON
+[166/726] [chromium] › tests/e2e/fhir-medicare.spec.ts:37:1 › TC-MED001 — /api/check-in-calls endpoint exists
+[167/726] [chromium] › tests/e2e/fhir-medicare.spec.ts:43:1 › TC-MED002 — Retell call-ended webhook endpoint exists
+[168/726] [chromium] › tests/e2e/fhir-medicare.spec.ts:52:1 › TC-MED003 — /api/admin/ma-report requires auth
+[169/726] [chromium] › tests/e2e/fhir-medicare.spec.ts:58:1 › TC-MED004 — no 500 on call-ended webhook with empty body
+[170/726] [chromium] › tests/e2e/fraud-safety.spec.ts:6:1 › TC-FS001 — /dashboard/fraud-protection no 500
+[171/726] [chromium] › tests/e2e/fraud-safety.spec.ts:19:1 › TC-FS002 — /api/fraud-flags responds
+[172/726] [chromium] › tests/e2e/fraud-safety.spec.ts:25:1 › TC-FS003 — /dashboard/home-safety loads
+[173/726] [chromium] › tests/e2e/fraud-safety.spec.ts:41:1 › TC-FS004 — /api/home-safety responds
+[174/726] [chromium] › tests/e2e/fraud-safety.spec.ts:47:1 › TC-FS005 — fraud detection API endpoint
+[175/726] [chromium] › tests/e2e/infrastructure.spec.ts:7:1 › TC-INF001 — supabase_auth_id column used (no 500 on member login)
+[176/726] [chromium] › tests/e2e/infrastructure.spec.ts:13:1 › TC-INF002 — /dashboard requires auth
+[177/726] [chromium] › tests/e2e/infrastructure.spec.ts:19:1 › TC-INF003 — cron endpoints require CRON_SECRET
+[178/726] [chromium] › tests/e2e/infrastructure.spec.ts:31:1 › TC-INF004 — member cannot access admin routes
+[179/726] [chromium] › tests/e2e/infrastructure.spec.ts:39:1 › TC-INF005 — Premier plan hidden from /pricing
+[180/726] [chromium] › tests/e2e/infrastructure.spec.ts:46:1 › TC-INF006 — /api/features returns feature flags
+[181/726] [chromium] › tests/e2e/infrastructure.spec.ts:56:1 › TC-PERF001 — homepage loads under 5s
+[182/726] [chromium] › tests/e2e/infrastructure.spec.ts:65:1 › TC-PERF002 — dashboard loads under 5s
+[183/726] [chromium] › tests/e2e/infrastructure.spec.ts:76:1 › TC-PERF003 — homepage no horizontal scroll at 390px
+[184/726] [chromium] › tests/e2e/life-transitions-deep.spec.ts:10:1 › TC-LTD001 — /dashboard/life-transitions loads
+[185/726] [chromium] › tests/e2e/life-transitions-deep.spec.ts:20:1 › TC-LTD002 — life-transitions page shows ≥ 4 pathways
+[186/726] [chromium] › tests/e2e/life-transitions-deep.spec.ts:31:1 › TC-LTD003 — /api/life-transitions GET responds
+[187/726] [chromium] › tests/e2e/life-transitions-deep.spec.ts:39:1 › TC-LTD004 — /api/life-transitions POST creates transition plan
+[188/726] [chromium] › tests/e2e/life-transitions-deep.spec.ts:51:1 › TC-LTD010 — /dashboard/transition loads
+[189/726] [chromium] › tests/e2e/life-transitions-deep.spec.ts:61:1 › TC-LTD011 — transition page shows facility-move checklist or steps
+[190/726] [chromium] › tests/e2e/life-transitions-deep.spec.ts:74:1 › TC-LTD020 — /dashboard/grief-support loads
+[191/726] [chromium] › tests/e2e/life-transitions-deep.spec.ts:84:1 › TC-LTD021 — grief support shows all 9 pathways
+[chromium] › tests/e2e/life-transitions-deep.spec.ts:84:1 › TC-LTD021 — grief support shows all 9 pathways
+TC-LTD021: only 0 sections found — expected 9 grief pathways
+
+[192/726] [chromium] › tests/e2e/life-transitions-deep.spec.ts:94:1 › TC-LTD022 — chaplain not shown proactively (member must request)
+[193/726] [chromium] › tests/e2e/life-transitions-deep.spec.ts:108:1 › TC-LTD030 — /dashboard/trusted-advisors loads
+[194/726] [chromium] › tests/e2e/life-transitions-deep.spec.ts:118:1 › TC-LTD031 — trusted advisors shows advisor categories
+[195/726] [chromium] › tests/e2e/life-transitions-deep.spec.ts:129:1 › TC-LTD032 — /api/trusted-advisors responds
+[196/726] [chromium] › tests/e2e/life-transitions.spec.ts:11:1 › TC-LT001 — /dashboard/grief-support loads
+[197/726] [chromium] › tests/e2e/life-transitions.spec.ts:20:1 › TC-LT002 — /dashboard/life-transitions loads
+[198/726] [chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-retirement pathway no 500
+[chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-retirement pathway no 500
+TC-LT003-retirement: pathway API not found
+
+[199/726] [chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-widow pathway no 500
+[chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-widow pathway no 500
+TC-LT003-widow: pathway API not found
+
+[200/726] [chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-diagnosis pathway no 500
+[chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-diagnosis pathway no 500
+TC-LT003-diagnosis: pathway API not found
+
+[201/726] [chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-moving pathway no 500
+[chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-moving pathway no 500
+TC-LT003-moving: pathway API not found
+
+[202/726] [chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-caregiving pathway no 500
+[chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-caregiving pathway no 500
+TC-LT003-caregiving: pathway API not found
+
+[203/726] [chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-divorce pathway no 500
+[chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-divorce pathway no 500
+TC-LT003-divorce: pathway API not found
+
+[204/726] [chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-loss pathway no 500
+[chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-loss pathway no 500
+TC-LT003-loss: pathway API not found
+
+[205/726] [chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-financial pathway no 500
+[chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-financial pathway no 500
+TC-LT003-financial: pathway API not found
+
+[206/726] [chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-independence pathway no 500
+[chromium] › tests/e2e/life-transitions.spec.ts:30:3 › TC-LT003-independence pathway no 500
+TC-LT003-independence: pathway API not found
+
+[207/726] [chromium] › tests/e2e/life-transitions.spec.ts:42:1 › TC-LT004 — /api/life-transitions endpoint exists
+[208/726] [chromium] › tests/e2e/life-transitions.spec.ts:48:1 › TC-LT005 — transition plan task creation works
+[209/726] [chromium] › tests/e2e/life-transitions.spec.ts:57:1 › TC-LT006 — /dashboard/trusted-advisors loads
+[210/726] [chromium] › tests/e2e/member-birthday-arc.spec.ts:6:1 › TC-MBA001 — /dashboard/profile has birthday field
+[211/726] [chromium] › tests/e2e/member-birthday-arc.spec.ts:19:1 › TC-MBA002 — /api/members/profile responds
+[212/726] [chromium] › tests/e2e/member-birthday-arc.spec.ts:25:1 › TC-MBA003 — birthday-arc cron requires CRON_SECRET
+[213/726] [chromium] › tests/e2e/member-birthday-arc.spec.ts:34:1 › TC-MBA004 — /dashboard achievements or milestones page loads
+[214/726] [chromium] › tests/e2e/member-birthday-arc.spec.ts:44:1 › TC-MBA005 — /api/achievements responds
+[215/726] [chromium] › tests/e2e/member-birthday-arc.spec.ts:50:1 › TC-MBA006 — /dashboard/communities shows interest circles
+[216/726] [chromium] › tests/e2e/member-birthday-arc.spec.ts:59:1 › TC-MBA007 — /api/interest-circles responds
+[217/726] [chromium] › tests/e2e/member-birthday-arc.spec.ts:65:1 › TC-MBA008 — /api/check-ins responds
+[218/726] [chromium] › tests/e2e/member-birthday-arc.spec.ts:71:1 › TC-MBA009 — check-ins cron requires CRON_SECRET
+[219/726] [chromium] › tests/e2e/member-birthday-arc.spec.ts:80:1 › TC-MBA010 — no 500 on communities page
+[220/726] [chromium] › tests/e2e/member-features-deep.spec.ts:33:1 › TC-M040 — Birthday arc cron: POST /api/cron/birthday-arc → 200/207
+[221/726] [chromium] › tests/e2e/member-features-deep.spec.ts:43:1 › TC-M041 — Birthday arc grief skip: grief_member dashboard loads, no arc banner
+[222/726] [chromium] › tests/e2e/member-features-deep.spec.ts:59:1 › TC-M042 — Birthday arc opt-out skip: opt_out_member sees no birthday banner
+[223/726] [chromium] › tests/e2e/member-features-deep.spec.ts:74:1 › TC-M043 — Milestone birthday cron: POST /api/cron/birthday-arc → 200
+[chromium] › tests/e2e/member-features-deep.spec.ts:74:1 › TC-M043 — Milestone birthday cron: POST /api/cron/birthday-arc → 200
+TC-M043: Full milestone test requires date-mocked member DOB; verifying cron endpoint only
+
+[224/726] [chromium] › tests/e2e/member-features-deep.spec.ts:82:1 › TC-M044 — Milestone deduplication: cron twice → no crash either run
+[225/726] [chromium] › tests/e2e/member-features-deep.spec.ts:91:1 › TC-M045 — member_achievements: dashboard loads; cron fires cleanly
+[chromium] › tests/e2e/member-features-deep.spec.ts:91:1 › TC-M045 — member_achievements: dashboard loads; cron fires cleanly
+TC-M045: Full achievement test requires seeded achievement rows; verifying page + cron
+
+[226/726] [chromium] › tests/e2e/member-features-deep.spec.ts:104:1 › TC-M050 — Interest circles: /dashboard/communities loads with circle content
+[227/726] [chromium] › tests/e2e/member-features-deep.spec.ts:119:1 › TC-M051 — LGBTQ+ circle visibility: communities page loads, no 500
+[228/726] [chromium] › tests/e2e/member-features-deep.spec.ts:133:1 › TC-M052 — Veterans circle: volunteer can access communities page
+[chromium] › tests/e2e/member-features-deep.spec.ts:133:1 › TC-M052 — Veterans circle: volunteer can access communities page
+TC-M052: veteran@test.com not in ACCOUNTS; using volunteer@test.com as proxy
+
+[229/726] [chromium] › tests/e2e/member-features-deep.spec.ts:148:1 › TC-M053 — Professional Identity circle: communities page loads, no 500
+[230/726] [chromium] › tests/e2e/member-features-deep.spec.ts:162:1 › TC-M054 — All 20 communities: page has substantial content
+[chromium] › tests/e2e/member-features-deep.spec.ts:162:1 › TC-M054 — All 20 communities: page has substantial content
+TC-M054: Full 20-community count requires DB query; verify via Supabase: SELECT COUNT(*) FROM communities
+
+[231/726] [chromium] › tests/e2e/member-features-deep.spec.ts:175:1 › TC-M055 — Community post member name (P0): post author is not anonymous
+[chromium] › tests/e2e/member-features-deep.spec.ts:175:1 › TC-M055 — Community post member name (P0): post author is not anonymous
+TC-M055: Auth required for community posts API — test via authenticated browser session
+
+[232/726] [chromium] › tests/e2e/member-features-deep.spec.ts:210:1 › TC-M056 — Cultural content: member dashboard loads after cultural preference set
+[chromium] › tests/e2e/member-features-deep.spec.ts:210:1 › TC-M056 — Cultural content: member dashboard loads after cultural preference set
+TC-M056: Full cultural content test requires member with cultural_preference=latinx seeded
+
+[233/726] [chromium] › tests/e2e/member-features-deep.spec.ts:221:1 › TC-M060 — Basic plan: /dashboard/navigator loads, shows hours or navigator info
+[234/726] [chromium] › tests/e2e/member-features-deep.spec.ts:235:1 › TC-M061 — Complete plan: /dashboard/navigator loads for complete member
+[235/726] [chromium] › tests/e2e/member-features-deep.spec.ts:249:1 › TC-M062 — Basic plan: /dashboard/marketplace shows locked or coming soon
+[236/726] [chromium] › tests/e2e/member-features-deep.spec.ts:264:1 › TC-M063 — Complete plan: dashboard loads with all feature access
+[237/726] [chromium] › tests/e2e/member-features-deep.spec.ts:276:1 › TC-M064 — member_campaigns_live=false: no campaign CTA for complete member
+[238/726] [chromium] › tests/e2e/member-features-deep.spec.ts:293:1 › TC-M070 — Family summary SMS cron: fires without 500
+[239/726] [chromium] › tests/e2e/member-features-deep.spec.ts:307:1 › TC-M071 — Event ride booking: /dashboard/events loads with event content
+[240/726] [chromium] › tests/e2e/member-features-deep.spec.ts:321:1 › TC-M080 — Campaigns off by default: complete member sees no campaign button
+[241/726] [chromium] › tests/e2e/member-features-deep.spec.ts:336:1 › TC-M081 — Campaign launch: MANUAL — requires member_campaigns_live=true
+[chromium] › tests/e2e/member-features-deep.spec.ts:336:1 › TC-M081 — Campaign launch: MANUAL — requires member_campaigns_live=true
+TC-M081: MANUAL TEST — Set member_campaigns_live=true via admin, then verify complete member can create a campaign at /dashboard
+
+[242/726] [chromium] › tests/e2e/member-features-deep.spec.ts:343:1 › TC-M082 — Campaign donation: MANUAL — requires active campaign + Stripe
+[chromium] › tests/e2e/member-features-deep.spec.ts:343:1 › TC-M082 — Campaign donation: MANUAL — requires active campaign + Stripe
+TC-M082: MANUAL TEST — Create active campaign, open /campaign/[share_url] incognito, donate $20 via Stripe test card
+
+[243/726] [chromium] › tests/e2e/member-features-deep.spec.ts:349:1 › TC-M083 — Campaign moderation: MANUAL — requires campaign in navigator queue
+[chromium] › tests/e2e/member-features-deep.spec.ts:349:1 › TC-M083 — Campaign moderation: MANUAL — requires campaign in navigator queue
+TC-M083: MANUAL TEST — Report campaign as suspicious, verify navigator sees review task, approve/reject flow
+
+[244/726] [chromium] › tests/e2e/member-features-deep.spec.ts:355:1 › TC-M084 — B2B org campaign dashboard: /org-admin loads for orgadmin
+[245/726] [chromium] › tests/e2e/member-health-care.spec.ts:17:1 › TC-MHC001 — /dashboard/health loads
+[246/726] [chromium] › tests/e2e/member-health-care.spec.ts:26:1 › TC-MHC002 — /dashboard/benefits-finder loads
+[247/726] [chromium] › tests/e2e/member-health-care.spec.ts:35:1 › TC-MHC003 — /dashboard/medicare-help loads
+[248/726] [chromium] › tests/e2e/member-health-care.spec.ts:44:1 › TC-MHC004 — /dashboard/grief-support loads with 9 pathways
+[249/726] [chromium] › tests/e2e/member-health-care.spec.ts:53:1 › TC-MHC005 — /dashboard/trusted-advisors loads
+[250/726] [chromium] › tests/e2e/member-health-care.spec.ts:62:1 › TC-MHC006 — /dashboard/fraud-protection loads
+[251/726] [chromium] › tests/e2e/member-health-care.spec.ts:71:1 › TC-MHC007 — /dashboard/vault loads
+[252/726] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M001 — /dashboard
+[chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M001 — /dashboard
+TC-M001: expected keyword "member name" not found on /dashboard
+
+TC-M001: expected keyword "plan badge" not found on /dashboard
+
+[253/726] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M002 — /dashboard/health
+[254/726] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M003 — /dashboard/family
+[255/726] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M004 — /dashboard/buddy
+[256/726] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M005 — /dashboard/communities
+[257/726] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M006 — /dashboard/events
+[258/726] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M007 — /dashboard/skill-exchange
+[259/726] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M008 — /dashboard/grief-support
+[chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M008 — /dashboard/grief-support
+TC-M008: expected keyword "navigator" not found on /dashboard/grief-support
+
+[260/726] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M009 — /dashboard/grief-circles
+[261/726] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M010 — /dashboard/life-transitions
+[262/726] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M011 — /dashboard/trusted-advisors
+[263/726] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M012 — /dashboard/fraud-protection
+[chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M012 — /dashboard/fraud-protection
+TC-M012: expected keyword "fraud" not found on /dashboard/fraud-protection
+
+TC-M012: expected keyword "scam" not found on /dashboard/fraud-protection
+
+[264/726] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M013 — /dashboard/benefits-finder
+[265/726] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M014 — /dashboard/plan
+[chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M014 — /dashboard/plan
+TC-M014: expected keyword "billing" not found on /dashboard/plan
+
+[266/726] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M015 — /dashboard/addons
+[chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M015 — /dashboard/addons
+TC-M015: expected keyword "addon" not found on /dashboard/addons
+
+[267/726] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M016 — /dashboard/profile
+[268/726] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M017 — /dashboard/vault
+[269/726] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M018 — /dashboard/navigator
+[270/726] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M019 — /dashboard/marketplace
+[271/726] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M020 — /dashboard/home-safety
+[272/726] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M021 — /dashboard/home-sharing
+[273/726] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M022 — /dashboard/encore-careers
+[274/726] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M023 — /dashboard/medicare-help
+[275/726] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M024 — /dashboard/plan-comparison
+[276/726] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M025 — /dashboard/fhir-referrals
+[277/726] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M026 — /dashboard/festivals
+[278/726] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M027 — /dashboard/training
+[279/726] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M028 — /dashboard/volunteer-opportunities
+[280/726] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M029 — /dashboard/transition
+[281/726] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M030 — /dashboard/pets
+[282/726] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M031 — /dashboard/gift-send
+[283/726] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M032 — /dashboard/gifts
+[284/726] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M033 — /dashboard/celebrations
+[285/726] [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M034 — /dashboard/celebrations/plan
+[286/726] [chromium] › tests/e2e/member-pages.spec.ts:82:1 › TC-M015 — /dashboard/addons has all 4 add-on SKUs
+[chromium] › tests/e2e/member-pages.spec.ts:82:1 › TC-M015 — /dashboard/addons has all 4 add-on SKUs
+TC-M015: SKU not found: extra.*navigator.*hours|navigator.*hours.*block
+
+TC-M015: SKU not found: premium.*content|content.*access
+
+TC-M015: SKU not found: enhanced.*fraud|fraud.*monitoring
+
+TC-M015: 3/4 add-on SKUs not found — verify names in /dashboard/addons
+
+[287/726] [chromium] › tests/e2e/member-pages.spec.ts:109:1 › TC-M008 — /dashboard/grief-support has all 9 pathways
+[288/726] [chromium] › tests/e2e/member-pages.spec.ts:136:1 › TC-M011 — trusted advisors: chaplain not shown proactively
+[chromium] › tests/e2e/member-pages.spec.ts:136:1 › TC-M011 — trusted advisors: chaplain not shown proactively
+TC-M011: "Request an introduction" button not found
+
+TC-M011: Chaplain may be proactively shown — spec says it should require member request
+
+[289/726] [chromium] › tests/e2e/member-pages.spec.ts:157:1 › TC-M005 — /dashboard/communities shows ≥ 20 circles
+[chromium] › tests/e2e/member-pages.spec.ts:157:1 › TC-M005 — /dashboard/communities shows ≥ 20 circles
+TC-M005: Found 0 community elements
+
+TC-M005: Expected ≥ 20 circles, found 0 — check markup
+
+[290/726] [chromium] › tests/e2e/metro-chapters.spec.ts:6:1 › TC-CH001 — /api/metro-areas returns list
+[291/726] [chromium] › tests/e2e/metro-chapters.spec.ts:16:1 › TC-CH002 — /api/metro-areas?zip=94103 returns Bay Area
+[292/726] [chromium] › tests/e2e/metro-chapters.spec.ts:22:1 › TC-CH003 — chapter activation cron requires CRON_SECRET
+[293/726] [chromium] › tests/e2e/metro-chapters.spec.ts:31:1 › TC-CH004 — /chapter/bay-area loads or returns graceful 404
+[294/726] [chromium] › tests/e2e/metro-chapters.spec.ts:39:1 › TC-CH005 — member dashboard shows local chapter content
+[295/726] [chromium] › tests/e2e/navigator-portal.spec.ts:30:3 › TC-N001–N008 — Navigator Portal › TC-N001 — /navigator loads with task queue and caseload
+[chromium] › tests/e2e/navigator-portal.spec.ts:30:3 › TC-N001–N008 — Navigator Portal › TC-N001 — /navigator loads with task queue and caseload
+TC-N001: Task queue or caseload not visible
+
+[296/726] [chromium] › tests/e2e/navigator-portal.spec.ts:40:3 › TC-N001–N008 — Navigator Portal › TC-N002 — task queue UI is visible
+[chromium] › tests/e2e/navigator-portal.spec.ts:40:3 › TC-N001–N008 — Navigator Portal › TC-N002 — task queue UI is visible
+TC-N002: Found task types in UI: none
+
+TC-N002: No task types visible — ensure navigator@test.com has seeded tasks
+
+[297/726] [chromium] › tests/e2e/navigator-portal.spec.ts:52:3 › TC-N001–N008 — Navigator Portal › TC-N003 — mark task complete button exists
+[chromium] › tests/e2e/navigator-portal.spec.ts:52:3 › TC-N001–N008 — Navigator Portal › TC-N003 — mark task complete button exists
+TC-N003: "Mark complete" button not found — check task queue UI
+
+[298/726] [chromium] › tests/e2e/navigator-portal.spec.ts:60:3 › TC-N001–N008 — Navigator Portal › TC-N005 — facility-move plan can be started
+[chromium] › tests/e2e/navigator-portal.spec.ts:60:3 › TC-N001–N008 — Navigator Portal › TC-N005 — facility-move plan can be started
+TC-N005: "Start transition plan" button not found — may be inside member detail
+
+[299/726] [chromium] › tests/e2e/navigator-portal.spec.ts:68:3 › TC-N001–N008 — Navigator Portal › TC-N008 — navigator hours tracking visible
+[chromium] › tests/e2e/navigator-portal.spec.ts:68:3 › TC-N001–N008 — Navigator Portal › TC-N008 — navigator hours tracking visible
+TC-N008: Navigator hours tracking not visible in main dashboard
+
+[300/726] [chromium] › tests/e2e/navigator-portal.spec.ts:76:1 › TC-AD001 — /admin loads with member count + stats
+[301/726] [chromium] › tests/e2e/new-sections.spec.ts:17:1 › TC-SVC001 — Complete member: /dashboard/marketplace loads
+[302/726] [chromium] › tests/e2e/new-sections.spec.ts:25:1 › TC-SVC005 — Agency admin: /agency-admin loads
+[303/726] [chromium] › tests/e2e/new-sections.spec.ts:34:1 › TC-SVC006 — Care worker: /care-worker loads
+[304/726] [chromium] › tests/e2e/new-sections.spec.ts:43:1 › TC-SVC009 — Basic member: /dashboard/marketplace shows locked/coming soon
+[305/726] [chromium] › tests/e2e/new-sections.spec.ts:54:1 › TC-SVC010 — Navigator: /navigator loads (marketplace oversight)
+[306/726] [chromium] › tests/e2e/new-sections.spec.ts:67:1 › TC-GR001 — Admin: /admin/grant-reports loads or soft-warns
+[307/726] [chromium] › tests/e2e/new-sections.spec.ts:78:1 › TC-GR003 — Admin: community_access tier manual note
+[chromium] › tests/e2e/new-sections.spec.ts:78:1 › TC-GR003 — Admin: community_access tier manual note
+TC-GR003: community_access tier requires manual admin action via /admin; no automated flow yet.
+
+[308/726] [chromium] › tests/e2e/new-sections.spec.ts:87:1 › TC-GR004 — Admin: /admin/campaigns loads
+[309/726] [chromium] › tests/e2e/new-sections.spec.ts:102:1 › TC-CVP001 — Employer admin: /employer-admin shows volunteer/hours content
+[chromium] › tests/e2e/new-sections.spec.ts:102:1 › TC-CVP001 — Employer admin: /employer-admin shows volunteer/hours content
+TC-CVP001: /employer-admin redirected
+
+[310/726] [chromium] › tests/e2e/new-sections.spec.ts:114:1 › TC-CVP002 — Volunteer dashboard: hours logging UI present
+[311/726] [chromium] › tests/e2e/new-sections.spec.ts:129:1 › TC-PEPM001 — /employer/acme-corp public page loads
+[312/726] [chromium] › tests/e2e/new-sections.spec.ts:137:1 › TC-PEPM002 — Employer admin: /employer-admin shows member count
+[chromium] › tests/e2e/new-sections.spec.ts:137:1 › TC-PEPM002 — Employer admin: /employer-admin shows member count
+TC-PEPM002: /employer-admin redirected
+
+[313/726] [chromium] › tests/e2e/new-sections.spec.ts:150:1 › TC-NOTIF001 — Aria cron fires without 500 (triggers Resend emails)
+[314/726] [chromium] › tests/e2e/new-sections.spec.ts:163:1 › TC-NOTIF005 — SPF/DKIM manual verification note
+[chromium] › tests/e2e/new-sections.spec.ts:163:1 › TC-NOTIF005 — SPF/DKIM manual verification note
+TC-NOTIF005: SPF/DKIM verification requires checking email headers; use mail-tester.com or Resend dashboard to confirm domain authentication.
+
+[315/726] [chromium] › tests/e2e/new-sections.spec.ts:171:1 › TC-SEC001 — /api/member-data: cross-member access returns 403/404, not 500
+[316/726] [chromium] › tests/e2e/new-sections.spec.ts:186:1 › TC-SEC005 — Webhooks reject missing/invalid auth
+[317/726] [chromium] › tests/e2e/new-sections.spec.ts:213:1 › TC-SEC006 — Auth rate limiting: manual note
+[chromium] › tests/e2e/new-sections.spec.ts:213:1 › TC-SEC006 — Auth rate limiting: manual note
+TC-SEC006: Rate limiting on auth endpoints requires load test; skip in automated E2E. Verify via middleware or upstash/rate-limit config.
+
+[318/726] [chromium] › tests/e2e/new-sections.spec.ts:221:1 › TC-A11Y001 — /dashboard: main and nav landmarks present
+[319/726] [chromium] › tests/e2e/new-sections.spec.ts:233:1 › TC-A11Y003 — Accessibility audit: manual/axe note
+[chromium] › tests/e2e/new-sections.spec.ts:233:1 › TC-A11Y003 — Accessibility audit: manual/axe note
+TC-A11Y003: Run axe-core audit: install @axe-core/playwright and add to playwright config. Target score ≥85 on Lighthouse a11y.
+
+[320/726] [chromium] › tests/e2e/new-sections.spec.ts:237:1 › TC-A11Y004 — /device kiosk: page loads without 500
+[321/726] [chromium] › tests/e2e/new-sections.spec.ts:249:1 › TC-RT001 — Family dashboard loads; Realtime subscription note
+[chromium] › tests/e2e/new-sections.spec.ts:249:1 › TC-RT001 — Family dashboard loads; Realtime subscription note
+TC-RT001: Realtime update requires live Supabase subscription; test manually by triggering an Aria call and observing /dashboard/family.
+
+[322/726] [chromium] › tests/e2e/new-sections.spec.ts:258:1 › TC-RT002 — Navigator dashboard loads; Realtime fraud badge note
+[chromium] › tests/e2e/new-sections.spec.ts:258:1 › TC-RT002 — Navigator dashboard loads; Realtime fraud badge note
+TC-RT002: Realtime fraud badge increment requires live fraud_flags insert; test manually.
+
+[323/726] [chromium] › tests/e2e/new-sections.spec.ts:268:1 › TC-RT003 — Navigator task queue: Realtime update note
+[chromium] › tests/e2e/new-sections.spec.ts:268:1 › TC-RT003 — Navigator task queue: Realtime update note
+TC-RT003: Realtime task queue update requires live navigator_task insert; test manually.
+
+[324/726] [chromium] › tests/e2e/new-sections.spec.ts:277:1 › TC-RT004 — Realtime connection scaling: manual note
+[chromium] › tests/e2e/new-sections.spec.ts:277:1 › TC-RT004 — Realtime connection scaling: manual note
+TC-RT004: 100 simultaneous Realtime connections require load testing tool (k6, artillery); skip in E2E. Check Supabase plan connection limits.
+
+[325/726] [chromium] › tests/e2e/new-sections.spec.ts:285:1 › TC-OB001 — /onboarding unauthenticated: redirects to /login (no 500)
+[326/726] [chromium] › tests/e2e/new-sections.spec.ts:295:1 › TC-OB005 — Aria cron fires; welcome task creation note
+[chromium] › tests/e2e/new-sections.spec.ts:295:1 › TC-OB005 — Aria cron fires; welcome task creation note
+TC-OB005: welcome_call navigator_task creation verified during TC-A001 full funnel; onboarding completion triggers task via onboarding API route.
+
+[327/726] [chromium] › tests/e2e/new-sections.spec.ts:313:1 › TC-GC001 — /dashboard/gift-send: catalog loads with content
+[328/726] [chromium] › tests/e2e/new-sections.spec.ts:323:1 › TC-GC005 — Grief guard: celebrations/plan shows guard for grief member
+[329/726] [chromium] › tests/e2e/new-sections.spec.ts:334:1 › TC-GC007 — /dashboard/gifts: gift history loads with pagination
+[330/726] [chromium] › tests/e2e/new-sections.spec.ts:346:1 › TC-COM001 — /dashboard/events: event list with Register button
+[331/726] [chromium] › tests/e2e/new-sections.spec.ts:357:1 › TC-COM003 — /dashboard/communities: community posts load
+[332/726] [chromium] › tests/e2e/new-sections.spec.ts:365:1 › TC-COM005 — /dashboard/skill-exchange: skill exchange loads
+[333/726] [chromium] › tests/e2e/new-sections.spec.ts:377:1 › TC-MOB001 — Home page at 390px: no horizontal scroll
+[334/726] [chromium] › tests/e2e/new-sections.spec.ts:385:1 › TC-MOB002 — Home page at 390px: hamburger menu present
+[335/726] [chromium] › tests/e2e/new-sections.spec.ts:399:1 › TC-VLT001 — /dashboard/vault: loads without 500
+[336/726] [chromium] › tests/e2e/new-sections.spec.ts:409:1 › TC-VLT004 — /dashboard/vault: privacy/sharing controls present
+[337/726] [chromium] › tests/e2e/org-admin.spec.ts:4:1 › TC-OA001 — org-admin can view member count
+[338/726] [chromium] › tests/e2e/org-admin.spec.ts:15:1 › TC-OA002 — /api/org-configs responds for org admin
+[339/726] [chromium] › tests/e2e/org-admin.spec.ts:21:1 › TC-OA003 — /org-admin/village-referrals loads
+[340/726] [chromium] › tests/e2e/partner-directory.spec.ts:6:1 › TC-PD001 — /partners public page loads
+[341/726] [chromium] › tests/e2e/partner-directory.spec.ts:17:1 › TC-PD002 — /api/partners returns list
+[342/726] [chromium] › tests/e2e/partner-directory.spec.ts:30:1 › TC-PD003 — /api/partners filters by category
+[343/726] [chromium] › tests/e2e/partner-directory.spec.ts:39:1 › TC-PD004 — partner detail page loads
+[344/726] [chromium] › tests/e2e/plan-entitlements-deep.spec.ts:8:1 › TC-PED001 — /api/entitlements returns plan_tier for member
+[345/726] [chromium] › tests/e2e/plan-entitlements-deep.spec.ts:20:1 › TC-PED002 — basics plan blocks premium features with upgrade prompt
+[346/726] [chromium] › tests/e2e/plan-entitlements-deep.spec.ts:31:1 › TC-PED003 — complete member sees marketplace unlocked
+[347/726] [chromium] › tests/e2e/plan-entitlements-deep.spec.ts:41:1 › TC-PED004 — /api/feature-flags responds with flags object
+[348/726] [chromium] › tests/e2e/plan-entitlements-deep.spec.ts:52:1 › TC-PED005 — /dashboard/plan shows current plan tier
+[349/726] [chromium] › tests/e2e/plan-entitlements-deep.spec.ts:64:1 › TC-PED006 — plan-comparison page loads
+[350/726] [chromium] › tests/e2e/plan-entitlements-deep.spec.ts:74:1 › TC-PED007 — plan comparison shows ≥ 2 plan tiers side by side
+[351/726] [chromium] › tests/e2e/plan-entitlements.spec.ts:6:1 › TC-PE001 — /api/entitlements returns plan_tier
+[352/726] [chromium] › tests/e2e/plan-entitlements.spec.ts:18:1 › TC-PE002 — basic plan member sees navigator hours limit
+[353/726] [chromium] › tests/e2e/plan-entitlements.spec.ts:27:1 › TC-PE003 — /api/feature-flags responds
+[354/726] [chromium] › tests/e2e/plan-entitlements.spec.ts:33:1 › TC-PE004 — Premier hidden from /pricing
+[355/726] [chromium] › tests/e2e/plan-entitlements.spec.ts:40:1 › TC-PE005 — /api/plan-features responds
+[356/726] [chromium] › tests/e2e/plan-entitlements.spec.ts:46:1 › TC-PE006 — member_campaigns feature flag is off by default
+[357/726] [chromium] › tests/e2e/plan-entitlements.spec.ts:58:1 › TC-PE007 — /api/navigator/schedule responds
+[358/726] [chromium] › tests/e2e/plan-entitlements.spec.ts:64:1 › TC-PE008 — /dashboard/navigator loads for member
+[359/726] [chromium] › tests/e2e/plan-entitlements.spec.ts:73:1 › TC-PE009 — /dashboard/profile loads and shows plan tier
+[360/726] [chromium] › tests/e2e/plan-entitlements.spec.ts:82:1 › TC-PE010 — marketplace locked when feature off
+[361/726] [chromium] › tests/e2e/plan-upgrade.spec.ts:4:1 › TC-PU001 — /dashboard/plan loads for member
+[362/726] [chromium] › tests/e2e/plan-upgrade.spec.ts:13:1 › TC-PU002 — upgrade page shows Basic and Complete plans
+[363/726] [chromium] › tests/e2e/plan-upgrade.spec.ts:25:1 › TC-PU003 — Premier plan NOT shown on upgrade page
+[364/726] [chromium] › tests/e2e/plan-upgrade.spec.ts:35:1 › TC-PU004 — /api/create-checkout-session responds
+[chromium] › tests/e2e/plan-upgrade.spec.ts:35:1 › TC-PU004 — /api/create-checkout-session responds
+TC-PU004: checkout endpoint not found
+
+[365/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:24:1 › TC-P003 — Home: 6 feature cards visible
+[366/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:34:1 › TC-P006 — B2C funnel: / → /signup lands without error
+[367/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:51:1 › TC-P007 — Family funnel: /for-families has family signup CTA
+[368/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:78:3 › TC-P010 — /about loads with content
+[369/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:78:3 › TC-P011 — /for-families loads with content
+[370/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:78:3 › TC-P012 — /for-volunteers loads with content
+[371/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:78:3 › TC-P014 — /employers loads with content
+[372/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:78:3 › TC-P015 — /outcomes loads with content
+[373/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:78:3 › TC-P016 — /team loads with content
+[374/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:78:3 › TC-P017 — /advisors loads with content
+[375/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:78:3 › TC-P018 — /advisors/apply loads with content
+[376/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:78:3 › TC-P019 — /k12 loads with content
+[377/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:78:3 › TC-P020 — /donate loads with content
+[378/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:78:3 › TC-P021 — /contact loads with content
+[379/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:78:3 › TC-P023 — /terms loads with content
+[380/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:78:3 › TC-P024 — /join loads with content
+[381/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:78:3 › TC-P025 — /careers/navigator loads with content
+[382/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:87:1 › TC-P020 — /donate has not-tax-deductible disclaimer
+[383/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:97:1 › TC-P030 — /blog index has at least 1 post card
+[384/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:107:1 › TC-P031 — /blog/[slug] article page loads with content
+[385/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:120:1 › TC-P032 — /resources lists at least 8 topic cards
+[386/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:136:3 › TC-P033 — /resources/caregiver-support loads with real content
+[387/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:136:3 › TC-P033 — /resources/daily-living loads with real content
+[388/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:136:3 › TC-P033 — /resources/home-organization loads with real content
+[389/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:136:3 › TC-P033 — /resources/in-home-care loads with real content
+[390/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:136:3 › TC-P033 — /resources/legal-planning loads with real content
+[391/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:136:3 › TC-P033 — /resources/public-assistance loads with real content
+[392/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:136:3 › TC-P033 — /resources/purpose loads with real content
+[393/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:136:3 › TC-P033 — /resources/retirement-planning loads with real content
+[394/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:136:3 › TC-P033 — /resources/senior-fitness loads with real content
+[395/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:136:3 › TC-P033 — /resources/home-safety loads with real content
+[396/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:136:3 › TC-P033 — /resources/smart-home-tech loads with real content
+[397/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:136:3 › TC-P033 — /resources/moving-downsizing loads with real content
+[398/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:146:1 › TC-P040 — /directory loads without auth redirect
+[399/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:153:1 › TC-P041 — /directory/california loads with state content
+[400/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:159:1 › TC-P042 — /chapter/bay-area loads without 500
+[401/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:167:1 › TC-P043 — /org/[slug] loads without 500
+[402/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:175:1 › TC-P044 — /employer/[slug] loads without 500
+[403/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:184:1 › TC-P052 — /onboarding loads for authenticated member
+[404/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:194:1 › TC-P053 — /select-role loads and has role options
+[405/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:203:1 › TC-P060 — /invite/[token] page renders accept form
+[406/726] [chromium] › tests/e2e/public-pages-deep.spec.ts:214:1 › TC-P061 — /employer-admin/invite/[token] renders without 500
+[407/726] [chromium] › tests/e2e/public-pages.spec.ts:13:3 › TC-P-smoke / loads without auth
+[408/726] [chromium] › tests/e2e/public-pages.spec.ts:13:3 › TC-P-smoke /about loads without auth
+[409/726] [chromium] › tests/e2e/public-pages.spec.ts:13:3 › TC-P-smoke /for-families loads without auth
+[410/726] [chromium] › tests/e2e/public-pages.spec.ts:13:3 › TC-P-smoke /for-volunteers loads without auth
+[411/726] [chromium] › tests/e2e/public-pages.spec.ts:13:3 › TC-P-smoke /pricing loads without auth
+[412/726] [chromium] › tests/e2e/public-pages.spec.ts:13:3 › TC-P-smoke /employers loads without auth
+[413/726] [chromium] › tests/e2e/public-pages.spec.ts:13:3 › TC-P-smoke /donate loads without auth
+[414/726] [chromium] › tests/e2e/public-pages.spec.ts:13:3 › TC-P-smoke /contact loads without auth
+[415/726] [chromium] › tests/e2e/public-pages.spec.ts:13:3 › TC-P-smoke /privacy loads without auth
+[416/726] [chromium] › tests/e2e/public-pages.spec.ts:13:3 › TC-P-smoke /terms loads without auth
+[417/726] [chromium] › tests/e2e/public-pages.spec.ts:13:3 › TC-P-smoke /blog loads without auth
+[418/726] [chromium] › tests/e2e/public-pages.spec.ts:13:3 › TC-P-smoke /resources loads without auth
+[419/726] [chromium] › tests/e2e/public-pages.spec.ts:13:3 › TC-P-smoke /login loads without auth
+[420/726] [chromium] › tests/e2e/public-pages.spec.ts:13:3 › TC-P-smoke /signup loads without auth
+[421/726] [chromium] › tests/e2e/public-pages.spec.ts:13:3 › TC-P-smoke /join loads without auth
+[422/726] [chromium] › tests/e2e/public-pages.spec.ts:25:1 › TC-P001 — homepage has hero and CTA
+[423/726] [chromium] › tests/e2e/public-pages.spec.ts:33:1 › TC-P004 — /pricing shows Basic and Complete, NOT Premier
+[424/726] [chromium] › tests/e2e/public-pages.spec.ts:41:1 › TC-P005 — footer links load
+[425/726] [chromium] › tests/e2e/public-pages.spec.ts:53:1 › TC-P008 — homepage mobile 390px no horizontal scroll
+[426/726] [chromium] › tests/e2e/public-pages.spec.ts:63:1 › TC-P009 — homepage has meta title
+[427/726] [chromium] › tests/e2e/public-pages.spec.ts:69:1 › TC-P013 — /pricing annual toggle present
+[428/726] [chromium] › tests/e2e/public-pages.spec.ts:78:1 › TC-P022 — /privacy has HIPAA language
+[429/726] [chromium] › tests/e2e/public-pages.spec.ts:89:1 › TC-P — /api/features returns 200
+[430/726] [chromium] › tests/e2e/public-pages.spec.ts:95:1 › TC-P — robots.txt exists
+[431/726] [chromium] › tests/e2e/public-routes.spec.ts:44:1 › TC-P001 — home page loads with key elements
+[chromium] › tests/e2e/public-routes.spec.ts:44:1 › TC-P001 — home page loads with key elements
+Console errors on /: [
+  "Cannot read properties of undefined (reading 'EventEmitter')",
+  "Cannot read properties of undefined (reading 'EventEmitter')"
+]
+
+[432/726] [chromium] › tests/e2e/public-routes.spec.ts:62:1 › TC-P002 — mission strip is visible
+[433/726] [chromium] › tests/e2e/public-routes.spec.ts:71:1 › TC-P004 — /pricing shows Basic and Complete, Premier hidden
+[434/726] [chromium] › tests/e2e/public-routes.spec.ts:80:1 › TC-P005 — footer privacy + terms links work
+[435/726] [chromium] › tests/e2e/public-routes.spec.ts:89:1 › TC-P009 — home page has SEO meta tags
+[436/726] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET / → 200
+[437/726] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /about → 200
+[438/726] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /for-families → 200
+[439/726] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /for-volunteers → 200
+[440/726] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /pricing → 200
+[441/726] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /employers → 200
+[chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /employers → 200
+TC-P070: /employers returned a server error — fix required
+
+[442/726] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /outcomes → 200
+[443/726] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /team → 200
+[444/726] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /blog → 200
+[445/726] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /advisors → 200
+[446/726] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /advisors/apply → 200
+[447/726] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /k12 → 200
+[448/726] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /donate → 200
+[449/726] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /contact → 200
+[450/726] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /directory → 200
+[451/726] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /resources → 200
+[452/726] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /privacy → 200
+[453/726] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /terms → 200
+[454/726] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /join → 200
+[455/726] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /careers/navigator → 200
+[456/726] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /login → 200
+[457/726] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /signup → 200
+[458/726] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /nonprofit-admin → 200
+[459/726] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /resources/senior-fitness → 200
+[chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /resources/senior-fitness → 200
+TC-P070: /resources/senior-fitness returned 404 (expected until page is built)
+
+[460/726] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /resources/caregiver-support → 200
+[chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /resources/caregiver-support → 200
+TC-P070: /resources/caregiver-support returned 404 (expected until page is built)
+
+[461/726] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /chapter/bay-area → 200
+[chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /chapter/bay-area → 200
+TC-P070: /chapter/bay-area returned 404 (expected until page is built)
+
+[462/726] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /directory/california → 200
+[463/726] [chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /onboarding → 200
+[chromium] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /onboarding → 200
+TC-P070: /onboarding redirects to /login (auth-required or not built yet)
+
+[464/726] [chromium] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › / — no horizontal scroll at 390px
+[465/726] [chromium] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /about — no horizontal scroll at 390px
+[466/726] [chromium] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /for-families — no horizontal scroll at 390px
+[467/726] [chromium] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /for-volunteers — no horizontal scroll at 390px
+[468/726] [chromium] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /pricing — no horizontal scroll at 390px
+[469/726] [chromium] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /outcomes — no horizontal scroll at 390px
+[470/726] [chromium] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /blog — no horizontal scroll at 390px
+[471/726] [chromium] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /advisors — no horizontal scroll at 390px
+[472/726] [chromium] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /advisors/apply — no horizontal scroll at 390px
+[473/726] [chromium] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /k12 — no horizontal scroll at 390px
+[474/726] [chromium] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /donate — no horizontal scroll at 390px
+[475/726] [chromium] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /contact — no horizontal scroll at 390px
+[476/726] [chromium] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /resources — no horizontal scroll at 390px
+[477/726] [chromium] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /privacy — no horizontal scroll at 390px
+[478/726] [chromium] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /terms — no horizontal scroll at 390px
+[479/726] [chromium] › tests/e2e/public-routes.spec.ts:201:1 › TC-P008 — home page mobile 390px: CTA above fold, no horizontal scroll
+[480/726] [chromium] › tests/e2e/role-access-control.spec.ts:6:1 › TC-RAC001 — member cannot access /navigator
+[481/726] [chromium] › tests/e2e/role-access-control.spec.ts:14:1 › TC-RAC002 — volunteer cannot access /admin
+[482/726] [chromium] › tests/e2e/role-access-control.spec.ts:22:1 › TC-RAC003 — family cannot access /org-admin
+[483/726] [chromium] › tests/e2e/role-access-control.spec.ts:30:1 › TC-RAC004 — member cannot access /employer-admin
+[484/726] [chromium] › tests/e2e/service-marketplace.spec.ts:10:1 › TC-MKT001 — /dashboard/marketplace loads (locked/coming soon state)
+[485/726] [chromium] › tests/e2e/service-marketplace.spec.ts:23:1 › TC-MKT002 — /dashboard/marketplace no 500
+[486/726] [chromium] › tests/e2e/service-marketplace.spec.ts:35:1 › TC-MKT003 — /api/marketplace returns 200 or locked response (not 500)
+[487/726] [chromium] › tests/e2e/service-marketplace.spec.ts:54:3 › TC-MKT004-transport — /api/marketplace/transport no 500
+[chromium] › tests/e2e/service-marketplace.spec.ts:54:3 › TC-MKT004-transport — /api/marketplace/transport no 500
+TC-MKT004-transport: /api/marketplace/transport not found — category stub not built yet
+
+[488/726] [chromium] › tests/e2e/service-marketplace.spec.ts:54:3 › TC-MKT004-home-services — /api/marketplace/home-services no 500
+[chromium] › tests/e2e/service-marketplace.spec.ts:54:3 › TC-MKT004-home-services — /api/marketplace/home-services no 500
+TC-MKT004-home-services: /api/marketplace/home-services not found — category stub not built yet
+
+[489/726] [chromium] › tests/e2e/service-marketplace.spec.ts:54:3 › TC-MKT004-meals — /api/marketplace/meals no 500
+[chromium] › tests/e2e/service-marketplace.spec.ts:54:3 › TC-MKT004-meals — /api/marketplace/meals no 500
+TC-MKT004-meals: /api/marketplace/meals not found — category stub not built yet
+
+[490/726] [chromium] › tests/e2e/service-marketplace.spec.ts:54:3 › TC-MKT004-health — /api/marketplace/health no 500
+[chromium] › tests/e2e/service-marketplace.spec.ts:54:3 › TC-MKT004-health — /api/marketplace/health no 500
+TC-MKT004-health: /api/marketplace/health not found — category stub not built yet
+
+[491/726] [chromium] › tests/e2e/service-marketplace.spec.ts:54:3 › TC-MKT004-legal-financial — /api/marketplace/legal-financial no 500
+[chromium] › tests/e2e/service-marketplace.spec.ts:54:3 › TC-MKT004-legal-financial — /api/marketplace/legal-financial no 500
+TC-MKT004-legal-financial: /api/marketplace/legal-financial not found — category stub not built yet
+
+[492/726] [chromium] › tests/e2e/service-marketplace.spec.ts:54:3 › TC-MKT004-tech-help — /api/marketplace/tech-help no 500
+[chromium] › tests/e2e/service-marketplace.spec.ts:54:3 › TC-MKT004-tech-help — /api/marketplace/tech-help no 500
+TC-MKT004-tech-help: /api/marketplace/tech-help not found — category stub not built yet
+
+[493/726] [chromium] › tests/e2e/service-marketplace.spec.ts:54:3 › TC-MKT004-companionship — /api/marketplace/companionship no 500
+[chromium] › tests/e2e/service-marketplace.spec.ts:54:3 › TC-MKT004-companionship — /api/marketplace/companionship no 500
+TC-MKT004-companionship: /api/marketplace/companionship not found — category stub not built yet
+
+[494/726] [chromium] › tests/e2e/service-marketplace.spec.ts:65:1 › TC-MKT005 — /api/marketplace/providers responds (schema live check)
+[chromium] › tests/e2e/service-marketplace.spec.ts:65:1 › TC-MKT005 — /api/marketplace/providers responds (schema live check)
+TC-MKT005: /api/marketplace/providers not found
+
+[495/726] [chromium] › tests/e2e/service-marketplace.spec.ts:72:1 › TC-MKT006 — marketplace booking endpoint exists (stub)
+[496/726] [chromium] › tests/e2e/service-marketplace.spec.ts:83:1 › TC-MKT007 — marketplace locked for Basic plan member (marketplace_live: false)
+[497/726] [chromium] › tests/e2e/service-marketplace.spec.ts:100:1 › TC-MKT008 — /api/marketplace/transactions responds (schema live)
+[chromium] › tests/e2e/service-marketplace.spec.ts:100:1 › TC-MKT008 — /api/marketplace/transactions responds (schema live)
+TC-MKT008: transactions endpoint not found
+
+[498/726] [chromium] › tests/e2e/support-system.spec.ts:4:1 › TC-SUP001 — /dashboard/support loads
+[499/726] [chromium] › tests/e2e/support-system.spec.ts:9:1 › TC-SUP002 — /dashboard/support has ticket form fields
+[500/726] [chromium] › tests/e2e/support-system.spec.ts:17:1 › TC-SUP003 — /dashboard/support shows Quinn
+[501/726] [chromium] › tests/e2e/support-system.spec.ts:22:1 › TC-SUP004 — /dashboard/support has FAQ link
+[502/726] [chromium] › tests/e2e/support-system.spec.ts:27:1 › TC-SUP005 — /org-admin/support loads
+[503/726] [chromium] › tests/e2e/support-system.spec.ts:33:1 › TC-SUP006 — /org-admin/support has priority selector
+[504/726] [chromium] › tests/e2e/support-system.spec.ts:38:1 › TC-SUP007 — /org-admin/support shows Jordan
+[505/726] [chromium] › tests/e2e/support-system.spec.ts:43:1 › TC-SUP008 — /org-admin/support SLA 24h visible
+[506/726] [chromium] › tests/e2e/support-system.spec.ts:48:1 › TC-SUP009 — /admin/support loads
+[507/726] [chromium] › tests/e2e/support-system.spec.ts:53:1 › TC-SUP010 — /admin/support has status filters
+[508/726] [chromium] › tests/e2e/support-system.spec.ts:60:1 › TC-SUP011 — /admin/support blocked for anon
+[509/726] [chromium] › tests/e2e/support-system.spec.ts:64:1 › TC-SUP012 — POST /api/support/ticket rejects anon
+[510/726] [chromium] › tests/e2e/support-system.spec.ts:71:1 › TC-SUP013 — POST /api/support/ticket validates fields
+[511/726] [chromium] › tests/e2e/support-system.spec.ts:78:1 › TC-SUP014 — GET /api/admin/support requires auth
+[512/726] [chromium] › tests/e2e/support-system.spec.ts:82:1 › TC-SUP015 — PATCH /api/admin/support/[id] requires auth
+[513/726] [chromium] › tests/e2e/support-system.spec.ts:88:1 › TC-SUP016 — SupportWidget in /org-admin
+[514/726] [chromium] › tests/e2e/support-system.spec.ts:93:1 › TC-SUP017 — SupportWidget in /employer-admin
+[515/726] [chromium] › tests/e2e/support-system.spec.ts:98:1 › TC-SUP018 — SupportWidget in /vso-admin
+[516/726] [chromium] › tests/e2e/support-system.spec.ts:103:1 › TC-SUP019 — /dashboard/support/faq loads
+[517/726] [chromium] › tests/e2e/support-system.spec.ts:109:1 › TC-SUP020 — /org-admin/support/faq loads
+[518/726] [chromium] › tests/e2e/voice-pipeline.spec.ts:45:1 › TC-V001 — Env vars present: wrong CRON_SECRET → 401 (endpoint exists)
+[519/726] [chromium] › tests/e2e/voice-pipeline.spec.ts:62:1 › TC-V002 — All 12 agent IDs: correct CRON_SECRET → 200/207 (not 500)
+[520/726] [chromium] › tests/e2e/voice-pipeline.spec.ts:78:1 › TC-V010 — Aria outbound cron: 200/207, called count ≥ 0
+[521/726] [chromium] › tests/e2e/voice-pipeline.spec.ts:91:1 › TC-V011 — Aria clinical extraction: webhook accepts call-ended payload
+[chromium] › tests/e2e/voice-pipeline.spec.ts:91:1 › TC-V011 — Aria clinical extraction: webhook accepts call-ended payload
+TC-V011: /api/webhooks/retell returned auth error — Retell signature verification required in prod
+
+[522/726] [chromium] › tests/e2e/voice-pipeline.spec.ts:114:1 › TC-V012 — Family events context: GET /api/family-events not 500
+[523/726] [chromium] › tests/e2e/voice-pipeline.spec.ts:125:1 › TC-V013 — Fraud detection: webhook with scam transcript not 500
+[chromium] › tests/e2e/voice-pipeline.spec.ts:125:1 › TC-V013 — Fraud detection: webhook with scam transcript not 500
+TC-V013: Retell webhook requires signature auth — manual test required for fraud detection
+
+[524/726] [chromium] › tests/e2e/voice-pipeline.spec.ts:147:1 › TC-V014 — Crisis detection: webhook with crisis transcript not 500
+[chromium] › tests/e2e/voice-pipeline.spec.ts:147:1 › TC-V014 — Crisis detection: webhook with crisis transcript not 500
+TC-V014: Crisis webhook requires Retell signature — manual test required
+
+[525/726] [chromium] › tests/e2e/voice-pipeline.spec.ts:169:1 › TC-V015 — Missed call handling: aria cron runs without crash
+[526/726] [chromium] › tests/e2e/voice-pipeline.spec.ts:181:1 › TC-V016 — Call summary email: aria cron completes without crash
+[527/726] [chromium] › tests/e2e/voice-pipeline.spec.ts:194:1 › TC-V020 — Grace reminder cron: 200/404, NOT 500
+[chromium] › tests/e2e/voice-pipeline.spec.ts:194:1 › TC-V020 — Grace reminder cron: 200/404, NOT 500
+TC-V020: Grace reminder cron endpoint not found (404) — not yet built
+
+[528/726] [chromium] › tests/e2e/voice-pipeline.spec.ts:217:1 › TC-V025 — Joy birthday call: birthday-arc cron 200/207, not 500
+[529/726] [chromium] › tests/e2e/voice-pipeline.spec.ts:227:1 › TC-V026 — Joy milestone interview: birthday-arc cron handles milestone members
+[530/726] [chromium] › tests/e2e/voice-pipeline.spec.ts:244:1 › TC-V030 — Rosa inbound: Twilio webhook endpoint not 500
+[chromium] › tests/e2e/voice-pipeline.spec.ts:244:1 › TC-V030 — Rosa inbound: Twilio webhook endpoint not 500
+TC-V030: /api/webhooks/twilio not found
+
+[531/726] [chromium] › tests/e2e/voice-pipeline.spec.ts:270:1 › TC-V035 — Hope crisis line: crisis webhook endpoint not 500
+[chromium] › tests/e2e/voice-pipeline.spec.ts:270:1 › TC-V035 — Hope crisis line: crisis webhook endpoint not 500
+TC-V035: No crisis webhook endpoint found (404) — may route through main Twilio webhook
+
+[532/726] [chromium] › tests/e2e/voice-pipeline.spec.ts:298:1 › TC-V040 — Claire family support: admin panel loads without crash
+[chromium] › tests/e2e/voice-pipeline.spec.ts:298:1 › TC-V040 — Claire family support: admin panel loads without crash
+TC-V040: Claire full E2E requires real inbound call to Claire number — manual verification needed
+
+[533/726] [chromium] › tests/e2e/voice-pipeline.spec.ts:311:1 › TC-V045 — Sam volunteer support: admin panel loads without crash
+[chromium] › tests/e2e/voice-pipeline.spec.ts:311:1 › TC-V045 — Sam volunteer support: admin panel loads without crash
+TC-V045: Sam full E2E requires real inbound call to Sam number — manual verification needed
+
+[534/726] [chromium] › tests/e2e/voice-pipeline.spec.ts:323:1 › TC-V050 — Morgan buddy support: admin panel loads without crash
+[chromium] › tests/e2e/voice-pipeline.spec.ts:323:1 › TC-V050 — Morgan buddy support: admin panel loads without crash
+TC-V050: Morgan full E2E requires real inbound call to Morgan number — manual verification needed
+
+[535/726] [chromium] › tests/e2e/voice-pipeline.spec.ts:335:1 › TC-V055 — Nova navigator assist: admin panel loads without crash
+[chromium] › tests/e2e/voice-pipeline.spec.ts:335:1 › TC-V055 — Nova navigator assist: admin panel loads without crash
+TC-V055: Nova full E2E requires real inbound call to Nova number — manual verification needed
+
+[536/726] [chromium] › tests/e2e/voice-pipeline.spec.ts:347:1 › TC-V060 — Alex staff support: admin panel loads without crash
+[chromium] › tests/e2e/voice-pipeline.spec.ts:347:1 › TC-V060 — Alex staff support: admin panel loads without crash
+TC-V060: Alex full E2E requires real inbound call to Alex number — manual verification needed
+
+[537/726] [chromium] › tests/e2e/voice-pipeline.spec.ts:363:1 › TC-V065 — Quinn deferred: aria cron still returns 200 without Quinn agent ID
+[chromium] › tests/e2e/voice-pipeline.spec.ts:363:1 › TC-V065 — Quinn deferred: aria cron still returns 200 without Quinn agent ID
+TC-V065: Quinn deferred to M9 — RETELL_QUINN_AGENT_ID not required for launch
+
+[538/726] [chromium] › tests/e2e/voice-pipeline.spec.ts:378:1 › TC-V070 — Jordan B2B support: org admin portal loads without crash
+[chromium] › tests/e2e/voice-pipeline.spec.ts:378:1 › TC-V070 — Jordan B2B support: org admin portal loads without crash
+TC-V070: Jordan full E2E requires real inbound call to Jordan number — manual verification needed
+
+[539/726] [chromium] › tests/e2e/voice-pipeline.spec.ts:398:1 › TC-V080 — Family crisis SMS: Twilio env present, cron endpoint responds
+[chromium] › tests/e2e/voice-pipeline.spec.ts:398:1 › TC-V080 — Family crisis SMS: Twilio env present, cron endpoint responds
+TC-V080: Full Twilio SMS delivery requires real phone number and 10DLC registration — manual verification needed
+
+[540/726] [chromium] › tests/e2e/voice-pipeline.spec.ts:412:1 › TC-V081 — 10DLC registration status: MANUAL CHECK REQUIRED
+[chromium] › tests/e2e/voice-pipeline.spec.ts:412:1 › TC-V081 — 10DLC registration status: MANUAL CHECK REQUIRED
+TC-V081 MANUAL CHECK REQUIRED: Verify 10DLC registration in Twilio Console → Messaging → Regulatory Compliance. Brand + Campaign must be APPROVED before sending SMS to real users. This is a P0 blocker (2–3 week approval lead time).
+
+[541/726] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:17:1 › TC-VOL011 — VSO admin: /vso-admin loads with veteran/export content
+[542/726] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:31:1 › TC-VOL021 — K-12 admin: /school-admin loads with student/hours content
+[543/726] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:45:1 › TC-VOL040 — Volunteer dashboard shows hours/tier/progress
+[544/726] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:60:1 › TC-VOL050 — Neighbor volunteer: /volunteer/dashboard loads
+[chromium] › tests/e2e/volunteer-portal-deep.spec.ts:60:1 › TC-VOL050 — Neighbor volunteer: /volunteer/dashboard loads
+TC-VOL050: Zip enforcement requires neighbor@test.com seeded with home_zip. Full zip-radius filter test must be run manually.
+
+[545/726] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:73:1 › TC-VOL061 — Training gate: API health responds; migration note
+[chromium] › tests/e2e/volunteer-portal-deep.spec.ts:73:1 › TC-VOL061 — Training gate: API health responds; migration note
+TC-VOL061: Verify training_completed column via Supabase SQL: SELECT column_name FROM information_schema.columns WHERE table_name='volunteer_profiles' AND column_name='training_completed';
+
+[546/726] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:85:1 › TC-VOL070 — Volunteer dashboard loads; reciprocity credits manual note
+[chromium] › tests/e2e/volunteer-portal-deep.spec.ts:85:1 › TC-VOL070 — Volunteer dashboard loads; reciprocity credits manual note
+TC-VOL070: reciprocity_credits table requires family volunteer action; test manually.
+
+[547/726] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:96:1 › TC-SCH001 — Admin dashboard loads; schema fix verified
+[chromium] › tests/e2e/volunteer-portal-deep.spec.ts:96:1 › TC-SCH001 — Admin dashboard loads; schema fix verified
+TC-SCH001: Verify Vercel build log has 0 navigator_tasks column errors after commit 43bd382
+
+[548/726] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:110:1 › TC-SCH002 — Aria cron fires without 500; task schema valid
+[chromium] › tests/e2e/volunteer-portal-deep.spec.ts:110:1 › TC-SCH002 — Aria cron fires without 500; task schema valid
+TC-SCH002: Full task type coverage (welcome_call, crisis_followup, etc.) requires seeded data for each task_type; run navigator flow manually.
+
+[549/726] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:126:1 › TC-MED005 — /admin/ma-report loads; data quality gate present
+[550/726] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:140:1 › TC-MED006 — /admin/ma-report loads; PDF export noted
+[chromium] › tests/e2e/volunteer-portal-deep.spec.ts:140:1 › TC-MED006 — /admin/ma-report loads; PDF export noted
+TC-MED006: PDF export requires ≥60% clinical coverage; test with seeded call data.
+
+[551/726] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:155:1 › TC-MED007 — /admin/ma-report: 3 rapid requests do not 429
+[chromium] › tests/e2e/volunteer-portal-deep.spec.ts:155:1 › TC-MED007 — /admin/ma-report: 3 rapid requests do not 429
+TC-MED007: Rate limit (429) triggers at >10 req/hr; full rate-limit test requires 11 rapid requests.
+
+[552/726] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:169:1 › TC-MED008 — Backfill script: manual note only
+[chromium] › tests/e2e/volunteer-portal-deep.spec.ts:169:1 › TC-MED008 — Backfill script: manual note only
+TC-MED008: Run `npx tsx scripts/backfill-clinical-fields.ts` on staging to verify backfill; skip in automated E2E.
+
+[553/726] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:175:1 › TC-REG001 — /api/family-members returns 200/401, not 500; no cross-member data
+[chromium] › tests/e2e/volunteer-portal-deep.spec.ts:175:1 › TC-REG001 — /api/family-members returns 200/401, not 500; no cross-member data
+TC-REG001: RLS cross-member isolation verified via Supabase policy (supabase_auth_id = auth.uid()); manual SQL audit recommended.
+
+[554/726] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:194:1 › TC-REG003 — Deploy method is git push origin main
+[chromium] › tests/e2e/volunteer-portal-deep.spec.ts:194:1 › TC-REG003 — Deploy method is git push origin main
+TC-REG003: Deploy method is git push origin main — NEVER npx vercel --prod. Verified via git log and Vercel deployment history.
+
+[555/726] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:200:1 › TC-REG004 — Old Resend API key is revoked
+[556/726] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:219:1 › TC-INF007 — 10DLC registration: manual check required
+[chromium] › tests/e2e/volunteer-portal-deep.spec.ts:219:1 › TC-INF007 — 10DLC registration: manual check required
+TC-INF007: MANUAL CHECK — Verify 10DLC brand+campaign registration in Twilio Console. This is P0 for SMS to real users.
+
+[557/726] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:225:1 › TC-F003 — Family dashboard: aria_can_mention toggle present
+[558/726] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:239:1 › TC-F005 — Family dashboard: pending gift approval UI present
+[chromium] › tests/e2e/volunteer-portal-deep.spec.ts:239:1 › TC-F005 — Family dashboard: pending gift approval UI present
+TC-F005: pending gift approval UI not visible — requires a pending_approval gift_order seeded
+
+[559/726] [chromium] › tests/e2e/volunteer-portal-deep.spec.ts:253:1 › TC-F007 — Family dashboard: transition plan visible if sharing enabled
+[chromium] › tests/e2e/volunteer-portal-deep.spec.ts:253:1 › TC-F007 — Family dashboard: transition plan visible if sharing enabled
+TC-F007: Transition plan visibility requires navigator to have started a plan and member.vault_sharing allows family; test manually.
+
+[560/726] [chromium] › tests/e2e/volunteer-portal-full.spec.ts:11:1 › TC-VPF001 — /volunteer loads or redirects (no 500)
+[561/726] [chromium] › tests/e2e/volunteer-portal-full.spec.ts:20:1 › TC-VPF002 — /volunteer/apply loads
+[562/726] [chromium] › tests/e2e/volunteer-portal-full.spec.ts:28:1 › TC-VPF003 — /volunteer/apply has application form
+[563/726] [chromium] › tests/e2e/volunteer-portal-full.spec.ts:39:1 › TC-VPF010 — /volunteer/buddy requires auth
+[564/726] [chromium] › tests/e2e/volunteer-portal-full.spec.ts:51:1 › TC-VPF011 — /volunteer/buddy loads for volunteer
+[565/726] [chromium] › tests/e2e/volunteer-portal-full.spec.ts:61:1 › TC-VPF012 — buddy portal shows buddy assignment cards or empty state
+[566/726] [chromium] › tests/e2e/volunteer-portal-full.spec.ts:75:1 › TC-VPF020 — /volunteer/chaplaincy loads
+[567/726] [chromium] › tests/e2e/volunteer-portal-full.spec.ts:87:1 › TC-VPF021 — chaplaincy page shows spiritual/grief content
+[568/726] [chromium] › tests/e2e/volunteer-portal-full.spec.ts:100:1 › TC-VPF030 — /volunteer/neighbors loads
+[569/726] [chromium] › tests/e2e/volunteer-portal-full.spec.ts:112:1 › TC-VPF031 — neighbors page shows zip-matched or match-pending content
+[570/726] [chromium] › tests/e2e/volunteer-portal-full.spec.ts:126:1 › TC-VPF040 — /volunteer/professionals loads
+[571/726] [chromium] › tests/e2e/volunteer-portal-full.spec.ts:138:1 › TC-VPF041 — retired-pro page shows specialty/service cards
+[572/726] [chromium] › tests/e2e/volunteer-portal-full.spec.ts:150:1 › TC-VPF042 — retired-pro discovery surfaces in Legal/Financial Hub
+[573/726] [chromium] › tests/e2e/volunteer-portal-full.spec.ts:166:1 › TC-VPF050 — /employer-admin loads corporate tier content
+[chromium] › tests/e2e/volunteer-portal-full.spec.ts:166:1 › TC-VPF050 — /employer-admin loads corporate tier content
+TC-VPF050: redirected to login
+
+[574/726] [chromium] › tests/e2e/volunteer-portal-full.spec.ts:176:1 › TC-VPF051 — employer-admin shows corporate volunteer tier progress
+[chromium] › tests/e2e/volunteer-portal-full.spec.ts:176:1 › TC-VPF051 — employer-admin shows corporate volunteer tier progress
+TC-VPF051: redirected
+
+[575/726] [chromium] › tests/e2e/volunteer-portal-full.spec.ts:187:1 › TC-VPF052 — /api/corporate-volunteer/progress responds
+[576/726] [chromium] › tests/e2e/volunteer-portal.spec.ts:4:1 › TC-VOL001 — volunteer dashboard loads
+[577/726] [chromium] › tests/e2e/volunteer-portal.spec.ts:11:1 › TC-VOL002 — /volunteer/dashboard loads content
+[578/726] [chromium] › tests/e2e/volunteer-portal.spec.ts:20:1 › TC-VOL010 — /university-admin loads
+[579/726] [chromium] › tests/e2e/volunteer-portal.spec.ts:29:1 › TC-VOL020 — /vso-admin loads
+[580/726] [chromium] › tests/e2e/volunteer-portal.spec.ts:38:1 › TC-VOL030 — /school-admin loads
+[581/726] [chromium] › tests/e2e/volunteer-portal.spec.ts:47:1 › TC-VOL060 — /api/volunteer/training-status responds
+[chromium] › tests/e2e/volunteer-portal.spec.ts:47:1 › TC-VOL060 — /api/volunteer/training-status responds
+TC-VOL060: training-status endpoint not found
+
+[582/726] [chromium] › tests/e2e/wiring-nov6.spec.ts:12:1 › TC-WIRE001 — /api/circles/posts POST requires auth
+[583/726] [chromium] › tests/e2e/wiring-nov6.spec.ts:19:1 › TC-WIRE002 — /api/circles/posts POST rejects scam content (422)
+[584/726] [chromium] › tests/e2e/wiring-nov6.spec.ts:29:1 › TC-WIRE003 — /api/circles/posts POST with safe content returns 201 or 200
+[585/726] [chromium] › tests/e2e/wiring-nov6.spec.ts:42:1 › TC-WIRE010 — /api/volunteers/[id]/buddies requires auth
+[586/726] [chromium] › tests/e2e/wiring-nov6.spec.ts:47:1 › TC-WIRE011 — /api/volunteers/[id]/buddies returns assignments array
+[587/726] [chromium] › tests/e2e/wiring-nov6.spec.ts:62:1 › TC-WIRE020 — family dashboard loads without 500
+[588/726] [chromium] › tests/e2e/wiring-nov6.spec.ts:75:1 › TC-WIRE021 — family dashboard renders scam protection card
+[589/726] [chromium] › tests/e2e/wiring-nov6.spec.ts:91:1 › TC-WIRE030 — /api/cron/celebrations requires CRON_SECRET
+[590/726] [chromium] › tests/e2e/wiring-nov6.spec.ts:98:1 › TC-WIRE031 — /api/cron/celebrations accepts correct CRON_SECRET
+  2) [chromium] › tests/e2e/wiring-nov6.spec.ts:98:1 › TC-WIRE031 — /api/cron/celebrations accepts correct CRON_SECRET 
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected value: 401
+    Received array: [200, 207]
+
+      101 |     headers: { authorization: `Bearer ${secret}` },
+      102 |   });
+    > 103 |   expect([200, 207]).toContain(res.status());
+          |                      ^
+      104 | });
+      105 |
+      106 | // ── My Buddies tab in volunteer dashboard ────────────────────────────────────
+        at /workspaces/ThriveAtHome/tests/e2e/wiring-nov6.spec.ts:103:22
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/wiring-nov6-TC-WIRE031-—-a-9e3a9-accepts-correct-CRON-SECRET-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/wiring-nov6-TC-WIRE031-—-a-9e3a9-accepts-correct-CRON-SECRET-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/wiring-nov6-TC-WIRE031-—-a-9e3a9-accepts-correct-CRON-SECRET-chromium/error-context.md
+
+
+[591/726] [chromium] › tests/e2e/wiring-nov6.spec.ts:108:1 › TC-WIRE040 — volunteer dashboard shows My Buddies tab
+[592/726] [chromium] › tests/e2e/wiring-nov6.spec.ts:121:1 › TC-WIRE041 — My Buddies tab renders when clicked

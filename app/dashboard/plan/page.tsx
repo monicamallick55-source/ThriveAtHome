@@ -1,80 +1,41 @@
-export const dynamic = 'force-dynamic'
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { requireAuth } from '@/lib/auth'
 
-const PLANS = [
-  {
-    id: 'basic',
-    name: 'Basic',
-    price: '$0',
-    period: '/mo',
-    color: '#6b7280',
-    features: ['Daily check-in calls', 'Community circles', 'Volunteer matching', 'Basic safety alerts'],
-  },
-  {
-    id: 'complete',
-    name: 'Complete',
-    price: '$29',
-    period: '/mo',
-    color: '#6366f1',
-    badge: 'Most Popular',
-    features: ['Everything in Basic', 'Dedicated navigator', 'Life transition support', 'Family portal access', 'Trusted advisor network', 'Priority support'],
-  },
-]
+export const dynamic = 'force-dynamic'
 
 export default async function PlanPage() {
-  let user = null
-  try {
-    const supabase = await Promise.race([
-      createClient(),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000)) as any
-    ])
-    const { data } = await supabase.auth.getUser()
-    user = data.user
-  } catch {}
-  if (!user) redirect('/login')
+  const user = await requireAuth()
+  const planTier = (user as any)?.app_metadata?.plan_tier ?? 'basic'
+
+  const TIERS = [
+    { id: 'basic', name: 'Basic', price: 'Free', features: ['Community access', 'Basic support'] },
+    { id: 'standard', name: 'Standard', price: '$29/mo', features: ['2 navigator hours/mo', 'Buddy calls', 'Community access'] },
+    { id: 'premium', name: 'Premium', price: '$79/mo', features: ['Unlimited navigator hours', 'Priority support', 'All features'] },
+  ]
 
   return (
-    <div style={{ maxWidth: 700, margin: '48px auto', padding: '0 16px', fontFamily: 'system-ui, sans-serif' }}>
-      <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#1f2937', textAlign: 'center', marginBottom: 8 }}>Your Plan</h1>
-      <p style={{ color: '#6b7280', textAlign: 'center', marginBottom: 36 }}>Upgrade anytime. Cancel anytime.</p>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20 }}>
-        {PLANS.map(plan => (
-          <div key={plan.id} data-plan={plan.id} style={{ border: `2px solid ${plan.color}`, borderRadius: 16, padding: '28px 24px', background: '#fff', position: 'relative', display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {plan.badge && (
-              <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: plan.color, color: '#fff', fontSize: '0.72rem', fontWeight: 700, padding: '3px 12px', borderRadius: 20, whiteSpace: 'nowrap' }}>
-                {plan.badge}
-              </div>
-            )}
-            <div>
-              <div style={{ fontWeight: 800, fontSize: '1.1rem', color: '#1f2937' }}>{plan.name}</div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 2, marginTop: 4 }}>
-                <span style={{ fontSize: '2rem', fontWeight: 800, color: plan.color }}>{plan.price}</span>
-                <span style={{ color: '#9ca3af', fontSize: '0.85rem' }}>{plan.period}</span>
-              </div>
-            </div>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {plan.features.map(f => (
-                <li key={f} style={{ fontSize: '0.85rem', color: '#374151', display: 'flex', gap: 8 }}>
-                  <span style={{ color: plan.color }}>✓</span> {f}
-                </li>
-              ))}
+    <main className="p-6 max-w-4xl mx-auto">
+      <h1 className="text-2xl font-bold mb-2">Your Plan</h1>
+      <p className="text-gray-600 mb-6">Current plan: <strong className="capitalize">{planTier}</strong></p>
+      <div className="grid gap-4 md:grid-cols-3">
+        {TIERS.map(tier => (
+          <div key={tier.id} className={`border rounded-lg p-4 ${tier.id === planTier ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}>
+            <h2 className="font-semibold text-lg">{tier.name}</h2>
+            <p className="text-2xl font-bold my-2">{tier.price}</p>
+            <ul className="text-sm text-gray-600 space-y-1">
+              {tier.features.map(f => <li key={f}>✓ {f}</li>)}
             </ul>
-            <button style={{ marginTop: 'auto', padding: '10px 20px', background: plan.color, color: '#fff', border: 'none', borderRadius: 10, fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem' }}>
-              {plan.id === 'basic' ? 'Current plan' : 'Upgrade to Complete'}
-            </button>
+            {tier.id !== planTier && (
+              <Link href="/dashboard/plan/upgrade" className="mt-4 block text-center bg-blue-600 text-white rounded px-3 py-2 text-sm">
+                Upgrade
+              </Link>
+            )}
           </div>
         ))}
       </div>
-
-      <p style={{ textAlign: 'center', marginTop: 24 }}>
-        <Link href="/dashboard/plan-comparison" style={{ color: '#6366f1', fontSize: '0.875rem' }}>Compare all plans →</Link>
-      </p>
-      <p style={{ textAlign: 'center', marginTop: 8 }}>
-        <Link href="/dashboard" style={{ color: '#9ca3af', fontSize: '0.8rem' }}>← Back to dashboard</Link>
-      </p>
-    </div>
+      <div className="mt-6 text-sm text-gray-500">
+        <Link href="/dashboard/plan/billing" className="underline">Billing history</Link>
+      </div>
+    </main>
   )
 }

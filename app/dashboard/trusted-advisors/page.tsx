@@ -1,36 +1,50 @@
 'use client'
+import { useState, useEffect } from 'react'
+
+type Advisor = { id: string; name: string; specialty: string; bio: string; telehealth: boolean }
+
+const SPECIALTY_LABELS: Record<string, string> = {
+  elder_law_attorney: 'Elder Law Attorney',
+  financial_planner: 'Financial Planner',
+  geriatric_care_manager: 'Geriatric Care Manager',
+  licensed_therapist: 'Licensed Therapist',
+  chaplain: 'Chaplain / Spiritual Care',
+  grief_counselor: 'Grief Counselor',
+  social_worker: 'Social Worker',
+  pharmacist: 'Pharmacist',
+}
+
 export default function TrustedAdvisorsPage() {
+  const [advisors, setAdvisors] = useState<Advisor[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch('/api/trusted-advisors')
+      .then(r => r.json())
+      .then(d => setAdvisors(d.advisors || []))
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
   return (
-    <main style={{ maxWidth: 800, margin: '0 auto', padding: '2rem 1rem' }}>
-      <h1>Trusted Advisors</h1>
-      <p>Connect with professionals who understand the needs of older adults.</p>
-      <div style={{ display: 'grid', gap: '1.5rem', marginTop: '1.5rem' }}>
-        <div style={{ border: '1px solid #e5e7eb', borderRadius: 8, padding: '1.5rem' }}>
-          <h2>Therapist</h2>
-          <p>Licensed therapists specializing in aging, grief, and life transitions.</p>
-          <button>Schedule a Session</button>
+    <main className="p-6 max-w-4xl mx-auto">
+      <h1 className="text-2xl font-bold mb-2">Trusted Advisors</h1>
+      <p className="text-gray-600 mb-6">Connect with vetted professionals who specialize in elder care and senior support.</p>
+      {loading ? (
+        <p className="text-gray-400">Loading advisors...</p>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2">
+          {advisors.map(a => (
+            <div key={a.id} className="border border-gray-200 rounded-lg p-4">
+              <h2 className="font-semibold">{a.name}</h2>
+              <p className="text-sm text-blue-600 mb-2">{SPECIALTY_LABELS[a.specialty] || a.specialty}</p>
+              <p className="text-sm text-gray-600">{a.bio}</p>
+              {a.telehealth && <span className="mt-2 inline-block text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Telehealth available</span>}
+              <button className="mt-3 w-full bg-blue-600 text-white rounded px-3 py-2 text-sm">Request Consultation</button>
+            </div>
+          ))}
         </div>
-        <div style={{ border: '1px solid #e5e7eb', borderRadius: 8, padding: '1.5rem' }}>
-          <h2>Attorney</h2>
-          <p>Elder law attorneys for estate planning, Medicare, and housing.</p>
-          <button>Schedule a Consultation</button>
-        </div>
-        <div style={{ border: '1px solid #e5e7eb', borderRadius: 8, padding: '1.5rem' }}>
-          <h2>Financial Planner</h2>
-          <p>Fee-only financial planners focused on retirement and long-term care.</p>
-          <button>Schedule a Meeting</button>
-        </div>
-        <div style={{ border: '1px solid #e5e7eb', borderRadius: 8, padding: '1.5rem' }}>
-          <h2>Grief Counselor</h2>
-          <p>Specialized support for loss, bereavement, and major life changes.</p>
-          <button>Request an Introduction</button>
-        </div>
-        <div style={{ border: '1px solid #e5e7eb', borderRadius: 8, padding: '1.5rem' }}>
-          <h2>Chaplain / Spiritual Care</h2>
-          <p>Interfaith spiritual support — available on request for members who want it.</p>
-          <button>Request an Introduction</button>
-        </div>
-      </div>
+      )}
     </main>
   )
 }
