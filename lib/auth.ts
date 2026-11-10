@@ -7,10 +7,17 @@ export type UserRole = 'family' | 'navigator' | 'admin' | 'volunteer' | 'student
 
 /** Returns the current authenticated Supabase user, or null if not signed in. */
 export async function getCurrentUser() {
-  const supabase = await createClient()
-  const { data: { user }, error } = await supabase.auth.getUser()
-  if (error || !user) return null
-  return user
+  try {
+    const supabase = await Promise.race([
+      createClient(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000))
+    ]) as Awaited<ReturnType<typeof createClient>>
+    const { data: { user }, error } = await supabase.auth.getUser()
+    if (error || !user) return null
+    return user
+  } catch {
+    return null
+  }
 }
 
 /**
