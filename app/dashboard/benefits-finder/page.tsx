@@ -3,16 +3,15 @@ import { useState } from 'react'
 
 const BENEFITS = [
   { id: '1', name: 'Medicare Savings Program', desc: 'Help paying Medicare Part B premiums.', category: 'health' },
-  { id: '2', name: 'SNAP (Food Assistance)', desc: 'Monthly food benefits for eligible seniors.', category: 'food' },
+  { id: '2', name: 'SNAP Food Assistance', desc: 'Monthly food benefits for eligible seniors.', category: 'food' },
   { id: '3', name: 'LIHEAP Energy Assistance', desc: 'Help with heating and cooling costs.', category: 'housing' },
   { id: '4', name: 'Extra Help with Medicare Drug Costs', desc: 'Reduces prescription drug costs.', category: 'health' },
-  { id: '5', name: 'Social Security Supplemental Income', desc: 'Monthly payments for low-income seniors.', category: 'income' },
+  { id: '5', name: 'Supplemental Security Income', desc: 'Monthly payments for low-income seniors.', category: 'income' },
 ]
 
 export default function BenefitsFinderPage() {
   const [filter, setFilter] = useState('all')
   const filtered = filter === 'all' ? BENEFITS : BENEFITS.filter(b => b.category === filter)
-
   return (
     <main className="p-6 max-w-3xl mx-auto">
       <h1 className="text-2xl font-bold mb-2">Benefits Finder</h1>
@@ -27,7 +26,7 @@ export default function BenefitsFinderPage() {
           <div key={b.id} className="border border-gray-200 rounded-lg p-4">
             <h2 className="font-semibold">{b.name}</h2>
             <p className="text-sm text-gray-600 mt-1">{b.desc}</p>
-            <button className="mt-2 text-sm text-blue-600 underline">Check Eligibility →</button>
+            <button className="mt-2 text-sm text-blue-600 underline">Check Eligibility</button>
           </div>
         ))}
       </div>

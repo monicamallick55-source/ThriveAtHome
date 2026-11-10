@@ -22,19 +22,12 @@ export default async function PlanPage() {
           <div key={tier.id} className={`border rounded-lg p-4 ${tier.id === planTier ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}>
             <h2 className="font-semibold text-lg">{tier.name}</h2>
             <p className="text-2xl font-bold my-2">{tier.price}</p>
-            <ul className="text-sm text-gray-600 space-y-1">
-              {tier.features.map(f => <li key={f}>✓ {f}</li>)}
-            </ul>
+            <ul className="text-sm text-gray-600 space-y-1">{tier.features.map(f => <li key={f}>&#x2713; {f}</li>)}</ul>
             {tier.id !== planTier && (
-              <Link href="/dashboard/plan/upgrade" className="mt-4 block text-center bg-blue-600 text-white rounded px-3 py-2 text-sm">
-                Upgrade
-              </Link>
+              <Link href="/dashboard/plan/upgrade" className="mt-4 block text-center bg-blue-600 text-white rounded px-3 py-2 text-sm">Upgrade</Link>
             )}
           </div>
         ))}
-      </div>
-      <div className="mt-6 text-sm text-gray-500">
-        <Link href="/dashboard/plan/billing" className="underline">Billing history</Link>
       </div>
     </main>
   )

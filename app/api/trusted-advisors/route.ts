@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
 
 const STUB_ADVISORS = [
-  { id: '1', name: 'Sarah Mitchell, Esq.', specialty: 'elder_law_attorney', bio: 'Elder law specialist with 20 years experience.', telehealth: true, non_proselytizing: true },
-  { id: '2', name: 'Robert Chen, CFP', specialty: 'financial_planner', bio: 'Certified financial planner focused on retirement.', telehealth: true, non_proselytizing: true },
-  { id: '3', name: 'Dr. Angela Torres', specialty: 'geriatric_care_manager', bio: 'Geriatric care manager specializing in aging in place.', telehealth: false, non_proselytizing: true },
-  { id: '4', name: 'Rev. James Park', specialty: 'chaplain', bio: 'Non-denominational chaplain and grief counselor.', telehealth: true, non_proselytizing: true },
-  { id: '5', name: 'Dr. Lisa Nguyen', specialty: 'licensed_therapist', bio: 'Licensed therapist specializing in life transitions.', telehealth: true, non_proselytizing: true },
+  { id: '1', name: 'Sarah Mitchell, Esq.', specialty: 'elder_law_attorney', bio: 'Elder law specialist with 20 years experience.', telehealth: true },
+  { id: '2', name: 'Robert Chen, CFP', specialty: 'financial_planner', bio: 'Certified financial planner focused on retirement.', telehealth: true },
+  { id: '3', name: 'Dr. Angela Torres', specialty: 'geriatric_care_manager', bio: 'Geriatric care manager specializing in aging in place.', telehealth: false },
+  { id: '4', name: 'Rev. James Park', specialty: 'chaplain', bio: 'Non-denominational chaplain and grief counselor.', telehealth: true },
+  { id: '5', name: 'Dr. Lisa Nguyen', specialty: 'licensed_therapist', bio: 'Licensed therapist specializing in life transitions.', telehealth: true },
 ]
 
 export async function GET(req: NextRequest) {
