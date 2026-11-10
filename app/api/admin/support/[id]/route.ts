@@ -1,19 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
-  try {
-    const { status, assigned_to, resolution_notes } = await req.json()
-    const admin = createAdminClient() as any
-    const update: Record<string, unknown> = { updated_at: new Date().toISOString() }
-    if (status) update.status = status
-    if (assigned_to) update.assigned_to = assigned_to
-    if (resolution_notes) update.resolution_notes = resolution_notes
-    if (status === 'resolved' || status === 'closed') update.resolved_at = new Date().toISOString()
-    const { error } = await admin.from('support_tickets').update(update).eq('id', params.id)
-    if (error) throw error
-    return NextResponse.json({ ok: true })
-  } catch (err) {
-    console.error('PATCH /api/admin/support/[id] error:', err)
-    return NextResponse.json({ error: 'Failed to update ticket' }, { status: 500 })
+
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  if (!profile || !['admin', 'super_admin', 'csm'].includes(profile.role)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
+
+  const admin = createAdminClient()
+  const { data, error } = await admin.from('support_tickets').select('*').eq('id', params.id).single()
+  if (error || !data) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  return NextResponse.json(data)
+}
+
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  if (!profile || !['admin', 'super_admin', 'csm'].includes(profile.role)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  const body = await req.json()
+  const allowed = ['status', 'assigned_to', 'admin_notes', 'priority']
+  const update: Record<string, any> = {}
+  for (const k of allowed) { if (body[k] !== undefined) update[k] = body[k] }
+  if (update.status === 'resolved') update.resolved_at = new Date().toISOString()
+
+  const admin = createAdminClient()
+  const { data, error } = await admin.from('support_tickets').update(update).eq('id', params.id).select().single()
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (!data) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  return NextResponse.json(data)
 }
