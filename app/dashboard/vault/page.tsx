@@ -1,11 +1,19 @@
+export const dynamic = 'force-dynamic'
 // /dashboard/vault — alias for /dashboard/documents
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 
 export default async function VaultPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  let user = null
+  try {
+    const supabase = await Promise.race([
+      createClient(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000)) as any
+    ])
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  } catch {}
   if (!user) redirect('/login')
 
   return (

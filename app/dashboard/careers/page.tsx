@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 // app/dashboard/careers/page.tsx
 // Member view: career profile + job board
 

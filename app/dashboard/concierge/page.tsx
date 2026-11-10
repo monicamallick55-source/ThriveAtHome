@@ -1,9 +1,17 @@
+export const dynamic = 'force-dynamic'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 
 export default async function ConciergeRequestsPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  let user = null
+  try {
+    const supabase = await Promise.race([
+      createClient(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000)) as any
+    ])
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  } catch {}
   if (!user) redirect('/login')
 
   const { data: rawRequests } = await supabase

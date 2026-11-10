@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 // app/dashboard/campaigns/page.tsx
 // G6.4 Community Care Fund — Member view: see own campaigns, request help
 'use client'

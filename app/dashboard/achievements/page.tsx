@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 // app/dashboard/achievements/page.tsx
 // G5.4 — Member achievement trophy shelf
 
@@ -6,8 +7,15 @@ import { createClient } from '@/lib/supabase/server'
 import MemberAchievements from '@/components/achievements/MemberAchievements'
 
 export default async function AchievementsPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  let user = null
+  try {
+    const supabase = await Promise.race([
+      createClient(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000)) as any
+    ])
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  } catch {}
   if (!user) redirect('/login')
 
   const { data: fm } = await supabase
