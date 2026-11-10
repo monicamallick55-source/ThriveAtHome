@@ -1,12 +1,29 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+const PROTECTED = [
+  '/dashboard', '/navigator', '/admin', '/employer-admin', '/volunteer',
+  '/org-admin', '/vso-admin', '/university-admin', '/network-admin',
+  '/senior-center-admin', '/aaa-admin', '/agency-admin', '/care-worker', '/school-admin',
+]
+
 export function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl
   const hostname = request.headers.get('host') || ''
   const url = request.nextUrl.clone()
 
-  // Production: [org].thriveathome.app or [org].thriveathome.com
-  // Dev: [org].localhost:3000
+  // Auth guard: redirect unauthenticated users to /login
+  const isProtected = PROTECTED.some(p => pathname === p || pathname.startsWith(p + '/'))
+  if (isProtected) {
+    const token = request.cookies.getAll().find(c =>
+      c.name.includes('auth-token') || c.name === 'sb-access-token'
+    )?.value
+    if (!token) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+  }
+
+  // Subdomain routing
   const isProd = hostname.endsWith('.thriveathome.app') || hostname.endsWith('.thriveathome.com')
   const isDev  = hostname.endsWith('.localhost:3000') || hostname.endsWith('.localhost')
 
@@ -15,10 +32,8 @@ export function proxy(request: NextRequest) {
       ? hostname.replace(/\.thriveathome\.(app|com)$/, '')
       : hostname.replace(/\.localhost(:\d+)?$/, '')
 
-    // Skip www, app, api — only route org subdomains
     const reserved = ['www', 'app', 'api', 'admin', 'mail']
     if (rootDomain && !reserved.includes(rootDomain)) {
-      // Rewrite [org].thriveathome.app/* → /org-admin/* with slug in header
       url.pathname = url.pathname.startsWith('/org-admin')
         ? url.pathname
         : `/org-admin${url.pathname}`
@@ -34,13 +49,6 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths EXCEPT:
-     * - _next/static (static files)
-     * - _next/image (image optimisation)
-     * - favicon.ico
-     * - api routes (let them pass through normally)
-     */
     '/((?!_next/static|_next/image|favicon.ico|api/).*)',
   ],
 }
