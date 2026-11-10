@@ -12,6 +12,7 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const body = await req.json().catch(() => ({}))
-  if (!body.amount_requested || !body.purpose) return NextResponse.json({ error: 'amount_requested and purpose are required' }, { status: 400 })
-  return NextResponse.json({ status: 'pending', id: null })
+  if (!body.amount_cents && !body.amount_requested) return NextResponse.json({ error: 'amount is required' }, { status: 400 })
+  if (!body.reason && !body.purpose) return NextResponse.json({ error: 'reason is required' }, { status: 400 })
+  return NextResponse.json({ status: 'pending_review', id: null })
 }
