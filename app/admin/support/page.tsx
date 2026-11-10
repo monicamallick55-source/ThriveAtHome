@@ -21,8 +21,8 @@ export default async function AdminSupportPage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (!profile || !['admin', 'super_admin', 'csm'].includes(profile.role)) redirect('/dashboard')
+  const role = (user.app_metadata?.role ?? user.user_metadata?.role ?? '') as string
+  if (!['admin', 'super_admin', 'csm'].includes(role)) redirect('/dashboard')
 
   let query = supabase
     .from('support_tickets')

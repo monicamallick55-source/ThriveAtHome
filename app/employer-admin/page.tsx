@@ -7,9 +7,9 @@ export default async function EmployerAdminPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase.from('profiles').select('role, full_name').eq('id', user.id).single()
+  const role = (user.app_metadata?.role ?? user.user_metadata?.role ?? '') as string
   const allowed = ['employer_admin', 'admin', 'super_admin']
-  if (!allowed.includes(profile?.role ?? '')) redirect('/dashboard')
+  if (!allowed.includes(role)) redirect('/dashboard')
 
   const { data: orgProfile } = await supabase
     .from('employer_orgs')

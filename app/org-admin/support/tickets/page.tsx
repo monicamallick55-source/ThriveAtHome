@@ -20,8 +20,8 @@ export default async function OrgTicketsPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase.from('profiles').select('role, org_id').eq('id', user.id).single()
-  if (!profile || !['org_admin', 'admin', 'super_admin'].includes(profile.role)) redirect('/org-admin')
+  const role = (user.app_metadata?.role ?? user.user_metadata?.role ?? '') as string
+  if (!['org_admin', 'admin', 'super_admin'].includes(role)) redirect('/org-admin')
 
   const { data: tickets } = await supabase
     .from('support_tickets')
