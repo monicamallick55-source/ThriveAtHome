@@ -875,3 +875,783 @@ TC-M015: 1/4 add-on SKUs not found — verify names in /dashboard/addons
   ✓  739 [mobile-chrome] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M033 — /dashboard/celebrations (11.1s)
   ✓  737 [mobile-chrome] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M031 — /dashboard/gift-send (12.7s)
   ✓  740 [mobile-chrome] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M034 — /dashboard/celebrations/plan (12.2s)
+  ✓  741 [mobile-chrome] › tests/e2e/member-pages.spec.ts:82:1 › TC-M015 — /dashboard/addons has all 4 add-on SKUs (12.6s)
+TC-M011: "Request an introduction" button not found
+TC-M011: Chaplain may be proactively shown — spec says it should require member request
+Console errors on /: [
+  "Cannot read properties of undefined (reading 'EventEmitter')",
+  "Cannot read properties of undefined (reading 'EventEmitter')"
+]
+TC-M005: Found 0 community elements
+TC-M005: Expected ≥ 20 circles, found 0 — check markup
+  ✓  742 [mobile-chrome] › tests/e2e/member-pages.spec.ts:109:1 › TC-M008 — /dashboard/grief-support has all 9 pathways (13.0s)
+  ✓  743 [mobile-chrome] › tests/e2e/member-pages.spec.ts:136:1 › TC-M011 — trusted advisors: chaplain not shown proactively (12.1s)
+  ✓  747 [mobile-chrome] › tests/e2e/public-routes.spec.ts:71:1 › TC-P004 — /pricing shows Basic and Complete, Premier hidden (7.9s)
+  ✓  744 [mobile-chrome] › tests/e2e/member-pages.spec.ts:157:1 › TC-M005 — /dashboard/communities shows ≥ 20 circles (11.0s)
+  ✓  746 [mobile-chrome] › tests/e2e/public-routes.spec.ts:62:1 › TC-P002 — mission strip is visible (11.5s)
+  ✓  745 [mobile-chrome] › tests/e2e/public-routes.spec.ts:44:1 › TC-P001 — home page loads with key elements (13.2s)
+TC-P070: /employers returned a server error — fix required
+  ✓  749 [mobile-chrome] › tests/e2e/public-routes.spec.ts:89:1 › TC-P009 — home page has SEO meta tags (11.0s)
+  ✓  751 [mobile-chrome] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /about → 200 (6.2s)
+  ✓  748 [mobile-chrome] › tests/e2e/public-routes.spec.ts:80:1 › TC-P005 — footer privacy + terms links work (12.2s)
+  ✓  752 [mobile-chrome] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /for-families → 200 (9.3s)
+  ✓  753 [mobile-chrome] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /for-volunteers → 200 (9.0s)
+  ✓  755 [mobile-chrome] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /employers → 200 (5.8s)
+  ✓  754 [mobile-chrome] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /pricing → 200 (6.9s)
+  ✓  750 [mobile-chrome] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET / → 200 (11.5s)
+  ✓  756 [mobile-chrome] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /outcomes → 200 (8.1s)
+  ✓  758 [mobile-chrome] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /blog → 200 (7.8s)
+  ✓  757 [mobile-chrome] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /team → 200 (8.4s)
+  ✓  759 [mobile-chrome] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /advisors → 200 (7.7s)
+  ✓  761 [mobile-chrome] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /k12 → 200 (7.3s)
+  ✓  762 [mobile-chrome] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /donate → 200 (6.6s)
+  ✓  760 [mobile-chrome] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /advisors/apply → 200 (8.3s)
+  ✓  763 [mobile-chrome] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /contact → 200 (7.0s)
+  ✓  765 [mobile-chrome] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /resources → 200 (6.6s)
+  ✓  764 [mobile-chrome] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /directory → 200 (7.0s)
+  ✓  766 [mobile-chrome] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /privacy → 200 (6.7s)
+  ✓  770 [mobile-chrome] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /login → 200 (5.2s)
+  ✓  768 [mobile-chrome] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /join → 200 (6.1s)
+  ✓  767 [mobile-chrome] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /terms → 200 (6.7s)
+  ✓  771 [mobile-chrome] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /signup → 200 (5.7s)
+TC-P070: /resources/senior-fitness returned 404 (expected until page is built)
+  ✓  769 [mobile-chrome] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /careers/navigator → 200 (7.0s)
+TC-P070: /resources/caregiver-support returned 404 (expected until page is built)
+TC-P070: /onboarding redirects to /login (auth-required or not built yet)
+  ✓  773 [mobile-chrome] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /resources/senior-fitness → 200 (5.4s)
+TC-P070: /chapter/bay-area returned 404 (expected until page is built)
+  ✓  772 [mobile-chrome] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /nonprofit-admin → 200 (5.9s)
+  ✓  774 [mobile-chrome] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /resources/caregiver-support → 200 (6.4s)
+  ✓  776 [mobile-chrome] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /directory/california → 200 (4.4s)
+  ✓  779 [mobile-chrome] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /about — no horizontal scroll at 390px (4.3s)
+  ✓  775 [mobile-chrome] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /chapter/bay-area → 200 (5.8s)
+  ✓  777 [mobile-chrome] › tests/e2e/public-routes.spec.ts:106:5 › TC-P070 — public route 200 checks › GET /onboarding → 200 (5.7s)
+  ✓  778 [mobile-chrome] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › / — no horizontal scroll at 390px (7.6s)
+  ✓  781 [mobile-chrome] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /for-volunteers — no horizontal scroll at 390px (4.7s)
+  ✓  782 [mobile-chrome] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /pricing — no horizontal scroll at 390px (4.0s)
+  ✓  783 [mobile-chrome] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /outcomes — no horizontal scroll at 390px (3.7s)
+  ✓  780 [mobile-chrome] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /for-families — no horizontal scroll at 390px (5.4s)
+  ✓  784 [mobile-chrome] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /blog — no horizontal scroll at 390px (3.7s)
+  ✓  785 [mobile-chrome] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /advisors — no horizontal scroll at 390px (3.8s)
+  ✓  786 [mobile-chrome] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /advisors/apply — no horizontal scroll at 390px (3.8s)
+  ✓  787 [mobile-chrome] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /k12 — no horizontal scroll at 390px (3.5s)
+  ✓  789 [mobile-chrome] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /contact — no horizontal scroll at 390px (3.2s)
+  ✓  790 [mobile-chrome] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /resources — no horizontal scroll at 390px (3.2s)
+  ✓  788 [mobile-chrome] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /donate — no horizontal scroll at 390px (3.5s)
+  ✓  791 [mobile-chrome] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /privacy — no horizontal scroll at 390px (3.3s)
+  ✓  792 [mobile-chrome] › tests/e2e/public-routes.spec.ts:164:5 › TC-P071 — mobile responsiveness at 390px › /terms — no horizontal scroll at 390px (3.1s)
+  ✓  793 [mobile-chrome] › tests/e2e/public-routes.spec.ts:201:1 › TC-P008 — home page mobile 390px: CTA above fold, no horizontal scroll (3.2s)
+
+
+  1) [chromium] › tests/e2e/admin-portal-deep.spec.ts:235:1 › TC-B2B012 — /employer-admin loads with invite UI 
+
+    TimeoutError: page.goto: Timeout 20000ms exceeded.
+    Call log:
+      - navigating to "https://thrive-at-home-pied.vercel.app/employer-admin", waiting until "load"
+
+
+      239 |     return;
+      240 |   }
+    > 241 |   await page.goto(`${BASE}/employer-admin`);
+          |              ^
+      242 |   await page.waitForLoadState('networkidle');
+      243 |   if (page.url().includes('/login')) {
+      244 |     console.warn('TC-B2B012: /employer-admin redirected to /login');
+        at /workspaces/ThriveAtHome/tests/e2e/admin-portal-deep.spec.ts:241:14
+
+    attachment #1: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/admin-portal-deep-TC-B2B01-041f1--admin-loads-with-invite-UI-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/admin-portal-deep-TC-B2B01-041f1--admin-loads-with-invite-UI-chromium/error-context.md
+
+  2) [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — employer@test.com routes to /employer-admin 
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected substring: "/employer-admin"
+    Received string:    "https://thrive-at-home-pied.vercel.app/dashboard/family"
+
+      25 |       return;
+      26 |     }
+    > 27 |     expect(page.url()).toContain(expectedPath);
+         |                        ^
+      28 |   });
+      29 | }
+      30 |
+        at /workspaces/ThriveAtHome/tests/e2e/auth-flows.spec.ts:27:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/auth-flows-TC-A001-—-emplo-0d841-om-routes-to-employer-admin-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/auth-flows-TC-A001-—-emplo-0d841-om-routes-to-employer-admin-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/auth-flows-TC-A001-—-emplo-0d841-om-routes-to-employer-admin-chromium/error-context.md
+
+  3) [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — k12admin@test.com routes to /school-admin 
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected substring: "/school-admin"
+    Received string:    "https://thrive-at-home-pied.vercel.app/dashboard/family"
+
+      25 |       return;
+      26 |     }
+    > 27 |     expect(page.url()).toContain(expectedPath);
+         |                        ^
+      28 |   });
+      29 | }
+      30 |
+        at /workspaces/ThriveAtHome/tests/e2e/auth-flows.spec.ts:27:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/auth-flows-TC-A001-—-k12ad-ff900--com-routes-to-school-admin-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/auth-flows-TC-A001-—-k12ad-ff900--com-routes-to-school-admin-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/auth-flows-TC-A001-—-k12ad-ff900--com-routes-to-school-admin-chromium/error-context.md
+
+  4) [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Employer Admin (employer@test.com) → /employer-admin 
+
+    Error: expect(page).toHaveURL(expected) failed
+
+    Expected pattern: /\/employer\-admin.*/
+    Received string:  "https://thrive-at-home-pied.vercel.app/dashboard/family"
+    Timeout: 15000ms
+
+    Call log:
+      - Expect "toHaveURL" with timeout 15000ms
+        30 × locator resolved to <html lang="en" class="h-full">…</html>
+           - unexpected value "https://thrive-at-home-pied.vercel.app/dashboard/family"
+
+
+      46 |
+      47 |       // Should land on the expected portal (or a sub-path of it)
+    > 48 |       await expect(page).toHaveURL(new RegExp(portal.replace('/', '\\/').replace('-', '\\-') + '.*'), { timeout: 15_000 });
+         |                          ^
+      49 |
+      50 |       // No 500 error on the portal page
+      51 |       const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
+        at /workspaces/ThriveAtHome/tests/e2e/auth-roles.spec.ts:48:26
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A004-—-21-ro-5e30f-r-test-com-→-employer-admin-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A004-—-21-ro-5e30f-r-test-com-→-employer-admin-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/auth-roles-TC-A004-—-21-ro-5e30f-r-test-com-→-employer-admin-chromium/error-context.md
+
+  5) [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › K-12 Admin (k12admin@test.com) → /school-admin 
+
+    Error: expect(page).toHaveURL(expected) failed
+
+    Expected pattern: /\/school\-admin.*/
+    Received string:  "https://thrive-at-home-pied.vercel.app/dashboard/family"
+    Timeout: 15000ms
+
+    Call log:
+      - Expect "toHaveURL" with timeout 15000ms
+        31 × locator resolved to <html lang="en" class="h-full">…</html>
+           - unexpected value "https://thrive-at-home-pied.vercel.app/dashboard/family"
+
+
+      46 |
+      47 |       // Should land on the expected portal (or a sub-path of it)
+    > 48 |       await expect(page).toHaveURL(new RegExp(portal.replace('/', '\\/').replace('-', '\\-') + '.*'), { timeout: 15_000 });
+         |                          ^
+      49 |
+      50 |       // No 500 error on the portal page
+      51 |       const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
+        at /workspaces/ThriveAtHome/tests/e2e/auth-roles.spec.ts:48:26
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A004-—-21-ro-9cb2b-min-test-com-→-school-admin-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/auth-roles-TC-A004-—-21-ro-9cb2b-min-test-com-→-school-admin-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/auth-roles-TC-A004-—-21-ro-9cb2b-min-test-com-→-school-admin-chromium/error-context.md
+
+  6) [chromium] › tests/e2e/b2b-portals-deep.spec.ts:93:1 › TC-B2BD030 — /employer-admin loads with corporate program data 
+
+    TimeoutError: page.goto: Timeout 20000ms exceeded.
+    Call log:
+      - navigating to "https://thrive-at-home-pied.vercel.app/employer-admin", waiting until "load"
+
+
+      94 |   await loginAs(page, ACCOUNTS.employer);
+      95 |   if (page.url().includes('/login')) { console.warn('TC-B2BD030: employer login failed'); return; }
+    > 96 |   await page.goto(`${BASE}/employer-admin`);
+         |              ^
+      97 |   await page.waitForLoadState('networkidle');
+      98 |   if (page.url().includes('/login')) { console.warn('TC-B2BD030: redirected'); return; }
+      99 |   const content = await page.content();
+        at /workspaces/ThriveAtHome/tests/e2e/b2b-portals-deep.spec.ts:96:14
+
+    attachment #1: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/b2b-portals-deep-TC-B2BD03-12d22-with-corporate-program-data-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/b2b-portals-deep-TC-B2BD03-12d22-with-corporate-program-data-chromium/error-context.md
+
+  7) [chromium] › tests/e2e/b2b-portals-deep.spec.ts:103:1 › TC-B2BD031 — employer-admin shows 3-tier corporate progress (Bronze/Silver/Gold) 
+
+    TimeoutError: page.goto: Timeout 20000ms exceeded.
+    Call log:
+      - navigating to "https://thrive-at-home-pied.vercel.app/employer-admin", waiting until "load"
+
+
+      104 |   await loginAs(page, ACCOUNTS.employer);
+      105 |   if (page.url().includes('/login')) { console.warn('TC-B2BD031: login failed'); return; }
+    > 106 |   await page.goto(`${BASE}/employer-admin`);
+          |              ^
+      107 |   await page.waitForLoadState('networkidle');
+      108 |   if (page.url().includes('/login')) { console.warn('TC-B2BD031: redirected'); return; }
+      109 |   const content = await page.content();
+        at /workspaces/ThriveAtHome/tests/e2e/b2b-portals-deep.spec.ts:106:14
+
+    attachment #1: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/b2b-portals-deep-TC-B2BD03-7c59f-rogress-Bronze-Silver-Gold--chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/b2b-portals-deep-TC-B2BD03-7c59f-rogress-Bronze-Silver-Gold--chromium/error-context.md
+
+  8) [chromium] › tests/e2e/b2b-portals.spec.ts:13:1 › TC-B2B010 — /employer-admin loads ───────────
+
+    TimeoutError: page.goto: Timeout 20000ms exceeded.
+    Call log:
+      - navigating to "https://thrive-at-home-pied.vercel.app/employer-admin", waiting until "load"
+
+
+      14 |   await loginAs(page, ACCOUNTS.employer);
+      15 |   if (page.url().includes('/login')) { console.warn('TC-B2B010: employer login failed — not seeded'); return; }
+    > 16 |   await page.goto(`${BASE}/employer-admin`);
+         |              ^
+      17 |   await page.waitForLoadState('networkidle');
+      18 |   if (page.url().includes('/login')) { console.warn('TC-B2B010: redirected to login'); return; }
+      19 |   expect(page.url()).not.toContain('/login');
+        at /workspaces/ThriveAtHome/tests/e2e/b2b-portals.spec.ts:16:14
+
+    attachment #1: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/b2b-portals-TC-B2B010-—-employer-admin-loads-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/b2b-portals-TC-B2B010-—-employer-admin-loads-chromium/error-context.md
+
+  9) [chromium] › tests/e2e/member-features-deep.spec.ts:33:1 › TC-M040 — Birthday arc cron: POST /api/cron/birthday-arc → 200/207 
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected value: 401
+    Received array: [200, 207]
+
+      36 |   const res = await cronPost('/api/cron/birthday-arc');
+      37 |   expect(res.status(), 'TC-M040: birthday-arc cron must not 500').not.toBe(500);
+    > 38 |   expect([200, 207]).toContain(res.status());
+         |                      ^
+      39 | });
+      40 |
+      41 | // ── TC-M041 — Grief skip ──────────────────────────────────────────────────────
+        at /workspaces/ThriveAtHome/tests/e2e/member-features-deep.spec.ts:38:22
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/member-features-deep-TC-M0-2aabf-cron-birthday-arc-→-200-207-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/member-features-deep-TC-M0-2aabf-cron-birthday-arc-→-200-207-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/member-features-deep-TC-M0-2aabf-cron-birthday-arc-→-200-207-chromium/error-context.md
+
+  10) [chromium] › tests/e2e/member-health-care.spec.ts:53:1 › TC-MHC005 — /dashboard/trusted-advisors loads 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard**" until "load"
+    ============================================================
+
+       at helpers.ts:57
+
+      55 |
+      56 |   if (expectedPath) {
+    > 57 |     await page.waitForURL(`**${expectedPath}**`, { timeout: 15_000 });
+         |                ^
+      58 |   } else {
+      59 |     // Wait for navigation away from /login
+      60 |     await page.waitForFunction(() => !window.location.pathname.startsWith('/login'), { timeout: 15_000 });
+        at loginAs (/workspaces/ThriveAtHome/tests/e2e/helpers.ts:57:16)
+        at goToDashboard (/workspaces/ThriveAtHome/tests/e2e/member-health-care.spec.ts:5:3)
+        at /workspaces/ThriveAtHome/tests/e2e/member-health-care.spec.ts:54:14
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/member-health-care-TC-MHC0-198ed-oard-trusted-advisors-loads-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/member-health-care-TC-MHC0-198ed-oard-trusted-advisors-loads-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/member-health-care-TC-MHC0-198ed-oard-trusted-advisors-loads-chromium/error-context.md
+
+  11) [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M005 — /dashboard/communities 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard**" until "load"
+    ============================================================
+
+       at helpers.ts:57
+
+      55 |
+      56 |   if (expectedPath) {
+    > 57 |     await page.waitForURL(`**${expectedPath}**`, { timeout: 15_000 });
+         |                ^
+      58 |   } else {
+      59 |     // Wait for navigation away from /login
+      60 |     await page.waitForFunction(() => !window.location.pathname.startsWith('/login'), { timeout: 15_000 });
+        at loginAs (/workspaces/ThriveAtHome/tests/e2e/helpers.ts:57:16)
+        at /workspaces/ThriveAtHome/tests/e2e/member-pages.spec.ts:52:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/member-pages-TC-M001–M034--c71b7-005-—-dashboard-communities-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/member-pages-TC-M001–M034--c71b7-005-—-dashboard-communities-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/member-pages-TC-M001–M034--c71b7-005-—-dashboard-communities-chromium/error-context.md
+
+  12) [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M009 — /dashboard/grief-circles 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard**" until "load"
+    ============================================================
+
+       at helpers.ts:57
+
+      55 |
+      56 |   if (expectedPath) {
+    > 57 |     await page.waitForURL(`**${expectedPath}**`, { timeout: 15_000 });
+         |                ^
+      58 |   } else {
+      59 |     // Wait for navigation away from /login
+      60 |     await page.waitForFunction(() => !window.location.pathname.startsWith('/login'), { timeout: 15_000 });
+        at loginAs (/workspaces/ThriveAtHome/tests/e2e/helpers.ts:57:16)
+        at /workspaces/ThriveAtHome/tests/e2e/member-pages.spec.ts:52:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/member-pages-TC-M001–M034--dc2ec-9-—-dashboard-grief-circles-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/member-pages-TC-M001–M034--dc2ec-9-—-dashboard-grief-circles-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/member-pages-TC-M001–M034--dc2ec-9-—-dashboard-grief-circles-chromium/error-context.md
+
+  13) [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M012 — /dashboard/fraud-protection 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard**" until "load"
+    ============================================================
+
+       at helpers.ts:57
+
+      55 |
+      56 |   if (expectedPath) {
+    > 57 |     await page.waitForURL(`**${expectedPath}**`, { timeout: 15_000 });
+         |                ^
+      58 |   } else {
+      59 |     // Wait for navigation away from /login
+      60 |     await page.waitForFunction(() => !window.location.pathname.startsWith('/login'), { timeout: 15_000 });
+        at loginAs (/workspaces/ThriveAtHome/tests/e2e/helpers.ts:57:16)
+        at /workspaces/ThriveAtHome/tests/e2e/member-pages.spec.ts:52:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/member-pages-TC-M001–M034--d9702--dashboard-fraud-protection-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/member-pages-TC-M001–M034--d9702--dashboard-fraud-protection-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/member-pages-TC-M001–M034--d9702--dashboard-fraud-protection-chromium/error-context.md
+
+  14) [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M015 — /dashboard/addons 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard**" until "load"
+    ============================================================
+
+       at helpers.ts:57
+
+      55 |
+      56 |   if (expectedPath) {
+    > 57 |     await page.waitForURL(`**${expectedPath}**`, { timeout: 15_000 });
+         |                ^
+      58 |   } else {
+      59 |     // Wait for navigation away from /login
+      60 |     await page.waitForFunction(() => !window.location.pathname.startsWith('/login'), { timeout: 15_000 });
+        at loginAs (/workspaces/ThriveAtHome/tests/e2e/helpers.ts:57:16)
+        at /workspaces/ThriveAtHome/tests/e2e/member-pages.spec.ts:52:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/member-pages-TC-M001–M034--4823c--TC-M015-—-dashboard-addons-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/member-pages-TC-M001–M034--4823c--TC-M015-—-dashboard-addons-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/member-pages-TC-M001–M034--4823c--TC-M015-—-dashboard-addons-chromium/error-context.md
+
+  15) [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M017 — /dashboard/vault 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard**" until "load"
+    ============================================================
+
+       at helpers.ts:57
+
+      55 |
+      56 |   if (expectedPath) {
+    > 57 |     await page.waitForURL(`**${expectedPath}**`, { timeout: 15_000 });
+         |                ^
+      58 |   } else {
+      59 |     // Wait for navigation away from /login
+      60 |     await page.waitForFunction(() => !window.location.pathname.startsWith('/login'), { timeout: 15_000 });
+        at loginAs (/workspaces/ThriveAtHome/tests/e2e/helpers.ts:57:16)
+        at /workspaces/ThriveAtHome/tests/e2e/member-pages.spec.ts:52:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/member-pages-TC-M001–M034--060f3-d-TC-M017-—-dashboard-vault-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/member-pages-TC-M001–M034--060f3-d-TC-M017-—-dashboard-vault-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/member-pages-TC-M001–M034--060f3-d-TC-M017-—-dashboard-vault-chromium/error-context.md
+
+  16) [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M023 — /dashboard/medicare-help 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard**" until "load"
+    ============================================================
+
+       at helpers.ts:57
+
+      55 |
+      56 |   if (expectedPath) {
+    > 57 |     await page.waitForURL(`**${expectedPath}**`, { timeout: 15_000 });
+         |                ^
+      58 |   } else {
+      59 |     // Wait for navigation away from /login
+      60 |     await page.waitForFunction(() => !window.location.pathname.startsWith('/login'), { timeout: 15_000 });
+        at loginAs (/workspaces/ThriveAtHome/tests/e2e/helpers.ts:57:16)
+        at /workspaces/ThriveAtHome/tests/e2e/member-pages.spec.ts:52:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/member-pages-TC-M001–M034--c7bab-3-—-dashboard-medicare-help-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/member-pages-TC-M001–M034--c7bab-3-—-dashboard-medicare-help-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/member-pages-TC-M001–M034--c7bab-3-—-dashboard-medicare-help-chromium/error-context.md
+
+  17) [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M030 — /dashboard/pets 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard**" until "load"
+    ============================================================
+
+       at helpers.ts:57
+
+      55 |
+      56 |   if (expectedPath) {
+    > 57 |     await page.waitForURL(`**${expectedPath}**`, { timeout: 15_000 });
+         |                ^
+      58 |   } else {
+      59 |     // Wait for navigation away from /login
+      60 |     await page.waitForFunction(() => !window.location.pathname.startsWith('/login'), { timeout: 15_000 });
+        at loginAs (/workspaces/ThriveAtHome/tests/e2e/helpers.ts:57:16)
+        at /workspaces/ThriveAtHome/tests/e2e/member-pages.spec.ts:52:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/member-pages-TC-M001–M034--47673-ad-TC-M030-—-dashboard-pets-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/member-pages-TC-M001–M034--47673-ad-TC-M030-—-dashboard-pets-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/member-pages-TC-M001–M034--47673-ad-TC-M030-—-dashboard-pets-chromium/error-context.md
+
+  18) [chromium] › tests/e2e/member-pages.spec.ts:157:1 › TC-M005 — /dashboard/communities shows ≥ 20 circles 
+
+    TimeoutError: page.waitForURL: Timeout 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard**" until "load"
+    ============================================================
+
+       at helpers.ts:57
+
+      55 |
+      56 |   if (expectedPath) {
+    > 57 |     await page.waitForURL(`**${expectedPath}**`, { timeout: 15_000 });
+         |                ^
+      58 |   } else {
+      59 |     // Wait for navigation away from /login
+      60 |     await page.waitForFunction(() => !window.location.pathname.startsWith('/login'), { timeout: 15_000 });
+        at loginAs (/workspaces/ThriveAtHome/tests/e2e/helpers.ts:57:16)
+        at /workspaces/ThriveAtHome/tests/e2e/member-pages.spec.ts:158:3
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/member-pages-TC-M005-—-das-cee87-munities-shows-≥-20-circles-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/member-pages-TC-M005-—-das-cee87-munities-shows-≥-20-circles-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/member-pages-TC-M005-—-das-cee87-munities-shows-≥-20-circles-chromium/error-context.md
+
+  19) [chromium] › tests/e2e/new-sections.spec.ts:102:1 › TC-CVP001 — Employer admin: /employer-admin shows volunteer/hours content 
+
+    TimeoutError: page.goto: Timeout 20000ms exceeded.
+    Call log:
+      - navigating to "https://thrive-at-home-pied.vercel.app/employer-admin", waiting until "load"
+
+
+      103 |   await loginAs(page, ACCOUNTS.employer).catch(() => {});
+      104 |   if (page.url().includes('/login')) { console.warn('TC-CVP001: employer@test.com not seeded'); return; }
+    > 105 |   await page.goto(`${BASE}/employer-admin`);
+          |              ^
+      106 |   await page.waitForLoadState('networkidle');
+      107 |   if (page.url().includes('/login')) { console.warn('TC-CVP001: /employer-admin redirected'); return; }
+      108 |   expect(page.url()).not.toContain('/500');
+        at /workspaces/ThriveAtHome/tests/e2e/new-sections.spec.ts:105:14
+
+    attachment #1: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/new-sections-TC-CVP001-—-E-f97d1-ows-volunteer-hours-content-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/new-sections-TC-CVP001-—-E-f97d1-ows-volunteer-hours-content-chromium/error-context.md
+
+  20) [chromium] › tests/e2e/new-sections.spec.ts:137:1 › TC-PEPM002 — Employer admin: /employer-admin shows member count 
+
+    TimeoutError: page.goto: Timeout 20000ms exceeded.
+    Call log:
+      - navigating to "https://thrive-at-home-pied.vercel.app/employer-admin", waiting until "load"
+
+
+      138 |   await loginAs(page, ACCOUNTS.employer).catch(() => {});
+      139 |   if (page.url().includes('/login')) { console.warn('TC-PEPM002: employer@test.com not seeded'); return; }
+    > 140 |   await page.goto(`${BASE}/employer-admin`);
+          |              ^
+      141 |   await page.waitForLoadState('networkidle');
+      142 |   if (page.url().includes('/login')) { console.warn('TC-PEPM002: /employer-admin redirected'); return; }
+      143 |   expect(page.url()).not.toContain('/500');
+        at /workspaces/ThriveAtHome/tests/e2e/new-sections.spec.ts:140:14
+
+    attachment #1: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/new-sections-TC-PEPM002-—--0d4b4-er-admin-shows-member-count-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/new-sections-TC-PEPM002-—--0d4b4-er-admin-shows-member-count-chromium/error-context.md
+
+  21) [chromium] › tests/e2e/new-sections.spec.ts:221:1 › TC-A11Y001 — /dashboard: main and nav landmarks present 
+
+    Error: TC-A11Y001: <main> landmark missing
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 1
+    Received:    0
+
+      226 |   expect(page.url()).not.toContain('/500');
+      227 |   const mainCount = await page.locator('main').count();
+    > 228 |   expect(mainCount, 'TC-A11Y001: <main> landmark missing').toBeGreaterThanOrEqual(1);
+          |                                                            ^
+      229 |   const navCount = await page.locator('nav, [role="navigation"]').count();
+      230 |   if (navCount === 0) console.warn('TC-A11Y001: No <nav> or role=navigation found on /dashboard');
+      231 | });
+        at /workspaces/ThriveAtHome/tests/e2e/new-sections.spec.ts:228:60
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/new-sections-TC-A11Y001-—--1b4ab-n-and-nav-landmarks-present-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/new-sections-TC-A11Y001-—--1b4ab-n-and-nav-landmarks-present-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/new-sections-TC-A11Y001-—--1b4ab-n-and-nav-landmarks-present-chromium/error-context.md
+
+  22) [chromium] › tests/e2e/plan-entitlements-deep.spec.ts:8:1 › TC-PED001 — /api/entitlements returns plan_tier for member 
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected value: "basic"
+    Received array: ["basics", "connect", "complete", "premier"]
+
+      14 |     const body = await res.json();
+      15 |     expect(body).toHaveProperty('plan_tier');
+    > 16 |     expect(['basics', 'connect', 'complete', 'premier']).toContain(body.plan_tier);
+         |                                                          ^
+      17 |   }
+      18 | });
+      19 |
+        at /workspaces/ThriveAtHome/tests/e2e/plan-entitlements-deep.spec.ts:16:58
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/plan-entitlements-deep-TC--5c2a6-eturns-plan-tier-for-member-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/plan-entitlements-deep-TC--5c2a6-eturns-plan-tier-for-member-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/plan-entitlements-deep-TC--5c2a6-eturns-plan-tier-for-member-chromium/error-context.md
+
+  23) [chromium] › tests/e2e/volunteer-portal-full.spec.ts:166:1 › TC-VPF050 — /employer-admin loads corporate tier content 
+
+    TimeoutError: page.goto: Timeout 20000ms exceeded.
+    Call log:
+      - navigating to "https://thrive-at-home-pied.vercel.app/employer-admin", waiting until "load"
+
+
+      167 |   await loginAs(page, ACCOUNTS.employer);
+      168 |   if (page.url().includes('/login')) { console.warn('TC-VPF050: employer login failed'); return; }
+    > 169 |   await page.goto(`${BASE}/employer-admin`);
+          |              ^
+      170 |   await page.waitForLoadState('networkidle');
+      171 |   if (page.url().includes('/login')) { console.warn('TC-VPF050: redirected to login'); return; }
+      172 |   const content = await page.content();
+        at /workspaces/ThriveAtHome/tests/e2e/volunteer-portal-full.spec.ts:169:14
+
+    attachment #1: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/volunteer-portal-full-TC-V-7498f-oads-corporate-tier-content-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/volunteer-portal-full-TC-V-7498f-oads-corporate-tier-content-chromium/error-context.md
+
+  24) [chromium] › tests/e2e/volunteer-portal-full.spec.ts:176:1 › TC-VPF051 — employer-admin shows corporate volunteer tier progress 
+
+    TimeoutError: page.goto: Timeout 20000ms exceeded.
+    Call log:
+      - navigating to "https://thrive-at-home-pied.vercel.app/employer-admin", waiting until "load"
+
+
+      177 |   await loginAs(page, ACCOUNTS.employer);
+      178 |   if (page.url().includes('/login')) { console.warn('TC-VPF051: login failed'); return; }
+    > 179 |   await page.goto(`${BASE}/employer-admin`);
+          |              ^
+      180 |   await page.waitForLoadState('networkidle');
+      181 |   if (page.url().includes('/login')) { console.warn('TC-VPF051: redirected'); return; }
+      182 |   const content = await page.content();
+        at /workspaces/ThriveAtHome/tests/e2e/volunteer-portal-full.spec.ts:179:14
+
+    attachment #1: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/volunteer-portal-full-TC-V-fa293-ate-volunteer-tier-progress-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/volunteer-portal-full-TC-V-fa293-ate-volunteer-tier-progress-chromium/error-context.md
+
+  25) [chromium] › tests/e2e/workflow-b2b.spec.ts:40:1 › TC-WB005 — employer admin portal loads ────
+
+    TimeoutError: page.goto: Timeout 20000ms exceeded.
+    Call log:
+      - navigating to "https://thrive-at-home-pied.vercel.app/employer-admin", waiting until "load"
+
+
+      41 |   await loginAs(page, ACCOUNTS.employer);
+      42 |   if (page.url().includes('/login')) { console.warn('TC-WB005: employer not seeded'); return; }
+    > 43 |   await page.goto(`${BASE}/employer-admin`);
+         |              ^
+      44 |   await page.waitForLoadState('networkidle');
+      45 |   if (page.url().includes('/login')) { console.warn('TC-WB005: redirected to login'); return; }
+      46 |   expect(page.url()).not.toContain('/login');
+        at /workspaces/ThriveAtHome/tests/e2e/workflow-b2b.spec.ts:43:14
+
+    attachment #1: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/workflow-b2b-TC-WB005-—-employer-admin-portal-loads-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/workflow-b2b-TC-WB005-—-employer-admin-portal-loads-chromium/error-context.md
+
+  26) [chromium] › tests/e2e/workflow-safety.spec.ts:41:1 › TC-WS004 — /api/home-safety/assessment responds 
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected value: 405
+    Received array: [200, 401]
+
+      42 |   const res = await page.request.get(`${BASE}/api/home-safety/assessment`);
+      43 |   if (res.status() === 404) { console.warn('TC-WS004: /api/home-safety/assessment not found'); return; }
+    > 44 |   expect([200, 401]).toContain(res.status());
+         |                      ^
+      45 | });
+      46 |
+      47 | test('TC-WS005 — /dashboard/fraud-protection loads without 500', async ({ page }) => {
+        at /workspaces/ThriveAtHome/tests/e2e/workflow-safety.spec.ts:44:22
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/workflow-safety-TC-WS004-—-ec058--safety-assessment-responds-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/workflow-safety-TC-WS004-—-ec058--safety-assessment-responds-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/workflow-safety-TC-WS004-—-ec058--safety-assessment-responds-chromium/error-context.md
+
+  26 failed
+    [chromium] › tests/e2e/admin-portal-deep.spec.ts:235:1 › TC-B2B012 — /employer-admin loads with invite UI 
+    [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — employer@test.com routes to /employer-admin 
+    [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — k12admin@test.com routes to /school-admin 
+    [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Employer Admin (employer@test.com) → /employer-admin 
+    [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › K-12 Admin (k12admin@test.com) → /school-admin 
+    [chromium] › tests/e2e/b2b-portals-deep.spec.ts:93:1 › TC-B2BD030 — /employer-admin loads with corporate program data 
+    [chromium] › tests/e2e/b2b-portals-deep.spec.ts:103:1 › TC-B2BD031 — employer-admin shows 3-tier corporate progress (Bronze/Silver/Gold) 
+    [chromium] › tests/e2e/b2b-portals.spec.ts:13:1 › TC-B2B010 — /employer-admin loads ────────────
+    [chromium] › tests/e2e/member-features-deep.spec.ts:33:1 › TC-M040 — Birthday arc cron: POST /api/cron/birthday-arc → 200/207 
+    [chromium] › tests/e2e/member-health-care.spec.ts:53:1 › TC-MHC005 — /dashboard/trusted-advisors loads 
+    [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M005 — /dashboard/communities 
+    [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M009 — /dashboard/grief-circles 
+    [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M012 — /dashboard/fraud-protection 
+    [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M015 — /dashboard/addons 
+    [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M017 — /dashboard/vault 
+    [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M023 — /dashboard/medicare-help 
+    [chromium] › tests/e2e/member-pages.spec.ts:56:5 › TC-M001–M034 — member dashboard pages load › TC-M030 — /dashboard/pets 
+    [chromium] › tests/e2e/member-pages.spec.ts:157:1 › TC-M005 — /dashboard/communities shows ≥ 20 circles 
+    [chromium] › tests/e2e/new-sections.spec.ts:102:1 › TC-CVP001 — Employer admin: /employer-admin shows volunteer/hours content 
+    [chromium] › tests/e2e/new-sections.spec.ts:137:1 › TC-PEPM002 — Employer admin: /employer-admin shows member count 
+    [chromium] › tests/e2e/new-sections.spec.ts:221:1 › TC-A11Y001 — /dashboard: main and nav landmarks present 
+    [chromium] › tests/e2e/plan-entitlements-deep.spec.ts:8:1 › TC-PED001 — /api/entitlements returns plan_tier for member 
+    [chromium] › tests/e2e/volunteer-portal-full.spec.ts:166:1 › TC-VPF050 — /employer-admin loads corporate tier content 
+    [chromium] › tests/e2e/volunteer-portal-full.spec.ts:176:1 › TC-VPF051 — employer-admin shows corporate volunteer tier progress 
+    [chromium] › tests/e2e/workflow-b2b.spec.ts:40:1 › TC-WB005 — employer admin portal loads ──────
+    [chromium] › tests/e2e/workflow-safety.spec.ts:41:1 › TC-WS004 — /api/home-safety/assessment responds 
+  767 passed (14.5m)
