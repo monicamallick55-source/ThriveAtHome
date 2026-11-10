@@ -17,6 +17,7 @@ export default function SignupPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
+    if (!/^[^@]+@[^@]+\.[^@]+$/.test(email)) { setError('Please enter a valid email address.'); return }
     try {
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
