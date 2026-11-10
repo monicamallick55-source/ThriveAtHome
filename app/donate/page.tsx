@@ -1,31 +1,71 @@
+'use client'
+import { useState } from 'react'
+
+const AMOUNTS = [10, 25, 50, 100, 250]
+
 export default function DonatePage() {
+  const [selected, setSelected] = useState<number | null>(25)
+  const [custom, setCustom] = useState('')
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [submitted, setSubmitted] = useState(false)
+
+  const amount = custom ? parseFloat(custom) : selected
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setSubmitted(true)
+  }
+
   return (
-    <main style={{ maxWidth: 600, margin: '0 auto', padding: '2rem 1rem' }}>
-      <h1>Support ThriveAtHome</h1>
-      <p>Your donation helps seniors live with independence, dignity, and joy.</p>
-      <p style={{ color: '#666', fontSize: '0.875rem' }}>
-        ThriveAtHome is a for-profit company. Donations are <strong>not tax-deductible</strong>.
-      </p>
-      <div style={{ display: 'flex', gap: '0.75rem', margin: '1.5rem 0', flexWrap: 'wrap' }}>
-        <button>$25</button>
-        <button>$50</button>
-        <button>$100</button>
-        <button>$250</button>
-        <button>Custom</button>
+    <main className="min-h-screen bg-gray-50 py-12 px-4">
+      <div className="max-w-lg mx-auto bg-white rounded-2xl shadow p-8">
+        <h1 className="text-3xl font-bold mb-2 text-gray-900">Support Thrive@Home</h1>
+        <p className="text-gray-600 mb-6">Your donation helps seniors live independently and with dignity.</p>
+        {submitted ? (
+          <div className="text-center py-8">
+            <div className="text-5xl mb-4">🙏</div>
+            <h2 className="text-xl font-semibold mb-2">Thank you for your support!</h2>
+            <p className="text-gray-600">Your donation of ${amount} means the world to our community.</p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit}>
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-3">Select Amount</label>
+              <div className="grid grid-cols-3 gap-2 mb-3">
+                {AMOUNTS.map(a => (
+                  <button key={a} type="button"
+                    onClick={() => { setSelected(a); setCustom('') }}
+                    className={`py-2 rounded-lg border text-sm font-medium transition ${selected === a && !custom ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-200 text-gray-700 hover:border-blue-400'}`}>
+                    ${a}
+                  </button>
+                ))}
+              </div>
+              <input type="number" placeholder="Custom amount" value={custom}
+                onChange={e => { setCustom(e.target.value); setSelected(null) }}
+                aria-label="amount"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <input type="text" value={name} onChange={e => setName(e.target.value)}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" placeholder="Your name" />
+            </div>
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" placeholder="your@email.com" />
+            </div>
+            <button type="submit" disabled={!amount || amount <= 0}
+              className="w-full bg-blue-600 text-white rounded-lg py-3 font-semibold text-sm disabled:opacity-50">
+              Donate ${amount || '—'}
+            </button>
+            <p className="mt-4 text-xs text-gray-500 text-center">
+              Thrive@Home is a for-profit company. Donations are <strong>not tax-deductible</strong>.
+            </p>
+          </form>
+        )}
       </div>
-      <form>
-        <div style={{ marginBottom: '1rem' }}>
-          <label>Name<br/>
-            <input type="text" name="name" placeholder="Your name" style={{ width: '100%' }} />
-          </label>
-        </div>
-        <div style={{ marginBottom: '1rem' }}>
-          <label>Email<br/>
-            <input type="email" name="email" placeholder="your@email.com" style={{ width: '100%' }} />
-          </label>
-        </div>
-        <button type="submit">Donate Now</button>
-      </form>
     </main>
   )
 }
