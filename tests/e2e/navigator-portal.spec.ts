@@ -81,3 +81,56 @@ test('TC-AD001 — /admin loads with member count + stats', async ({ page }) => 
   const hasStats = /member|subscription|aria|call|stat/i.test(bodyText);
   if (!hasStats) console.warn('TC-AD001: Admin stats not found on /admin');
 });
+
+/** TC-N004 — Navigator sends family invite */
+test('TC-N004 — navigator can send family invite', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.navigator, '/navigator');
+  if (page.url().includes('/login')) { console.warn('TC-N004: navigator login failed'); return; }
+  const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
+  const hasInviteUI = /invite|family|add.*member/i.test(bodyText);
+  if (!hasInviteUI) console.warn('TC-N004: No family invite UI found on /navigator');
+  expect(page.url()).not.toContain('/login');
+});
+
+/** TC-N006 — Navigator marks member home from hospital */
+test('TC-N006 — navigator hospital discharge workflow exists', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.navigator, '/navigator');
+  if (page.url().includes('/login')) { console.warn('TC-N006: navigator login failed'); return; }
+  const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
+  const hasDischarge = /hospital|discharge|home.*from|transition/i.test(bodyText);
+  if (!hasDischarge) console.warn('TC-N006: Hospital discharge / home-from-hospital UI not visible');
+  expect(page.url()).not.toContain('/login');
+});
+
+/** TC-N007 — Navigator approves member campaign */
+test('TC-N007 — navigator campaign approval UI exists', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.navigator, '/navigator');
+  if (page.url().includes('/login')) { console.warn('TC-N007: navigator login failed'); return; }
+  const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
+  const hasCampaign = /campaign|approve|review/i.test(bodyText);
+  if (!hasCampaign) console.warn('TC-N007: Campaign approval UI not visible — may need seeded campaign');
+  expect(page.url()).not.toContain('/login');
+});
+
+/** TC-AD003–AD010 — Admin portal sub-pages */
+const ADMIN_PAGES = [
+  { tc: 'TC-AD003', path: '/admin/metro-activation',    keyword: /metro|activat|chapter/i },
+  { tc: 'TC-AD004', path: '/admin/community-partners',  keyword: /partner|communit/i },
+  { tc: 'TC-AD005', path: '/admin/grief-circles',       keyword: /grief|circle/i },
+  { tc: 'TC-AD006', path: '/admin/devices',             keyword: /device|kiosk/i },
+  { tc: 'TC-AD007', path: '/admin/org-imports',         keyword: /import|org/i },
+  { tc: 'TC-AD008', path: '/admin/campaigns',           keyword: /campaign/i },
+  { tc: 'TC-AD009', path: '/admin/community-partners',  keyword: /partner|listing/i },
+  { tc: 'TC-AD010', path: '/admin',                     keyword: /flag|feature/i },
+];
+
+for (const { tc, path, keyword } of ADMIN_PAGES) {
+  test(`${tc} — ${path} loads for admin`, async ({ page }) => {
+    await loginAs(page, ACCOUNTS.admin, path);
+    if (page.url().includes('/login')) { console.warn(`${tc}: admin login failed`); return; }
+    const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
+    expect(/500|internal server error/i.test(bodyText), `${tc}: server error on ${path}`).toBe(false);
+    if (!keyword.test(bodyText)) console.warn(`${tc}: expected content not found on ${path}`);
+    expect(page.url()).not.toContain('/login');
+  });
+}

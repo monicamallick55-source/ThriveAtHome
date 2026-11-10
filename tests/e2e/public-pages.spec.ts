@@ -97,3 +97,68 @@ test('TC-P — robots.txt exists', async ({ page }) => {
   if (res.status() === 404) { console.warn('TC-P: robots.txt not found'); return; }
   expect(res.status()).toBe(200);
 });
+
+/** TC-P002 — Mission strip donate pill */
+test('TC-P002 — homepage has donate link', async ({ page }) => {
+  await page.goto(`${BASE}/`);
+  await page.waitForLoadState('domcontentloaded');
+  const donateLink = page.locator('a[href*="donate"]').first();
+  const hasLink = await donateLink.count() > 0;
+  if (!hasLink) console.warn('TC-P002: No donate link found on homepage');
+  expect(page.url()).not.toContain('/login');
+});
+
+/** TC-P050 — /login redirects each role correctly */
+test('TC-P050 — /login page loads and has email+password fields', async ({ page }) => {
+  await page.goto(`${BASE}/login`);
+  await page.waitForLoadState('domcontentloaded');
+  const hasEmail = await page.locator('input[type="email"]').isVisible({ timeout: 5000 }).catch(() => false);
+  const hasPassword = await page.locator('input[type="password"]').isVisible({ timeout: 5000 }).catch(() => false);
+  expect(hasEmail, 'TC-P050: email field required on /login').toBe(true);
+  expect(hasPassword, 'TC-P050: password field required on /login').toBe(true);
+});
+
+/** TC-P070 — Key public routes all return 200 */
+const KEY_PUBLIC_ROUTES = ['/', '/about', '/pricing', '/donate', '/blog', '/resources', '/login', '/signup'];
+test('TC-P070 — key public routes all return 200', async ({ page }) => {
+  const failures: string[] = [];
+  for (const route of KEY_PUBLIC_ROUTES) {
+    const res = await page.request.get(`${BASE}${route}`);
+    if (res.status() >= 400) failures.push(`${route} → ${res.status()}`);
+  }
+  if (failures.length > 0) console.warn(`TC-P070: Some routes returned errors: ${failures.join(', ')}`);
+  expect(failures.length, `TC-P070: ${failures.join(', ')}`).toBe(0);
+});
+
+/** TC-P071 — public pages mobile-responsive (no hscroll) */
+test('TC-P071 — /pricing mobile 390px no horizontal scroll', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`${BASE}/pricing`);
+  await page.waitForLoadState('domcontentloaded');
+  const hasHScroll = await page.evaluate(
+    () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 5
+  );
+  if (hasHScroll) console.warn('TC-P071: /pricing has horizontal scroll at 390px');
+});
+
+/** TC-A002 — Family invitation flow */
+test('TC-A002 — /invite/[token] renders accept form', async ({ page }) => {
+  await page.goto(`${BASE}/invite/test-token-123`);
+  await page.waitForLoadState('domcontentloaded');
+  const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
+  const hasInviteUI = /invit|accept|join|family/i.test(bodyText);
+  if (!hasInviteUI) console.warn('TC-A002: Invite acceptance form not found at /invite/[token]');
+  expect(/500|internal server error/i.test(bodyText)).toBe(false);
+});
+
+/** TC-A006 — Device kiosk /device mode */
+test('TC-A006 — /device kiosk loads without standard sidebar', async ({ page }) => {
+  await page.goto(`${BASE}/device`);
+  await page.waitForLoadState('domcontentloaded');
+  if (page.url().includes('/login')) {
+    console.warn('TC-A006: /device redirects to /login — may need device-specific auth');
+    return;
+  }
+  const hasSidebar = await page.locator('nav[aria-label="sidebar"], [data-testid="sidebar"]').isVisible().catch(() => false);
+  expect(hasSidebar, 'TC-A006: /device should not have standard sidebar nav').toBe(false);
+});

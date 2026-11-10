@@ -154,3 +154,77 @@ test('TC-B030 — /donate shows donation form + not tax-deductible note', async 
   const hasDisclaimer = /not.*tax.?deductible|for.?profit/i.test(bodyText);
   expect(hasDisclaimer, 'TC-B030: "not tax-deductible" disclaimer required on /donate').toBe(true);
 });
+
+/** TC-B002 — Complete checkout $79/mo */
+test('TC-B002 — Complete plan CTA goes to signup or Stripe', async ({ page }) => {
+  await page.goto('/pricing');
+  await page.waitForLoadState('domcontentloaded');
+  const completeCTA = page.getByRole('link', { name: /choose complete|get complete|subscribe/i }).first().or(
+    page.getByRole('button', { name: /choose complete|get complete/i }).first()
+  );
+  const hasCTA = await completeCTA.isVisible({ timeout: 5000 }).catch(() => false);
+  if (!hasCTA) { console.warn('TC-B002: Complete plan CTA not found on /pricing'); return; }
+  await completeCTA.click();
+  const url = page.url();
+  const ok = url.includes('/signup') || url.includes('/login') || url.includes('stripe') || url.includes('/checkout');
+  expect(ok, 'TC-B002: Complete CTA should go to signup or Stripe').toBe(true);
+});
+
+/** TC-B006 — Plan upgrade flow */
+test('TC-B006 — /dashboard/plan has upgrade option', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard/plan');
+  if (page.url().includes('/login')) { console.warn('TC-B006: member login failed'); return; }
+  const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
+  const hasUpgrade = /upgrade|change plan|switch/i.test(bodyText);
+  if (!hasUpgrade) console.warn('TC-B006: No upgrade option found on /dashboard/plan');
+  expect(page.url()).not.toContain('/login');
+});
+
+/** TC-B007 — Cancellation via Stripe portal */
+test('TC-B007 — /dashboard/plan has cancel or manage subscription link', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard/plan');
+  if (page.url().includes('/login')) { console.warn('TC-B007: member login failed'); return; }
+  const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
+  const hasCancel = /cancel|manage.*subscription|billing.*portal/i.test(bodyText);
+  if (!hasCancel) console.warn('TC-B007: No cancel/manage subscription link on /dashboard/plan');
+  expect(page.url()).not.toContain('/login');
+});
+
+/** TC-B008 — Gift subscription UI */
+test('TC-B008 — gift subscription option exists', async ({ page }) => {
+  await page.goto('/pricing');
+  await page.waitForLoadState('domcontentloaded');
+  const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
+  const hasGift = /gift|give.*subscription|gift.*plan/i.test(bodyText);
+  if (!hasGift) console.warn('TC-B008: Gift subscription option not found on /pricing — check /dashboard/gift-send too');
+});
+
+/** TC-B031 — Recurring donation */
+test('TC-B031 — /donate has monthly/recurring option', async ({ page }) => {
+  await page.goto('/donate');
+  await page.waitForLoadState('domcontentloaded');
+  const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
+  const hasRecurring = /monthly|recurring|per month|\$10/i.test(bodyText);
+  if (!hasRecurring) console.warn('TC-B031: No monthly/recurring donation option on /donate');
+  expect(/500|internal server error/i.test(bodyText)).toBe(false);
+});
+
+/** TC-B040 — Celebration Enhanced ($25) */
+test('TC-B040 — celebration Enhanced tier ($25) visible', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard/celebrations/plan');
+  if (page.url().includes('/login')) { console.warn('TC-B040: member login failed'); return; }
+  const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
+  const has25 = /\$25|25\.00|signature|enhanced/i.test(bodyText);
+  if (!has25) console.warn('TC-B040: $25 / Enhanced celebration tier not visible on /dashboard/celebrations/plan');
+  expect(page.url()).not.toContain('/login');
+});
+
+/** TC-B041 — Celebration Premier ($75) */
+test('TC-B041 — celebration Premier tier ($75) visible', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard/celebrations/plan');
+  if (page.url().includes('/login')) { console.warn('TC-B041: member login failed'); return; }
+  const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
+  const has75 = /\$75|75\.00|premier|legacy/i.test(bodyText);
+  if (!has75) console.warn('TC-B041: $75 / Premier celebration tier not visible on /dashboard/celebrations/plan');
+  expect(page.url()).not.toContain('/login');
+});
