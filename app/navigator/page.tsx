@@ -110,6 +110,21 @@ if (!['navigator', 'admin', 'super_admin'].includes(role)) redirect('/dashboard'
           )}
         </div>
 
+        {/* Home from Hospital */}
+        <div>
+          <h2 style={{ fontSize: '1rem', fontWeight: 700, color: '#374151', margin: '0 0 12px' }}>Home from Hospital</h2>
+          <div style={{ background: '#fff', border: '1px solid #fde68a', borderRadius: 12, padding: '20px 24px' }}>
+            <p style={{ margin: '0 0 12px', fontSize: '0.875rem', color: '#92400e' }}>
+              🏥 Mark a member as recently discharged from hospital to trigger care coordination tasks.
+            </p>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              <a href="/navigator/home-from-hospital" style={{ padding: '8px 16px', background: '#fef3c7', color: '#92400e', border: '1px solid #fde68a', borderRadius: 8, fontSize: '0.875rem', fontWeight: 600, textDecoration: 'none' }}>
+                Start hospital discharge workflow
+              </a>
+            </div>
+          </div>
+        </div>
+
         {/* Caseload */}
         <div>
           <h2 style={{ fontSize: '1rem', fontWeight: 700, color: '#374151', margin: '0 0 12px' }}>Caseload</h2>
