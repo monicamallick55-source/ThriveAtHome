@@ -43,7 +43,7 @@ test.describe('TC-A004 — 21 role login smoke tests', () => {
   test.describe.configure({ retries: 3 });
   for (const { key, portal, label } of ROLE_PORTAL_MAP) {
     test(`${label} (${ACCOUNTS[key].email}) → ${portal}`, async ({ page }) => {
-      await loginAs(page, ACCOUNTS[key]);
+      await loginAs(page, ACCOUNTS[key], portal);
 
       // Should land on the expected portal (or a sub-path of it)
       await expect(page).toHaveURL(new RegExp(portal.replace('/', '\\/').replace('-', '\\-') + '.*'), { timeout: 15_000 });
