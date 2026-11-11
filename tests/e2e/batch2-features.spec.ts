@@ -55,7 +55,7 @@ test('TC-TA002 — trusted advisors shows therapist, attorney, financial planner
   await loginAs(page, MEMBER_EMAIL, MEMBER_PASS)
   await page.goto(`${BASE}/dashboard/trusted-advisors`, { waitUntil: 'domcontentloaded' })
   if (page.url().includes('login')) return
-  const text = await page.textContent('body')
+  const text = await page.locator('body').innerText()
   expect(text).toMatch(/therapist|attorney|financial/i)
 })
 
@@ -63,7 +63,7 @@ test('TC-TA003 — chaplain shows "Request an introduction" not auto-shown', asy
   await loginAs(page, MEMBER_EMAIL, MEMBER_PASS)
   await page.goto(`${BASE}/dashboard/trusted-advisors`, { waitUntil: 'domcontentloaded' })
   if (page.url().includes('login')) return
-  const text = await page.textContent('body')
+  const text = await page.locator('body').innerText()
   // Chaplain should be present but gated
   expect(text).toMatch(/chaplain|spiritual/i)
   expect(text).toMatch(/request an introduction/i)
@@ -82,7 +82,7 @@ test('TC-TA005 — grief counselor is on-request only', async ({ page }) => {
   await loginAs(page, MEMBER_EMAIL, MEMBER_PASS)
   await page.goto(`${BASE}/dashboard/trusted-advisors`, { waitUntil: 'domcontentloaded' })
   if (page.url().includes('login')) return
-  const text = await page.textContent('body')
+  const text = await page.locator('body').innerText()
   expect(text).toMatch(/grief counselor/i)
 })
 
@@ -93,7 +93,7 @@ test('TC-NAV010 — /navigator shows hours tracking section', async ({ page }) =
   await loginAs(page, NAV_EMAIL, NAV_PASS)
   await page.goto(`${BASE}/navigator`, { waitUntil: 'domcontentloaded' })
   if (page.url().includes('login') || page.url().includes('dashboard')) return
-  const text = await page.textContent('body')
+  const text = await page.locator('body').innerText()
   expect(text).toMatch(/hours|caseload|task/i)
 })
 
@@ -101,7 +101,7 @@ test('TC-NAV011 — /navigator task queue section present', async ({ page }) => 
   await loginAs(page, NAV_EMAIL, NAV_PASS)
   await page.goto(`${BASE}/navigator`, { waitUntil: 'domcontentloaded' })
   if (page.url().includes('login') || page.url().includes('dashboard')) return
-  const text = await page.textContent('body')
+  const text = await page.locator('body').innerText()
   expect(text).toMatch(/task queue|open tasks/i)
 })
 
@@ -109,7 +109,7 @@ test('TC-NAV012 — /navigator caseload section present', async ({ page }) => {
   await loginAs(page, NAV_EMAIL, NAV_PASS)
   await page.goto(`${BASE}/navigator`, { waitUntil: 'domcontentloaded' })
   if (page.url().includes('login') || page.url().includes('dashboard')) return
-  const text = await page.textContent('body')
+  const text = await page.locator('body').innerText()
   expect(text).toMatch(/caseload|assigned members/i)
 })
 
@@ -245,7 +245,7 @@ test('TC-DV011 — GET /api/device returns devices array for member', async ({ p
 test('TC-DON001 — /donate loads without auth', async ({ page }) => {
   await page.goto(`${BASE}/donate`, { waitUntil: 'domcontentloaded' })
   expect(page.url()).not.toContain('500')
-  const text = await page.textContent('body')
+  const text = await page.locator('body').innerText()
   expect(text).toMatch(/donate|support|thriveat/i)
 })
 
@@ -257,7 +257,7 @@ test('TC-DON002 — /donate has amount selector buttons', async ({ page }) => {
 
 test('TC-DON003 — /donate has not-tax-deductible disclaimer', async ({ page }) => {
   await page.goto(`${BASE}/donate`, { waitUntil: 'domcontentloaded' })
-  const text = await page.textContent('body')
+  const text = await page.locator('body').innerText()
   expect(text).toMatch(/not tax.deductible|for-profit/i)
 })
 
@@ -347,7 +347,7 @@ test('TC-FAM010 — /dashboard/family has wellness summary section', async ({ pa
   await loginAs(page, MEMBER_EMAIL, MEMBER_PASS)
   await page.goto(`${BASE}/dashboard/family`, { waitUntil: 'domcontentloaded' })
   if (page.url().includes('login')) return
-  const text = await page.textContent('body')
+  const text = await page.locator('body').innerText()
   expect(text).toMatch(/wellness summary/i)
 })
 
@@ -355,7 +355,7 @@ test('TC-FAM011 — /dashboard/family has fraud protection card', async ({ page 
   await loginAs(page, MEMBER_EMAIL, MEMBER_PASS)
   await page.goto(`${BASE}/dashboard/family`, { waitUntil: 'domcontentloaded' })
   if (page.url().includes('login')) return
-  const text = await page.textContent('body')
+  const text = await page.locator('body').innerText()
   expect(text).toMatch(/fraud protection/i)
 })
 
@@ -363,7 +363,7 @@ test('TC-FAM012 — /dashboard/family has events calendar section', async ({ pag
   await loginAs(page, MEMBER_EMAIL, MEMBER_PASS)
   await page.goto(`${BASE}/dashboard/family`, { waitUntil: 'domcontentloaded' })
   if (page.url().includes('login')) return
-  const text = await page.textContent('body')
+  const text = await page.locator('body').innerText()
   expect(text).toMatch(/family events calendar/i)
 })
 
@@ -371,7 +371,7 @@ test('TC-FAM013 — /dashboard/family has mood timeline section', async ({ page 
   await loginAs(page, MEMBER_EMAIL, MEMBER_PASS)
   await page.goto(`${BASE}/dashboard/family`, { waitUntil: 'domcontentloaded' })
   if (page.url().includes('login')) return
-  const text = await page.textContent('body')
+  const text = await page.locator('body').innerText()
   expect(text).toMatch(/mood|how.*feeling/i)
 })
 
@@ -402,7 +402,7 @@ test('TC-ADD001 — /dashboard/addons has all 4 SKUs', async ({ page }) => {
   await loginAs(page, MEMBER_EMAIL, MEMBER_PASS)
   await page.goto(`${BASE}/dashboard/addons`, { waitUntil: 'domcontentloaded' })
   if (page.url().includes('login')) return
-  const text = await page.textContent('body')
+  const text = await page.locator('body').innerText()
   expect(text).toMatch(/extra.*navigator.*hours|navigator.*hours.*block/i)
   expect(text).toMatch(/premium.*content|content.*access/i)
   expect(text).toMatch(/enhanced.*fraud|fraud.*monitoring/i)
@@ -430,7 +430,7 @@ test('TC-EMP002 — /employer-admin shows volunteer hours section when accessibl
   await loginAs(page, ADMIN_EMAIL, ADMIN_PASS)
   await page.goto(`${BASE}/employer-admin`, { waitUntil: 'domcontentloaded' })
   if (page.url().includes('login') || page.url().includes('dashboard')) return
-  const text = await page.textContent('body')
+  const text = await page.locator('body').innerText()
   expect(text).toMatch(/volunteer hours|member count/i)
 })
 

@@ -55,7 +55,7 @@ test.describe('Member dashboard pages', () => {
 
       // Must not be a 500
       const status = page.url()
-      const bodyText = (await page.textContent('body') ?? '').toLowerCase()
+      const bodyText = (await page.locator('body').innerText() ?? '').toLowerCase()
       expect(bodyText).not.toContain('internal server error')
       expect(bodyText).not.toContain('application error')
 

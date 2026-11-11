@@ -12,7 +12,7 @@ test.describe('TC-P002 / TC-P005: Public page essentials', () => {
   })
   test('TC-P004 — Pricing page shows Basic $39 and Complete $79', async ({ page }) => {
     await page.goto(BASE + '/pricing', { waitUntil: 'domcontentloaded' })
-    const body = await page.textContent('body')
+    const body = await page.locator('body').innerText()
     expect(body).toMatch(/\$39|\$39\.00|39\/mo/)
     expect(body).toMatch(/\$79|\$79\.00|79\/mo/)
   })

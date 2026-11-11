@@ -77,7 +77,7 @@ test.describe('TC-N006: home_from_hospital achievement flow', () => {
     await page.waitForURL(/dashboard|navigator/, { timeout: 20000 })
 
     await page.goto(BASE + '/dashboard/navigator', { waitUntil: 'domcontentloaded' })
-    const body = await page.textContent('body')
+    const body = await page.locator('body').innerText()
 
     expect(body).not.toMatch(/500|internal server error/i)
     expect(body?.length).toBeGreaterThan(100)
