@@ -44,6 +44,7 @@ export async function loginAs(
   account: { email: string; password: string },
   expectedPath?: string,
 ): Promise<void> {
+  // Get token directly from Supabase API — no browser form needed
   const res = await page.request.post(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
     headers: { 'apikey': ANON_KEY, 'Content-Type': 'application/json' },
     data: { email: account.email, password: account.password },
@@ -52,6 +53,7 @@ export async function loginAs(
   const { access_token, refresh_token } = json
 
   if (!access_token) {
+    // Fall back to UI login
     await page.goto(BASE_URL + '/login')
     await page.locator('input[type="email"], input[name="email"], #email').first().fill(account.email)
     await page.locator('input[type="password"], input[name="password"], #password').first().fill(account.password)
@@ -64,16 +66,21 @@ export async function loginAs(
     return
   }
 
-  await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 20000 })
-  await page.evaluate(({ access_token, refresh_token }: { access_token: string, refresh_token: string }) => {
-    localStorage.setItem('sb-qdniskppkfqjmtpkftdt-auth-token', JSON.stringify({
-      access_token,
-      refresh_token,
-      token_type: 'bearer',
-      expires_in: 3600,
-      expires_at: Math.floor(Date.now() / 1000) + 3600,
-    }))
-  }, { access_token, refresh_token })
+  // Set cookies so Next.js middleware (SSR) sees the session
+  const expiresAt = Math.floor(Date.now() / 1000) + 3600
+  const sessionVal = JSON.stringify({ access_token, refresh_token, token_type: 'bearer', expires_in: 3600, expires_at: expiresAt })
+  const domain = new URL(BASE_URL).hostname
+
+  // Supabase SSR splits large cookies into chunks
+  await page.context().addCookies([
+    { name: 'sb-qdniskppkfqjmtpkftdt-auth-token', value: sessionVal.slice(0, 1800), domain, path: '/', expires: expiresAt, httpOnly: false, secure: true, sameSite: 'Lax' },
+    { name: 'sb-qdniskppkfqjmtpkftdt-auth-token.0', value: sessionVal.slice(0, 1800), domain, path: '/', expires: expiresAt, httpOnly: false, secure: true, sameSite: 'Lax' },
+    { name: 'sb-qdniskppkfqjmtpkftdt-auth-token.1', value: sessionVal.slice(1800), domain, path: '/', expires: expiresAt, httpOnly: false, secure: true, sameSite: 'Lax' },
+  ])
+
+  // Navigate to expected path with session already set
+  const dest = expectedPath ?? '/dashboard'
+  await page.goto(BASE_URL + dest, { waitUntil: 'domcontentloaded', timeout: 20000 })
 }
 
 export async function assertPageLoads(page: Page, path: string): Promise<number> {
