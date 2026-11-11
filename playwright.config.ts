@@ -11,6 +11,7 @@ const BASE_URL = process.env.BASE_URL || 'https://thrive-at-home-pied.vercel.app
 
 export default defineConfig({
   testDir: './tests/e2e',
+  globalSetup: './tests/e2e/global-setup.ts',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -29,18 +30,15 @@ export default defineConfig({
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
-    // Reasonable timeouts for a Vercel production deployment
     navigationTimeout: 20_000,
     actionTimeout: 10_000,
   },
 
   projects: [
-    // Desktop Chrome — primary
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
-    // Mobile viewport — for TC-P071, TC-PERF002
     {
       name: 'mobile-chrome',
       use: { ...devices['Pixel 5'] },
