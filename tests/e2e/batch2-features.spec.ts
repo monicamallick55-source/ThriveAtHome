@@ -30,8 +30,8 @@ for (const pathway of LT_PATHWAYS) {
     if (res.status() === 200) {
       const json = await res.json()
       expect(json).toHaveProperty('pathway', pathway)
-      expect(json).toHaveProperty('title')
-      expect(json).toHaveProperty('resources')
+      expect(json).toHaveProperty('name')
+      expect(json).toHaveProperty('steps')
     }
   })
 }
