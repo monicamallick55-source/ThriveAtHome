@@ -5,6 +5,7 @@ const CIRCLES = [
   'Grandparents Network','Veterans Circle','Faith & Reflection','Tech Help Group','Grief Support Circle',
   'Fitness Friends','Nature Explorers','Creative Writers','Trivia Team','Volunteer Corps',
   'Pet Lovers','Language Exchange','History Buffs','Dance Enthusiasts','Wellness Warriors',
+  'Professional Identity','LGBTQ+ Seniors','Cultural Heritage','Caregivers Circle','Home Sharing Network',
 ]
 export default function CommunitiesPage() {
   return (
@@ -13,7 +14,12 @@ export default function CommunitiesPage() {
       <p>Join circles of members who share your interests.</p>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(200px,1fr))', gap: '1rem', marginTop: '1.5rem' }}>
         {CIRCLES.map(name => (
-          <div key={name} data-community-circle={name} style={{ border: '1px solid #e5e7eb', borderRadius: 8, padding: '1rem' }}>
+          <div key={name} data-community-circle={name} data-tags={
+            name === 'Professional Identity' ? 'profession' :
+            name === 'Veterans Circle' ? 'veteran' :
+            name === 'LGBTQ+ Seniors' ? 'lgbtq' :
+            name === 'Grief Support Circle' ? 'grief' : ''
+          } style={{ border: '1px solid #e5e7eb', borderRadius: 8, padding: '1rem' }}>
             <h3 style={{ margin: '0 0 0.5rem' }}>{name}</h3>
             <button>Join Circle</button>
           </div>
