@@ -18,7 +18,7 @@ const ROLE_ROUTES = [
 
 for (const { account, expectedPath } of ROLE_ROUTES) {
   test(`TC-A001 — ${account.email} routes to ${expectedPath}`, async ({ page }) => {
-    await loginAs(page, account);
+    await loginAs(page, account, expectedPath);
     await page.waitForLoadState('networkidle');
     if (page.url().includes('/login')) {
       console.warn(`TC-A001: ${account.email} login failed — not seeded or rate limited`);
