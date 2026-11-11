@@ -1,6 +1,3 @@
-/**
- * Shared helpers for ThriveAtHome E2E test suite
- */
 import { Page, expect } from '@playwright/test';
 
 export const BASE_URL = process.env.BASE_URL || 'https://thrive-at-home-pied.vercel.app';
@@ -44,45 +41,35 @@ export async function loginAs(
   account: { email: string; password: string },
   expectedPath?: string,
 ): Promise<void> {
-  const res = await page.request.post(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
-    headers: { 'apikey': ANON_KEY, 'Content-Type': 'application/json' },
-    data: { email: account.email, password: account.password },
-  })
-  const json = await res.json()
-  const { access_token, refresh_token } = json
-
-  if (!access_token) {
-    await page.goto(BASE_URL + '/login')
-    await page.locator('input[type="email"], input[name="email"], #email').first().fill(account.email)
-    await page.locator('input[type="password"], input[name="password"], #password').first().fill(account.password)
-    await page.getByRole('button', { name: /sign in|log in/i }).click()
-    if (expectedPath) {
-      await page.waitForURL(`**${expectedPath}**`, { timeout: 20_000 })
-    } else {
-      await page.waitForFunction(() => !window.location.pathname.startsWith('/login'), { timeout: 20_000 })
-    }
-    return
-  }
-
-  const expiresAt = Math.floor(Date.now() / 1000) + 3600
-  const sessionVal = JSON.stringify({ access_token, refresh_token, token_type: 'bearer', expires_in: 3600, expires_at: expiresAt })
-  const domain = new URL(BASE_URL).hostname
-
-  await page.context().addCookies([
-    { name: 'sb-qdniskppkfqjmtpkftdt-auth-token', value: sessionVal.slice(0, 1800), domain, path: '/', expires: expiresAt, httpOnly: false, secure: true, sameSite: 'Lax' },
-    { name: 'sb-qdniskppkfqjmtpkftdt-auth-token.0', value: sessionVal.slice(0, 1800), domain, path: '/', expires: expiresAt, httpOnly: false, secure: true, sameSite: 'Lax' },
-    { name: 'sb-qdniskppkfqjmtpkftdt-auth-token.1', value: sessionVal.slice(1800), domain, path: '/', expires: expiresAt, httpOnly: false, secure: true, sameSite: 'Lax' },
-  ])
-
+  // If we have an expectedPath, inject cookie and go directly — fast path
   if (expectedPath) {
-    // Navigate directly to the expected path
-    await page.goto(BASE_URL + expectedPath, { waitUntil: 'domcontentloaded', timeout: 20000 })
-  } else {
-    // No expected path — hit /login so the app redirects to the role's default landing page
-    await page.goto(BASE_URL + '/login', { waitUntil: 'domcontentloaded', timeout: 20000 })
-    // Wait for redirect away from /login
-    await page.waitForFunction(() => !window.location.pathname.startsWith('/login'), { timeout: 15000 })
+    const res = await page.request.post(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+      headers: { 'apikey': ANON_KEY, 'Content-Type': 'application/json' },
+      data: { email: account.email, password: account.password },
+    })
+    const json = await res.json()
+    const { access_token, refresh_token } = json
+    if (access_token) {
+      const expiresAt = Math.floor(Date.now() / 1000) + 3600
+      const sessionVal = JSON.stringify({ access_token, refresh_token, token_type: 'bearer', expires_in: 3600, expires_at: expiresAt })
+      const domain = new URL(BASE_URL).hostname
+      await page.context().addCookies([
+        { name: 'sb-qdniskppkfqjmtpkftdt-auth-token', value: sessionVal.slice(0, 1800), domain, path: '/', expires: expiresAt, httpOnly: false, secure: true, sameSite: 'Lax' },
+        { name: 'sb-qdniskppkfqjmtpkftdt-auth-token.0', value: sessionVal.slice(0, 1800), domain, path: '/', expires: expiresAt, httpOnly: false, secure: true, sameSite: 'Lax' },
+        { name: 'sb-qdniskppkfqjmtpkftdt-auth-token.1', value: sessionVal.slice(1800), domain, path: '/', expires: expiresAt, httpOnly: false, secure: true, sameSite: 'Lax' },
+      ])
+      await page.goto(BASE_URL + expectedPath, { waitUntil: 'domcontentloaded', timeout: 20000 })
+      return
+    }
   }
+
+  // No expectedPath (TC-A001) or token fetch failed — use UI login with form submit
+  // Supabase auth API call already warmed the lambda so form submit is fast
+  await page.goto(BASE_URL + '/login', { waitUntil: 'domcontentloaded', timeout: 20000 })
+  await page.locator('input[type="email"], input[name="email"], #email').first().fill(account.email)
+  await page.locator('input[type="password"], input[name="password"], #password').first().fill(account.password)
+  await page.locator('button[type="submit"], button:has-text("Sign In"), button:has-text("Log In")').first().click()
+  await page.waitForFunction(() => !window.location.pathname.startsWith('/login'), { timeout: 20000 })
 }
 
 export async function assertPageLoads(page: Page, path: string): Promise<number> {
