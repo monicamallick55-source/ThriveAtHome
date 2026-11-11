@@ -5,6 +5,9 @@ import { Page, expect } from '@playwright/test';
 
 export const BASE_URL = process.env.BASE_URL || 'https://thrive-at-home-pied.vercel.app';
 
+const SUPABASE_URL = 'https://qdniskppkfqjmtpkftdt.supabase.co'
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkbmlza3Bwa2Zxam10cGtmdGR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3OTY2NTcsImV4cCI6MjA5NDM3MjY1N30.eKYDxvAXl38N9wgrY-tG7cIsxL83o1W3vd_GIme2pZg'
+
 /** Seed test accounts — passwords must match what's seeded in Supabase */
 export const ACCOUNTS = {
   member:        { email: 'member@test.com',        password: 'TestPass123!' },
@@ -38,27 +41,47 @@ export const ACCOUNTS = {
 };
 
 /**
- * Login via the /login form and wait for redirect.
- * Uses the password input specifically (not the show/hide toggle button).
+ * Login via Supabase API (no browser form) then inject session into localStorage.
+ * Much faster than UI login — avoids cold-start timeouts on Vercel.
  */
 export async function loginAs(
   page: Page,
   account: { email: string; password: string },
   expectedPath?: string,
 ): Promise<void> {
-  await page.goto('/login');
-  // Use the email input field
-  await page.locator('input[type="email"], input[name="email"], #email').first().fill(account.email);
-  // Use the password input field — NOT the show/hide toggle button
-  await page.locator('input[type="password"], input[name="password"], #password').first().fill(account.password);
-  await page.getByRole('button', { name: /sign in|log in/i }).click();
+  // Get token directly from Supabase — no browser round-trips
+  const res = await page.request.post(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+    headers: { 'apikey': ANON_KEY, 'Content-Type': 'application/json' },
+    data: { email: account.email, password: account.password },
+  })
+  const json = await res.json()
+  const { access_token, refresh_token } = json
 
-  if (expectedPath) {
-    await page.waitForURL(`**${expectedPath}**`, { timeout: 15_000 });
-  } else {
-    // Wait for navigation away from /login
-    await page.waitForFunction(() => !window.location.pathname.startsWith('/login'), { timeout: 15_000 });
+  if (!access_token) {
+    // Fall back to UI login if API fails (account may not exist)
+    await page.goto(BASE_URL + '/login')
+    await page.locator('input[type="email"], input[name="email"], #email').first().fill(account.email)
+    await page.locator('input[type="password"], input[name="password"], #password').first().fill(account.password)
+    await page.getByRole('button', { name: /sign in|log in/i }).click()
+    if (expectedPath) {
+      await page.waitForURL(`**${expectedPath}**`, { timeout: 20_000 })
+    } else {
+      await page.waitForFunction(() => !window.location.pathname.startsWith('/login'), { timeout: 20_000 })
+    }
+    return
   }
+
+  // Inject session into localStorage — Supabase JS reads this key on page load
+  await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 20000 })
+  await page.evaluate(({ access_token, refresh_token }: { access_token: string, refresh_token: string }) => {
+    localStorage.setItem('sb-qdniskppkfqjmtpkftdt-auth-token', JSON.stringify({
+      access_token,
+      refresh_token,
+      token_type: 'bearer',
+      expires_in: 3600,
+      expires_at: Math.floor(Date.now() / 1000) + 3600,
+    }))
+  }, { access_token, refresh_token })
 }
 
 /**
