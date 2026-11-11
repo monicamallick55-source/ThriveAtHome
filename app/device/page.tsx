@@ -10,7 +10,7 @@
  * - Self-identifies using ?token= query param
  * - Sends heartbeat every 5 minutes
  * - Shows large-print member dashboard shortcut buttons
- * - Calls Grace directly (opens Retell call widget)
+ * - Calls Aria (Grace) directly (opens Retell call widget)
  * - Device must be in 'active' status to show dashboard
  */
 
@@ -32,14 +32,12 @@ export default function DevicePage() {
   const [status, setStatus] = useState<'loading' | 'active' | 'pending' | 'suspended' | 'error'>('loading')
   const [time, setTime] = useState(new Date())
 
-  // Parse token from URL on mount
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const t = params.get('token')
     setToken(t)
   }, [])
 
-  // Fetch device info when token is available
   useEffect(() => {
     if (!token) return
     fetch(`/api/devices/${token}?by=token`)
@@ -52,7 +50,6 @@ export default function DevicePage() {
       .catch(() => setStatus('error'))
   }, [token])
 
-  // Heartbeat
   const sendHeartbeat = useCallback(() => {
     if (!token || !device) return
     fetch(`/api/devices/${device.id}`, {
@@ -69,7 +66,6 @@ export default function DevicePage() {
     return () => clearInterval(interval)
   }, [status, sendHeartbeat])
 
-  // Clock
   useEffect(() => {
     const interval = setInterval(() => setTime(new Date()), 1000)
     return () => clearInterval(interval)
@@ -128,12 +124,27 @@ export default function DevicePage() {
         )}
       </div>
 
+      {/* Aria call button — prominent at top */}
+      <button
+        aria-label="Call Aria — your AI companion"
+        onClick={() => window.location.assign('/dashboard/call')}
+        style={{
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          width: '100%', maxWidth: 560, padding: '28px 16px', borderRadius: 20, marginBottom: 20,
+          background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+          border: 'none', cursor: 'pointer', boxShadow: '0 8px 24px rgba(99,102,241,0.35)',
+        }}>
+        <div style={{ fontSize: '3rem', marginBottom: 8 }}>📞</div>
+        <div style={{ fontSize: '1.6rem', fontWeight: 700, color: 'white', marginBottom: 4 }}>Call Aria</div>
+        <div style={{ fontSize: '1rem', color: 'rgba(255,255,255,0.85)' }}>Your AI companion — always here</div>
+      </button>
+
       {/* Main action buttons */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 20, width: '100%', maxWidth: 560, marginBottom: 32 }}>
         {[
-          { emoji: '📞', label: 'Call Grace', sublabel: 'Your AI companion', color: '#6366f1', href: '/dashboard/call' },
           { emoji: '🗓', label: 'My Schedule', sublabel: 'Today\'s activities', color: '#10b981', href: '/dashboard/calendar' },
           { emoji: '💊', label: 'Medications', sublabel: 'Reminders & tracking', color: '#f59e0b', href: '/dashboard/health' },
+          { emoji: '👥', label: 'My Buddy', sublabel: 'Connect with your buddy', color: '#3b82f6', href: '/dashboard/buddy' },
           { emoji: '🆘', label: 'Need Help', sublabel: 'Contact navigator', color: '#ef4444', href: '/dashboard/help' },
         ].map((btn) => (
           <a
@@ -145,7 +156,6 @@ export default function DevicePage() {
               background: '#fff', border: `3px solid ${btn.color}20`,
               boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
               textDecoration: 'none', cursor: 'pointer',
-              transition: 'transform 0.1s',
             }}>
             <div style={{ fontSize: '3.5rem', marginBottom: 12 }}>{btn.emoji}</div>
             <div style={{ fontSize: '1.4rem', fontWeight: 700, color: '#1f2937', marginBottom: 4 }}>{btn.label}</div>
@@ -154,7 +164,6 @@ export default function DevicePage() {
         ))}
       </div>
 
-      {/* Thrive branding */}
       <div style={{ fontSize: '0.85rem', color: '#9ca3af', textAlign: 'center' }}>
         🌿 ThriveAtHome · Keeping you independent at home
       </div>
