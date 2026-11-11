@@ -54,7 +54,7 @@ test('TC-M053 — professional identity circle has profession tag', async ({ pag
   const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
   const hasProfessional = /professional|career|profession|retired/i.test(bodyText);
   if (!hasProfessional) console.warn('TC-M053: Professional identity circle not visible in /dashboard/communities');
-  expect(/500|internal server error/i.test(bodyText)).toBe(false);
+  expect(/\b500\b|internal server error/i.test(bodyText)).toBe(false);
 });
 
 /** TC-M054 — All 20 communities present */
