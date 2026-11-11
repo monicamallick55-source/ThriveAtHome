@@ -8,7 +8,6 @@ export const BASE_URL = process.env.BASE_URL || 'https://thrive-at-home-pied.ver
 const SUPABASE_URL = 'https://qdniskppkfqjmtpkftdt.supabase.co'
 const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkbmlza3Bwa2Zxam10cGtmdGR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3OTY2NTcsImV4cCI6MjA5NDM3MjY1N30.eKYDxvAXl38N9wgrY-tG7cIsxL83o1W3vd_GIme2pZg'
 
-/** Seed test accounts — passwords must match what's seeded in Supabase */
 export const ACCOUNTS = {
   member:        { email: 'member@test.com',        password: 'TestPass123!' },
   complete:      { email: 'complete@test.com',       password: 'TestPass123!' },
@@ -40,16 +39,11 @@ export const ACCOUNTS = {
   b2b_new_org:   { email: 'b2b_new_org@test.com',   password: 'TestPass123!' },
 };
 
-/**
- * Login via Supabase API (no browser form) then inject session into localStorage.
- * Much faster than UI login — avoids cold-start timeouts on Vercel.
- */
 export async function loginAs(
   page: Page,
   account: { email: string; password: string },
   expectedPath?: string,
 ): Promise<void> {
-  // Get token directly from Supabase — no browser round-trips
   const res = await page.request.post(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
     headers: { 'apikey': ANON_KEY, 'Content-Type': 'application/json' },
     data: { email: account.email, password: account.password },
@@ -58,7 +52,6 @@ export async function loginAs(
   const { access_token, refresh_token } = json
 
   if (!access_token) {
-    // Fall back to UI login if API fails (account may not exist)
     await page.goto(BASE_URL + '/login')
     await page.locator('input[type="email"], input[name="email"], #email').first().fill(account.email)
     await page.locator('input[type="password"], input[name="password"], #password').first().fill(account.password)
@@ -71,7 +64,6 @@ export async function loginAs(
     return
   }
 
-  // Inject session into localStorage — Supabase JS reads this key on page load
   await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 20000 })
   await page.evaluate(({ access_token, refresh_token }: { access_token: string, refresh_token: string }) => {
     localStorage.setItem('sb-qdniskppkfqjmtpkftdt-auth-token', JSON.stringify({
@@ -84,10 +76,6 @@ export async function loginAs(
   }, { access_token, refresh_token })
 }
 
-/**
- * Assert page loads (200) and no hard console errors.
- * Returns the response status code.
- */
 export async function assertPageLoads(page: Page, path: string): Promise<number> {
   const [response] = await Promise.all([
     page.waitForResponse((r) => r.url().includes(path.replace('/', '').split('/')[0]) || r.status() < 400),
@@ -98,10 +86,6 @@ export async function assertPageLoads(page: Page, path: string): Promise<number>
   return status;
 }
 
-/**
- * Assert no horizontal scroll at a given viewport width.
- * TC-P071, TC-PERF002
- */
 export async function assertNoHorizontalScroll(page: Page): Promise<void> {
   const hasHScroll = await page.evaluate(
     () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
@@ -109,5 +93,4 @@ export async function assertNoHorizontalScroll(page: Page): Promise<void> {
   expect(hasHScroll, 'Page should not have horizontal scroll').toBe(false);
 }
 
-/** Stripe test card number */
 export const STRIPE_TEST_CARD = '4242 4242 4242 4242';
