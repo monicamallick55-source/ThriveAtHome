@@ -1,13 +1,4 @@
 User-agent: *
 Allow: /
 
-# Keep admin portals and API routes out of search indexes
-Disallow: /api/
-Disallow: /employer-admin
-Disallow: /agency-admin
-Disallow: /network-admin
-Disallow: /senior-center-admin
-Disallow: /org-admin
-Disallow: /dashboard
-
-Sitemap: https://thrive-at-home-pied.vercel.app/sitemap.xml
+Sitemap: https://thrivathome.com/sitemap.xml
