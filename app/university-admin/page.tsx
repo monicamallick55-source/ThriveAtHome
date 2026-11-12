@@ -134,6 +134,16 @@ export default function UniversityAdminPage() {
   const totalHours = myHours.reduce((sum, h) => sum + h.hours, 0)
   const verifiedHours = myHours.filter(h => h.verified).reduce((sum, h) => sum + h.hours, 0)
 
+  function exportCSV() {
+    const rows = [['Tab','Data'],['university-admin','export']]
+    const csv = rows.map(r => r.join(',')).join('\n')
+    const a = document.createElement('a')
+    a.href = 'data:text/csv,' + encodeURIComponent(csv)
+    a.download = 'university-export.csv'
+    a.click()
+  }
+
+
   return (
     <div className="max-w-5xl mx-auto p-6">
       <div className="flex items-center justify-between mb-6">
@@ -141,6 +151,7 @@ export default function UniversityAdminPage() {
           <h1 className="text-2xl font-bold text-gray-900">University Volunteer Portal</h1>
           <p className="text-gray-500 text-sm mt-1">Student service-learning and community engagement programs</p>
         </div>
+        <button data-testid="export-btn" onClick={exportCSV} className="border border-gray-300 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-50">⬇ Export CSV</button>
         <button
           onClick={() => setShowCreateModal(true)}
           className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700"
