@@ -1,13 +1,15 @@
 export default function PartnersPage() {
+  const categories = ['Home Care Agencies','Senior Centers','Medical Practices','Faith Communities','Non-Profits','Transportation']
   return (
-    <main className="min-h-screen bg-gray-50">
-      <section className="bg-white border-b py-12 px-4 text-center">
-        <h1 className="text-3xl font-bold text-gray-900 mb-3">Partner Directory</h1>
-        <p className="text-gray-500 max-w-xl mx-auto">Thrive@Home works with trusted community organizations to support seniors.</p>
-      </section>
-      <section className="max-w-5xl mx-auto py-12 px-4 text-center text-gray-400">
-        <p>Partner listings coming soon. <a href="/contact" className="text-blue-600">Contact us</a> to become a partner.</p>
-      </section>
+    <main style={{ maxWidth: 900, margin: '0 auto', padding: '48px 24px' }}>
+      <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: 8 }}>Partner Directory</h1>
+      <p style={{ color: '#6b7280', marginBottom: 32 }}>Thrive@Home works with trusted community organizations to support seniors.</p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(220px,1fr))', gap: 16, marginBottom: 48 }}>
+        {categories.map(cat => (
+          <a key={cat} href={`/partners?category=${encodeURIComponent(cat)}`} style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 12, padding: '20px', textDecoration: 'none', color: '#111827', fontWeight: 500 }}>{cat}</a>
+        ))}
+      </div>
+      <p style={{ color: '#9ca3af', fontSize: 14, textAlign: 'center' }}>Partner listings are being verified. <a href="/contact" style={{ color: '#6366f1' }}>Become a partner →</a></p>
     </main>
   )
 }

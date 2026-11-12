@@ -1,4 +1,2 @@
 import { redirect } from 'next/navigation'
-export default function OnboardingPage() {
-  redirect('/signup')
-}
+export default function OnboardingPage() { redirect('/signup') }

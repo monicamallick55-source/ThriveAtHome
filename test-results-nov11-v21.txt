@@ -1,0 +1,96 @@
+
+Running 819 tests using 8 workers
+
+TC-AD009: RLS verified via Supabase SQL; manual check only — cannot test service-role bypass from E2E
+  ✓    2 [chromium] › tests/e2e/admin-portal-deep.spec.ts:113:1 › TC-AD009 — Partner listings RLS (manual check) (3.4s)
+TC-AD010: No feature flag UI found on /admin — may be on a subpage
+  ✓    8 [chromium] › tests/e2e/admin-portal-deep.spec.ts:57:1 › TC-AD002 — /admin/ma-report loads without 500 (16.0s)
+  ✓    1 [chromium] › tests/e2e/admin-portal-deep.spec.ts:105:1 › TC-AD008 — /admin/campaigns loads without 500 (16.1s)
+  ✓    6 [chromium] › tests/e2e/admin-portal-deep.spec.ts:81:1 › TC-AD005 — /admin/grief-circles loads without 500 (16.4s)
+  ✓    7 [chromium] › tests/e2e/admin-portal-deep.spec.ts:89:1 › TC-AD006 — /admin/devices loads without 500 (16.4s)
+  ✓    3 [chromium] › tests/e2e/admin-portal-deep.spec.ts:97:1 › TC-AD007 — /admin/org-imports loads without 500 (16.6s)
+  ✓    5 [chromium] › tests/e2e/admin-portal-deep.spec.ts:73:1 › TC-AD004 — /admin/community-partners loads without 500 (16.7s)
+  ✓    4 [chromium] › tests/e2e/admin-portal-deep.spec.ts:65:1 › TC-AD003 — /admin/metro-activation loads without 500 (16.8s)
+  ✓    9 [chromium] › tests/e2e/admin-portal-deep.spec.ts:125:1 › TC-AD010 — /admin has feature flag controls (13.8s)
+TC-N006: home_from_hospital achievement requires seeded member; test via navigator UI manually
+TC-B2B004: feature toggle requires org_configs row; check via admin portal or Supabase directly
+  ✓   17 [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — member@test.com routes to /dashboard (8.6s)
+  ✓   16 [chromium] › tests/e2e/admin-portal-deep.spec.ts:235:1 › TC-B2B012 — /employer-admin loads with invite UI (9.1s)
+  ✓   10 [chromium] › tests/e2e/admin-portal-deep.spec.ts:143:1 › TC-N004 — /navigator loads for navigator role (10.3s)
+TC-N007: campaign approval requires member_campaigns_live=true; manual test
+  ✓   14 [chromium] › tests/e2e/admin-portal-deep.spec.ts:201:1 › TC-B2B003 — /org-admin loads with org context (10.0s)
+  ✓   15 [chromium] › tests/e2e/admin-portal-deep.spec.ts:219:1 › TC-B2B004 — /org-admin feature config loads (10.4s)
+  ✓   11 [chromium] › tests/e2e/admin-portal-deep.spec.ts:161:1 › TC-N006 — /navigator loads; home-from-hospital requires seeded data (11.5s)
+  ✓   13 [chromium] › tests/e2e/admin-portal-deep.spec.ts:193:1 › TC-B2B002 — /org-admin/village-referrals loads without 500 (11.4s)
+  ✓   12 [chromium] › tests/e2e/admin-portal-deep.spec.ts:177:1 › TC-N007 — /navigator loads; campaign approval requires flag on (12.9s)
+  ✓   18 [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — family@test.com routes to /dashboard/family (6.9s)
+  ✓   20 [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — admin@test.com routes to /admin (7.5s)
+  ✓   19 [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — navigator@test.com routes to /navigator (7.9s)
+  ✓   23 [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — employer@test.com routes to /employer-admin (7.9s)
+  ✓   22 [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — orgadmin@test.com routes to /org-admin (8.4s)
+  ✓   24 [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — uniadmin@test.com routes to /university-admin (9.8s)
+  ✓   25 [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — vsoadmin@test.com routes to /vso-admin (9.1s)
+  ✓   27 [chromium] › tests/e2e/auth-flows.spec.ts:31:1 › TC-A002 — /signup page loads (5.1s)
+  ✓   21 [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — volunteer@test.com routes to /volunteer (12.7s)
+  ✓   30 [chromium] › tests/e2e/auth-flows.spec.ts:55:1 › TC-A006 — /login page has email and password fields (4.0s)
+  ✓   26 [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — k12admin@test.com routes to /school-admin (9.0s)
+  ✓   28 [chromium] › tests/e2e/auth-flows.spec.ts:39:1 › TC-A004 — member cannot reach admin after login (9.3s)
+  ✓   29 [chromium] › tests/e2e/auth-flows.spec.ts:47:1 › TC-A005 — member cannot reach navigator after login (9.5s)
+  ✓   32 [chromium] › tests/e2e/auth-roles.spec.ts:45:5 › TC-A004 — 21 role login smoke tests › Family (family@test.com) → /dashboard/family (6.8s)
+  ✓   31 [chromium] › tests/e2e/auth-roles.spec.ts:45:5 › TC-A004 — 21 role login smoke tests › Member (member@test.com) → /dashboard (8.4s)
+  ✓   33 [chromium] › tests/e2e/auth-roles.spec.ts:45:5 › TC-A004 — 21 role login smoke tests › Navigator (navigator@test.com) → /navigator (8.5s)
+  ✓   35 [chromium] › tests/e2e/auth-roles.spec.ts:45:5 › TC-A004 — 21 role login smoke tests › Care Worker (careworker@test.com) → /care-worker (7.6s)
+  ✓   34 [chromium] › tests/e2e/auth-roles.spec.ts:45:5 › TC-A004 — 21 role login smoke tests › Admin (admin@test.com) → /admin (8.7s)
+  ✓   36 [chromium] › tests/e2e/auth-roles.spec.ts:45:5 › TC-A004 — 21 role login smoke tests › General Volunteer (volunteer@test.com) → /volunteer/dashboard (9.4s)
+  ✓   39 [chromium] › tests/e2e/auth-roles.spec.ts:45:5 › TC-A004 — 21 role login smoke tests › Retired Pro Volunteer (retired_pro@test.com) → /volunteer/dashboard (8.6s)
+  ✓   37 [chromium] › tests/e2e/auth-roles.spec.ts:45:5 › TC-A004 — 21 role login smoke tests › Student Volunteer (student@test.com) → /student (10.8s)
+  ✓   38 [chromium] › tests/e2e/auth-roles.spec.ts:45:5 › TC-A004 — 21 role login smoke tests › Veteran Volunteer (veteran@test.com) → /volunteer/dashboard (9.0s)
+  ✓   40 [chromium] › tests/e2e/auth-roles.spec.ts:45:5 › TC-A004 — 21 role login smoke tests › Corporate Volunteer (corporate@test.com) → /volunteer/dashboard (8.5s)
+  ✓   41 [chromium] › tests/e2e/auth-roles.spec.ts:45:5 › TC-A004 — 21 role login smoke tests › Neighbor Volunteer (neighbor@test.com) → /volunteer/dashboard (8.4s)
+  ✓   42 [chromium] › tests/e2e/auth-roles.spec.ts:45:5 › TC-A004 — 21 role login smoke tests › Faith Volunteer (faith@test.com) → /volunteer/dashboard (9.3s)
+  ✓   43 [chromium] › tests/e2e/auth-roles.spec.ts:45:5 › TC-A004 — 21 role login smoke tests › K-12 Student Volunteer (k12student@test.com) → /student (11.9s)
+  ✓   44 [chromium] › tests/e2e/auth-roles.spec.ts:45:5 › TC-A004 — 21 role login smoke tests › Agency Admin (agency@test.com) → /agency-admin (8.2s)
+  ✓   46 [chromium] › tests/e2e/auth-roles.spec.ts:45:5 › TC-A004 — 21 role login smoke tests › Network Admin (network@test.com) → /network-admin (8.0s)
+  ✓   47 [chromium] › tests/e2e/auth-roles.spec.ts:45:5 › TC-A004 — 21 role login smoke tests › Senior Center Admin (seniorcenter@test.com) → /senior-center-admin (8.7s)
+  ✘   45 [chromium] › tests/e2e/auth-roles.spec.ts:45:5 › TC-A004 — 21 role login smoke tests › Employer Admin (employer@test.com) → /employer-admin (8.9s)
+  ✓   49 [chromium] › tests/e2e/auth-roles.spec.ts:45:5 › TC-A004 — 21 role login smoke tests › Org Admin (orgadmin@test.com) → /org-admin (7.7s)
+  ✓   48 [chromium] › tests/e2e/auth-roles.spec.ts:45:5 › TC-A004 — 21 role login smoke tests › AAA Admin (aaa@test.com) → /aaa-admin (9.1s)
+  ✓   50 [chromium] › tests/e2e/auth-roles.spec.ts:45:5 › TC-A004 — 21 role login smoke tests › VSO Admin (vsoadmin@test.com) → /vso-admin (8.2s)
+  ✓   51 [chromium] › tests/e2e/auth-roles.spec.ts:45:5 › TC-A004 — 21 role login smoke tests › University Admin (uniadmin@test.com) → /university-admin (8.0s)
+  ✓   52 [chromium] › tests/e2e/auth-roles.spec.ts:45:5 › TC-A004 — 21 role login smoke tests › K-12 Admin (k12admin@test.com) → /school-admin (8.2s)
+TC-A006: Aria call button not found on /device
+TC-B021: /api/billing/b2b-invoice not yet built — verify $50 flat tier in Stripe manually
+  ✓   59 [chromium] › tests/e2e/b2b-billing-deep.spec.ts:14:1 › TC-B021 — B2B in-development billing tier endpoint (394ms)
+TC-B022: /api/billing/b2b-invoice not yet built — verify $75 + $1.25/member tier manually
+  ✓   60 [chromium] › tests/e2e/b2b-billing-deep.spec.ts:33:1 › TC-B022 — B2B established billing tier (100 members → $125) (253ms)
+TC-B023: /api/billing/metered not yet built — verify $0.08/call Aria metering in Stripe manually
+  ✓   61 [chromium] › tests/e2e/b2b-billing-deep.spec.ts:51:1 › TC-B023 — B2B metered AI billing endpoint (Aria calls) (267ms)
+  ✓   57 [chromium] › tests/e2e/auth-roles.spec.ts:111:1 › TC-A006 — /device kiosk loads with large-print UI (5.4s)
+  ✓   53 [chromium] › tests/e2e/auth-roles.spec.ts:64:3 › TC-A005 — cross-role access blocked › member cannot access /navigator (8.8s)
+  ✓   55 [chromium] › tests/e2e/auth-roles.spec.ts:89:3 › TC-A005 — cross-role access blocked › family cannot access /org-admin (7.7s)
+TC-B031: /api/checkout/donate not found — verify endpoint exists
+  ✓   63 [chromium] › tests/e2e/b2b-billing-deep.spec.ts:104:1 › TC-B031 — POST /api/checkout/donate recurring does not 500 (702ms)
+  ✓   56 [chromium] › tests/e2e/auth-roles.spec.ts:97:3 › TC-A005 — cross-role access blocked › k12student cannot access /employer-admin (8.6s)
+  ✓   58 [chromium] › tests/e2e/auth-roles.spec.ts:128:1 › TC-P051 — /signup rejects invalid email and mismatched passwords (5.1s)
+  ✓   54 [chromium] › tests/e2e/auth-roles.spec.ts:77:3 › TC-A005 — cross-role access blocked › volunteer cannot access /admin (10.8s)
+TC-BILL001: B2B enrollment fee requires STRIPE_B2B_ENROLLMENT_PRICE_ID in Vercel env; verify manually in Stripe dashboard
+TC-BILL002: Requires Stripe test subscription with in_development tier price ID; verify manually in Stripe dashboard
+TC-B031: Recurring/monthly donation option not visible on /donate
+  ✓   64 [chromium] › tests/e2e/b2b-billing-deep.spec.ts:90:1 › TC-B031 — /donate page loads; recurring option present (7.7s)
+  ✓   69 [chromium] › tests/e2e/b2b-billing-deep.spec.ts:180:1 › TC-BILL001 — B2B enrollment fee: env var and onboarding page (5.7s)
+TC-BILL003: Requires Stripe test subscription with established tier price ID; verify manually in Stripe dashboard
+  ✓   62 [chromium] › tests/e2e/b2b-billing-deep.spec.ts:69:1 › TC-B024 — /org-admin shows community module option (9.8s)
+  ✓   65 [chromium] › tests/e2e/b2b-billing-deep.spec.ts:119:1 › TC-B040 — /dashboard/celebrations/plan shows Enhanced $25 tier (8.7s)
+  ✓   67 [chromium] › tests/e2e/b2b-billing-deep.spec.ts:139:1 › TC-B041 — /dashboard/celebrations/plan shows Premier $75 tier (9.0s)
+  ✓   68 [chromium] › tests/e2e/b2b-billing-deep.spec.ts:159:1 › TC-B042 — /dashboard/gift-send shows paid gift options (9.5s)
+  ✓   70 [chromium] › tests/e2e/b2b-billing-deep.spec.ts:192:1 › TC-BILL002 — B2B in-development monthly tier (Stripe manual verification) (10.4s)
+  ✘   66 [chromium] › tests/e2e/auth-roles.spec.ts:45:5 › TC-A004 — 21 role login smoke tests › Employer Admin (employer@test.com) → /employer-admin (retry #1) (10.8s)
+TC-B2BD002: CSV/PDF export option not found on university admin
+  ✓   74 [chromium] › tests/e2e/b2b-portals-deep.spec.ts:33:1 › TC-B2BD003 — /api/university-admin/volunteers responds (8.0s)
+  ✓   71 [chromium] › tests/e2e/b2b-billing-deep.spec.ts:208:1 › TC-BILL003 — B2B established monthly tier (Stripe manual verification) (9.9s)
+TC-B2BD011: export not found on VSO admin
+  ✓   73 [chromium] › tests/e2e/b2b-portals-deep.spec.ts:22:1 › TC-B2BD002 — /university-admin has CSV/PDF export (10.7s)
+  ✓   72 [chromium] › tests/e2e/b2b-portals-deep.spec.ts:10:1 › TC-B2BD001 — /university-admin loads with volunteer stats (11.4s)
+  ✓   75 [chromium] › tests/e2e/b2b-portals-deep.spec.ts:43:1 › TC-B2BD010 — /vso-admin shows veteran volunteer content (10.6s)
+  ✓   76 [chromium] › tests/e2e/b2b-portals-deep.spec.ts:55:1 › TC-B2BD011 — /vso-admin has export functionality (10.1s)
+  ✓   77 [chromium] › tests/e2e/b2b-portals-deep.spec.ts:68:1 › TC-B2BD020 — /school-admin shows student volunteer content (10.5s)

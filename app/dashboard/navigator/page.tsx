@@ -1,21 +1,16 @@
 'use client'
-export default function NavigatorPage() {
+export default function NavigatorDashboardPage() {
   return (
-    <main className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Your Navigator</h1>
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-2">Your Care Navigator</h2>
-          <p className="text-gray-600">Your navigator is here to guide you through Thrive@Home and connect you with the right resources.</p>
-        </div>
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Your Tasks</h2>
-          <div className="text-gray-400 text-sm py-4 text-center">No tasks assigned yet. Your navigator will add tasks here.</div>
-        </div>
-        <div className="bg-white rounded-2xl border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-2">Navigator Guide</h2>
-          <p className="text-gray-600 text-sm">Your navigator will help you set goals, find services, and stay on track with your care plan.</p>
-        </div>
+    <main style={{ maxWidth: 900, margin: '0 auto', padding: '32px 24px' }}>
+      <h1 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: 4 }}>Navigator Dashboard</h1>
+      <p style={{ color: '#6b7280', marginBottom: 32 }}>Manage your assigned members and care coordination tasks.</p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: 16 }}>
+        {[['My Members','View all assigned members','/navigator/members'],['Task Queue','Pending follow-ups and check-ins','/navigator/tasks'],['Care Plans','Active care plans and goals','/navigator/care-plans'],['Reports','Weekly activity summary','/navigator/reports']].map(([title,desc,href]) => (
+          <a key={title as string} href={href as string} style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, padding: 20, textDecoration: 'none', color: 'inherit', display: 'block' }}>
+            <div style={{ fontWeight: 600, marginBottom: 4 }}>{title}</div>
+            <div style={{ fontSize: 13, color: '#6b7280' }}>{desc}</div>
+          </a>
+        ))}
       </div>
     </main>
   )

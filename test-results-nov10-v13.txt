@@ -1,0 +1,70 @@
+
+Running 793 tests using 8 workers
+
+TC-AD009: RLS verified via Supabase SQL; manual check only — cannot test service-role bypass from E2E
+  ✓    4 [chromium] › tests/e2e/admin-portal-deep.spec.ts:113:1 › TC-AD009 — Partner listings RLS (manual check) (3.6s)
+admin-portal-deep: admin@test.com not seeded — skipping
+admin-portal-deep: admin@test.com not seeded — skipping
+admin-portal-deep: admin@test.com not seeded — skipping
+admin-portal-deep: admin@test.com not seeded — skipping
+admin-portal-deep: admin@test.com not seeded — skipping
+admin-portal-deep: admin@test.com not seeded — skipping
+admin-portal-deep: admin@test.com not seeded — skipping
+admin-portal-deep: admin@test.com not seeded — skipping
+  ✓    1 [chromium] › tests/e2e/admin-portal-deep.spec.ts:73:1 › TC-AD004 — /admin/community-partners loads without 500 (18.7s)
+  ✓    6 [chromium] › tests/e2e/admin-portal-deep.spec.ts:81:1 › TC-AD005 — /admin/grief-circles loads without 500 (19.1s)
+  ✓    9 [chromium] › tests/e2e/admin-portal-deep.spec.ts:125:1 › TC-AD010 — /admin has feature flag controls (15.6s)
+  ✓    7 [chromium] › tests/e2e/admin-portal-deep.spec.ts:89:1 › TC-AD006 — /admin/devices loads without 500 (19.4s)
+  ✓    3 [chromium] › tests/e2e/admin-portal-deep.spec.ts:105:1 › TC-AD008 — /admin/campaigns loads without 500 (20.6s)
+  ✓    5 [chromium] › tests/e2e/admin-portal-deep.spec.ts:57:1 › TC-AD002 — /admin/ma-report loads without 500 (21.7s)
+  ✓    2 [chromium] › tests/e2e/admin-portal-deep.spec.ts:65:1 › TC-AD003 — /admin/metro-activation loads without 500 (21.9s)
+  ✓    8 [chromium] › tests/e2e/admin-portal-deep.spec.ts:97:1 › TC-AD007 — /admin/org-imports loads without 500 (22.7s)
+admin-portal-deep: navigator@test.com not seeded — skipping
+  ✓   10 [chromium] › tests/e2e/admin-portal-deep.spec.ts:143:1 › TC-N004 — /navigator loads for navigator role (12.8s)
+admin-portal-deep: navigator@test.com not seeded — skipping
+admin-portal-deep: orgadmin@test.com not seeded — skipping
+admin-portal-deep: navigator@test.com not seeded — skipping
+  ✓   12 [chromium] › tests/e2e/admin-portal-deep.spec.ts:177:1 › TC-N007 — /navigator loads; campaign approval requires flag on (13.4s)
+  ✓   11 [chromium] › tests/e2e/admin-portal-deep.spec.ts:161:1 › TC-N006 — /navigator loads; home-from-hospital requires seeded data (14.0s)
+  ✓   13 [chromium] › tests/e2e/admin-portal-deep.spec.ts:193:1 › TC-B2B002 — /org-admin/village-referrals loads without 500 (13.8s)
+admin-portal-deep: orgadmin@test.com not seeded — skipping
+admin-portal-deep: orgadmin@test.com not seeded — skipping
+TC-B2B012: employer@test.com not seeded — skipping
+  ✓   14 [chromium] › tests/e2e/admin-portal-deep.spec.ts:201:1 › TC-B2B003 — /org-admin loads with org context (15.5s)
+  ✓   16 [chromium] › tests/e2e/admin-portal-deep.spec.ts:235:1 › TC-B2B012 — /employer-admin loads with invite UI (14.5s)
+  ✓   15 [chromium] › tests/e2e/admin-portal-deep.spec.ts:219:1 › TC-B2B004 — /org-admin feature config loads (15.5s)
+  ✘   17 [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — member@test.com routes to /dashboard (15.1s)
+  ✓   21 [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — volunteer@test.com routes to /volunteer (6.3s)
+  ✘   18 [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — family@test.com routes to /dashboard/family (11.2s)
+  ✓   25 [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — k12admin@test.com routes to /school-admin (3.8s)
+  ✘   19 [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — navigator@test.com routes to /navigator (12.9s)
+  ✘   20 [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — admin@test.com routes to /admin (12.6s)
+  ✓   28 [chromium] › tests/e2e/auth-flows.spec.ts:31:1 › TC-A002 — /signup page loads (2.5s)
+  ✘   22 [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — orgadmin@test.com routes to /org-admin (13.8s)
+  ✓   31 [chromium] › tests/e2e/auth-flows.spec.ts:55:1 › TC-A006 — /login page has email and password fields (2.6s)
+  ✘   23 [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — employer@test.com routes to /employer-admin (14.1s)
+  ✘   24 [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — uniadmin@test.com routes to /university-admin (13.5s)
+  ✘   26 [chromium] › tests/e2e/auth-flows.spec.ts:20:3 › TC-A001 — vsoadmin@test.com routes to /vso-admin (12.7s)
+  ✘   29 [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Member (member@test.com) → /dashboard (11.7s)
+  ✘   27 [chromium] › tests/e2e/auth-flows.spec.ts:39:1 › TC-A004 — member cannot reach admin after login (16.8s)
+  ✘   32 [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Navigator (navigator@test.com) → /navigator (12.0s)
+  ✘   30 [chromium] › tests/e2e/auth-flows.spec.ts:47:1 › TC-A005 — member cannot reach navigator after login (18.1s)
+  ✘   33 [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Family (family@test.com) → /dashboard/family (12.7s)
+  ✘   34 [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Admin (admin@test.com) → /admin (13.3s)
+  ✘   35 [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Care Worker (careworker@test.com) → /care-worker (13.5s)
+  ✘   37 [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Student Volunteer (student@test.com) → /student (13.2s)
+  ✘   36 [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › General Volunteer (volunteer@test.com) → /volunteer/dashboard (18.6s)
+  ✘   38 [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Veteran Volunteer (veteran@test.com) → /volunteer/dashboard (17.0s)
+  ✘   39 [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Retired Pro Volunteer (retired_pro@test.com) → /volunteer/dashboard (16.7s)
+  ✘   43 [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › K-12 Student Volunteer (k12student@test.com) → /student (12.0s)
+  ✘   44 [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Agency Admin (agency@test.com) → /agency-admin (11.8s)
+  ✘   40 [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Corporate Volunteer (corporate@test.com) → /volunteer/dashboard (19.2s)
+  ✘   41 [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Neighbor Volunteer (neighbor@test.com) → /volunteer/dashboard (19.8s)
+  ✘   45 [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Employer Admin (employer@test.com) → /employer-admin (12.3s)
+  ✘   46 [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Network Admin (network@test.com) → /network-admin (14.1s)
+  ✘   42 [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Faith Volunteer (faith@test.com) → /volunteer/dashboard (22.3s)
+  ✘   47 [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Senior Center Admin (seniorcenter@test.com) → /senior-center-admin (14.3s)
+  ✓   52 [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › K-12 Admin (k12admin@test.com) → /school-admin (3.9s)
+  ✘   48 [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › AAA Admin (aaa@test.com) → /aaa-admin (13.2s)
+  ✓   55 [chromium] › tests/e2e/auth-roles.spec.ts:76:3 › TC-A005 — cross-role access blocked › volunteer cannot access /admin (3.9s)
+  ✘   49 [chromium] › tests/e2e/auth-roles.spec.ts:44:5 › TC-A004 — 21 role login smoke tests › Org Admin (orgadmin@test.com) → /org-admin (13.7s)
