@@ -1,50 +1,38 @@
+'use client'
 export default function TrustedAdvisorsPage() {
   const advisors = [
-    { name: 'Sarah Mitchell, Esq.', specialty: 'Elder Law Attorney', bio: 'Elder law specialist with 20 years experience.', telehealth: true },
-    { name: 'Robert Chen, CFP', specialty: 'Financial Planner', bio: 'Certified financial planner focused on retirement planning.', telehealth: true },
-    { name: 'Dr. Angela Torres', specialty: 'Geriatric Care Manager', bio: 'Geriatric care manager specializing in aging in place.', telehealth: false },
-    { name: 'Dr. Lisa Nguyen', specialty: 'Licensed Therapist', bio: 'Licensed therapist specializing in life transitions and grief.', telehealth: true },
+    { role: 'therapist', label: 'Therapist', emoji: '🧠', desc: 'Licensed mental health support', available: true },
+    { role: 'attorney', label: 'Elder Law Attorney', emoji: '⚖️', desc: 'Legal planning and elder rights', available: true },
+    { role: 'financial_planner', label: 'Financial Planner', emoji: '💰', desc: 'Retirement and benefits planning', available: true },
+    { role: 'chaplain', label: 'Chaplain / Spiritual Care', emoji: '🕊️', desc: 'Request an introduction', available: false, onRequest: true },
+    { role: 'grief_counselor', label: 'Grief Counselor', emoji: '💜', desc: 'Available on request only', available: false, onRequest: true },
   ]
-
   return (
-    <div style={{ padding: '1.5rem', maxWidth: '900px', margin: '0 auto' }}>
-      <h1>Trusted Advisors</h1>
-      <p>Connect with vetted professionals who specialize in elder care and senior support.</p>
-
-      <div style={{ display: 'grid', gap: '1rem', marginTop: '1.5rem' }}>
-        {advisors.map((a, i) => (
-          <div key={i} style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1rem' }}>
-            <h2 style={{ margin: 0 }}>{a.name}</h2>
-            <p style={{ color: '#2563eb', fontSize: '0.9rem', margin: '0.25rem 0' }}>{a.specialty}</p>
-            <p style={{ color: '#4b5563', fontSize: '0.9rem' }}>{a.bio}</p>
-            {a.telehealth && <span style={{ fontSize: '0.75rem', background: '#d1fae5', color: '#065f46', padding: '2px 8px', borderRadius: '4px' }}>Telehealth available</span>}
-            <button style={{ marginTop: '0.75rem', display: 'block', width: '100%', background: '#2563eb', color: 'white', border: 'none', borderRadius: '6px', padding: '0.5rem', cursor: 'pointer' }}>
-              Request Consultation
-            </button>
+    <main style={{ maxWidth: 800, margin: '0 auto', padding: '32px 24px' }}>
+      <h1 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: 8 }}>Trusted Advisors</h1>
+      <p style={{ color: '#6b7280', marginBottom: 32 }}>Connect with licensed professionals who specialize in senior wellbeing.</p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {advisors.map(a => (
+          <div key={a.role} style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <span style={{ fontSize: 28 }}>{a.emoji}</span>
+              <div>
+                <div style={{ fontWeight: 600, marginBottom: 2 }}>{a.label}</div>
+                <div style={{ fontSize: 13, color: '#6b7280' }}>{a.desc}</div>
+              </div>
+            </div>
+            {a.onRequest ? (
+              <button style={{ background: '#f3f4f6', color: '#374151', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, cursor: 'pointer' }}>
+                Request an introduction
+              </button>
+            ) : (
+              <button style={{ background: '#6366f1', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, cursor: 'pointer' }}>
+                Connect
+              </button>
+            )}
           </div>
         ))}
       </div>
-
-      <section style={{ marginTop: '2rem', padding: '1rem', background: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
-        <h2>On-Request Specialists</h2>
-        <p>These specialists are available by request only. Contact your navigator to be connected.</p>
-        <div style={{ display: 'grid', gap: '0.75rem', marginTop: '1rem' }}>
-          <div style={{ padding: '0.75rem', background: 'white', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
-            <strong>Chaplain / Spiritual Care</strong>
-            <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: '0.25rem 0' }}>Non-denominational chaplain and grief counselor available for spiritual support.</p>
-            <button style={{ marginTop: '0.5rem', background: 'white', border: '1px solid #2563eb', color: '#2563eb', borderRadius: '4px', padding: '0.4rem 1rem', cursor: 'pointer' }}>
-              Request an introduction
-            </button>
-          </div>
-          <div style={{ padding: '0.75rem', background: 'white', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
-            <strong>Grief Counselor</strong>
-            <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: '0.25rem 0' }}>Specialized grief counselor for loss, transitions, and bereavement support.</p>
-            <button style={{ marginTop: '0.5rem', background: 'white', border: '1px solid #2563eb', color: '#2563eb', borderRadius: '4px', padding: '0.4rem 1rem', cursor: 'pointer' }}>
-              Request an introduction
-            </button>
-          </div>
-        </div>
-      </section>
-    </div>
+    </main>
   )
 }
