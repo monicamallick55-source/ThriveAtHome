@@ -29,7 +29,7 @@ export default function DonatePage() {
             <p className="text-gray-600">Your donation of ${amount} means the world to our community.</p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit}>
+          <form role="form" onSubmit={handleSubmit}>
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-3">Select Amount</label>
               <div className="grid grid-cols-3 gap-2 mb-3">
