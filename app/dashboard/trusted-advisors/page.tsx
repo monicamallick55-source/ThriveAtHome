@@ -8,6 +8,7 @@ export default function TrustedAdvisorsPage() {
     { role: 'grief_counselor', label: 'Grief Counselor', emoji: '💜', desc: 'Available on request only', available: false, onRequest: true },
   ]
   return (
+      <noscript>Trusted advisors: therapist, attorney, financial planner. Request an introduction to a chaplain or grief counselor.</noscript>
     <main style={{ maxWidth: 800, margin: '0 auto', padding: '32px 24px' }}>
       <h1 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: 8 }}>Trusted Advisors</h1>
       <p style={{ color: '#6b7280', marginBottom: 32 }}>Connect with licensed professionals who specialize in senior wellbeing.</p>

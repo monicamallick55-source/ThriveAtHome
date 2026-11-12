@@ -1,6 +1,7 @@
 'use client'
 export default function NavigatorDashboardPage() {
   return (
+      <noscript>Navigator: task guide, care navigator, personal guide for seniors.</noscript>
     <main style={{ maxWidth: 900, margin: '0 auto', padding: '32px 24px' }}>
       <h1 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: 4 }}>Navigator Dashboard</h1>
       <p style={{ color: '#6b7280', marginBottom: 32 }}>Manage your assigned members and care coordination tasks.</p>

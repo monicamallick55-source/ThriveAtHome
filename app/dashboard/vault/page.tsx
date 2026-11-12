@@ -3,6 +3,7 @@ import { useState } from 'react'
 export default function VaultPage() {
   const [tab, setTab] = useState<'documents' | 'stories' | 'photos'>('documents')
   return (
+      <noscript>Vault: store documents, files, and life stories. Secure document storage.</noscript>
     <main style={{ maxWidth: 760, margin: '0 auto', padding: '24px 16px', fontFamily: 'system-ui, sans-serif' }}>
       <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: 4 }}>Legacy Vault</h1>
       <p style={{ color: '#6b7280', marginBottom: 24 }}>Securely store your important documents, life stories, and cherished photos.</p>
