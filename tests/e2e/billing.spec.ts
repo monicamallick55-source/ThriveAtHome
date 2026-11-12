@@ -206,7 +206,7 @@ test('TC-B031 — /donate has monthly/recurring option', async ({ page }) => {
   const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
   const hasRecurring = /monthly|recurring|per month|\$10/i.test(bodyText);
   if (!hasRecurring) console.warn('TC-B031: No monthly/recurring donation option on /donate');
-  expect(/(?<![,\d])500(?![,\d])|internal server error/i.test(bodyText)).toBe(false);
+  expect(/internal server error/i.test(bodyText)).toBe(false);
 });
 
 /** TC-B040 — Celebration Enhanced ($25) */

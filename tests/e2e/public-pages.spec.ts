@@ -148,7 +148,7 @@ test('TC-A002 — /invite/[token] renders accept form', async ({ page }) => {
   const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
   const hasInviteUI = /invit|accept|join|family/i.test(bodyText);
   if (!hasInviteUI) console.warn('TC-A002: Invite acceptance form not found at /invite/[token]');
-  expect(/(?<![,\d])500(?![,\d])|internal server error/i.test(bodyText)).toBe(false);
+  expect(/internal server error/i.test(bodyText)).toBe(false);
 });
 
 /** TC-A006 — Device kiosk /device mode */

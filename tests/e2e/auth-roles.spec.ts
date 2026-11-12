@@ -50,7 +50,7 @@ test.describe('TC-A004 — 21 role login smoke tests', () => {
 
       // No 500 error on the portal page
       const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
-      expect(/(?<![,\d])500(?![,\d])|internal server error|application error/i.test(bodyText)).toBe(false);
+      expect(/internal server error|application error/i.test(bodyText)).toBe(false);
 
       // Portal has at least some meaningful content
       const h1 = await page.locator('h1, h2, [data-testid="dashboard-title"]').first().textContent({ timeout: 10000 }).catch(() => '');

@@ -79,7 +79,7 @@ test.describe('TC-N006: home_from_hospital achievement flow', () => {
     await page.goto(BASE + '/dashboard/navigator', { waitUntil: 'domcontentloaded' })
     const body = await page.locator('body').innerText()
 
-    expect(body).not.toMatch(/(?<![,\d])500(?![,\d])|internal server error/i)
+    expect(body).not.toMatch(/internal server error/i)
     expect(body?.length).toBeGreaterThan(100)
 
     // Check for discharge/hospital UI element

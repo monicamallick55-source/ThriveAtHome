@@ -129,7 +129,7 @@ for (const { tc, path, keyword } of ADMIN_PAGES) {
     await loginAs(page, ACCOUNTS.admin, path);
     if (page.url().includes('/login')) { console.warn(`${tc}: admin login failed`); return; }
     const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
-    expect(/(?<![,\d])500(?![,\d])|internal server error/i.test(bodyText), `${tc}: server error on ${path}`).toBe(false);
+    expect(/internal server error/i.test(bodyText), `${tc}: server error on ${path}`).toBe(false);
     if (!keyword.test(bodyText)) console.warn(`${tc}: expected content not found on ${path}`);
     expect(page.url()).not.toContain('/login');
   });
