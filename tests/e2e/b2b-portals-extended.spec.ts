@@ -20,14 +20,14 @@ test.describe('B2B Portals', () => {
     await loginAs(page, 'orgadmin@test.com')
     await page.goto(BASE + '/org-admin', { waitUntil: 'domcontentloaded', timeout: 20000 })
     const body = await page.locator('body').innerText()
-    expect(body).not.toMatch(/\b500\b|internal server error/i)
+    expect(body).not.toMatch(/(?<![,\d])500(?![,\d])|internal server error/i)
   })
 
   test('TC-B2B010 — /employer-admin loads', async ({ page }) => {
     await loginAs(page, 'employer@test.com')
     await page.goto(BASE + '/employer-admin', { waitUntil: 'domcontentloaded', timeout: 20000 })
     const body = await page.locator('body').innerText()
-    expect(body).not.toMatch(/\b500\b|internal server error/i)
+    expect(body).not.toMatch(/(?<![,\d])500(?![,\d])|internal server error/i)
   })
 
   test('TC-B2B011 — /employers landing page (public)', async ({ page }) => {
@@ -39,35 +39,35 @@ test.describe('B2B Portals', () => {
   test('TC-B2B012 — /employer-admin/invite/[token] renders', async ({ page }) => {
     await page.goto(BASE + '/employer-admin/invite/test-token', { waitUntil: 'domcontentloaded', timeout: 20000 })
     const body = await page.locator('body').innerText()
-    expect(body).not.toMatch(/\b500\b|internal server error/i)
+    expect(body).not.toMatch(/(?<![,\d])500(?![,\d])|internal server error/i)
   })
 
   test('TC-B2B020 — /senior-center-admin loads', async ({ page }) => {
     await loginAs(page, 'seniorcenter@test.com')
     await page.goto(BASE + '/senior-center-admin', { waitUntil: 'domcontentloaded', timeout: 20000 })
     const body = await page.locator('body').innerText()
-    expect(body).not.toMatch(/\b500\b|internal server error/i)
+    expect(body).not.toMatch(/(?<![,\d])500(?![,\d])|internal server error/i)
   })
 
   test('TC-B2B025 — /aaa-admin loads', async ({ page }) => {
     await loginAs(page, 'aaa@test.com')
     await page.goto(BASE + '/aaa-admin', { waitUntil: 'domcontentloaded', timeout: 20000 })
     const body = await page.locator('body').innerText()
-    expect(body).not.toMatch(/\b500\b|internal server error/i)
+    expect(body).not.toMatch(/(?<![,\d])500(?![,\d])|internal server error/i)
   })
 
   test('TC-B2B030 — /network-admin loads', async ({ page }) => {
     await loginAs(page, 'network@test.com')
     await page.goto(BASE + '/network-admin', { waitUntil: 'domcontentloaded', timeout: 20000 })
     const body = await page.locator('body').innerText()
-    expect(body).not.toMatch(/\b500\b|internal server error/i)
+    expect(body).not.toMatch(/(?<![,\d])500(?![,\d])|internal server error/i)
   })
 
   test('TC-B2B035 — /agency-admin loads', async ({ page }) => {
     await loginAs(page, 'agency@test.com')
     await page.goto(BASE + '/agency-admin', { waitUntil: 'domcontentloaded', timeout: 20000 })
     const body = await page.locator('body').innerText()
-    expect(body).not.toMatch(/\b500\b|internal server error/i)
+    expect(body).not.toMatch(/(?<![,\d])500(?![,\d])|internal server error/i)
   })
 })
 
@@ -78,28 +78,28 @@ test.describe('Volunteer Portals', () => {
     await loginAs(page, 'uniadmin@test.com')
     await page.goto(BASE + '/university-admin', { waitUntil: 'domcontentloaded', timeout: 20000 })
     const body = await page.locator('body').innerText()
-    expect(body).not.toMatch(/\b500\b|internal server error/i)
+    expect(body).not.toMatch(/(?<![,\d])500(?![,\d])|internal server error/i)
   })
 
   test('TC-VOL010 — /vso-admin loads', async ({ page }) => {
     await loginAs(page, 'vsoadmin@test.com')
     await page.goto(BASE + '/vso-admin', { waitUntil: 'domcontentloaded', timeout: 20000 })
     const body = await page.locator('body').innerText()
-    expect(body).not.toMatch(/\b500\b|internal server error/i)
+    expect(body).not.toMatch(/(?<![,\d])500(?![,\d])|internal server error/i)
   })
 
   test('TC-VOL020 — /school-admin loads', async ({ page }) => {
     await loginAs(page, 'k12admin@test.com')
     await page.goto(BASE + '/school-admin', { waitUntil: 'domcontentloaded', timeout: 20000 })
     const body = await page.locator('body').innerText()
-    expect(body).not.toMatch(/\b500\b|internal server error/i)
+    expect(body).not.toMatch(/(?<![,\d])500(?![,\d])|internal server error/i)
   })
 
   test('TC-VOL030 — Retired pro login lands on valid page', async ({ page }) => {
     await loginAs(page, 'volunteer@test.com')
     await page.goto(BASE + '/volunteer/dashboard', { waitUntil: 'domcontentloaded', timeout: 20000 })
     const body = await page.locator('body').innerText()
-    expect(body).not.toMatch(/\b500\b|internal server error/i)
+    expect(body).not.toMatch(/(?<![,\d])500(?![,\d])|internal server error/i)
   })
 
   test('TC-VOL060 — /api/volunteer/training-status exists (not 404/500)', async ({ page }) => {

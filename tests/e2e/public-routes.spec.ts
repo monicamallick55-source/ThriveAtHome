@@ -121,7 +121,7 @@ test.describe('TC-P070 — public route 200 checks', () => {
       if (path === '/login') {
         // Just check it doesn't 500
         const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
-        const hasServerError = /\b500\b|internal server error|application error/i.test(bodyText);
+        const hasServerError = /(?<![,\d])500(?![,\d])|internal server error|application error/i.test(bodyText);
         if (hasServerError) {
           expect(false, '/login returned 500').toBe(true);
         }
@@ -130,7 +130,7 @@ test.describe('TC-P070 — public route 200 checks', () => {
 
       // Check for server error indicators in page content
       const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
-      const hasServerError = /\b500\b|internal server error|application error/i.test(bodyText);
+      const hasServerError = /(?<![,\d])500(?![,\d])|internal server error|application error/i.test(bodyText);
       if (hasServerError) {
         if (allowServerError) {
           console.warn(`TC-P070: ${path} returned a server error — fix required`);

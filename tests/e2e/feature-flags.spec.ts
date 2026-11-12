@@ -106,7 +106,7 @@ test('TC-REG006/M019 — /dashboard/marketplace is locked or coming soon', async
 
   // If somehow loaded (cached session), check for locked state
   const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
-  const hasServerError = /\b500\b|internal server error|application error/i.test(bodyText);
+  const hasServerError = /(?<![,\d])500(?![,\d])|internal server error|application error/i.test(bodyText);
   if (hasServerError) {
     console.warn('TC-REG006: /dashboard/marketplace returned a server error');
     return; // soft pass — the route exists, it's just broken

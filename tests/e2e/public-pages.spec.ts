@@ -12,7 +12,7 @@ const PUBLIC_ROUTES = [
 for (const route of PUBLIC_ROUTES) {
   test(`TC-P-smoke ${route} loads without auth`, async ({ page }) => {
     await page.goto(`${BASE}${route}`);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     if (page.url().includes('/login') && route !== '/login') {
       console.warn(`TC-P-smoke: ${route} unexpectedly redirected to /login`);
       return;
@@ -24,7 +24,7 @@ for (const route of PUBLIC_ROUTES) {
 
 test('TC-P001 — homepage has hero and CTA', async ({ page }) => {
   await page.goto(`${BASE}/`);
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
   const body = await page.locator('body').textContent();
   expect(body?.length).toBeGreaterThan(100);
   expect(page.url()).not.toContain('/login');
@@ -32,7 +32,7 @@ test('TC-P001 — homepage has hero and CTA', async ({ page }) => {
 
 test('TC-P004 — /pricing shows Basic and Complete, NOT Premier', async ({ page }) => {
   await page.goto(`${BASE}/pricing`);
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
   const body = await page.locator('body').textContent();
   expect(body).toContain('Basic');
   expect(body?.toLowerCase()).not.toContain('premier');
@@ -40,7 +40,7 @@ test('TC-P004 — /pricing shows Basic and Complete, NOT Premier', async ({ page
 
 test('TC-P005 — footer links load', async ({ page }) => {
   await page.goto(`${BASE}/`);
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
   const privacyLink = page.locator('a[href*="privacy"]').first();
   if (await privacyLink.count() > 0) {
     const href = await privacyLink.getAttribute('href');
@@ -53,7 +53,7 @@ test('TC-P005 — footer links load', async ({ page }) => {
 test('TC-P008 — homepage mobile 390px no horizontal scroll', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(`${BASE}/`);
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
   const hasHScroll = await page.evaluate(
     () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
   );
@@ -68,7 +68,7 @@ test('TC-P009 — homepage has meta title', async ({ page }) => {
 
 test('TC-P013 — /pricing annual toggle present', async ({ page }) => {
   await page.goto(`${BASE}/pricing`);
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
   const body = await page.locator('body').textContent();
   const hasAnnual = body?.toLowerCase().includes('annual') || body?.toLowerCase().includes('yearly') || body?.toLowerCase().includes('/yr');
   if (!hasAnnual) console.warn('TC-P013: no annual toggle or annual pricing text found');
@@ -77,7 +77,7 @@ test('TC-P013 — /pricing annual toggle present', async ({ page }) => {
 
 test('TC-P022 — /privacy has HIPAA language', async ({ page }) => {
   await page.goto(`${BASE}/privacy`);
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
   if (page.url().includes('/login')) { console.warn('TC-P022: /privacy requires auth'); return; }
   const body = await page.locator('body').textContent();
   if (!body?.toLowerCase().includes('hipaa') && !body?.toLowerCase().includes('privacy')) {
@@ -148,7 +148,7 @@ test('TC-A002 — /invite/[token] renders accept form', async ({ page }) => {
   const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
   const hasInviteUI = /invit|accept|join|family/i.test(bodyText);
   if (!hasInviteUI) console.warn('TC-A002: Invite acceptance form not found at /invite/[token]');
-  expect(/\b500\b|internal server error/i.test(bodyText)).toBe(false);
+  expect(/(?<![,\d])500(?![,\d])|internal server error/i.test(bodyText)).toBe(false);
 });
 
 /** TC-A006 — Device kiosk /device mode */

@@ -63,7 +63,7 @@ test.describe('TC-M001–M034 — member dashboard pages load', () => {
       const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
 
       // Should NOT be a server error
-      expect(/\b500\b|internal server error|application error/i.test(bodyText), `${tc}: server error`).toBe(false);
+      expect(/(?<![,\d])500(?![,\d])|internal server error|application error/i.test(bodyText), `${tc}: server error`).toBe(false);
 
       // Should NOT be a hard 404 (page not found with no content)
       const is404 = /^(not found|404 — |page not found)$/im.test(bodyText.trim().substring(0, 100));
