@@ -159,12 +159,24 @@ export default function VSOAdminPage() {
           <h1 className="text-2xl font-bold text-gray-900">Veteran Service Organizations</h1>
           <p className="text-gray-500 text-sm mt-1">VSO programs for veterans, service members, and their families</p>
         </div>
+        <div style={{display:'flex',gap:8}}>
         <button
-          onClick={() => setShowCreateModal(true)}
+          data-testid="export-btn"
+          onClick={() => {
+            const rows = [['VSO','Program','Type','Branch','Era'],...programs.map(p=>[p.vso_name,p.name,p.program_type,p.branch_focus,p.era_focus])]
+            const csv = rows.map(r=>r.join(',')).join('\n')
+            const a = Object.assign(document.createElement('a'),{href:'data:text/csv;charset=utf-8,'+encodeURIComponent(csv),download:'vso-programs.csv'})
+            a.click()
+          }}
+          className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200"
+        >⬇ Export CSV</button>
+        <button
+          onClick={() => setShowCreateModal(true)} data-testid="add-program-btn"
           className="bg-olive-700 bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-900"
         >
           + Add VSO Program
         </button>
+        </div>
       </div>
 
       {msg && (
