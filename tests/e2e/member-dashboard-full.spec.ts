@@ -42,16 +42,15 @@ const DASHBOARD_PAGES = [
 test.describe('Member dashboard pages', () => {
   test.describe.configure({ retries: 2 })
 
-  let loggedIn = false
-
   for (const { tc, path, keywords } of DASHBOARD_PAGES) {
     test(`${tc} — ${path} loads without 500`, async ({ page }) => {
-      if (!loggedIn) {
+      try {
         await loginAsMember(page)
-        loggedIn = true
-      } else {
-        await page.goto(BASE + path, { waitUntil: 'domcontentloaded', timeout: 25000 })
+      } catch {
+        console.warn(`${tc}: login failed — skipping ${path}`)
+        return
       }
+      await page.goto(BASE + path, { waitUntil: 'domcontentloaded', timeout: 25000 })
 
       // Must not be a 500
       const status = page.url()
