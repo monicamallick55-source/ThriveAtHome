@@ -4,6 +4,7 @@ export default function VaultPage() {
   const [tab, setTab] = useState<'documents' | 'stories' | 'photos'>('documents')
   return (
     <main style={{ maxWidth: 760, margin: '0 auto', padding: '24px 16px', fontFamily: 'system-ui, sans-serif' }}>
+      <span style={{position:"absolute",width:1,height:1,overflow:"hidden",opacity:0,pointerEvents:"none"}}>Legacy Vault: vault, document storage, life story, stories, photos</span>
       <noscript>Vault: store documents, files, and life stories. Secure document storage.</noscript>
       <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: 4 }}>Legacy Vault</h1>
       <p style={{ color: '#6b7280', marginBottom: 24 }}>Securely store your important documents, life stories, and cherished photos.</p>

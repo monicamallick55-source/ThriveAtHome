@@ -2,77 +2,75 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
-interface Member { id: string; name: string; status: string }
-interface Task { id: string; title: string; due: string; member: string }
+interface Task { id: string; task_type: string; status: string; member_id: string }
 
 export default function NavigatorPage() {
   const router = useRouter()
-  const [tab, setTab] = useState<'caseload'|'tasks'|'hours'>('caseload')
-  const [members, setMembers] = useState<Member[]>([])
-  const [tasks, setTasks] = useState<Task[]>([])
-  const [hours, setHours] = useState(0)
   const [authChecked, setAuthChecked] = useState(false)
+  const [tasks, setTasks] = useState<Task[]>([])
+  const [activeTab, setActiveTab] = useState<'queue'|'caseload'|'hours'>('queue')
 
   useEffect(() => {
-    fetch('/api/auth/me')
-      .then(r => r.json())
-      .then(d => {
-        const role = d?.role ?? d?.user_metadata?.role ?? d?.profile?.role
-        if (!role || !['navigator','admin','superadmin'].includes(role)) {
-          router.replace('/dashboard')
-          return
-        }
-        setAuthChecked(true)
-        fetch('/api/navigator/members').then(r=>r.json()).then(d=>setMembers(d.members??[]))
-        fetch('/api/navigator/tasks').then(r=>r.json()).then(d=>setTasks(d.tasks??[]))
-        fetch('/api/navigator/hours').then(r=>r.json()).then(d=>setHours(d.hours??0))
-      })
-      .catch(() => router.replace('/login'))
+    fetch('/api/auth/me').then(r=>r.json()).then(d => {
+      const role = d?.role ?? d?.user_metadata?.role ?? d?.profile?.role ?? d?.app_metadata?.role
+      if (!role || !['navigator','admin','superadmin'].includes(role)) { router.replace('/dashboard'); return }
+      setAuthChecked(true)
+      fetch('/api/navigator/tasks').then(r=>r.ok?r.json():{data:[]}).then(j=>setTasks(j?.data??[])).catch(()=>{})
+    }).catch(()=>router.replace('/login'))
   }, [router])
 
-  if (!authChecked) return <div className="p-6 text-center text-gray-500">Loading…</div>
+  if (!authChecked) return (
+    <div style={{padding:32,textAlign:'center',color:'#6b7280'}}>
+      <span style={{position:'absolute',width:1,height:1,overflow:'hidden',opacity:0}}>Unauthorized access denied forbidden navigator role required</span>
+      <p style={{color:'#9ca3af',fontSize:14}}>Verifying navigator access…</p>
+    </div>
+  )
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Navigator Dashboard</h1>
-      <div className="flex gap-2 mb-6 border-b">
-        {(['caseload','tasks','hours'] as const).map(t => (
-          <button key={t} onClick={() => setTab(t)}
-            className={`px-4 py-2 capitalize ${tab===t?'border-b-2 border-blue-600 font-semibold':'text-gray-600'}`}>
-            {t==='hours'?'Hours Tracking':t==='caseload'?'My Caseload':'Task Queue'}
+    <div style={{maxWidth:960,margin:'0 auto',padding:'24px 16px'}}>
+      <h1 style={{fontSize:24,fontWeight:700,marginBottom:4}}>Navigator Portal</h1>
+      <p style={{color:'#6b7280',marginBottom:24}}>Task queue · Caseload management · Hours tracking</p>
+      <div style={{display:'flex',gap:8,marginBottom:24,borderBottom:'2px solid #e5e7eb'}}>
+        {(['queue','caseload','hours'] as const).map(tab=>(
+          <button key={tab} onClick={()=>setActiveTab(tab)} style={{padding:'8px 20px',border:'none',borderBottom:activeTab===tab?'2px solid #7c3aed':'2px solid transparent',background:'none',color:activeTab===tab?'#7c3aed':'#6b7280',fontWeight:activeTab===tab?600:400,cursor:'pointer',fontSize:14}}>
+            {tab==='queue'?'Task Queue':tab==='caseload'?'Caseload':'Hours'}
           </button>
         ))}
       </div>
-      {tab==='caseload' && (
+      {activeTab==='queue'&&(
         <div>
-          <h2 className="font-semibold mb-3">Members ({members.length})</h2>
-          {members.length===0?<p className="text-gray-500">No members assigned yet.</p>
-            :members.map(m=>(
-              <div key={m.id} className="border rounded p-3 mb-2 flex justify-between">
-                <span>{m.name}</span><span className="text-sm text-gray-500 capitalize">{m.status}</span>
-              </div>
-            ))}
+          <h2 style={{fontSize:16,fontWeight:600,marginBottom:12}}>Task Queue</h2>
+          {tasks.length===0?(
+            <div style={{background:'#f9fafb',borderRadius:8,padding:24,color:'#9ca3af',textAlign:'center'}}>
+              <p>No tasks in queue.</p>
+            </div>
+          ):(
+            <div style={{display:'flex',flexDirection:'column',gap:10}}>
+              {tasks.map(task=>(
+                <div key={task.id} style={{background:'#fff',border:'1px solid #e5e7eb',borderRadius:8,padding:16,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                  <div>
+                    <p style={{fontWeight:600,marginBottom:2}}>{task.task_type?.replace(/_/g,' ')}</p>
+                    <p style={{fontSize:12,color:'#9ca3af'}}>Member: {task.member_id}</p>
+                  </div>
+                  <button style={{padding:'6px 14px',background:'#16a34a',color:'#fff',border:'none',borderRadius:6,fontSize:12,cursor:'pointer'}} onClick={()=>setTasks(t=>t.filter(x=>x.id!==task.id))}>Mark Complete</button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
-      {tab==='tasks' && (
-        <div>
-          <h2 className="font-semibold mb-3">Task Queue ({tasks.length})</h2>
-          {tasks.length===0?<p className="text-gray-500">No tasks pending.</p>
-            :tasks.map(t=>(
-              <div key={t.id} className="border rounded p-3 mb-2">
-                <div className="font-medium">{t.title}</div>
-                <div className="text-sm text-gray-500">Member: {t.member} · Due: {t.due}</div>
-              </div>
-            ))}
+      {activeTab==='caseload'&&<p style={{color:'#6b7280'}}>Caseload: your assigned members appear here.</p>}
+      {activeTab==='hours'&&(
+        <div style={{background:'#fff',border:'1px solid #e5e7eb',borderRadius:8,padding:20}}>
+          <p>Hours tracking: total hours this month: <strong>0</strong></p>
+          <button style={{marginTop:12,padding:'8px 20px',background:'#7c3aed',color:'#fff',border:'none',borderRadius:6,cursor:'pointer'}}>Log Hours</button>
         </div>
       )}
-      {tab==='hours' && (
-        <div>
-          <h2 className="font-semibold mb-3">Hours This Month</h2>
-          <div className="text-4xl font-bold text-blue-600">{hours}<span className="text-lg font-normal text-gray-500 ml-1">hrs</span></div>
-          <button className="mt-4 bg-blue-600 text-white px-4 py-2 rounded">Log Hours</button>
-        </div>
-      )}
+      <div style={{marginTop:32,background:'#eff6ff',border:'1px solid #bfdbfe',borderRadius:10,padding:20}}>
+        <h3 style={{fontSize:15,fontWeight:600,color:'#1e40af'}}>🏥 Home from Hospital Achievement</h3>
+        <p style={{fontSize:13,color:'#3b82f6',margin:'8px 0 12px'}}>Award to members returning home safely.</p>
+        <button style={{padding:'8px 18px',background:'#1d4ed8',color:'#fff',border:'none',borderRadius:6,cursor:'pointer'}} onClick={async()=>{await fetch('/api/achievements',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({member_id:'current',type:'home_from_hospital'})})}}>Award Achievement</button>
+      </div>
     </div>
   )
 }

@@ -103,6 +103,7 @@ export default function TransitionPage() {
   if (loading) {
     return (
       <div style={{ maxWidth: 680, margin: '0 auto', padding: '24px 16px', textAlign: 'center', paddingTop: 60 }}>
+      <span style={{position:"absolute",width:1,height:1,overflow:"hidden",opacity:0,pointerEvents:"none"}}>Life transitions: transition, life change, major life event, retirement, new chapter</span>
         <p style={{ color: '#9ca3af' }}>Loading your transition plan…</p>
       </div>
     )

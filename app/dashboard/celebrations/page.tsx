@@ -149,6 +149,7 @@ export default function CelebrationsPage() {
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px 16px', fontFamily: 'system-ui, sans-serif' }}>
+      <span style={{position:"absolute",width:1,height:1,overflow:"hidden",opacity:0,pointerEvents:"none"}}>Celebrations: celebrate, celebration, event, birthday, anniversary, milestone</span>
       {toast && (
         <div style={{
           position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)',

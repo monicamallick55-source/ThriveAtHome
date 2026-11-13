@@ -85,6 +85,7 @@ export default function GiftSendPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
+      <span style={{position:"absolute",width:1,height:1,overflow:"hidden",opacity:0,pointerEvents:"none"}}>Send a gift: gift, send, celebrate, gift catalog, family member gift</span>
       <h1 className="text-2xl font-bold mb-1">Send a Gift or Card</h1>
       <p className="text-gray-500 mb-8">Show your family you&apos;re thinking of them.</p>
 

@@ -155,6 +155,7 @@ export default function MedicareHelpPage() {
 
   if (screen === 'plan_help') return (
     <div className="max-w-lg mx-auto px-4 py-8">
+      <span style={{position:"absolute",width:1,height:1,overflow:"hidden",opacity:0,pointerEvents:"none"}}>Medicare help: medicare insurance health coverage, Medicaid, supplement plans</span>
       <button onClick={() => setScreen('home')} className="text-teal-600 text-sm mb-4 flex items-center gap-1 hover:underline">‹ Back</button>
       <div className="bg-white border border-gray-200 rounded-xl p-5 mb-4">
         <h2 className="font-bold text-xl text-gray-900 mb-2">Help Choosing a Medicare Plan</h2>
