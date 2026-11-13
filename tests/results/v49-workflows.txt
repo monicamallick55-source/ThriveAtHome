@@ -1,30 +1,0 @@
-
-🔥 Warming up 54 pages + 9 APIs at http://localhost:3000...
-
-  warmed 5/54 pages  warmed 10/54 pages  warmed 15/54 pages  warmed 20/54 pages  warmed 25/54 pages  warmed 30/54 pages  warmed 35/54 pages  warmed 40/54 pages  warmed 45/54 pages  warmed 50/54 pages  warmed 54/54 pages
-✅ Warmup complete — all functions are hot
-
-
-Running 150 tests using 8 workers
-
-  ✘    2 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:84:3 › AR-02 Check-In Call › TC-AR02-b: crisis_detected flag creates crisis event (2.6s)
-  ✘    3 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:60:3 › AR-02 Check-In Call › TC-AR02-a: webhook creates check_in row with mood (2.5s)
-  ✘    7 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:120:3 › AR-03 Gift Intent in Call › TC-AR03-a: gift_intent in webhook creates gift_order draft (2.4s)
-  ✘    6 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:152:3 › AR-04 Service Request Intent in Call › TC-AR04-a: service_intent in webhook creates service booking (2.5s)
-  ✓    4 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:43:3 › AR-01 Aria Opt-In › TC-AR01-c: device page shows Aria call button (7.6s)
-  ✓    1 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:31:3 › AR-01 Aria Opt-In › TC-AR01-a: opt-in updates members.aria_call_opted_in (9.1s)
-  ✓    5 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:37:3 › AR-01 Aria Opt-In › TC-AR01-b: opt-out clears flag (8.4s)
-  ✘    8 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:108:3 › AR-02 Check-In Call › TC-AR02-c: check-ins endpoint returns mood timeline (8.8s)
-  ✘   10 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:60:3 › AR-02 Check-In Call › TC-AR02-a: webhook creates check_in row with mood (retry #1) (2.6s)
-  ✘    9 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:84:3 › AR-02 Check-In Call › TC-AR02-b: crisis_detected flag creates crisis event (retry #1) (2.7s)
-  ✘   12 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:152:3 › AR-04 Service Request Intent in Call › TC-AR04-a: service_intent in webhook creates service booking (retry #1) (2.8s)
-  ✘   13 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:120:3 › AR-03 Gift Intent in Call › TC-AR03-a: gift_intent in webhook creates gift_order draft (retry #1) (2.7s)
-  ✘   15 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:58:3 › B2B-01 Employer Signup & Org Setup › TC-B01-a: POST /api/b2b-signup creates org + admin user (4.1s)
-  ✘   11 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:184:3 › AR-05 Buddy Brief › TC-AR05-a: GET /api/buddy/brief returns AI-generated context (7.1s)
-  ✘   14 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:200:3 › AR-06 Important Date Reminder in Call › TC-AR06-a: tracked items endpoint returns upcoming items for Aria (6.4s)
-  ✘   18 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:60:3 › AR-02 Check-In Call › TC-AR02-a: webhook creates check_in row with mood (retry #2) (1.5s)
-  ✘   17 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:84:3 › AR-02 Check-In Call › TC-AR02-b: crisis_detected flag creates crisis event (retry #2) (2.1s)
-  ✘   20 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:120:3 › AR-03 Gift Intent in Call › TC-AR03-a: gift_intent in webhook creates gift_order draft (retry #2) (1.7s)
-  ✘   19 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:152:3 › AR-04 Service Request Intent in Call › TC-AR04-a: service_intent in webhook creates service booking (retry #2) (1.9s)
-  ✘   21 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:58:3 › B2B-01 Employer Signup & Org Setup › TC-B01-a: POST /api/b2b-signup creates org + admin user (retry #1) (5.1s)
-  ✘   16 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:108:3 › AR-02 Check-In Call › TC-AR02-c: check-ins endpoint returns mood timeline (retry #1) (8.7s)
