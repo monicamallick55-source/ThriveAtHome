@@ -43,13 +43,10 @@ test.describe('AR-01 Aria Opt-In', () => {
   test('TC-AR01-c: device page shows Aria call button', async ({ page }) => {
     await loginAsMember(page);
     await page.goto(`${BASE}/dashboard/device`);
-    // Should show Aria call UI element
     const html = await page.content();
     expect(
-      html.includes('aria') ||
-      html.includes('Aria') ||
-      html.includes('call') ||
-      html.includes('Call')
+      html.includes('aria') || html.includes('Aria') ||
+      html.includes('call') || html.includes('Call')
     ).toBe(true);
   });
 });
@@ -58,9 +55,9 @@ test.describe('AR-01 Aria Opt-In', () => {
 
 test.describe('AR-02 Check-In Call', () => {
   test('TC-AR02-a: webhook creates check_in row with mood', async ({ page }) => {
-    // Simulate Retell webhook call completion
-    const result = await page.evaluate(() =>
-      fetch('/api/retell/webhook', {
+    await page.goto(`${BASE}/`);
+    const result = await page.evaluate((base: string) =>
+      fetch(`${base}/api/retell/webhook`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -76,14 +73,16 @@ test.describe('AR-02 Check-In Call', () => {
           service_intent: null,
         }),
         credentials: 'include',
-      }).then(r => r.json())
+      }).then(r => r.json()),
+      BASE
     );
     expect(result.check_in_id || result.id).toBeTruthy();
   });
 
   test('TC-AR02-b: crisis_detected flag creates crisis event', async ({ page }) => {
-    const result = await page.evaluate(() =>
-      fetch('/api/retell/webhook', {
+    await page.goto(`${BASE}/`);
+    const result = await page.evaluate((base: string) =>
+      fetch(`${base}/api/retell/webhook`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -100,15 +99,17 @@ test.describe('AR-02 Check-In Call', () => {
           service_intent: null,
         }),
         credentials: 'include',
-      }).then(r => r.json())
+      }).then(r => r.json()),
+      BASE
     );
     expect(result.crisis_event_id || result.check_in_id).toBeTruthy();
   });
 
   test('TC-AR02-c: check-ins endpoint returns mood timeline', async ({ page }) => {
     await loginAsMember(page);
-    const checkins = await page.evaluate(() =>
-      fetch('/api/check-ins', { credentials: 'include' }).then(r => r.json())
+    const checkins = await page.evaluate((base: string) =>
+      fetch(`${base}/api/check-ins`, { credentials: 'include' }).then(r => r.json()),
+      BASE
     );
     expect(Array.isArray(checkins)).toBe(true);
   });
@@ -118,8 +119,9 @@ test.describe('AR-02 Check-In Call', () => {
 
 test.describe('AR-03 Gift Intent in Call', () => {
   test('TC-AR03-a: gift_intent in webhook creates gift_order draft', async ({ page }) => {
-    const result = await page.evaluate(() =>
-      fetch('/api/retell/webhook', {
+    await page.goto(`${BASE}/`);
+    const result = await page.evaluate((base: string) =>
+      fetch(`${base}/api/retell/webhook`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -140,7 +142,8 @@ test.describe('AR-03 Gift Intent in Call', () => {
           service_intent: null,
         }),
         credentials: 'include',
-      }).then(r => r.json())
+      }).then(r => r.json()),
+      BASE
     );
     expect(result.gift_order_draft_id || result.check_in_id).toBeTruthy();
   });
@@ -150,8 +153,9 @@ test.describe('AR-03 Gift Intent in Call', () => {
 
 test.describe('AR-04 Service Request Intent in Call', () => {
   test('TC-AR04-a: service_intent in webhook creates service booking', async ({ page }) => {
-    const result = await page.evaluate(() =>
-      fetch('/api/retell/webhook', {
+    await page.goto(`${BASE}/`);
+    const result = await page.evaluate((base: string) =>
+      fetch(`${base}/api/retell/webhook`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -172,7 +176,8 @@ test.describe('AR-04 Service Request Intent in Call', () => {
           },
         }),
         credentials: 'include',
-      }).then(r => r.json())
+      }).then(r => r.json()),
+      BASE
     );
     expect(result.service_booking_id || result.check_in_id).toBeTruthy();
   });
@@ -183,12 +188,13 @@ test.describe('AR-04 Service Request Intent in Call', () => {
 test.describe('AR-05 Buddy Brief', () => {
   test('TC-AR05-a: GET /api/buddy/brief returns AI-generated context', async ({ page }) => {
     await loginAsMember(page);
-    const me = await page.evaluate(() =>
-      fetch('/api/members/me', { credentials: 'include' }).then(r => r.json())
+    const me = await page.evaluate((base: string) =>
+      fetch(`${base}/api/members/me`, { credentials: 'include' }).then(r => r.json()),
+      BASE
     );
-    const brief = await page.evaluate((id: string) =>
-      fetch(`/api/buddy/brief?member_id=${id}`, { credentials: 'include' }).then(r => r.json()),
-      me.id
+    const brief = await page.evaluate(([base, id]: [string, string]) =>
+      fetch(`${base}/api/buddy/brief?member_id=${id}`, { credentials: 'include' }).then(r => r.json()),
+      [BASE, me.id] as [string, string]
     );
     expect(brief.summary || brief.brief || brief.text).toBeTruthy();
   });
@@ -199,8 +205,9 @@ test.describe('AR-05 Buddy Brief', () => {
 test.describe('AR-06 Important Date Reminder in Call', () => {
   test('TC-AR06-a: tracked items endpoint returns upcoming items for Aria', async ({ page }) => {
     await loginAsMember(page);
-    const items = await page.evaluate(() =>
-      fetch('/api/tracked-items?upcoming=true&days=7', { credentials: 'include' }).then(r => r.json())
+    const items = await page.evaluate((base: string) =>
+      fetch(`${base}/api/tracked-items?upcoming=true&days=7`, { credentials: 'include' }).then(r => r.json()),
+      BASE
     );
     expect(Array.isArray(items)).toBe(true);
   });
