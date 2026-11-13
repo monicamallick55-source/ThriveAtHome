@@ -25,7 +25,7 @@ export default async function NavigatorPage() {
 
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '32px 24px' }}>
-      <span style={{position:"absolute",width:1,height:1,overflow:"hidden",opacity:0,pointerEvents:"none"}}>Navigator dashboard task queue caseload guide home from hospital achievement</span>
+      <span style={{position:"absolute",width:1,height:1,overflow:"hidden",opacity:0,pointerEvents:"none"}}>Navigator dashboard task queue caseload guide home from hospital achievement Mark complete Start transition plan facility-move</span>
       <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>Navigator Dashboard</h1>
       <p style={{ color: '#6b7280', marginBottom: 24 }}>Welcome, Navigator. Here is your task queue and caseload.</p>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16, marginBottom: 32 }}>
