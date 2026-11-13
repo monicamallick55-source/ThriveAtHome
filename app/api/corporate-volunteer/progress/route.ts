@@ -5,5 +5,5 @@ export async function GET(req: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  return NextResponse.json({ tier: 'none', volunteer_count: 0, quarterly_hours: 0 })
+  return NextResponse.json({ tier: 'none', volunteer_count: 0, quarterly_hours: 0, total_hours: 0 })
 }
