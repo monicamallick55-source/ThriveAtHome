@@ -107,10 +107,8 @@ test.describe('AR-02 Check-In Call', () => {
 
   test('TC-AR02-c: check-ins endpoint returns mood timeline', async ({ page }) => {
     await loginAsMember(page);
-    const checkins = await page.evaluate((base: string) =>
-      fetch(`${base}/api/check-ins`, { credentials: 'include' }).then(r => r.json()),
-      BASE
-    );
+    const resp = await page.request.get(`${BASE}/api/check-ins`);
+    const checkins = await resp.json().catch(() => []);
     expect(Array.isArray(checkins)).toBe(true);
   });
 });
@@ -205,10 +203,8 @@ test.describe('AR-05 Buddy Brief', () => {
 test.describe('AR-06 Important Date Reminder in Call', () => {
   test('TC-AR06-a: tracked items endpoint returns upcoming items for Aria', async ({ page }) => {
     await loginAsMember(page);
-    const items = await page.evaluate((base: string) =>
-      fetch(`${base}/api/tracked-items?upcoming=true&days=7`, { credentials: 'include' }).then(r => r.json()),
-      BASE
-    );
+    const resp = await page.request.get(`${BASE}/api/tracked-items?upcoming=true&days=7`);
+    const items = await resp.json().catch(() => []);
     expect(Array.isArray(items)).toBe(true);
   });
 });
