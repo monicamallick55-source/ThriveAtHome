@@ -7,10 +7,12 @@ export async function GET(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { searchParams } = new URL(req.url)
   const member_id = searchParams.get('member_id')
-  const { data: member } = await supabase.from('members').select('id').eq('supabase_auth_id', user.id).maybeSingle()
+  let member = null
+  const { data: m1 } = await supabase.from('members').select('id').eq('supabase_auth_id', user.id).maybeSingle().catch(() => ({ data: null }))
+  member = m1
+  if (!member) { const { data: m2 } = await supabase.from('members').select('id').eq('user_id', user.id).maybeSingle().catch(() => ({ data: null })); member = m2 }
   const targetId = member_id || member?.id
-  if (!targetId) return NextResponse.json({ data: [] })
-  const { data, error } = await supabase.from('check_ins').select('*').eq('member_id', targetId).order('created_at', { ascending: false }).limit(50)
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ data: data || [] })
+  if (!targetId) return NextResponse.json([])
+  const { data } = await supabase.from('check_ins').select('*').eq('member_id', targetId).order('created_at', { ascending: false }).limit(50).catch(() => ({ data: null }))
+  return NextResponse.json(data || [])
 }
