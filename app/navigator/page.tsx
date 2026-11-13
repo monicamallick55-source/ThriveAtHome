@@ -1,26 +1,27 @@
 import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export default async function NavigatorPage() {
   let user = null
   try { user = await getCurrentUser() } catch {}
   if (!user) redirect('/login')
 
-  // Check role via app_metadata using service role client
-  const admin = createAdminClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
-  const { data: { user: authUser } } = await admin.auth.admin.getUserById(user.id)
-  const role = authUser?.app_metadata?.role ?? authUser?.user_metadata?.role ?? ''
+  let isNavigator = false
+  try {
+    const admin = createAdminClient()
+    const { data: { user: authUser } } = await admin.auth.admin.getUserById(user.id)
+    const role = authUser?.app_metadata?.role ?? authUser?.user_metadata?.role ?? ''
+    if (['navigator','admin','superadmin','super_admin'].includes(role)) {
+      isNavigator = true
+    }
+    if (!isNavigator) {
+      const { data: navRow } = await admin.from('care_navigators').select('id').eq('supabase_auth_id', user.id).maybeSingle()
+      if (navRow) isNavigator = true
+    }
+  } catch { isNavigator = false }
 
-  // Also check care_navigators table as fallback
-  const { data: navRow } = await admin.from('care_navigators').select('id').eq('supabase_auth_id', user.id).maybeSingle()
-
-  if (!['navigator','admin','superadmin','super_admin'].includes(role) && !navRow) {
-    redirect('/dashboard')
-  }
+  if (!isNavigator) redirect('/dashboard')
 
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '32px 24px' }}>
