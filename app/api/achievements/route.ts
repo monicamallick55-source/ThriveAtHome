@@ -5,7 +5,7 @@ export async function GET(_req: NextRequest) {
   try {
     const user = await getCurrentUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    return NextResponse.json({ data: [], total: 0 })
+    return NextResponse.json({ achievements: [], total: 0 })
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
