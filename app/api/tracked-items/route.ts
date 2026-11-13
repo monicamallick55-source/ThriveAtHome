@@ -5,7 +5,7 @@ export async function GET(req: NextRequest) {
   let supabase: any
   try { supabase = await createClient() } catch { return NextResponse.json([]) }
   const { data: { user } } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }))
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user) return NextResponse.json([])
   const { searchParams } = new URL(req.url)
   const upcoming = searchParams.get('upcoming')
   const days = parseInt(searchParams.get('days') || '7')
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
   let supabase: any
   try { supabase = await createClient() } catch { return NextResponse.json([]) }
   const { data: { user } } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }))
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user) return NextResponse.json([])
   const body = await req.json().catch(() => ({}))
   let member = null
   const { data: m1 } = await supabase.from('members').select('id').eq('supabase_auth_id', user.id).maybeSingle().catch(() => ({ data: null }))
