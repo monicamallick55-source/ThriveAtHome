@@ -1,4 +1,3 @@
-'use client'
 export default function TrustedAdvisorsPage() {
   const advisors = [
     { role: 'therapist', label: 'Therapist', emoji: '🧠', desc: 'Licensed mental health support', available: true },

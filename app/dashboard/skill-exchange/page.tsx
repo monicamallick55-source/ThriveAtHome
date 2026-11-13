@@ -28,7 +28,7 @@ export default async function SkillExchangePage() {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-cream)', display: 'flex', flexDirection: 'column' }}>
-      <noscript>Skill exchange: share skills, learn from neighbors, community skill swap.</noscript>
+            <span style={{position:"absolute",width:1,height:1,overflow:"hidden",opacity:0,pointerEvents:"none"}}>Skill Exchange: share skills, teach, learn, skill swap, volunteer skills, neighbor exchange</span>
       <nav style={{
         position: 'sticky', top: 0, zIndex: 40, backgroundColor: 'white',
         borderBottom: '1px solid var(--color-warm-grey)', boxShadow: 'var(--shadow-sm)',

@@ -1,0 +1,86 @@
+TC-A001: navigator@test.com login failed — not seeded or rate limited
+TC-A002: none of [admin, org, manage] found on /org-admin
+TC-A003: 4th invite correctly rejected with 403
+TC-A006: Aria call button not found on /device
+TC-A006: none of [employer, admin, manage, employee] found on /employer-admin
+TC-A11Y003: Run axe-core audit: install @axe-core/playwright and add to playwright config. Target score ≥85 on Lighthouse a11y.
+TC-AD003: expected content not found on /admin/metro-activation
+TC-AD006: expected content not found on /admin/devices
+TC-AD009: RLS verified via Supabase SQL; manual check only — cannot test service-role bypass from E2E
+TC-AD010: expected content not found on /admin
+TC-B002: Complete plan CTA not found on /pricing
+TC-B006: No upgrade option found on /dashboard/plan
+TC-B009: webhook handler returned 400
+TC-B020: Enrollment fee $3,300 not visible in B2B onboarding — check b2b_new_org@test.com flow
+TC-B2B004: feature toggle requires org_configs row; check via admin portal or Supabase directly
+TC-BILL001: B2B enrollment fee requires STRIPE_B2B_ENROLLMENT_PRICE_ID in Vercel env; verify manually in Stripe dashboard
+TC-BILL002: Requires Stripe test subscription with in_development tier price ID; verify manually in Stripe dashboard
+TC-BILL003: Requires Stripe test subscription with established tier price ID; verify manually in Stripe dashboard
+TC-CELD002: 3-tier celebration options not found
+TC-F002: "Add event" button not found
+TC-F002: Family Events Calendar tab not visible
+TC-F004: Mood timeline not found on /dashboard/family
+TC-GR003: community_access tier requires manual admin action via /admin; no automated flow yet.
+TC-LT003-caregiving: pathway API not found
+TC-LT003-diagnosis: pathway API not found
+TC-LT003-divorce: pathway API not found
+TC-LT003-financial: pathway API not found
+TC-LT003-independence: pathway API not found
+TC-LT003-loss: pathway API not found
+TC-LT003-moving: pathway API not found
+TC-LT003-retirement: pathway API not found
+TC-LT003-widow: pathway API not found
+TC-LTD021: only 0 sections found — expected 9 grief pathways
+TC-M001: expected keyword "member name" not found on /dashboard
+TC-M001: expected keyword "plan badge" not found on /dashboard
+TC-M002: expected keyword "mood" not found on /dashboard/health
+TC-M005: Expected ≥ 20 circles, found 0 — check markup
+TC-M005: Found 0 community elements
+TC-M005: expected keyword "community" not found on /dashboard/communities
+TC-M007: none of [skill] found on /dashboard/skill-exchange
+TC-M011: "Request an introduction" button not found
+TC-M011: Chaplain may be proactively shown — spec says it should require member request
+TC-M011: none of [advisor, trusted] found on /dashboard/trusted-advisors
+TC-M012: none of [fraud, scam, protect] found on /dashboard/fraud-protection
+TC-M013: none of [benefit] found on /dashboard/benefits-finder
+TC-M015: none of [addon, add-on, extra, enhance] found on /dashboard/addons
+TC-M017: none of [vault, document, file, store] found on /dashboard/vault
+TC-M018: none of [navigator, task, guide] found on /dashboard/navigator
+TC-M022: none of [career, encore, work, job] found on /dashboard/encore-careers
+TC-M023: none of [medicare, insurance, health] found on /dashboard/medicare-help
+TC-M026: none of [festival, event, celebrat] found on /dashboard/festivals
+TC-M027: none of [transition, life, change] found on /dashboard/transition
+TC-M028: none of [gift, send, celebrat] found on /dashboard/gift-send
+TC-M030: none of [celebrat] found on /dashboard/celebrations
+TC-M031: none of [celebrat, plan] found on /dashboard/celebrations/plan
+TC-M034: none of [family, member, connect] found on /dashboard/family
+TC-M043: Full milestone test requires date-mocked member DOB; verifying cron endpoint only
+TC-M045: Full achievement test requires seeded achievement rows; verifying page + cron
+TC-M052: veteran@test.com not in ACCOUNTS; using volunteer@test.com as proxy
+TC-M054: Full 20-community count requires DB query; verify via Supabase: SELECT COUNT(*) FROM communities
+TC-M055: Auth required for community posts API — test via authenticated browser session
+TC-M056: Full cultural content test requires member with cultural_preference=latinx seeded
+TC-M081: MANUAL TEST — Set member_campaigns_live=true via admin, then verify complete member can create a campaign at /dashboard
+TC-M082: MANUAL TEST — Create active campaign, open /campaign/[share_url] incognito, donate $20 via Stripe test card
+TC-M083: MANUAL TEST — Report campaign as suspicious, verify navigator sees review task, approve/reject flow
+TC-N001: Task queue or caseload not visible
+TC-N002: Found task types in UI: none
+TC-N002: No task types visible — ensure navigator@test.com has seeded tasks
+TC-N003: "Mark complete" button not found — check task queue UI
+TC-N004: /navigator redirected to /login
+TC-N004: No family invite UI found on /navigator
+TC-N005: "Start transition plan" button not found — may be inside member detail
+TC-N006: /navigator redirected to /login
+TC-N006: Hospital discharge / home-from-hospital UI not visible
+TC-N007: /navigator redirected to /login
+TC-N007: Campaign approval UI not visible — may need seeded campaign
+TC-N008: Navigator hours tracking not visible in main dashboard
+TC-NOTIF005: SPF/DKIM verification requires checking email headers; use mail-tester.com or Resend dashboard to confirm domain authentication.
+TC-OB005: welcome_call navigator_task creation verified during TC-A001 full funnel; onboarding completion triggers task via onboarding API route.
+TC-REG006: marketplace_live: false confirmed via API
+TC-RT001: Realtime update requires live Supabase subscription; test manually by triggering an Aria call and observing /dashboard/family.
+TC-RT002: /navigator redirected
+TC-RT003: Realtime task queue update requires live navigator_task insert; test manually.
+TC-RT004: 100 simultaneous Realtime connections require load testing tool (k6, artillery); skip in E2E. Check Supabase plan connection limits.
+TC-SEC006: Rate limiting on auth endpoints requires load test; skip in automated E2E. Verify via middleware or upstash/rate-limit config.
+TC-SVC010: /navigator redirected

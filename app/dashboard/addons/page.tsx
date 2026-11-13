@@ -1,4 +1,3 @@
-'use client'
 const ADDONS = [
   { id: 'nav-hours', name: 'Extra Navigator Hours Block', desc: 'Add 2 extra navigator hours per month to your plan.', price: '$29/mo' },
   { id: 'premium-content', name: 'Premium Content Access', desc: 'Unlock all premium courses, workshops, and expert content.', price: '$9/mo' },
