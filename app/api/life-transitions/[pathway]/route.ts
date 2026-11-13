@@ -6,7 +6,7 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ pathway: string }> }
 ) {
-  const { pathway } = params
+  const { pathway } = await params
   if (!PATHWAYS.includes(pathway)) {
     return NextResponse.json({ error: 'Unknown pathway' }, { status: 404 })
   }
