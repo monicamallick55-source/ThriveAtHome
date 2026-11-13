@@ -49,7 +49,6 @@ export default function EmployerAdminClient() {
           </button>
         </div>
       </section>
-    </div>
 
       <section style={{ marginTop: '2rem', background: '#f5f3ff', border: '1px solid #ede9fe', borderRadius: 12, padding: '1.5rem' }}>
         <h2 style={{ fontSize: '1rem', fontWeight: 700, color: '#1f2937', margin: '0 0 0.5rem' }}>Corporate Volunteer Tier Progress</h2>
@@ -71,5 +70,6 @@ export default function EmployerAdminClient() {
         </div>
         <p style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.5rem' }}>1,284 of 5,000 annual hours toward Leader tier</p>
       </section>
+    </div>
   )
 }
