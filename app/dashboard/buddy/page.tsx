@@ -18,27 +18,27 @@ export default async function BuddyPage() {
 
   if (!isPaidPlan) {
     return (
-    <>
-    <span style={{position:"absolute",left:-9999,top:"auto",width:1,height:1,overflow:"hidden"}}>buddy friend connect volunteer matching companion call</span>
-      <div className="max-w-2xl mx-auto px-4 py-10">
-        <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center">
-          <div className="text-5xl mb-4">🤝</div>
-          <h1 className="text-2xl font-bold text-[#1B3A6B] mb-3">Get a real buddy</h1>
-          <p className="text-gray-600 mb-6">
-            Upgrade to Connect and we'll match {seniorName} with one dedicated volunteer who calls every week,
-            gets to know them, and remembers what matters.
-          </p>
-          <Link href="/dashboard/plan" className="inline-block bg-[#2A9D8F] text-white font-semibold px-6 py-3 rounded-xl">
-            Upgrade to Connect →
-          </Link>
+      <>
+        <span style={{position:'absolute',left:-9999,top:'auto',width:1,height:1,overflow:'hidden'}}>buddy friend connect volunteer matching companion call</span>
+        <div className="max-w-2xl mx-auto px-4 py-10">
+          <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center">
+            <div className="text-5xl mb-4">🤝</div>
+            <h1 className="text-2xl font-bold text-[#1B3A6B] mb-3">Get a real buddy</h1>
+            <p className="text-gray-600 mb-6">
+              Upgrade to Connect and we&apos;ll match {seniorName} with one dedicated volunteer who calls every week,
+              gets to know them, and remembers what matters.
+            </p>
+            <Link href="/dashboard/plan" className="inline-block bg-[#2A9D8F] text-white font-semibold px-6 py-3 rounded-xl">
+              Upgrade to Connect →
+            </Link>
+          </div>
         </div>
-      </div>
+      </>
     )
   }
 
   const supabase = await createClient()
 
-  // Get active buddy assignment
   const { data: assignment } = await supabase
     .from('buddy_assignments')
     .select(`id, status, call_frequency, preferred_call_day, preferred_call_time, assigned_at, match_reasons, volunteer_id`)
@@ -50,138 +50,64 @@ export default async function BuddyPage() {
   if (assignment?.volunteer_id) {
     const { data: vol } = await supabase
       .from('volunteers')
-      .select('id, first_name, last_name, buddy_bio')
+      .select('id, first_name, last_name, bio, interests, languages')
       .eq('id', assignment.volunteer_id)
       .maybeSingle()
     volunteer = vol
   }
 
-  const calls: any[] = []
-  if (assignment) {
-    const { data: callData } = await supabase
-      .from('buddy_calls')
-      .select('id, started_at, duration_minutes, buddy_notes, family_note, milestone_flag, milestone_description, call_quality')
-      .eq('assignment_id', assignment.id)
-      .order('started_at', { ascending: false })
-      .limit(10)
-    if (callData) calls.push(...callData)
-  }
-
-  const milestones = calls.filter(c => c.milestone_flag)
-  const lastCall = calls[0]
-  const lastCallDate = lastCall?.started_at
-    ? new Date(lastCall.started_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
-    : null
-  const dayLabel = assignment?.preferred_call_day
-    ? assignment.preferred_call_day.charAt(0).toUpperCase() + assignment.preferred_call_day.slice(1) + 's'
-    : null
-  const assignedSince = assignment?.assigned_at
-    ? new Date(assignment.assigned_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-    : null
-  const buddyFirstName = volunteer?.first_name ?? ''
-  const buddyLastInitial = volunteer?.last_name?.[0] ?? ''
-  const buddyDisplayName = buddyFirstName ? `${buddyFirstName} ${buddyLastInitial}.` : 'your buddy'
-
   return (
     <>
-    <span style={{position:"absolute",left:-9999,top:"auto",width:1,height:1,overflow:"hidden"}}>buddy friend connect volunteer matching companion call</span>
-    <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
-      <h1 className="text-2xl font-bold text-[#1B3A6B]">{seniorName}'s Buddy</h1>
+      <span style={{position:'absolute',left:-9999,top:'auto',width:1,height:1,overflow:'hidden'}}>buddy friend connect volunteer matching companion call</span>
+      <div className="max-w-2xl mx-auto px-4 py-10">
+        <h1 className="text-2xl font-bold text-[#1B3A6B] mb-6">My Buddy</h1>
 
-      {!assignment ? (
-        <div className="bg-teal-50 border border-teal-100 rounded-2xl p-6">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-full bg-teal-200 flex items-center justify-center text-2xl flex-shrink-0">🕐</div>
-            <div>
-              <h2 className="font-bold text-[#1B3A6B] mb-1">Finding the right match…</h2>
-              <p className="text-gray-600 text-sm leading-relaxed">
-                We're matching {seniorName} with a buddy now — this typically takes 5–7 days.
-                You'll get an email as soon as they're introduced.
-              </p>
-              <p className="text-teal-700 text-sm mt-3 font-medium">
-                ✓ Included in your {planTier.charAt(0).toUpperCase() + planTier.slice(1)} plan
-              </p>
-            </div>
+        {!assignment ? (
+          <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center">
+            <div className="text-5xl mb-4">🔍</div>
+            <h2 className="text-xl font-semibold mb-2">Finding your perfect match</h2>
+            <p className="text-gray-600">Your navigator is working on matching you with a compatible buddy. You&apos;ll hear back soon!</p>
           </div>
-        </div>
-      ) : (
-        <>
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-            <div className="flex items-start gap-4">
-              <div className="w-14 h-14 rounded-full bg-[#1B3A6B] flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
-                {buddyFirstName[0] ?? '?'}
+        ) : (
+          <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-full bg-[#2A9D8F] flex items-center justify-center text-white text-2xl font-bold">
+                {volunteer?.first_name?.[0] ?? '?'}
               </div>
-              <div className="flex-1 min-w-0">
-                <h2 className="text-xl font-bold text-[#1B3A6B]">{buddyDisplayName}</h2>
-                {assignedSince && <p className="text-gray-500 text-sm">Calling {seniorName} since {assignedSince}</p>}
-                {volunteer?.buddy_bio && <p className="text-gray-600 text-sm mt-2 leading-relaxed">{volunteer.buddy_bio}</p>}
+              <div>
+                <p className="font-semibold text-lg">{volunteer ? `${volunteer.first_name} ${volunteer.last_name}` : 'Your Buddy'}</p>
+                <p className="text-sm text-gray-500">Buddy since {new Date(assignment.assigned_at).toLocaleDateString()}</p>
               </div>
             </div>
-            <div className="mt-4 pt-4 border-t border-gray-100 grid grid-cols-2 gap-4 text-sm">
-              {dayLabel && (
-                <div>
-                  <span className="text-gray-400 block text-xs uppercase tracking-wide mb-0.5">Calls on</span>
-                  <span className="font-semibold text-gray-800">{dayLabel}</span>
-                  {assignment.preferred_call_time && <span className="text-gray-500 ml-1">at {assignment.preferred_call_time}</span>}
-                </div>
-              )}
-              {lastCallDate && (
-                <div>
-                  <span className="text-gray-400 block text-xs uppercase tracking-wide mb-0.5">Last call</span>
-                  <span className="font-semibold text-gray-800">{lastCallDate}</span>
-                </div>
-              )}
+
+            {volunteer?.bio && (
+              <p className="text-gray-700 text-sm">{volunteer.bio}</p>
+            )}
+
+            {volunteer?.interests?.length > 0 && (
               <div>
-                <span className="text-gray-400 block text-xs uppercase tracking-wide mb-0.5">Frequency</span>
-                <span className="font-semibold text-gray-800 capitalize">{assignment.call_frequency ?? 'Weekly'}</span>
+                <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Shared Interests</p>
+                <div className="flex flex-wrap gap-2">
+                  {volunteer.interests.map((i: string) => (
+                    <span key={i} className="bg-[#f0fdf4] text-[#166534] text-xs px-2 py-1 rounded-full">{i}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="border-t pt-4 grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <p className="text-gray-500">Call frequency</p>
+                <p className="font-medium">{assignment.call_frequency ?? 'Weekly'}</p>
               </div>
               <div>
-                <span className="text-gray-400 block text-xs uppercase tracking-wide mb-0.5">Total calls</span>
-                <span className="font-semibold text-gray-800">{calls.length}</span>
+                <p className="text-gray-500">Preferred day</p>
+                <p className="font-medium">{assignment.preferred_call_day ?? 'Flexible'}</p>
               </div>
             </div>
           </div>
-
-          {lastCall?.family_note && (
-            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5">
-              <p className="text-xs font-bold uppercase tracking-wider text-amber-600 mb-2">A note from {buddyFirstName}</p>
-              <p className="text-gray-800 leading-relaxed">"{lastCall.family_note}"</p>
-              {lastCall.started_at && <p className="text-gray-400 text-xs mt-2">{new Date(lastCall.started_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}</p>}
-            </div>
-          )}
-
-          {milestones[0] && (
-            <div className="bg-purple-50 border border-purple-100 rounded-2xl p-5">
-              <p className="text-xs font-bold uppercase tracking-wider text-purple-600 mb-2">✨ A special moment</p>
-              <p className="text-gray-800 leading-relaxed">{milestones[0].milestone_description}</p>
-              {milestones[0].started_at && <p className="text-gray-400 text-xs mt-2">{new Date(milestones[0].started_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}</p>}
-            </div>
-          )}
-
-          {calls.length > 0 && (
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-              <h3 className="font-bold text-[#1B3A6B] mb-4">Recent calls</h3>
-              <div className="space-y-4">
-                {calls.slice(0, 5).map((call: any) => (
-                  <div key={call.id} className="flex gap-4 items-start">
-                    <div className="w-1 self-stretch bg-teal-100 rounded-full flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-semibold text-gray-800 text-sm">
-                          {call.started_at ? new Date(call.started_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Unknown date'}
-                        </span>
-                        {call.duration_minutes && <span className="text-gray-400 text-xs">{call.duration_minutes} min</span>}
-                        {call.milestone_flag && <span className="text-purple-500 text-xs">✨ milestone</span>}
-                      </div>
-                      {call.buddy_notes && <p className="text-gray-600 text-sm leading-relaxed">{call.buddy_notes}</p>}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </>
-      )}
-    </div>
+        )}
+      </div>
+    </>
   )
 }
