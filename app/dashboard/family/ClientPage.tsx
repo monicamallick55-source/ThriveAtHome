@@ -2,7 +2,6 @@
 export default function FamilyDashboardPage() {
   return (
     <main style={{ maxWidth: 900, margin: '0 auto', padding: '2rem 1rem' }}>
-      <span style={{position:"absolute",width:1,height:1,overflow:"hidden",opacity:0,pointerEvents:"none"}}>Family dashboard: family, member, connect, family portal, loved ones, family events</span>
       <h1>Family Portal</h1>
 
       <section style={{ marginBottom: '2rem' }}>
@@ -16,12 +15,19 @@ export default function FamilyDashboardPage() {
       </section>
 
       <section style={{ marginBottom: '2rem' }}>
+        <div role="tablist" style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+          <button role="tab" aria-selected="true">Family Events</button>
+          <button role="tab" aria-selected="false">Mood</button>
+        </div>
         <h2>Family Events Calendar</h2>
         <p>Upcoming family events and important dates.</p>
+        <button type="button" style={{ marginTop: '0.5rem', padding: '0.5rem 1rem', background: '#6366f1', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer' }}>
+          + Add Event
+        </button>
       </section>
 
       <section style={{ marginBottom: '2rem' }}>
-        <h2>Mood &amp; How They're Feeling</h2>
+        <h2>Mood &amp; How They&apos;re Feeling</h2>
         <p>Mood timeline — track emotional wellbeing over time.</p>
       </section>
     </main>
