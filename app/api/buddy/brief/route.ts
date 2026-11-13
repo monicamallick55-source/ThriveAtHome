@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 export const dynamic = 'force-dynamic'
 export async function GET(req: NextRequest) {
   let supabase: any
-  try { supabase = await createClient() } catch { return NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
+  try { supabase = await createClient() } catch { return NextResponse.json({ summary: 'Member context unavailable', brief: 'No data', text: 'No data', id: 'unknown' }) }
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { searchParams } = new URL(req.url)
