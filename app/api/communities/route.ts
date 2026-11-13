@@ -1,29 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth'
-
-export const runtime = 'nodejs'
+import { createClient } from '@/lib/supabase/server'
 export const dynamic = 'force-dynamic'
-
-const NAMES = ['Book Club','Gardening','Music Appreciation','Art & Crafts','Walking Group',
-  'Cooking Circle','Chess Club','Photography','History Buffs','Travel Stories',
-  'Technology Help','Yoga & Wellness','Bird Watching','Knitting & Sewing','Dance',
-  'Movie Club','Creative Writing','Nature Walks','Language Learning','Volunteering Together',
-  'Faith & Reflection','Veterans Connect','Crafts & Hobbies','Health & Wellness']
-
-const STUB_CIRCLES = NAMES.map((name, i) => ({
-  id: String(i + 1), name,
-  category: ['culture','hobbies','wellness','learning','social'][i % 5],
-  member_count: 10 + (i * 3 % 40), tags: [], joined: false,
-}))
-
-export async function GET(req: NextRequest) {
-  const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ circles: [] })
-  return NextResponse.json({ circles: STUB_CIRCLES, total: STUB_CIRCLES.length })
-}
-
-export async function POST(req: NextRequest) {
-  const user = await getCurrentUser()
+export async function GET() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  return NextResponse.json({ ok: true })
+  const { data: circles, error } = await supabase.from('interest_circles').select('id, name, description, category, member_count, meeting_frequency, is_virtual').order('member_count', { ascending: false })
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  const { data: memberships } = await supabase.from('circle_members').select('circle_id').eq('user_id', user.id)
+  const memberSet = new Set((memberships ?? []).map((m: any) => m.circle_id))
+  const result = (circles ?? []).map((c: any) => ({ ...c, is_member: memberSet.has(c.id) }))
+  return NextResponse.json({ circles: result, total: result.length })
+}
+export async function POST(req: NextRequest) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const body = await req.json().catch(() => ({}))
+  const { data, error } = await supabase.from('interest_circles').insert({ ...body, created_by: user.id }).select().single()
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json(data, { status: 201 })
 }

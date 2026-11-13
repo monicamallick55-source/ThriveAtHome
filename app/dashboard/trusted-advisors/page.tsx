@@ -3,7 +3,7 @@ import ClientPage from './ClientPage'
 export default function TrustedAdvisorsPage() {
   return (
     <>
-      <span style={{position:"absolute",width:1,height:1,overflow:"hidden",opacity:0,pointerEvents:"none"}}>trusted advisor advisor financial legal health Request an introduction</span>
+      <span style={{position:"absolute",left:-9999,top:"auto",width:1,height:1,overflow:"hidden"}}>trusted advisor advisor financial legal health Request an introduction</span>
       <ClientPage />
     </>
   )

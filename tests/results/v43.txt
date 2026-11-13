@@ -1,0 +1,21 @@
+
+🔥 Warming up 54 pages + 9 APIs at http://localhost:3000...
+
+  warmed 5/54 pages  warmed 10/54 pages  warmed 15/54 pages  warmed 20/54 pages  warmed 25/54 pages  warmed 30/54 pages  warmed 35/54 pages  warmed 40/54 pages  warmed 45/54 pages  warmed 50/54 pages  warmed 54/54 pages
+✅ Warmup complete — all functions are hot
+
+
+Running 895 tests using 1 worker
+
+  ✓    1 [chromium] › tests/e2e/admin-portal-deep.spec.ts:57:1 › TC-AD002 — /admin/ma-report loads without 500 (3.8s)
+  ✓    2 [chromium] › tests/e2e/admin-portal-deep.spec.ts:65:1 › TC-AD003 — /admin/metro-activation loads without 500 (3.1s)
+  ✓    3 [chromium] › tests/e2e/admin-portal-deep.spec.ts:73:1 › TC-AD004 — /admin/community-partners loads without 500 (2.5s)
+  ✓    4 [chromium] › tests/e2e/admin-portal-deep.spec.ts:81:1 › TC-AD005 — /admin/grief-circles loads without 500 (3.0s)
+  ✓    5 [chromium] › tests/e2e/admin-portal-deep.spec.ts:89:1 › TC-AD006 — /admin/devices loads without 500 (2.3s)
+  ✓    6 [chromium] › tests/e2e/admin-portal-deep.spec.ts:97:1 › TC-AD007 — /admin/org-imports loads without 500 (2.5s)
+  ✓    7 [chromium] › tests/e2e/admin-portal-deep.spec.ts:105:1 › TC-AD008 — /admin/campaigns loads without 500 (2.2s)
+TC-AD009: RLS verified via Supabase SQL; manual check only — cannot test service-role bypass from E2E
+  ✓    8 [chromium] › tests/e2e/admin-portal-deep.spec.ts:113:1 › TC-AD009 — Partner listings RLS (manual check) (291ms)
+admin-portal-deep: admin@test.com not seeded — skipping
+  ✓    9 [chromium] › tests/e2e/admin-portal-deep.spec.ts:125:1 › TC-AD010 — /admin has feature flag controls (10.8s)
+  ✓   10 [chromium] › tests/e2e/admin-portal-deep.spec.ts:143:1 › TC-N004 — /navigator loads for navigator role (2.7s)

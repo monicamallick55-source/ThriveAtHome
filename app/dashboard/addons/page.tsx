@@ -7,7 +7,7 @@ const ADDONS = [
 export default function AddonsPage() {
   return (
     <main style={{ maxWidth: 800, margin: '0 auto', padding: '2rem 1rem' }}>
-      <span style={{position:"absolute",width:1,height:1,overflow:"hidden",opacity:0,pointerEvents:"none"}}>Add-ons: addon, add-on, extra features, enhancements, companion care credits</span>
+      <span style={{position:"absolute",left:-9999,top:"auto",width:1,height:1,overflow:"hidden"}}>Add-ons: addon, add-on, extra features, enhancements, companion care credits</span>
       <noscript>Add-on features: companion care credits, addon services, extra features.</noscript>
       <h1>Add-Ons</h1>
       <p>Enhance your plan with additional services.</p>
