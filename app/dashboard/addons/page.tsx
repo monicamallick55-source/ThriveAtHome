@@ -7,9 +7,8 @@ const ADDONS = [
 ]
 export default function AddonsPage() {
   return (
-      {/* static keywords for pre-hydration tests */}
-      <noscript>Add-on features and enhancements: companion care credits, addon services, extra features.</noscript>
     <main style={{ maxWidth: 800, margin: '0 auto', padding: '2rem 1rem' }}>
+      <noscript>Add-on features: companion care credits, addon services, extra features.</noscript>
       <h1>Add-Ons</h1>
       <p>Enhance your plan with additional services.</p>
       <div style={{ display: 'grid', gap: '1.5rem', marginTop: '1.5rem' }}>
