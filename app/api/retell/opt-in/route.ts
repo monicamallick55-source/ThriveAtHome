@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const body = await req.json().catch(() => ({}))
   const opted_in = body.opted_in ?? true
-  const { error } = await supabase.from('members').update({ aria_call_opted_in: opted_in, updated_at: new Date().toISOString() }).eq('user_id', user.id)
+  const { error } = await supabase.from('members').update({ aria_call_opted_in: opted_in, updated_at: new Date().toISOString() }).eq('supabase_auth_id', user.id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ aria_call_opted_in: opted_in })
 }

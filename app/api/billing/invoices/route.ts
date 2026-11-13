@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const org_id = searchParams.get('org_id')
   let query = supabase.from('invoices').select('*')
-  if (org_id) query = query.eq('org_id', org_id); else query = query.eq('user_id', user.id)
+  if (org_id) query = query.eq('org_id', org_id); else query = query.eq('supabase_auth_id', user.id)
   const { data, error } = await query.order('created_at', { ascending: false }).limit(20)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ data: data || [] })
