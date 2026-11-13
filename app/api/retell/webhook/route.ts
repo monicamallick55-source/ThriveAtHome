@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
 
   const fallbackId = `real-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 
-  let supabase: Awaited<ReturnType<typeof createClient>> | null = null
+  let supabase: any = null
   try { supabase = await createClient() } catch { supabase = null }
 
   if (!supabase) {
