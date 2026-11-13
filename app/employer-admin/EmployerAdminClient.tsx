@@ -50,5 +50,26 @@ export default function EmployerAdminClient() {
         </div>
       </section>
     </div>
+
+      <section style={{ marginTop: '2rem', background: '#f5f3ff', border: '1px solid #ede9fe', borderRadius: 12, padding: '1.5rem' }}>
+        <h2 style={{ fontSize: '1rem', fontWeight: 700, color: '#1f2937', margin: '0 0 0.5rem' }}>Corporate Volunteer Tier Progress</h2>
+        <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: '0 0 1rem' }}>
+          Partner: 50–200 hrs/yr &nbsp;·&nbsp; Champion: 200–500 hrs/yr &nbsp;·&nbsp; Leader: 500+ hrs/yr
+        </p>
+        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+          {(['Partner', 'Champion', 'Leader'] as const).map((tier) => (
+            <div key={tier} style={{ flex: 1, background: '#fff', border: '1px solid #ede9fe', borderRadius: 8, padding: '0.75rem 1rem', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#7c3aed', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{tier}</div>
+              <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: 2 }}>
+                {tier === 'Partner' ? '50–200 hrs' : tier === 'Champion' ? '200–500 hrs' : '500+ hrs'}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div style={{ background: '#ede9fe', borderRadius: 999, height: 10, overflow: 'hidden' }}>
+          <div style={{ background: '#7c3aed', height: '100%', width: '26%', borderRadius: 999, transition: 'width 0.5s' }} />
+        </div>
+        <p style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.5rem' }}>1,284 of 5,000 annual hours toward Leader tier</p>
+      </section>
   )
 }
