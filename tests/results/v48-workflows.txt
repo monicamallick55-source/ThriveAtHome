@@ -1,71 +1,0 @@
-
-🔥 Warming up 54 pages + 9 APIs at http://localhost:3000...
-
-  warmed 5/54 pages  warmed 10/54 pages  warmed 15/54 pages  warmed 20/54 pages  warmed 25/54 pages  warmed 30/54 pages  warmed 35/54 pages  warmed 40/54 pages  warmed 45/54 pages  warmed 50/54 pages  warmed 54/54 pages
-✅ Warmup complete — all functions are hot
-
-
-Running 150 tests using 8 workers
-
-  ✘    2 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:120:3 › AR-03 Gift Intent in Call › TC-AR03-a: gift_intent in webhook creates gift_order draft (3.0s)
-  ✘    3 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:60:3 › AR-02 Check-In Call › TC-AR02-a: webhook creates check_in row with mood (3.1s)
-  ✘    7 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:152:3 › AR-04 Service Request Intent in Call › TC-AR04-a: service_intent in webhook creates service booking (2.5s)
-  ✘    8 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:84:3 › AR-02 Check-In Call › TC-AR02-b: crisis_detected flag creates crisis event (2.9s)
-  ✓    5 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:43:3 › AR-01 Aria Opt-In › TC-AR01-c: device page shows Aria call button (7.4s)
-  ✘    1 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:31:3 › AR-01 Aria Opt-In › TC-AR01-a: opt-in updates members.aria_call_opted_in (8.7s)
-  ✘    4 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:108:3 › AR-02 Check-In Call › TC-AR02-c: check-ins endpoint returns mood timeline (7.5s)
-  ✘    6 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:37:3 › AR-01 Aria Opt-In › TC-AR01-b: opt-out clears flag (8.1s)
-  ✘   10 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:120:3 › AR-03 Gift Intent in Call › TC-AR03-a: gift_intent in webhook creates gift_order draft (retry #1) (2.2s)
-  ✘   11 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:60:3 › AR-02 Check-In Call › TC-AR02-a: webhook creates check_in row with mood (retry #1) (2.0s)
-  ✘   12 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:84:3 › AR-02 Check-In Call › TC-AR02-b: crisis_detected flag creates crisis event (retry #1) (2.0s)
-  ✘   13 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:152:3 › AR-04 Service Request Intent in Call › TC-AR04-a: service_intent in webhook creates service booking (retry #1) (1.9s)
-  ✘    9 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:184:3 › AR-05 Buddy Brief › TC-AR05-a: GET /api/buddy/brief returns AI-generated context (6.1s)
-  ✘   17 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:120:3 › AR-03 Gift Intent in Call › TC-AR03-a: gift_intent in webhook creates gift_order draft (retry #2) (2.2s)
-  ✘   18 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:60:3 › AR-02 Check-In Call › TC-AR02-a: webhook creates check_in row with mood (retry #2) (2.5s)
-  ✘   19 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:84:3 › AR-02 Check-In Call › TC-AR02-b: crisis_detected flag creates crisis event (retry #2) (2.5s)
-  ✘   20 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:152:3 › AR-04 Service Request Intent in Call › TC-AR04-a: service_intent in webhook creates service booking (retry #2) (1.9s)
-  ✘   15 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:31:3 › AR-01 Aria Opt-In › TC-AR01-a: opt-in updates members.aria_call_opted_in (retry #1) (8.6s)
-  ✘   14 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:108:3 › AR-02 Check-In Call › TC-AR02-c: check-ins endpoint returns mood timeline (retry #1) (8.8s)
-  ✘   16 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:37:3 › AR-01 Aria Opt-In › TC-AR01-b: opt-out clears flag (retry #1) (8.5s)
-  ✘   22 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:58:3 › B2B-01 Employer Signup & Org Setup › TC-B01-a: POST /api/b2b-signup creates org + admin user (4.7s)
-  ✓   23 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:79:3 › B2B-01 Employer Signup & Org Setup › TC-B01-b: B2B signup page renders without Coming Soon (4.7s)
-  ✘   21 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:184:3 › AR-05 Buddy Brief › TC-AR05-a: GET /api/buddy/brief returns AI-generated context (retry #1) (9.8s)
-  ✘   24 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:200:3 › AR-06 Important Date Reminder in Call › TC-AR06-a: tracked items endpoint returns upcoming items for Aria (7.8s)
-  ✘   26 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:31:3 › AR-01 Aria Opt-In › TC-AR01-a: opt-in updates members.aria_call_opted_in (retry #2) (7.2s)
-  ✘   27 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:108:3 › AR-02 Check-In Call › TC-AR02-c: check-ins endpoint returns mood timeline (retry #2) (7.6s)
-  ✘   28 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:37:3 › AR-01 Aria Opt-In › TC-AR01-b: opt-out clears flag (retry #2) (6.5s)
-  ✘   30 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:58:3 › B2B-01 Employer Signup & Org Setup › TC-B01-a: POST /api/b2b-signup creates org + admin user (retry #1) (3.7s)
-  ✘   31 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:184:3 › AR-05 Buddy Brief › TC-AR05-a: GET /api/buddy/brief returns AI-generated context (retry #2) (6.5s)
-  ✘   32 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:200:3 › AR-06 Important Date Reminder in Call › TC-AR06-a: tracked items endpoint returns upcoming items for Aria (retry #1) (6.3s)
-  ✘   36 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:58:3 › B2B-01 Employer Signup & Org Setup › TC-B01-a: POST /api/b2b-signup creates org + admin user (retry #2) (2.2s)
-  ✘   38 [chromium] › tests/e2e/wf-aria-checkin.spec.ts:200:3 › AR-06 Important Date Reminder in Call › TC-AR06-a: tracked items endpoint returns upcoming items for Aria (retry #2) (3.1s)
-  ✘   25 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:88:3 › B2B-02 Employee Bulk Enrollment › TC-B02-a: bulk import CSV enrolls employees as members (25.3s)
-  ✘   29 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:108:3 › B2B-02 Employee Bulk Enrollment › TC-B02-b: individual employee enrollment (24.3s)
-  ✘   33 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:124:3 › B2B-03 B2B Invoicing › TC-B03-a: invoice generated for org subscription (23.0s)
-  ✘   35 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:132:3 › B2B-03 B2B Invoicing › TC-B03-b: invoice has real Stripe invoice id (23.7s)
-  ✘   34 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:143:3 › B2B-03 B2B Invoicing › TC-B03-c: invoice PDF download link (23.9s)
-  ✘   37 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:161:3 › B2B-04 Per-Seat Billing › TC-B04-a: billing summary shows seat count + cost (21.9s)
-  ✘   39 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:169:3 › B2B-04 Per-Seat Billing › TC-B04-b: add seats updates subscription quantity in Stripe (22.1s)
-  ✘   40 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:183:3 › B2B-05 Employer Admin Dashboard › TC-B05-a: dashboard shows enrolled member count (22.1s)
-  ✘   41 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:88:3 › B2B-02 Employee Bulk Enrollment › TC-B02-a: bulk import CSV enrolls employees as members (retry #1) (22.4s)
-  ✘   42 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:108:3 › B2B-02 Employee Bulk Enrollment › TC-B02-b: individual employee enrollment (retry #1) (22.1s)
-  ✘   43 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:124:3 › B2B-03 B2B Invoicing › TC-B03-a: invoice generated for org subscription (retry #1) (21.3s)
-  ✘   44 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:132:3 › B2B-03 B2B Invoicing › TC-B03-b: invoice has real Stripe invoice id (retry #1) (22.0s)
-  ✘   45 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:143:3 › B2B-03 B2B Invoicing › TC-B03-c: invoice PDF download link (retry #1) (22.3s)
-  ✘   46 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:161:3 › B2B-04 Per-Seat Billing › TC-B04-a: billing summary shows seat count + cost (retry #1) (22.6s)
-  ✘   47 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:169:3 › B2B-04 Per-Seat Billing › TC-B04-b: add seats updates subscription quantity in Stripe (retry #1) (22.0s)
-  ✘   48 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:183:3 › B2B-05 Employer Admin Dashboard › TC-B05-a: dashboard shows enrolled member count (retry #1) (21.7s)
-  ✘   49 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:88:3 › B2B-02 Employee Bulk Enrollment › TC-B02-a: bulk import CSV enrolls employees as members (retry #2) (22.2s)
-  ✘   50 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:108:3 › B2B-02 Employee Bulk Enrollment › TC-B02-b: individual employee enrollment (retry #2) (22.0s)
-  ✘   51 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:124:3 › B2B-03 B2B Invoicing › TC-B03-a: invoice generated for org subscription (retry #2) (21.3s)
-  ✘   52 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:132:3 › B2B-03 B2B Invoicing › TC-B03-b: invoice has real Stripe invoice id (retry #2) (21.8s)
-  ✘   53 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:143:3 › B2B-03 B2B Invoicing › TC-B03-c: invoice PDF download link (retry #2) (21.8s)
-  ✘   54 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:161:3 › B2B-04 Per-Seat Billing › TC-B04-a: billing summary shows seat count + cost (retry #2) (22.3s)
-  ✘   55 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:169:3 › B2B-04 Per-Seat Billing › TC-B04-b: add seats updates subscription quantity in Stripe (retry #2) (22.0s)
-  ✘   56 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:183:3 › B2B-05 Employer Admin Dashboard › TC-B05-a: dashboard shows enrolled member count (retry #2) (21.6s)
-  ✘   57 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:191:3 › B2B-05 Employer Admin Dashboard › TC-B05-b: employer admin page no Coming Soon (21.5s)
-  ✘   58 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:197:3 › B2B-05 Employer Admin Dashboard › TC-B05-c: usage report shows engagement metrics (21.7s)
-  ✘   59 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:210:3 › B2B-06 Corporate Volunteer Program › TC-B06-a: program creates with 3 tiers (21.0s)
-  ✘   60 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:227:3 › B2B-06 Corporate Volunteer Program › TC-B06-b: volunteer hours update tier progress (21.4s)
-  ✘   61 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:244:3 › B2B-07 University Affiliate Verification › TC-B07-a: university admin verifies student affiliate (22.8s)
-  ✘   62 [chromium] › tests/e2e/wf-b2b-enterprise.spec.ts:261:3 › B2B-07 University Affiliate Verification › TC-B07-b: verified hours report generates (24.7s)
