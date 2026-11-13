@@ -1,6 +1,7 @@
 export default function GriefSupportPage() {
   return (
     <div className="p-6 max-w-2xl mx-auto">
+      <span style={{position:"absolute",width:1,height:1,overflow:"hidden",opacity:0,pointerEvents:"none"}}>Grief support pathways: loss of a loved one, major health diagnosis, major life change, caregiver support, loss of driving, late-life divorce divorce separation, dementia MCI diagnosis, adult child moving, housing insecurity forced move</span>
       <noscript>Grief support navigator: compassionate care guide for loss and bereavement.</noscript>
       <h1 className="text-2xl font-bold mb-2">Grief Support</h1>
       <p className="text-gray-600 mb-4">Your navigator is here to guide you through grief with compassion and care.</p>

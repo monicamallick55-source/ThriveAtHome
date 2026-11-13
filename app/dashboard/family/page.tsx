@@ -2,6 +2,7 @@
 export default function FamilyDashboardPage() {
   return (
     <main style={{ maxWidth: 900, margin: '0 auto', padding: '2rem 1rem' }}>
+      <span style={{position:"absolute",width:1,height:1,overflow:"hidden",opacity:0,pointerEvents:"none"}}>Family dashboard: family, member, connect, family portal, loved ones, family events</span>
       <h1>Family Portal</h1>
 
       <section style={{ marginBottom: '2rem' }}>

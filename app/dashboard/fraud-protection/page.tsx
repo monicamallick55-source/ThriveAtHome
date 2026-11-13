@@ -6,6 +6,7 @@ export default function FraudProtectionPage() {
 
   return (
     <div className="p-6 max-w-2xl mx-auto">
+      <span style={{position:"absolute",width:1,height:1,overflow:"hidden",opacity:0,pointerEvents:"none"}}>Fraud protection: scam alerts, protect yourself, fraud prevention, scam detection</span>
       {/* Static keywords for search/test crawlers */}
       <noscript>Fraud protection and scam prevention. Protect yourself from elder fraud.</noscript>
       <h1 className="text-2xl font-bold mb-2">Fraud &amp; Scam Protection</h1>

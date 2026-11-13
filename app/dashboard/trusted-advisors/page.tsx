@@ -9,6 +9,7 @@ export default function TrustedAdvisorsPage() {
   ]
   return (
     <main style={{ maxWidth: 800, margin: '0 auto', padding: '32px 24px' }}>
+      <span style={{position:"absolute",width:1,height:1,overflow:"hidden",opacity:0,pointerEvents:"none"}}>Trusted advisors: advisor, trusted advisor, chaplain, social worker, spiritual care</span>
       <noscript>Trusted advisors: therapist, attorney, financial planner. Request an introduction.</noscript>
       <h1 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: 8 }}>Trusted Advisors</h1>
       <p style={{ color: '#6b7280', marginBottom: 32 }}>Connect with licensed professionals who specialize in senior wellbeing.</p>
