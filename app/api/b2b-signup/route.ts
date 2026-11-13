@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic'
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
   const body = await req.json().catch(() => ({}))
-  const { org_name, org_type = 'employer', admin_email, seat_count = 10, plan = 'b2b_basic' } = body
+  const { org_name, org_type = 'employer', admin_email, seat_count = 10, plan = 'b2b_standard' } = body
   if (!org_name || !admin_email) return NextResponse.json({ error: 'org_name and admin_email required' }, { status: 400 })
   const slug = org_name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + Date.now().toString(36)
   const { data: org, error: orgErr } = await supabase
