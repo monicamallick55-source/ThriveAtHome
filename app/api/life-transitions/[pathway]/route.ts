@@ -4,7 +4,7 @@ const PATHWAYS = ['retirement','widow','diagnosis','moving','caregiving','divorc
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { pathway: string } }
+  { params }: { params: Promise<{ pathway: string }> }
 ) {
   const { pathway } = params
   if (!PATHWAYS.includes(pathway)) {
