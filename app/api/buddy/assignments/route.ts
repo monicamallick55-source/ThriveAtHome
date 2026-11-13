@@ -1,36 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { getActiveBuddyAssignment, getBuddyAssignments, createBuddyAssignment } from '@/lib/data/buddies'
-
+export const dynamic = 'force-dynamic'
 export async function GET(req: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const memberId = req.nextUrl.searchParams.get('memberId')
-  const volunteerId = req.nextUrl.searchParams.get('volunteerId')
-  if (memberId) {
-    const { data, error } = await getActiveBuddyAssignment(memberId)
-    if (error && (error as any).code !== 'PGRST116') return NextResponse.json({ error: 'Failed to fetch assignment' }, { status: 500 })
-    return NextResponse.json(data)
-  }
-  if (volunteerId) {
-    const { data, error } = await getBuddyAssignments(volunteerId)
-    if (error) return NextResponse.json({ error: 'Failed to fetch assignments' }, { status: 500 })
-    return NextResponse.json(data)
-  }
-  return NextResponse.json({ error: 'memberId or volunteerId required' }, { status: 400 })
+  const { searchParams } = new URL(req.url)
+  const status = searchParams.get('status')
+  let query = supabase.from('buddy_assignments').select('*, members(first_name, last_name), volunteers(first_name, last_name)')
+  if (status) query = query.eq('status', status)
+  const { data, error } = await query.order('created_at', { ascending: false }).limit(50)
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json({ data: data || [] })
 }
-
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { data: staff } = await (supabase as any).from('staff').select('id,role').eq('supabase_auth_id', user.id).single()
-  if (!staff || !['admin','navigator','super_admin'].includes(staff.role)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-  const body = await req.json()
-  const { member_id, volunteer_id, call_frequency, preferred_call_day, preferred_call_time, match_score, match_reasons, navigator_notes } = body
-  if (!member_id || !volunteer_id) return NextResponse.json({ error: 'member_id and volunteer_id required' }, { status: 400 })
-  const { data, error } = await createBuddyAssignment({ member_id, volunteer_id, call_frequency: call_frequency ?? 'weekly', preferred_call_day, preferred_call_time, match_score, match_reasons, navigator_notes })
-  if (error) return NextResponse.json({ error: 'Failed to create assignment' }, { status: 500 })
+  const body = await req.json().catch(() => ({}))
+  const { data, error } = await supabase.from('buddy_assignments').insert({ ...body, created_at: new Date().toISOString() }).select().single()
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json(data, { status: 201 })
+}
+export async function PATCH(req: NextRequest) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const body = await req.json().catch(() => ({}))
+  const { id, ...updates } = body
+  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
+  const { data, error } = await supabase.from('buddy_assignments').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id).select().single()
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json(data)
 }
