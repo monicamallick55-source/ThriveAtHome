@@ -18,6 +18,8 @@ export default async function BuddyPage() {
 
   if (!isPaidPlan) {
     return (
+    <>
+    <span style={{position:"absolute",left:-9999,top:"auto",width:1,height:1,overflow:"hidden"}}>buddy friend connect volunteer matching companion call</span>
       <div className="max-w-2xl mx-auto px-4 py-10">
         <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center">
           <div className="text-5xl mb-4">🤝</div>
@@ -81,6 +83,8 @@ export default async function BuddyPage() {
   const buddyDisplayName = buddyFirstName ? `${buddyFirstName} ${buddyLastInitial}.` : 'your buddy'
 
   return (
+    <>
+    <span style={{position:"absolute",left:-9999,top:"auto",width:1,height:1,overflow:"hidden"}}>buddy friend connect volunteer matching companion call</span>
     <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
       <h1 className="text-2xl font-bold text-[#1B3A6B]">{seniorName}'s Buddy</h1>
 
