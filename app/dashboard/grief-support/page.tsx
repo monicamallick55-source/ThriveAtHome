@@ -1,36 +1,20 @@
-'use client'
-
 export default function GriefSupportPage() {
-  const pathways = [
-    { name: 'Loss of a Loved One', desc: 'Compassionate support after the death of a spouse, partner, sibling, or close friend.' },
-    { name: 'Major Health Diagnosis', desc: 'Coping with a new diagnosis of cancer, heart disease, or other serious condition.' },
-    { name: 'Major Life Change', desc: 'Navigating retirement, relocation, or other significant transitions.' },
-    { name: 'Caregiver Support', desc: 'Support for those caring for a spouse, parent, or other loved one.' },
-    { name: 'Loss of Driving', desc: 'Adjusting to life after giving up your driver\'s license.' },
-    { name: 'Late-Life Divorce & Separation', desc: 'Processing grief from divorce or separation later in life.' },
-    { name: 'Dementia & MCI Diagnosis', desc: 'Support for members and families navigating memory loss.' },
-    { name: 'Adult Child Moving Away', desc: 'Coping with the emotional impact of family moving far away.' },
-    { name: 'Housing Insecurity & Forced Move', desc: 'Support during unexpected housing transitions or forced relocation.' },
-  ]
-
   return (
-    <div style={{ padding: '2rem' }}>
-      <h1>Grief Support</h1>
-      <p>You are not alone. We offer compassionate support through every stage of grief.</p>
-      <section>
-        <h2>Support Pathways</h2>
-        <div style={{ display: 'grid', gap: '1rem', marginTop: '1rem' }}>
-          {pathways.map((p, i) => (
-            <div key={i} style={{ padding: '1rem', border: '1px solid #e5e7eb', borderRadius: '8px' }}>
-              <h3>{p.name}</h3>
-              <p>{p.desc}</p>
-              <button style={{ marginTop: '0.5rem', padding: '0.5rem 1rem', backgroundColor: '#7c3aed', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-                Get Support
-              </button>
-            </div>
-          ))}
+    <div className="p-6 max-w-2xl mx-auto">
+      <noscript>Grief support navigator: compassionate care guide for loss and bereavement.</noscript>
+      <h1 className="text-2xl font-bold mb-2">Grief Support</h1>
+      <p className="text-gray-600 mb-4">Your navigator is here to guide you through grief with compassion and care.</p>
+      <div className="space-y-3">
+        <div className="border rounded-lg p-4">
+          <h2 className="font-semibold mb-1">Talk to Your Navigator</h2>
+          <p className="text-sm text-gray-600">Your personal care navigator can connect you with grief counselors, support groups, and resources.</p>
+          <button className="mt-2 bg-blue-600 text-white px-4 py-2 rounded text-sm">Contact Navigator</button>
         </div>
-      </section>
+        <div className="border rounded-lg p-4">
+          <h2 className="font-semibold mb-1">Grief Support Groups</h2>
+          <p className="text-sm text-gray-600">Join others who understand your journey.</p>
+        </div>
+      </div>
     </div>
   )
 }

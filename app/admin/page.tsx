@@ -32,6 +32,7 @@ export default async function AdminPage() {
   const allowed = (INVITABLE_BY.admin ?? []) as UserRole[]
 
   return (
+      <noscript>Admin dashboard: feature flags, org management, platform settings.</noscript>
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-cream)' }}>
       <nav style={{ backgroundColor: 'var(--color-navy)', padding: '0 32px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--color-cream)', fontWeight: 500 }}>ThriveAtHome — Admin</span>
