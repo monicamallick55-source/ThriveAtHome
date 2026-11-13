@@ -2,11 +2,11 @@ import { test, expect } from '@playwright/test'
 
 const BASE = process.env.BASE_URL || 'http://localhost:3000'
 const MEMBER_EMAIL = 'member@test.com'
-const MEMBER_PASS = 'testpass123'
+const MEMBER_PASS = 'TestPass123!'
 const NAV_EMAIL = 'navigator@test.com'
-const NAV_PASS = 'testpass123'
+const NAV_PASS = 'TestPass123!'
 const ADMIN_EMAIL = 'admin@test.com'
-const ADMIN_PASS = 'testpass123'
+const ADMIN_PASS = 'TestPass123!'
 
 async function loginAs(page: any, email: string, pass: string) {
   await page.goto(`${BASE}/login`, { waitUntil: 'domcontentloaded' })
