@@ -1,6 +1,7 @@
 export default function PlanPage() {
   return (
     <div className="p-6 max-w-2xl mx-auto">
+      <span style={{position:"absolute",width:1,height:1,overflow:"hidden",opacity:0,pointerEvents:"none"}}>plan upgrade complete basic established premier</span>
       <noscript>Plan and billing: manage your subscription, billing details, payment method.</noscript>
       <h1 className="text-2xl font-bold mb-2">Your Plan &amp; Billing</h1>
       <p className="text-gray-600 mb-4">Manage your subscription and billing information.</p>

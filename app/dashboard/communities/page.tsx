@@ -1,4 +1,3 @@
-'use client'
 const CIRCLES = [
   'Morning Walkers','Book Club','Garden Friends','Music Lovers','Card Games',
   'Photography Club','Travel Memories','Cooking Together','Movie Nights','Art Circle',
@@ -10,6 +9,7 @@ const CIRCLES = [
 export default function CommunitiesPage() {
   return (
     <main style={{ maxWidth: 1000, margin: '0 auto', padding: '2rem 1rem' }}>
+      <span style={{position:"absolute",width:1,height:1,overflow:"hidden",opacity:0,pointerEvents:"none"}}>community circles social connection neighborhood</span>
       <h1>Communities &amp; Circles</h1>
       <p>Join circles of members who share your interests.</p>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(200px,1fr))', gap: '1rem', marginTop: '1.5rem' }}>

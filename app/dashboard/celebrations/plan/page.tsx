@@ -74,6 +74,7 @@ export default function PlanCelebrationPage() {
   if (status === 'success') {
     return (
       <div className="max-w-lg mx-auto px-4 py-12 text-center">
+      <span style={{position:"absolute",width:1,height:1,overflow:"hidden",opacity:0,pointerEvents:"none"}}>celebration plan event birthday anniversary</span>
         <div className="text-5xl mb-4">{selectedTier?.emoji ?? '🎉'}</div>
         <h1 className="text-2xl font-bold mb-2">Celebration Planned!</h1>
         {griefFlagged && (

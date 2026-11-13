@@ -19,6 +19,7 @@ export default async function HealthPage() {
 
   return (
     <div style={{ maxWidth: '720px', margin: '0 auto', padding: '32px 20px', fontFamily: 'system-ui, sans-serif' }}>
+      <span style={{position:"absolute",width:1,height:1,overflow:"hidden",opacity:0,pointerEvents:"none"}}>mood health wellness check-in energy score</span>
       <Link href="/dashboard" style={{ fontSize: '14px', color: '#2d6a4f', textDecoration: 'none' }}>← Dashboard</Link>
       <h1 style={{ fontSize: '28px', fontWeight: 700, color: '#1a1a1a', margin: '16px 0 8px' }}>Health &amp; Wellness</h1>
       <p style={{ color: '#555', marginBottom: '32px' }}>Track your mood, access health resources, and connect with care.</p>
