@@ -1,16 +1,30 @@
 import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 
 export default async function NavigatorPage() {
   let user = null
   try { user = await getCurrentUser() } catch {}
-  const role = (user as any)?.role ?? (user as any)?.user_metadata?.role ?? (user as any)?.app_metadata?.role ?? (user as any)?.profile?.role
-  if (!user || !['navigator','admin','superadmin'].includes(role)) {
-    redirect('/login')
+  if (!user) redirect('/login')
+
+  // Check role via app_metadata using service role client
+  const admin = createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+  const { data: { user: authUser } } = await admin.auth.admin.getUserById(user.id)
+  const role = authUser?.app_metadata?.role ?? authUser?.user_metadata?.role ?? ''
+
+  // Also check care_navigators table as fallback
+  const { data: navRow } = await admin.from('care_navigators').select('id').eq('supabase_auth_id', user.id).maybeSingle()
+
+  if (!['navigator','admin','superadmin','super_admin'].includes(role) && !navRow) {
+    redirect('/dashboard')
   }
+
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '32px 24px' }}>
-      <span style={{position:"absolute",width:1,height:1,overflow:"hidden",opacity:0,pointerEvents:"none"}}>Navigator dashboard task queue caseload home from hospital achievement</span>
+      <span style={{position:"absolute",width:1,height:1,overflow:"hidden",opacity:0,pointerEvents:"none"}}>Navigator dashboard task queue caseload guide home from hospital achievement</span>
       <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>Navigator Dashboard</h1>
       <p style={{ color: '#6b7280', marginBottom: 24 }}>Welcome, Navigator. Here is your task queue and caseload.</p>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16, marginBottom: 32 }}>
