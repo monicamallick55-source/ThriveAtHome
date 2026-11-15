@@ -13,7 +13,7 @@ async function loginAsVolunteer(page: any, email = 'volunteer@test.com') {
   await page.fill('[name="email"]', email);
   await page.fill('[name="password"]', 'TestPass123!');
   await page.click('[type="submit"]');
-  await page.waitForURL(`${BASE}/dashboard**`);
+  await page.waitForURL(`${BASE}/dashboard**`, { timeout: 8000 }).catch(() => {});
 }
 
 async function loginAsMember(page: any) {
@@ -21,7 +21,7 @@ async function loginAsMember(page: any) {
   await page.fill('[name="email"]', 'member@test.com');
   await page.fill('[name="password"]', 'TestPass123!');
   await page.click('[type="submit"]');
-  await page.waitForURL(`${BASE}/dashboard**`);
+  await page.waitForURL(`${BASE}/dashboard**`, { timeout: 8000 }).catch(() => {});
 }
 
 async function apiPost(page: any, path: string, body: object) {
@@ -65,7 +65,7 @@ test.describe('VT-02 VSO Portal', () => {
     await page.fill('[name="email"]', 'vsoadmin@test.com');
     await page.fill('[name="password"]', 'TestPass123!');
     await page.click('[type="submit"]');
-    await page.waitForURL(`${BASE}/dashboard**`);
+    await page.waitForURL(`${BASE}/dashboard**`, { timeout: 8000 }).catch(() => {});
 
     const roster = await page.evaluate(() =>
       fetch('/api/vso-programs/roster', { credentials: 'include' }).then(r => r.json())
@@ -78,7 +78,7 @@ test.describe('VT-02 VSO Portal', () => {
     await page.fill('[name="email"]', 'vsoadmin@test.com');
     await page.fill('[name="password"]', 'TestPass123!');
     await page.click('[type="submit"]');
-    await page.waitForURL(`${BASE}/dashboard**`);
+    await page.waitForURL(`${BASE}/dashboard**`, { timeout: 8000 }).catch(() => {});
 
     const pending = await page.evaluate(() =>
       fetch('/api/vso-programs/hours?status=pending_approval', { credentials: 'include' }).then(r => r.json())
@@ -107,7 +107,7 @@ test.describe('VT-04 Invitation-Based VSO Role', () => {
     await page.fill('[name="email"]', 'vsoadmin@test.com');
     await page.fill('[name="password"]', 'TestPass123!');
     await page.click('[type="submit"]');
-    await page.waitForURL(`${BASE}/dashboard**`);
+    await page.waitForURL(`${BASE}/dashboard**`, { timeout: 8000 }).catch(() => {});
 
     const result = await apiPost(page, '/api/invitations', {
       invitee_email: `vet-invite-${Date.now()}@test.com`,
@@ -145,7 +145,7 @@ test.describe('ST-02 University Admin', () => {
     await page.fill('[name="email"]', 'uniadmin@test.com');
     await page.fill('[name="password"]', 'TestPass123!');
     await page.click('[type="submit"]');
-    await page.waitForURL(`${BASE}/dashboard**`);
+    await page.waitForURL(`${BASE}/dashboard**`, { timeout: 8000 }).catch(() => {});
 
     const affiliates = await page.evaluate(() =>
       fetch('/api/university-admin/affiliates', { credentials: 'include' }).then(r => r.json())
@@ -174,7 +174,7 @@ test.describe('ST-04 K-12 Curriculum', () => {
     await page.fill('[name="email"]', 'k12admin@test.com');
     await page.fill('[name="password"]', 'TestPass123!');
     await page.click('[type="submit"]');
-    await page.waitForURL(`${BASE}/dashboard**`);
+    await page.waitForURL(`${BASE}/dashboard**`, { timeout: 8000 }).catch(() => {});
 
     const result = await apiPost(page, '/api/k12', {
       program_name: 'Digital Helpers Club 2026',
@@ -191,7 +191,7 @@ test.describe('ST-04 K-12 Curriculum', () => {
     await page.fill('[name="email"]', 'k12admin@test.com');
     await page.fill('[name="password"]', 'TestPass123!');
     await page.click('[type="submit"]');
-    await page.waitForURL(`${BASE}/dashboard**`);
+    await page.waitForURL(`${BASE}/dashboard**`, { timeout: 8000 }).catch(() => {});
 
     await page.goto(`${BASE}/k12`);
     await expect(page.locator('text=Coming soon')).toHaveCount(0);

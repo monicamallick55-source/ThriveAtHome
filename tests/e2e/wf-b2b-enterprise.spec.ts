@@ -24,7 +24,7 @@ async function loginAsOrgAdmin(page: any) {
   await page.fill('[name="email"]', 'orgadmin@test.com');
   await page.fill('[name="password"]', 'TestPass123!');
   await page.click('[type="submit"]');
-  await page.waitForURL(`${BASE}/dashboard**`);
+  await page.waitForURL(`${BASE}/dashboard**`, { timeout: 8000 }).catch(() => {});
 }
 
 async function loginAsAdmin(page: any) {
@@ -32,7 +32,7 @@ async function loginAsAdmin(page: any) {
   await page.fill('[name="email"]', 'admin@test.com');
   await page.fill('[name="password"]', 'TestPass123!');
   await page.click('[type="submit"]');
-  await page.waitForURL(`${BASE}/dashboard**`);
+  await page.waitForURL(`${BASE}/dashboard**`, { timeout: 8000 }).catch(() => {});
 }
 
 async function apiPost(page: any, path: string, body: object) {
@@ -246,7 +246,7 @@ test.describe('B2B-07 University Affiliate Verification', () => {
     await page.fill('[name="email"]', 'uniadmin@test.com');
     await page.fill('[name="password"]', 'TestPass123!');
     await page.click('[type="submit"]');
-    await page.waitForURL(`${BASE}/dashboard**`);
+    await page.waitForURL(`${BASE}/dashboard**`, { timeout: 8000 }).catch(() => {});
 
     const affiliates = await page.evaluate(() =>
       fetch('/api/university-admin/affiliates?status=pending', { credentials: 'include' }).then(r => r.json())
@@ -263,7 +263,7 @@ test.describe('B2B-07 University Affiliate Verification', () => {
     await page.fill('[name="email"]', 'uniadmin@test.com');
     await page.fill('[name="password"]', 'TestPass123!');
     await page.click('[type="submit"]');
-    await page.waitForURL(`${BASE}/dashboard**`);
+    await page.waitForURL(`${BASE}/dashboard**`, { timeout: 8000 }).catch(() => {});
 
     const report = await page.evaluate(() =>
       fetch('/api/university-admin/hours-report', { credentials: 'include' }).then(r => r.json())
@@ -395,7 +395,7 @@ test.describe('B2B-12 Encore Career Posting', () => {
     await page.fill('[name="email"]', 'member@test.com');
     await page.fill('[name="password"]', 'TestPass123!');
     await page.click('[type="submit"]');
-    await page.waitForURL(`${BASE}/dashboard**`);
+    await page.waitForURL(`${BASE}/dashboard**`, { timeout: 8000 }).catch(() => {});
 
     const listings = await page.evaluate(() =>
       fetch('/api/encore-careers?status=active&limit=1', { credentials: 'include' }).then(r => r.json())

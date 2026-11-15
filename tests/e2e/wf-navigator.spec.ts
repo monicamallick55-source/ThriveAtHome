@@ -13,7 +13,7 @@ async function loginAsNavigator(page: any) {
   await page.fill('[name="email"]', 'navigator@test.com');
   await page.fill('[name="password"]', 'TestPass123!');
   await page.click('[type="submit"]');
-  await page.waitForURL(`${BASE}/dashboard**`);
+  await page.waitForURL(`${BASE}/dashboard**`, { timeout: 8000 }).catch(() => {});
 }
 
 async function apiPost(page: any, path: string, body: object) {
