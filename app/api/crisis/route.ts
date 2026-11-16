@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
   if (member_id) query = query.eq('member_id', member_id)
   const { data, error } = await query.order('created_at', { ascending: false }).limit(50)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ data: data || [] })
+  return NextResponse.json(data || [])
 }
 export async function POST(req: NextRequest) {
   const supabase = await createClient()

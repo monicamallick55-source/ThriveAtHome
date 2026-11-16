@@ -5,7 +5,7 @@ export async function GET() {
   try {
     const user = await getCurrentUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    return NextResponse.json({ transitions: [] })
+    return NextResponse.json([])
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
