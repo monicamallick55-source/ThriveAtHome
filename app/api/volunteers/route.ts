@@ -72,6 +72,10 @@ export async function POST(req: Request) {
 
   const { data: fm } = await db.from('family_members').select('id').eq('supabase_auth_id', user.id).maybeSingle()
 
+  // Return existing volunteer if already applied
+  const { data: existing } = await db.from('volunteers').select('id, status').eq('email', user.email).maybeSingle()
+  if (existing) return NextResponse.json({ id: existing.id, status: existing.status === 'active' ? 'pending_review' : existing.status }, { status: 200 })
+
   const { data: volunteer, error } = await db.from('volunteers').insert({
     family_member_id: fm?.id ?? null,
     full_name,
