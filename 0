@@ -1,0 +1,22 @@
+[33mcommit fbbc501027948a331e52743b949b13159ec14b60[m
+Author: monicamallick55-source <monicamallick55@gmail.com>
+Date:   Mon Nov 16 18:42:15 2026 +0000
+
+    Add missing navigator endpoints: dispatch, members/:id, crisis escalate, life-transitions steps, tracked-items, trusted-advisors assign; fix crisis/life-transitions array responses
+    
+    Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_019GpSirUhpwEpGZjzxtrqN4
+
+[1mdiff --git a/app/api/crisis/route.ts b/app/api/crisis/route.ts[m
+[1mindex bd1423e..762a94c 100644[m
+[1m--- a/app/api/crisis/route.ts[m
+[1m+++ b/app/api/crisis/route.ts[m
+[36m@@ -13,7 +13,7 @@[m [mexport async function GET(req: NextRequest) {[m
+   if (member_id) query = query.eq('member_id', member_id)[m
+   const { data, error } = await query.order('created_at', { ascending: false }).limit(50)[m
+   if (error) return NextResponse.json({ error: error.message }, { status: 500 })[m
+[31m-  return NextResponse.json({ data: data || [] })[m
+[32m+[m[32m  return NextResponse.json(data || [])[m
+ }[m
+ export async function POST(req: NextRequest) {[m
+   const supabase = await createClient()[m
