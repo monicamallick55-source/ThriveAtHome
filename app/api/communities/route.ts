@@ -6,12 +6,12 @@ export async function GET(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   try {
-    const { data, error } = await supabase.from('interest_circles').select('*').eq('status', 'active').order('name').limit(50)
+    const { data, error } = await supabase
+      .from('interest_circles').select('*').eq('is_active', true)
+      .order('name').limit(50)
     if (error) return NextResponse.json([])
     return NextResponse.json(data || [])
-  } catch {
-    return NextResponse.json([])
-  }
+  } catch { return NextResponse.json([]) }
 }
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
@@ -19,11 +19,10 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const body = await req.json().catch(() => ({}))
   try {
-    const { data, error } = await supabase.from('interest_circles').insert({ ...body, created_by: user.id, status: 'active', created_at: new Date().toISOString() }).select().single()
-    if (error) {
-      const id = `real-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
-      return NextResponse.json({ id, ...body, created_at: new Date().toISOString() }, { status: 201 })
-    }
+    const { data, error } = await supabase.from('interest_circles')
+      .insert({ ...body, created_by: user.id, is_active: true, created_at: new Date().toISOString() })
+      .select().single()
+    if (error) throw error
     return NextResponse.json(data, { status: 201 })
   } catch {
     const id = `real-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
