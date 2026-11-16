@@ -5,16 +5,7 @@ export async function GET(req: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  // Try to find member row
   const { data: member } = await supabase.from('members').select('id, plan_tier, status')
     .eq('supabase_auth_id', user.id).maybeSingle().catch(() => ({ data: null }))
-  return NextResponse.json({
-    plan: member?.plan_tier ?? 'basics',
-    status: member?.status ?? 'active',
-    member_id: member?.id ?? null,
-    subscription_id: null,
-    current_period_end: null,
-    seat_count: 1,
-    quantity: 1,
-  })
+  return NextResponse.json({ plan: member?.plan_tier ?? 'basics', status: member?.status ?? 'active', member_id: member?.id ?? null, subscription_id: null, current_period_end: null, seat_count: 1, quantity: 1 })
 }

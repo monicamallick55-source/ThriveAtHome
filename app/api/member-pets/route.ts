@@ -18,10 +18,8 @@ export async function POST(req: NextRequest) {
   const id = `real-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
   const { data: member } = await supabase.from('members').select('id').eq('supabase_auth_id', user.id).maybeSingle().catch(() => ({ data: null }))
   if (member) {
-    const { data } = await supabase.from('member_pets').insert({
-      member_id: member.id, ...body, created_at: new Date().toISOString()
-    }).select().single().catch(() => ({ data: null }))
+    const { data } = await supabase.from('member_pets').insert({ member_id: member.id, ...body, created_at: new Date().toISOString() }).select().single().catch(() => ({ data: null }))
     if (data) return NextResponse.json(data, { status: 201 })
   }
-  return NextResponse.json({ id, ...body, member_id: member?.id, created_at: new Date().toISOString() }, { status: 201 })
+  return NextResponse.json({ id, ...body, member_id: member?.id ?? null, created_at: new Date().toISOString() }, { status: 201 })
 }
