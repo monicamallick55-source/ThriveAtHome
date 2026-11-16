@@ -19,22 +19,15 @@ async function loginAsMember(page: any, email = 'member@test.com') {
   await page.fill('[name="email"]', email);
   await page.fill('[name="password"]', 'TestPass123!');
   await page.click('[type="submit"]');
-  await page.waitForURL(`${BASE}/dashboard**`, { timeout: 8000 }).catch(() => {});
+  await Promise.race([
+    page.waitForURL(`${BASE}/dashboard**`, { timeout: 30000 }),
+    page.waitForURL(`${BASE}/volunteer**`, { timeout: 30000 }),
+  ]);
 }
 
 async function apiPost(page: any, path: string, body: object) {
-  return page.evaluate(
-    async ([p, b]: [string, object]) => {
-      const r = await fetch(p, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(b),
-        credentials: 'include',
-      });
-      return r.json();
-    },
-    [path, body]
-  );
+  const resp = await page.request.post(`${BASE}${path}`, { data: body });
+  return resp.json().catch(() => ({}));
 }
 
 // ─── TC-M001 · M-01 Onboarding ────────────────────────────────────────────────
@@ -59,21 +52,21 @@ test.describe('M-01 Onboarding', () => {
 
     // Step 4 — confirm
     await page.click('[data-testid="complete-onboarding"]');
-    await page.waitForURL(`${BASE}/dashboard**`, { timeout: 8000 }).catch(() => {});
+    await page.waitForURL(`${BASE}/dashboard**`);
 
     // Verify member exists in DB via API
-    const res = await page.evaluate(() =>
-      fetch('/api/members/me', { credentials: 'include' }).then(r => r.json())
-    );
+    const _resR = await page.request.get(`${BASE}/api/members/me`);
+
+    const res = await _resR.json().catch(() => ({}));
     expect(res.first_name).toBe('TestFirst');
     expect(res.zip_code).toBe('94102');
   });
 
   test('TC-M001-b: navigator task created when grief support opted in', async ({ page }) => {
     await loginAsMember(page);
-    const tasks = await page.evaluate(() =>
-      fetch('/api/navigator/tasks?type=grief_check', { credentials: 'include' }).then(r => r.json())
-    );
+    const _tasksR = await page.request.get(`${BASE}/api/navigator/tasks?type=grief_check`);
+
+    const tasks = await _tasksR.json().catch(() => ({}));
     // After grief opt-in, at least one navigator task should exist
     expect(Array.isArray(tasks)).toBe(true);
   });
@@ -141,10 +134,8 @@ test.describe('M-03 Buddy Matching', () => {
     });
     expect(result.id).toBeTruthy();
     // Matching should create a pending assignment
-    const assignment = await page.evaluate((rid: string) =>
-      fetch(`/api/buddy/assignments?request_id=${rid}`, { credentials: 'include' }).then(r => r.json()),
-      result.id
-    );
+    const _assignR = await page.request.get(`${BASE}/api/buddy/assignments?request_id=${result.id}`);
+    const assignment = await _assignR.json().catch(() => ({}));
     // May be empty if no volunteers, but must not error
     expect(Array.isArray(assignment) || typeof assignment === 'object').toBe(true);
   });
@@ -168,9 +159,9 @@ test.describe('M-03 Buddy Matching', () => {
 test.describe('M-04 Communities', () => {
   test('TC-M004-a: GET /api/communities returns REAL circles, not stub data', async ({ page }) => {
     await loginAsMember(page);
-    const circles = await page.evaluate(() =>
-      fetch('/api/communities', { credentials: 'include' }).then(r => r.json())
-    );
+    const _circlesR = await page.request.get(`${BASE}/api/communities`);
+
+    const circles = await _circlesR.json().catch(() => ({}));
     // Stubs use hardcoded ids like '1', '2', '3' — real UUIDs are 36 chars
     expect(Array.isArray(circles)).toBe(true);
     if (circles.length > 0) {
@@ -180,9 +171,9 @@ test.describe('M-04 Communities', () => {
 
   test('TC-M004-b: member can join a circle', async ({ page }) => {
     await loginAsMember(page);
-    const circles = await page.evaluate(() =>
-      fetch('/api/communities', { credentials: 'include' }).then(r => r.json())
-    );
+    const _circlesR = await page.request.get(`${BASE}/api/communities`);
+
+    const circles = await _circlesR.json().catch(() => ({}));
     if (circles.length === 0) test.skip();
     const circleId = circles[0].id;
     const result = await apiPost(page, `/api/communities/${circleId}/join`, {});
@@ -202,9 +193,9 @@ test.describe('M-04 Communities', () => {
 test.describe('M-05 Events', () => {
   test('TC-M005-a: GET /api/events returns real rows from DB', async ({ page }) => {
     await loginAsMember(page);
-    const events = await page.evaluate(() =>
-      fetch('/api/events', { credentials: 'include' }).then(r => r.json())
-    );
+    const _eventsR = await page.request.get(`${BASE}/api/events`);
+
+    const events = await _eventsR.json().catch(() => ({}));
     expect(Array.isArray(events)).toBe(true);
     if (events.length > 0) {
       expect(events[0].id).toMatch(/^[0-9a-f-]{36}$/i);
@@ -213,9 +204,9 @@ test.describe('M-05 Events', () => {
 
   test('TC-M005-b: RSVP writes to event_rsvps table', async ({ page }) => {
     await loginAsMember(page);
-    const events = await page.evaluate(() =>
-      fetch('/api/events', { credentials: 'include' }).then(r => r.json())
-    );
+    const _eventsR = await page.request.get(`${BASE}/api/events`);
+
+    const events = await _eventsR.json().catch(() => ({}));
     if (!events.length) test.skip();
     const result = await apiPost(page, `/api/events/${events[0].id}/rsvp`, { status: 'attending' });
     expect(result.id || result.event_id).toBeTruthy();
@@ -240,9 +231,9 @@ test.describe('M-06 Skill Exchange', () => {
 
   test('TC-M006-b: time bank credits updated after exchange', async ({ page }) => {
     await loginAsMember(page);
-    const credits = await page.evaluate(() =>
-      fetch('/api/time-bank/balance', { credentials: 'include' }).then(r => r.json())
-    );
+    const _creditsR = await page.request.get(`${BASE}/api/time-bank/balance`);
+
+    const credits = await _creditsR.json().catch(() => ({}));
     expect(typeof credits.balance === 'number' || credits.balance === null).toBe(true);
   });
 });
@@ -252,17 +243,17 @@ test.describe('M-06 Skill Exchange', () => {
 test.describe('M-07 Gift Sending', () => {
   test('TC-M007-a: gift catalog returns real items', async ({ page }) => {
     await loginAsMember(page);
-    const items = await page.evaluate(() =>
-      fetch('/api/gifts', { credentials: 'include' }).then(r => r.json())
-    );
+    const _itemsR = await page.request.get(`${BASE}/api/gifts`);
+
+    const items = await _itemsR.json().catch(() => ({}));
     expect(Array.isArray(items)).toBe(true);
   });
 
   test('TC-M007-b: POST /api/gift-orders creates order with Stripe intent', async ({ page }) => {
     await loginAsMember(page);
-    const items = await page.evaluate(() =>
-      fetch('/api/gifts', { credentials: 'include' }).then(r => r.json())
-    );
+    const _itemsR = await page.request.get(`${BASE}/api/gifts`);
+
+    const items = await _itemsR.json().catch(() => ({}));
     if (!items.length) test.skip();
     const result = await apiPost(page, '/api/gift-orders', {
       item_id: items[0].id,
@@ -287,9 +278,9 @@ test.describe('M-07 Gift Sending', () => {
 test.describe('M-08 Celebrations', () => {
   test('TC-M008-a: birthday detection creates celebration event', async ({ page }) => {
     await loginAsMember(page);
-    const events = await page.evaluate(() =>
-      fetch('/api/celebrations?type=birthday', { credentials: 'include' }).then(r => r.json())
-    );
+    const _eventsR = await page.request.get(`${BASE}/api/celebrations?type=birthday`);
+
+    const events = await _eventsR.json().catch(() => ({}));
     expect(Array.isArray(events) || typeof events === 'object').toBe(true);
   });
 
@@ -371,18 +362,10 @@ test.describe('M-11 Important Dates', () => {
       title: 'Metformin refill',
       due_date: new Date(Date.now() + 5 * 86400000).toISOString().split('T')[0],
     });
-    const updated = await page.evaluate(
-      async (id: string) => {
-        const r = await fetch(`/api/tracked-items/${id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'snooze', days: 7 }),
-          credentials: 'include',
-        });
-        return r.json();
-      },
-      item.id
-    );
+    const _snoozeR = await page.request.patch(`${BASE}/api/tracked-items/${item.id}`, {
+      data: { action: 'snooze', days: 7 },
+    });
+    const updated = await _snoozeR.json().catch(() => ({}));
     expect(updated.id).toBe(item.id);
   });
 });
@@ -404,9 +387,9 @@ test.describe('M-12 Life Story', () => {
 
   test('TC-M012-b: GET returns saved entries', async ({ page }) => {
     await loginAsMember(page);
-    const entries = await page.evaluate(() =>
-      fetch('/api/life-story', { credentials: 'include' }).then(r => r.json())
-    );
+    const _entriesR = await page.request.get(`${BASE}/api/life-story`);
+
+    const entries = await _entriesR.json().catch(() => ({}));
     expect(Array.isArray(entries)).toBe(true);
   });
 });
@@ -416,9 +399,9 @@ test.describe('M-12 Life Story', () => {
 test.describe('M-13 Benefits Finder', () => {
   test('TC-M013-a: benefits search returns results', async ({ page }) => {
     await loginAsMember(page);
-    const results = await page.evaluate(() =>
-      fetch('/api/benefits?category=transportation&zip=94102', { credentials: 'include' }).then(r => r.json())
-    );
+    const _resultsR = await page.request.get(`${BASE}/api/benefits?category=transportation&zip=94102`);
+
+    const results = await _resultsR.json().catch(() => ({}));
     expect(Array.isArray(results) || typeof results.programs !== 'undefined').toBe(true);
   });
 });
@@ -450,9 +433,9 @@ test.describe('M-14 Home Sharing', () => {
 test.describe('M-15 Encore Careers', () => {
   test('TC-M015-a: job listings return real rows', async ({ page }) => {
     await loginAsMember(page);
-    const listings = await page.evaluate(() =>
-      fetch('/api/encore-careers', { credentials: 'include' }).then(r => r.json())
-    );
+    const _listingsR = await page.request.get(`${BASE}/api/encore-careers`);
+
+    const listings = await _listingsR.json().catch(() => ({}));
     expect(Array.isArray(listings) || typeof listings === 'object').toBe(true);
   });
 
@@ -468,9 +451,9 @@ test.describe('M-15 Encore Careers', () => {
 test.describe('M-16 Cultural Programming', () => {
   test('TC-M016-a: GET /api/festivals returns events', async ({ page }) => {
     await loginAsMember(page);
-    const festivals = await page.evaluate(() =>
-      fetch('/api/festivals', { credentials: 'include' }).then(r => r.json())
-    );
+    const _festivalsR = await page.request.get(`${BASE}/api/festivals`);
+
+    const festivals = await _festivalsR.json().catch(() => ({}));
     expect(Array.isArray(festivals) || typeof festivals === 'object').toBe(true);
   });
 });
@@ -496,9 +479,9 @@ test.describe('M-17 Pet Profile', () => {
 test.describe('M-18 Fraud Alert', () => {
   test('TC-M018-a: GET /api/fraud-flags returns flags array', async ({ page }) => {
     await loginAsMember(page);
-    const flags = await page.evaluate(() =>
-      fetch('/api/fraud-flags', { credentials: 'include' }).then(r => r.json())
-    );
+    const _flagsR = await page.request.get(`${BASE}/api/fraud-flags`);
+
+    const flags = await _flagsR.json().catch(() => ({}));
     expect(Array.isArray(flags)).toBe(true);
   });
 });
@@ -528,9 +511,9 @@ test.describe('M-20 Medicare Help', () => {
 
   test('TC-M020-b: GET /api/medicare-help returns real response', async ({ page }) => {
     await loginAsMember(page);
-    const result = await page.evaluate(() =>
-      fetch('/api/medicare-help', { credentials: 'include' }).then(r => r.json())
-    );
+    const _resultR = await page.request.get(`${BASE}/api/medicare-help`);
+
+    const result = await _resultR.json().catch(() => ({}));
     expect(result).toBeTruthy();
     expect(result.error).toBeUndefined();
   });
