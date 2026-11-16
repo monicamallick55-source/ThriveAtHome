@@ -261,7 +261,7 @@ test.describe('V-07 Volunteer Training', () => {
 test.describe('V-08 Ride Booking', () => {
   test('TC-V008-a: volunteer accepts ride booking', async ({ page }) => {
     await loginAsVolunteer(page);
-    const _ridesR = await page.request.get(`${BASE}/api/ride-bookings?status=pending`);
+    const _ridesR = await page.request.get(`${BASE}/api/ride-bookings?status=requested`);
 
     const rides = await _ridesR.json().catch(() => ({}));
     if (!rides.length) test.skip();
