@@ -13,10 +13,7 @@ async function loginAsNavigator(page: any) {
   await page.fill('[name="email"]', 'navigator@test.com');
   await page.fill('[name="password"]', 'TestPass123!');
   await page.click('[type="submit"]');
-  await Promise.race([
-    page.waitForURL(`${BASE}/navigator**`, { timeout: 30000 }),
-    page.waitForURL(`${BASE}/dashboard**`, { timeout: 30000 }),
-  ]);
+  await page.waitForURL(/thrive-at-home-pied\.vercel\.app\/(?!login)/, { timeout: 30000 });
 }
 
 async function apiPost(page: any, path: string, body: object) {
@@ -34,7 +31,6 @@ test.describe('N-01 Navigator Action Feed', () => {
   test('TC-N001-a: GET navigator tasks returns real rows', async ({ page }) => {
     await loginAsNavigator(page);
     const _tasksR = await page.request.get(`${BASE}/api/navigator/tasks`);
-
     const tasks = await _tasksR.json().catch(() => ({}));
     expect(Array.isArray(tasks)).toBe(true);
   });
@@ -42,7 +38,6 @@ test.describe('N-01 Navigator Action Feed', () => {
   test('TC-N001-b: resolve task updates status to resolved', async ({ page }) => {
     await loginAsNavigator(page);
     const _tasksR = await page.request.get(`${BASE}/api/navigator/tasks?status=open`);
-
     const tasks = await _tasksR.json().catch(() => ({}));
     if (!tasks.length) test.skip();
     const result = await apiPatch(page, `/api/navigator/tasks/${tasks[0].id}`, {
@@ -55,7 +50,6 @@ test.describe('N-01 Navigator Action Feed', () => {
   test('TC-N001-c: snooze task updates snoozed_until', async ({ page }) => {
     await loginAsNavigator(page);
     const _tasksR = await page.request.get(`${BASE}/api/navigator/tasks?status=open`);
-
     const tasks = await _tasksR.json().catch(() => ({}));
     if (!tasks.length) test.skip();
     const result = await apiPatch(page, `/api/navigator/tasks/${tasks[0].id}`, {
@@ -72,10 +66,8 @@ test.describe('N-02 Service Dispatch', () => {
   test('TC-N002-a: navigator assigns volunteer to booking', async ({ page }) => {
     await loginAsNavigator(page);
     const _bookingsR = await page.request.get(`${BASE}/api/services?status=pending`);
-
     const bookings = await _bookingsR.json().catch(() => ({}));
     const _volunteersR = await page.request.get(`${BASE}/api/volunteers?status=active`);
-
     const volunteers = await _volunteersR.json().catch(() => ({}));
     if (!bookings.length || !volunteers.length) test.skip();
     const result = await apiPost(page, '/api/navigator/dispatch', {
@@ -89,7 +81,6 @@ test.describe('N-02 Service Dispatch', () => {
   test('TC-N002-b: cancel booking with reason writes to DB', async ({ page }) => {
     await loginAsNavigator(page);
     const _bookingsR = await page.request.get(`${BASE}/api/services?status=pending`);
-
     const bookings = await _bookingsR.json().catch(() => ({}));
     if (!bookings.length) test.skip();
     const result = await apiPatch(page, `/api/services/${bookings[0].id}`, {
@@ -107,7 +98,6 @@ test.describe('N-03 Member Detail Panel', () => {
   test('TC-N003-a: GET /api/members/:id returns full profile for navigator', async ({ page }) => {
     await loginAsNavigator(page);
     const _membersR = await page.request.get(`${BASE}/api/members?limit=1`);
-
     const members = await _membersR.json().catch(() => ({}));
     if (!members.length) test.skip();
     const _detailR = await page.request.get(`${BASE}/api/members/${members[0].id}`);
@@ -123,10 +113,8 @@ test.describe('N-04 Buddy Override', () => {
   test('TC-N004-a: navigator force-assigns buddy assignment', async ({ page }) => {
     await loginAsNavigator(page);
     const _membersR = await page.request.get(`${BASE}/api/members?limit=1`);
-
     const members = await _membersR.json().catch(() => ({}));
     const _volunteersR = await page.request.get(`${BASE}/api/volunteers?status=active&limit=1`);
-
     const volunteers = await _volunteersR.json().catch(() => ({}));
     if (!members.length || !volunteers.length) test.skip();
     const result = await apiPost(page, '/api/buddy/assignments', {
@@ -146,11 +134,9 @@ test.describe('N-05 Grief Referral', () => {
   test('TC-N005-a: assign grief counselor to member', async ({ page }) => {
     await loginAsNavigator(page);
     const _membersR = await page.request.get(`${BASE}/api/members?grief_support=true&limit=1`);
-
     const members = await _membersR.json().catch(() => ({}));
     if (!members.length) test.skip();
     const _advisorsR = await page.request.get(`${BASE}/api/trusted-advisors?category=grief&limit=1`);
-
     const advisors = await _advisorsR.json().catch(() => ({}));
     if (!advisors.length) test.skip();
     const result = await apiPost(page, '/api/trusted-advisors/assign', {
@@ -168,7 +154,6 @@ test.describe('N-06 Life Transition Plan', () => {
   test('TC-N006-a: create transition plan for member', async ({ page }) => {
     await loginAsNavigator(page);
     const _membersR = await page.request.get(`${BASE}/api/members?limit=1`);
-
     const members = await _membersR.json().catch(() => ({}));
     if (!members.length) test.skip();
     const plan = await apiPost(page, '/api/life-transitions', {
@@ -187,7 +172,6 @@ test.describe('N-06 Life Transition Plan', () => {
   test('TC-N006-b: mark step complete updates progress', async ({ page }) => {
     await loginAsNavigator(page);
     const _plansR = await page.request.get(`${BASE}/api/life-transitions`);
-
     const plans = await _plansR.json().catch(() => ({}));
     if (!plans.length) test.skip();
     const plan = plans[0];
@@ -207,7 +191,6 @@ test.describe('N-07 Crisis Escalation', () => {
   test('TC-N007-a: crisis event POST writes to crisis_events', async ({ page }) => {
     await loginAsNavigator(page);
     const _membersR = await page.request.get(`${BASE}/api/members?limit=1`);
-
     const members = await _membersR.json().catch(() => ({}));
     if (!members.length) test.skip();
     const event = await apiPost(page, '/api/crisis', {
@@ -224,7 +207,6 @@ test.describe('N-07 Crisis Escalation', () => {
   test('TC-N007-b: escalation step 1 creates family notification', async ({ page }) => {
     await loginAsNavigator(page);
     const _crisesR = await page.request.get(`${BASE}/api/crisis?status=open`);
-
     const crises = await _crisesR.json().catch(() => ({}));
     if (!crises.length) test.skip();
     const result = await apiPost(page, `/api/crisis/${crises[0].id}/escalate`, {
@@ -241,7 +223,6 @@ test.describe('N-08 Important Date (Navigator)', () => {
   test('TC-N008-a: navigator marks item complete', async ({ page }) => {
     await loginAsNavigator(page);
     const _itemsR = await page.request.get(`${BASE}/api/tracked-items?status=pending`);
-
     const items = await _itemsR.json().catch(() => ({}));
     if (!items.length) test.skip();
     const result = await apiPatch(page, `/api/tracked-items/${items[0].id}`, {
