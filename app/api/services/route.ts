@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
   const statusMap: Record<string, string> = { pending: 'requested', accepted: 'confirmed' }
   const status = statusRaw ? (statusMap[statusRaw] ?? statusRaw) : null
   const volunteerEligible = searchParams.get('volunteer_eligible')
-  let query = supabase.from('service_bookings').select('id, service_type, status, notes, scheduled_for, created_at, member_id')
+  let query = supabase.from('service_bookings').select('id, service_type, status, notes, scheduled_at, created_at, member_id')
   if (status) query = query.eq('status', status)
   query = query.order('created_at', { ascending: false }).limit(20)
   const { data } = await query.catch(() => ({ data: null }))
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
     service_type,
     status: 'requested',
     notes: body.notes ?? body.free_text ?? null,
-    scheduled_for: body.scheduled_for ?? null,
+    scheduled_at: body.scheduled_at ?? body.scheduled_for ?? null,
     created_at: new Date().toISOString(),
   }).select().single()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
