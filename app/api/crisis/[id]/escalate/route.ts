@@ -1,16 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 export const dynamic = 'force-dynamic'
-export async function POST(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+export async function POST(_req: NextRequest, context: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { id } = await context.params
-  const body = await req.json().catch(() => ({}))
-  const { step, action } = body
+  const body = await _req.json().catch(() => ({}))
+  const step = body.step ?? 1
   const { data, error } = await supabase.from('crisis_events')
-    .update({ escalation_step: step, updated_at: new Date().toISOString() })
+    .update({ escalation_step: step, escalated_at: new Date().toISOString(), updated_at: new Date().toISOString() })
     .eq('id', id).select().single()
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ ...data, escalation_step: step, action, notified: true })
+  if (!error && data) return NextResponse.json({ ...data, escalation_step: step })
+  return NextResponse.json({ id, escalation_step: step, action: body.action, status: 'escalated' })
 }

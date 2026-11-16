@@ -6,5 +6,7 @@ export async function GET(_req: NextRequest, context: { params: Promise<{ id: st
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { id } = await context.params
-  return NextResponse.json([{ id: `step-1-${id}`, title: 'First step', order: 1, status: 'pending' }])
+  const { data } = await supabase.from('transition_steps').select('*')
+    .eq('plan_id', id).order('order', { ascending: true }).limit(20).catch(() => ({ data: null }))
+  return NextResponse.json(data || [])
 }
