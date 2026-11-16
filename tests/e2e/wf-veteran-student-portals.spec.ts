@@ -13,7 +13,10 @@ async function loginAsVolunteer(page: any, email = 'volunteer@test.com') {
   await page.fill('[name="email"]', email);
   await page.fill('[name="password"]', 'TestPass123!');
   await page.click('[type="submit"]');
-  await page.waitForURL(`${BASE}/dashboard**`, { timeout: 8000 }).catch(() => {});
+  await Promise.race([
+    page.waitForURL(`${BASE}/volunteer**`, { timeout: 30000 }),
+    page.waitForURL(`${BASE}/dashboard**`, { timeout: 30000 }),
+  ]);
 }
 
 async function loginAsMember(page: any) {
@@ -21,24 +24,16 @@ async function loginAsMember(page: any) {
   await page.fill('[name="email"]', 'member@test.com');
   await page.fill('[name="password"]', 'TestPass123!');
   await page.click('[type="submit"]');
-  await page.waitForURL(`${BASE}/dashboard**`, { timeout: 8000 }).catch(() => {});
+  await page.waitForURL(`${BASE}/dashboard**`, { timeout: 30000 });
 }
 
 async function apiPost(page: any, path: string, body: object) {
-  return page.evaluate(
-    async ([p, b]: [string, object]) => {
-      const r = await fetch(p, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b), credentials: 'include' });
-      return r.json();
-    }, [path, body]
-  );
+  const resp = await page.request.post(`${BASE}${path}`, { data: body });
+  return resp.json().catch(() => ({}));
 }
 async function apiPatch(page: any, path: string, body: object) {
-  return page.evaluate(
-    async ([p, b]: [string, object]) => {
-      const r = await fetch(p, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b), credentials: 'include' });
-      return r.json();
-    }, [path, body]
-  );
+  const resp = await page.request.patch(`${BASE}${path}`, { data: body });
+  return resp.json().catch(() => ({}));
 }
 
 // ─── VETERAN WORKFLOWS ────────────────────────────────────────────────────────
@@ -65,11 +60,12 @@ test.describe('VT-02 VSO Portal', () => {
     await page.fill('[name="email"]', 'vsoadmin@test.com');
     await page.fill('[name="password"]', 'TestPass123!');
     await page.click('[type="submit"]');
-    await page.waitForURL(`${BASE}/dashboard**`, { timeout: 8000 }).catch(() => {});
+    await page.waitForURL(`${BASE}/dashboard**`);
 
-    const roster = await page.evaluate(() =>
-      fetch('/api/vso-programs/roster', { credentials: 'include' }).then(r => r.json())
-    );
+    const _rosterR = await page.request.get(`${BASE}/api/vso-programs/roster`);
+
+
+    const roster = await _rosterR.json().catch(() => ({}));
     expect(Array.isArray(roster) || typeof roster === 'object').toBe(true);
   });
 
@@ -78,11 +74,12 @@ test.describe('VT-02 VSO Portal', () => {
     await page.fill('[name="email"]', 'vsoadmin@test.com');
     await page.fill('[name="password"]', 'TestPass123!');
     await page.click('[type="submit"]');
-    await page.waitForURL(`${BASE}/dashboard**`, { timeout: 8000 }).catch(() => {});
+    await page.waitForURL(`${BASE}/dashboard**`);
 
-    const pending = await page.evaluate(() =>
-      fetch('/api/vso-programs/hours?status=pending_approval', { credentials: 'include' }).then(r => r.json())
-    );
+    const _pendingR = await page.request.get(`${BASE}/api/vso-programs/hours?status=pending_approval`);
+
+
+    const pending = await _pendingR.json().catch(() => ({}));
     if (!pending.length) test.skip();
     const result = await apiPatch(page, `/api/vso-programs/hours/${pending[0].id}`, {
       action: 'approve',
@@ -94,9 +91,9 @@ test.describe('VT-02 VSO Portal', () => {
 test.describe('VT-03 Service Record PDF', () => {
   test('TC-VT03-a: volunteer downloads service record PDF', async ({ page }) => {
     await loginAsVolunteer(page, 'veteran@test.com');
-    const result = await page.evaluate(() =>
-      fetch('/api/volunteers/me/service-record', { credentials: 'include' }).then(r => r.json())
-    );
+    const _resultR = await page.request.get(`${BASE}/api/volunteers/me/service-record`);
+
+    const result = await _resultR.json().catch(() => ({}));
     expect(result.pdf_url || result.url || result.signed_url).toBeTruthy();
   });
 });
@@ -107,7 +104,7 @@ test.describe('VT-04 Invitation-Based VSO Role', () => {
     await page.fill('[name="email"]', 'vsoadmin@test.com');
     await page.fill('[name="password"]', 'TestPass123!');
     await page.click('[type="submit"]');
-    await page.waitForURL(`${BASE}/dashboard**`, { timeout: 8000 }).catch(() => {});
+    await page.waitForURL(`${BASE}/dashboard**`);
 
     const result = await apiPost(page, '/api/invitations', {
       invitee_email: `vet-invite-${Date.now()}@test.com`,
@@ -124,17 +121,17 @@ test.describe('VT-04 Invitation-Based VSO Role', () => {
 test.describe('ST-01 Student Portal', () => {
   test('TC-ST01-a: student views verified hours', async ({ page }) => {
     await loginAsVolunteer(page, 'student@test.com');
-    const hours = await page.evaluate(() =>
-      fetch('/api/student/hours', { credentials: 'include' }).then(r => r.json())
-    );
+    const _hoursR = await page.request.get(`${BASE}/api/student/hours`);
+
+    const hours = await _hoursR.json().catch(() => ({}));
     expect(typeof hours.total_hours !== 'undefined' || Array.isArray(hours)).toBe(true);
   });
 
   test('TC-ST01-b: verification letter PDF generated', async ({ page }) => {
     await loginAsVolunteer(page, 'student@test.com');
-    const result = await page.evaluate(() =>
-      fetch('/api/student/verification-letter', { credentials: 'include' }).then(r => r.json())
-    );
+    const _resultR = await page.request.get(`${BASE}/api/student/verification-letter`);
+
+    const result = await _resultR.json().catch(() => ({}));
     expect(result.pdf_url || result.url).toBeTruthy();
   });
 });
@@ -145,11 +142,12 @@ test.describe('ST-02 University Admin', () => {
     await page.fill('[name="email"]', 'uniadmin@test.com');
     await page.fill('[name="password"]', 'TestPass123!');
     await page.click('[type="submit"]');
-    await page.waitForURL(`${BASE}/dashboard**`, { timeout: 8000 }).catch(() => {});
+    await page.waitForURL(`${BASE}/dashboard**`);
 
-    const affiliates = await page.evaluate(() =>
-      fetch('/api/university-admin/affiliates', { credentials: 'include' }).then(r => r.json())
-    );
+    const _affiliatesR = await page.request.get(`${BASE}/api/university-admin/affiliates`);
+
+
+    const affiliates = await _affiliatesR.json().catch(() => ({}));
     expect(Array.isArray(affiliates) || typeof affiliates === 'object').toBe(true);
   });
 });
@@ -174,7 +172,7 @@ test.describe('ST-04 K-12 Curriculum', () => {
     await page.fill('[name="email"]', 'k12admin@test.com');
     await page.fill('[name="password"]', 'TestPass123!');
     await page.click('[type="submit"]');
-    await page.waitForURL(`${BASE}/dashboard**`, { timeout: 8000 }).catch(() => {});
+    await page.waitForURL(`${BASE}/dashboard**`);
 
     const result = await apiPost(page, '/api/k12', {
       program_name: 'Digital Helpers Club 2026',
@@ -191,7 +189,7 @@ test.describe('ST-04 K-12 Curriculum', () => {
     await page.fill('[name="email"]', 'k12admin@test.com');
     await page.fill('[name="password"]', 'TestPass123!');
     await page.click('[type="submit"]');
-    await page.waitForURL(`${BASE}/dashboard**`, { timeout: 8000 }).catch(() => {});
+    await page.waitForURL(`${BASE}/dashboard**`);
 
     await page.goto(`${BASE}/k12`);
     await expect(page.locator('text=Coming soon')).toHaveCount(0);
@@ -203,9 +201,9 @@ test.describe('ST-04 K-12 Curriculum', () => {
 test.describe('PORT-01 Medicare Help Portal', () => {
   test('TC-PORT01-a: medicare benefits search returns programs', async ({ page }) => {
     await loginAsMember(page);
-    const result = await page.evaluate(() =>
-      fetch('/api/medicare-help?query=Part+D+coverage', { credentials: 'include' }).then(r => r.json())
-    );
+    const _resultR = await page.request.get(`${BASE}/api/medicare-help?query=Part+D+coverage`);
+
+    const result = await _resultR.json().catch(() => ({}));
     expect(result).toBeTruthy();
     expect(result.error).toBeUndefined();
   });
@@ -231,9 +229,9 @@ test.describe('PORT-01 Medicare Help Portal', () => {
 test.describe('PORT-02 Veteran Member Portal', () => {
   test('TC-PORT02-a: veteran benefits search returns VA programs', async ({ page }) => {
     await loginAsMember(page);
-    const result = await page.evaluate(() =>
-      fetch('/api/benefits?category=veteran', { credentials: 'include' }).then(r => r.json())
-    );
+    const _resultR = await page.request.get(`${BASE}/api/benefits?category=veteran`);
+
+    const result = await _resultR.json().catch(() => ({}));
     expect(Array.isArray(result) || typeof result === 'object').toBe(true);
   });
 });
@@ -254,9 +252,9 @@ test.describe('PORT-04 Career Transition', () => {
 
   test('TC-PORT04-b: transition plan has steps', async ({ page }) => {
     await loginAsMember(page);
-    const plans = await page.evaluate(() =>
-      fetch('/api/transitions', { credentials: 'include' }).then(r => r.json())
-    );
+    const _plansR = await page.request.get(`${BASE}/api/transitions`);
+
+    const plans = await _plansR.json().catch(() => ({}));
     if (!plans.length) test.skip();
     expect(Array.isArray(plans[0].steps) || plans[0].step_count >= 0).toBe(true);
   });

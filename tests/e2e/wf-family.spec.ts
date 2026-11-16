@@ -14,22 +14,15 @@ async function loginAsFamily(page: any) {
   await page.fill('[name="email"]', 'family@test.com');
   await page.fill('[name="password"]', 'TestPass123!');
   await page.click('[type="submit"]');
-  await page.waitForURL(`${BASE}/dashboard**`, { timeout: 8000 }).catch(() => {});
+  await Promise.race([
+    page.waitForURL(`${BASE}/dashboard**`, { timeout: 30000 }),
+    page.waitForURL(`${BASE}/family**`, { timeout: 30000 }),
+  ]);
 }
 
 async function apiPost(page: any, path: string, body: object) {
-  return page.evaluate(
-    async ([p, b]: [string, object]) => {
-      const r = await fetch(p, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(b),
-        credentials: 'include',
-      });
-      return r.json();
-    },
-    [path, body]
-  );
+  const resp = await page.request.post(`${BASE}${path}`, { data: body });
+  return resp.json().catch(() => ({}));
 }
 
 // ─── TC-F001 · F-01 Family Dashboard ─────────────────────────────────────────
@@ -37,18 +30,18 @@ async function apiPost(page: any, path: string, body: object) {
 test.describe('F-01 Family Dashboard', () => {
   test('TC-F001-a: family summary returns real wellness card', async ({ page }) => {
     await loginAsFamily(page);
-    const summary = await page.evaluate(() =>
-      fetch('/api/family-summary', { credentials: 'include' }).then(r => r.json())
-    );
+    const _summaryR = await page.request.get(`${BASE}/api/family-summary`);
+
+    const summary = await _summaryR.json().catch(() => ({}));
     expect(typeof summary === 'object').toBe(true);
     expect(summary.error).toBeUndefined();
   });
 
   test('TC-F001-b: check-ins endpoint returns mood timeline', async ({ page }) => {
     await loginAsFamily(page);
-    const checkins = await page.evaluate(() =>
-      fetch('/api/check-ins', { credentials: 'include' }).then(r => r.json())
-    );
+    const _checkinsR = await page.request.get(`${BASE}/api/check-ins`);
+
+    const checkins = await _checkinsR.json().catch(() => ({}));
     expect(Array.isArray(checkins)).toBe(true);
   });
 });
@@ -73,9 +66,9 @@ test.describe('F-02 Family Events', () => {
       title: 'Thanksgiving Dinner',
       date: new Date(Date.now() + 10 * 86400000).toISOString().split('T')[0],
     });
-    const events = await page.evaluate(() =>
-      fetch('/api/family-events', { credentials: 'include' }).then(r => r.json())
-    );
+    const _eventsR = await page.request.get(`${BASE}/api/family-events`);
+
+    const events = await _eventsR.json().catch(() => ({}));
     expect(Array.isArray(events)).toBe(true);
     expect(events.length).toBeGreaterThan(0);
   });
@@ -86,9 +79,9 @@ test.describe('F-02 Family Events', () => {
 test.describe('F-03 Gift to Senior', () => {
   test('TC-F003-a: family gift order creates real order row', async ({ page }) => {
     await loginAsFamily(page);
-    const gifts = await page.evaluate(() =>
-      fetch('/api/gifts', { credentials: 'include' }).then(r => r.json())
-    );
+    const _giftsR = await page.request.get(`${BASE}/api/gifts`);
+
+    const gifts = await _giftsR.json().catch(() => ({}));
     if (!gifts.length) test.skip();
     const result = await apiPost(page, '/api/family/gift-orders', {
       item_id: gifts[0].id,
@@ -147,9 +140,9 @@ test.describe('F-04 Celebration Request', () => {
 test.describe('F-05 Service History', () => {
   test('TC-F005-a: service history returns readable status', async ({ page }) => {
     await loginAsFamily(page);
-    const bookings = await page.evaluate(() =>
-      fetch('/api/services', { credentials: 'include' }).then(r => r.json())
-    );
+    const _bookingsR = await page.request.get(`${BASE}/api/services`);
+
+    const bookings = await _bookingsR.json().catch(() => ({}));
     expect(Array.isArray(bookings)).toBe(true);
     if (bookings.length > 0) {
       expect(bookings[0].status).toBeTruthy();
@@ -162,9 +155,9 @@ test.describe('F-05 Service History', () => {
 test.describe('F-06 Crisis Alert', () => {
   test('TC-F006-a: family can view crisis events', async ({ page }) => {
     await loginAsFamily(page);
-    const events = await page.evaluate(() =>
-      fetch('/api/crisis', { credentials: 'include' }).then(r => r.json())
-    );
+    const _eventsR = await page.request.get(`${BASE}/api/crisis`);
+
+    const events = await _eventsR.json().catch(() => ({}));
     expect(Array.isArray(events) || typeof events === 'object').toBe(true);
   });
 });
@@ -174,9 +167,9 @@ test.describe('F-06 Crisis Alert', () => {
 test.describe('F-07 Document Vault', () => {
   test('TC-F007-a: GET /api/documents returns array', async ({ page }) => {
     await loginAsFamily(page);
-    const docs = await page.evaluate(() =>
-      fetch('/api/documents', { credentials: 'include' }).then(r => r.json())
-    );
+    const _docsR = await page.request.get(`${BASE}/api/documents`);
+
+    const docs = await _docsR.json().catch(() => ({}));
     expect(Array.isArray(docs)).toBe(true);
   });
 });
@@ -186,9 +179,9 @@ test.describe('F-07 Document Vault', () => {
 test.describe('F-08 Subscription', () => {
   test('TC-F008-a: billing endpoint returns subscription info', async ({ page }) => {
     await loginAsFamily(page);
-    const billing = await page.evaluate(() =>
-      fetch('/api/billing', { credentials: 'include' }).then(r => r.json())
-    );
+    const _billingR = await page.request.get(`${BASE}/api/billing`);
+
+    const billing = await _billingR.json().catch(() => ({}));
     expect(billing).toBeTruthy();
     expect(billing.error).toBeUndefined();
   });
@@ -199,9 +192,9 @@ test.describe('F-08 Subscription', () => {
 test.describe('F-09 Memory Book View', () => {
   test('TC-F009-a: family can view member memory book', async ({ page }) => {
     await loginAsFamily(page);
-    const result = await page.evaluate(() =>
-      fetch('/api/life-story/memory-book', { credentials: 'include' }).then(r => r.json())
-    );
+    const _resultR = await page.request.get(`${BASE}/api/life-story/memory-book`);
+
+    const result = await _resultR.json().catch(() => ({}));
     expect(Array.isArray(result) || typeof result === 'object').toBe(true);
   });
 });

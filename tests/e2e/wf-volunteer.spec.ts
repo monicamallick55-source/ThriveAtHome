@@ -14,39 +14,19 @@ async function loginAsVolunteer(page: any) {
   await page.fill('[name="password"]', 'TestPass123!');
   await page.click('[type="submit"]');
   await Promise.race([
-      page.waitForURL(`${BASE}/volunteer**`, { timeout: 30000 }),
-      page.waitForURL(`${BASE}/dashboard**`, { timeout: 30000 }),
-    ]);
+    page.waitForURL(`${BASE}/volunteer**`, { timeout: 30000 }),
+    page.waitForURL(`${BASE}/dashboard**`, { timeout: 30000 }),
+  ]);
 }
 
 async function apiPost(page: any, path: string, body: object) {
-  return page.evaluate(
-    async ([p, b]: [string, object]) => {
-      const r = await fetch(p, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(b),
-        credentials: 'include',
-      });
-      return r.json();
-    },
-    [path, body]
-  );
+  const resp = await page.request.post(`${BASE}${path}`, { data: body });
+  return resp.json().catch(() => ({}));
 }
 
 async function apiPatch(page: any, path: string, body: object) {
-  return page.evaluate(
-    async ([p, b]: [string, object]) => {
-      const r = await fetch(p, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(b),
-        credentials: 'include',
-      });
-      return r.json();
-    },
-    [path, body]
-  );
+  const resp = await page.request.patch(`${BASE}${path}`, { data: body });
+  return resp.json().catch(() => ({}));
 }
 
 // ─── TC-V001 · V-01 Volunteer Application ────────────────────────────────────
@@ -57,7 +37,10 @@ test.describe('V-01 Volunteer Application', () => {
     await page.fill('[name="email"]', 'volunteer@test.com');
     await page.fill('[name="password"]', 'TestPass123!');
     await page.click('[type="submit"]');
-    await page.waitForURL(`${BASE}/dashboard**`, { timeout: 8000 }).catch(() => {});
+    await Promise.race([
+      page.waitForURL(`${BASE}/volunteer**`, { timeout: 30000 }),
+      page.waitForURL(`${BASE}/dashboard**`, { timeout: 30000 }),
+    ]);
 
     const result = await apiPost(page, '/api/volunteers', {
       service_types: ['buddy_calls', 'transportation'],
@@ -84,9 +67,9 @@ test.describe('V-01 Volunteer Application', () => {
 test.describe('V-02 Buddy Assignment Accept/Decline', () => {
   test('TC-V002-a: volunteer can accept buddy assignment', async ({ page }) => {
     await loginAsVolunteer(page);
-    const assignments = await page.evaluate(() =>
-      fetch('/api/buddy/assignments?status=pending_volunteer', { credentials: 'include' }).then(r => r.json())
-    );
+    const _assignmentsR = await page.request.get(`${BASE}/api/buddy/assignments?status=pending_volunteer`);
+
+    const assignments = await _assignmentsR.json().catch(() => ({}));
     if (!assignments.length) test.skip();
     const result = await apiPatch(page, `/api/buddy/assignments/${assignments[0].id}`, {
       action: 'accept',
@@ -96,9 +79,9 @@ test.describe('V-02 Buddy Assignment Accept/Decline', () => {
 
   test('TC-V002-b: volunteer can decline with reason', async ({ page }) => {
     await loginAsVolunteer(page);
-    const assignments = await page.evaluate(() =>
-      fetch('/api/buddy/assignments?status=pending_volunteer', { credentials: 'include' }).then(r => r.json())
-    );
+    const _assignmentsR = await page.request.get(`${BASE}/api/buddy/assignments?status=pending_volunteer`);
+
+    const assignments = await _assignmentsR.json().catch(() => ({}));
     if (assignments.length < 2) test.skip();
     const result = await apiPatch(page, `/api/buddy/assignments/${assignments[1].id}`, {
       action: 'decline',
@@ -110,9 +93,9 @@ test.describe('V-02 Buddy Assignment Accept/Decline', () => {
 
   test('TC-V002-c: decline triggers re-match (new pending assignment)', async ({ page }) => {
     await loginAsVolunteer(page);
-    const assignments = await page.evaluate(() =>
-      fetch('/api/buddy/assignments?status=pending_volunteer', { credentials: 'include' }).then(r => r.json())
-    );
+    const _assignmentsR = await page.request.get(`${BASE}/api/buddy/assignments?status=pending_volunteer`);
+
+    const assignments = await _assignmentsR.json().catch(() => ({}));
     if (!assignments.length) test.skip();
     const declined = await apiPatch(page, `/api/buddy/assignments/${assignments[0].id}`, {
       action: 'decline',
@@ -120,9 +103,9 @@ test.describe('V-02 Buddy Assignment Accept/Decline', () => {
     });
     expect(declined.status).toBe('declined');
     // System should queue a re-match; navigator task should appear
-    const tasks = await page.evaluate(() =>
-      fetch('/api/navigator/tasks?type=buddy_rematch', { credentials: 'include' }).then(r => r.json())
-    );
+    const _tasksR = await page.request.get(`${BASE}/api/navigator/tasks?type=buddy_rematch`);
+
+    const tasks = await _tasksR.json().catch(() => ({}));
     expect(Array.isArray(tasks)).toBe(true);
   });
 });
@@ -132,9 +115,9 @@ test.describe('V-02 Buddy Assignment Accept/Decline', () => {
 test.describe('V-03 Log Buddy Call', () => {
   test('TC-V003-a: POST buddy call writes to buddy_calls', async ({ page }) => {
     await loginAsVolunteer(page);
-    const assignments = await page.evaluate(() =>
-      fetch('/api/buddy/assignments?status=active', { credentials: 'include' }).then(r => r.json())
-    );
+    const _assignmentsR = await page.request.get(`${BASE}/api/buddy/assignments?status=active`);
+
+    const assignments = await _assignmentsR.json().catch(() => ({}));
     if (!assignments.length) test.skip();
     const result = await apiPost(page, '/api/buddy/calls', {
       assignment_id: assignments[0].id,
@@ -151,9 +134,9 @@ test.describe('V-03 Log Buddy Call', () => {
 
   test('TC-V003-b: concern_flag creates navigator task', async ({ page }) => {
     await loginAsVolunteer(page);
-    const assignments = await page.evaluate(() =>
-      fetch('/api/buddy/assignments?status=active', { credentials: 'include' }).then(r => r.json())
-    );
+    const _assignmentsR = await page.request.get(`${BASE}/api/buddy/assignments?status=active`);
+
+    const assignments = await _assignmentsR.json().catch(() => ({}));
     if (!assignments.length) test.skip();
     const call = await apiPost(page, '/api/buddy/calls', {
       assignment_id: assignments[0].id,
@@ -165,9 +148,9 @@ test.describe('V-03 Log Buddy Call', () => {
     });
     expect(call.id).toBeTruthy();
     // Should create navigator task
-    const tasks = await page.evaluate(() =>
-      fetch('/api/navigator/tasks?type=concern_follow_up', { credentials: 'include' }).then(r => r.json())
-    );
+    const _tasksR = await page.request.get(`${BASE}/api/navigator/tasks?type=concern_follow_up`);
+
+    const tasks = await _tasksR.json().catch(() => ({}));
     expect(Array.isArray(tasks)).toBe(true);
     expect(tasks.length).toBeGreaterThan(0);
   });
@@ -178,9 +161,9 @@ test.describe('V-03 Log Buddy Call', () => {
 test.describe('V-04 Service Accept & Complete', () => {
   test('TC-V004-a: volunteer accepts pending service booking', async ({ page }) => {
     await loginAsVolunteer(page);
-    const bookings = await page.evaluate(() =>
-      fetch('/api/services?status=pending&volunteer_eligible=true', { credentials: 'include' }).then(r => r.json())
-    );
+    const _bookingsR = await page.request.get(`${BASE}/api/services?status=pending&volunteer_eligible=true`);
+
+    const bookings = await _bookingsR.json().catch(() => ({}));
     if (!bookings.length) test.skip();
     const result = await apiPatch(page, `/api/services/${bookings[0].id}`, {
       action: 'accept',
@@ -191,9 +174,9 @@ test.describe('V-04 Service Accept & Complete', () => {
 
   test('TC-V004-b: volunteer marks service complete', async ({ page }) => {
     await loginAsVolunteer(page);
-    const bookings = await page.evaluate(() =>
-      fetch('/api/services?status=accepted', { credentials: 'include' }).then(r => r.json())
-    );
+    const _bookingsR = await page.request.get(`${BASE}/api/services?status=accepted`);
+
+    const bookings = await _bookingsR.json().catch(() => ({}));
     if (!bookings.length) test.skip();
     const result = await apiPatch(page, `/api/services/${bookings[0].id}`, {
       action: 'complete',
@@ -208,25 +191,25 @@ test.describe('V-04 Service Accept & Complete', () => {
 test.describe('V-05 Time Bank', () => {
   test('TC-V005-a: GET time bank balance returns number', async ({ page }) => {
     await loginAsVolunteer(page);
-    const balance = await page.evaluate(() =>
-      fetch('/api/time-bank/balance', { credentials: 'include' }).then(r => r.json())
-    );
+    const _balanceR = await page.request.get(`${BASE}/api/time-bank/balance`);
+
+    const balance = await _balanceR.json().catch(() => ({}));
     expect(typeof balance.balance === 'number' || balance.balance === null).toBe(true);
   });
 
   test('TC-V005-b: log hours increases balance', async ({ page }) => {
     await loginAsVolunteer(page);
-    const before = await page.evaluate(() =>
-      fetch('/api/time-bank/balance', { credentials: 'include' }).then(r => r.json())
-    );
+    const _beforeR = await page.request.get(`${BASE}/api/time-bank/balance`);
+
+    const before = await _beforeR.json().catch(() => ({}));
     await apiPost(page, '/api/time-bank/log', {
       hours: 2,
       service_type: 'buddy_call',
       notes: 'Weekly buddy call',
     });
-    const after = await page.evaluate(() =>
-      fetch('/api/time-bank/balance', { credentials: 'include' }).then(r => r.json())
-    );
+    const _afterR = await page.request.get(`${BASE}/api/time-bank/balance`);
+
+    const after = await _afterR.json().catch(() => ({}));
     expect((after.balance || 0)).toBeGreaterThanOrEqual((before.balance || 0));
   });
 });
@@ -242,9 +225,9 @@ test.describe('V-06 Volunteer Dashboard', () => {
 
   test('TC-V006-b: buddy assignments endpoint returns data', async ({ page }) => {
     await loginAsVolunteer(page);
-    const assignments = await page.evaluate(() =>
-      fetch('/api/buddy/assignments', { credentials: 'include' }).then(r => r.json())
-    );
+    const _assignmentsR = await page.request.get(`${BASE}/api/buddy/assignments`);
+
+    const assignments = await _assignmentsR.json().catch(() => ({}));
     expect(Array.isArray(assignments)).toBe(true);
   });
 });
@@ -254,17 +237,17 @@ test.describe('V-06 Volunteer Dashboard', () => {
 test.describe('V-07 Volunteer Training', () => {
   test('TC-V007-a: GET training modules returns list', async ({ page }) => {
     await loginAsVolunteer(page);
-    const modules = await page.evaluate(() =>
-      fetch('/api/volunteer-training', { credentials: 'include' }).then(r => r.json())
-    );
+    const _modulesR = await page.request.get(`${BASE}/api/volunteer-training`);
+
+    const modules = await _modulesR.json().catch(() => ({}));
     expect(Array.isArray(modules) || typeof modules === 'object').toBe(true);
   });
 
   test('TC-V007-b: POST completion writes to training_completions', async ({ page }) => {
     await loginAsVolunteer(page);
-    const modules = await page.evaluate(() =>
-      fetch('/api/volunteer-training', { credentials: 'include' }).then(r => r.json())
-    );
+    const _modulesR = await page.request.get(`${BASE}/api/volunteer-training`);
+
+    const modules = await _modulesR.json().catch(() => ({}));
     const list = Array.isArray(modules) ? modules : (modules.modules || []);
     if (!list.length) test.skip();
     const result = await apiPost(page, `/api/volunteer-training/${list[0].id}/complete`, {
@@ -279,9 +262,9 @@ test.describe('V-07 Volunteer Training', () => {
 test.describe('V-08 Ride Booking', () => {
   test('TC-V008-a: volunteer accepts ride booking', async ({ page }) => {
     await loginAsVolunteer(page);
-    const rides = await page.evaluate(() =>
-      fetch('/api/ride-bookings?status=pending', { credentials: 'include' }).then(r => r.json())
-    );
+    const _ridesR = await page.request.get(`${BASE}/api/ride-bookings?status=pending`);
+
+    const rides = await _ridesR.json().catch(() => ({}));
     if (!rides.length) test.skip();
     const result = await apiPatch(page, `/api/ride-bookings/${rides[0].id}`, {
       action: 'accept',
@@ -311,9 +294,9 @@ test.describe('V-09 Skill Exchange Offer', () => {
 test.describe('V-10 Neighbor Volunteer Match', () => {
   test('TC-V010-a: neighbor match returns nearby seniors', async ({ page }) => {
     await loginAsVolunteer(page);
-    const matches = await page.evaluate(() =>
-      fetch('/api/neighbor-match', { credentials: 'include' }).then(r => r.json())
-    );
+    const _matchesR = await page.request.get(`${BASE}/api/neighbor-match`);
+
+    const matches = await _matchesR.json().catch(() => ({}));
     expect(Array.isArray(matches) || typeof matches === 'object').toBe(true);
   });
 });

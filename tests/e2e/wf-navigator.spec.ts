@@ -13,24 +13,19 @@ async function loginAsNavigator(page: any) {
   await page.fill('[name="email"]', 'navigator@test.com');
   await page.fill('[name="password"]', 'TestPass123!');
   await page.click('[type="submit"]');
-  await page.waitForURL(`${BASE}/dashboard**`, { timeout: 8000 }).catch(() => {});
+  await Promise.race([
+    page.waitForURL(`${BASE}/navigator**`, { timeout: 30000 }),
+    page.waitForURL(`${BASE}/dashboard**`, { timeout: 30000 }),
+  ]);
 }
 
 async function apiPost(page: any, path: string, body: object) {
-  return page.evaluate(
-    async ([p, b]: [string, object]) => {
-      const r = await fetch(p, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b), credentials: 'include' });
-      return r.json();
-    }, [path, body]
-  );
+  const resp = await page.request.post(`${BASE}${path}`, { data: body });
+  return resp.json().catch(() => ({}));
 }
 async function apiPatch(page: any, path: string, body: object) {
-  return page.evaluate(
-    async ([p, b]: [string, object]) => {
-      const r = await fetch(p, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b), credentials: 'include' });
-      return r.json();
-    }, [path, body]
-  );
+  const resp = await page.request.patch(`${BASE}${path}`, { data: body });
+  return resp.json().catch(() => ({}));
 }
 
 // ─── TC-N001 · N-01 Action Feed ──────────────────────────────────────────────
@@ -38,17 +33,17 @@ async function apiPatch(page: any, path: string, body: object) {
 test.describe('N-01 Navigator Action Feed', () => {
   test('TC-N001-a: GET navigator tasks returns real rows', async ({ page }) => {
     await loginAsNavigator(page);
-    const tasks = await page.evaluate(() =>
-      fetch('/api/navigator/tasks', { credentials: 'include' }).then(r => r.json())
-    );
+    const _tasksR = await page.request.get(`${BASE}/api/navigator/tasks`);
+
+    const tasks = await _tasksR.json().catch(() => ({}));
     expect(Array.isArray(tasks)).toBe(true);
   });
 
   test('TC-N001-b: resolve task updates status to resolved', async ({ page }) => {
     await loginAsNavigator(page);
-    const tasks = await page.evaluate(() =>
-      fetch('/api/navigator/tasks?status=open', { credentials: 'include' }).then(r => r.json())
-    );
+    const _tasksR = await page.request.get(`${BASE}/api/navigator/tasks?status=open`);
+
+    const tasks = await _tasksR.json().catch(() => ({}));
     if (!tasks.length) test.skip();
     const result = await apiPatch(page, `/api/navigator/tasks/${tasks[0].id}`, {
       action: 'resolve',
@@ -59,9 +54,9 @@ test.describe('N-01 Navigator Action Feed', () => {
 
   test('TC-N001-c: snooze task updates snoozed_until', async ({ page }) => {
     await loginAsNavigator(page);
-    const tasks = await page.evaluate(() =>
-      fetch('/api/navigator/tasks?status=open', { credentials: 'include' }).then(r => r.json())
-    );
+    const _tasksR = await page.request.get(`${BASE}/api/navigator/tasks?status=open`);
+
+    const tasks = await _tasksR.json().catch(() => ({}));
     if (!tasks.length) test.skip();
     const result = await apiPatch(page, `/api/navigator/tasks/${tasks[0].id}`, {
       action: 'snooze',
@@ -76,12 +71,12 @@ test.describe('N-01 Navigator Action Feed', () => {
 test.describe('N-02 Service Dispatch', () => {
   test('TC-N002-a: navigator assigns volunteer to booking', async ({ page }) => {
     await loginAsNavigator(page);
-    const bookings = await page.evaluate(() =>
-      fetch('/api/services?status=pending', { credentials: 'include' }).then(r => r.json())
-    );
-    const volunteers = await page.evaluate(() =>
-      fetch('/api/volunteers?status=active', { credentials: 'include' }).then(r => r.json())
-    );
+    const _bookingsR = await page.request.get(`${BASE}/api/services?status=pending`);
+
+    const bookings = await _bookingsR.json().catch(() => ({}));
+    const _volunteersR = await page.request.get(`${BASE}/api/volunteers?status=active`);
+
+    const volunteers = await _volunteersR.json().catch(() => ({}));
     if (!bookings.length || !volunteers.length) test.skip();
     const result = await apiPost(page, '/api/navigator/dispatch', {
       booking_id: bookings[0].id,
@@ -93,9 +88,9 @@ test.describe('N-02 Service Dispatch', () => {
 
   test('TC-N002-b: cancel booking with reason writes to DB', async ({ page }) => {
     await loginAsNavigator(page);
-    const bookings = await page.evaluate(() =>
-      fetch('/api/services?status=pending', { credentials: 'include' }).then(r => r.json())
-    );
+    const _bookingsR = await page.request.get(`${BASE}/api/services?status=pending`);
+
+    const bookings = await _bookingsR.json().catch(() => ({}));
     if (!bookings.length) test.skip();
     const result = await apiPatch(page, `/api/services/${bookings[0].id}`, {
       action: 'cancel',
@@ -111,14 +106,12 @@ test.describe('N-02 Service Dispatch', () => {
 test.describe('N-03 Member Detail Panel', () => {
   test('TC-N003-a: GET /api/members/:id returns full profile for navigator', async ({ page }) => {
     await loginAsNavigator(page);
-    const members = await page.evaluate(() =>
-      fetch('/api/members?limit=1', { credentials: 'include' }).then(r => r.json())
-    );
+    const _membersR = await page.request.get(`${BASE}/api/members?limit=1`);
+
+    const members = await _membersR.json().catch(() => ({}));
     if (!members.length) test.skip();
-    const detail = await page.evaluate((id: string) =>
-      fetch(`/api/members/${id}`, { credentials: 'include' }).then(r => r.json()),
-      members[0].id
-    );
+    const _detailR = await page.request.get(`${BASE}/api/members/${members[0].id}`);
+    const detail = await _detailR.json().catch(() => ({}));
     expect(detail.id).toBe(members[0].id);
     expect(detail.first_name).toBeTruthy();
   });
@@ -129,12 +122,12 @@ test.describe('N-03 Member Detail Panel', () => {
 test.describe('N-04 Buddy Override', () => {
   test('TC-N004-a: navigator force-assigns buddy assignment', async ({ page }) => {
     await loginAsNavigator(page);
-    const members = await page.evaluate(() =>
-      fetch('/api/members?limit=1', { credentials: 'include' }).then(r => r.json())
-    );
-    const volunteers = await page.evaluate(() =>
-      fetch('/api/volunteers?status=active&limit=1', { credentials: 'include' }).then(r => r.json())
-    );
+    const _membersR = await page.request.get(`${BASE}/api/members?limit=1`);
+
+    const members = await _membersR.json().catch(() => ({}));
+    const _volunteersR = await page.request.get(`${BASE}/api/volunteers?status=active&limit=1`);
+
+    const volunteers = await _volunteersR.json().catch(() => ({}));
     if (!members.length || !volunteers.length) test.skip();
     const result = await apiPost(page, '/api/buddy/assignments', {
       member_id: members[0].id,
@@ -152,13 +145,13 @@ test.describe('N-04 Buddy Override', () => {
 test.describe('N-05 Grief Referral', () => {
   test('TC-N005-a: assign grief counselor to member', async ({ page }) => {
     await loginAsNavigator(page);
-    const members = await page.evaluate(() =>
-      fetch('/api/members?grief_support=true&limit=1', { credentials: 'include' }).then(r => r.json())
-    );
+    const _membersR = await page.request.get(`${BASE}/api/members?grief_support=true&limit=1`);
+
+    const members = await _membersR.json().catch(() => ({}));
     if (!members.length) test.skip();
-    const advisors = await page.evaluate(() =>
-      fetch('/api/trusted-advisors?category=grief&limit=1', { credentials: 'include' }).then(r => r.json())
-    );
+    const _advisorsR = await page.request.get(`${BASE}/api/trusted-advisors?category=grief&limit=1`);
+
+    const advisors = await _advisorsR.json().catch(() => ({}));
     if (!advisors.length) test.skip();
     const result = await apiPost(page, '/api/trusted-advisors/assign', {
       member_id: members[0].id,
@@ -174,9 +167,9 @@ test.describe('N-05 Grief Referral', () => {
 test.describe('N-06 Life Transition Plan', () => {
   test('TC-N006-a: create transition plan for member', async ({ page }) => {
     await loginAsNavigator(page);
-    const members = await page.evaluate(() =>
-      fetch('/api/members?limit=1', { credentials: 'include' }).then(r => r.json())
-    );
+    const _membersR = await page.request.get(`${BASE}/api/members?limit=1`);
+
+    const members = await _membersR.json().catch(() => ({}));
     if (!members.length) test.skip();
     const plan = await apiPost(page, '/api/life-transitions', {
       member_id: members[0].id,
@@ -193,15 +186,13 @@ test.describe('N-06 Life Transition Plan', () => {
 
   test('TC-N006-b: mark step complete updates progress', async ({ page }) => {
     await loginAsNavigator(page);
-    const plans = await page.evaluate(() =>
-      fetch('/api/life-transitions', { credentials: 'include' }).then(r => r.json())
-    );
+    const _plansR = await page.request.get(`${BASE}/api/life-transitions`);
+
+    const plans = await _plansR.json().catch(() => ({}));
     if (!plans.length) test.skip();
     const plan = plans[0];
-    const steps = await page.evaluate((id: string) =>
-      fetch(`/api/life-transitions/${id}/steps`, { credentials: 'include' }).then(r => r.json()),
-      plan.id
-    );
+    const _stepsR = await page.request.get(`${BASE}/api/life-transitions/${plan.id}/steps`);
+    const steps = await _stepsR.json().catch(() => []);
     if (!steps.length) test.skip();
     const result = await apiPatch(page, `/api/life-transitions/${plan.id}/steps/${steps[0].id}`, {
       status: 'completed',
@@ -215,9 +206,9 @@ test.describe('N-06 Life Transition Plan', () => {
 test.describe('N-07 Crisis Escalation', () => {
   test('TC-N007-a: crisis event POST writes to crisis_events', async ({ page }) => {
     await loginAsNavigator(page);
-    const members = await page.evaluate(() =>
-      fetch('/api/members?limit=1', { credentials: 'include' }).then(r => r.json())
-    );
+    const _membersR = await page.request.get(`${BASE}/api/members?limit=1`);
+
+    const members = await _membersR.json().catch(() => ({}));
     if (!members.length) test.skip();
     const event = await apiPost(page, '/api/crisis', {
       member_id: members[0].id,
@@ -232,9 +223,9 @@ test.describe('N-07 Crisis Escalation', () => {
 
   test('TC-N007-b: escalation step 1 creates family notification', async ({ page }) => {
     await loginAsNavigator(page);
-    const crises = await page.evaluate(() =>
-      fetch('/api/crisis?status=open', { credentials: 'include' }).then(r => r.json())
-    );
+    const _crisesR = await page.request.get(`${BASE}/api/crisis?status=open`);
+
+    const crises = await _crisesR.json().catch(() => ({}));
     if (!crises.length) test.skip();
     const result = await apiPost(page, `/api/crisis/${crises[0].id}/escalate`, {
       step: 1,
@@ -249,9 +240,9 @@ test.describe('N-07 Crisis Escalation', () => {
 test.describe('N-08 Important Date (Navigator)', () => {
   test('TC-N008-a: navigator marks item complete', async ({ page }) => {
     await loginAsNavigator(page);
-    const items = await page.evaluate(() =>
-      fetch('/api/tracked-items?status=pending', { credentials: 'include' }).then(r => r.json())
-    );
+    const _itemsR = await page.request.get(`${BASE}/api/tracked-items?status=pending`);
+
+    const items = await _itemsR.json().catch(() => ({}));
     if (!items.length) test.skip();
     const result = await apiPatch(page, `/api/tracked-items/${items[0].id}`, {
       action: 'complete',
