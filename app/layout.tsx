@@ -10,8 +10,6 @@ const dmSans = DM_Sans({
   weight: ['400', '500', '600'],
   variable: '--font-dm-sans',
   display: 'swap',
-  preload: false,
-  adjustFontFallback: false,
 })
 
 const dmMono = DM_Mono({
@@ -19,8 +17,6 @@ const dmMono = DM_Mono({
   weight: ['400'],
   variable: '--font-dm-mono',
   display: 'swap',
-  preload: false,
-  adjustFontFallback: false,
 })
 
 export const metadata: Metadata = {
