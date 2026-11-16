@@ -3,7 +3,7 @@ import { useState } from 'react'
 
 const ROLE_REDIRECTS: Record<string, string> = {
   employer: '/employer-admin', k12admin: '/school-admin',
-  admin: '/admin', super_admin: '/admin', navigator: '/navigator',
+  admin: '/dashboard', super_admin: '/dashboard', navigator: '/navigator',
   volunteer: '/volunteer/dashboard', orgadmin: '/org-admin',
   vsoadmin: '/vso-admin', uniadmin: '/university-admin',
   network: '/network-admin', seniorcenter: '/senior-center-admin',

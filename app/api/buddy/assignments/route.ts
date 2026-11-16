@@ -7,12 +7,9 @@ export async function GET(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { searchParams } = new URL(req.url)
   const status = searchParams.get('status')
-
-  // Look up volunteer row by supabase_auth_id
   const { data: volRow } = await supabase.from('volunteers')
     .select('id').eq('supabase_auth_id', user.id).maybeSingle()
-
-  let query = supabase.from('buddy_assignments').select('id, status, member_id, volunteer_id, created_at')
+  let query = supabase.from('buddy_assignments').select('id, status, member_id, volunteer_id, created_at, end_reason, ended_at')
   if (volRow) query = query.eq('volunteer_id', volRow.id)
   if (status) query = query.eq('status', status)
   const { data, error } = await query.order('created_at', { ascending: false }).limit(50)
