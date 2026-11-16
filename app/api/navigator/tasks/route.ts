@@ -1,20 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 export const dynamic = 'force-dynamic'
-export async function GET(_req: NextRequest) {
+export async function GET(req: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { data, error } = await supabase.from('navigator_tasks').select('id, title, description, status, priority, due_date, member_id, created_at').or(`assigned_to.eq.${user.id},created_by.eq.${user.id}`).order('created_at', { ascending: false }).limit(50)
+  const { searchParams } = new URL(req.url)
+  const status = searchParams.get('status')
+  const type = searchParams.get('type')
+  let query = supabase.from('navigator_tasks')
+    .select('id, task_type, description, priority, due_by, member_id, completed, created_at')
+    .order('created_at', { ascending: false }).limit(50)
+  if (status === 'open' || status === 'pending') query = query.eq('completed', false)
+  if (type) query = query.ilike('task_type', `%${type}%`)
+  const { data, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ data: data ?? [], total: (data ?? []).length })
+  return NextResponse.json(data || [])
 }
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const body = await req.json().catch(() => ({}))
-  const { data, error } = await supabase.from('navigator_tasks').insert({ title: body.title ?? 'Follow up', description: body.description ?? null, status: 'pending', priority: body.priority ?? 'normal', member_id: body.member_id ?? null, due_date: body.due_date ?? null, created_by: user.id, assigned_to: body.assigned_to ?? user.id, created_at: new Date().toISOString() }).select().single()
+  const { data, error } = await supabase.from('navigator_tasks').insert({
+    member_id: body.member_id,
+    task_type: body.task_type || body.type || 'general',
+    description: body.description || body.notes || null,
+    priority: body.priority || 'medium',
+    completed: false,
+    created_at: new Date().toISOString()
+  }).select().single()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json(data, { status: 201 })
 }
