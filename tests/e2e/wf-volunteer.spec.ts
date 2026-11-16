@@ -13,7 +13,10 @@ async function loginAsVolunteer(page: any) {
   await page.fill('[name="email"]', 'volunteer@test.com');
   await page.fill('[name="password"]', 'TestPass123!');
   await page.click('[type="submit"]');
-  await page.waitForURL(`${BASE}/dashboard**`, { timeout: 8000 }).catch(() => {});
+  await Promise.race([
+      page.waitForURL(`${BASE}/volunteer**`, { timeout: 30000 }),
+      page.waitForURL(`${BASE}/dashboard**`, { timeout: 30000 }),
+    ]);
 }
 
 async function apiPost(page: any, path: string, body: object) {
