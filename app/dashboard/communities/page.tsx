@@ -12,7 +12,7 @@ export default function CommunitiesPage() {
       <span style={{position:"absolute",width:1,height:1,overflow:"hidden",opacity:0,pointerEvents:"none"}}>community circles social connection neighborhood</span>
       <h1>Communities &amp; Circles</h1>
       <p>Join circles of members who share your interests.</p>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(200px,1fr))', gap: '1rem', marginTop: '1.5rem' }}>
+      <div data-testid="community-list" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(200px,1fr))', gap: '1rem', marginTop: '1.5rem' }}>
         {CIRCLES.map(name => (
           <div key={name} data-community-circle={name} data-tags={
             name === 'Professional Identity' ? 'profession' :
