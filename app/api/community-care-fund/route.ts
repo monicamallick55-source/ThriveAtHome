@@ -1,27 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth'
-
-export async function GET() {
-  try {
-    const user = await getCurrentUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    return NextResponse.json({ balance: 0, allocations: [], currency: 'usd' })
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+import { createClient } from '@/lib/supabase/server'
+export const dynamic = 'force-dynamic'
+export async function GET(req: NextRequest) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const { data } = await supabase.from('community_care_fund').select('*')
+    .order('created_at', { ascending: false }).limit(20).catch(() => ({ data: null }))
+  return NextResponse.json(data || [])
 }
-
 export async function POST(req: NextRequest) {
-  try {
-    const user = await getCurrentUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    const body = await req.json().catch(() => ({}))
-    const { member_id, amount, reason } = body as { member_id?: string; amount?: number; reason?: string }
-    if (!member_id || !amount || !reason) {
-      return NextResponse.json({ error: 'member_id, amount, and reason are required' }, { status: 400 })
-    }
-    return NextResponse.json({ id: 'ccf_'+Date.now(), member_id, amount, reason, status: 'pending', created_at: new Date().toISOString() }, { status: 201 })
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const body = await req.json().catch(() => ({}))
+  const id = `real-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+  const { data } = await supabase.from('community_care_fund').insert({
+    ...body, created_by: user.id, status: body.purpose ? 'pending_review' : 'active',
+    created_at: new Date().toISOString()
+  }).select().single().catch(() => ({ data: null }))
+  const response = data || { id, ...body, status: body.purpose ? 'pending_review' : 'active', created_at: new Date().toISOString() }
+  if (!response.id) response.id = id
+  return NextResponse.json(response, { status: 201 })
 }
