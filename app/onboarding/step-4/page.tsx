@@ -17,7 +17,7 @@ export default function OnboardingStep4() {
       sessionStorage.removeItem('onboarding_step2')
       sessionStorage.removeItem('onboarding_step3')
       router.push('/dashboard')
-    } catch { setLoading(false) }
+    } catch { router.push('/dashboard') }
   }
   return (
     <div className="max-w-md mx-auto px-4 py-10 text-center">
