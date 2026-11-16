@@ -6,17 +6,17 @@ export const dynamic = 'force-dynamic'
 export async function GET() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ id: 'unknown', error: 'Unauthorized' })
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  // Try supabase_auth_id first, then user_id
-  let member = null
-  const { data: m1 } = await supabase.from('members').select('*').eq('supabase_auth_id', user.id).maybeSingle().catch(() => ({ data: null }))
-  member = m1
-  if (!member) {
-    const { data: m2 } = await supabase.from('members').select('*').eq('user_id', user.id).maybeSingle().catch(() => ({ data: null }))
-    member = m2
-  }
+  const { data, error } = await supabase
+    .from('members')
+    .select('*')
+    .or(`supabase_auth_id.eq.${user.id},auth_id.eq.${user.id}`)
+    .maybeSingle()
 
-  if (!member) return NextResponse.json({ error: 'Member not found' }, { status: 404 })
-  return NextResponse.json(member)
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (!data) return NextResponse.json({ error: 'Member not found' }, { status: 404 })
+  // Derive first_name/last_name from full_name for API consumers
+  const parts = (data.full_name || '').split(' ')
+  return NextResponse.json({ ...data, first_name: parts[0] || '', last_name: parts.slice(1).join(' ') || '' })
 }
