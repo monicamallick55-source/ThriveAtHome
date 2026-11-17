@@ -22,6 +22,7 @@ export async function PATCH(_req: NextRequest, context: { params: Promise<{ id: 
   const update: Record<string, unknown> = { ...rest, updated_at: new Date().toISOString() }
   if (action === 'complete') update.status = 'completed'
   if (action === 'dismiss') update.status = 'dismissed'
+  if (action === 'snooze') update.status = 'snoozed'
   if (due_date) update.expiration_or_appointment_date = due_date
   if (navigator_note) update.notes = navigator_note
   const { data, error } = await supabase.from('tracked_items').update(update).eq('id', id).select().single()
