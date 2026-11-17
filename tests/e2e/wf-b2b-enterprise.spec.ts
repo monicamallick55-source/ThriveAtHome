@@ -104,7 +104,7 @@ test.describe('B2B-03 B2B Invoicing', () => {
     const resp = await page.request.get(`${BASE}/api/billing/invoices`);
     const invoices = await resp.json().catch(() => ({}));
     const list = Array.isArray(invoices) ? invoices : (invoices.data || []);
-    if (list.length === 0) { expect(typeof invoices === 'object').toBe(true); return; }
+    if (list.length === 0) test.skip();
     expect(list[0].stripe_invoice_id || list[0].id).toBeTruthy();
   });
 
@@ -113,7 +113,7 @@ test.describe('B2B-03 B2B Invoicing', () => {
     const resp = await page.request.get(`${BASE}/api/billing/invoices`);
     const invoices = await resp.json().catch(() => ({}));
     const list = Array.isArray(invoices) ? invoices : (invoices.data || []);
-    if (!list.length) { expect(typeof invoices === 'object').toBe(true); return; }
+    if (!list.length) test.skip();
     const pdfResp = await page.request.get(`${BASE}/api/billing/invoices/${list[0].id}/pdf`);
     const pdfResult = await pdfResp.json().catch(() => ({}));
     expect(pdfResult.url || pdfResult.pdf_url).toBeTruthy();
@@ -181,7 +181,7 @@ test.describe('B2B-06 Corporate Volunteer Program', () => {
     await loginAsOrgAdmin(page);
     const progResp = await page.request.get(`${BASE}/api/corporate-volunteer-programs`);
     const programs = await progResp.json().catch(() => ({}));
-    if (!programs.length) { return; }
+    if (!programs.length) test.skip();
     const pResp = await page.request.get(`${BASE}/api/corporate-volunteer-programs/${programs[0].id}/progress`);
     const progress = await pResp.json().catch(() => ({}));
     expect(Array.isArray(progress) || typeof progress === 'object').toBe(true);
@@ -197,7 +197,7 @@ test.describe('B2B-07 University Affiliate Verification', () => {
     await page.waitForURL(/thrive-at-home-pied\.vercel\.app\/(?!login)/, { timeout: 30000 });
     const aResp = await page.request.get(`${BASE}/api/university-admin/affiliates?status=pending`);
     const affiliates = await aResp.json().catch(() => ({}));
-    if (!affiliates.length) { return; }
+    if (!affiliates.length) test.skip();
     const result = await apiPatch(page, `/api/university-admin/affiliates/${affiliates[0].id}`, { action: 'verify' });
     expect(result.status).toBe('verified');
   });
@@ -246,7 +246,7 @@ test.describe('B2B-09 B2B Implementation Flow', () => {
     const resp = await page.request.get(`${BASE}/api/org-configs/implementation-checklist`);
     const checklist = await resp.json().catch(() => ({}));
     const steps = Array.isArray(checklist) ? checklist : (checklist.steps || []);
-    if (!steps.length) { return; }
+    if (!steps.length) test.skip();
     const result = await apiPatch(page, `/api/org-configs/implementation-checklist/${steps[0].id}`, { status: 'completed' });
     expect(result.status).toBe('completed');
   });
@@ -307,7 +307,7 @@ test.describe('B2B-12 Encore Career Posting', () => {
     await page.waitForURL(/thrive-at-home-pied\.vercel\.app\/(?!login)/, { timeout: 30000 });
     const lResp = await page.request.get(`${BASE}/api/encore-careers?status=active&limit=1`);
     const listings = await lResp.json().catch(() => ({}));
-    if (!listings.length) { return; }
+    if (!listings.length) test.skip();
     const result = await apiPost(page, `/api/encore-careers/${listings[0].id}/apply`, { cover_note: 'I am very interested in this role' });
     expect(result.id || result.application_id).toBeTruthy();
   });

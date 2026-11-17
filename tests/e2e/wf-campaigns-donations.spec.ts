@@ -146,7 +146,7 @@ test.describe('C-04 Campaign Share', () => {
     const _campaignsR = await page.request.get(`${BASE}/api/campaigns?status=active&limit=1`);
 
     const campaigns = await _campaignsR.json().catch(() => ({}));
-    if (!campaigns.length) { return; }
+    if (!campaigns.length) test.skip();
     const result = await apiPost(page, `/api/campaigns/${campaigns[0].id}/share`, {
       channel: 'email',
     });

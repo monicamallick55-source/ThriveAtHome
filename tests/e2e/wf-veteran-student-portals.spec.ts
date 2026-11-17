@@ -71,7 +71,7 @@ test.describe('VT-02 VSO Portal', () => {
     await loginAsAdmin(page, 'vsoadmin@test.com');
     const _pendingR = await page.request.get(`${BASE}/api/vso-programs/hours?status=pending_approval`);
     const pending = await _pendingR.json().catch(() => ({}));
-    if (!pending.length) { return; }
+    if (!pending.length) test.skip();
     const result = await apiPatch(page, `/api/vso-programs/hours/${pending[0].id}`, {
       action: 'approve',
     });
@@ -218,7 +218,7 @@ test.describe('PORT-04 Career Transition', () => {
     await loginAsMember(page);
     const _plansR = await page.request.get(`${BASE}/api/transitions`);
     const plans = await _plansR.json().catch(() => ({}));
-    if (!plans.length) { return; }
+    if (!plans.length) test.skip();
     expect(Array.isArray(plans[0].steps) || plans[0].step_count >= 0).toBe(true);
   });
 });
