@@ -20,7 +20,10 @@ async function loginAsAdmin(page: any) {
   await page.fill('[name="email"]', 'admin@test.com');
   await page.fill('[name="password"]', 'TestPass123!');
   await page.click('[type="submit"]');
-  await page.waitForURL(`${BASE}/dashboard**`);
+  await Promise.race([
+    page.waitForURL(`${BASE}/dashboard**`, { timeout: 20000 }),
+    page.waitForURL(`${BASE}/admin**`, { timeout: 20000 }),
+  ]);
 }
 
 async function apiPost(page: any, path: string, body: object) {
