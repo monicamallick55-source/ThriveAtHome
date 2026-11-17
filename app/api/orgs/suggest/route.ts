@@ -19,7 +19,6 @@ async function resolveMember(authId: string): Promise<{ memberId: string | null;
 
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await req.json().catch(() => null)
   const orgName = typeof body?.org_name === 'string' ? body.org_name.trim() : ''

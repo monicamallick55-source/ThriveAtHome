@@ -7,7 +7,6 @@ export const runtime = 'nodejs'
 
 export async function GET(req: NextRequest) {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const state = req.nextUrl.searchParams.get('state') ?? undefined
   const { data, error } = await getVitaSites(state)
   if (error) return NextResponse.json({ error }, { status: 500 })

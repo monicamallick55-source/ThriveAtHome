@@ -17,8 +17,6 @@ async function getOrgId(userId: string): Promise<{ orgId: string | null; role: s
 
 export async function GET(request: Request) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { searchParams } = new URL(request.url)
   const { orgId, role, error: roleError } = await getOrgId(user.id)
@@ -34,8 +32,6 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { orgId, role, error: roleError } = await getOrgId(user.id)
   if (roleError === 'Forbidden') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })

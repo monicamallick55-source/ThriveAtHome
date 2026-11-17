@@ -6,7 +6,6 @@ import { getEntitlements, navigatorUsagePct } from '@/lib/plans/entitlements'
 
 export async function GET(req: NextRequest) {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const supabase = await createClient()
   const { data: fm } = await (supabase.from as any)('family_members')
@@ -56,7 +55,6 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const supabase = await createClient()
   const { data: fm } = await (supabase.from as any)('family_members')

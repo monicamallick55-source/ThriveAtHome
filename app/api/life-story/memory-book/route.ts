@@ -6,7 +6,6 @@ import { createMemoryBook, upsertDraft, getMemoryBooks } from '@/lib/data/life-s
 // GET — list all memory books (including drafts) for the auth user's member
 export async function GET() {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { memberId } = await resolveMemberContext(user.id)
   if (!memberId) return NextResponse.json({ error: 'No member linked' }, { status: 404 })
@@ -19,7 +18,6 @@ export async function GET() {
 // POST — create a new memory book record, OR save/update a draft
 export async function POST(req: Request) {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { memberId } = await resolveMemberContext(user.id)
   if (!memberId) return NextResponse.json({ error: 'No member linked' }, { status: 404 })

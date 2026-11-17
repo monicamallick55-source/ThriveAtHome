@@ -5,7 +5,6 @@ import { rsvpToCircleEvent, cancelRsvpToCircleEvent } from '@/lib/data/circles'
 
 export async function POST(request: Request) {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { memberId } = await resolveMemberContext(user.id)
   if (!memberId) return NextResponse.json({ error: 'No member linked' }, { status: 403 })

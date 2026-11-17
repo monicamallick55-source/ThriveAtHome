@@ -8,8 +8,6 @@ const LABELS: Record<string,string> = {
 }
 export async function GET(req: NextRequest, { params }: { params: { category: string } }) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const cat = params.category
   if (!LABELS[cat]) return NextResponse.json({ error: 'Unknown category' }, { status: 404 })
   return NextResponse.json({ category: cat, label: LABELS[cat], providers: [] })

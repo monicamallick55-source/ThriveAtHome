@@ -10,7 +10,6 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const role = await getUserRole(user.id)
   if (role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })

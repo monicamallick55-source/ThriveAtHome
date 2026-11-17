@@ -15,8 +15,6 @@ const TIER_CONFIG = {
 export async function GET(req: NextRequest) {
   try {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const programId = new URL(req.url).searchParams.get('program_id')
     if (!programId) return NextResponse.json({ error: 'program_id required' }, { status: 400 })

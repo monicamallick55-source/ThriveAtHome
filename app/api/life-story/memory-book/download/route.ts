@@ -6,7 +6,6 @@ import { createAdminClient } from '@/lib/supabase/admin'
 // POST {storagePath} — returns a fresh 1-hour signed URL for a Memory Book PDF
 export async function POST(req: Request) {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { memberId } = await resolveMemberContext(user.id)
   if (!memberId) return NextResponse.json({ error: 'No member linked' }, { status: 404 })

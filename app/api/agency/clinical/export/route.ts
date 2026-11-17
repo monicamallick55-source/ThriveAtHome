@@ -18,8 +18,6 @@ function toRow(fields: unknown[]): string {
 
 export async function GET(req: NextRequest) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const memberId = req.nextUrl.searchParams.get('memberId')
   const agencyId = req.nextUrl.searchParams.get('agencyId')

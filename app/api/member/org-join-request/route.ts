@@ -18,7 +18,6 @@ async function resolveMember(authId: string): Promise<{ memberId: string | null;
 
 export async function GET() {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { memberId } = await resolveMember(user.id)
   if (!memberId) return NextResponse.json({ requests: [] })
 
@@ -34,7 +33,6 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await req.json().catch(() => null)
   const orgId = body?.org_id
@@ -74,7 +72,6 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const orgId = req.nextUrl.searchParams.get('org_id')
   if (!orgId) return NextResponse.json({ error: 'org_id is required' }, { status: 400 })
   const { memberId } = await resolveMember(user.id)

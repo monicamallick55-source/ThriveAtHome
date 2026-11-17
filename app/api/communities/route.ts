@@ -3,8 +3,6 @@ import { createClient } from '@/lib/supabase/server'
 export const dynamic = 'force-dynamic'
 export async function GET(req: NextRequest) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   try {
     const { data, error } = await supabase
       .from('interest_circles').select('*').eq('is_active', true)
@@ -15,8 +13,6 @@ export async function GET(req: NextRequest) {
 }
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const body = await req.json().catch(() => ({}))
   try {
     const { data, error } = await supabase.from('interest_circles')

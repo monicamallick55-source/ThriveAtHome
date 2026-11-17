@@ -7,7 +7,6 @@ import type { VisitType } from '@/lib/services/serviceTypes'
 export async function POST(req: NextRequest) {
   try {
     const user = await getCurrentUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const volunteer_result = await getVolunteerByAuthId(user.id)
     if (volunteer_result.error || !volunteer_result.data) {

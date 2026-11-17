@@ -14,8 +14,6 @@ async function getNavigatorId(userId: string): Promise<string | null> {
 
 export async function GET() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { data, error } = await getActiveAmbassadors()
   if (error) return NextResponse.json({ error }, { status: 500 })
@@ -24,8 +22,6 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   // Verify admin or navigator role
   const admin = createAdminClient()

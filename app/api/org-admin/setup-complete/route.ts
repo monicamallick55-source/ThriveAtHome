@@ -3,8 +3,6 @@ import { NextResponse } from 'next/server'
 
 export async function PATCH() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   // Find org where user is org_admin
   const { data: member } = await supabase

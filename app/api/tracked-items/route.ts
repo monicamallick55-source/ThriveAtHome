@@ -3,8 +3,6 @@ import { createClient } from '@/lib/supabase/server'
 export const dynamic = 'force-dynamic'
 export async function GET(req: NextRequest) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { searchParams } = new URL(req.url)
   const upcoming = searchParams.get('upcoming')
   const days = parseInt(searchParams.get('days') || '7')
@@ -32,8 +30,6 @@ export async function GET(req: NextRequest) {
 }
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const body = await req.json().catch(() => ({}))
   let member = null
   const { data: m1 } = await supabase.from('members').select('id')

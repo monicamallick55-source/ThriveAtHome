@@ -15,7 +15,6 @@ const DEFAULT_SCOPES = ['activity', 'heartrate', 'sleep']
 
 export async function GET() {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { memberId } = await resolveMemberContext(user.id)
   if (!memberId) return NextResponse.json({ error: 'Complete onboarding first.' }, { status: 400 })
 
@@ -26,7 +25,6 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { memberId } = await resolveMemberContext(user.id)
   if (!memberId) return NextResponse.json({ error: 'Complete onboarding first.' }, { status: 400 })
 

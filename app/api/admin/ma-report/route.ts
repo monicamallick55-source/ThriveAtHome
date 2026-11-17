@@ -48,8 +48,6 @@ function toCSV(rows: any[], headers: string[]): string {
 export async function GET(req: NextRequest) {
   try {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const { data: member } = await supabase
       .from('members')

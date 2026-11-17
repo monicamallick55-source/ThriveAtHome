@@ -4,7 +4,6 @@ import { getCurrentUser } from '@/lib/auth'
 export async function POST(req: NextRequest) {
   try {
     const user = await getCurrentUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     const body = await req.json().catch(() => ({}))
     const { provider_id, service_id, date, time } = body as { provider_id?: string; service_id?: string; date?: string; time?: string }
     if (!provider_id || !service_id) {

@@ -4,8 +4,6 @@ import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function GET(req: NextRequest) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const role = (user.app_metadata?.role ?? user.user_metadata?.role ?? '') as string
   if (!['admin', 'super_admin', 'csm'].includes(role)) {

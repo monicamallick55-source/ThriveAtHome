@@ -19,7 +19,6 @@ const REFERRAL_TYPES = [
 
 export async function POST(req: Request) {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const role = await getUserRole(user.id)
   if (!(await isNavigatorOrAdmin(user.id))) {

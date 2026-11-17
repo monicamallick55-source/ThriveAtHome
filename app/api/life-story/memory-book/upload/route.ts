@@ -11,7 +11,6 @@ const BUCKET = 'memory-books'
 // + optional 'purchase_date' (ISO string)
 export async function POST(req: Request) {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { memberId } = await resolveMemberContext(user.id)
   if (!memberId) return NextResponse.json({ error: 'No member linked' }, { status: 404 })

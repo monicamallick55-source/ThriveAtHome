@@ -18,8 +18,6 @@ const ALLOWED_ROLES = ['caregiver', 'nurse', 'therapist', 'care_coordinator', 's
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const caller = await getCallerAgencyInfo(user.id)
   if (!caller) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })

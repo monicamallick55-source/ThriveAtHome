@@ -26,7 +26,6 @@ function getPriceInCents(formatType: string, planTier: string, isMemorial: boole
 // POST — returns pricing, regen info, or checkout URL
 export async function POST(req: Request) {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { memberId } = await resolveMemberContext(user.id)
   if (!memberId) return NextResponse.json({ error: 'No member linked' }, { status: 404 })
@@ -141,7 +140,6 @@ export async function POST(req: Request) {
 // GET — return pricing info for a format + current plan (no Stripe involved)
 export async function GET(req: Request) {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { memberId } = await resolveMemberContext(user.id)
   if (!memberId) return NextResponse.json({ error: 'No member linked' }, { status: 404 })

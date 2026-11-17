@@ -4,8 +4,6 @@ import { GIFT_CATALOG, calculateOrderTotals, requiresFamilyApproval } from '@/li
 
 export async function GET(req: NextRequest) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const memberId = req.nextUrl.searchParams.get('memberId')
   if (!memberId) return NextResponse.json({ error: 'memberId required' }, { status: 400 })
@@ -22,8 +20,6 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await req.json()
   const { member_id, catalog_item_id, recipient_name, recipient_address, recipient_email, message, sign_as, family_event_id } = body
@@ -84,8 +80,6 @@ export async function POST(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   // Family approves a pending gift order
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { id, action } = await req.json()
   if (!id || !['approve', 'cancel'].includes(action)) {

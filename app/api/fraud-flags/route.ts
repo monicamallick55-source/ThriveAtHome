@@ -9,8 +9,6 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(_req: NextRequest) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { data, error } = await supabase
     .from('fraud_flags')
@@ -26,8 +24,6 @@ export async function GET(_req: NextRequest) {
 export async function POST(req: NextRequest) {
   // TC-FS005 — report a fraud flag
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = supabase as any

@@ -8,7 +8,6 @@ type NavigatorNote = Database['public']['Tables']['navigator_notes']['Row']
 
 export async function POST(req: Request) {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const userId = user.id
 
   const role = await getUserRole(userId)

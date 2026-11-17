@@ -6,8 +6,6 @@ const VALID_PATHWAYS = ['late_life_divorce', 'dementia_mci', 'adult_child_moving
 
 export async function GET(_req: NextRequest) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { data } = await supabase.from('transition_plans').select('*')
     .order('created_at', { ascending: false }).limit(50)
   return NextResponse.json(data || [])
@@ -15,8 +13,6 @@ export async function GET(_req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const body = await req.json().catch(() => ({}))
   const { steps: _steps, ...planBody } = body
   if (planBody.pathway && !VALID_PATHWAYS.includes(planBody.pathway)) {

@@ -8,8 +8,6 @@ import { createAdminClient } from '@/lib/supabase/admin'
 // GET /api/neighbor-match?memberId=xxx — list pending/approved matches for member
 export async function GET(req: NextRequest) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const memberId = req.nextUrl.searchParams.get('memberId')
   if (!memberId) return NextResponse.json({ error: 'memberId required' }, { status: 400 })
@@ -36,8 +34,6 @@ export async function GET(req: NextRequest) {
 // Body: { volunteerId, memberId }
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { data: isStaff } = await supabase.rpc('is_staff')
   if (!isStaff) return NextResponse.json({ error: 'Staff only' }, { status: 403 })
@@ -152,8 +148,6 @@ export async function POST(req: NextRequest) {
 // Body: { matchId, status: 'approved'|'declined', navigatorNote }
 export async function PATCH(req: NextRequest) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { data: isStaff } = await supabase.rpc('is_staff')
   if (!isStaff) return NextResponse.json({ error: 'Staff only' }, { status: 403 })

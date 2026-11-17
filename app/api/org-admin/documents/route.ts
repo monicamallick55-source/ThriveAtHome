@@ -20,8 +20,6 @@ async function getOrgAdmin(userId: string) {
 
 export async function GET() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const fm = await getOrgAdmin(user.id)
   if (!fm || !['org_admin', 'admin'].includes(fm.role ?? '')) {
@@ -47,8 +45,6 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const fm = await getOrgAdmin(user.id)
   if (!fm || !['org_admin', 'admin'].includes(fm.role ?? '')) {

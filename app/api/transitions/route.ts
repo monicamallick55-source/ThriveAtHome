@@ -38,8 +38,6 @@ const PATHWAY_STEPS: Record<Pathway, Array<{ key: string; delayDays: number; tit
 
 export async function GET(req: Request) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = createAdminClient() as any
@@ -64,8 +62,6 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await req.json().catch(() => ({})) as { pathway?: string; metadata?: Record<string, unknown>; member_id?: string }
   const pathway = body.pathway as Pathway | undefined

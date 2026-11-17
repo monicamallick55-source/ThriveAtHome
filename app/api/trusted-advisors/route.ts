@@ -3,8 +3,6 @@ import { createClient } from '@/lib/supabase/server'
 export const dynamic = 'force-dynamic'
 export async function GET(req: NextRequest) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { searchParams } = new URL(req.url)
   const category = searchParams.get('category')
   const limit = parseInt(searchParams.get('limit') || '20')
@@ -17,8 +15,6 @@ export async function GET(req: NextRequest) {
 }
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const body = await req.json().catch(() => ({}))
   const id = `real-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
   return NextResponse.json({ id, ...body, status: 'assigned', created_at: new Date().toISOString() }, { status: 201 })

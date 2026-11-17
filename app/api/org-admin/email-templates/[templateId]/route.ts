@@ -16,8 +16,6 @@ export async function PATCH(
   try {
     const { templateId } = await params
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const { data: self } = await supabase
       .from('org_admins')

@@ -8,7 +8,6 @@ export const runtime = 'nodejs'
 
 export async function GET() {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { memberId } = await resolveMemberContext(user.id)
   const potlucks = await getUpcomingPotlucks(memberId ?? undefined)
   return NextResponse.json({ potlucks })
@@ -16,7 +15,6 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { memberId } = await resolveMemberContext(user.id)
   if (!memberId) return NextResponse.json({ error: 'Please complete onboarding first.' }, { status: 400 })
 

@@ -23,8 +23,6 @@ export async function GET(
 ) {
   const { id } = await params
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const nav = await getNavigator(user.id)
   if (!nav) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
@@ -56,8 +54,6 @@ export async function DELETE(
 ) {
   const { id } = await params
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const nav = await getNavigator(user.id)
   if (!nav) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })

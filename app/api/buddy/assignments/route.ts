@@ -4,8 +4,6 @@ import { createAdminClient } from '@/lib/supabase/admin'
 export const dynamic = 'force-dynamic'
 export async function GET(req: NextRequest) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { searchParams } = new URL(req.url)
   const status = searchParams.get('status')
   const admin = createAdminClient()
@@ -20,8 +18,6 @@ export async function GET(req: NextRequest) {
 }
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const body = await req.json().catch(() => ({}))
   const admin = createAdminClient()
   const { data, error } = await admin.from('buddy_assignments').insert({ ...body, created_at: new Date().toISOString() }).select().single()

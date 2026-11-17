@@ -5,7 +5,6 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   return NextResponse.json({
     plan_tier: 'basics',
     features: ['buddy', 'communities', 'events', 'vault'],

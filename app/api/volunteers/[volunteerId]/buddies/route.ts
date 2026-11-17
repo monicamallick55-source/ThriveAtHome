@@ -10,7 +10,6 @@ export async function GET(
   { params }: { params: { volunteerId: string } }
 ) {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const admin = createAdminClient()
   const { data, error } = await (admin as any)

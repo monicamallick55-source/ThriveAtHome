@@ -30,8 +30,6 @@ async function getNavigator(userId: string) {
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const nav = await getNavigator(user.id)
   if (!nav) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
@@ -57,8 +55,6 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const nav = await getNavigator(user.id)
   if (!nav) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })

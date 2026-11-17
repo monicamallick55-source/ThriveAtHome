@@ -16,8 +16,6 @@ async function resolveMemberId(authUserId: string): Promise<string | null> {
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const memberId = await resolveMemberId(user.id)
   if (!memberId) return NextResponse.json({ error: 'No member found' }, { status: 404 })

@@ -14,8 +14,6 @@ export async function PATCH(
 ) {
   const { id, stepId } = await params
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await req.json()
   const { status, navigator_notes, resources } = body

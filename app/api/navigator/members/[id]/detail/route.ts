@@ -21,7 +21,6 @@ export async function GET(
   const { id: memberId } = await params
 
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const userId = user.id
 
   const role = await getUserRole(userId)

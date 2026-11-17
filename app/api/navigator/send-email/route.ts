@@ -6,7 +6,6 @@ import { emailProvider } from '@/lib/providers'
 
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { data: navigator, error: navError } = await getNavigatorByAuthId(user.id)
   if (navError || !navigator) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })

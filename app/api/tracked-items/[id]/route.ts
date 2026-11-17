@@ -3,8 +3,6 @@ import { createClient } from '@/lib/supabase/server'
 export const dynamic = 'force-dynamic'
 export async function GET(_req: NextRequest, context: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { id } = await context.params
   if (!id || id === 'undefined') return NextResponse.json({ error: 'not found' }, { status: 404 })
   const { data, error } = await supabase.from('tracked_items').select('*').eq('id', id).single()
@@ -13,8 +11,6 @@ export async function GET(_req: NextRequest, context: { params: Promise<{ id: st
 }
 export async function PATCH(_req: NextRequest, context: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { id } = await context.params
   if (!id || id === 'undefined') return NextResponse.json({ error: 'not found' }, { status: 404 })
   const body = await _req.json().catch(() => ({}))

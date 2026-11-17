@@ -13,7 +13,6 @@ const VALID_SITUATIONS = FILING_SITUATIONS.map((s: any) => s.value)
 
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { memberId, familyMemberId } = await resolveMemberContext(user.id)
   if (!memberId) {

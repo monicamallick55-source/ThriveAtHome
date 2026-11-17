@@ -9,7 +9,6 @@ const VALID_TIERS: PlanTier[] = ['basic', 'complete', 'premier']
 
 export async function POST(req: Request) {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   let body: { planTier?: string; billingInterval?: string }
   try {

@@ -25,7 +25,6 @@ const VISIT_TYPE_MAP: Record<string, VisitType> = {
 
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { data: volunteer, error: volError } = await getVolunteerByAuthId(user.id)
   if (volError || !volunteer || volunteer.status !== 'active') {

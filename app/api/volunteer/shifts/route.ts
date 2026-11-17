@@ -10,7 +10,6 @@ const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/
 
 export async function GET() {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { data: volunteer } = await getVolunteerByAuthId(user.id)
   if (!volunteer) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
@@ -28,7 +27,6 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { data: volunteer } = await getVolunteerByAuthId(user.id)
   if (!volunteer) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
@@ -61,7 +59,6 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { data: volunteer } = await getVolunteerByAuthId(user.id)
   if (!volunteer) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 

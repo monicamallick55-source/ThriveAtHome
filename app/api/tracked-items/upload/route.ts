@@ -10,7 +10,6 @@ const BUCKET = 'tracked-item-attachments'
 
 export async function POST(request: Request) {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const directMember = await getMemberByDirectAuth(user.id)
   const { data: fm } = await getFamilyMemberByAuthId(user.id)

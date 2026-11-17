@@ -14,8 +14,6 @@ async function verifyAgencyAccess(userId: string, agencyId: string): Promise<boo
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ noteId: string }> }) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { noteId } = await params
 
@@ -78,8 +76,6 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ no
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ noteId: string }> }) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { noteId } = await params
 

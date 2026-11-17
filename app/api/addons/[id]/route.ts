@@ -12,7 +12,6 @@ export async function DELETE(
 ) {
   const { id } = await params
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { memberId } = await resolveMemberContext(user.id)
   if (!memberId) {

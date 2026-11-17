@@ -14,8 +14,6 @@ async function resolveMember(db: ReturnType<typeof createAdminClient>, userId: s
 export async function POST(_req: Request, { params }: Params) {
   const { id: circleId } = await params
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const db = createAdminClient()
   const memberId = await resolveMember(db, user.id)
@@ -31,8 +29,6 @@ export async function POST(_req: Request, { params }: Params) {
 export async function DELETE(_req: Request, { params }: Params) {
   const { id: circleId } = await params
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const db = createAdminClient()
   const memberId = await resolveMember(db, user.id)

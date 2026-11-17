@@ -14,8 +14,6 @@ const TIER_PRICES: Record<string, number> = {
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await req.json()
   const { tier, occasion, occasion_date, title, notes } = body

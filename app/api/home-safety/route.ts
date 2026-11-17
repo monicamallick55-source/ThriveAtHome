@@ -10,18 +10,15 @@ const DEFAULT_PROFILE = {
 
 export async function GET() {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   return NextResponse.json({ profile: DEFAULT_PROFILE, checklist: [] })
 }
 
 export async function POST() {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   return NextResponse.json({ profile: DEFAULT_PROFILE })
 }
 
 export async function PATCH(req: NextRequest) {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   return NextResponse.json({ ok: true })
 }

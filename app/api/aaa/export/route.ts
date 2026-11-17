@@ -64,8 +64,6 @@ const CSV_HEADER = [
 
 export async function GET(req: NextRequest) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const role = await getUserRole(user.id)
   if (role !== 'aaa_admin' && role !== 'admin') {

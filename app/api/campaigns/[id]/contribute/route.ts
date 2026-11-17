@@ -11,8 +11,6 @@ export async function POST(
   try {
     const { id: campaignId } = await params
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const { data: fm } = await (supabase as any)
       .from('family_members')
@@ -87,8 +85,6 @@ export async function PATCH(
   try {
     const { id: campaignId } = await params
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     // Only navigators/admins can confirm contributions
     const { data: fm } = await (supabase as any)
@@ -161,8 +157,6 @@ export async function GET(
   try {
     const { id: campaignId } = await params
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const { data, error } = await (supabase as any)
       .from('campaign_contributions')

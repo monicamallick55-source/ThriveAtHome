@@ -4,7 +4,6 @@ import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function PATCH(req: NextRequest) {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await req.json().catch(() => null)
   if (!body) return NextResponse.json({ error: 'Invalid body' }, { status: 400 })

@@ -20,8 +20,6 @@ async function getAgencyAdmin(userId: string) {
 
 export async function GET() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const fm = await getAgencyAdmin(user.id)
   if (!fm || !['agency_admin', 'admin'].includes(fm.role ?? '')) {
@@ -47,8 +45,6 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const fm = await getAgencyAdmin(user.id)
   if (!fm || !['agency_admin', 'admin'].includes(fm.role ?? '')) {

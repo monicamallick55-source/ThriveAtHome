@@ -11,7 +11,6 @@ const VISIBILITIES = new Set(['family', 'circle', 'public'])
 
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { memberId, familyMemberId } = await resolveMemberContext(user.id)
   if (!memberId) return NextResponse.json({ error: 'Please complete onboarding first.' }, { status: 400 })
 

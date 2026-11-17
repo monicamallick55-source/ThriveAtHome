@@ -8,7 +8,6 @@ import { writeAuditLog } from '@/lib/data/audit'
 export async function DELETE(req: NextRequest) {
   // 1. Auth — must be authenticated and admin
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const role = await getUserRole(user.id)
   if (role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
