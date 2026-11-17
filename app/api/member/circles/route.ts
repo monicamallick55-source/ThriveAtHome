@@ -2,6 +2,12 @@ import { NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 
+const MOCK_CIRCLES = [
+  { id: 'circ-mock-001', name: 'Morning Walkers', member_count: 12, category: 'fitness', status: 'active' },
+  { id: 'circ-mock-002', name: 'Book Lovers', member_count: 8, category: 'culture', status: 'active' },
+]
+
+
 export async function GET() {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

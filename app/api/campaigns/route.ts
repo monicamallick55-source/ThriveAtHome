@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+
+const MOCK_CAMPAIGNS = [
+  { id: 'camp-mock-001', title: 'Holiday Food Drive', status: 'active', goal_cents: 500000, raised_cents: 123000, created_at: new Date().toISOString() },
+]
+
 export const dynamic = 'force-dynamic'
 export async function GET(req: NextRequest) {
   const supabase = await createClient()

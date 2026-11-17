@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+
+const MOCK_TASKS = [
+  { id: 'task-mock-001', member_name: 'Jane Doe', task_type: 'wellness_check', status: 'open', priority: 'high', created_at: new Date().toISOString() },
+  { id: 'task-mock-002', member_name: 'John Smith', task_type: 'service_request', status: 'open', priority: 'medium', created_at: new Date().toISOString() },
+]
+
 export const dynamic = 'force-dynamic'
 export async function GET(req: NextRequest) {
   const supabase = await createClient()

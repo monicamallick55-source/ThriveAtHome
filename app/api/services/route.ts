@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+
+const MOCK_SERVICES = [
+  { id: 'svc-mock-001', service_type: 'transportation', status: 'pending', member_id: 'mem-1', scheduled_at: new Date(Date.now() + 86400000).toISOString() },
+  { id: 'svc-mock-002', service_type: 'companionship', status: 'pending', member_id: 'mem-2', scheduled_at: new Date(Date.now() + 172800000).toISOString() },
+]
+
 export const dynamic = 'force-dynamic'
 
 function detectServiceType(text: string): string {

@@ -3,6 +3,12 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { scoreVolunteerForMember as rankVolunteers } from '@/lib/volunteers/match'
 
+const MOCK_VOLUNTEERS = [
+  { id: 'vol-mock-001', name: 'Carol Helper', status: 'active', skills: ['driving','companionship'], availability: 'weekdays' },
+  { id: 'vol-mock-002', name: 'Dave Assist', status: 'active', skills: ['errands','tech_help'], availability: 'weekends' },
+]
+
+
 export async function GET(req: Request) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
