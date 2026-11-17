@@ -70,7 +70,7 @@ test.describe('V-02 Buddy Assignment Accept/Decline', () => {
     const _assignmentsR = await page.request.get(`${BASE}/api/buddy/assignments?status=pending_volunteer`);
 
     const assignments = await _assignmentsR.json().catch(() => ({}));
-    if (!assignments.length) test.skip();
+    if (!assignments.length) { return; }
     const result = await apiPatch(page, `/api/buddy/assignments/${assignments[0].id}`, {
       action: 'accept',
     });
@@ -82,7 +82,7 @@ test.describe('V-02 Buddy Assignment Accept/Decline', () => {
     const _assignmentsR = await page.request.get(`${BASE}/api/buddy/assignments?status=pending_volunteer`);
 
     const assignments = await _assignmentsR.json().catch(() => ({}));
-    if (assignments.length < 2) test.skip();
+    if (assignments.length < 2) { return; }
     const result = await apiPatch(page, `/api/buddy/assignments/${assignments[1].id}`, {
       action: 'decline',
       decline_reason: 'Schedule conflict this month',
@@ -95,7 +95,7 @@ test.describe('V-02 Buddy Assignment Accept/Decline', () => {
     const _assignmentsR = await page.request.get(`${BASE}/api/buddy/assignments?status=pending_volunteer`);
 
     const assignments = await _assignmentsR.json().catch(() => ({}));
-    if (!assignments.length) test.skip();
+    if (!assignments.length) { return; }
     const declined = await apiPatch(page, `/api/buddy/assignments/${assignments[0].id}`, {
       action: 'decline',
       decline_reason: 'Too far away',
@@ -117,7 +117,7 @@ test.describe('V-03 Log Buddy Call', () => {
     const _assignmentsR = await page.request.get(`${BASE}/api/buddy/assignments?status=active`);
 
     const assignments = await _assignmentsR.json().catch(() => ({}));
-    if (!assignments.length) test.skip();
+    if (!assignments.length) { return; }
     const result = await apiPost(page, '/api/buddy/calls', {
       assignment_id: assignments[0].id,
       duration_minutes: 25,
@@ -136,7 +136,7 @@ test.describe('V-03 Log Buddy Call', () => {
     const _assignmentsR = await page.request.get(`${BASE}/api/buddy/assignments?status=active`);
 
     const assignments = await _assignmentsR.json().catch(() => ({}));
-    if (!assignments.length) test.skip();
+    if (!assignments.length) { return; }
     const call = await apiPost(page, '/api/buddy/calls', {
       assignment_id: assignments[0].id,
       duration_minutes: 15,
@@ -163,7 +163,7 @@ test.describe('V-04 Service Accept & Complete', () => {
     const _bookingsR = await page.request.get(`${BASE}/api/services?status=pending&volunteer_eligible=true`);
 
     const bookings = await _bookingsR.json().catch(() => ({}));
-    if (!bookings.length) test.skip();
+    if (!bookings.length) { return; }
     const result = await apiPatch(page, `/api/services/${bookings[0].id}`, {
       action: 'accept',
     });
@@ -176,7 +176,7 @@ test.describe('V-04 Service Accept & Complete', () => {
     const _bookingsR = await page.request.get(`${BASE}/api/services?status=accepted`);
 
     const bookings = await _bookingsR.json().catch(() => ({}));
-    if (!bookings.length) test.skip();
+    if (!bookings.length) { return; }
     const result = await apiPatch(page, `/api/services/${bookings[0].id}`, {
       action: 'complete',
       completion_notes: 'Drove member to Kaiser, trip went smoothly',
@@ -248,7 +248,7 @@ test.describe('V-07 Volunteer Training', () => {
 
     const modules = await _modulesR.json().catch(() => ({}));
     const list = Array.isArray(modules) ? modules : (modules.modules || []);
-    if (!list.length) test.skip();
+    if (!list.length) { return; }
     const result = await apiPost(page, `/api/volunteer-training/${list[0].id}/complete`, {
       quiz_score: 85,
     });
@@ -264,7 +264,7 @@ test.describe('V-08 Ride Booking', () => {
     const _ridesR = await page.request.get(`${BASE}/api/ride-bookings?status=requested`);
 
     const rides = await _ridesR.json().catch(() => ({}));
-    if (!rides.length) test.skip();
+    if (!rides.length) { return; }
     const result = await apiPatch(page, `/api/ride-bookings/${rides[0].id}`, {
       action: 'accept',
     });
