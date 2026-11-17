@@ -12,7 +12,6 @@ const VALID_ACTIONS = ['view', 'call_clicked', 'text_clicked', 'chat_clicked']
 
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ ok: false }, { status: 401 })
 
   const body = await req.json().catch(() => null)
   if (!body || typeof body !== 'object') {

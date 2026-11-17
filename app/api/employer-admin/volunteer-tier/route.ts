@@ -21,7 +21,6 @@ const TIER_NEXT: Record<string, string | null> = {
 export async function GET(req: Request) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 })
 
   const { searchParams } = new URL(req.url)
   const programId = searchParams.get('program_id')
@@ -73,7 +72,6 @@ export async function GET(req: Request) {
 export async function PATCH(req: Request) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 })
   const { data: isStaff } = await supabase.rpc('is_staff')
   if (!isStaff) return NextResponse.json({ error: 'Staff only' }, { status: 403 })
 

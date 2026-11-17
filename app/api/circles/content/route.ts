@@ -9,7 +9,6 @@ import { createAdminClient } from '@/lib/supabase/admin'
 export async function GET(req: Request) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 })
 
   const { searchParams } = new URL(req.url)
   const circleId = searchParams.get('circle_id')
@@ -40,7 +39,6 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 })
 
   const { data: isStaff } = await supabase.rpc('is_staff')
   if (!isStaff) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })

@@ -9,7 +9,6 @@ import { createAdminClient } from '@/lib/supabase/admin'
 export async function GET(req: Request) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 })
 
   const { searchParams } = new URL(req.url)
   const memberId = searchParams.get('member_id')
@@ -64,7 +63,6 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 })
 
   const body = await req.json().catch(() => ({}))
   const { member_id, event_id, pickup_address, dropoff_address, pickup_time, notes } = body as {

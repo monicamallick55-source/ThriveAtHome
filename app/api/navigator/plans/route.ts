@@ -8,7 +8,6 @@ import { createAdminClient } from '@/lib/supabase/admin'
 export async function GET() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const admin = createAdminClient()
