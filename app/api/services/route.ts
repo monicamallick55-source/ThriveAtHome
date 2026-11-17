@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
   const { data, error } = await supabase.from('service_bookings').insert({
     member_id: member.id,
     service_type,
-    status: 'requested',
+    status: 'pending',
     notes: body.notes ?? body.free_text ?? null,
     scheduled_at: body.scheduled_at ?? body.scheduled_for ?? null,
     created_at: new Date().toISOString(),
