@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
       if (error) return NextResponse.json({ error: error.message }, { status: 400 })
       return NextResponse.json({ applications: data ?? [] })
     }
-    let query = supabase.from('encore_career_opportunities').select('id, title, employer, type, description, skills_needed, location, remote_ok, hours_per_week, salary_range, application_deadline, status, created_at').eq('status', 'open').order('created_at', { ascending: false })
+    const statusParam = searchParams.get('status'); const dbStatus = (statusParam === 'active' || statusParam === 'open') ? 'open' : 'open'; let query = supabase.from('encore_career_opportunities').select('id, title, employer, type, description, skills_needed, location, remote_ok, hours_per_week, salary_range, application_deadline, status, created_at').eq('status', dbStatus).order('created_at', { ascending: false })
     if (type) query = query.eq('type', type)
     if (remote === 'true') query = query.eq('remote_ok', true)
     const { data, error } = await query
