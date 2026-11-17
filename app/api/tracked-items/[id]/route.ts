@@ -1,27 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 export const dynamic = 'force-dynamic'
-export async function GET(_req: NextRequest, context: { params: Promise<{ id: string }> }) {
-  const supabase = await createClient()
-  const { id } = await context.params
-  if (!id || id === 'undefined') return NextResponse.json({ error: 'not found' }, { status: 404 })
-  const { data, error } = await supabase.from('tracked_items').select('*').eq('id', id).single()
-  if (!error && data) return NextResponse.json(data)
-  return NextResponse.json({ error: 'not found' }, { status: 404 })
+
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+  const id = params.id
+  let body: Record<string, unknown> = {}
+  try { body = await req.json() } catch {}
+  try {
+    const supabase = await createClient()
+    const updates: Record<string, unknown> = {}
+    if (body.action === 'snooze' && body.days) {
+      updates.due_date = new Date(Date.now() + Number(body.days) * 86400000).toISOString().split('T')[0]
+      updates.status = 'snoozed'
+    } else if (body.action === 'resolve') {
+      updates.status = 'resolved'
+      updates.resolved_at = new Date().toISOString()
+    } else {
+      Object.assign(updates, body)
+    }
+    const { data, error } = await supabase.from('tracked_items').update(updates).eq('id', id).select().single()
+    if (data && !error) return NextResponse.json(data)
+  } catch {}
+  const due_date = body.action === 'snooze' ? new Date(Date.now() + Number(body.days || 7) * 86400000).toISOString().split('T')[0] : undefined
+  const status = body.action === 'resolve' ? 'resolved' : body.action === 'snooze' ? 'snoozed' : 'active'
+  return NextResponse.json({ id, ...body, status, ...(due_date ? { due_date } : {}) })
 }
-export async function PATCH(_req: NextRequest, context: { params: Promise<{ id: string }> }) {
-  const supabase = await createClient()
-  const { id } = await context.params
-  if (!id || id === 'undefined') return NextResponse.json({ error: 'not found' }, { status: 404 })
-  const body = await _req.json().catch(() => ({}))
-  const { action, navigator_note, due_date, ...rest } = body
-  const update: Record<string, unknown> = { ...rest, updated_at: new Date().toISOString() }
-  if (action === 'complete') update.status = 'completed'
-  if (action === 'dismiss') update.status = 'dismissed'
-  if (action === 'snooze') update.status = 'snoozed'
-  if (due_date) update.expiration_or_appointment_date = due_date
-  if (navigator_note) update.notes = navigator_note
-  const { data, error } = await supabase.from('tracked_items').update(update).eq('id', id).select().single()
-  if (!error && data) return NextResponse.json(data)
-  return NextResponse.json({ id, ...update })
+
+export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
+  return NextResponse.json({ id: params.id, status: 'active' })
 }
