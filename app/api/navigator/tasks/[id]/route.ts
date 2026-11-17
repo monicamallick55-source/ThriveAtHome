@@ -3,27 +3,37 @@ import { createClient } from '@/lib/supabase/server'
 export const dynamic = 'force-dynamic'
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
-  const id = params.id
-  let body: Record<string, unknown> = {}
-  try { body = await req.json() } catch {}
+  const supabase = await createClient()
+  const body = await req.json().catch(() => ({}))
   const { action, snooze_days } = body as { action?: string; snooze_days?: number }
+
+  if (action === 'resolve') {
+    try {
+      const { data } = await supabase.from('navigator_tasks')
+        .update({ status: 'resolved', completed: true, completed_at: new Date().toISOString() })
+        .eq('id', params.id).select().single()
+      return NextResponse.json({ id: params.id, status: 'resolved', ...data })
+    } catch {}
+    return NextResponse.json({ id: params.id, status: 'resolved' })
+  }
+
+  if (action === 'snooze') {
+    const days = snooze_days || 3
+    const snoozed_until = new Date(Date.now() + days * 86400000).toISOString()
+    try {
+      const { data } = await supabase.from('navigator_tasks')
+        .update({ status: 'snoozed', snoozed_until, due_by: snoozed_until })
+        .eq('id', params.id).select().single()
+      return NextResponse.json({ id: params.id, status: 'snoozed', snoozed_until, ...data })
+    } catch {}
+    return NextResponse.json({ id: params.id, status: 'snoozed', snoozed_until })
+  }
+
   try {
-    const supabase = await createClient()
-    if (action === 'resolve') {
-      const { data } = await supabase.from('navigator_tasks').update({ status: 'resolved', completed: true, completed_at: new Date().toISOString() }).eq('id', id).select().single()
-      return NextResponse.json({ id, status: 'resolved', ...data })
-    }
-    if (action === 'snooze') {
-      const snoozed_until = new Date(Date.now() + (snooze_days || 3) * 86400000).toISOString()
-      const { data } = await supabase.from('navigator_tasks').update({ status: 'snoozed', snoozed_until }).eq('id', id).select().single()
-      return NextResponse.json({ id, status: 'snoozed', snoozed_until, ...data })
-    }
-    const { data } = await supabase.from('navigator_tasks').update({ ...body }).eq('id', id).select().single()
+    const { data } = await supabase.from('navigator_tasks').update({ ...body }).eq('id', params.id).select().single()
     if (data) return NextResponse.json(data)
   } catch {}
-  if (action === 'resolve') return NextResponse.json({ id, status: 'resolved' })
-  if (action === 'snooze') return NextResponse.json({ id, status: 'snoozed', snoozed_until: new Date(Date.now() + (snooze_days || 3) * 86400000).toISOString() })
-  return NextResponse.json({ id, ...body })
+  return NextResponse.json({ id: params.id, ...body })
 }
 
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
