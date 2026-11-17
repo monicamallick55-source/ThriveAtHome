@@ -22,8 +22,6 @@ function detectServiceType(text: string): string {
 
 export async function GET(req: NextRequest) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { searchParams } = new URL(req.url)
   const statusRaw = searchParams.get('status')
   const statusMap: Record<string, string> = { pending: 'requested', accepted: 'confirmed' }
@@ -38,8 +36,6 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const body = await req.json().catch(() => ({}))
   const { data: member } = await supabase.from('members').select('id')
     .or(`supabase_auth_id.eq.${user.id},user_id.eq.${user.id}`).maybeSingle()

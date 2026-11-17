@@ -16,7 +16,6 @@ export async function PATCH(
   const { bookingId } = await params
 
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const role = await getUserRole(user.id)
   if (role !== 'navigator' && role !== 'admin') {
@@ -213,7 +212,6 @@ export async function DELETE(
   const { bookingId } = await params
 
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { memberId } = await resolveMemberContext(user.id)
   if (!memberId) return NextResponse.json({ error: 'No member linked' }, { status: 400 })
