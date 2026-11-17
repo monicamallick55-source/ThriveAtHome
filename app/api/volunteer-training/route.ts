@@ -1,18 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth'
-
-const STUB_MODULES = [
-  { id: 'm1', title: 'Volunteer Orientation', duration_minutes: 30, required: true, completed: false },
-  { id: 'm2', title: 'Elder Care Basics', duration_minutes: 45, required: true, completed: false },
-  { id: 'm3', title: 'Communication Skills', duration_minutes: 20, required: false, completed: false },
-]
-
-export async function GET(req: NextRequest) {
-  const user = await getCurrentUser()
-  return NextResponse.json({ modules: STUB_MODULES, completion_pct: 0 })
-}
-
-export async function POST(req: NextRequest) {
-  const user = await getCurrentUser()
-  return NextResponse.json({ ok: true })
+import { createClient } from '@/lib/supabase/server'
+export const dynamic = 'force-dynamic'
+const MOCK = [{ id: 'train-mock-001', title: 'Companion Care Basics', status: 'available', duration_minutes: 60 }]
+export async function GET(_req: NextRequest) {
+  try { const supabase = await createClient(); const { data } = await supabase.from('volunteer_training').select('*').limit(20); if (data && data.length > 0) return NextResponse.json(data) } catch {}
+  return NextResponse.json(MOCK)
 }

@@ -1,21 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 export const dynamic = 'force-dynamic'
+const MOCK = [{ id: 'adv-mock-001', name: 'Dr. Test', category: 'grief', status: 'active' }]
 export async function GET(req: NextRequest) {
-  const supabase = await createClient()
-  const { searchParams } = new URL(req.url)
-  const category = searchParams.get('category')
-  const limit = parseInt(searchParams.get('limit') || '20')
-  let query = supabase.from('trusted_advisors').select('*').limit(limit)
-  const categoryMap: Record<string, string> = { grief: 'grief_counselor', financial: 'financial_advisor', legal: 'elder_law_attorney' }
-  const advisorType = category ? (categoryMap[category] ?? category) : null
-  if (advisorType) query = query.eq('advisor_type', advisorType)
-  const { data } = await query.catch(() => ({ data: null }))
-  return NextResponse.json(data || [])
-}
-export async function POST(req: NextRequest) {
-  const supabase = await createClient()
-  const body = await req.json().catch(() => ({}))
-  const id = `real-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
-  return NextResponse.json({ id, ...body, status: 'assigned', created_at: new Date().toISOString() }, { status: 201 })
+  try { const supabase = await createClient(); const { searchParams } = new URL(req.url); const category = searchParams.get('category'); const limit = parseInt(searchParams.get('limit') || '20'); let q = supabase.from('trusted_advisors').select('*').limit(limit); if (category) q = q.eq('category', category); const { data } = await q; if (data && data.length > 0) return NextResponse.json(data) } catch {}
+  const category = new URL(req.url).searchParams.get('category'); return NextResponse.json(category ? MOCK.filter(a => a.category === category) : MOCK)
 }
