@@ -9,5 +9,5 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   let body: Record<string,unknown> = {}; try { body = await req.json() } catch {}
   try { const supabase = await createClient(); const { data, error } = await supabase.from('volunteers').insert([body]).select().single(); if (data && !error) return NextResponse.json(data, { status: 201 }) } catch {}
-  return NextResponse.json({ id: `vol-${Date.now()}`, ...body, status: 'active' }, { status: 201 })
+  return NextResponse.json({ id: `vol-${Date.now()}`, ...body, status: 'pending_review' }, { status: 201 })
 }
