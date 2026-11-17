@@ -4,8 +4,6 @@ export const dynamic = 'force-dynamic'
 
 export async function PATCH(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { id } = await context.params
   const body = await req.json().catch(() => ({}))
   const { action, snooze_days } = body
