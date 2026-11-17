@@ -4,13 +4,13 @@ export const dynamic = 'force-dynamic'
 
 function detectServiceType(text: string): string {
   const t = text.toLowerCase()
-  if (t.includes('ride') || t.includes('transport') || t.includes('drive') || t.includes('car')) return 'transport'
-  if (t.includes('grocery') || t.includes('food') || t.includes('shop')) return 'grocery'
-  if (t.includes('meal') || t.includes('cook') || t.includes('dinner')) return 'meal_delivery'
-  if (t.includes('clean') || t.includes('house') || t.includes('laundry')) return 'housekeeping'
-  if (t.includes('medical') || t.includes('doctor') || t.includes('appointment')) return 'medical_transport'
-  if (t.includes('companion') || t.includes('visit') || t.includes('talk')) return 'companionship'
-  if (t.includes('tech') || t.includes('computer') || t.includes('phone')) return 'tech_help'
+  if (t.includes('ride') || t.includes('transport')) return 'transport'
+  if (t.includes('grocery') || t.includes('food')) return 'grocery'
+  if (t.includes('meal') || t.includes('cook')) return 'meal_delivery'
+  if (t.includes('clean') || t.includes('house')) return 'housekeeping'
+  if (t.includes('medical') || t.includes('doctor')) return 'medical_transport'
+  if (t.includes('companion') || t.includes('visit')) return 'companionship'
+  if (t.includes('tech') || t.includes('computer')) return 'tech_help'
   return 'general'
 }
 
