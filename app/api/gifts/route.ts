@@ -5,6 +5,6 @@ export async function GET(req: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { data } = await supabase.from('gift_catalog').select('*').eq('status', 'active').order('name').limit(50).catch(() => ({ data: null }))
+  const { data } = await supabase.from('gifts').select('id, gift_type, gift_description, amount_cents, status, created_at').eq('status', 'active').order('created_at', { ascending: false }).limit(50).catch(() => ({ data: null }))
   return NextResponse.json(data || [])
 }
