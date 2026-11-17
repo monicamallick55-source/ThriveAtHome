@@ -8,13 +8,16 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}))
   const { data, error } = await supabase.from('members').upsert({
     supabase_auth_id: user.id,
-    full_name: body.full_name ?? body.first_name + ' ' + body.last_name,
+    first_name: body.first_name ?? null,
+    last_name: body.last_name ?? null,
+    full_name: body.full_name ?? ((body.first_name ?? '') + ' ' + (body.last_name ?? '')).trim(),
     preferred_name: body.preferred_name ?? body.first_name ?? 'Friend',
     date_of_birth: body.date_of_birth ?? '1950-01-01',
     phone_number: body.phone_number ?? '555-0000',
     preferred_language: body.preferred_language ?? 'english',
     timezone: body.timezone ?? 'America/New_York',
     check_in_frequency: body.check_in_frequency ?? 'daily',
+    zip_code: body.zip_code ?? null,
     address: body.zip_code ?? body.address ?? null,
     plan_tier: 'basics',
     status: 'active',

@@ -7,7 +7,8 @@ export async function GET() {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { data, error } = await supabase.from('time_bank_accounts').select('balance_hours, lifetime_given, lifetime_received').eq('user_id', user.id).maybeSingle()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json(data ?? { balance_hours: 0, lifetime_given: 0, lifetime_received: 0 })
+  const row = data ?? { balance_hours: 0, lifetime_given: 0, lifetime_received: 0 }
+  return NextResponse.json({ ...row, balance: row.balance_hours })
 }
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
