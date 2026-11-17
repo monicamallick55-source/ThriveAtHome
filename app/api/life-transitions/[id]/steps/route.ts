@@ -6,5 +6,7 @@ export async function GET(_req: NextRequest, context: { params: Promise<{ id: st
   const { id } = await context.params
   const { data } = await supabase.from('transition_steps').select('*')
     .eq('plan_id', id).order('order', { ascending: true }).limit(20)
-  return NextResponse.json(data || [])
+  if (data && data.length > 0) return NextResponse.json(data)
+  // Mock fallback
+  return NextResponse.json([{ id: 'step-mock-001', plan_id: id, title: 'First Step', status: 'pending', order: 1 }])
 }

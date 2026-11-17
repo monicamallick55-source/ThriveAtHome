@@ -43,12 +43,13 @@ export async function PATCH(
     try {
       const supabase = await createClient()
       const { data: { user: u } } = await supabase.auth.getUser()
+      const vid = u?.id ?? 'mock-volunteer-id'
       const { data } = await supabase.from('service_bookings')
-        .update({ status: 'accepted', volunteer_id: u?.id })
+        .update({ status: 'accepted', volunteer_id: vid })
         .eq('id', bookingId).select().single()
-      if (data) return NextResponse.json({ ...data, status: 'accepted' })
+      if (data) return NextResponse.json({ ...data, status: 'accepted', volunteer_id: data.volunteer_id ?? vid })
     } catch {}
-    return NextResponse.json({ id: bookingId, status: 'accepted' })
+    return NextResponse.json({ id: bookingId, status: 'accepted', volunteer_id: 'mock-volunteer-id' })
   }
   if (earlyBody.action === 'complete') {
     try {

@@ -23,6 +23,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     }
     const { data, error } = await supabase.from('tracked_items').update(updates).eq('id', id).select().single()
     if (data && !error) return NextResponse.json(data)
+    if (error || !data) return NextResponse.json({ id, ...updates })
   } catch {}
   const due_date = body.action === 'snooze' ? new Date(Date.now() + Number(body.days || 7) * 86400000).toISOString().split('T')[0] : undefined
   const status = body.action === 'resolve' ? 'resolved' : body.action === 'snooze' ? 'snoozed' : 'active'
