@@ -34,6 +34,7 @@ async function apiPost(page: any, path: string, body: object) {
 
 test.describe('M-01 Onboarding', () => {
   test('TC-M001-a: 4-step onboarding writes member row to DB', async ({ page }) => {
+    await loginAsMember(page);
     await page.goto(`${BASE}/onboarding/step-1`);
 
     // Step 1 — personal info
