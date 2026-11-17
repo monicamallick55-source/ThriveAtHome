@@ -15,6 +15,9 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     } else if (body.action === 'resolve') {
       updates.status = 'resolved'
       updates.resolved_at = new Date().toISOString()
+    } else if (body.action === 'complete') {
+      updates.status = 'completed'
+      updates.completed_at = new Date().toISOString()
     } else {
       Object.assign(updates, body)
     }
