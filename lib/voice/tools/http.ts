@@ -1,11 +1,13 @@
 // Shared HTTP wrapper for /api/retell/tools/* routes: verify signature → parse → run tool.
 import { NextResponse } from 'next/server'
-import { verifyRetellRequest } from '../verifyRetell'
+import { verifyRetellSignature } from '../verifyRetell'
 import type { ToolArgs, ToolFn } from './index'
 import { toolContextFromCall } from './types'
 
 export async function handleToolRequest(req: Request, tool: ToolFn, label: string): Promise<NextResponse> {
-  const { ok, rawBody } = await verifyRetellRequest(req)
+  const rawBody = await req.text()
+  const signature = (req as Request & { headers: Headers }).headers.get('x-retell-signature')
+  const { ok } = verifyRetellSignature(rawBody, signature)
   if (!ok) return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
 
   let body: { args?: ToolArgs; call?: Parameters<typeof toolContextFromCall>[0] } & ToolArgs
