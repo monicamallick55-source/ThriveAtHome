@@ -1,145 +1,58 @@
-// app/api/cron/aria-calls/route.ts
-// Triggers Retell AI daily check-in calls for all active members
-// Schedule: daily at 8:00 AM in each member's timezone (run hourly, filter by local time)
-//
-// TC-V002 — All 12 agent IDs: returns 200/207 (not 500)
-// TC-V010 — Aria outbound cron: 200/207, called count ≥ 0
-// TC-V016 — Call summary email: cron completes without crash
-// TC-V025 — Birthday arc cron: 200/207
-// TC-V080 — Family crisis SMS: cron endpoint responds
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-
-// All 12 Retell agent IDs (TC-V002 coverage)
-const AGENT_IDS = {
-  aria:    process.env.RETELL_ARIA_AGENT_ID    || process.env.RETELL_AGENT_ID_ARIA,
-  grace:   process.env.RETELL_GRACE_AGENT_ID   || process.env.RETELL_AGENT_ID_GRACE,
-  joy:     process.env.RETELL_JOY_AGENT_ID     || process.env.RETELL_AGENT_ID_JOY,
-  hope:    process.env.RETELL_HOPE_AGENT_ID    || process.env.RETELL_AGENT_ID_HOPE,
-  rosa:    process.env.RETELL_ROSA_AGENT_ID    || process.env.RETELL_AGENT_ID_ROSA,
-  claire:  process.env.RETELL_CLAIRE_AGENT_ID  || process.env.RETELL_AGENT_ID_CLAIRE,
-  sam:     process.env.RETELL_SAM_AGENT_ID     || process.env.RETELL_AGENT_ID_SAM,
-  nova:    process.env.RETELL_NOVA_AGENT_ID    || process.env.RETELL_AGENT_ID_NOVA,
-  morgan:  process.env.RETELL_MORGAN_AGENT_ID  || process.env.RETELL_AGENT_ID_MORGAN,
-  alex:    process.env.RETELL_ALEX_AGENT_ID    || process.env.RETELL_AGENT_ID_ALEX,
-  jordan:  process.env.RETELL_JORDAN_AGENT_ID  || process.env.RETELL_AGENT_ID_JORDAN,
-  quinn:   process.env.RETELL_QUINN_AGENT_ID   || process.env.RETELL_AGENT_ID_QUINN,  // deferred to M9
+import { agentIdFor } from '@/lib/voice/agents'
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+function authOk(req: NextRequest): boolean {
+  const secret = process.env.CRON_SECRET; if (!secret) return true
+  const h = req.headers.get('x-cron-secret') ?? req.headers.get('authorization')?.replace('Bearer ','')
+  return h === secret
 }
-
-const RETELL_API_KEY = process.env.RETELL_API_KEY
-const PRIMARY_AGENT  = AGENT_IDS.aria
-
-export async function POST(req: NextRequest) {
-  const cronSecret = req.headers.get('x-cron-secret') || req.headers.get('authorization')?.replace('Bearer ', '')
-  if (cronSecret !== process.env.CRON_SECRET) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+export async function POST(request: NextRequest) {
+  if (!authOk(request)) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  const now = new Date()
+  const day21 = new Date(now.getTime() - 21*24*60*60*1000)
+  const day22 = new Date(now.getTime() - 22*24*60*60*1000)
+  const day2  = new Date(now.getTime() -  2*24*60*60*1000)
+  const { data: newMembers } = await supabase.from('members').select('id,aria_call_opted_in,created_at')
+    .eq('status','active').gte('created_at', day2.toISOString())
+  for (const m of newMembers ?? []) {
+    if (!m.aria_call_opted_in) {
+      const { count } = await supabase.from('navigator_tasks').select('id',{count:'exact',head:true})
+        .eq('member_id',m.id).eq('task_type','welcome_call')
+      if (!count) await supabase.from('navigator_tasks').insert({
+        member_id:m.id, task_type:'welcome_call', priority:'high', status:'pending',
+        description:'Personal welcome call — do not mention Aria (Launch Protocol days 1–7)',
+        due_by: new Date(new Date(m.created_at).getTime()+24*60*60*1000).toISOString(),
+      }).catch(console.error)
+    }
   }
-
-  // If Retell is not configured, return 207 (partial) — route is healthy but no calls made.
-  // This is NOT a 503: the endpoint exists and responds correctly.
-  if (!RETELL_API_KEY || !PRIMARY_AGENT) {
-    const configured = Object.entries(AGENT_IDS)
-      .filter(([, v]) => !!v)
-      .map(([k]) => k)
-    return NextResponse.json({
-      called: 0,
-      skipped: 0,
-      message: 'Retell not configured — set RETELL_API_KEY and RETELL_ARIA_AGENT_ID to enable live calls',
-      agents_configured: configured,
-    }, { status: 207 })
+  const { data: d21 } = await supabase.from('members').select('id')
+    .eq('status','active').eq('aria_call_opted_in',false)
+    .lte('created_at',day21.toISOString()).gte('created_at',day22.toISOString())
+  for (const m of d21 ?? []) {
+    const { count } = await supabase.from('navigator_tasks').select('id',{count:'exact',head:true})
+      .eq('member_id',m.id).eq('task_type','aria_intro')
+    if (!count) await supabase.from('navigator_tasks').insert({
+      member_id:m.id, task_type:'aria_intro', priority:'normal', status:'pending',
+      description:'Offer Aria (play sample call if wanted). Default is NO.',
+    }).catch(console.error)
   }
-
-  const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
-
-  // Fetch active members with phone numbers who haven't had a call today
-  const today = new Date().toISOString().slice(0, 10)
-  const { data: members, error } = await supabaseAdmin
-    .from('members')
-    .select('id, first_name, phone, timezone, plan, subscription_status')
-    .eq('subscription_status', 'active')
-    .not('phone', 'is', null)
-    .not('plan', 'is', null)
-
-  if (error) {
-    console.error('[aria-calls] DB error:', error)
-    return NextResponse.json({ error: 'DB error' }, { status: 500 })
+  const agentId = agentIdFor('aria')
+  if (!agentId) { console.warn('[Cron/aria] RETELL_AGENT_ID not set — stub mode'); return NextResponse.json({ ok:true, mode:'stub', called:0 }) }
+  const { data: members } = await supabase.from('members').select('id,phone_number,checkin_preference')
+    .eq('status','active').eq('aria_call_opted_in',true).neq('checkin_preference','none')
+  let called = 0
+  for (const m of members ?? []) {
+    if (!m.phone_number) continue
+    const r = await fetch('https://api.retellai.com/v2/create-phone-call', {
+      method:'POST',
+      headers:{ 'Authorization':`Bearer ${process.env.RETELL_API_KEY}`, 'Content-Type':'application/json' },
+      body: JSON.stringify({ from_number:process.env.TWILIO_PHONE_NUMBER, to_number:m.phone_number,
+        agent_id:agentId, metadata:{ member_id:m.id, call_type:'check_in' } }),
+    }).catch(e => { console.error('[Aria] call failed:',e); return null })
+    if (r?.ok) called++
+    await new Promise(r => setTimeout(r, 200))
   }
-
-  if (!members || members.length === 0) {
-    return NextResponse.json({ called: 0, skipped: 0, message: 'No active members with phones' })
-  }
-
-  console.log(`[aria-calls] Initiating check-in calls for ${members.length} members`)
-
-  const results = await Promise.allSettled(
-    members.map(async (member: Record<string, unknown>) => {
-      // Check if already called today
-      const { count } = await supabaseAdmin
-        .from('call_logs')
-        .select('id', { count: 'exact', head: true })
-        .eq('member_id', member.id)
-        .eq('call_type', 'aria_checkin')
-        .gte('created_at', `${today}T00:00:00Z`)
-
-      if ((count ?? 0) > 0) {
-        return { id: member.id, skipped: true, reason: 'already called today' }
-      }
-
-      // Initiate Retell call
-      const res = await fetch('https://api.retellai.com/v2/create-phone-call', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${RETELL_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          agent_id: PRIMARY_AGENT,
-          from_number: process.env.RETELL_PHONE_NUMBER,
-          to_number: member.phone,
-          retell_llm_dynamic_variables: {
-            member_name: (member.first_name as string) || 'Friend',
-            member_id: member.id,
-            call_type: 'daily_checkin',
-          },
-        }),
-      })
-
-      if (!res.ok) {
-        const errBody = await res.text()
-        console.error(`[aria-calls] Retell error for member ${member.id}:`, errBody)
-        return { id: member.id, success: false, error: errBody }
-      }
-
-      const callData = await res.json() as { call_id: string }
-
-      // Log the call
-      await supabaseAdmin.from('call_logs').insert({
-        member_id: member.id,
-        call_type: 'aria_checkin',
-        retell_call_id: callData.call_id,
-        status: 'initiated',
-      }).then(({ error: logErr }: { error: unknown }) => { if (logErr) console.warn('[aria-calls] call_logs insert warning:', logErr) })
-
-      return { id: member.id, success: true, call_id: callData.call_id }
-    })
-  )
-
-  type CallResult = { success?: boolean; skipped?: boolean; error?: string }
-  const val = (r: PromiseSettledResult<CallResult>): CallResult => r.status === 'fulfilled' ? r.value : {}
-  const initiated = results.filter(r => val(r).success).length
-  const skipped   = results.filter(r => val(r).skipped).length
-  const failed    = results.filter(r => !val(r).success && !val(r).skipped).length
-
-  return NextResponse.json({
-    called: initiated,
-    total: members.length,
-    initiated,
-    skipped,
-    failed,
-  })
+  return NextResponse.json({ ok:true, called })
 }
-
 export async function GET(req: NextRequest) { return POST(req) }

@@ -1,30 +1,8 @@
-import { createHmac, timingSafeEqual } from 'crypto'
-
-const WEBHOOK_SECRET = process.env.RETELL_WEBHOOK_SECRET ?? ''
-
-/** Verify a raw Retell webhook request. Returns { ok, rawBody }. */
-export async function verifyRetellRequest(req: Request): Promise<{ ok: boolean; rawBody: string }> {
-  const rawBody = await req.text()
-  const signature = req.headers.get('x-retell-signature')
-  if (!WEBHOOK_SECRET) return { ok: true, rawBody } // skip if secret not configured
-  const ok = verifyRetellSignature(rawBody, signature, WEBHOOK_SECRET)
-  return { ok, rawBody }
-}
-
-/** Low-level HMAC-SHA256 signature check (timing-safe). */
-export function verifyRetellSignature(
-  payload: string,
-  signature: string | null,
-  secret: string
-): boolean {
-  if (!signature) return false
-  try {
-    const expected = createHmac('sha256', secret).update(payload).digest('hex')
-    const expectedBuf = Buffer.from(expected, 'hex')
-    const sigBuf = Buffer.from(signature.replace(/^sha256=/, ''), 'hex')
-    if (expectedBuf.length !== sigBuf.length) return false
-    return timingSafeEqual(expectedBuf, sigBuf)
-  } catch {
-    return false
-  }
+import { createHmac } from 'crypto'
+export function verifyRetellSignature(rawBody: string, signature: string | null): { ok: boolean; reason?: string } {
+  const key = process.env.RETELL_WEBHOOK_SECRET ?? process.env.RETELL_API_KEY
+  if (!key) { console.warn('[STUB][Retell] signature check skipped'); return { ok: true } }
+  if (!signature) return { ok: false, reason: 'missing x-retell-signature header' }
+  const expected = createHmac('sha256', key).update(rawBody).digest('hex')
+  return signature === expected ? { ok: true } : { ok: false, reason: 'signature mismatch' }
 }

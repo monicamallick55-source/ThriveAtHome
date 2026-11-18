@@ -1,54 +1,13 @@
-// Retell tool: update_call_preferences — member tells the agent how often to call.
-// Args: { call_frequency?: string, preferred_time?: string }. Members only — anyone else gets a polite spoken reply.
-import { toolAdmin, resolveToolCaller, str, type ToolArgs, type ToolContext, type ToolOutcome } from './types'
-
-export async function run(args: ToolArgs, ctx: ToolContext): Promise<ToolOutcome> {
-  const memberId = (await resolveToolCaller(args, ctx)).memberId
-  const callFrequency = str(args.call_frequency)
-  const preferredTime = str(args.preferred_time)
-
-  if (!memberId) {
-    return {
-      status: 200,
-      body: { result: 'I can only change call times for members calling from their own phone. A care navigator can help with that — would you like me to ask one to call you back?' },
-    }
-  }
-
-  let freq = 'weekly'
-  if (callFrequency) {
-    const f = callFrequency.toLowerCase().trim()
-    if (f === 'daily' || f === 'few_times_week' || f === 'weekly') freq = f
-    else if (f.includes('daily') || f.includes('every day')) freq = 'daily'
-    else if (f.includes('few') || f.includes('twice') || f.includes('other day')) freq = 'few_times_week'
-    else if (f.includes('week')) freq = 'weekly'
-  }
-
-  const admin = toolAdmin()
-  const { data: member, error: memberErr } = await admin
-    .from('members')
-    .select('id, preferred_name')
-    .eq('id', memberId)
-    .maybeSingle()
-
-  if (memberErr || !member) return { status: 404, body: { error: 'Member not found' } }
-
-  const { error: updateErr } = await admin
-    .from('members')
-    .update({ call_frequency_preference: freq, onboarding_call_completed: true })
-    .eq('id', memberId)
-
-  if (updateErr) {
-    console.error('[update-call-preferences] error:', updateErr)
-    return { status: 500, body: { error: 'Failed to update preferences' } }
-  }
-
-  const freqPhrase = freq === 'daily' ? 'every day' : freq === 'few_times_week' ? 'a few times a week' : 'once a week'
-
-  return {
-    status: 200,
-    body: {
-      success: true,
-      result: 'Got it, I will call you ' + freqPhrase + (preferredTime ? ' in the ' + preferredTime : '') + '. You are all set!',
-    },
-  }
+import { createClient } from '@supabase/supabase-js'
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+export async function run(args: Record<string, unknown>, memberId: string | null): Promise<{ ok: boolean }> {
+  if (!memberId) return { ok: false }
+  const updates: Record<string, unknown> = {}
+  if (args.frequency) updates.call_frequency_preference = args.frequency
+  if (args.time_preference) updates.call_time_preference = args.time_preference
+  if (args.opted_in !== undefined) updates.aria_call_opted_in = !!args.opted_in
+  if (!Object.keys(updates).length) return { ok: true }
+  const { error } = await supabase.from('members').update(updates).eq('id', memberId)
+  if (error) console.error('[Tool] updateCallPreferences:', error.message)
+  return { ok: !error }
 }

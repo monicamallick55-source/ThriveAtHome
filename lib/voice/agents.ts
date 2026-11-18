@@ -1,59 +1,38 @@
-export type CallDirection = 'inbound' | 'outbound'
-export type CallType =
-  | 'daily_companion'
-  | 'care_line'
-  | 'celebration'
-  | 'reminder'
-  | 'crisis_line'
-  | 'family_support'
-  | 'volunteer_support'
-  | 'buddy_support'
-  | 'navigator_assist'
-  | 'staff_support'
-  | 'concierge'
-  | 'partner_support'
-
-export type AgentName =
-  | 'aria' | 'rosa' | 'joy' | 'grace' | 'hope' | 'claire'
-  | 'sam' | 'morgan' | 'nova' | 'alex' | 'quinn' | 'jordan'
-
-export interface AgentConfig {
-  envVar: string
-  name: string
-  callType: CallType
-  direction: CallDirection
-  requiresOptIn: boolean
+export type AgentName = 'aria'|'rosa'|'joy'|'grace'|'hope'|'claire'|'sam'|'morgan'|'nova'|'alex'|'quinn'|'jordan'
+export type CallType = 'check_in'|'onboarding'|'celebration'|'reminder'|'crisis'|'care_line'|'concierge'|'navigator'|'callback'
+export interface AgentDef {
+  name: AgentName; label: string; envVar: string
+  direction: 'inbound'|'outbound'; defaultCallType: CallType
+  expectedCaller: 'member'|'family'|'volunteer'|'buddy'|'staff'|'partner'|'any'
+  crisisScan: boolean
 }
-
-export const AGENTS: Record<AgentName, AgentConfig> = {
-  aria:   { envVar: 'RETELL_AGENT_ID',        name: 'Aria',   callType: 'daily_companion',   direction: 'outbound', requiresOptIn: true },
-  rosa:   { envVar: 'RETELL_ROSA_AGENT_ID',    name: 'Rosa',   callType: 'care_line',         direction: 'inbound',  requiresOptIn: false },
-  joy:    { envVar: 'RETELL_JOY_AGENT_ID',     name: 'Joy',    callType: 'celebration',       direction: 'outbound', requiresOptIn: false },
-  grace:  { envVar: 'RETELL_GRACE_AGENT_ID',   name: 'Grace',  callType: 'reminder',          direction: 'outbound', requiresOptIn: false },
-  hope:   { envVar: 'RETELL_HOPE_AGENT_ID',    name: 'Hope',   callType: 'crisis_line',       direction: 'inbound',  requiresOptIn: false },
-  claire: { envVar: 'RETELL_CLAIRE_AGENT_ID',  name: 'Claire', callType: 'family_support',    direction: 'inbound',  requiresOptIn: false },
-  sam:    { envVar: 'RETELL_SAM_AGENT_ID',     name: 'Sam',    callType: 'volunteer_support', direction: 'inbound',  requiresOptIn: false },
-  morgan: { envVar: 'RETELL_MORGAN_AGENT_ID',  name: 'Morgan', callType: 'buddy_support',     direction: 'inbound',  requiresOptIn: false },
-  nova:   { envVar: 'RETELL_NOVA_AGENT_ID',    name: 'Nova',   callType: 'navigator_assist',  direction: 'inbound',  requiresOptIn: false },
-  alex:   { envVar: 'RETELL_ALEX_AGENT_ID',    name: 'Alex',   callType: 'staff_support',     direction: 'inbound',  requiresOptIn: false },
-  quinn:  { envVar: 'RETELL_QUINN_AGENT_ID',   name: 'Quinn',  callType: 'concierge',         direction: 'inbound',  requiresOptIn: false },
-  jordan: { envVar: 'RETELL_JORDAN_AGENT_ID',  name: 'Jordan', callType: 'partner_support',   direction: 'inbound',  requiresOptIn: false },
+export const AGENTS: Record<AgentName, AgentDef> = {
+  aria:   { name:'aria',   label:'Aria',   envVar:'RETELL_AGENT_ID',          direction:'outbound', defaultCallType:'check_in',   expectedCaller:'member',    crisisScan:true  },
+  rosa:   { name:'rosa',   label:'Rosa',   envVar:'RETELL_ROSA_AGENT_ID',     direction:'inbound',  defaultCallType:'care_line',  expectedCaller:'member',    crisisScan:true  },
+  joy:    { name:'joy',    label:'Joy',    envVar:'RETELL_JOY_AGENT_ID',      direction:'outbound', defaultCallType:'celebration',expectedCaller:'member',    crisisScan:true  },
+  grace:  { name:'grace',  label:'Grace',  envVar:'RETELL_GRACE_AGENT_ID',    direction:'outbound', defaultCallType:'reminder',   expectedCaller:'member',    crisisScan:true  },
+  hope:   { name:'hope',   label:'Hope',   envVar:'RETELL_HOPE_AGENT_ID',     direction:'inbound',  defaultCallType:'crisis',     expectedCaller:'any',       crisisScan:true  },
+  claire: { name:'claire', label:'Claire', envVar:'RETELL_CLAIRE_AGENT_ID',   direction:'inbound',  defaultCallType:'concierge',  expectedCaller:'family',    crisisScan:false },
+  sam:    { name:'sam',    label:'Sam',    envVar:'RETELL_SAM_AGENT_ID',      direction:'inbound',  defaultCallType:'concierge',  expectedCaller:'volunteer', crisisScan:false },
+  morgan: { name:'morgan', label:'Morgan', envVar:'RETELL_MORGAN_AGENT_ID',   direction:'inbound',  defaultCallType:'concierge',  expectedCaller:'buddy',     crisisScan:false },
+  nova:   { name:'nova',   label:'Nova',   envVar:'RETELL_NOVA_AGENT_ID',     direction:'inbound',  defaultCallType:'navigator',  expectedCaller:'staff',     crisisScan:false },
+  alex:   { name:'alex',   label:'Alex',   envVar:'RETELL_ALEX_AGENT_ID',     direction:'inbound',  defaultCallType:'navigator',  expectedCaller:'staff',     crisisScan:false },
+  quinn:  { name:'quinn',  label:'Quinn',  envVar:'RETELL_QUINN_AGENT_ID',    direction:'inbound',  defaultCallType:'concierge',  expectedCaller:'any',       crisisScan:true  },
+  jordan: { name:'jordan', label:'Jordan', envVar:'RETELL_JORDAN_AGENT_ID',   direction:'inbound',  defaultCallType:'concierge',  expectedCaller:'partner',   crisisScan:false },
 }
-
-export const AGENT_NAMES = Object.keys(AGENTS) as AgentName[]
-
-/** ID → name reverse lookup (reads live env vars) */
-export function agentNameFromId(id: string | null | undefined): AgentName | null {
-  if (!id) return null
-  for (const [name, cfg] of Object.entries(AGENTS) as [AgentName, AgentConfig][]) {
-    if (process.env[cfg.envVar] === id) return name
+export function agentIdFor(name: AgentName): string | null {
+  const def = AGENTS[name]; if (!def) return null
+  return process.env[def.envVar] ?? null
+}
+export function agentNameFromId(agentId: string | null | undefined): AgentName | null {
+  if (!agentId) return null
+  for (const [name, def] of Object.entries(AGENTS)) {
+    const v = process.env[def.envVar]; if (v && v === agentId) return name as AgentName
   }
   return null
 }
-
-/** name → agent ID from env */
-export function agentIdFor(name: AgentName): string | null {
-  const cfg = AGENTS[name]
-  if (!cfg) return null
-  return process.env[cfg.envVar] ?? null
+export function requireAgentId(name: AgentName): string {
+  const id = agentIdFor(name)
+  if (!id) throw new Error(`${AGENTS[name].envVar} is not set`)
+  return id
 }
