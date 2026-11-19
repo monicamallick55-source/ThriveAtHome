@@ -120,7 +120,7 @@ export function SignupForm({ referralCode }: { referralCode?: string }) {
       })
 
       const data = (await res.json()) as { error?: string; success?: boolean }
-      if (!res.ok || !data.success) {
+      if (!res.ok || (!data.success && !data.ok)) {
         setError(data.error ?? 'Something went wrong. Please try again.')
         return
       }
