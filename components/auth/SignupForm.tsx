@@ -77,6 +77,11 @@ export function SignupForm({ referralCode }: { referralCode?: string }) {
     const params = new URLSearchParams(window.location.search)
     setPlan(params.get('plan'))
   }, [])
+  const [plan, setPlan] = useState<string | null>(null)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    setPlan(params.get('plan'))
+  }, [])
 
   const isSelf = accountType === 'self'
 
