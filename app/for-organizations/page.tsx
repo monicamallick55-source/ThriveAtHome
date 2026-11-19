@@ -117,28 +117,28 @@ export default function ForOrganizationsPage() {
     <main className="min-h-screen bg-white">
 
       {/* Hero */}
-      <section className="bg-gradient-to-b from-slate-900 to-slate-800 py-20 px-4 text-center">
-        <div className="inline-flex items-center gap-2 bg-teal-400/10 text-teal-400 text-sm font-semibold px-4 py-2 rounded-full mb-6">
-          <Building2 className="w-4 h-4" />
+      <section style={{ background: 'linear-gradient(to bottom, #0f172a, #1e293b)', padding: 'clamp(64px, 10vw, 96px) 24px', textAlign: 'center' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: 'rgba(45,212,191,0.1)', color: '#2dd4bf', fontSize: '14px', fontWeight: 600, padding: '6px 16px', borderRadius: '999px', marginBottom: '24px' }}>
+          <Building2 style={{ width: '16px', height: '16px' }} />
           For Organizations
         </div>
-        <h1 className="text-4xl md:text-5xl font-bold text-white mb-5 leading-tight max-w-3xl mx-auto">
-          The platform behind every<br className="hidden md:block" /> senior independence program
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(32px, 5vw, 52px)', fontWeight: 700, color: '#ffffff', marginBottom: '20px', lineHeight: 1.15, maxWidth: '760px', margin: '0 auto 20px' }}>
+          The platform behind every senior independence program
         </h1>
-        <p className="text-slate-300 text-lg max-w-2xl mx-auto mb-8">
+        <p style={{ fontFamily: 'var(--font-body)', fontSize: '19px', color: 'rgba(255,255,255,0.75)', maxWidth: '600px', margin: '0 auto 36px', lineHeight: 1.65 }}>
           Village networks, Area Agencies on Aging, hospitals, employers, and Medicare Advantage plans
           use ThriveAtHome as the coordination layer that makes their programs work — under their brand.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: '16px', justifyContent: 'center' }}>
           <a
             href="#demo"
-            className="bg-teal-500 text-white font-bold px-8 py-4 rounded-xl hover:bg-teal-400 transition"
+            style={{ backgroundColor: 'var(--color-teal)', color: 'white', fontWeight: 700, padding: '14px 32px', borderRadius: '12px', textDecoration: 'none', fontSize: '16px' }}
           >
             Request a demo
           </a>
           <a
             href="#channels"
-            className="border border-slate-500 text-slate-300 font-semibold px-8 py-4 rounded-xl hover:border-white hover:text-white transition"
+            style={{ border: '1.5px solid rgba(255,255,255,0.35)', color: 'rgba(255,255,255,0.85)', fontWeight: 600, padding: '14px 32px', borderRadius: '12px', textDecoration: 'none', fontSize: '16px' }}
           >
             See your channel
           </a>
