@@ -9,8 +9,8 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-const SENDGRID_API_KEY   = process.env.SENDGRID_API_KEY
-const SENDGRID_FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || 'hello@thriveathome.com'
+const RESEND_API_KEY   = process.env.RESEND_API_KEY
+const RESEND_FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'hello@thriveathome.com'
 const APP_URL             = process.env.NEXT_PUBLIC_APP_URL || 'https://thriveathome.vercel.app'
 
 async function sendWeeklySummaryEmail(
@@ -23,7 +23,7 @@ async function sendWeeklySummaryEmail(
     messagesReceived: number
   }
 ) {
-  if (!SENDGRID_API_KEY) return
+  if (!RESEND_API_KEY) return
 
   const html = `
     <div style="font-family: Georgia, serif; max-width: 560px; margin: 0 auto; color: #1a1a1a;">
@@ -58,15 +58,15 @@ async function sendWeeklySummaryEmail(
     </div>
   `
 
-  await fetch('https://api.sendgrid.com/v3/mail/send', {
+  await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${SENDGRID_API_KEY}`,
+      Authorization: `Bearer ${RESEND_API_KEY}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
       personalizations: [{ to: [{ email }], subject: `Your ThriveAtHome week in review 🌿` }],
-      from: { email: SENDGRID_FROM_EMAIL, name: 'ThriveAtHome' },
+      from: { email: RESEND_FROM_EMAIL, name: 'ThriveAtHome' },
       content: [{ type: 'text/html', value: html }],
     }),
   }).catch(err => console.error('[weekly-summary] SendGrid error:', err))
@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  if (!SENDGRID_API_KEY) {
+  if (!RESEND_API_KEY) {
     return NextResponse.json({ error: 'SendGrid not configured' }, { status: 503 })
   }
 

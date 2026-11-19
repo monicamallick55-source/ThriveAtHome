@@ -331,16 +331,16 @@ export async function sendEmail(params: {
   toName?: string
   template: EmailTemplate
 }): Promise<void> {
-  const apiKey = process.env.SENDGRID_API_KEY
-  const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'hello@thriveathome.com'
-  const fromName = process.env.SENDGRID_FROM_NAME || 'ThriveAtHome'
+  const apiKey = process.env.RESEND_API_KEY
+  const fromEmail = process.env.RESEND_FROM_EMAIL || 'hello@thriveathome.com'
+  const fromName = process.env.RESEND_FROM_NAME || 'ThriveAtHome'
 
   if (!apiKey) {
-    console.error('[sendEmail] SENDGRID_API_KEY not set')
+    console.error('[sendEmail] RESEND_API_KEY not set')
     return
   }
 
-  const res = await fetch('https://api.sendgrid.com/v3/mail/send', {
+  const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${apiKey}`,

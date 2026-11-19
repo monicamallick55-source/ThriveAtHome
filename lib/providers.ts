@@ -53,10 +53,10 @@ function resolveSmsProvider(): SmsProvider {
   return new StubSmsProvider()
 }
 function resolveEmailProvider(): EmailProvider {
-  if (envKey('SENDGRID_API_KEY')) {
+  if (envKey('RESEND_API_KEY')) {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { SendGridEmailProvider } = require('./services/SendGridEmailProvider') // Added in M10
-    return new SendGridEmailProvider()
+    const { ResendEmailProvider } = require('./services/ResendEmailProvider') // Added in M10
+    return new ResendEmailProvider()
   }
   return new StubEmailProvider()
 }

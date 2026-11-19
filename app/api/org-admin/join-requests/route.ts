@@ -75,10 +75,10 @@ export async function POST(req: NextRequest) {
     }
 
     // Optionally notify user via SendGrid
-    const sendgridApiKey = process.env.SENDGRID_API_KEY
-    const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'hello@thriveathome.app'
+    const resendApiKey = process.env.RESEND_API_KEY
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'hello@thriveathome.app'
 
-    if (sendgridApiKey) {
+    if (resendApiKey) {
       // Fetch org name for email
       const { data: org } = await supabase
         .from('b2b_orgs')
@@ -86,10 +86,10 @@ export async function POST(req: NextRequest) {
         .eq('id', org_id)
         .single()
 
-      await fetch('https://api.sendgrid.com/v3/mail/send', {
+      await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${sendgridApiKey}`,
+          Authorization: `Bearer ${resendApiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -162,14 +162,14 @@ export async function POST(req: NextRequest) {
     .eq('id', request_id)
 
   // Send welcome invite
-  const sendgridApiKey = process.env.SENDGRID_API_KEY
-  const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'hello@thriveathome.app'
+  const resendApiKey = process.env.RESEND_API_KEY
+  const fromEmail = process.env.RESEND_FROM_EMAIL || 'hello@thriveathome.app'
 
-  if (sendgridApiKey) {
-    await fetch('https://api.sendgrid.com/v3/mail/send', {
+  if (resendApiKey) {
+    await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${sendgridApiKey}`,
+        Authorization: `Bearer ${resendApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({

@@ -33,11 +33,11 @@ function priceIdToPlan(priceId: string | null | undefined): 'basics' | 'complete
 }
 
 async function sendWelcomeEmail(email: string, firstName: string, plan: string) {
-  const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY
-  const SENDGRID_FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || 'hello@thriveathome.com'
+  const RESEND_API_KEY = process.env.RESEND_API_KEY
+  const RESEND_FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'hello@thriveathome.com'
 
-  if (!SENDGRID_API_KEY) {
-    console.warn('[welcome-email] SENDGRID_API_KEY not set — skipping email')
+  if (!RESEND_API_KEY) {
+    console.warn('[welcome-email] RESEND_API_KEY not set — skipping email')
     return
   }
 
@@ -76,15 +76,15 @@ async function sendWelcomeEmail(email: string, firstName: string, plan: string) 
   `
 
   try {
-    const res = await fetch('https://api.sendgrid.com/v3/mail/send', {
+    const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${SENDGRID_API_KEY}`,
+        Authorization: `Bearer ${RESEND_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         personalizations: [{ to: [{ email }], subject: `Welcome to ThriveAtHome, ${firstName}! 🌿` }],
-        from: { email: SENDGRID_FROM_EMAIL, name: 'ThriveAtHome' },
+        from: { email: RESEND_FROM_EMAIL, name: 'ThriveAtHome' },
         content: [{ type: 'text/html', value: html }],
       }),
     })
