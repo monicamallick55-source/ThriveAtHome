@@ -16,7 +16,7 @@ export default async function GiftsPage() {
   if (!user) redirect('/login')
 
   return (
-    <div style={{ maxWidth: '720px', margin: '0 auto', padding: '32px 20px', fontFamily: 'system-ui, sans-serif' }}>
+    <div style={{ maxWidth: '720px', margin: '0 auto', padding: '32px 20px', fontFamily: 'var(--font-body)' }}>
       <Link href="/dashboard" style={{ fontSize: '14px', color: '#2d6a4f', textDecoration: 'none' }}>← Dashboard</Link>
       <h1 style={{ fontSize: '28px', fontWeight: 700, color: '#1a1a1a', margin: '16px 0 8px' }}>Gifts &amp; Giving</h1>
       <p style={{ color: '#555', marginBottom: '32px' }}>Send thoughtful gifts to friends and family in the community.</p>

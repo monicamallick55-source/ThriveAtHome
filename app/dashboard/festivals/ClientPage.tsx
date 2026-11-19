@@ -139,7 +139,7 @@ export default function ClientPage() {
               <span style={{ fontSize: '0.7rem', color: '#6b7280' }}>💰 {f.ticket_price}</span>
             ) : null}
           </div>
-          <div style={{ fontWeight: 700, fontSize: compact ? '0.88rem' : '0.95rem', color: '#1f2937' }}>{f.name}</div>
+          <div style={{ fontWeight: 700, fontSize: compact ? '0.88rem' : '0.95rem', color: 'var(--color-navy)' }}>{f.name}</div>
           <div style={{ fontSize: '0.78rem', color: '#6b7280', marginTop: 3 }}>
             📅 {new Date(f.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
             {f.time_start && ` · ${f.time_start}${f.time_end ? `–${f.time_end}` : ''}`}
@@ -153,7 +153,7 @@ export default function ClientPage() {
             disabled={rsvping === f.id}
             style={{
               padding: compact ? '5px 12px' : '7px 16px',
-              background: f.is_attending ? '#d1fae5' : '#6366f1',
+              background: f.is_attending ? '#d1fae5' : 'var(--color-teal)',
               color: f.is_attending ? '#065f46' : '#fff',
               border: f.is_attending ? '1px solid #6ee7b7' : 'none',
               borderRadius: 8, fontWeight: 700, fontSize: '0.78rem', cursor: rsvping === f.id ? 'default' : 'pointer',
@@ -167,9 +167,9 @@ export default function ClientPage() {
   }
 
   return (
-    <div style={{ maxWidth: 820, margin: '0 auto', padding: '24px 16px', fontFamily: 'system-ui, sans-serif' }}>
+    <div style={{ maxWidth: 820, margin: '0 auto', padding: '24px 16px', fontFamily: 'var(--font-body)' }}>
       {toast && (
-        <div style={{ position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', background: '#1f2937', color: '#fff', padding: '10px 24px', borderRadius: 10, fontSize: '0.9rem', zIndex: 100, boxShadow: '0 4px 16px rgba(0,0,0,0.2)', whiteSpace: 'nowrap' }}>
+        <div style={{ position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', background: 'var(--color-navy)', color: '#fff', padding: '10px 24px', borderRadius: 10, fontSize: '0.9rem', zIndex: 100, boxShadow: '0 4px 16px rgba(0,0,0,0.2)', whiteSpace: 'nowrap' }}>
           {toast}
         </div>
       )}
@@ -181,7 +181,7 @@ export default function ClientPage() {
       <div style={{ display: 'flex', borderBottom: '2px solid #e5e7eb', marginBottom: 20, gap: 0 }}>
         {(['calendar', 'list', 'my-events'] as const).map(v => (
           <button key={v} onClick={() => setView(v)}
-            style={{ padding: '7px 16px', background: 'none', border: 'none', borderBottom: view === v ? '2px solid #6366f1' : '2px solid transparent', marginBottom: -2, fontWeight: view === v ? 700 : 500, color: view === v ? '#6366f1' : '#6b7280', fontSize: '0.875rem', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+            style={{ padding: '7px 16px', background: 'none', border: 'none', borderBottom: view === v ? '2px solid var(--color-teal)' : '2px solid transparent', marginBottom: -2, fontWeight: view === v ? 700 : 500, color: view === v ? 'var(--color-teal)' : '#6b7280', fontSize: '0.875rem', cursor: 'pointer', whiteSpace: 'nowrap' }}>
             {v === 'calendar' ? '📅 Calendar' : v === 'list' ? '📋 List View' : '🌟 My Events'}
           </button>
         ))}
@@ -200,7 +200,7 @@ export default function ClientPage() {
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                 {['all', ...cultures].map(c => (
                   <button key={c} onClick={() => setFilterCulture(c)}
-                    style={{ padding: '3px 10px', borderRadius: 99, border: `1px solid ${filterCulture === c ? '#6366f1' : '#e5e7eb'}`, background: filterCulture === c ? '#6366f1' : '#fff', color: filterCulture === c ? '#fff' : '#374151', fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer' }}>
+                    style={{ padding: '3px 10px', borderRadius: 99, border: `1px solid ${filterCulture === c ? 'var(--color-teal)' : '#e5e7eb'}`, background: filterCulture === c ? 'var(--color-teal)' : '#fff', color: filterCulture === c ? '#fff' : '#374151', fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer' }}>
                     {c === 'all' ? 'All Cultures' : c}
                   </button>
                 ))}
@@ -249,7 +249,7 @@ export default function ClientPage() {
           </div>
           {!loading && festivals.length > 0 && (
             <div style={{ marginTop: 24 }}>
-              <h3 style={{ fontWeight: 700, fontSize: '0.95rem', marginBottom: 14, color: '#1f2937' }}>Events this month</h3>
+              <h3 style={{ fontWeight: 700, fontSize: '0.95rem', marginBottom: 14, color: 'var(--color-navy)' }}>Events this month</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {festivals.map(f => <FestivalCard key={f.id} f={f} compact />)}
               </div>
@@ -272,7 +272,7 @@ export default function ClientPage() {
             <div>
               {Object.entries(grouped).sort().map(([date, dayFests]) => (
                 <div key={date} style={{ marginBottom: 20 }}>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#6366f1', marginBottom: 10, paddingBottom: 4, borderBottom: '1px solid #e5e7eb' }}>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-teal)', marginBottom: 10, paddingBottom: 4, borderBottom: '1px solid #e5e7eb' }}>
                     {new Date(date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -291,7 +291,7 @@ export default function ClientPage() {
             <div style={{ textAlign: 'center', padding: '48px', color: '#9ca3af' }}>
               <div style={{ fontSize: '2.5rem', marginBottom: 12 }}>🌟</div>
               <div style={{ fontWeight: 600, color: '#6b7280', marginBottom: 8 }}>No RSVPs yet</div>
-              <button onClick={() => setView('list')} style={{ padding: '8px 20px', background: '#6366f1', color: '#fff', border: 'none', borderRadius: 9, fontWeight: 700, fontSize: '0.875rem', cursor: 'pointer' }}>
+              <button onClick={() => setView('list')} style={{ padding: '8px 20px', background: 'var(--color-teal)', color: '#fff', border: 'none', borderRadius: 9, fontWeight: 700, fontSize: '0.875rem', cursor: 'pointer' }}>
                 Browse Festivals
               </button>
             </div>
@@ -302,8 +302,8 @@ export default function ClientPage() {
                 if (!f) return null
                 const cs = cultureStyle(f.culture)
                 return (
-                  <div key={rsvp.id} style={{ border: '1px solid #e5e7eb', borderRadius: 12, padding: '14px 16px', background: '#fff', borderLeft: '4px solid #6366f1' }}>
-                    <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#1f2937' }}>{f.name}</div>
+                  <div key={rsvp.id} style={{ border: '1px solid #e5e7eb', borderRadius: 12, padding: '14px 16px', background: '#fff', borderLeft: '4px solid var(--color-teal)' }}>
+                    <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--color-navy)' }}>{f.name}</div>
                     <div style={{ display: 'flex', gap: 8, marginTop: 6, alignItems: 'center', flexWrap: 'wrap' }}>
                       {f.culture && <span style={{ fontSize: '0.7rem', background: cs.bg, color: cs.color, padding: '1px 8px', borderRadius: 99, fontWeight: 700 }}>{f.culture}</span>}
                       <span style={{ fontSize: '0.78rem', color: '#6b7280' }}>📅 {new Date(f.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>

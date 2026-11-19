@@ -128,7 +128,7 @@ export default function TrainingPage() {
             <div style={{
               height: '100%', borderRadius: 99,
               width: `${summary.required_total > 0 ? (summary.required_completed / summary.required_total) * 100 : 0}%`,
-              background: summary.all_required_done ? '#10b981' : '#6366f1',
+              background: summary.all_required_done ? '#10b981' : 'var(--color-teal)',
               transition: 'width 0.4s ease',
             }} />
           </div>
@@ -195,13 +195,13 @@ function ModuleRow({
       border: '1px solid #e5e7eb', borderRadius: 10, padding: '14px 16px',
       display: 'flex', alignItems: 'center', gap: 14,
       background: mod.completed ? '#f0fdf4' : '#fff',
-      borderLeft: `4px solid ${mod.completed ? '#10b981' : mod.required ? '#6366f1' : '#e5e7eb'}`,
+      borderLeft: `4px solid ${mod.completed ? '#10b981' : mod.required ? 'var(--color-teal)' : '#e5e7eb'}`,
     }}>
       <div style={{ fontSize: '1.4rem', flexShrink: 0 }}>
         {mod.completed ? '✅' : mod.required ? '📘' : '📄'}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontWeight: 600, fontSize: '0.925rem', color: '#1f2937' }}>{mod.title}</div>
+        <div style={{ fontWeight: 600, fontSize: '0.925rem', color: 'var(--color-navy)' }}>{mod.title}</div>
         <div style={{ fontSize: '0.78rem', color: '#6b7280', marginTop: 2 }}>
           {mod.duration_min} min
           {mod.completed && mod.completed_at
@@ -214,7 +214,7 @@ function ModuleRow({
           onClick={() => onComplete(mod.id)}
           disabled={marking === mod.id}
           style={{
-            padding: '5px 14px', border: '1px solid #6366f1', color: '#6366f1',
+            padding: '5px 14px', border: '1px solid var(--color-teal)', color: 'var(--color-teal)',
             background: '#fff', borderRadius: 7, cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600,
             flexShrink: 0,
           }}>

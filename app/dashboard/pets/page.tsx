@@ -105,7 +105,7 @@ export default function PetsPage() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
         <h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>My Pets</h1>
         <button onClick={() => setShowForm(!showForm)}
-          style={{ padding: '8px 16px', background: '#6366f1', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>
+          style={{ padding: '8px 16px', background: 'var(--color-teal)', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>
           + Add Pet
         </button>
       </div>
@@ -115,7 +115,7 @@ export default function PetsPage() {
 
       {/* Add pet form */}
       {showForm && (
-        <div style={{ border: '2px solid #6366f1', borderRadius: 14, padding: 20, marginBottom: 24 }}>
+        <div style={{ border: '2px solid var(--color-teal)', borderRadius: 14, padding: 20, marginBottom: 24 }}>
           <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: 16 }}>Tell us about your pet</h2>
           {error && <p style={{ color: '#ef4444', marginBottom: 12 }}>{error}</p>}
 
@@ -193,7 +193,7 @@ export default function PetsPage() {
             <button onClick={addPet} disabled={!form.name || saving}
               style={{
                 flex: 2, padding: '10px',
-                background: form.name ? '#6366f1' : '#e5e7eb',
+                background: form.name ? 'var(--color-teal)' : '#e5e7eb',
                 color: form.name ? '#fff' : '#9ca3af',
                 border: 'none', borderRadius: 8,
                 cursor: form.name ? 'pointer' : 'default', fontWeight: 600

@@ -27,7 +27,7 @@ export default function TrustedAdvisorsPage() {
                 Request an introduction
               </button>
             ) : (
-              <button style={{ background: '#6366f1', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, cursor: 'pointer' }}>
+              <button style={{ background: 'var(--color-teal)', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, cursor: 'pointer' }}>
                 Connect
               </button>
             )}

@@ -123,10 +123,10 @@ export default function ClientPage() {
   const types = ['all', ...Object.keys(TYPE_LABELS)]
 
   return (
-    <div style={{ maxWidth: 760, margin: '0 auto', padding: '24px 16px', fontFamily: 'system-ui, sans-serif' }}>
+    <div style={{ maxWidth: 760, margin: '0 auto', padding: '24px 16px', fontFamily: 'var(--font-body)' }}>
       <span style={{position:"absolute",width:1,height:1,overflow:"hidden",opacity:0,pointerEvents:"none"}}>Encore careers: career opportunities, encore employment, job search, work</span>
       {toast && (
-        <div style={{ position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', background: '#1f2937', color: '#fff', padding: '10px 24px', borderRadius: 10, fontSize: '0.9rem', zIndex: 100, boxShadow: '0 4px 16px rgba(0,0,0,0.2)', whiteSpace: 'nowrap' }}>
+        <div style={{ position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', background: 'var(--color-navy)', color: '#fff', padding: '10px 24px', borderRadius: 10, fontSize: '0.9rem', zIndex: 100, boxShadow: '0 4px 16px rgba(0,0,0,0.2)', whiteSpace: 'nowrap' }}>
           {toast}
         </div>
       )}
@@ -135,7 +135,7 @@ export default function ClientPage() {
       {applyingTo && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
           <div style={{ background: '#fff', borderRadius: 16, padding: '28px 24px', maxWidth: 480, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.25)' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: 4, color: '#1f2937' }}>Apply: {applyingTo.title}</h3>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: 4, color: 'var(--color-navy)' }}>Apply: {applyingTo.title}</h3>
             <p style={{ fontSize: '0.82rem', color: '#6b7280', marginBottom: 20 }}>{applyingTo.employer ?? 'Organization not listed'}</p>
             <div style={{ marginBottom: 16 }}>
               <label style={{ display: 'block', fontWeight: 600, fontSize: '0.875rem', marginBottom: 6, color: '#374151' }}>
@@ -151,7 +151,7 @@ export default function ClientPage() {
             </div>
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={submitApplication} disabled={submitting}
-                style={{ flex: 1, padding: '11px 0', background: submitting ? '#e5e7eb' : '#6366f1', color: submitting ? '#9ca3af' : '#fff', border: 'none', borderRadius: 9, fontWeight: 700, fontSize: '0.95rem', cursor: submitting ? 'default' : 'pointer' }}>
+                style={{ flex: 1, padding: '11px 0', background: submitting ? '#e5e7eb' : 'var(--color-teal)', color: submitting ? '#9ca3af' : '#fff', border: 'none', borderRadius: 9, fontWeight: 700, fontSize: '0.95rem', cursor: submitting ? 'default' : 'pointer' }}>
                 {submitting ? 'Submitting…' : 'Submit Application'}
               </button>
               <button onClick={() => { setApplyingTo(null); setCoverNote('') }}
@@ -172,7 +172,7 @@ export default function ClientPage() {
       <div style={{ display: 'flex', borderBottom: '2px solid #e5e7eb', marginBottom: 24, gap: 0 }}>
         {(['browse', 'my-applications'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
-            style={{ padding: '8px 20px', background: 'none', border: 'none', borderBottom: tab === t ? '2px solid #6366f1' : '2px solid transparent', marginBottom: -2, fontWeight: tab === t ? 700 : 500, color: tab === t ? '#6366f1' : '#6b7280', fontSize: '0.9rem', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+            style={{ padding: '8px 20px', background: 'none', border: 'none', borderBottom: tab === t ? '2px solid var(--color-teal)' : '2px solid transparent', marginBottom: -2, fontWeight: tab === t ? 700 : 500, color: tab === t ? 'var(--color-teal)' : '#6b7280', fontSize: '0.9rem', cursor: 'pointer', whiteSpace: 'nowrap' }}>
             {t === 'browse' ? '🔍 Browse Opportunities' : `📋 My Applications${applications.length > 0 ? ` (${applications.length})` : ''}`}
           </button>
         ))}
@@ -185,7 +185,7 @@ export default function ClientPage() {
             <span style={{ fontSize: '0.8rem', color: '#6b7280', fontWeight: 600 }}>Type:</span>
             {types.map(t => (
               <button key={t} onClick={() => setFilterType(t)}
-                style={{ padding: '4px 12px', borderRadius: 99, border: `1px solid ${filterType === t ? '#6366f1' : '#e5e7eb'}`, background: filterType === t ? '#6366f1' : '#fff', color: filterType === t ? '#fff' : '#374151', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer' }}>
+                style={{ padding: '4px 12px', borderRadius: 99, border: `1px solid ${filterType === t ? 'var(--color-teal)' : '#e5e7eb'}`, background: filterType === t ? 'var(--color-teal)' : '#fff', color: filterType === t ? '#fff' : '#374151', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer' }}>
                 {t === 'all' ? 'All Types' : TYPE_LABELS[t]?.label ?? t}
               </button>
             ))}
@@ -213,7 +213,7 @@ export default function ClientPage() {
                   <div key={opp.id} style={{ border: '1px solid #e5e7eb', borderRadius: 14, padding: '18px 20px', background: '#fff' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 10 }}>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontWeight: 700, fontSize: '1rem', color: '#1f2937', marginBottom: 2 }}>{opp.title}</div>
+                        <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--color-navy)', marginBottom: 2 }}>{opp.title}</div>
                         {opp.employer && <div style={{ fontSize: '0.85rem', color: '#6b7280', marginBottom: 8 }}>{opp.employer}</div>}
                         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginBottom: 10 }}>
                           {typeMeta && (
@@ -251,7 +251,7 @@ export default function ClientPage() {
                           <span style={{ fontSize: '0.8rem', color: '#059669', fontWeight: 700, background: '#d1fae5', padding: '6px 14px', borderRadius: 8, display: 'block' }}>✓ Applied</span>
                         ) : !isExpired ? (
                           <button onClick={() => setApplyingTo(opp)}
-                            style={{ padding: '8px 18px', background: '#6366f1', color: '#fff', border: 'none', borderRadius: 9, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                            style={{ padding: '8px 18px', background: 'var(--color-teal)', color: '#fff', border: 'none', borderRadius: 9, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', whiteSpace: 'nowrap' }}>
                             Apply Now
                           </button>
                         ) : null}
@@ -271,7 +271,7 @@ export default function ClientPage() {
             <div style={{ textAlign: 'center', padding: '48px', color: '#9ca3af' }}>
               <div style={{ fontSize: '2.5rem', marginBottom: 12 }}>📋</div>
               <div style={{ fontWeight: 600, color: '#6b7280', marginBottom: 8 }}>No applications yet</div>
-              <button onClick={() => setTab('browse')} style={{ padding: '8px 20px', background: '#6366f1', color: '#fff', border: 'none', borderRadius: 9, fontWeight: 700, fontSize: '0.875rem', cursor: 'pointer' }}>
+              <button onClick={() => setTab('browse')} style={{ padding: '8px 20px', background: 'var(--color-teal)', color: '#fff', border: 'none', borderRadius: 9, fontWeight: 700, fontSize: '0.875rem', cursor: 'pointer' }}>
                 Browse Opportunities
               </button>
             </div>
@@ -283,7 +283,7 @@ export default function ClientPage() {
                 return (
                   <div key={app.id} style={{ border: '1px solid #e5e7eb', borderRadius: 12, padding: '16px 18px', background: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 10 }}>
                     <div>
-                      <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#1f2937' }}>{app.opportunity?.title ?? 'Opportunity'}</div>
+                      <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--color-navy)' }}>{app.opportunity?.title ?? 'Opportunity'}</div>
                       {app.opportunity?.employer && <div style={{ fontSize: '0.82rem', color: '#6b7280', marginTop: 2 }}>{app.opportunity.employer}</div>}
                       <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap', alignItems: 'center' }}>
                         {typeMeta && (

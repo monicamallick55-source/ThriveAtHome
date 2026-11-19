@@ -113,7 +113,7 @@ function StripeCardForm({
       const elements = stripeRef.current.elements()
       cardElementRef.current = elements.create('card', {
         style: {
-          base: { fontSize: '16px', color: '#1f2937', '::placeholder': { color: '#9ca3af' } },
+          base: { fontSize: '16px', color: 'var(--color-navy)', '::placeholder': { color: '#9ca3af' } },
           invalid: { color: '#dc2626' },
         },
       })
@@ -483,7 +483,7 @@ export default function CelebrationsClient({
     <div style={{ maxWidth: 760, margin: '0 auto', padding: '24px 16px' }}>
       {toast && (
         <div style={{
-          position: 'fixed', top: 20, right: 20, background: '#1f2937', color: '#fff',
+          position: 'fixed', top: 20, right: 20, background: 'var(--color-navy)', color: '#fff',
           padding: '10px 18px', borderRadius: 8, fontSize: 14, zIndex: 1100,
           boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
         }}>{toast}</div>

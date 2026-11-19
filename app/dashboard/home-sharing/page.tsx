@@ -41,7 +41,7 @@ const STATUS_LABELS: Record<string, string> = {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  referred: '#6366f1',
+  referred: 'var(--color-teal)',
   application_submitted: '#f59e0b',
   enrolled: '#10b981',
   completed: '#3b82f6',
@@ -139,7 +139,7 @@ export default function HomeSharingPage() {
               </div>
               {ref.program_url && (
                 <a href={ref.program_url} target="_blank" rel="noopener noreferrer"
-                   style={{ color: '#6366f1', fontSize: '0.875rem', marginTop: 4, display: 'block' }}>
+                   style={{ color: 'var(--color-teal)', fontSize: '0.875rem', marginTop: 4, display: 'block' }}>
                   Visit {ref.program_name} ↗
                 </a>
               )}
@@ -170,7 +170,7 @@ export default function HomeSharingPage() {
             <div
               onClick={() => { setRole('provider'); setStep('interest') }}
               style={{
-                border: role === 'provider' ? '2px solid #6366f1' : '1px solid #e5e7eb',
+                border: role === 'provider' ? '2px solid var(--color-teal)' : '1px solid #e5e7eb',
                 borderRadius: 12, padding: 20, cursor: 'pointer', transition: 'border 0.15s'
               }}
             >
@@ -185,7 +185,7 @@ export default function HomeSharingPage() {
             <div
               onClick={() => { setRole('seeker'); setStep('interest') }}
               style={{
-                border: role === 'seeker' ? '2px solid #6366f1' : '1px solid #e5e7eb',
+                border: role === 'seeker' ? '2px solid var(--color-teal)' : '1px solid #e5e7eb',
                 borderRadius: 12, padding: 20, cursor: 'pointer', transition: 'border 0.15s'
               }}
             >
@@ -207,7 +207,7 @@ export default function HomeSharingPage() {
       {/* ── Step: Interest form ───────────────────────────────────────── */}
       {step === 'interest' && (
         <div>
-          <button onClick={() => setStep('intro')} style={{ color: '#6366f1', background: 'none', border: 'none', cursor: 'pointer', marginBottom: 16 }}>
+          <button onClick={() => setStep('intro')} style={{ color: 'var(--color-teal)', background: 'none', border: 'none', cursor: 'pointer', marginBottom: 16 }}>
             ← Back
           </button>
           <h2 style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: 16 }}>
@@ -255,7 +255,7 @@ export default function HomeSharingPage() {
 
           {error && <p style={{ color: '#ef4444', marginBottom: 12 }}>{error}</p>}
           <button onClick={handleInterestSubmit} disabled={loading}
-            style={{ width: '100%', padding: '12px 16px', background: '#6366f1', color: '#fff', borderRadius: 10, border: 'none', cursor: loading ? 'default' : 'pointer', fontWeight: 600, fontSize: '1rem' }}>
+            style={{ width: '100%', padding: '12px 16px', background: 'var(--color-teal)', color: '#fff', borderRadius: 10, border: 'none', cursor: loading ? 'default' : 'pointer', fontWeight: 600, fontSize: '1rem' }}>
             {loading ? 'Finding partners…' : 'Find home-sharing options →'}
           </button>
         </div>
@@ -295,7 +295,7 @@ export default function HomeSharingPage() {
           <button onClick={() => setStep('consent')} disabled={!consentGiven}
             style={{
               width: '100%', padding: '12px 16px',
-              background: consentGiven ? '#6366f1' : '#e5e7eb',
+              background: consentGiven ? 'var(--color-teal)' : '#e5e7eb',
               color: consentGiven ? '#fff' : '#9ca3af',
               borderRadius: 10, border: 'none', cursor: consentGiven ? 'pointer' : 'default',
               fontWeight: 600, fontSize: '1rem'
@@ -315,7 +315,7 @@ export default function HomeSharingPage() {
             and help with the introduction — at your pace, no pressure.
           </p>
           <button onClick={() => router.push('/dashboard')}
-            style={{ padding: '10px 24px', background: '#6366f1', color: '#fff', borderRadius: 8, border: 'none', cursor: 'pointer' }}>
+            style={{ padding: '10px 24px', background: 'var(--color-teal)', color: '#fff', borderRadius: 8, border: 'none', cursor: 'pointer' }}>
             Back to dashboard
           </button>
         </div>
@@ -335,7 +335,7 @@ export default function HomeSharingPage() {
             or the benefits finder.
           </p>
           <button onClick={() => router.push('/dashboard')}
-            style={{ padding: '10px 24px', background: '#6366f1', color: '#fff', borderRadius: 8, border: 'none', cursor: 'pointer' }}>
+            style={{ padding: '10px 24px', background: 'var(--color-teal)', color: '#fff', borderRadius: 8, border: 'none', cursor: 'pointer' }}>
             Back to dashboard
           </button>
         </div>

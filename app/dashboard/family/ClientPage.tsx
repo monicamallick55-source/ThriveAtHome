@@ -21,7 +21,7 @@ export default function FamilyDashboardPage() {
         </div>
         <h2>Family Events Calendar</h2>
         <p>Upcoming family events and important dates.</p>
-        <button type="button" style={{ marginTop: '0.5rem', padding: '0.5rem 1rem', background: '#6366f1', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer' }}>
+        <button type="button" style={{ marginTop: '0.5rem', padding: '0.5rem 1rem', background: 'var(--color-teal)', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer' }}>
           + Add Event
         </button>
       </section>

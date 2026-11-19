@@ -110,9 +110,9 @@ export default function ClientPage() {
   }
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px 16px', fontFamily: 'system-ui, sans-serif' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px 16px', fontFamily: 'var(--font-body)' }}>
       {toast && (
-        <div style={{ position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', background: '#1f2937', color: '#fff', padding: '10px 24px', borderRadius: 10, fontSize: '0.9rem', zIndex: 100, boxShadow: '0 4px 16px rgba(0,0,0,0.2)' }}>
+        <div style={{ position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', background: 'var(--color-navy)', color: '#fff', padding: '10px 24px', borderRadius: 10, fontSize: '0.9rem', zIndex: 100, boxShadow: '0 4px 16px rgba(0,0,0,0.2)' }}>
           {toast}
         </div>
       )}
@@ -135,7 +135,7 @@ export default function ClientPage() {
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 20 }}>
               {plans.map(p => (
                 <button key={p.id} onClick={() => setSelected(p)}
-                  style={{ padding: '8px 16px', borderRadius: 8, border: `2px solid ${selected?.id === p.id ? '#6366f1' : '#e5e7eb'}`, background: selected?.id === p.id ? '#f5f3ff' : '#fff', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', color: '#374151' }}>
+                  style={{ padding: '8px 16px', borderRadius: 8, border: `2px solid ${selected?.id === p.id ? 'var(--color-teal)' : '#e5e7eb'}`, background: selected?.id === p.id ? '#f5f3ff' : '#fff', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', color: '#374151' }}>
                   {p.title}
                 </button>
               ))}
@@ -148,7 +148,7 @@ export default function ClientPage() {
               <div style={{ border: '1px solid #e5e7eb', borderRadius: 14, padding: '18px 20px', background: '#fafafa', marginBottom: 24 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 }}>
                   <div>
-                    <div style={{ fontWeight: 700, fontSize: '1.1rem', color: '#1f2937' }}>{selected.title}</div>
+                    <div style={{ fontWeight: 700, fontSize: '1.1rem', color: 'var(--color-navy)' }}>{selected.title}</div>
                     {selected.facility_name && (
                       <div style={{ fontSize: '0.85rem', color: '#6b7280', marginTop: 4 }}>📍 {selected.facility_name}</div>
                     )}
@@ -172,7 +172,7 @@ export default function ClientPage() {
                       <div style={{
                         height: '100%', borderRadius: 99,
                         width: `${(selected.steps.filter(s => s.completed).length / selected.steps.length) * 100}%`,
-                        background: selected.status === 'completed' ? '#10b981' : '#6366f1',
+                        background: selected.status === 'completed' ? '#10b981' : 'var(--color-teal)',
                         transition: 'width 0.4s ease',
                       }} />
                     </div>
@@ -186,14 +186,14 @@ export default function ClientPage() {
                   <div key={step.id} style={{
                     border: '1px solid #e5e7eb', borderRadius: 12, padding: '14px 16px',
                     background: step.completed ? '#f0fdf4' : '#fff',
-                    borderLeft: `4px solid ${step.completed ? '#10b981' : '#6366f1'}`,
+                    borderLeft: `4px solid ${step.completed ? '#10b981' : 'var(--color-teal)'}`,
                     display: 'flex', alignItems: 'center', gap: 14,
                   }}>
                     <div style={{ fontSize: '1.3rem', flexShrink: 0 }}>
                       {step.completed ? '✅' : `${i + 1}.`}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 600, fontSize: '0.925rem', color: step.completed ? '#065f46' : '#1f2937' }}>
+                      <div style={{ fontWeight: 600, fontSize: '0.925rem', color: step.completed ? '#065f46' : 'var(--color-navy)' }}>
                         {step.title}
                       </div>
                       {step.description && (
@@ -208,7 +208,7 @@ export default function ClientPage() {
                       <button
                         onClick={() => completeStep(selected.id, step.id)}
                         disabled={completing === step.id}
-                        style={{ padding: '6px 14px', border: '1px solid #6366f1', color: '#6366f1', background: '#fff', borderRadius: 7, cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600, flexShrink: 0 }}>
+                        style={{ padding: '6px 14px', border: '1px solid var(--color-teal)', color: 'var(--color-teal)', background: '#fff', borderRadius: 7, cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600, flexShrink: 0 }}>
                         {completing === step.id ? '…' : 'Done'}
                       </button>
                     )}

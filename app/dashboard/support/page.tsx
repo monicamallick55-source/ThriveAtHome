@@ -25,25 +25,25 @@ export default function MemberSupportPage() {
     } catch { setStatus('error') }
   }
   if (status === 'sent') return (
-    <div style={{ maxWidth: 560, margin: '0 auto', padding: '48px 16px', textAlign: 'center', fontFamily: 'system-ui, sans-serif' }}>
+    <div style={{ maxWidth: 560, margin: '0 auto', padding: '48px 16px', textAlign: 'center', fontFamily: 'var(--font-body)' }}>
       <div style={{ fontSize: '3rem', marginBottom: 16 }}>✅</div>
-      <h1 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#1f2937', margin: '0 0 12px' }}>Request received</h1>
+      <h1 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--color-navy)', margin: '0 0 12px' }}>Request received</h1>
       <p style={{ color: '#6b7280', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: 24 }}>We'll follow up within 24 hours. For urgent help call Quinn 24/7: <strong>{process.env.NEXT_PUBLIC_PHONE_QUINN ?? '1-800-TAH-24HR'}</strong>.</p>
-      <a href="/dashboard" style={{ display: 'inline-block', padding: '10px 24px', background: '#6366f1', color: '#fff', borderRadius: 8, fontWeight: 700, textDecoration: 'none' }}>Back to dashboard</a>
+      <a href="/dashboard" style={{ display: 'inline-block', padding: '10px 24px', background: 'var(--color-teal)', color: '#fff', borderRadius: 8, fontWeight: 700, textDecoration: 'none' }}>Back to dashboard</a>
     </div>
   )
   return (
-    <div style={{ maxWidth: 560, margin: '0 auto', padding: '32px 16px', fontFamily: 'system-ui, sans-serif' }}>
+    <div style={{ maxWidth: 560, margin: '0 auto', padding: '32px 16px', fontFamily: 'var(--font-body)' }}>
       <a href="/dashboard" style={{ fontSize: '0.82rem', color: '#6b7280', textDecoration: 'none', marginBottom: 24, display: 'inline-block' }}>← Back to dashboard</a>
-      <h1 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#1f2937', margin: '0 0 6px' }}>Submit a request</h1>
-      <p style={{ color: '#6b7280', fontSize: '0.875rem', margin: '0 0 28px' }}>We'll respond within 24 hours. <a href="/dashboard/support/faq" style={{ color: '#6366f1', fontWeight: 600 }}>Browse FAQ →</a><br/>Need help now? <a href={`tel:${(process.env.NEXT_PUBLIC_PHONE_QUINN ?? '').replace(/[^0-9+]/g,'')}`} style={{ color: '#6366f1', fontWeight: 700 }}>Call Quinn 24/7</a></p>
+      <h1 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--color-navy)', margin: '0 0 6px' }}>Submit a request</h1>
+      <p style={{ color: '#6b7280', fontSize: '0.875rem', margin: '0 0 28px' }}>We'll respond within 24 hours. <a href="/dashboard/support/faq" style={{ color: 'var(--color-teal)', fontWeight: 600 }}>Browse FAQ →</a><br/>Need help now? <a href={`tel:${(process.env.NEXT_PUBLIC_PHONE_QUINN ?? '').replace(/[^0-9+]/g,'')}`} style={{ color: 'var(--color-teal)', fontWeight: 700 }}>Call Quinn 24/7</a></p>
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <div>
           <label style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', color: '#374151', marginBottom: 8 }}>What's this about?</label>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {CATEGORIES.map(c => (
-              <label key={c.value} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 10, cursor: 'pointer', border: category === c.value ? '2px solid #6366f1' : '1px solid #e5e7eb', background: category === c.value ? '#eef2ff' : '#fff', fontSize: '0.875rem', color: '#1f2937', fontWeight: category === c.value ? 600 : 400 }}>
-                <input type="radio" name="category" value={c.value} checked={category === c.value} onChange={() => setCategory(c.value)} style={{ accentColor: '#6366f1' }} />
+              <label key={c.value} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 10, cursor: 'pointer', border: category === c.value ? '2px solid var(--color-teal)' : '1px solid #e5e7eb', background: category === c.value ? '#eef2ff' : '#fff', fontSize: '0.875rem', color: 'var(--color-navy)', fontWeight: category === c.value ? 600 : 400 }}>
+                <input type="radio" name="category" value={c.value} checked={category === c.value} onChange={() => setCategory(c.value)} style={{ accentColor: 'var(--color-teal)' }} />
                 {c.label}
               </label>
             ))}
@@ -59,7 +59,7 @@ export default function MemberSupportPage() {
         </div>
         {error && <p style={{ color: '#ef4444', fontSize: '0.82rem', margin: 0 }}>{error}</p>}
         {status === 'error' && <p style={{ color: '#ef4444', fontSize: '0.82rem', margin: 0 }}>Something went wrong — please try again or call Quinn directly.</p>}
-        <button type="submit" disabled={status === 'sending'} style={{ padding: '12px 24px', background: status === 'sending' ? '#a5b4fc' : '#6366f1', color: '#fff', border: 'none', borderRadius: 10, fontWeight: 700, fontSize: '0.95rem', cursor: status === 'sending' ? 'not-allowed' : 'pointer' }}>
+        <button type="submit" disabled={status === 'sending'} style={{ padding: '12px 24px', background: status === 'sending' ? '#a5b4fc' : 'var(--color-teal)', color: '#fff', border: 'none', borderRadius: 10, fontWeight: 700, fontSize: '0.95rem', cursor: status === 'sending' ? 'not-allowed' : 'pointer' }}>
           {status === 'sending' ? 'Sending…' : 'Submit request'}
         </button>
       </form>

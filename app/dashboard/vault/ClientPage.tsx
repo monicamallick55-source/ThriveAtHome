@@ -3,7 +3,7 @@ import { useState } from 'react'
 export default function ClientPage() {
   const [tab, setTab] = useState<'documents' | 'stories' | 'photos'>('documents')
   return (
-    <main style={{ maxWidth: 760, margin: '0 auto', padding: '24px 16px', fontFamily: 'system-ui, sans-serif' }}>
+    <main style={{ maxWidth: 760, margin: '0 auto', padding: '24px 16px', fontFamily: 'var(--font-body)' }}>
       <span style={{position:"absolute",width:1,height:1,overflow:"hidden",opacity:0,pointerEvents:"none"}}>Legacy Vault: vault, document storage, life story, stories, photos</span>
       <noscript>Vault: store documents, files, and life stories. Secure document storage.</noscript>
       <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: 4 }}>Legacy Vault</h1>
@@ -11,7 +11,7 @@ export default function ClientPage() {
       <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
         {(['documents', 'stories', 'photos'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
-            style={{ padding: '8px 18px', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: tab === t ? 700 : 400, background: tab === t ? '#6366f1' : '#f3f4f6', color: tab === t ? '#fff' : '#374151', textTransform: 'capitalize' }}>
+            style={{ padding: '8px 18px', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: tab === t ? 700 : 400, background: tab === t ? 'var(--color-teal)' : '#f3f4f6', color: tab === t ? '#fff' : '#374151', textTransform: 'capitalize' }}>
             {t}
           </button>
         ))}
@@ -23,7 +23,7 @@ export default function ClientPage() {
            tab === 'stories'   ? 'Record your life story — memories, wisdom, and experiences for future generations.' :
                                  'Preserve your most treasured photos in a private family gallery.'}
         </p>
-        <button style={{ background: '#6366f1', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 24px', cursor: 'pointer', fontWeight: 600 }}>
+        <button style={{ background: 'var(--color-teal)', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 24px', cursor: 'pointer', fontWeight: 600 }}>
           {tab === 'documents' ? 'Upload Document' : tab === 'stories' ? 'Write a Story' : 'Upload Photos'}
         </button>
       </div>

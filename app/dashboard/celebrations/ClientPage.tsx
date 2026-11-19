@@ -148,12 +148,12 @@ export default function ClientPage() {
   }
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px 16px', fontFamily: 'system-ui, sans-serif' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px 16px', fontFamily: 'var(--font-body)' }}>
       <span style={{position:"absolute",width:1,height:1,overflow:"hidden",opacity:0,pointerEvents:"none"}}>Celebrations: celebrate, celebration, event, birthday, anniversary, milestone</span>
       {toast && (
         <div style={{
           position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)',
-          background: toast.warn ? '#92400e' : '#1f2937', color: '#fff',
+          background: toast.warn ? '#92400e' : 'var(--color-navy)', color: '#fff',
           padding: '10px 24px', borderRadius: 10, fontSize: '0.9rem', zIndex: 100,
           boxShadow: '0 4px 16px rgba(0,0,0,0.2)', maxWidth: 420, textAlign: 'center',
         }}>
@@ -172,8 +172,8 @@ export default function ClientPage() {
           <button key={t} onClick={() => setTab(t)} style={{
             padding: '10px 20px', border: 'none', background: 'none', cursor: 'pointer',
             fontWeight: tab === t ? 700 : 400, fontSize: '0.9rem',
-            color: tab === t ? '#6366f1' : '#6b7280',
-            borderBottom: tab === t ? '2px solid #6366f1' : '2px solid transparent',
+            color: tab === t ? 'var(--color-teal)' : '#6b7280',
+            borderBottom: tab === t ? '2px solid var(--color-teal)' : '2px solid transparent',
             marginBottom: -2,
           }}>
             {t === 'upcoming' ? '🎉 Upcoming' : '+ Plan a Celebration'}
@@ -191,7 +191,7 @@ export default function ClientPage() {
               <div style={{ fontSize: '3rem', marginBottom: 12 }}>🎈</div>
               <p style={{ marginBottom: 16 }}>No celebrations planned yet.</p>
               <button onClick={() => setTab('plan')}
-                style={{ padding: '10px 24px', border: 'none', borderRadius: 8, background: '#6366f1', color: '#fff', fontWeight: 700, cursor: 'pointer' }}>
+                style={{ padding: '10px 24px', border: 'none', borderRadius: 8, background: 'var(--color-teal)', color: '#fff', fontWeight: 700, cursor: 'pointer' }}>
                 Plan your first celebration
               </button>
             </div>
@@ -203,12 +203,12 @@ export default function ClientPage() {
                   <div key={c.id} style={{ border: '1px solid #e5e7eb', borderRadius: 12, padding: '16px 18px', background: '#fff' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 }}>
                       <div>
-                        <div style={{ fontWeight: 700, fontSize: '1rem', color: '#1f2937' }}>
+                        <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--color-navy)' }}>
                           {tierInfo?.emoji} {c.title || c.occasion}
                         </div>
                         <div style={{ fontSize: '0.82rem', color: '#6b7280', marginTop: 4 }}>
                           {c.occasion} · {new Date(c.occasion_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                          {' · '}<span style={{ color: '#6366f1', fontWeight: 600 }}>{tierInfo?.label} tier</span>
+                          {' · '}<span style={{ color: 'var(--color-teal)', fontWeight: 600 }}>{tierInfo?.label} tier</span>
                         </div>
                         {c.description && <div style={{ fontSize: '0.82rem', color: '#9ca3af', marginTop: 4 }}>{c.description}</div>}
                         {c.grief_flagged && (
@@ -282,13 +282,13 @@ export default function ClientPage() {
                 {TIERS.map(t => (
                   <button key={t.id} onClick={() => setTier(t.id)}
                     style={{
-                      border: `2px solid ${tier === t.id ? '#6366f1' : '#e5e7eb'}`,
+                      border: `2px solid ${tier === t.id ? 'var(--color-teal)' : '#e5e7eb'}`,
                       borderRadius: 12, padding: '14px 16px', background: tier === t.id ? '#f5f3ff' : '#fff',
                       cursor: 'pointer', textAlign: 'left',
                     }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                      <span style={{ fontWeight: 700, fontSize: '0.95rem', color: '#1f2937' }}>{t.emoji} {t.label}</span>
-                      <span style={{ fontWeight: 700, color: t.price === 0 ? '#10b981' : '#6366f1', fontSize: '0.9rem' }}>
+                      <span style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--color-navy)' }}>{t.emoji} {t.label}</span>
+                      <span style={{ fontWeight: 700, color: t.price === 0 ? '#10b981' : 'var(--color-teal)', fontSize: '0.9rem' }}>
                         {t.price === 0 ? 'Free' : `$${t.price}`}
                       </span>
                     </div>
@@ -306,7 +306,7 @@ export default function ClientPage() {
               disabled={submitting || !occasionDate || !memberId}
               style={{
                 padding: '13px 0', borderRadius: 10, border: 'none',
-                background: submitting || !occasionDate ? '#e5e7eb' : '#6366f1',
+                background: submitting || !occasionDate ? '#e5e7eb' : 'var(--color-teal)',
                 color: submitting || !occasionDate ? '#9ca3af' : '#fff',
                 fontWeight: 700, fontSize: '1rem', cursor: submitting || !occasionDate ? 'default' : 'pointer',
               }}>

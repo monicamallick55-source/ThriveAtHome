@@ -20,7 +20,7 @@ const FEATURES = [
 
 const TIERS = [
   { id: 'basics',   name: 'Basics',   price: '$0',  color: '#6b7280' },
-  { id: 'complete', name: 'Complete', price: '$29', color: '#6366f1' },
+  { id: 'complete', name: 'Complete', price: '$29', color: 'var(--color-teal)' },
   { id: 'premier',  name: 'Premier',  price: '$79', color: '#f59e0b' },
 ]
 
@@ -37,8 +37,8 @@ export default async function PlanComparisonPage() {
   if (!user) redirect('/login')
 
   return (
-    <div style={{ maxWidth: 860, margin: '48px auto', padding: '0 16px', fontFamily: 'system-ui, sans-serif' }}>
-      <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#1f2937', textAlign: 'center', marginBottom: 8 }}>Compare Plans</h1>
+    <div style={{ maxWidth: 860, margin: '48px auto', padding: '0 16px', fontFamily: 'var(--font-body)' }}>
+      <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--color-navy)', textAlign: 'center', marginBottom: 8 }}>Compare Plans</h1>
       <p style={{ color: '#6b7280', textAlign: 'center', marginBottom: 36 }}>Find the right level of support for your needs.</p>
 
       <div style={{ overflowX: 'auto' }}>
@@ -71,7 +71,7 @@ export default async function PlanComparisonPage() {
       </div>
 
       <p style={{ textAlign: 'center', marginTop: 28 }}>
-        <Link href="/dashboard/plan" style={{ padding: '10px 24px', background: '#6366f1', color: '#fff', borderRadius: 10, textDecoration: 'none', fontWeight: 700, fontSize: '0.9rem' }}>
+        <Link href="/dashboard/plan" style={{ padding: '10px 24px', background: 'var(--color-teal)', color: '#fff', borderRadius: 10, textDecoration: 'none', fontWeight: 700, fontSize: '0.9rem' }}>
           Upgrade now →
         </Link>
       </p>

@@ -30,15 +30,15 @@ export default function MemberFaqPage() {
   const q = search.toLowerCase()
   const filtered = FAQS.map(c => ({ ...c, items: c.items.filter(i => !q || i.q.toLowerCase().includes(q) || i.a.toLowerCase().includes(q)) })).filter(c => c.items.length > 0)
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 16px', fontFamily: 'system-ui, sans-serif' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 16px', fontFamily: 'var(--font-body)' }}>
       <Link href="/dashboard/support" style={{ fontSize: '0.82rem', color: '#6b7280', textDecoration: 'none' }}>← Back to Support</Link>
-      <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#1f2937', margin: '12px 0 4px' }}>Help &amp; FAQ</h1>
+      <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--color-navy)', margin: '12px 0 4px' }}>Help &amp; FAQ</h1>
       <p style={{ color: '#6b7280', fontSize: '0.875rem', margin: '0 0 24px' }}>Find answers to common questions</p>
       <input type="text" placeholder="Search help articles…" value={search} onChange={e => setSearch(e.target.value)}
         style={{ width: '100%', padding: '10px 14px', border: '1px solid #d1d5db', borderRadius: 8, fontSize: '0.875rem', marginBottom: 28, boxSizing: 'border-box' }} />
       {filtered.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '48px 0', color: '#6b7280' }}>
-          <p>No results for "{search}" — <Link href="/dashboard/support" style={{ color: '#6366f1' }}>submit a ticket</Link></p>
+          <p>No results for "{search}" — <Link href="/dashboard/support" style={{ color: 'var(--color-teal)' }}>submit a ticket</Link></p>
         </div>
       ) : filtered.map(cat => (
         <div key={cat.category} style={{ marginBottom: 28 }}>
@@ -48,7 +48,7 @@ export default function MemberFaqPage() {
               const k = `${cat.category}-${i}`
               return (
                 <div key={k} style={{ borderTop: i > 0 ? '1px solid #f3f4f6' : 'none' }}>
-                  <button onClick={() => toggle(k)} style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 18px', border: 'none', background: 'none', cursor: 'pointer', textAlign: 'left', fontSize: '0.875rem', fontWeight: 600, color: '#1f2937' }}>
+                  <button onClick={() => toggle(k)} style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 18px', border: 'none', background: 'none', cursor: 'pointer', textAlign: 'left', fontSize: '0.875rem', fontWeight: 600, color: 'var(--color-navy)' }}>
                     {item.q}<span style={{ color: '#9ca3af', marginLeft: 8 }}>{open.has(k) ? '−' : '+'}</span>
                   </button>
                   {open.has(k) && <div style={{ padding: '0 18px 14px', fontSize: '0.85rem', color: '#4b5563', lineHeight: 1.6 }}>{item.a}</div>}
@@ -61,7 +61,7 @@ export default function MemberFaqPage() {
       <div style={{ marginTop: 32, background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 12, padding: '20px 24px', textAlign: 'center' }}>
         <p style={{ fontWeight: 700, color: '#1e40af', margin: '0 0 8px' }}>Still need help?</p>
         <p style={{ fontSize: '0.85rem', color: '#3b82f6', margin: '0 0 16px' }}>Quinn is available 24/7 for urgent questions. Our team responds within 48 hours.</p>
-        <Link href="/dashboard/support" style={{ display: 'inline-block', padding: '10px 24px', background: '#6366f1', color: '#fff', borderRadius: 8, fontWeight: 700, fontSize: '0.875rem', textDecoration: 'none' }}>Submit a Support Ticket</Link>
+        <Link href="/dashboard/support" style={{ display: 'inline-block', padding: '10px 24px', background: 'var(--color-teal)', color: '#fff', borderRadius: 8, fontWeight: 700, fontSize: '0.875rem', textDecoration: 'none' }}>Submit a Support Ticket</Link>
       </div>
     </div>
   )

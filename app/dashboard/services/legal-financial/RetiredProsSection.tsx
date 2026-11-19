@@ -56,12 +56,12 @@ export default function RetiredProsSection() {
   return (
     <div style={{ marginTop: 32 }}>
       {toast && (
-        <div style={{ position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', background: '#1f2937', color: '#fff', padding: '10px 24px', borderRadius: 10, fontSize: '0.9rem', zIndex: 100, boxShadow: '0 4px 16px rgba(0,0,0,0.2)', maxWidth: 420, textAlign: 'center' }}>
+        <div style={{ position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', background: 'var(--color-navy)', color: '#fff', padding: '10px 24px', borderRadius: 10, fontSize: '0.9rem', zIndex: 100, boxShadow: '0 4px 16px rgba(0,0,0,0.2)', maxWidth: 420, textAlign: 'center' }}>
           {toast}
         </div>
       )}
       <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: 28 }}>
-        <h2 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1f2937', marginBottom: 4 }}>
+        <h2 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--color-navy)', marginBottom: 4 }}>
           💼 Free Consultations from Retired Professionals
         </h2>
         <p style={{ fontSize: '0.85rem', color: '#6b7280', marginBottom: 18 }}>
@@ -75,15 +75,15 @@ export default function RetiredProsSection() {
               <div key={pro.id} style={{ border: '1px solid #e5e7eb', borderRadius: 12, padding: '18px', background: '#fff' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
                   <div>
-                    <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#1f2937' }}>{pro.specialty_emoji} {pro.first_name} {pro.last_initial}.</div>
+                    <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--color-navy)' }}>{pro.specialty_emoji} {pro.first_name} {pro.last_initial}.</div>
                     <div style={{ fontSize: '0.78rem', color: '#6b7280', marginTop: 2 }}>Retired {pro.specialty_label}{pro.location ? ` · ${pro.location}` : ''}</div>
-                    {pro.total_hours > 0 && <div style={{ fontSize: '0.72rem', color: '#6366f1', fontWeight: 600, marginTop: 2 }}>{pro.total_hours.toFixed(0)}h donated</div>}
+                    {pro.total_hours > 0 && <div style={{ fontSize: '0.72rem', color: 'var(--color-teal)', fontWeight: 600, marginTop: 2 }}>{pro.total_hours.toFixed(0)}h donated</div>}
                   </div>
                   <span style={{ fontSize: '0.68rem', background: '#f0fdf4', color: '#065f46', padding: '2px 8px', borderRadius: 99, fontWeight: 700, flexShrink: 0 }}>Free</span>
                 </div>
                 {pro.bio && <p style={{ fontSize: '0.8rem', color: '#374151', marginBottom: 10, lineHeight: 1.5 }}>{pro.bio}</p>}
                 <button onClick={() => !isSent && requestConsult(pro)} disabled={isSent || isRequesting}
-                  style={{ width: '100%', padding: '8px', border: 'none', borderRadius: 8, background: isSent ? '#d1fae5' : isRequesting ? '#e5e7eb' : '#6366f1', color: isSent ? '#065f46' : isRequesting ? '#9ca3af' : '#fff', fontWeight: 700, fontSize: '0.82rem', cursor: isSent || isRequesting ? 'default' : 'pointer' }}>
+                  style={{ width: '100%', padding: '8px', border: 'none', borderRadius: 8, background: isSent ? '#d1fae5' : isRequesting ? '#e5e7eb' : 'var(--color-teal)', color: isSent ? '#065f46' : isRequesting ? '#9ca3af' : '#fff', fontWeight: 700, fontSize: '0.82rem', cursor: isSent || isRequesting ? 'default' : 'pointer' }}>
                   {isSent ? '✓ Request Sent' : isRequesting ? 'Sending…' : 'Request Free Consultation'}
                 </button>
               </div>
