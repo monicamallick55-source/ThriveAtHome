@@ -254,19 +254,15 @@ export default function HomePage() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(230px, 100%), 1fr))', gap: '20px', marginBottom: '40px' }}>
               {[
                 {
-                  name: 'Thrive Basics', price: '$29', period: '/mo',
+                  name: 'Thrive Basic', price: '$39', period: '/mo',
                   features: ['Daily Aria check-in calls', 'Family dashboard & alerts', 'Wellness tracking', 'Document vault', 'Fraud monitoring'],
                 },
                 {
-                  name: 'Thrive Connect', price: '$49', period: '/mo',
-                  features: ['Everything in Basics', 'Human Buddy (weekly)', '25+ communities', 'Community events & RSVP', 'Skill exchange', 'Benefits finder'],
-                },
-                {
-                  name: 'Thrive Complete', price: '$99', period: '/mo', highlight: true,
-                  features: ['Everything in Connect', 'Dedicated navigator (2 hr/mo)', 'Grief & transition support', 'Services marketplace', 'Celebrations & gift sending', 'Family Events Calendar'],
+                  name: 'Thrive Complete', price: '$79', period: '/mo', highlight: true,
+                  features: ['Everything in Basic', 'Human Buddy (weekly)', '25+ communities', 'Dedicated navigator (2 hr/mo)', 'Grief & transition support', 'Services marketplace'],
                 },
                 ...(process.env.NEXT_PUBLIC_PREMIER_LIVE === 'true' ? [{
-                  name: 'Thrive Premier', price: '$199', period: '/mo',
+                  name: 'Thrive Premier', price: '$149', period: '/mo',
                   features: ['Everything in Complete', 'Priority navigator (8 hr/mo)', 'Bi-weekly priority Buddy', 'Thrive Device included', 'Concierge line', 'Medicare Advantage eligible'],
                 }] : []),
               ].map(plan => (
