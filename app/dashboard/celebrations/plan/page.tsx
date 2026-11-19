@@ -8,7 +8,7 @@ const ALLOWED_ROLES = ['member','family','navigator','admin','platform_admin']
 type PlanTier = 'digital'|'enhanced'|'premier'
 
 export default function CelebrationPlannerPage() {
-  const supabase = createClientComponentClient()
+  const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
   const router = useRouter()
   const [step, setStep] = useState(1)
   const [tier, setTier] = useState<PlanTier|null>(null)
