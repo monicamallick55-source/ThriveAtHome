@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { STRIPE_PLANS } from '@/lib/stripe/config'
 import type { PlanTier } from '@/lib/interfaces/BillingProvider'
 import type { Subscription } from '@/lib/data/billing'
@@ -22,6 +23,16 @@ export function BillingClient({ currentTier, subscription, memberName }: Props) 
   const [upgradeLoading, setUpgradeLoading] = useState<PlanTier | null>(null)
   const [error, setError] = useState<string | null>(null)
 
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const plan = searchParams.get('plan') as PlanTier | null
+    const billing = searchParams.get('billing') ?? 'monthly'
+    if (plan && ['basic', 'complete', 'premier'].includes(plan)) {
+      handleUpgrade(plan, billing === 'annual' ? 'annual' : 'monthly')
+    }
+  }, [])
+
   const TIER_ORDER: PlanTier[] = ['basic', 'complete', 'premier']
   const currentIndex = TIER_ORDER.indexOf(currentTier)
 
@@ -39,14 +50,14 @@ export function BillingClient({ currentTier, subscription, memberName }: Props) 
     }
   }
 
-  async function handleUpgrade(tier: PlanTier) {
+  async function handleUpgrade(tier: PlanTier, billingInterval: 'monthly' | 'annual' = 'monthly') {
     setUpgradeLoading(tier)
     setError(null)
     try {
       const res = await fetch('/api/billing/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planTier: tier }),
+        body: JSON.stringify({ planTier: tier, billingInterval }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Could not start checkout')
