@@ -1,16 +1,18 @@
 import type { ReactNode } from 'react'
+import { getCurrentUser } from '@/lib/auth'
+import { getMemberForAuthUser } from '@/lib/data/members'
+import { DashNavClient } from '@/components/dashboard/DashNavClient'
 
-export default function DashboardLayout({ children }: { children: ReactNode }) {
+export default async function DashboardLayout({ children }: { children: ReactNode }) {
+  const user = await getCurrentUser()
+  const memberData = user ? await getMemberForAuthUser(user.id) : null
+  const member = memberData?.data
+  const seniorName = member?.preferred_name ?? member?.full_name?.split(' ')[0] ?? 'Member'
+
   return (
     <div className="dashboard-shell">
-      <nav aria-label="Main navigation" role="navigation" style={{ padding: '1rem', borderBottom: '1px solid #e5e7eb', background: '#fff' }}>
-        <a href="/dashboard" style={{ fontWeight: 'bold', marginRight: '1rem' }}>Thrive@Home</a>
-        <a href="/dashboard/health" style={{ marginRight: '1rem' }}>Health</a>
-        <a href="/dashboard/communities" style={{ marginRight: '1rem' }}>Communities</a>
-        <a href="/dashboard/family" style={{ marginRight: '1rem' }}>Family</a>
-        <a href="/dashboard/vault" style={{ marginRight: '1rem' }}>Vault</a>
-      </nav>
-      <main id="main-content" style={{ padding: '1.5rem' }}>
+      <DashNavClient seniorName={seniorName} />
+      <main id="main-content" style={{ padding: '1.5rem', paddingBottom: '80px' }}>
         {children}
       </main>
     </div>
