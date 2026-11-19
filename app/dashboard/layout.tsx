@@ -1,20 +1,27 @@
-import type { ReactNode } from 'react'
-import { getCurrentUser } from '@/lib/auth'
-import { getMemberForAuthUser } from '@/lib/data/members'
+import { requireAuth } from '@/lib/auth'
+import { getFamilyMemberByAuthId } from '@/lib/data/family'
+import { getUnreadCount } from '@/lib/data/member-messages'
 import { DashNavClient } from '@/components/dashboard/DashNavClient'
 
-export default async function DashboardLayout({ children }: { children: ReactNode }) {
-  const user = await getCurrentUser()
-  const memberData = user ? await getMemberForAuthUser(user.id) : null
-  const member = memberData?.data
-  const seniorName = member?.preferred_name ?? member?.full_name?.split(' ')[0] ?? 'Member'
+export default async function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  const user = await requireAuth()
+  const { data: fm } = await getFamilyMemberByAuthId(user.id)
+  const memberId = fm?.member_id ?? null
+  const { count: unreadMessages } = memberId
+    ? await getUnreadCount(memberId)
+    : { count: 0 }
+  const seniorName = fm
+    ? fm.full_name?.split(' ')[0] || 'Member'
+    : 'Member'
 
   return (
-    <div className="dashboard-shell">
-      <DashNavClient seniorName={seniorName} />
-      <main id="main-content" style={{ padding: '1.5rem', paddingBottom: '80px' }}>
-        {children}
-      </main>
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-bg, #fafaf8)' }}>
+      <DashNavClient seniorName={seniorName} unreadMessages={unreadMessages} />
+      <main style={{ paddingBottom: '80px' }}>{children}</main>
     </div>
   )
 }

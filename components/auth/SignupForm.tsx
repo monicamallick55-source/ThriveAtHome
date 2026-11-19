@@ -1,5 +1,5 @@
 'use client'
-import { useState, type FormEvent } from 'react'
+import { useState, useEffect, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
@@ -72,6 +72,11 @@ export function SignupForm({ referralCode }: { referralCode?: string }) {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const [plan, setPlan] = useState<string | null>(null)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    setPlan(params.get('plan'))
+  }, [])
 
   const isSelf = accountType === 'self'
 
@@ -265,7 +270,7 @@ export function SignupForm({ referralCode }: { referralCode?: string }) {
               marginBottom: '8px',
             }}
           >
-            Create your account
+            {plan ? 'Continue to Payment' : 'Create your account'}
           </h2>
           <p
             style={{
