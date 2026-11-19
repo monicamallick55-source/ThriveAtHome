@@ -1,6 +1,6 @@
 export default function PrivacyPage() {
   return (
-    <main style={{ maxWidth: 760, margin: '0 auto', padding: '48px 24px', fontFamily: 'system-ui, sans-serif' }}>
+    <main style={{ maxWidth: 760, margin: '0 auto', padding: '48px 24px', fontFamily: 'var(--font-body)' }}>
       <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: 4 }}>Privacy Policy</h1>
       <p style={{ color: '#9ca3af', fontSize: 14, marginBottom: 32 }}>Last updated: November 2026</p>
       <p>Thrive@Home, Inc. (&ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;) operates the Thrive@Home platform. This Privacy Policy explains how we collect, use, and safeguard your information.</p>

@@ -12,7 +12,7 @@ export default function ForVolunteersPage() {
           <li>Social activities and companionship</li>
         </ul>
       </section>
-      <a href="/signup?role=volunteer" style={{ background: '#6366f1', color: '#fff', padding: '12px 28px', borderRadius: 8, textDecoration: 'none', fontWeight: 600 }}>Apply to Volunteer</a>
+      <a href="/signup?role=volunteer" style={{ background: 'var(--color-teal)', color: '#fff', padding: '12px 28px', borderRadius: 8, textDecoration: 'none', fontWeight: 600 }}>Apply to Volunteer</a>
     </main>
   )
 }

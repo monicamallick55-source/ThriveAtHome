@@ -14,15 +14,15 @@ export default function TermsPage() {
   return (
     <div style={{ maxWidth: '780px', margin: '0 auto', padding: '48px 24px 80px', fontFamily: 'Georgia, serif', color: '#1a1a1a', lineHeight: 1.8 }}>
       <div style={{ marginBottom: '40px' }}>
-        <Link href="/" style={{ fontSize: '13px', color: '#2d6a4f', textDecoration: 'none', fontFamily: 'system-ui, sans-serif' }}>
+        <Link href="/" style={{ fontSize: '13px', color: '#2d6a4f', textDecoration: 'none', fontFamily: 'var(--font-body)' }}>
           ← ThriveAtHome
         </Link>
       </div>
 
-      <h1 style={{ fontSize: '32px', fontWeight: 800, fontFamily: 'system-ui, sans-serif', marginBottom: '8px', color: '#111' }}>
+      <h1 style={{ fontSize: '32px', fontWeight: 800, fontFamily: 'var(--font-body)', marginBottom: '8px', color: '#111' }}>
         Terms of Service
       </h1>
-      <p style={{ fontSize: '14px', color: '#888', fontFamily: 'system-ui, sans-serif', marginBottom: '40px' }}>
+      <p style={{ fontSize: '14px', color: '#888', fontFamily: 'var(--font-body)', marginBottom: '40px' }}>
         Effective date: {EFFECTIVE_DATE}
       </p>
 
@@ -266,7 +266,7 @@ export default function TermsPage() {
         </p>
       </Section>
 
-      <div style={{ marginTop: '48px', paddingTop: '24px', borderTop: '1px solid #e8e8e8', display: 'flex', gap: '24px', fontSize: '13px', fontFamily: 'system-ui, sans-serif' }}>
+      <div style={{ marginTop: '48px', paddingTop: '24px', borderTop: '1px solid #e8e8e8', display: 'flex', gap: '24px', fontSize: '13px', fontFamily: 'var(--font-body)' }}>
         <Link href="/privacy" style={{ color: '#2d6a4f', textDecoration: 'none' }}>Privacy Policy</Link>
         <Link href="/" style={{ color: '#888', textDecoration: 'none' }}>← Home</Link>
       </div>
@@ -277,7 +277,7 @@ export default function TermsPage() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div style={{ marginBottom: '36px' }}>
-      <h2 style={{ fontSize: '18px', fontWeight: 700, fontFamily: 'system-ui, sans-serif', color: '#111', marginBottom: '12px', marginTop: '36px' }}>
+      <h2 style={{ fontSize: '18px', fontWeight: 700, fontFamily: 'var(--font-body)', color: '#111', marginBottom: '12px', marginTop: '36px' }}>
         {title}
       </h2>
       {children}
@@ -288,7 +288,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function SubSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div style={{ marginBottom: '16px' }}>
-      <h3 style={{ fontSize: '15px', fontWeight: 600, fontFamily: 'system-ui, sans-serif', color: '#333', marginBottom: '8px' }}>
+      <h3 style={{ fontSize: '15px', fontWeight: 600, fontFamily: 'var(--font-body)', color: '#333', marginBottom: '8px' }}>
         {title}
       </h3>
       {children}
