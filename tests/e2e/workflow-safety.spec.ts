@@ -49,9 +49,7 @@ test('TC-WS005 — /dashboard/fraud-protection loads without 500', async ({ page
     if (res.status() === 500) throw new Error(`TC-WS005: 500 on ${res.url()}`);
   });
   await loginAs(page, ACCOUNTS.member, '/dashboard');
-  if (page.url().includes('/login')) { console.warn('TC-WS005: login failed'); return; }
   await page.goto(`${BASE}/dashboard/fraud-protection`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-WS005: redirected to login'); return; }
   expect(page.url()).not.toContain('/login');
 });

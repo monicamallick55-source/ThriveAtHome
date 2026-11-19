@@ -106,7 +106,6 @@ test('TC-M050 — Interest circles: /dashboard/communities loads with circle con
   if (!ok) return;
   await page.goto(`${BASE}/dashboard/communities`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-M050: redirect to login'); return; }
   expect(page.url()).not.toContain('/500');
   const body = (await page.locator('body').textContent() ?? '').toLowerCase();
   expect(body.length, 'TC-M050: communities page should have content').toBeGreaterThan(100);
@@ -223,7 +222,6 @@ test('TC-M060 — Basic plan: /dashboard/navigator loads, shows hours or navigat
   if (!ok) return;
   await page.goto(`${BASE}/dashboard/navigator`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-M060: redirect to login'); return; }
   expect(page.url()).not.toContain('/500');
   const body = (await page.locator('body').textContent() ?? '').toLowerCase();
   const hasNavigatorContent = body.includes('navigator') || body.includes('hour') || body.includes('session');
@@ -251,7 +249,6 @@ test('TC-M062 — Basic plan: /dashboard/marketplace shows locked or coming soon
   if (!ok) return;
   await page.goto(`${BASE}/dashboard/marketplace`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-M062: redirect to login'); return; }
   expect(page.url()).not.toContain('/500');
   // Basic plan should see marketplace locked
   const body = (await page.locator('body').textContent() ?? '').toLowerCase();
@@ -309,7 +306,6 @@ test('TC-M071 — Event ride booking: /dashboard/events loads with event content
   if (!ok) return;
   await page.goto(`${BASE}/dashboard/events`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-M071: redirect to login'); return; }
   expect(page.url()).not.toContain('/500');
   const body = (await page.locator('body').textContent() ?? '').toLowerCase();
   const hasEventContent = body.includes('event') || body.includes('register') || body.includes('upcoming');
@@ -357,7 +353,6 @@ test('TC-M084 — B2B org campaign dashboard: /org-admin loads for orgadmin', as
   if (!ok) return;
   await page.goto(`${BASE}/org-admin`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-M084: orgadmin not seeded or redirect to login'); return; }
   expect(page.url()).not.toContain('/500');
   const body = await page.locator('body').textContent() ?? '';
   expect(body.length, 'TC-M084: /org-admin should render content').toBeGreaterThan(50);

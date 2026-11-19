@@ -78,7 +78,6 @@ test('TC-P013 — /pricing annual toggle present', async ({ page }) => {
 test('TC-P022 — /privacy has HIPAA language', async ({ page }) => {
   await page.goto(`${BASE}/privacy`);
   await page.waitForLoadState('domcontentloaded');
-  if (page.url().includes('/login')) { console.warn('TC-P022: /privacy requires auth'); return; }
   const body = await page.locator('body').textContent();
   if (!body?.toLowerCase().includes('hipaa') && !body?.toLowerCase().includes('privacy')) {
     console.warn('TC-P022: HIPAA language not found on privacy page');
@@ -155,10 +154,6 @@ test('TC-A002 — /invite/[token] renders accept form', async ({ page }) => {
 test('TC-A006 — /device kiosk loads without standard sidebar', async ({ page }) => {
   await page.goto(`${BASE}/device`);
   await page.waitForLoadState('domcontentloaded');
-  if (page.url().includes('/login')) {
-    console.warn('TC-A006: /device redirects to /login — may need device-specific auth');
-    return;
-  }
   const hasSidebar = await page.locator('nav[aria-label="sidebar"], [data-testid="sidebar"]').isVisible().catch(() => false);
   expect(hasSidebar, 'TC-A006: /device should not have standard sidebar nav').toBe(false);
 });

@@ -183,7 +183,6 @@ test('TC-P044 — /employer/[slug] loads without 500', async ({ page }) => {
 
 test('TC-P052 — /onboarding loads for authenticated member', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member).catch(() => {});
-  if (page.url().includes('/login')) { console.warn('TC-P052: member@test.com not seeded'); return; }
   await page.goto(`${BASE}/onboarding`);
   await page.waitForLoadState('networkidle');
   // Accept onboarding page or redirect to /dashboard (already onboarded)

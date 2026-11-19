@@ -30,20 +30,12 @@ test('TC-CCF002 — /api/community-care-fund endpoint exists', async ({ page }) 
 
 test('TC-CCF003 — member can view care fund status on dashboard', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member, '/dashboard');
-  if (page.url().includes('/login')) {
-    console.warn('TC-CCF003: member login failed — skipping');
-    return;
-  }
   await page.goto(`${BASE}/dashboard`);
   await page.waitForLoadState('networkidle');
   if (page.url().includes('/login')) {
     await loginAs(page, ACCOUNTS.member, '/dashboard');
     await page.goto(`${BASE}/dashboard`);
     await page.waitForLoadState('networkidle');
-  }
-  if (page.url().includes('/login')) {
-    console.warn('TC-CCF003: still on login after retry — auth rate limited');
-    return;
   }
   // care fund widget may not be on dashboard for all plans — soft check
   const bodyText = await page.locator('body').textContent();

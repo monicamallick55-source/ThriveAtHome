@@ -16,7 +16,6 @@ const CRON_SECRET = '0LjR0pE/7WueB508Z6OER1s/6x0Buze2vbRPVljKxFs=';
 
 test('TC-SVC001 — Complete member: /dashboard/marketplace loads', async ({ page }) => {
   await loginAs(page, ACCOUNTS.complete).catch(() => {});
-  if (page.url().includes('/login')) { console.warn('TC-SVC001: complete@test.com not seeded'); return; }
   await page.goto(`${BASE}/dashboard/marketplace`);
   await page.waitForLoadState('networkidle');
   expect(page.url()).not.toContain('/500');
@@ -24,25 +23,20 @@ test('TC-SVC001 — Complete member: /dashboard/marketplace loads', async ({ pag
 
 test('TC-SVC005 — Agency admin: /agency-admin loads', async ({ page }) => {
   await loginAs(page, ACCOUNTS.agency).catch(() => {});
-  if (page.url().includes('/login')) { console.warn('TC-SVC005: agency@test.com not seeded'); return; }
   await page.goto(`${BASE}/agency-admin`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-SVC005: /agency-admin redirected'); return; }
   expect(page.url()).not.toContain('/500');
 });
 
 test('TC-SVC006 — Care worker: /care-worker loads', async ({ page }) => {
   await loginAs(page, ACCOUNTS.careworker).catch(() => {});
-  if (page.url().includes('/login')) { console.warn('TC-SVC006: careworker@test.com not seeded'); return; }
   await page.goto(`${BASE}/care-worker`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-SVC006: /care-worker redirected'); return; }
   expect(page.url()).not.toContain('/500');
 });
 
 test('TC-SVC009 — Basic member: /dashboard/marketplace shows locked/coming soon', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member).catch(() => {});
-  if (page.url().includes('/login')) { console.warn('TC-SVC009: member@test.com not seeded'); return; }
   await page.goto(`${BASE}/dashboard/marketplace`);
   await page.waitForLoadState('networkidle');
   expect(page.url()).not.toContain('/500');
@@ -53,10 +47,8 @@ test('TC-SVC009 — Basic member: /dashboard/marketplace shows locked/coming soo
 
 test('TC-SVC010 — Navigator: /navigator loads (marketplace oversight)', async ({ page }) => {
   await loginAs(page, ACCOUNTS.navigator).catch(() => {});
-  if (page.url().includes('/login')) { console.warn('TC-SVC010: navigator@test.com not seeded'); return; }
   await page.goto(`${BASE}/navigator`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-SVC010: /navigator redirected'); return; }
   expect(page.url()).not.toContain('/500');
 });
 
@@ -66,7 +58,6 @@ test('TC-SVC010 — Navigator: /navigator loads (marketplace oversight)', async 
 
 test('TC-GR001 — Admin: /admin/grant-reports loads or soft-warns', async ({ page }) => {
   await loginAs(page, ACCOUNTS.admin).catch(() => {});
-  if (page.url().includes('/login')) { console.warn('TC-GR001: admin@test.com not seeded'); return; }
   await page.goto(`${BASE}/admin/grant-reports`);
   await page.waitForLoadState('networkidle');
   if (page.url().includes('/404') || page.url().includes('/login')) {
@@ -77,7 +68,6 @@ test('TC-GR001 — Admin: /admin/grant-reports loads or soft-warns', async ({ pa
 
 test('TC-GR003 — Admin: community_access tier manual note', async ({ page }) => {
   await loginAs(page, ACCOUNTS.admin).catch(() => {});
-  if (page.url().includes('/login')) { console.warn('TC-GR003: admin@test.com not seeded'); return; }
   await page.goto(`${BASE}/admin`);
   await page.waitForLoadState('networkidle');
   expect(page.url()).not.toContain('/500');
@@ -86,7 +76,6 @@ test('TC-GR003 — Admin: community_access tier manual note', async ({ page }) =
 
 test('TC-GR004 — Admin: /admin/campaigns loads', async ({ page }) => {
   await loginAs(page, ACCOUNTS.admin).catch(() => {});
-  if (page.url().includes('/login')) { console.warn('TC-GR004: admin@test.com not seeded'); return; }
   await page.goto(`${BASE}/admin/campaigns`);
   await page.waitForLoadState('networkidle');
   if (page.url().includes('/404') || page.url().includes('/login')) {
@@ -101,10 +90,8 @@ test('TC-GR004 — Admin: /admin/campaigns loads', async ({ page }) => {
 
 test('TC-CVP001 — Employer admin: /employer-admin shows volunteer/hours content', async ({ page }) => {
   await loginAs(page, ACCOUNTS.employer).catch(() => {});
-  if (page.url().includes('/login')) { console.warn('TC-CVP001: employer@test.com not seeded'); return; }
   await page.goto(`${BASE}/employer-admin`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-CVP001: /employer-admin redirected'); return; }
   expect(page.url()).not.toContain('/500');
   const body = await page.locator('body').textContent() ?? '';
   const hasContent = /volunteer|hours|impact/i.test(body);
@@ -113,7 +100,6 @@ test('TC-CVP001 — Employer admin: /employer-admin shows volunteer/hours conten
 
 test('TC-CVP002 — Volunteer dashboard: hours logging UI present', async ({ page }) => {
   await loginAs(page, ACCOUNTS.volunteer).catch(() => {});
-  if (page.url().includes('/login')) { console.warn('TC-CVP002: volunteer@test.com not seeded'); return; }
   await page.goto(`${BASE}/volunteer/dashboard`);
   await page.waitForLoadState('networkidle');
   expect(page.url()).not.toContain('/500');
@@ -136,10 +122,8 @@ test('TC-PEPM001 — /employer/acme-corp public page loads', async ({ page }) =>
 
 test('TC-PEPM002 — Employer admin: /employer-admin shows member count', async ({ page }) => {
   await loginAs(page, ACCOUNTS.employer).catch(() => {});
-  if (page.url().includes('/login')) { console.warn('TC-PEPM002: employer@test.com not seeded'); return; }
   await page.goto(`${BASE}/employer-admin`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-PEPM002: /employer-admin redirected'); return; }
   expect(page.url()).not.toContain('/500');
 });
 
@@ -170,7 +154,6 @@ test('TC-NOTIF005 — SPF/DKIM manual verification note', async () => {
 
 test('TC-SEC001 — /api/member-data: cross-member access returns 403/404, not 500', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member).catch(() => {});
-  if (page.url().includes('/login')) { console.warn('TC-SEC001: member@test.com not seeded'); return; }
   const result = await page.evaluate(async () => {
     const res = await fetch('/api/member-data?id=fake-other-member-id-00000');
     return { status: res.status };
@@ -220,7 +203,6 @@ test('TC-SEC006 — Auth rate limiting: manual note', async () => {
 
 test('TC-A11Y001 — /dashboard: main and nav landmarks present', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member).catch(() => {});
-  if (page.url().includes('/login')) { console.warn('TC-A11Y001: member@test.com not seeded'); return; }
   await page.goto(`${BASE}/dashboard`);
   await page.waitForLoadState('networkidle');
   expect(page.url()).not.toContain('/500');
@@ -248,7 +230,6 @@ test('TC-A11Y004 — /device kiosk: page loads without 500', async ({ page }) =>
 
 test('TC-RT001 — Family dashboard loads; Realtime subscription note', async ({ page }) => {
   await loginAs(page, ACCOUNTS.family).catch(() => {});
-  if (page.url().includes('/login')) { console.warn('TC-RT001: family@test.com not seeded'); return; }
   await page.goto(`${BASE}/dashboard/family`);
   await page.waitForLoadState('networkidle');
   expect(page.url()).not.toContain('/500');
@@ -257,17 +238,14 @@ test('TC-RT001 — Family dashboard loads; Realtime subscription note', async ({
 
 test('TC-RT002 — Navigator dashboard loads; Realtime fraud badge note', async ({ page }) => {
   await loginAs(page, ACCOUNTS.navigator).catch(() => {});
-  if (page.url().includes('/login')) { console.warn('TC-RT002: navigator@test.com not seeded'); return; }
   await page.goto(`${BASE}/navigator`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-RT002: /navigator redirected'); return; }
   expect(page.url()).not.toContain('/500');
   console.warn('TC-RT002: Realtime fraud badge increment requires live fraud_flags insert; test manually.');
 });
 
 test('TC-RT003 — Navigator task queue: Realtime update note', async ({ page }) => {
   await loginAs(page, ACCOUNTS.navigator).catch(() => {});
-  if (page.url().includes('/login')) { console.warn('TC-RT003: navigator@test.com not seeded'); return; }
   await page.goto(`${BASE}/navigator`);
   await page.waitForLoadState('networkidle');
   expect(page.url()).not.toContain('/500');
@@ -312,7 +290,6 @@ test('TC-OB005 — Aria cron fires; welcome task creation note', async () => {
 
 test('TC-GC001 — /dashboard/gift-send: catalog loads with content', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member).catch(() => {});
-  if (page.url().includes('/login')) { console.warn('TC-GC001: member@test.com not seeded'); return; }
   await page.goto(`${BASE}/dashboard/gift-send`);
   await page.waitForLoadState('networkidle');
   expect(page.url()).not.toContain('/500');
@@ -322,7 +299,6 @@ test('TC-GC001 — /dashboard/gift-send: catalog loads with content', async ({ p
 
 test('TC-GC005 — Grief guard: celebrations/plan shows guard for grief member', async ({ page }) => {
   await loginAs(page, ACCOUNTS.grief_member).catch(() => {});
-  if (page.url().includes('/login')) { console.warn('TC-GC005: grief_member@test.com not seeded'); return; }
   await page.goto(`${BASE}/dashboard/celebrations/plan`);
   await page.waitForLoadState('networkidle');
   expect(page.url()).not.toContain('/500');
@@ -333,7 +309,6 @@ test('TC-GC005 — Grief guard: celebrations/plan shows guard for grief member',
 
 test('TC-GC007 — /dashboard/gifts: gift history loads with pagination', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member).catch(() => {});
-  if (page.url().includes('/login')) { console.warn('TC-GC007: member@test.com not seeded'); return; }
   await page.goto(`${BASE}/dashboard/gifts`);
   await page.waitForLoadState('networkidle');
   expect(page.url()).not.toContain('/500');
@@ -345,7 +320,6 @@ test('TC-GC007 — /dashboard/gifts: gift history loads with pagination', async 
 
 test('TC-COM001 — /dashboard/events: event list with Register button', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member).catch(() => {});
-  if (page.url().includes('/login')) { console.warn('TC-COM001: member@test.com not seeded'); return; }
   await page.goto(`${BASE}/dashboard/events`);
   await page.waitForLoadState('networkidle');
   expect(page.url()).not.toContain('/500');
@@ -356,7 +330,6 @@ test('TC-COM001 — /dashboard/events: event list with Register button', async (
 
 test('TC-COM003 — /dashboard/communities: community posts load', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member).catch(() => {});
-  if (page.url().includes('/login')) { console.warn('TC-COM003: member@test.com not seeded'); return; }
   await page.goto(`${BASE}/dashboard/communities`);
   await page.waitForLoadState('networkidle');
   expect(page.url()).not.toContain('/500');
@@ -364,7 +337,6 @@ test('TC-COM003 — /dashboard/communities: community posts load', async ({ page
 
 test('TC-COM005 — /dashboard/skill-exchange: skill exchange loads', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member).catch(() => {});
-  if (page.url().includes('/login')) { console.warn('TC-COM005: member@test.com not seeded'); return; }
   await page.goto(`${BASE}/dashboard/skill-exchange`);
   await page.waitForLoadState('networkidle');
   expect(page.url()).not.toContain('/500');
@@ -398,17 +370,14 @@ test('TC-MOB002 — Home page at 390px: hamburger menu present', async ({ page }
 
 test('TC-VLT001 — /dashboard/vault: loads without 500', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member).catch(() => {});
-  if (page.url().includes('/login')) { console.warn('TC-VLT001: member@test.com not seeded'); return; }
   await page.goto(`${BASE}/dashboard/vault`);
   await page.waitForLoadState('networkidle');
   if (page.url().includes('/404')) { console.warn('TC-VLT001: /dashboard/vault returns 404 — not yet built'); return; }
-  if (page.url().includes('/login')) { console.warn('TC-VLT001: /dashboard/vault redirected to /login'); return; }
   expect(page.url()).not.toContain('/500');
 });
 
 test('TC-VLT004 — /dashboard/vault: privacy/sharing controls present', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member).catch(() => {});
-  if (page.url().includes('/login')) { console.warn('TC-VLT004: member@test.com not seeded'); return; }
   await page.goto(`${BASE}/dashboard/vault`);
   await page.waitForLoadState('networkidle');
   if (page.url().includes('/404') || page.url().includes('/login')) {

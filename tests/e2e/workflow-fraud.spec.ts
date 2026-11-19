@@ -3,10 +3,8 @@ import { BASE_URL as BASE, loginAs, ACCOUNTS } from './helpers';
 
 test('TC-WF001 — fraud protection page loads', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member, '/dashboard');
-  if (page.url().includes('/login')) { console.warn('TC-WF001: login failed'); return; }
   await page.goto(`${BASE}/dashboard/fraud-protection`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-WF001: redirected after nav'); return; }
   expect(page.url()).not.toContain('/login');
 });
 

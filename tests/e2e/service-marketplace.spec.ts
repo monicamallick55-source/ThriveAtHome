@@ -9,10 +9,8 @@ import { BASE_URL as BASE, loginAs, ACCOUNTS } from './helpers';
 
 test('TC-MKT001 — /dashboard/marketplace loads (locked/coming soon state)', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member, '/dashboard');
-  if (page.url().includes('/login')) { console.warn('TC-MKT001: login failed'); return; }
   await page.goto(`${BASE}/dashboard/marketplace`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-MKT001: redirected to login after nav'); return; }
   // Should show locked/coming soon — NOT a 404 or 500
   const body = await page.locator('body').textContent();
   const isLocked = body?.toLowerCase().match(/coming soon|marketplace|locked|available|service/);
@@ -25,10 +23,8 @@ test('TC-MKT002 — /dashboard/marketplace no 500', async ({ page }) => {
     if (res.status() === 500) throw new Error(`TC-MKT002: 500 on ${res.url()}`);
   });
   await loginAs(page, ACCOUNTS.member, '/dashboard');
-  if (page.url().includes('/login')) { console.warn('TC-MKT002: login failed'); return; }
   await page.goto(`${BASE}/dashboard/marketplace`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-MKT002: redirected to login'); return; }
   expect(page.url()).not.toContain('/login');
 });
 
@@ -82,7 +78,6 @@ test('TC-MKT006 — marketplace booking endpoint exists (stub)', async ({ page }
 
 test('TC-MKT007 — marketplace locked for Basic plan member (marketplace_live: false)', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member, '/dashboard');
-  if (page.url().includes('/login')) { console.warn('TC-MKT007: login failed'); return; }
   // Check feature-flags confirm marketplace_live is false
   const res = await page.request.get(`${BASE}/api/features`);
   if (res.status() === 200) {
@@ -93,7 +88,6 @@ test('TC-MKT007 — marketplace locked for Basic plan member (marketplace_live: 
   }
   await page.goto(`${BASE}/dashboard/marketplace`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-MKT007: redirected to login'); return; }
   expect(page.url()).not.toContain('/login');
 });
 

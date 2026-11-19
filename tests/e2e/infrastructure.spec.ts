@@ -6,7 +6,6 @@ import { BASE_URL as BASE, loginAs, ACCOUNTS } from './helpers';
 
 test('TC-INF001 — supabase_auth_id column used (no 500 on member login)', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member, '/dashboard');
-  if (page.url().includes('/login')) { console.warn('TC-INF001: login failed — may be auth issue'); return; }
   expect(page.url()).toContain('/dashboard');
 });
 
@@ -30,7 +29,6 @@ test('TC-INF003 — cron endpoints require CRON_SECRET', async ({ page }) => {
 
 test('TC-INF004 — member cannot access admin routes', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member, '/dashboard');
-  if (page.url().includes('/login')) { console.warn('TC-INF004: login failed'); return; }
   await page.goto(`${BASE}/admin`);
   await page.waitForLoadState('networkidle');
   expect(page.url()).not.toContain('/admin');
@@ -64,7 +62,6 @@ test('TC-PERF001 — homepage loads under 5s', async ({ page }) => {
 
 test('TC-PERF002 — dashboard loads under 5s', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member, '/dashboard');
-  if (page.url().includes('/login')) { console.warn('TC-PERF002: login failed'); return; }
   const start = Date.now();
   await page.goto(`${BASE}/dashboard`);
   await page.waitForLoadState('networkidle');

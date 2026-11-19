@@ -18,7 +18,6 @@ test('TC-WIRE001 — /api/circles/posts POST requires auth', async ({ page }) =>
 
 test('TC-WIRE002 — /api/circles/posts POST rejects scam content (422)', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member);
-  if (page.url().includes('/login')) { console.warn('TC-WIRE002: login failed'); return; }
   const res = await page.request.post(`${BASE}/api/circles/posts`, {
     data: { circleId: 'any', content: 'Send me your gift card number and wire transfer now! Call 1-800-SCAM urgent lottery winner' },
   });
@@ -28,7 +27,6 @@ test('TC-WIRE002 — /api/circles/posts POST rejects scam content (422)', async 
 
 test('TC-WIRE003 — /api/circles/posts POST with safe content returns 201 or 200', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member);
-  if (page.url().includes('/login')) { console.warn('TC-WIRE003: login failed'); return; }
   const res = await page.request.post(`${BASE}/api/circles/posts`, {
     data: { circleId: 'test-circle-id', content: 'Looking forward to our next book club meeting!' },
   });
@@ -46,7 +44,6 @@ test('TC-WIRE010 — /api/volunteers/[id]/buddies requires auth', async ({ page 
 
 test('TC-WIRE011 — /api/volunteers/[id]/buddies returns assignments array', async ({ page }) => {
   await loginAs(page, ACCOUNTS.volunteer);
-  if (page.url().includes('/login')) { console.warn('TC-WIRE011: login failed'); return; }
   // Use a known volunteer ID or any string — should return 200 with assignments array or 404
   const res = await page.request.get(`${BASE}/api/volunteers/test-volunteer-id/buddies`);
   expect([200, 403, 404]).toContain(res.status());
@@ -61,7 +58,6 @@ test('TC-WIRE011 — /api/volunteers/[id]/buddies returns assignments array', as
 
 test('TC-WIRE020 — family dashboard loads without 500', async ({ page }) => {
   await loginAs(page, ACCOUNTS.family);
-  if (page.url().includes('/login')) { console.warn('TC-WIRE020: family login failed'); return; }
   await page.goto(`${BASE}/dashboard/family`);
   await page.waitForLoadState('networkidle');
   if (page.url().includes('/login') || page.url().includes('/onboarding')) {
@@ -74,7 +70,6 @@ test('TC-WIRE020 — family dashboard loads without 500', async ({ page }) => {
 
 test('TC-WIRE021 — family dashboard renders scam protection card', async ({ page }) => {
   await loginAs(page, ACCOUNTS.family);
-  if (page.url().includes('/login')) { console.warn('TC-WIRE021: login failed'); return; }
   await page.goto(`${BASE}/dashboard/family`);
   await page.waitForLoadState('networkidle');
   if (page.url().includes('/login') || page.url().includes('/onboarding')) {
@@ -107,10 +102,8 @@ test('TC-WIRE031 — /api/cron/celebrations accepts correct CRON_SECRET', async 
 
 test('TC-WIRE040 — volunteer dashboard shows My Buddies tab', async ({ page }) => {
   await loginAs(page, ACCOUNTS.volunteer);
-  if (page.url().includes('/login')) { console.warn('TC-WIRE040: login failed'); return; }
   await page.goto(`${BASE}/volunteer/dashboard`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-WIRE040: redirected to login'); return; }
   const content = await page.content();
   const hasBuddiesTab = content.match(/my buddies|buddies/i);
   if (!hasBuddiesTab) console.warn('TC-WIRE040: My Buddies tab text not found');
@@ -120,10 +113,8 @@ test('TC-WIRE040 — volunteer dashboard shows My Buddies tab', async ({ page })
 
 test('TC-WIRE041 — My Buddies tab renders when clicked', async ({ page }) => {
   await loginAs(page, ACCOUNTS.volunteer);
-  if (page.url().includes('/login')) { console.warn('TC-WIRE041: login failed'); return; }
   await page.goto(`${BASE}/volunteer/dashboard`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-WIRE041: redirected'); return; }
   const buddiesTab = page.getByRole('button', { name: /my buddies/i });
   if (!(await buddiesTab.isVisible())) { console.warn('TC-WIRE041: My Buddies tab not visible'); return; }
   await buddiesTab.click();

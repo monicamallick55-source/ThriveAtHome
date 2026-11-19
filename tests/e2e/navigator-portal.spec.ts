@@ -75,7 +75,6 @@ test.describe('TC-N001–N008 — Navigator Portal', () => {
 /** TC-AD001 — Admin dashboard loads */
 test('TC-AD001 — /admin loads with member count + stats', async ({ page }) => {
   await loginAs(page, ACCOUNTS.admin, '/admin').catch(() => {});
-  if (page.url().includes('/login')) { console.warn('TC-AD001: admin login failed — not seeded'); return; }
   const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
   expect(/application error|internal server error/i.test(bodyText)).toBe(false);
   const hasStats = /member|subscription|aria|call|stat/i.test(bodyText);
@@ -85,7 +84,6 @@ test('TC-AD001 — /admin loads with member count + stats', async ({ page }) => 
 /** TC-N004 — Navigator sends family invite */
 test('TC-N004 — navigator can send family invite', async ({ page }) => {
   await loginAs(page, ACCOUNTS.navigator, '/navigator');
-  if (page.url().includes('/login')) { console.warn('TC-N004: navigator login failed'); return; }
   const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
   const hasInviteUI = /invite|family|add.*member/i.test(bodyText);
   if (!hasInviteUI) console.warn('TC-N004: No family invite UI found on /navigator');
@@ -95,7 +93,6 @@ test('TC-N004 — navigator can send family invite', async ({ page }) => {
 /** TC-N006 — Navigator marks member home from hospital */
 test('TC-N006 — navigator hospital discharge workflow exists', async ({ page }) => {
   await loginAs(page, ACCOUNTS.navigator, '/navigator');
-  if (page.url().includes('/login')) { console.warn('TC-N006: navigator login failed'); return; }
   const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
   const hasDischarge = /hospital|discharge|home.*from|transition/i.test(bodyText);
   if (!hasDischarge) console.warn('TC-N006: Hospital discharge / home-from-hospital UI not visible');
@@ -105,7 +102,6 @@ test('TC-N006 — navigator hospital discharge workflow exists', async ({ page }
 /** TC-N007 — Navigator approves member campaign */
 test('TC-N007 — navigator campaign approval UI exists', async ({ page }) => {
   await loginAs(page, ACCOUNTS.navigator, '/navigator');
-  if (page.url().includes('/login')) { console.warn('TC-N007: navigator login failed'); return; }
   const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
   const hasCampaign = /campaign|approve|review/i.test(bodyText);
   if (!hasCampaign) console.warn('TC-N007: Campaign approval UI not visible — may need seeded campaign');

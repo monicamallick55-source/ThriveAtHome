@@ -11,28 +11,16 @@ import { BASE_URL as BASE, ACCOUNTS, loginAs } from './helpers';
 
 async function loginAdmin(page: any) {
   await loginAs(page, ACCOUNTS.admin).catch(() => {});
-  if (page.url().includes('/login')) {
-    console.warn('admin-portal-deep: admin@test.com not seeded — skipping');
-    return false;
-  }
   return true;
 }
 
 async function loginNavigator(page: any) {
   await loginAs(page, ACCOUNTS.navigator).catch(() => {});
-  if (page.url().includes('/login')) {
-    console.warn('admin-portal-deep: navigator@test.com not seeded — skipping');
-    return false;
-  }
   return true;
 }
 
 async function loginOrgAdmin(page: any) {
   await loginAs(page, ACCOUNTS.orgadmin).catch(() => {});
-  if (page.url().includes('/login')) {
-    console.warn('admin-portal-deep: orgadmin@test.com not seeded — skipping');
-    return false;
-  }
   return true;
 }
 
@@ -127,10 +115,6 @@ test('TC-AD010 — /admin has feature flag controls', async ({ page }) => {
   if (!ok) return;
   await page.goto(`${BASE}/admin`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) {
-    console.warn('TC-AD010: admin portal redirected to /login');
-    return;
-  }
   const body = (await page.locator('body').textContent() ?? '').toLowerCase();
   expect(body.length).toBeGreaterThan(20);
   // Check for feature flag-related content — soft-warn if not present
@@ -145,10 +129,6 @@ test('TC-N004 — /navigator loads for navigator role', async ({ page }) => {
   if (!ok) return;
   await page.goto(`${BASE}/navigator`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) {
-    console.warn('TC-N004: /navigator redirected to /login');
-    return;
-  }
   const body = await page.locator('body').textContent() ?? '';
   expect(body.length).toBeGreaterThan(20);
   // Check for invite-related UI
@@ -163,10 +143,6 @@ test('TC-N006 — /navigator loads; home-from-hospital requires seeded data', as
   if (!ok) return;
   await page.goto(`${BASE}/navigator`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) {
-    console.warn('TC-N006: /navigator redirected to /login');
-    return;
-  }
   const body = await page.locator('body').textContent() ?? '';
   expect(body.length).toBeGreaterThan(20);
   console.warn('TC-N006: home_from_hospital achievement requires seeded member; test via navigator UI manually');
@@ -179,10 +155,6 @@ test('TC-N007 — /navigator loads; campaign approval requires flag on', async (
   if (!ok) return;
   await page.goto(`${BASE}/navigator`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) {
-    console.warn('TC-N007: /navigator redirected to /login');
-    return;
-  }
   const body = await page.locator('body').textContent() ?? '';
   expect(body.length).toBeGreaterThan(20);
   console.warn('TC-N007: campaign approval requires member_campaigns_live=true; manual test');
@@ -203,10 +175,6 @@ test('TC-B2B003 — /org-admin loads with org context', async ({ page }) => {
   if (!ok) return;
   await page.goto(`${BASE}/org-admin`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) {
-    console.warn('TC-B2B003: /org-admin redirected to /login — orgadmin not seeded');
-    return;
-  }
   const body = await page.locator('body').textContent() ?? '';
   expect(body.length).toBeGreaterThan(20);
   if (!body.toLowerCase().includes('org') && !body.toLowerCase().includes('member')) {
@@ -221,10 +189,6 @@ test('TC-B2B004 — /org-admin feature config loads', async ({ page }) => {
   if (!ok) return;
   await page.goto(`${BASE}/org-admin`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) {
-    console.warn('TC-B2B004: /org-admin redirected to /login');
-    return;
-  }
   const body = await page.locator('body').textContent() ?? '';
   expect(body.length).toBeGreaterThan(20);
   console.warn('TC-B2B004: feature toggle requires org_configs row; check via admin portal or Supabase directly');
@@ -234,16 +198,8 @@ test('TC-B2B004 — /org-admin feature config loads', async ({ page }) => {
 
 test('TC-B2B012 — /employer-admin loads with invite UI', async ({ page }) => {
   await loginAs(page, ACCOUNTS.employer).catch(() => {});
-  if (page.url().includes('/login')) {
-    console.warn('TC-B2B012: employer@test.com not seeded — skipping');
-    return;
-  }
   await page.goto(`${BASE}/employer-admin`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) {
-    console.warn('TC-B2B012: /employer-admin redirected to /login');
-    return;
-  }
   const body = (await page.locator('body').textContent() ?? '').toLowerCase();
   expect(body.length).toBeGreaterThan(20);
   const hasInvite = body.includes('invite') || body.includes('staff') || body.includes('employee');

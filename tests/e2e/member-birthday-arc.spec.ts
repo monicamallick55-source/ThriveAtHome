@@ -5,10 +5,8 @@ import { BASE_URL as BASE, loginAs, ACCOUNTS } from './helpers';
 
 test('TC-MBA001 — /dashboard/profile has birthday field', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member, '/dashboard');
-  if (page.url().includes('/login')) { console.warn('TC-MBA001: login failed'); return; }
   await page.goto(`${BASE}/dashboard/profile`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-MBA001: redirected after nav'); return; }
   const body = await page.locator('body').textContent();
   if (!body?.toLowerCase().includes('birthday') && !body?.toLowerCase().includes('birth')) {
     console.warn('TC-MBA001: birthday field not found on profile');
@@ -33,11 +31,9 @@ test('TC-MBA003 — birthday-arc cron requires CRON_SECRET', async ({ page }) =>
 
 test('TC-MBA004 — /dashboard achievements or milestones page loads', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member, '/dashboard');
-  if (page.url().includes('/login')) { console.warn('TC-MBA004: login failed'); return; }
   // Try /dashboard/achievements; fall back to dashboard
   await page.goto(`${BASE}/dashboard/achievements`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-MBA004: redirected after nav'); return; }
   expect(page.url()).not.toContain('/login');
 });
 
@@ -49,10 +45,8 @@ test('TC-MBA005 — /api/achievements responds', async ({ page }) => {
 
 test('TC-MBA006 — /dashboard/communities shows interest circles', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member, '/dashboard');
-  if (page.url().includes('/login')) { console.warn('TC-MBA006: login failed'); return; }
   await page.goto(`${BASE}/dashboard/communities`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-MBA006: redirected after nav'); return; }
   expect(page.url()).not.toContain('/login');
 });
 
@@ -82,9 +76,7 @@ test('TC-MBA010 — no 500 on communities page', async ({ page }) => {
     if (res.status() === 500) throw new Error(`TC-MBA010: 500 on ${res.url()}`);
   });
   await loginAs(page, ACCOUNTS.member, '/dashboard');
-  if (page.url().includes('/login')) { console.warn('TC-MBA010: login failed'); return; }
   await page.goto(`${BASE}/dashboard/communities`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-MBA010: redirected after nav'); return; }
   expect(page.url()).not.toContain('/login');
 });

@@ -3,19 +3,15 @@ import { BASE_URL as BASE, loginAs, ACCOUNTS } from './helpers';
 
 test('TC-WC001 — communities page loads with circles', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member, '/dashboard');
-  if (page.url().includes('/login')) { console.warn('TC-WC001: login failed'); return; }
   await page.goto(`${BASE}/dashboard/communities`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-WC001: redirected after nav'); return; }
   expect(page.url()).not.toContain('/login');
 });
 
 test('TC-WC002 — member can view events', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member, '/dashboard');
-  if (page.url().includes('/login')) { console.warn('TC-WC002: login failed'); return; }
   await page.goto(`${BASE}/dashboard/events`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-WC002: redirected after nav'); return; }
   expect(page.url()).not.toContain('/login');
 });
 
@@ -31,9 +27,7 @@ test('TC-WC003 — /api/communities no 500', async ({ page }) => {
 
 test('TC-WC004 — skill-exchange page loads', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member, '/dashboard');
-  if (page.url().includes('/login')) { console.warn('TC-WC004: login failed'); return; }
   await page.goto(`${BASE}/dashboard/skill-exchange`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-WC004: redirected after nav'); return; }
   expect(page.url()).not.toContain('/login');
 });

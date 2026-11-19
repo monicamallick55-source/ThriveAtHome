@@ -6,10 +6,6 @@ import { BASE_URL as BASE, loginAs, ACCOUNTS } from './helpers';
 test('TC-PD001 — /partners public page loads', async ({ page }) => {
   await page.goto(`${BASE}/partners`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) {
-    console.warn('TC-PD001: /partners redirected to login — may require auth');
-    return;
-  }
   const status = await page.evaluate(() => document.readyState);
   expect(['complete', 'interactive']).toContain(status);
 });
@@ -39,10 +35,6 @@ test('TC-PD003 — /api/partners filters by category', async ({ page }) => {
 test('TC-PD004 — partner detail page loads', async ({ page }) => {
   await page.goto(`${BASE}/partners/1`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) {
-    console.warn('TC-PD004: /partners/1 redirected to login — may require auth');
-    return;
-  }
   if (page.url().includes('/404') || page.url().includes('not-found')) {
     console.warn('TC-PD004: partner detail page returns 404 — no partner seeded');
     return;

@@ -297,10 +297,6 @@ test('TC-V035 — Hope crisis line: crisis webhook endpoint not 500', async ({ r
 
 test('TC-V040 — Claire family support: admin panel loads without crash', async ({ page }) => {
   await loginAs(page, ACCOUNTS.admin).catch(() => {});
-  if (page.url().includes('/login')) {
-    console.warn('TC-V040: admin@test.com not seeded — skipping Claire agent check');
-    return;
-  }
   await page.goto(`${BASE}/admin`);
   await page.waitForLoadState('networkidle');
   expect(page.url()).not.toContain('/500');
@@ -310,10 +306,6 @@ test('TC-V040 — Claire family support: admin panel loads without crash', async
 
 test('TC-V045 — Sam volunteer support: admin panel loads without crash', async ({ page }) => {
   await loginAs(page, ACCOUNTS.admin).catch(() => {});
-  if (page.url().includes('/login')) {
-    console.warn('TC-V045: admin@test.com not seeded — skipping Sam agent check');
-    return;
-  }
   await page.goto(`${BASE}/admin`);
   await page.waitForLoadState('networkidle');
   expect(page.url()).not.toContain('/500');
@@ -322,10 +314,6 @@ test('TC-V045 — Sam volunteer support: admin panel loads without crash', async
 
 test('TC-V050 — Morgan buddy support: admin panel loads without crash', async ({ page }) => {
   await loginAs(page, ACCOUNTS.admin).catch(() => {});
-  if (page.url().includes('/login')) {
-    console.warn('TC-V050: admin@test.com not seeded — skipping Morgan agent check');
-    return;
-  }
   await page.goto(`${BASE}/admin`);
   await page.waitForLoadState('networkidle');
   expect(page.url()).not.toContain('/500');
@@ -334,10 +322,6 @@ test('TC-V050 — Morgan buddy support: admin panel loads without crash', async 
 
 test('TC-V055 — Nova navigator assist: admin panel loads without crash', async ({ page }) => {
   await loginAs(page, ACCOUNTS.admin).catch(() => {});
-  if (page.url().includes('/login')) {
-    console.warn('TC-V055: admin@test.com not seeded — skipping Nova agent check');
-    return;
-  }
   await page.goto(`${BASE}/admin`);
   await page.waitForLoadState('networkidle');
   expect(page.url()).not.toContain('/500');
@@ -346,10 +330,6 @@ test('TC-V055 — Nova navigator assist: admin panel loads without crash', async
 
 test('TC-V060 — Alex staff support: admin panel loads without crash', async ({ page }) => {
   await loginAs(page, ACCOUNTS.admin).catch(() => {});
-  if (page.url().includes('/login')) {
-    console.warn('TC-V060: admin@test.com not seeded — skipping Alex agent check');
-    return;
-  }
   await page.goto(`${BASE}/admin`);
   await page.waitForLoadState('networkidle');
   expect(page.url()).not.toContain('/500');

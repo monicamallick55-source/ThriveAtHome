@@ -9,10 +9,8 @@ import { BASE_URL as BASE, loginAs, ACCOUNTS } from './helpers';
 
 test('TC-CELD001 — celebrations hub shows all event types', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member);
-  if (page.url().includes('/login')) { console.warn('TC-CELD001: login failed'); return; }
   await page.goto(`${BASE}/dashboard/celebrations`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-CELD001: redirected'); return; }
   const content = await page.content();
   expect(content).not.toMatch(/application error|internal server error/i);
   const hasTypes = content.match(/birthday|anniversary|milestone|celebration/i);
@@ -21,10 +19,8 @@ test('TC-CELD001 — celebrations hub shows all event types', async ({ page }) =
 
 test('TC-CELD002 — celebration planner shows 3 tiers (Simple/Signature/Legacy)', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member);
-  if (page.url().includes('/login')) { console.warn('TC-CELD002: login failed'); return; }
   await page.goto(`${BASE}/dashboard/celebrations/plan`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-CELD002: redirected'); return; }
   const content = await page.content();
   expect(content).not.toMatch(/application error|internal server error/i);
   const hasTiers = content.match(/simple|signature|legacy/i);
@@ -33,7 +29,6 @@ test('TC-CELD002 — celebration planner shows 3 tiers (Simple/Signature/Legacy)
 
 test('TC-CELD003 — /api/celebrations POST responds', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member);
-  if (page.url().includes('/login')) { console.warn('TC-CELD003: login failed'); return; }
   const res = await page.request.post(`${BASE}/api/celebrations`, {
     data: { type: 'birthday', tier: 'simple', memberId: 'test' },
   });
@@ -45,10 +40,8 @@ test('TC-CELD003 — /api/celebrations POST responds', async ({ page }) => {
 
 test('TC-CELD010 — /dashboard/gift-send shows catalog categories', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member);
-  if (page.url().includes('/login')) { console.warn('TC-CELD010: login failed'); return; }
   await page.goto(`${BASE}/dashboard/gift-send`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-CELD010: redirected'); return; }
   const content = await page.content();
   expect(content).not.toMatch(/application error|internal server error/i);
   const hasGifts = content.match(/gift|flower|card|experience|send/i);
@@ -57,7 +50,6 @@ test('TC-CELD010 — /dashboard/gift-send shows catalog categories', async ({ pa
 
 test('TC-CELD011 — /api/gifts/catalog responds with items', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member);
-  if (page.url().includes('/login')) { console.warn('TC-CELD011: login failed'); return; }
   const res = await page.request.get(`${BASE}/api/gifts/catalog`);
   expect(res.status()).not.toBe(500);
   if (res.status() === 200) {
@@ -93,10 +85,8 @@ test('TC-CELD021 — birthday arc cron accepts correct CRON_SECRET', async ({ pa
 
 test('TC-CELD022 — member profile has birthday field', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member);
-  if (page.url().includes('/login')) { console.warn('TC-CELD022: login failed'); return; }
   await page.goto(`${BASE}/dashboard/profile`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-CELD022: redirected'); return; }
   const content = await page.content();
   const hasBirthday = content.match(/birthday|birth date|date of birth/i);
   if (!hasBirthday) console.warn('TC-CELD022: birthday field not found on profile page');
@@ -119,7 +109,6 @@ test('TC-CELD030 — /api/cron/birthday-arc returns milestones data', async ({ p
 
 test('TC-CELD031 — member achievements page loads', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member);
-  if (page.url().includes('/login')) { console.warn('TC-CELD031: login failed'); return; }
   await page.goto(`${BASE}/dashboard/achievements`);
   await page.waitForLoadState('networkidle');
   if (page.url().includes('/login') || page.url().includes('/404')) {

@@ -68,16 +68,8 @@ test('TC-B023 — B2B metered AI billing endpoint (Aria calls)', async ({ reques
 
 test('TC-B024 — /org-admin shows community module option', async ({ page }) => {
   await loginAs(page, ACCOUNTS.orgadmin).catch(() => {});
-  if (page.url().includes('/login')) {
-    console.warn('TC-B024: orgadmin@test.com not seeded — skipping');
-    return;
-  }
   await page.goto(`${BASE}/org-admin`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) {
-    console.warn('TC-B024: /org-admin redirected to /login');
-    return;
-  }
   const body = (await page.locator('body').textContent() ?? '').toLowerCase();
   expect(body.length).toBeGreaterThan(20);
   if (!body.includes('module') && !body.includes('community')) {
@@ -90,10 +82,6 @@ test('TC-B024 — /org-admin shows community module option', async ({ page }) =>
 test('TC-B031 — /donate page loads; recurring option present', async ({ page }) => {
   await page.goto(`${BASE}/donate`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) {
-    console.warn('TC-B031: /donate redirected to /login — should be public');
-    return;
-  }
   const body = (await page.locator('body').textContent() ?? '').toLowerCase();
   expect(body.length).toBeGreaterThan(50);
   if (!body.includes('month') && !body.includes('recurring') && !body.includes('monthly')) {
@@ -118,16 +106,8 @@ test('TC-B031 — POST /api/checkout/donate recurring does not 500', async ({ re
 
 test('TC-B040 — /dashboard/celebrations/plan shows Enhanced $25 tier', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member).catch(() => {});
-  if (page.url().includes('/login')) {
-    console.warn('TC-B040: member@test.com not seeded — skipping');
-    return;
-  }
   await page.goto(`${BASE}/dashboard/celebrations/plan`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) {
-    console.warn('TC-B040: /dashboard/celebrations/plan redirected to /login');
-    return;
-  }
   const body = await page.locator('body').textContent() ?? '';
   expect(body.length).toBeGreaterThan(20);
   const hasEnhanced = body.includes('Enhanced') || body.includes('$25') || body.includes('25');
@@ -138,16 +118,8 @@ test('TC-B040 — /dashboard/celebrations/plan shows Enhanced $25 tier', async (
 
 test('TC-B041 — /dashboard/celebrations/plan shows Premier $75 tier', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member).catch(() => {});
-  if (page.url().includes('/login')) {
-    console.warn('TC-B041: member@test.com not seeded — skipping');
-    return;
-  }
   await page.goto(`${BASE}/dashboard/celebrations/plan`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) {
-    console.warn('TC-B041: /dashboard/celebrations/plan redirected to /login');
-    return;
-  }
   const body = await page.locator('body').textContent() ?? '';
   expect(body.length).toBeGreaterThan(20);
   const hasPremier = body.includes('Premier') || body.includes('$75') || body.includes('75');
@@ -158,16 +130,8 @@ test('TC-B041 — /dashboard/celebrations/plan shows Premier $75 tier', async ({
 
 test('TC-B042 — /dashboard/gift-send shows paid gift options', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member).catch(() => {});
-  if (page.url().includes('/login')) {
-    console.warn('TC-B042: member@test.com not seeded — skipping');
-    return;
-  }
   await page.goto(`${BASE}/dashboard/gift-send`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) {
-    console.warn('TC-B042: /dashboard/gift-send redirected to /login');
-    return;
-  }
   const body = (await page.locator('body').textContent() ?? '').toLowerCase();
   expect(body.length).toBeGreaterThan(20);
   // Expect some payment UI (Stripe checkout / pay button) for paid gifts
@@ -193,10 +157,6 @@ test('TC-BILL002 — B2B in-development monthly tier (Stripe manual verification
   console.warn('TC-BILL002: Requires Stripe test subscription with in_development tier price ID; verify manually in Stripe dashboard');
   // Portal load check only
   await loginAs(page, ACCOUNTS.admin).catch(() => {});
-  if (page.url().includes('/login')) {
-    console.warn('TC-BILL002: admin not seeded — skipping portal check');
-    return;
-  }
   await page.goto(`${BASE}/admin`);
   await page.waitForLoadState('networkidle');
   const body = await page.locator('body').textContent() ?? '';
@@ -208,10 +168,6 @@ test('TC-BILL002 — B2B in-development monthly tier (Stripe manual verification
 test('TC-BILL003 — B2B established monthly tier (Stripe manual verification)', async ({ page }) => {
   console.warn('TC-BILL003: Requires Stripe test subscription with established tier price ID; verify manually in Stripe dashboard');
   await loginAs(page, ACCOUNTS.admin).catch(() => {});
-  if (page.url().includes('/login')) {
-    console.warn('TC-BILL003: admin not seeded — skipping portal check');
-    return;
-  }
   await page.goto(`${BASE}/admin`);
   await page.waitForLoadState('networkidle');
   const body = await page.locator('body').textContent() ?? '';

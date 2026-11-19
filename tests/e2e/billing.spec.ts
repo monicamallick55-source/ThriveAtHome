@@ -173,7 +173,6 @@ test('TC-B002 — Complete plan CTA goes to signup or Stripe', async ({ page }) 
 /** TC-B006 — Plan upgrade flow */
 test('TC-B006 — /dashboard/plan has upgrade option', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member, '/dashboard/plan');
-  if (page.url().includes('/login')) { console.warn('TC-B006: member login failed'); return; }
   const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
   const hasUpgrade = /upgrade|change plan|switch/i.test(bodyText);
   if (!hasUpgrade) console.warn('TC-B006: No upgrade option found on /dashboard/plan');
@@ -183,7 +182,6 @@ test('TC-B006 — /dashboard/plan has upgrade option', async ({ page }) => {
 /** TC-B007 — Cancellation via Stripe portal */
 test('TC-B007 — /dashboard/plan has cancel or manage subscription link', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member, '/dashboard/plan');
-  if (page.url().includes('/login')) { console.warn('TC-B007: member login failed'); return; }
   const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
   const hasCancel = /cancel|manage.*subscription|billing.*portal/i.test(bodyText);
   if (!hasCancel) console.warn('TC-B007: No cancel/manage subscription link on /dashboard/plan');
@@ -212,7 +210,6 @@ test('TC-B031 — /donate has monthly/recurring option', async ({ page }) => {
 /** TC-B040 — Celebration Enhanced ($25) */
 test('TC-B040 — celebration Enhanced tier ($25) visible', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member, '/dashboard/celebrations/plan');
-  if (page.url().includes('/login')) { console.warn('TC-B040: member login failed'); return; }
   const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
   const has25 = /\$25|25\.00|signature|enhanced/i.test(bodyText);
   if (!has25) console.warn('TC-B040: $25 / Enhanced celebration tier not visible on /dashboard/celebrations/plan');
@@ -222,7 +219,6 @@ test('TC-B040 — celebration Enhanced tier ($25) visible', async ({ page }) => 
 /** TC-B041 — Celebration Premier ($75) */
 test('TC-B041 — celebration Premier tier ($75) visible', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member, '/dashboard/celebrations/plan');
-  if (page.url().includes('/login')) { console.warn('TC-B041: member login failed'); return; }
   const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
   const has75 = /\$75|75\.00|premier|legacy/i.test(bodyText);
   if (!has75) console.warn('TC-B041: $75 / Premier celebration tier not visible on /dashboard/celebrations/plan');

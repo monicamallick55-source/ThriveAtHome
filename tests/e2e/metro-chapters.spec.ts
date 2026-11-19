@@ -31,7 +31,6 @@ test('TC-CH003 — chapter activation cron requires CRON_SECRET', async ({ page 
 test('TC-CH004 — /chapter/bay-area loads or returns graceful 404', async ({ page }) => {
   await page.goto(`${BASE}/chapter/bay-area`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-CH004: chapter page requires auth'); return; }
   const status = await page.evaluate(() => document.readyState);
   expect(['complete', 'interactive']).toContain(status);
 });

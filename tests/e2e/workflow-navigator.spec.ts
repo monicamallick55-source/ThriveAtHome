@@ -3,13 +3,11 @@ import { BASE_URL as BASE, loginAs, ACCOUNTS } from './helpers';
 
 test('TC-WN001 — navigator dashboard loads', async ({ page }) => {
   await loginAs(page, ACCOUNTS.navigator, '/navigator');
-  if (page.url().includes('/login')) { console.warn('TC-WN001: navigator login failed'); return; }
   expect(page.url()).toContain('/navigator');
 });
 
 test('TC-WN002 — navigator task queue visible', async ({ page }) => {
   await loginAs(page, ACCOUNTS.navigator, '/navigator');
-  if (page.url().includes('/login')) { console.warn('TC-WN002: login failed'); return; }
   expect(page.url()).not.toContain('/login');
 });
 
@@ -21,10 +19,8 @@ test('TC-WN003 — /api/navigator/tasks responds', async ({ page }) => {
 
 test('TC-WN004 — navigator can view member record', async ({ page }) => {
   await loginAs(page, ACCOUNTS.navigator, '/navigator');
-  if (page.url().includes('/login')) { console.warn('TC-WN004: login failed'); return; }
   await page.goto(`${BASE}/navigator/members`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-WN004: redirected after nav'); return; }
   expect(page.url()).not.toContain('/login');
 });
 

@@ -17,10 +17,8 @@ test('TC-PE001 — /api/entitlements returns plan_tier', async ({ page }) => {
 
 test('TC-PE002 — basic plan member sees navigator hours limit', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member, '/dashboard');
-  if (page.url().includes('/login')) { console.warn('TC-PE002: login failed'); return; }
   await page.goto(`${BASE}/dashboard/plan`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-PE002: redirected after nav'); return; }
   expect(page.url()).not.toContain('/login');
 });
 
@@ -63,28 +61,22 @@ test('TC-PE007 — /api/navigator/schedule responds', async ({ page }) => {
 
 test('TC-PE008 — /dashboard/navigator loads for member', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member, '/dashboard');
-  if (page.url().includes('/login')) { console.warn('TC-PE008: login failed'); return; }
   await page.goto(`${BASE}/dashboard/navigator`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-PE008: redirected after nav'); return; }
   expect(page.url()).not.toContain('/login');
 });
 
 test('TC-PE009 — /dashboard/profile loads and shows plan tier', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member, '/dashboard');
-  if (page.url().includes('/login')) { console.warn('TC-PE009: login failed'); return; }
   await page.goto(`${BASE}/dashboard/profile`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-PE009: redirected after nav'); return; }
   expect(page.url()).not.toContain('/login');
 });
 
 test('TC-PE010 — marketplace locked when feature off', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member, '/dashboard');
-  if (page.url().includes('/login')) { console.warn('TC-PE010: login failed'); return; }
   await page.goto(`${BASE}/dashboard/marketplace`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-PE010: redirected after nav'); return; }
   const body = await page.locator('body').textContent();
   if (!body?.toLowerCase().includes('coming soon') && !body?.toLowerCase().includes('locked')) {
     console.warn('TC-PE010: marketplace not showing locked/coming soon state');

@@ -10,19 +10,15 @@ const TRANSITIONS = [
 
 test('TC-LT001 — /dashboard/grief-support loads', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member, '/dashboard');
-  if (page.url().includes('/login')) { console.warn('TC-LT001: login failed'); return; }
   await page.goto(`${BASE}/dashboard/grief-support`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-LT001: redirected to login'); return; }
   expect(page.url()).not.toContain('/login');
 });
 
 test('TC-LT002 — /dashboard/life-transitions loads', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member, '/dashboard');
-  if (page.url().includes('/login')) { console.warn('TC-LT002: login failed'); return; }
   await page.goto(`${BASE}/dashboard/life-transitions`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-LT002: redirected to login'); return; }
   expect(page.url()).not.toContain('/login');
 });
 
@@ -56,9 +52,7 @@ test('TC-LT005 — transition plan task creation works', async ({ page }) => {
 
 test('TC-LT006 — /dashboard/trusted-advisors loads', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member, '/dashboard');
-  if (page.url().includes('/login')) { console.warn('TC-LT006: login failed'); return; }
   await page.goto(`${BASE}/dashboard/trusted-advisors`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-LT006: redirected after nav'); return; }
   expect(page.url()).not.toContain('/login');
 });

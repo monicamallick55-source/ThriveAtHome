@@ -13,7 +13,6 @@ test.describe('TC-F001–F007 — Family Portal', () => {
 
   /** TC-F001 — Family main view */
   test('TC-F001 — /dashboard/family loads with member wellness summary', async ({ page }) => {
-    if (page.url().includes('/login')) { console.warn('TC-F001: family login failed — not seeded'); return; }
     if (!page.url().includes('/dashboard/family')) { console.warn(`TC-F001: unexpected URL ${page.url()}`); return; }
 
     const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
@@ -32,7 +31,6 @@ test.describe('TC-F001–F007 — Family Portal', () => {
 
   /** TC-F002 — Family events calendar — add event */
   test('TC-F002 — family events calendar visible + add event form', async ({ page }) => {
-    if (page.url().includes('/login')) { console.warn('TC-F002: family login failed — not seeded'); return; }
     // Look for events calendar tab or section
     const calendarTab = page.getByRole('tab', { name: /events/i }).or(
       page.getByRole('link', { name: /events/i })
@@ -49,14 +47,12 @@ test.describe('TC-F001–F007 — Family Portal', () => {
 
   /** TC-F004 — Mood timeline */
   test('TC-F004 — mood timeline visible', async ({ page }) => {
-    if (page.url().includes('/login')) { console.warn('TC-F004: family login failed — not seeded'); return; }
     const hasMood = await page.getByText(/mood/i).isVisible({ timeout: 5000 }).catch(() => false);
     if (!hasMood) console.warn('TC-F004: Mood timeline not found on /dashboard/family');
   });
 
   /** TC-F006 — Celebration planning accessible to family */
   test('TC-F006 — family can access celebration planner', async ({ page }) => {
-    if (page.url().includes('/login')) { console.warn('TC-F006: family login failed — not seeded'); return; }
     await page.goto('/dashboard/celebrations/plan');
     await page.waitForLoadState('networkidle').catch(() => {});
     const url = page.url();

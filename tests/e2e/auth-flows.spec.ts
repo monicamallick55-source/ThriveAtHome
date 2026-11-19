@@ -38,7 +38,6 @@ test('TC-A002 — /signup page loads', async ({ page }) => {
 
 test('TC-A004 — member cannot reach admin after login', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member, '/dashboard');
-  if (page.url().includes('/login')) { console.warn('TC-A004: login failed'); return; }
   await page.goto(`${BASE}/admin`);
   await page.waitForLoadState('networkidle');
   expect(page.url()).not.toContain('/admin');
@@ -46,7 +45,6 @@ test('TC-A004 — member cannot reach admin after login', async ({ page }) => {
 
 test('TC-A005 — member cannot reach navigator after login', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member, '/dashboard');
-  if (page.url().includes('/login')) { console.warn('TC-A005: login failed'); return; }
   await page.goto(`${BASE}/navigator`);
   await page.waitForLoadState('networkidle');
   expect(page.url()).not.toContain('/navigator');

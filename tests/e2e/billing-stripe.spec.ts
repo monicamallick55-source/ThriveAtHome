@@ -23,10 +23,8 @@ test('TC-B002 — /pricing shows monthly prices', async ({ page }) => {
 
 test('TC-B003 — /dashboard/plan shows current plan', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member, '/dashboard');
-  if (page.url().includes('/login')) { console.warn('TC-B003: login failed'); return; }
   await page.goto(`${BASE}/dashboard/plan`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-B003: redirected after nav'); return; }
   expect(page.url()).not.toContain('/login');
 });
 
@@ -62,17 +60,14 @@ test('TC-B007 — /dashboard/plan no 500', async ({ page }) => {
     if (res.status() === 500) throw new Error(`TC-B007: 500 on ${res.url()}`);
   });
   await loginAs(page, ACCOUNTS.member, '/dashboard');
-  if (page.url().includes('/login')) { console.warn('TC-B007: login failed'); return; }
   await page.goto(`${BASE}/dashboard/plan`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-B007: redirected after nav'); return; }
   expect(page.url()).not.toContain('/login');
 });
 
 test('TC-B008 — /donate page loads with form', async ({ page }) => {
   await page.goto(`${BASE}/donate`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-B008: /donate requires auth'); return; }
   const body = await page.locator('body').textContent();
   if (!body?.toLowerCase().includes('donat')) console.warn('TC-B008: donate page missing donation content');
   expect(page.url()).not.toContain('/login');
@@ -90,9 +85,7 @@ test('TC-B009 — Premier plan NOT in checkout flow', async ({ page }) => {
 
 test('TC-B010 — /dashboard/addons loads', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member, '/dashboard');
-  if (page.url().includes('/login')) { console.warn('TC-B010: login failed'); return; }
   await page.goto(`${BASE}/dashboard/addons`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-B010: redirected after nav'); return; }
   expect(page.url()).not.toContain('/login');
 });

@@ -5,14 +5,12 @@ import { BASE_URL as BASE, loginAs, ACCOUNTS } from './helpers';
 
 test('TC-FS001 — /dashboard/fraud-protection no 500', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member, '/dashboard');
-  if (page.url().includes('/login')) { console.warn('TC-FS001: login failed'); return; }
   page.on('response', (res) => {
     if (res.url().includes('/dashboard/fraud-protection') && res.status() === 500)
       throw new Error(`TC-FS001: 500 on fraud-protection`);
   });
   await page.goto(`${BASE}/dashboard/fraud-protection`);
   await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) { console.warn('TC-FS001: redirected to login after nav'); return; }
   expect(page.url()).not.toContain('/login');
 });
 
@@ -30,10 +28,6 @@ test('TC-FS003 — /dashboard/home-safety loads', async ({ page }) => {
     await loginAs(page, ACCOUNTS.member, '/dashboard');
     await page.goto(`${BASE}/dashboard/home-safety`);
     await page.waitForLoadState('networkidle');
-  }
-  if (page.url().includes('/login')) {
-    console.warn('TC-FS003: Still redirected to /login after retry — auth may be rate-limited');
-    return;
   }
   expect(page.url()).not.toContain('/login');
 });
