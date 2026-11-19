@@ -57,12 +57,15 @@ export async function getMemberByDirectAuth(
   }
 }
 
-/** Fetch the member linked to a given Supabase auth user UUID (via family_members.member_id). */
+/** Fetch the member linked to a given Supabase auth user UUID.
+ * Checks family_members.supabase_auth_id first (family/proxy signup),
+ * then falls back to members.supabase_auth_id (senior direct signup). */
 export async function getMemberForAuthUser(
   authUserId: string
 ): Promise<{ data: Member | null; error: string | null }> {
   try {
     const admin = createAdminClient()
+    // 1. Try family_members link (family member / proxy signup)
     const { data: fm, error: fmError } = await admin
       .from('family_members')
       .select('member_id')
@@ -71,10 +74,23 @@ export async function getMemberForAuthUser(
       .maybeSingle()
     if (fmError) {
       console.error('[data/members/getMemberForAuthUser] family_members lookup:', fmError)
-      return { data: null, error: fmError.message }
     }
-    if (!fm || !fm.member_id) return { data: null, error: 'Not found' }
-    return getMemberById(fm.member_id)
+    if (fm?.member_id) return getMemberById(fm.member_id)
+
+    // 2. Fall back to direct member signup (senior signed up themselves)
+    const { data: directMember, error: directError } = await admin
+      .from('members')
+      .select('id')
+      .eq('supabase_auth_id', authUserId)
+      .limit(1)
+      .maybeSingle()
+    if (directError) {
+      console.error('[data/members/getMemberForAuthUser] direct members lookup:', directError)
+      return { data: null, error: directError.message }
+    }
+    if (directMember?.id) return getMemberById(directMember.id)
+
+    return { data: null, error: 'Not found' }
   } catch (e) {
     console.error('[data/members/getMemberForAuthUser] Unexpected error:', e)
     return { data: null, error: e instanceof Error ? e.message : String(e) }
