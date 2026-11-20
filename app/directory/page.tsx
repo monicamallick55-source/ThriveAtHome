@@ -7,15 +7,16 @@ export const metadata = {
   description: 'Find trusted local services for seniors — home care, transportation, meal delivery, home modification, and more. Search by location and service type.',
 }
 
-export const revalidate = 3600
+export const dynamic = 'force-dynamic'
 
 interface SearchParams { q?: string; category?: string; state?: string }
 
-export default async function DirectoryPage({ searchParams }: { searchParams: SearchParams }) {
+export default async function DirectoryPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const supabase = createClient()
-  const q = searchParams.q?.trim() ?? ''
-  const category = searchParams.category ?? ''
-  const state = searchParams.state ?? ''
+  const params = await searchParams
+  const q = params.q?.trim() ?? ''
+  const category = params.category ?? ''
+  const state = params.state ?? ''
 
   let query = supabase
     .from('partner_listings')
@@ -35,13 +36,11 @@ export default async function DirectoryPage({ searchParams }: { searchParams: Se
 
   return (
     <main className="max-w-6xl mx-auto px-4 py-10">
-      {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Local Senior Services Directory</h1>
         <p className="text-gray-600">Find trusted local providers across 60 service categories — vetted and reviewed by the ThriveAtHome community.</p>
       </div>
 
-      {/* Search + filters */}
       <form method="GET" className="bg-white border border-gray-200 rounded-xl p-5 mb-8 flex flex-wrap gap-3">
         <input
           name="q"
@@ -69,10 +68,7 @@ export default async function DirectoryPage({ searchParams }: { searchParams: Se
             <option key={s} value={s}>{s}</option>
           ))}
         </select>
-        <button
-          type="submit"
-          className="bg-teal-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors"
-        >
+        <button type="submit" className="bg-teal-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors">
           Search
         </button>
         {(q || category || state) && (
@@ -80,7 +76,6 @@ export default async function DirectoryPage({ searchParams }: { searchParams: Se
         )}
       </form>
 
-      {/* Category chips — show when no filter active */}
       {!category && !q && !state && (
         <section className="mb-10">
           <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Browse by category</h2>
@@ -98,7 +93,6 @@ export default async function DirectoryPage({ searchParams }: { searchParams: Se
         </section>
       )}
 
-      {/* Active filter label */}
       {(category || q || state) && (
         <div className="mb-4 text-sm text-gray-600">
           {listings?.length ?? 0} result{listings?.length !== 1 ? 's' : ''}
@@ -108,7 +102,6 @@ export default async function DirectoryPage({ searchParams }: { searchParams: Se
         </div>
       )}
 
-      {/* Listings grid */}
       {listings && listings.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
           {listings.map(p => {
@@ -153,14 +146,10 @@ export default async function DirectoryPage({ searchParams }: { searchParams: Se
         </div>
       )}
 
-      {/* Partner CTA */}
-      <section className="bg-navy-50 border border-navy-100 rounded-xl p-8 text-center" style={{background:'#f0f4f9', borderColor:'#c5d3e0'}}>
+      <section className="rounded-xl p-8 text-center" style={{background:'#f0f4f9', border:'1px solid #c5d3e0'}}>
         <h2 className="text-xl font-bold text-gray-900 mb-2">Are you a service provider?</h2>
-        <p className="text-gray-600 mb-5 text-sm max-w-lg mx-auto">Join thousands of trusted providers on ThriveAtHome. Get discovered by seniors and families in your area looking for exactly what you offer.</p>
-        <Link
-          href="/directory/submit"
-          className="inline-block bg-teal-600 text-white font-medium px-6 py-3 rounded-lg hover:bg-teal-700 transition-colors"
-        >
+        <p className="text-gray-600 mb-5 text-sm max-w-lg mx-auto">Join thousands of trusted providers on ThriveAtHome. Get discovered by seniors and families in your area.</p>
+        <Link href="/directory/submit" className="inline-block bg-teal-600 text-white font-medium px-6 py-3 rounded-lg hover:bg-teal-700 transition-colors">
           List your business free →
         </Link>
       </section>
