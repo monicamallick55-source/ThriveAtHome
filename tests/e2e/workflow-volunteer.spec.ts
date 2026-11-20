@@ -58,5 +58,4 @@ test('TC-WV003 — /api/volunteer/buddy-assignments requires auth', async ({ pag
   const res = await page.request.get(`${BASE}/api/volunteer/buddy-assignments`)
   expect([401, 403, 302]).toContain(res.status())
 })
-2.43.0
 

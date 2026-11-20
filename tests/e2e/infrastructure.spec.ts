@@ -1,3 +1,15 @@
+import { test, expect } from "@playwright/test"
+import { loginAs, ACCOUNTS, BASE_URL as BASE } from "./helpers"
+
+test.describe("Infrastructure", () => {
+
+test("TC-INFRA001 — homepage loads and redirects to dashboard after login", async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, "/dashboard")
+  expect(page.url()).toContain("/dashboard")
+})
+
+})
+
   if (hasHScroll) console.warn('TC-PERF003: homepage has horizontal scroll at 390px');
   expect(page.url()).not.toContain('/login');
 });

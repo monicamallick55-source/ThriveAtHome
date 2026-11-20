@@ -23,6 +23,7 @@ test('TC-SRV002 — POST /api/service-requests requires auth', async ({ page }) 
   const res = await page.request.post(`${BASE}/api/service-requests`, {
     data: { service_type: 'ride', notes: 'test' },
     headers: { 'Content-Type': 'application/json' },
+  })
   expect([401, 403, 302]).toContain(res.status())
 })
 
