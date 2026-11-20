@@ -54,7 +54,7 @@ export async function loginAs(
       const sessionVal = JSON.stringify({ access_token, refresh_token, token_type: 'bearer', expires_in: 3600, expires_at: expiresAt })
       const domain = new URL(BASE_URL).hostname
       await page.context().addCookies([
-        { name: 'sb-qdniskppkfqjmtpkftdt-auth-token', value: sessionVal.slice(0, 1800), domain, path: '/', expires: expiresAt, httpOnly: false, secure: true, sameSite: 'Lax' },
+        { name: 'sb-qdniskppkfqjmtpkftdt-auth-token', value: sessionVal, domain, path: '/', expires: expiresAt, httpOnly: false, secure: true, sameSite: 'Lax' },
         { name: 'sb-qdniskppkfqjmtpkftdt-auth-token.0', value: sessionVal.slice(0, 1800), domain, path: '/', expires: expiresAt, httpOnly: false, secure: true, sameSite: 'Lax' },
         { name: 'sb-qdniskppkfqjmtpkftdt-auth-token.1', value: sessionVal.slice(1800), domain, path: '/', expires: expiresAt, httpOnly: false, secure: true, sameSite: 'Lax' },
       ])

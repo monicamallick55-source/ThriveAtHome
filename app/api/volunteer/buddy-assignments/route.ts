@@ -15,6 +15,10 @@ export async function GET() {
     if (error) return NextResponse.json({ error }, { status: 500 })
     return NextResponse.json({ data })
   } catch (err) {
-    return NextResponse.json({ error: String(err) }, { status: 500 })
+    const msg = String(err)
+    if (msg.includes('Unauthorized') || msg.includes('Not authenticated') || msg.includes('JWT') || msg.includes('session')) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+    }
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 }

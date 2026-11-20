@@ -10,11 +10,13 @@ const DEFAULT_PROFILE = {
 
 export async function GET() {
   const user = await getCurrentUser()
+  if (!user) return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
   return NextResponse.json({ profile: DEFAULT_PROFILE, checklist: [] })
 }
 
 export async function POST() {
   const user = await getCurrentUser()
+  if (!user) return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
   return NextResponse.json({ profile: DEFAULT_PROFILE })
 }
 

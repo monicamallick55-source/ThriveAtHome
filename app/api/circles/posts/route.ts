@@ -5,6 +5,8 @@ import { postToCircle, getCirclePosts } from '@/lib/data/circles'
 import { scanForFraudPatterns } from '@/lib/fraud/detect'
 
 export async function GET(request: Request) {
+  const user = await getCurrentUser()
+  if (!user) return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
   const { searchParams } = new URL(request.url)
   const circleId = searchParams.get('circleId')
   if (!circleId) return NextResponse.json({ error: 'circleId required' }, { status: 400 })
