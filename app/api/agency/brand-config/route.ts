@@ -31,11 +31,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-  const supabase = await createClient()
+  const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
-
-  const supabase = await createServerClient()
 
   const agencyId = await getAgencyIdForUser(user.id)
   if (!agencyId) return NextResponse.json({ error: 'No agency linked or insufficient permissions' }, { status: 403 })

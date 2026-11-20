@@ -21,10 +21,6 @@ const PRICE_MAP: Record<string, string | undefined> = {
 }
 
 export async function POST(req: NextRequest) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
-
   // Require authenticated user
   const user = await requireAuth().catch(() => null)
 
