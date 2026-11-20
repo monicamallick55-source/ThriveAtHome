@@ -78,6 +78,23 @@ export function LoginForm() {
         return
       }
 
+      // Role-based redirect
+      const { data: profile } = await supabase
+        .from('members')
+        .select('role, onboarding_complete')
+        .eq('id', user.id)
+        .single()
+
+      if (profile?.role === 'admin' || profile?.role === 'aaa_admin') {
+        router.push('/admin')
+      } else if (profile?.role === 'org_admin') {
+        router.push('/org-admin')
+      } else if (!profile?.onboarding_complete) {
+        router.push('/onboarding')
+      } else {
+        router.push('/dashboard')
+      }
+
       // Central server-side resolver: routes every role type, and sends
       // multi-role users to /select-role.
       let landing = '/dashboard'
