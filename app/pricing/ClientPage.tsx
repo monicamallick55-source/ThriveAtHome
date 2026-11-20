@@ -71,7 +71,7 @@ const COMPARISON: { category: string; rows: ComparisonRow[] }[] = [
     { feature: 'Matched Human Buddy (via partner orgs)', basic: false, complete: true },
     { feature: 'Buddy call frequency', basic: '—', complete: 'Weekly' },
     { feature: 'Dedicated navigator (via partner orgs)', basic: '—', complete: '2 hr/mo' },
-    { feature: '25+ interest & cultural communities', basic: false, complete: true },
+    { feature: '25+ interest & cultural communities', basic: true, complete: true },
     { feature: 'Community events & RSVP', basic: false, complete: true },
     { feature: 'Skill exchange & time banking', basic: false, complete: true },
     { feature: 'Benefits finder (15+ programs)', basic: false, complete: true },
