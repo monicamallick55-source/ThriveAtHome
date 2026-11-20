@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 export const dynamic = 'force-dynamic'
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   const body = await req.json().catch(() => ({}))
   const { data: member } = await supabase.from('members').select('id').eq('supabase_auth_id', user.id).maybeSingle()
   if (!member) return NextResponse.json({ error: 'Member not found' }, { status: 404 })
@@ -12,6 +14,8 @@ export async function POST(req: NextRequest) {
 }
 export async function GET() {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ data: null })
   const { data: member } = await supabase.from('members').select('id').eq('supabase_auth_id', user.id).maybeSingle()
   if (!member) return NextResponse.json({ data: null })
   const { data } = await supabase.from('buddy_requests').select('*').eq('member_id', member.id).order('created_at', { ascending: false }).limit(1).maybeSingle()

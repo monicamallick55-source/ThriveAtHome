@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 export const dynamic = 'force-dynamic'
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   const body = await req.json().catch(() => ({}))
   const id = `real-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
   const { data } = await supabase.from('skill_exchange_listings').insert({ user_id: user.id, skill_offered: body.skill_offered, skill_wanted: body.skill_wanted, description: body.description ?? null, hours_per_week: body.hours_per_week ?? 1, status: 'active', created_at: new Date().toISOString() }).select().single().catch(() => ({ data: null }))
