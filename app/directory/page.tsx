@@ -12,7 +12,7 @@ export const revalidate = 3600
 interface SearchParams { q?: string; category?: string; state?: string }
 
 export default async function DirectoryPage({ searchParams }: { searchParams: SearchParams }) {
-  const supabase = await createClient() as any
+  const supabase = createClient()
   const q = searchParams.q?.trim() ?? ''
   const category = searchParams.category ?? ''
   const state = searchParams.state ?? ''
@@ -29,10 +29,7 @@ export default async function DirectoryPage({ searchParams }: { searchParams: Se
   if (state) query = query.eq('state', state.toUpperCase())
   if (q) query = query.ilike('name', `%${q}%`)
 
-  let listings: any[] = []
-  try {
-    const { data, error } = await query
-  } catch { /* table may not exist yet */ }
+  const { data: listings } = await query
 
   const categoryObj = DIRECTORY_CATEGORIES.find(c => c.slug === category)
 
@@ -114,7 +111,7 @@ export default async function DirectoryPage({ searchParams }: { searchParams: Se
       {/* Listings grid */}
       {listings && listings.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
-          {listings.map((p: { id: string; name: string; slug: string; bio?: string; category: string; city?: string; state?: string; phone?: string; logo_url?: string; featured?: boolean }) => {
+          {listings.map(p => {
             const cat = DIRECTORY_CATEGORIES.find(c => c.slug === p.category)
             return (
               <Link
