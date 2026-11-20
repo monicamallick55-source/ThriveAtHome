@@ -10,8 +10,8 @@
  * NOTE: These tests require seed accounts to exist in Supabase.
  * See tests/db/seed-accounts.sql for setup.
  */
-import { test, expect } from '@playwright/test';
-import { ACCOUNTS, loginAs } from './helpers';
+import { BASE_URL as BASE, test, expect } from '@playwright/test';
+import { BASE_URL as BASE, ACCOUNTS, loginAs } from './helpers';
 
 /** TC-A004 / TC-P050 — All 21 roles reach correct portal */
 const ROLE_PORTAL_MAP: Array<{ key: keyof typeof ACCOUNTS; portal: string; label: string }> = [
@@ -127,7 +127,7 @@ test('TC-A006 — /device kiosk loads with large-print UI', async ({ page }) => 
 /** TC-P051 — /signup form validation */
 test('TC-P051 — /signup rejects invalid email and mismatched passwords', async ({ page }) => {
   // ?plan=basics skips step 0 (plan picker) and lands directly on step 1 (account info)
-  await page.goto('/signup?plan=basics');
+  await page.goto(`${BASE}/signup?plan=basics`);
 
  // Email label is a <div>, not a <label>, so use type selector
     await page.locator('input[type="email"]').fill('not-an-email');
