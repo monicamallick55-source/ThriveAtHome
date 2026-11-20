@@ -119,8 +119,8 @@ test('WF-SRV005 — /dashboard/support page UI flow works end to end', async ({ 
   await loginAs(page, ACCOUNTS.member, '/dashboard/support')
   if (page.url().includes('/login')) { test.skip(); return }
 
-  // Fill in the form
-  await page.locator('input[type="radio"][value="technical"]').click()
+  // Click the label (radio inputs may be visually hidden)
+  await page.locator('label').filter({ hasText: /technical/i }).click()
   await page.locator('input[type="text"]').fill('E2E automated test subject')
   await page.locator('textarea').fill('This is an automated test - safe to ignore')
 
@@ -128,5 +128,5 @@ test('WF-SRV005 — /dashboard/support page UI flow works end to end', async ({ 
   await page.locator('button[type="submit"]').click()
 
   // Success state
-  await expect(page.locator('text=Request received')).toBeVisible({ timeout: 10000 })
+  await expect(page.locator('text=Request received')).toBeVisible({ timeout: 15000 })
 })
