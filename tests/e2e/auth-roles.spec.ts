@@ -10,8 +10,8 @@
  * NOTE: These tests require seed accounts to exist in Supabase.
  * See tests/db/seed-accounts.sql for setup.
  */
-import { BASE_URL as BASE, test, expect } from '@playwright/test';
 import { BASE_URL as BASE, ACCOUNTS, loginAs } from './helpers';
+import { test, expect } from '@playwright/test';
 
 /** TC-A004 / TC-P050 — All 21 roles reach correct portal */
 const ROLE_PORTAL_MAP: Array<{ key: keyof typeof ACCOUNTS; portal: string; label: string }> = [
