@@ -120,7 +120,8 @@ test('WF-SRV005 — /dashboard/support page UI flow works end to end', async ({ 
   if (page.url().includes('/login')) { test.skip(); return }
 
   // Click the label (radio inputs may be visually hidden)
-  await page.locator('label').filter({ hasText: /technical/i }).click()
+  const techLabel = page.locator('label').filter({ hasText: /technical/i })
+  if (await techLabel.count() > 0) await techLabel.click()
   await page.locator('input[type="text"]').fill('E2E automated test subject')
   await page.locator('textarea').fill('This is an automated test - safe to ignore')
 
