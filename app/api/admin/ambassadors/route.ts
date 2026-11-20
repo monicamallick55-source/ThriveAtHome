@@ -17,6 +17,13 @@ export async function GET() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
+  // Role guard: admin and navigator only
+  const adminDb = createAdminClient() as any
+  const { data: fm } = await adminDb.from('family_members').select('role').eq('supabase_auth_id', user.id).maybeSingle()
+  if (!fm || !['admin', 'navigator'].includes(fm.role)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
   const { data, error } = await getActiveAmbassadors()
   if (error) return NextResponse.json({ error }, { status: 500 })
   return NextResponse.json({ data })
