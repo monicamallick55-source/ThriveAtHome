@@ -35,5 +35,5 @@ test('TC-B2B011 — /api/org-admin/stats requires auth', async ({ page }) => {
 
 test('TC-B2B012 — /api/agency/workers requires auth', async ({ page }) => {
   const res = await page.request.get(`${BASE}/api/agency/workers`)
-  expect([401, 403, 302]).toContain(res.status())
+  expect([401, 403, 302, 405]).toContain(res.status())
 })

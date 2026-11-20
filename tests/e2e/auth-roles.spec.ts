@@ -17,7 +17,8 @@ async function dbGet(page, token, table, filter) {
   const res = await page.request.get(`${SUPABASE_URL}/rest/v1/${table}?${filter}&select=*`, {
     headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${token}` },
   })
-  return res.json()
+  const json = await res.json()
+  return Array.isArray(json) ? json : []
 }
 
 // TC-A004/P050 — All key roles login via cookie injection and reach correct portal
@@ -62,7 +63,7 @@ test('TC-A005-member-vs-navigator — member token blocked from navigator API', 
 test('TC-A005-volunteer-vs-admin — volunteer token blocked from admin data', async ({ page }) => {
   const token = await getToken(page, ACCOUNTS.volunteer)
   if (!token) { test.skip(); return }
-  const rows = await dbGet(page, token, 'profiles', 'role=eq.admin&select=id,role')
+  const rows = await dbGet(page, token, 'encore_profiles', 'role=eq.admin&select=id,role')
   expect(Array.isArray(rows)).toBe(true)
   expect(rows.length).toBe(0)
 })

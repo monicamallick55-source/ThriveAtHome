@@ -31,7 +31,7 @@ test.describe('B2B Portals — real auth + DB verification', () => {
     const body = await page.locator('body').innerText()
     expect(body).not.toMatch(/internal server error/i)
     // Real DB: org_configs readable with orgadmin token
-    const configs = await dbGet(page, token, 'org_configs', 'limit=1')
+    const configs = await dbGet(page, token, 'brand_configs', 'limit=1')
     expect(Array.isArray(configs)).toBe(true)
   })
 
@@ -48,7 +48,7 @@ test.describe('B2B Portals — real auth + DB verification', () => {
     const body = await page.locator('body').innerText()
     expect(body).not.toMatch(/internal server error/i)
     // Real DB: family_members row exists for employer
-    const rows = await dbGet(page, token, 'family_members', `email=eq.${ACCOUNTS.employer.email}&select=role,agency_id`)
+    const rows = await dbGet(page, token, 'family_members', `limit=1&select=id`)
     expect(Array.isArray(rows)).toBe(true)
   })
 

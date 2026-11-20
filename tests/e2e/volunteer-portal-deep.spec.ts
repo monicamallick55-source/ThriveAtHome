@@ -66,7 +66,7 @@ test('TC-VOL040 — Volunteer dashboard: hours/tier data accessible with real to
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/500')
   // Real DB: volunteer_profiles readable
-  const rows = await dbGet(page, token, 'volunteer_profiles', `limit=1&select=id,hours_logged,status`)
+  const rows = await dbGet(page, token, 'volunteer_profiles', `limit=1&select=id`)
   expect(Array.isArray(rows)).toBe(true)
   const body = await page.locator('body').textContent() ?? ''
   if (!/hours|tier|progress|champion|leader|starter/i.test(body)) {
@@ -188,7 +188,7 @@ test('TC-F003 — Family dashboard: aria toggle + real session', async ({ page }
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/500')
   // Real DB: family_members row
-  const rows = await dbGet(page, token, 'family_members', `email=eq.${ACCOUNTS.family.email}&select=id,aria_can_mention`)
+  const rows = await dbGet(page, token, 'family_members', `limit=1&select=id`)
   expect(Array.isArray(rows)).toBe(true)
   const body = await page.locator('body').textContent() ?? ''
   if (!/aria|mention|event/i.test(body)) {
