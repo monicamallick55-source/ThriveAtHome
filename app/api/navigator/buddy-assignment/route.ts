@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server'
 import { requireAuth, isNavigatorOrAdmin } from '@/lib/auth'
 import { getBuddyCalls, getCompletedBuddyCallCount, endBuddyAssignment } from '@/lib/data/buddies'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
 
 export async function GET(req: Request) {
   try {
@@ -45,6 +46,10 @@ export async function GET(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+
   try {
     const user = await requireAuth()
     if (!(await isNavigatorOrAdmin(user.id))) {

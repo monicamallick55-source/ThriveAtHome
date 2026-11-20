@@ -3,8 +3,13 @@ import { requireAuth } from '@/lib/auth'
 import { getMemberForAuthUser } from '@/lib/data/members'
 import { createGriefSupportRequest, setDailyCheckInForGrief } from '@/lib/data/grief'
 import { emailProvider } from '@/lib/providers'
+import { createClient } from '@/lib/supabase/server'
 
 export async function POST(req: Request) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+
   try {
     const user = await requireAuth()
     const body = await req.json()

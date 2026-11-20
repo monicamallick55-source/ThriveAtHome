@@ -5,11 +5,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAuth } from '@/lib/auth'
+import { createClient } from '@/lib/supabase/server'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const PLAN_SEAT_LIMITS: Record<string, number> = { basic: 3, complete: Infinity, premier: Infinity }
 
 export async function POST(req: NextRequest) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+
   let user: Awaited<ReturnType<typeof requireAuth>>
   try { user = await requireAuth() } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

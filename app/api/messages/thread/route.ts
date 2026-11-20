@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
 import { getFamilyMemberByAuthId } from '@/lib/data/family'
 import { getThread } from '@/lib/data/member-messages'
+import { createClient } from '@/lib/supabase/server'
 
 export async function GET(req: NextRequest) {
   try {

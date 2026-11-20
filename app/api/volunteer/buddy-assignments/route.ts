@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
 import { getVolunteerByAuthId } from '@/lib/data/volunteers'
 import { getVolunteerBuddyAssignments } from '@/lib/data/buddies'
+import { createClient } from '@/lib/supabase/server'
 
 export async function GET() {
   try {

@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
 import { getBuddyCallsForFamily, getCompletedBuddyCallCount } from '@/lib/data/buddies'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
 
 export async function GET(req: Request) {
   try {
