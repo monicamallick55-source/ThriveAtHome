@@ -10,6 +10,8 @@ const MOCK_GIFTS = [
 export async function GET(req: NextRequest) {
   try {
     const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
     const { data } = await supabase.from('gift_catalog').select('*').eq('status', 'active').order('name').limit(50)
     if (data && data.length > 0) return NextResponse.json(data)
   } catch {}

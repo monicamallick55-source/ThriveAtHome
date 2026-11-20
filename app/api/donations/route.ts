@@ -5,6 +5,8 @@ export const dynamic = 'force-dynamic'
 export async function GET(req: NextRequest) {
   try {
     const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
     const { data } = await supabase.from('donations').select('*').order('created_at', { ascending: false }).limit(20).catch(() => ({ data: null }))
     if (data && data.length > 0) return NextResponse.json(data)
   } catch {}
@@ -12,6 +14,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const supabase0 = await createClient()
+  const { data: { user: postUser } } = await supabase0.auth.getUser()
+  if (!postUser) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   const body = await req.json().catch(() => ({}))
   const id = `real-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
   const isRecurring = body.frequency && body.frequency !== 'one_time'
