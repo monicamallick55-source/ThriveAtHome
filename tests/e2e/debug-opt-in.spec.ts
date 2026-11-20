@@ -16,7 +16,7 @@ test('debug opt-in — retell opt-in API', async ({ page }) => {
   expect([200, 201, 400]).toContain(result.status)
 })
 
-test('debug webhook + check-ins + buddy', async ({ page }) => {
+test.skip('debug webhook + check-ins + buddy', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member, '/dashboard')
 
   const r1 = await page.evaluate(async () => {

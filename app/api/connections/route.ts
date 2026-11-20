@@ -14,7 +14,7 @@ export async function GET(_req: NextRequest) {
       .from('family_members')
       .select('member_id')
       .eq('supabase_auth_id', user.id)
-      .single()
+      .maybeSingle()
 
     if (!fm?.member_id) return NextResponse.json([], { status: 200 })
 

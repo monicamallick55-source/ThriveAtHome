@@ -25,7 +25,7 @@ export async function GET(_req: NextRequest) {
     .eq('supabase_auth_id', user.id)
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error || !data) return NextResponse.json({ error: error?.message ?? 'Not found' }, { status: 404 })
   return NextResponse.json(data)
 }
 
@@ -50,6 +50,6 @@ export async function PATCH(req: NextRequest) {
     .select()
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error || !data) return NextResponse.json({ error: error?.message ?? 'Not found' }, { status: 404 })
   return NextResponse.json(data)
 }

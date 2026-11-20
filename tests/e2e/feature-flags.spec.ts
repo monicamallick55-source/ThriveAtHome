@@ -53,7 +53,7 @@ test('TC-REG006 — /dashboard/marketplace loads in locked state (no 500)', asyn
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const res = await page.request.get(`${BASE}/dashboard/marketplace`)
-  expect(res.status()).not.toBe(500)
+  expect([200, 302, 307, 401, 403, 404]).toContain(res.status())
 })
 
 // TC-M080 — Complete member can access dashboard
@@ -74,7 +74,7 @@ test('TC-M064 — /api/feature-flags does not 500 for authenticated member', asy
   const res = await page.request.get(`${BASE}/api/feature-flags`, {
     headers: { 'Cookie': cookieStr },
   })
-  expect(res.status()).not.toBe(500)
+  expect([200, 302, 307, 401, 403, 404]).toContain(res.status())
 })
 
 // TC-FF001 — /api/feature-flags requires auth (anon gets 401)

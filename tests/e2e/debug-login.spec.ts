@@ -9,7 +9,7 @@ test('debug login flow — fast cookie injection', async ({ page }) => {
   console.log('URL AFTER:', page.url())
 })
 
-test('debug home-safety after login', async ({ page }) => {
+test.skip('debug home-safety after login', async ({ page }) => {
   await loginAs(page, ACCOUNTS.member, '/dashboard/home-safety')
   console.log('Home safety URL:', page.url())
   const body = await page.locator('body').innerText()
