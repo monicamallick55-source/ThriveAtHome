@@ -4,6 +4,8 @@ import { createClient } from '@/lib/supabase/server'
 
 export async function GET() {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   const { data: fm } = await (createAdminClient() as any).from('family_members').select('member_id').eq('supabase_auth_id', user.id).single()
   if (!fm?.member_id) return NextResponse.json({ error: 'Not found' }, { status: 403 })
   const { data, error } = await (createAdminClient() as any).from('veterans_profiles').select('*, vso_chapters(*)').eq('member_id', fm.member_id).single()

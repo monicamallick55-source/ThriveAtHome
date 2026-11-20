@@ -5,6 +5,8 @@ import { NextResponse } from 'next/server'
 
 export async function PATCH(request: Request) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

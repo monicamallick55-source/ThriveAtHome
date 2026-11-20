@@ -8,6 +8,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 // GET /api/neighbor-match?memberId=xxx — list pending/approved matches for member
 export async function GET(req: NextRequest) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
   const memberId = req.nextUrl.searchParams.get('memberId')
   if (!memberId) return NextResponse.json({ error: 'memberId required' }, { status: 400 })

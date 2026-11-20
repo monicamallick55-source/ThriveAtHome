@@ -18,6 +18,8 @@ const VALID_GRADE_BANDS = ['K-2', '3-5', '6-8', '9-12', 'K-5', 'K-8', 'K-12', '6
 export async function GET(req: NextRequest) {
   try {
     const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
     const { data: member } = await supabase
       .from('members')

@@ -6,6 +6,8 @@ import { assignWorkerToLocation } from '@/lib/data/agencies'
 
 export async function PATCH(req: NextRequest) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
   const body = await req.json() as { worker_id: string; agency_id: string; location_id: string | null }
   if (!body.worker_id || !body.agency_id) {

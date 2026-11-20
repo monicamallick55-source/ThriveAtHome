@@ -6,6 +6,8 @@ import { verifyCenterAdmin, createActivity } from '@/lib/data/seniorCenters'
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
     const body = await request.json()
     const { center_id, title, activity_type, room, instructor_name, scheduled_at, duration_minutes, max_capacity, description } = body

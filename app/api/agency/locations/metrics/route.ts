@@ -6,6 +6,8 @@ import { getLocationMetrics } from '@/lib/data/agencies'
 
 export async function GET(req: NextRequest) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
   const agencyId = req.nextUrl.searchParams.get('agencyId')
   const locationId = req.nextUrl.searchParams.get('locationId') // null = aggregate

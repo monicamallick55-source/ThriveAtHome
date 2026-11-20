@@ -6,6 +6,8 @@ export async function POST(req: NextRequest) {
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
   if (!supabaseUrl || !serviceKey) return NextResponse.json({ error: 'Missing env' }, { status: 500 })
   const admin = createClient(supabaseUrl, serviceKey, { auth: { autoRefreshToken: false, persistSession: false } })
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   const body = await req.json().catch(() => ({}))
   const { email, first_name, last_name, department } = body
   if (!email) return NextResponse.json({ error: 'email required' }, { status: 400 })

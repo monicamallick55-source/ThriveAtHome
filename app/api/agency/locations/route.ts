@@ -18,6 +18,8 @@ async function getAgencyAdmin(userId: string): Promise<string | null> {
 
 export async function GET(req: NextRequest) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
   const agencyId = req.nextUrl.searchParams.get('agencyId')
   if (!agencyId) return NextResponse.json({ error: 'agencyId required' }, { status: 400 })

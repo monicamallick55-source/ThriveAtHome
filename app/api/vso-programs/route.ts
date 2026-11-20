@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 export const dynamic = 'force-dynamic'
 export async function GET(req: NextRequest) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   const { searchParams } = new URL(req.url)
   const status = searchParams.get('status')
   let query = supabase.from('vso_volunteer_hours').select('*, volunteers(first_name, last_name, email)')

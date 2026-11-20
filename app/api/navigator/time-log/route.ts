@@ -12,6 +12,8 @@ function billingPeriod(date = new Date()) {
 
 export async function GET(req: Request) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
   const { searchParams } = new URL(req.url)
   const memberId = searchParams.get('member_id')

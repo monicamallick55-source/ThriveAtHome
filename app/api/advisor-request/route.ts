@@ -4,6 +4,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
   const body = await req.json().catch(() => ({}))
   if (!body.advisor_role) return NextResponse.json({ error: 'advisor_role required' }, { status: 400 })

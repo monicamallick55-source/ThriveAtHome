@@ -9,6 +9,8 @@ import { NextRequest, NextResponse } from 'next/server'
 export async function GET(req: NextRequest) {
   try {
     const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
     const circleId = new URL(req.url).searchParams.get('circle_id')
     let query = supabase

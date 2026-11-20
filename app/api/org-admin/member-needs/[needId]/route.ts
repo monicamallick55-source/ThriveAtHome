@@ -6,6 +6,8 @@ import { updateMemberNeedStatus } from '@/lib/data/communityOrgs'
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ needId: string }> }) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

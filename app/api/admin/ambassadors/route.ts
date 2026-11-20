@@ -14,6 +14,8 @@ async function getNavigatorId(userId: string): Promise<string | null> {
 
 export async function GET() {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
   const { data, error } = await getActiveAmbassadors()
   if (error) return NextResponse.json({ error }, { status: 500 })

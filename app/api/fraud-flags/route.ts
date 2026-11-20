@@ -9,6 +9,8 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(_req: NextRequest) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
   const { data, error } = await supabase
     .from('fraud_flags')

@@ -13,6 +13,8 @@ type BulkAction = typeof VALID_ACTIONS[number]
 export async function POST(req: NextRequest) {
   try {
     const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
     const { data: self } = await supabase
       .from('org_admins')

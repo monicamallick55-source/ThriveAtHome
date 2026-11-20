@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 
 export async function GET(req: NextRequest) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
   const { data: fm } = await supabase
     .from('family_members').select('member_id').eq('supabase_auth_id', user.id).single()

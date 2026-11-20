@@ -12,6 +12,8 @@ export async function POST(
   try {
     const { id } = await params
     const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
     const { data: member } = await supabase.from('members').select('id').eq('supabase_auth_id', user.id).single()
     if (!member) return NextResponse.json({ error: 'Member not found' }, { status: 404 })

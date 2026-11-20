@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 export const dynamic = 'force-dynamic'
 export async function GET(req: NextRequest) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   const { data: member } = await supabase.from('members').select('id').eq('supabase_auth_id', user.id).maybeSingle().catch(() => ({ data: null }))
   if (!member) return NextResponse.json([])
   const { data } = await supabase.from('member_pets').select('*').eq('member_id', member.id).catch(() => ({ data: null }))

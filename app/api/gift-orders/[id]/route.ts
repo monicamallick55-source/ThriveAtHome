@@ -12,6 +12,8 @@ import { goodsProvider } from '@/lib/gifts/provider'
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
   const { data: order, error } = await supabase
     .from('gift_orders')

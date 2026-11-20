@@ -17,6 +17,8 @@ async function getOrgAdminContext(userId: string) {
 
 export async function GET(req: NextRequest) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
   const fm = await getOrgAdminContext(user.id)
   if (!fm) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })

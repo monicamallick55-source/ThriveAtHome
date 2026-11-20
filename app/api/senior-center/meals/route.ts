@@ -5,6 +5,8 @@ import { verifyCenterAdmin, upsertMeal } from '@/lib/data/seniorCenters'
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
     const body = await request.json()
     const { center_id, meal_date, meal_type, attendee_count, menu_description, notes } = body

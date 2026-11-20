@@ -20,6 +20,8 @@ async function getAgencyAdmin(userId: string) {
 
 export async function GET() {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
   const fm = await getAgencyAdmin(user.id)
   if (!fm || !['agency_admin', 'admin'].includes(fm.role ?? '')) {

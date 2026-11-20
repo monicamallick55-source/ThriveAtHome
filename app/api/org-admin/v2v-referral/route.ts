@@ -30,6 +30,8 @@ async function requireOrgAdmin(authId: string) {
 
 export async function GET(req: NextRequest) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   const { fm, error } = await requireOrgAdmin(user.id)
   if (error || !fm) return NextResponse.json({ error }, { status: error === 'Forbidden' ? 403 : 400 })
 
