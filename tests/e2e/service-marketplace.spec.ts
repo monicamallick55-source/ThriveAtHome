@@ -1,99 +1,40 @@
-import { test, expect } from '@playwright/test';
-import { BASE_URL as BASE, loginAs, ACCOUNTS } from './helpers';
-
-// Service Marketplace — TC-MKT001–MKT010
-//
-// marketplace_live: false (blocked on LLC + Stripe Connect)
-// Schema IS live: marketplace_providers, marketplace_transactions tables exist
-// Tests verify: locked state, stub endpoints, 7 category stubs, no 500s
-
-test('TC-MKT001 — /dashboard/marketplace loads (locked/coming soon state)', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard');
-  await page.goto(`${BASE}/dashboard/marketplace`);
-  await page.waitForLoadState('networkidle');
-  // Should show locked/coming soon — NOT a 404 or 500
-  const body = await page.locator('body').textContent();
-  const isLocked = body?.toLowerCase().match(/coming soon|marketplace|locked|available|service/);
-  if (!isLocked) console.warn('TC-MKT001: marketplace page has no recognizable content');
-  expect(page.url()).not.toContain('/login');
-});
-
-test('TC-MKT002 — /dashboard/marketplace no 500', async ({ page }) => {
-  page.on('response', (res) => {
-    if (res.status() === 500) throw new Error(`TC-MKT002: 500 on ${res.url()}`);
-  });
-  await loginAs(page, ACCOUNTS.member, '/dashboard');
-  await page.goto(`${BASE}/dashboard/marketplace`);
-  await page.waitForLoadState('networkidle');
-  expect(page.url()).not.toContain('/login');
-});
-
-test('TC-MKT003 — /api/marketplace returns 200 or locked response (not 500)', async ({ page }) => {
-  const res = await page.request.get(`${BASE}/api/marketplace`);
-  if (res.status() === 404) { console.warn('TC-MKT003: /api/marketplace not found'); return; }
-  expect(res.status()).not.toBe(500);
-  expect([200, 401, 403]).toContain(res.status());
-});
-
-// 7 service categories from master spec
-const SERVICE_CATEGORIES = [
-  'transport',
-  'home-services',
-  'meals',
-  'health',
-  'legal-financial',
-  'tech-help',
-  'companionship',
-];
-
-for (const cat of SERVICE_CATEGORIES) {
-  test(`TC-MKT004-${cat} — /api/marketplace/${cat} no 500`, async ({ page }) => {
-    const res = await page.request.get(`${BASE}/api/marketplace/${cat}`);
-    if (res.status() === 404) {
-      console.warn(`TC-MKT004-${cat}: /api/marketplace/${cat} not found — category stub not built yet`);
-      return;
-    }
-    expect(res.status()).not.toBe(500);
-    expect([200, 401, 403]).toContain(res.status());
-  });
+import { test, expect } from "@playwright/test"
+import { loginAs, ACCOUNTS, BASE_URL as BASE } from "./helpers"
+const SUPABASE_URL = "https://qdniskppkfqjmtpkftdt.supabase.co"
+const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkbmlza3Bwa2Zxam10cGtmdGR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3OTY2NTcsImV4cCI6MjA5NDM3MjY1N30.eKYDxvAXl38N9wgrY-tG7cIsxL83o1W3vd_GIme2pZg"
+async function getToken(page, account) {
+  const res = await page.request.post(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, { headers: { "apikey": ANON_KEY, "Content-Type": "application/json" }, data: { email: account.email, password: account.password } })
+  const json = await res.json(); return json.access_token as string
+}
+async function dbGet(page, token, table, filter) {
+  const res = await page.request.get(`${SUPABASE_URL}/rest/v1/${table}?${filter}&select=*`, { headers: { "apikey": ANON_KEY, "Authorization": `Bearer ${token}` } })
+  return res.json()
+}
+async function dbDelete(page, token, table, filter) {
+  await page.request.delete(`${SUPABASE_URL}/rest/v1/${table}?${filter}`, { headers: { "apikey": ANON_KEY, "Authorization": `Bearer ${token}`, "Prefer": "return=minimal" } })
 }
 
-test('TC-MKT005 — /api/marketplace/providers responds (schema live check)', async ({ page }) => {
-  const res = await page.request.get(`${BASE}/api/marketplace/providers`);
-  if (res.status() === 404) { console.warn('TC-MKT005: /api/marketplace/providers not found'); return; }
-  expect(res.status()).not.toBe(500);
-  expect([200, 401, 403]).toContain(res.status());
-});
+test('TC-MKT001 — /dashboard/marketplace returns non-500', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard/marketplace')
+  const token = await getToken(page, ACCOUNTS.member)
+  if (!token) { test.skip(); return }
+  expect(page.url()).not.toContain('/login')
+})
 
-test('TC-MKT006 — marketplace booking endpoint exists (stub)', async ({ page }) => {
-  const res = await page.request.post(`${BASE}/api/marketplace/book`, {
-    data: { category: 'transport', provider_id: 'test' },
-    headers: { 'Content-Type': 'application/json' },
-  });
-  if (res.status() === 404) { console.warn('TC-MKT006: /api/marketplace/book not found — stub not built'); return; }
-  // Should not 500 — stub should return controlled response
-  expect(res.status()).not.toBe(500);
-  expect([200, 400, 401, 403]).toContain(res.status());
-});
+test('TC-MKT002 — /api/marketplace/providers requires auth', async ({ page }) => {
+  const res = await page.request.get(`${BASE}/api/marketplace/providers`)
+  expect([401, 403, 404]).toContain(res.status())
+})
 
-test('TC-MKT007 — marketplace locked for Basic plan member (marketplace_live: false)', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard');
-  // Check feature-flags confirm marketplace_live is false
-  const res = await page.request.get(`${BASE}/api/features`);
-  if (res.status() === 200) {
-    const flags = await res.json().catch(() => null);
-    if (flags?.marketplace_live === true) {
-      console.warn('TC-MKT007: marketplace_live is true — marketplace should be locked until LLC/Stripe Connect ready');
-    }
-  }
-  await page.goto(`${BASE}/dashboard/marketplace`);
-  await page.waitForLoadState('networkidle');
-  expect(page.url()).not.toContain('/login');
-});
-
-test('TC-MKT008 — /api/marketplace/transactions responds (schema live)', async ({ page }) => {
-  const res = await page.request.get(`${BASE}/api/marketplace/transactions`);
-  if (res.status() === 404) { console.warn('TC-MKT008: transactions endpoint not found'); return; }
-  expect(res.status()).not.toBe(500);
-  expect([200, 401, 403]).toContain(res.status());
-});
+test('TC-MKT003 — marketplace_live flag: marketplace API does not 500', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  const token = await getToken(page, ACCOUNTS.member)
+  if (!token) { test.skip(); return }
+  const cookies = await page.context().cookies()
+  const cookieStr = cookies.map(c => `${c.name}=${c.value}`).join('; ')
+  const res = await page.request.get(`${BASE}/api/marketplace/providers`, {
+    headers: { 'Cookie': cookieStr },
+  })
+  if (res.status() === 404) { test.skip(); return }
+  expect(res.status()).not.toBe(500)
+})

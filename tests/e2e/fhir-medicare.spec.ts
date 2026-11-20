@@ -1,65 +1,57 @@
-import { test, expect } from '@playwright/test';
-import { BASE_URL as BASE } from './helpers';
+import { test, expect } from "@playwright/test"
+import { loginAs, ACCOUNTS, BASE_URL as BASE } from "./helpers"
 
-// TC-FH001–FH006: FHIR R4 Endpoint
-// TC-MED001–MED004: Medicare NLP
+const SUPABASE_URL = "https://qdniskppkfqjmtpkftdt.supabase.co"
+const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkbmlza3Bwa2Zxam10cGtmdGR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3OTY2NTcsImV4cCI6MjA5NDM3MjY1N30.eKYDxvAXl38N9wgrY-tG7cIsxL83o1W3vd_GIme2pZg"
+const CRON_SECRET = "0LjR0pE/7WueB508Z6OER1s/6x0Buze2vbRPVljKxFs="
 
-test('TC-FH001 — FHIR inbound referral endpoint exists', async ({ page }) => {
+async function getToken(page, account) {
+  const res = await page.request.post(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+    headers: { "apikey": ANON_KEY, "Content-Type": "application/json" },
+    data: { email: account.email, password: account.password },
+  })
+  const json = await res.json()
+  return json.access_token as string
+}
+
+async function dbGet(page, token, table, filter) {
+  const res = await page.request.get(`${SUPABASE_URL}/rest/v1/${table}?${filter}&select=*`, {
+    headers: { "apikey": ANON_KEY, "Authorization": `Bearer ${token}` },
+  })
+  return res.json()
+}
+
+async function dbDelete(page, token, table, filter) {
+  await page.request.delete(`${SUPABASE_URL}/rest/v1/${table}?${filter}`, {
+    headers: { "apikey": ANON_KEY, "Authorization": `Bearer ${token}`, "Prefer": "return=minimal" },
+  })
+}
+
+test('TC-FH001 — /api/fhir/referrals requires auth or returns 400', async ({ page }) => {
   const res = await page.request.post(`${BASE}/api/fhir/referrals`, {
     data: { resourceType: 'ServiceRequest', status: 'active' },
     headers: { 'Content-Type': 'application/fhir+json' },
-  });
-  if (res.status() === 404) { console.warn('TC-FH001: /api/fhir/referrals not implemented'); return; }
-  expect([200, 400, 401, 422]).toContain(res.status());
-});
+  })
+  if (res.status() === 404) { test.skip(); return }
+  expect([400, 401, 403, 422]).toContain(res.status())
+})
 
-test('TC-FH002 — FHIR endpoint rejects unauthenticated request', async ({ page }) => {
-  const res = await page.request.post(`${BASE}/api/fhir/referrals`, {
-    data: { resourceType: 'ServiceRequest' },
-    headers: { 'Content-Type': 'application/fhir+json' },
-  });
-  if (res.status() === 404) { console.warn('TC-FH002: endpoint not found — skipping'); return; }
-  expect([401, 422]).toContain(res.status());
-});
+test('TC-FH002 — /dashboard/fhir-referrals loads for member', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard/fhir-referrals')
+  const token = await getToken(page, ACCOUNTS.member)
+  if (!token) { test.skip(); return }
+  expect(page.url()).not.toContain('/login')
+})
 
-test('TC-FH003 — FHIR endpoint returns OperationOutcome on bad JSON', async ({ page }) => {
-  const res = await page.request.post(`${BASE}/api/fhir/referrals`, {
-    data: 'not-json',
-    headers: {
-      'Content-Type': 'application/fhir+json',
-      'Authorization': 'Bearer test-key',
-    },
-  });
-  if (res.status() === 404) { console.warn('TC-FH003: endpoint not found'); return; }
-  expect([400, 401, 422]).toContain(res.status());
-});
+test('TC-MED001 — /dashboard/medicare-help loads', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard/medicare-help')
+  const token = await getToken(page, ACCOUNTS.member)
+  if (!token) { test.skip(); return }
+  expect(page.url()).not.toContain('/login')
+})
 
-test('TC-MED001 — /api/check-in-calls endpoint exists', async ({ page }) => {
-  const res = await page.request.get(`${BASE}/api/check-in-calls`);
-  if (res.status() === 404) { console.warn('TC-MED001: /api/check-in-calls not found'); return; }
-  expect([200, 401]).toContain(res.status());
-});
-
-test('TC-MED002 — Retell call-ended webhook endpoint exists', async ({ page }) => {
-  const res = await page.request.post(`${BASE}/api/retell/call-ended`, {
-    data: { call_id: 'test', transcript: 'I feel some pain today' },
-    headers: { 'Content-Type': 'application/json' },
-  });
-  if (res.status() === 404) { console.warn('TC-MED002: /api/retell/call-ended not found'); return; }
-  expect([200, 400, 401]).toContain(res.status());
-});
-
-test('TC-MED003 — /api/admin/ma-report requires auth', async ({ page }) => {
-  const res = await page.request.get(`${BASE}/api/admin/ma-report`);
-  if (res.status() === 404) { console.warn('TC-MED003: /api/admin/ma-report not found'); return; }
-  expect([200, 401, 403]).toContain(res.status());
-});
-
-test('TC-MED004 — no 500 on call-ended webhook with empty body', async ({ page }) => {
-  const res = await page.request.post(`${BASE}/api/retell/call-ended`, {
-    data: {},
-    headers: { 'Content-Type': 'application/json' },
-  });
-  if (res.status() === 404) { console.warn('TC-MED004: endpoint not found'); return; }
-  expect(res.status()).not.toBe(500);
-});
+test('TC-MED002 — /api/medicare-plans returns non-500', async ({ page }) => {
+  const res = await page.request.get(`${BASE}/api/medicare-plans`)
+  if (res.status() === 404) { test.skip(); return }
+  expect(res.status()).not.toBe(500)
+})

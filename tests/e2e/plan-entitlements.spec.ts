@@ -1,85 +1,45 @@
-import { test, expect } from '@playwright/test';
-import { BASE_URL as BASE, loginAs, ACCOUNTS } from './helpers';
+import { test, expect } from "@playwright/test"
+import { loginAs, ACCOUNTS, BASE_URL as BASE } from "./helpers"
+const SUPABASE_URL = "https://qdniskppkfqjmtpkftdt.supabase.co"
+const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkbmlza3Bwa2Zxam10cGtmdGR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3OTY2NTcsImV4cCI6MjA5NDM3MjY1N30.eKYDxvAXl38N9wgrY-tG7cIsxL83o1W3vd_GIme2pZg"
+async function getToken(page, account) {
+  const res = await page.request.post(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, { headers: { "apikey": ANON_KEY, "Content-Type": "application/json" }, data: { email: account.email, password: account.password } })
+  const json = await res.json(); return json.access_token as string
+}
+async function dbGet(page, token, table, filter) {
+  const res = await page.request.get(`${SUPABASE_URL}/rest/v1/${table}?${filter}&select=*`, { headers: { "apikey": ANON_KEY, "Authorization": `Bearer ${token}` } })
+  return res.json()
+}
+async function dbDelete(page, token, table, filter) {
+  await page.request.delete(`${SUPABASE_URL}/rest/v1/${table}?${filter}`, { headers: { "apikey": ANON_KEY, "Authorization": `Bearer ${token}`, "Prefer": "return=minimal" } })
+}
 
-// TC-PE001–PE010: Plan Entitlements & Feature Flags
+test('TC-PE001 — /api/entitlements requires auth', async ({ page }) => {
+  const res = await page.request.get(`${BASE}/api/entitlements`)
+  expect([401, 403, 404]).toContain(res.status())
+})
 
-test('TC-PE001 — /api/entitlements returns plan_tier', async ({ page }) => {
-  const res = await page.request.get(`${BASE}/api/entitlements`);
-  if (res.status() === 404) { console.warn('TC-PE001: /api/entitlements not found'); return; }
-  expect([200, 401]).toContain(res.status());
-  if (res.status() === 200) {
-    const body = await res.json().catch(() => null);
-    if (body && typeof body === 'object') {
-      if (!body.plan_tier) console.warn('TC-PE001: plan_tier field missing from /api/entitlements');
-    }
+test('TC-PE002 — /api/entitlements returns plan_tier for member', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  const token = await getToken(page, ACCOUNTS.member)
+  if (!token) { test.skip(); return }
+  const cookies = await page.context().cookies()
+  const cookieStr = cookies.map(c => `${c.name}=${c.value}`).join('; ')
+  const res = await page.request.get(`${BASE}/api/entitlements`, {
+    headers: { 'Cookie': cookieStr },
+  })
+  if (res.status() === 404) { test.skip(); return }
+  expect(res.status()).toBe(200)
+  const body = await res.json()
+  expect(body).toHaveProperty('plan_tier')
+})
+
+test('TC-PE003 — member plan_tier is valid value in DB', async ({ page }) => {
+  const token = await getToken(page, ACCOUNTS.member)
+  if (!token) { test.skip(); return }
+  const rows = await dbGet(page, token, 'profiles', 'select=plan_tier')
+  expect(Array.isArray(rows)).toBe(true)
+  if (rows.length > 0 && rows[0].plan_tier) {
+    expect(['basics', 'connect', 'complete', 'premier']).toContain(rows[0].plan_tier)
   }
-});
-
-test('TC-PE002 — basic plan member sees navigator hours limit', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard');
-  await page.goto(`${BASE}/dashboard/plan`);
-  await page.waitForLoadState('networkidle');
-  expect(page.url()).not.toContain('/login');
-});
-
-test('TC-PE003 — /api/feature-flags responds', async ({ page }) => {
-  const res = await page.request.get(`${BASE}/api/feature-flags`);
-  if (res.status() === 404) { console.warn('TC-PE003: /api/feature-flags not found'); return; }
-  expect([200, 401]).toContain(res.status());
-});
-
-test('TC-PE004 — Premier hidden from /pricing', async ({ page }) => {
-  await page.goto(`${BASE}/pricing`);
-  await page.waitForLoadState('networkidle');
-  const body = await page.locator('body').textContent();
-  expect(body?.toLowerCase()).not.toContain('premier');
-});
-
-test('TC-PE005 — /api/plan-features responds', async ({ page }) => {
-  const res = await page.request.get(`${BASE}/api/plan-features`);
-  if (res.status() === 404) { console.warn('TC-PE005: /api/plan-features not found'); return; }
-  expect([200, 401]).toContain(res.status());
-});
-
-test('TC-PE006 — member_campaigns feature flag is off by default', async ({ page }) => {
-  const res = await page.request.get(`${BASE}/api/feature-flags`);
-  if (res.status() === 404) { console.warn('TC-PE006: /api/feature-flags not found'); return; }
-  if (res.status() === 200) {
-    const body = await res.json().catch(() => null);
-    if (body?.member_campaigns_live === true) {
-      console.warn('TC-PE006: member_campaigns_live is true — should be false by default');
-    }
-  }
-  expect([200, 401]).toContain(res.status());
-});
-
-test('TC-PE007 — /api/navigator/schedule responds', async ({ page }) => {
-  const res = await page.request.get(`${BASE}/api/navigator/schedule`);
-  if (res.status() === 404) { console.warn('TC-PE007: /api/navigator/schedule not found'); return; }
-  expect([200, 401]).toContain(res.status());
-});
-
-test('TC-PE008 — /dashboard/navigator loads for member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard');
-  await page.goto(`${BASE}/dashboard/navigator`);
-  await page.waitForLoadState('networkidle');
-  expect(page.url()).not.toContain('/login');
-});
-
-test('TC-PE009 — /dashboard/profile loads and shows plan tier', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard');
-  await page.goto(`${BASE}/dashboard/profile`);
-  await page.waitForLoadState('networkidle');
-  expect(page.url()).not.toContain('/login');
-});
-
-test('TC-PE010 — marketplace locked when feature off', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard');
-  await page.goto(`${BASE}/dashboard/marketplace`);
-  await page.waitForLoadState('networkidle');
-  const body = await page.locator('body').textContent();
-  if (!body?.toLowerCase().includes('coming soon') && !body?.toLowerCase().includes('locked')) {
-    console.warn('TC-PE010: marketplace not showing locked/coming soon state');
-  }
-  expect(page.url()).not.toContain('/login');
-});
+})

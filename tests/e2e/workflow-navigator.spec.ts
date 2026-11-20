@@ -1,31 +1,60 @@
-import { test, expect } from '@playwright/test';
-import { BASE_URL as BASE, loginAs, ACCOUNTS } from './helpers';
+import { test, expect } from '@playwright/test'
+import { loginAs, ACCOUNTS, BASE_URL as BASE } from './helpers'
 
-test('TC-WN001 — navigator dashboard loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.navigator, '/navigator');
-  expect(page.url()).toContain('/navigator');
-});
+const SUPABASE_URL = 'https://qdniskppkfqjmtpkftdt.supabase.co'
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkbmlza3Bwa2Zxam10cGtmdGR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3OTY2NTcsImV4cCI6MjA5NDM3MjY1N30.eKYDxvAXl38N9wgrY-tG7cIsxL83o1W3vd_GIme2pZg'
 
-test('TC-WN002 — navigator task queue visible', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.navigator, '/navigator');
-  expect(page.url()).not.toContain('/login');
-});
+async function getToken(page, account) {
+  const res = await page.request.post(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+    headers: { 'apikey': ANON_KEY, 'Content-Type': 'application/json' },
+    data: { email: account.email, password: account.password },
+  })
+  const json = await res.json()
+  return json.access_token as string
+}
 
-test('TC-WN003 — /api/navigator/tasks responds', async ({ page }) => {
-  const res = await page.request.get(`${BASE}/api/navigator/tasks`);
-  if (res.status() === 404) { console.warn('TC-WN003: /api/navigator/tasks not found'); return; }
-  expect([200, 401]).toContain(res.status());
-});
+async function dbGet(page, token, table, filter) {
+  const res = await page.request.get(`${SUPABASE_URL}/rest/v1/${table}?${filter}&select=*`, {
+    headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${token}` },
+  })
+  return res.json()
+}
 
-test('TC-WN004 — navigator can view member record', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.navigator, '/navigator');
-  await page.goto(`${BASE}/navigator/members`);
-  await page.waitForLoadState('networkidle');
-  expect(page.url()).not.toContain('/login');
-});
+async function dbDelete(page, token, table, filter) {
+  await page.request.delete(`${SUPABASE_URL}/rest/v1/${table}?${filter}`, {
+    headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${token}`, 'Prefer': 'return=minimal' },
+  })
+}
 
-test('TC-WN005 — /api/navigator/schedule responds', async ({ page }) => {
-  const res = await page.request.get(`${BASE}/api/navigator/schedule`);
-  if (res.status() === 404) { console.warn('TC-WN005: /api/navigator/schedule not found'); return; }
-  expect([200, 401]).toContain(res.status());
-});
+test('TC-WN001 — /navigator loads for navigator', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.navigator, '/navigator')
+  const token = await getToken(page, ACCOUNTS.navigator)
+  if (!token) { test.skip(); return }
+  expect(page.url()).toContain('/navigator')
+})
+
+test('TC-WN002 — /api/navigator/tasks requires auth', async ({ page }) => {
+  const res = await page.request.get(`${BASE}/api/navigator/tasks`)
+  expect([401, 403, 302]).toContain(res.status())
+})
+
+test('TC-WN003 — POST /api/navigator/time-log creates DB row', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.navigator, '/navigator')
+  const token = await getToken(page, ACCOUNTS.navigator)
+  if (!token) { test.skip(); return }
+  const cookies = await page.context().cookies()
+  const cookieStr = cookies.map(c => `${c.name}=${c.value}`).join('; ')
+  const res = await page.request.post(`${BASE}/api/navigator/time-log`, {
+    headers: { 'Content-Type': 'application/json', 'Cookie': cookieStr },
+    data: { task_type: 'crisis_followup', duration_minutes: 45, notes: 'E2E workflow nav test' },
+  })
+  if (res.status() === 404) { test.skip(); return }
+  expect([200, 201]).toContain(res.status())
+  const body = await res.json()
+  const id = body.id || body.record?.id
+  if (id) {
+    const rows = await dbGet(page, token, 'navigator_time_logs', `id=eq.${id}`)
+    expect(rows.length).toBe(1)
+    await dbDelete(page, token, 'navigator_time_logs', `id=eq.${id}`)
+  }
+})

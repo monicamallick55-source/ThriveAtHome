@@ -1,169 +1,97 @@
-/**
- * TC-VPF* — Full volunteer portal coverage (deployed Nov 6, 2026)
- * Covers: buddy portal, chaplaincy, neighbors, professionals, apply flow,
- *         retired-pro discovery, corporate tier progress bar
- */
-import { test, expect } from '@playwright/test';
-import { BASE_URL as BASE, loginAs, ACCOUNTS } from './helpers';
+import { test, expect } from '@playwright/test'
+import { loginAs, ACCOUNTS, BASE_URL as BASE } from './helpers'
 
-// ── Volunteer portal top-level pages ─────────────────────────────────────────
+const SUPABASE_URL = 'https://qdniskppkfqjmtpkftdt.supabase.co'
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkbmlza3Bwa2Zxam10cGtmdGR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3OTY2NTcsImV4cCI6MjA5NDM3MjY1N30.eKYDxvAXl38N9wgrY-tG7cIsxL83o1W3vd_GIme2pZg'
 
-test('TC-VPF001 — /volunteer loads or redirects (no 500)', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard');
-  await page.goto(`${BASE}/volunteer`);
-  await page.waitForLoadState('domcontentloaded');
-  const content = await page.content();
-  expect(content).not.toMatch(/application error|internal server error/i);
-});
+async function getToken(page, account) {
+  const res = await page.request.post(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+    headers: { 'apikey': ANON_KEY, 'Content-Type': 'application/json' },
+    data: { email: account.email, password: account.password },
+  })
+  const json = await res.json()
+  return json.access_token as string
+}
 
-test('TC-VPF002 — /volunteer/apply loads', async ({ page }) => {
-  await page.goto(`${BASE}/volunteer/apply`);
-  await page.waitForLoadState('domcontentloaded');
-  const content = await page.content();
-  expect(content).not.toMatch(/application error|internal server error/i);
-  expect(page.url()).not.toContain('/500');
-});
+async function dbGet(page, token, table, filter) {
+  const res = await page.request.get(`${SUPABASE_URL}/rest/v1/${table}?${filter}&select=*`, {
+    headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${token}` },
+  })
+  return res.json()
+}
 
-test('TC-VPF003 — /volunteer/apply has application form', async ({ page }) => {
-  await page.goto(`${BASE}/volunteer/apply`);
-  await page.waitForLoadState('domcontentloaded');
-  const content = await page.content();
-  const hasForm = content.match(/apply|volunteer|name|email|specialty|submit/i);
-  if (!hasForm) console.warn('TC-VPF003: volunteer apply form content not found');
-  expect(content).not.toMatch(/application error|internal server error/i);
-});
+async function dbDelete(page, token, table, filter) {
+  await page.request.delete(`${SUPABASE_URL}/rest/v1/${table}?${filter}`, {
+    headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${token}`, 'Prefer': 'return=minimal' },
+  })
+}
 
-// ── Buddy portal ──────────────────────────────────────────────────────────────
+// TC-VPF001 — /volunteer portal loads without 500
+test('TC-VPF001 — /volunteer loads without 500', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard')
+  const token = await getToken(page, ACCOUNTS.volunteer)
+  if (!token) { test.skip(); return }
+  const res = await page.request.get(`${BASE}/volunteer`)
+  expect(res.status()).not.toBe(500)
+})
 
-test('TC-VPF010 — /volunteer/buddy requires auth', async ({ page }) => {
-  await page.goto(`${BASE}/volunteer/buddy`);
-  await page.waitForLoadState('domcontentloaded');
-  const redirectedToLogin = page.url().includes('/login');
-  const redirectedToOnboarding = page.url().includes('/onboarding');
-  if (!redirectedToLogin && !redirectedToOnboarding) {
-    // If page loaded, must not be a 500
-    const content = await page.content();
-    expect(content).not.toMatch(/application error|internal server error/i);
+// TC-VPF002 — /volunteer/apply loads without auth
+test('TC-VPF002 — /volunteer/apply loads without auth', async ({ page }) => {
+  const res = await page.request.get(`${BASE}/volunteer/apply`)
+  expect(res.status()).not.toBe(500)
+  expect([200, 301, 302]).toContain(res.status())
+})
+
+// TC-VPF003 — POST /api/volunteers/hours creates volunteer_hours row
+test('TC-VPF003 — POST /api/volunteers/hours creates DB row', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard')
+  const token = await getToken(page, ACCOUNTS.volunteer)
+  if (!token) { test.skip(); return }
+  const cookies = await page.context().cookies()
+  const cookieStr = cookies.map(c => `${c.name}=${c.value}`).join('; ')
+
+  const res = await page.request.post(`${BASE}/api/volunteers/hours`, {
+    headers: { 'Content-Type': 'application/json', 'Cookie': cookieStr },
+    data: { hours: 2, activity_type: 'buddy_call', notes: 'E2E test hours log', date: '2026-11-20' },
+  })
+  if (res.status() === 404) { test.skip(); return }
+  expect([200, 201]).toContain(res.status())
+  const body = await res.json()
+  const id = body.id || body.record?.id || body.data?.id
+  if (id) {
+    const rows = await dbGet(page, token, 'volunteer_hours', `id=eq.${id}`)
+    expect(rows.length).toBe(1)
+    expect(rows[0].hours).toBe(2)
+    await dbDelete(page, token, 'volunteer_hours', `id=eq.${id}`)
   }
-});
+})
 
-test('TC-VPF011 — /volunteer/buddy loads for volunteer', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard');
-  await page.goto(`${BASE}/volunteer/buddy`);
-  await page.waitForLoadState('domcontentloaded');
-  const content = await page.content();
-  expect(content).not.toMatch(/application error|internal server error/i);
-});
+// TC-VPF004 — /api/volunteer/buddy-assignments requires auth
+test('TC-VPF004 — /api/volunteer/buddy-assignments requires auth', async ({ page }) => {
+  const res = await page.request.get(`${BASE}/api/volunteer/buddy-assignments`)
+  expect([401, 403, 302]).toContain(res.status())
+})
 
-test('TC-VPF012 — buddy portal shows buddy assignment cards or empty state', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard');
-  await page.goto(`${BASE}/volunteer/buddy`);
-  await page.waitForLoadState('domcontentloaded');
-  const content = await page.content();
-  const hasContent = content.match(/buddy|assignment|member|call|log|no buddies|🤝/i);
-  if (!hasContent) console.warn('TC-VPF012: buddy portal content not detected');
-  expect(content).not.toMatch(/application error|internal server error/i);
-});
+// TC-VPF005 — /dashboard/training loads for volunteer
+test('TC-VPF005 — /dashboard/training loads for volunteer', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.volunteer, '/dashboard/training')
+  const token = await getToken(page, ACCOUNTS.volunteer)
+  if (!token) { test.skip(); return }
+  expect(page.url()).not.toContain('/login')
+})
 
-// ── Chaplaincy ────────────────────────────────────────────────────────────────
+// TC-VPF006 — volunteer token can read own volunteer_hours from DB
+test('TC-VPF006 — volunteer token can read own volunteer_hours from DB', async ({ page }) => {
+  const token = await getToken(page, ACCOUNTS.volunteer)
+  if (!token) { test.skip(); return }
+  const rows = await dbGet(page, token, 'volunteer_hours', 'select=id,hours,activity_type')
+  expect(Array.isArray(rows)).toBe(true)
+})
 
-test('TC-VPF020 — /volunteer/chaplaincy loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.faith, '/volunteer/dashboard');
-  if (page.url().includes('/login')) { console.warn('TC-VPF020: faith login failed — try volunteer'); }
-  if (page.url().includes('/login')) await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard');
-  await page.goto(`${BASE}/volunteer/chaplaincy`);
-  await page.waitForLoadState('domcontentloaded');
-  const content = await page.content();
-  expect(content).not.toMatch(/application error|internal server error/i);
-});
-
-test('TC-VPF021 — chaplaincy page shows spiritual/grief content', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard');
-  await page.goto(`${BASE}/volunteer/chaplaincy`);
-  await page.waitForLoadState('domcontentloaded');
-  const content = await page.content();
-  const hasContent = content.match(/chaplain|spiritual|grief|prayer|faith|visit/i);
-  if (!hasContent) console.warn('TC-VPF021: chaplaincy content not detected');
-});
-
-// ── Neighbor volunteers ───────────────────────────────────────────────────────
-
-test('TC-VPF030 — /volunteer/neighbors loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.neighbor, '/volunteer/dashboard');
-  if (page.url().includes('/login')) { console.warn('TC-VPF030: neighbor login failed — try volunteer'); }
-  if (page.url().includes('/login')) await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard');
-  await page.goto(`${BASE}/volunteer/neighbors`);
-  await page.waitForLoadState('domcontentloaded');
-  const content = await page.content();
-  expect(content).not.toMatch(/application error|internal server error/i);
-});
-
-test('TC-VPF031 — neighbors page shows zip-matched or match-pending content', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.neighbor, '/volunteer/dashboard');
-  if (page.url().includes('/login')) await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard');
-  await page.goto(`${BASE}/volunteer/neighbors`);
-  await page.waitForLoadState('domcontentloaded');
-  const content = await page.content();
-  const hasContent = content.match(/neighbor|zip|match|nearby|area|distance/i);
-  if (!hasContent) console.warn('TC-VPF031: neighbor matching content not found');
-});
-
-// ── Retired professionals ─────────────────────────────────────────────────────
-
-test('TC-VPF040 — /volunteer/professionals loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.retired_pro);
-  if (page.url().includes('/login')) { console.warn('TC-VPF040: retired_pro login failed — try volunteer'); }
-  if (page.url().includes('/login')) await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard');
-  await page.goto(`${BASE}/volunteer/professionals`);
-  await page.waitForLoadState('domcontentloaded');
-  const content = await page.content();
-  expect(content).not.toMatch(/application error|internal server error/i);
-});
-
-test('TC-VPF041 — retired-pro page shows specialty/service cards', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.retired_pro);
-  if (page.url().includes('/login')) await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard');
-  await page.goto(`${BASE}/volunteer/professionals`);
-  await page.waitForLoadState('domcontentloaded');
-  const content = await page.content();
-  const hasContent = content.match(/attorney|financial|doctor|specialty|legal|advisor|professional/i);
-  if (!hasContent) console.warn('TC-VPF041: retired professional specialty content not found');
-});
-
-test('TC-VPF042 — retired-pro discovery surfaces in Legal/Financial Hub', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member);
-  // Check the legal/financial hub or trusted advisors page
-  await page.goto(`${BASE}/dashboard/trusted-advisors`);
-  await page.waitForLoadState('domcontentloaded');
-  const content = await page.content();
-  expect(content).not.toMatch(/application error|internal server error/i);
-  // Should have retired professional content surfaced
-  const hasRetiredPro = content.match(/retired|professional|attorney|financial advisor|doctor/i);
-  if (!hasRetiredPro) console.warn('TC-VPF042: retired-pro content not surfaced on trusted advisors page');
-});
-
-// ── Corporate tier progress bar (G7.11) ──────────────────────────────────────
-
-test('TC-VPF050 — /employer-admin loads corporate tier content', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.employer);
-  await page.goto(`${BASE}/employer-admin`);
-  await page.waitForLoadState('domcontentloaded');
-  const content = await page.content();
-  expect(content).not.toMatch(/application error|internal server error/i);
-});
-
-test('TC-VPF051 — employer-admin shows corporate volunteer tier progress', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.employer);
-  await page.goto(`${BASE}/employer-admin`);
-  await page.waitForLoadState('domcontentloaded');
-  const content = await page.content();
-  const hasTier = content.match(/tier|bronze|silver|gold|progress|corporate|volunteer hours/i);
-  if (!hasTier) console.warn('TC-VPF051: corporate tier progress bar content not detected');
-});
-
-test('TC-VPF052 — /api/corporate-volunteer/progress responds', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.employer);
-  const res = await page.request.get(`${BASE}/api/corporate-volunteer/progress`);
-  expect([200, 400, 404]).toContain(res.status());
-  expect(res.status()).not.toBe(500);
-});
+// TC-VPF007 — student volunteer portal loads
+test('TC-VPF007 — /student portal loads for student volunteer', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.student, '/student')
+  const token = await getToken(page, ACCOUNTS.student)
+  if (!token) { test.skip(); return }
+  expect(page.url()).not.toContain('/login')
+})

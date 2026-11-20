@@ -1,132 +1,124 @@
-/**
- * TC-N001–TC-N008 — Navigator Portal Tests
- *
- * Run: npx playwright test tests/e2e/navigator-portal.spec.ts
- */
-import { test, expect } from '@playwright/test';
-import { ACCOUNTS, loginAs } from './helpers';
+import { test, expect } from '@playwright/test'
+import { loginAs, ACCOUNTS, BASE_URL as BASE } from './helpers'
 
-const NAV_TASK_TYPES = [
-  'welcome_call',
-  'crisis_followup',
-  'fraud_review',
-  'celebration_grief_review',
-  'milestone_birthday',
-  'life_transition',
-  'service_request',
-  'fhir_referral',
-  'check_in_missed',
-  'benefit_application',
-  'advisor_connection',
-  'campaign_review',
-];
+const SUPABASE_URL = 'https://qdniskppkfqjmtpkftdt.supabase.co'
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkbmlza3Bwa2Zxam10cGtmdGR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3OTY2NTcsImV4cCI6MjA5NDM3MjY1N30.eKYDxvAXl38N9wgrY-tG7cIsxL83o1W3vd_GIme2pZg'
 
-test.describe('TC-N001–N008 — Navigator Portal', () => {
-  test.beforeEach(async ({ page }) => {
-    await loginAs(page, ACCOUNTS.navigator, '/navigator');
-  });
-
-  /** TC-N001 — Navigator dashboard loads */
-  test('TC-N001 — /navigator loads with task queue and caseload', async ({ page }) => {
-    await expect(page).toHaveURL(/\/navigator/);
-    const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
-    expect(/application error|internal server error/i.test(bodyText)).toBe(false);
-    // Should have some task-related content
-    const hasTaskUI = /task|queue|caseload|member/i.test(bodyText);
-    if (!hasTaskUI) console.warn('TC-N001: Task queue or caseload not visible');
-  });
-
-  /** TC-N002 — Task queue shows all task types */
-  test('TC-N002 — task queue UI is visible', async ({ page }) => {
-    const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
-    // At least some task types should appear
-    const foundTypes = NAV_TASK_TYPES.filter((t) =>
-      new RegExp(t.replace(/_/g, '.?'), 'i').test(bodyText)
-    );
-    console.log(`TC-N002: Found task types in UI: ${foundTypes.join(', ') || 'none'}`);
-    // Soft — depends on seeded data
-    if (foundTypes.length === 0) console.warn('TC-N002: No task types visible — ensure navigator@test.com has seeded tasks');
-  });
-
-  /** TC-N003 — Mark task complete */
-  test('TC-N003 — mark task complete button exists', async ({ page }) => {
-    // Look for a "complete" or "mark done" action
-    const completeBtn = page.getByRole('button', { name: /complete|mark done|resolve/i });
-    const hasBtn = await completeBtn.isVisible({ timeout: 5000 }).catch(() => false);
-    if (!hasBtn) console.warn('TC-N003: "Mark complete" button not found — check task queue UI');
-  });
-
-  /** TC-N005 — Start facility-move plan */
-  test('TC-N005 — facility-move plan can be started', async ({ page }) => {
-    // Look for a member record and transition plan option
-    const startPlanBtn = page.getByRole('button', { name: /start transition|transition plan|facility.?move/i });
-    const hasBtn = await startPlanBtn.isVisible({ timeout: 5000 }).catch(() => false);
-    if (!hasBtn) console.warn('TC-N005: "Start transition plan" button not found — may be inside member detail');
-  });
-
-  /** TC-N008 — Hours tracking visible */
-  test('TC-N008 — navigator hours tracking visible', async ({ page }) => {
-    const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
-    const hasHours = /hours|minutes|time.*used|session/i.test(bodyText);
-    if (!hasHours) console.warn('TC-N008: Navigator hours tracking not visible in main dashboard');
-  });
-});
-
-/** TC-AD001 — Admin dashboard loads */
-test('TC-AD001 — /admin loads with member count + stats', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.admin, '/admin').catch(() => {});
-  const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
-  expect(/application error|internal server error/i.test(bodyText)).toBe(false);
-  const hasStats = /member|subscription|aria|call|stat/i.test(bodyText);
-  if (!hasStats) console.warn('TC-AD001: Admin stats not found on /admin');
-});
-
-/** TC-N004 — Navigator sends family invite */
-test('TC-N004 — navigator can send family invite', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.navigator, '/navigator');
-  const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
-  const hasInviteUI = /invite|family|add.*member/i.test(bodyText);
-  if (!hasInviteUI) console.warn('TC-N004: No family invite UI found on /navigator');
-  expect(page.url()).not.toContain('/login');
-});
-
-/** TC-N006 — Navigator marks member home from hospital */
-test('TC-N006 — navigator hospital discharge workflow exists', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.navigator, '/navigator');
-  const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
-  const hasDischarge = /hospital|discharge|home.*from|transition/i.test(bodyText);
-  if (!hasDischarge) console.warn('TC-N006: Hospital discharge / home-from-hospital UI not visible');
-  expect(page.url()).not.toContain('/login');
-});
-
-/** TC-N007 — Navigator approves member campaign */
-test('TC-N007 — navigator campaign approval UI exists', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.navigator, '/navigator');
-  const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
-  const hasCampaign = /campaign|approve|review/i.test(bodyText);
-  if (!hasCampaign) console.warn('TC-N007: Campaign approval UI not visible — may need seeded campaign');
-  expect(page.url()).not.toContain('/login');
-});
-
-/** TC-AD003–AD010 — Admin portal sub-pages */
-const ADMIN_PAGES = [
-  { tc: 'TC-AD003', path: '/admin/metro-activation',    keyword: /metro|activat|chapter/i },
-  { tc: 'TC-AD004', path: '/admin/community-partners',  keyword: /partner|communit/i },
-  { tc: 'TC-AD005', path: '/admin/grief-circles',       keyword: /grief|circle/i },
-  { tc: 'TC-AD006', path: '/admin/devices',             keyword: /device|kiosk/i },
-  { tc: 'TC-AD007', path: '/admin/org-imports',         keyword: /import|org/i },
-  { tc: 'TC-AD008', path: '/admin/campaigns',           keyword: /campaign/i },
-  { tc: 'TC-AD009', path: '/admin/community-partners',  keyword: /partner|listing/i },
-  { tc: 'TC-AD010', path: '/admin',                     keyword: /flag|feature/i },
-];
-
-for (const { tc, path, keyword } of ADMIN_PAGES) {
-  test(`${tc} — ${path} loads for admin`, async ({ page }) => {
-    await loginAs(page, ACCOUNTS.admin, path);
-    if (page.url().includes('/login')) { console.warn(`${tc}: admin login failed`); return; }
-    const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
-    expect(/internal server error/i.test(bodyText), `${tc}: server error on ${path}`).toBe(false);
-    if (!keyword.test(bodyText)) console.warn(`${tc}: expected content not found on ${path}`);
-    expect(page.url()).not.toContain('/login');
-  });
+async function getToken(page, account) {
+  const res = await page.request.post(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+    headers: { 'apikey': ANON_KEY, 'Content-Type': 'application/json' },
+    data: { email: account.email, password: account.password },
+  })
+  const json = await res.json()
+  return json.access_token as string
 }
+
+async function dbGet(page, token, table, filter) {
+  const res = await page.request.get(`${SUPABASE_URL}/rest/v1/${table}?${filter}&select=*`, {
+    headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${token}` },
+  })
+  return res.json()
+}
+
+async function dbDelete(page, token, table, filter) {
+  await page.request.delete(`${SUPABASE_URL}/rest/v1/${table}?${filter}`, {
+    headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${token}`, 'Prefer': 'return=minimal' },
+  })
+}
+
+// TC-N001 — /navigator loads for navigator
+test('TC-N001 — /navigator loads for navigator via cookie injection', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.navigator, '/navigator')
+  const token = await getToken(page, ACCOUNTS.navigator)
+  if (!token) { test.skip(); return }
+  expect(page.url()).not.toContain('/login')
+})
+
+// TC-N002 — /api/navigator/tasks returns data
+test('TC-N002 — /api/navigator/tasks returns data for navigator', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.navigator, '/navigator')
+  const token = await getToken(page, ACCOUNTS.navigator)
+  if (!token) { test.skip(); return }
+  const cookies = await page.context().cookies()
+  const cookieStr = cookies.map(c => `${c.name}=${c.value}`).join('; ')
+  const res = await page.request.get(`${BASE}/api/navigator/tasks`, {
+    headers: { 'Cookie': cookieStr },
+  })
+  if (res.status() === 404) { test.skip(); return }
+  expect([200, 204]).toContain(res.status())
+})
+
+// TC-N003 — POST /api/navigator/time-log creates navigator_time_logs row
+test('TC-N003 — POST /api/navigator/time-log creates DB row', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.navigator, '/navigator')
+  const token = await getToken(page, ACCOUNTS.navigator)
+  if (!token) { test.skip(); return }
+  const cookies = await page.context().cookies()
+  const cookieStr = cookies.map(c => `${c.name}=${c.value}`).join('; ')
+
+  const res = await page.request.post(`${BASE}/api/navigator/time-log`, {
+    headers: { 'Content-Type': 'application/json', 'Cookie': cookieStr },
+    data: { task_type: 'welcome_call', duration_minutes: 30, notes: 'E2E test time log' },
+  })
+  if (res.status() === 404) { test.skip(); return }
+  expect([200, 201]).toContain(res.status())
+  const body = await res.json()
+  const id = body.id || body.record?.id || body.data?.id
+  if (id) {
+    const rows = await dbGet(page, token, 'navigator_time_logs', `id=eq.${id}`)
+    expect(rows.length).toBe(1)
+    expect(rows[0].task_type).toBe('welcome_call')
+    await dbDelete(page, token, 'navigator_time_logs', `id=eq.${id}`)
+  }
+})
+
+// TC-N004 — POST /api/navigator/documents creates navigator_documents row
+test('TC-N004 — POST /api/navigator/documents creates DB row', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.navigator, '/navigator')
+  const token = await getToken(page, ACCOUNTS.navigator)
+  if (!token) { test.skip(); return }
+  const cookies = await page.context().cookies()
+  const cookieStr = cookies.map(c => `${c.name}=${c.value}`).join('; ')
+
+  const res = await page.request.post(`${BASE}/api/navigator/documents`, {
+    headers: { 'Content-Type': 'application/json', 'Cookie': cookieStr },
+    data: { document_type: 'care_plan', title: 'E2E Test Document', content: 'test content' },
+  })
+  if (res.status() === 404) { test.skip(); return }
+  expect([200, 201]).toContain(res.status())
+  const body = await res.json()
+  const id = body.id || body.record?.id || body.data?.id
+  if (id) {
+    const rows = await dbGet(page, token, 'navigator_documents', `id=eq.${id}`)
+    expect(rows.length).toBe(1)
+    await dbDelete(page, token, 'navigator_documents', `id=eq.${id}`)
+  }
+})
+
+// TC-N005 — /api/navigator/tasks requires auth
+test('TC-N005 — /api/navigator/tasks requires auth', async ({ page }) => {
+  const res = await page.request.get(`${BASE}/api/navigator/tasks`)
+  expect([401, 403, 302]).toContain(res.status())
+})
+
+// TC-N007 — navigator token can read own navigator_time_logs from DB
+test('TC-N007 — navigator token can read own navigator_time_logs from DB', async ({ page }) => {
+  const token = await getToken(page, ACCOUNTS.navigator)
+  if (!token) { test.skip(); return }
+  const rows = await dbGet(page, token, 'navigator_time_logs', 'select=id,task_type')
+  expect(Array.isArray(rows)).toBe(true)
+})
+
+// TC-N008 — /navigator action feed visible
+test('TC-N008 — navigator action feed accessible', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.navigator, '/navigator')
+  const token = await getToken(page, ACCOUNTS.navigator)
+  if (!token) { test.skip(); return }
+  const cookies = await page.context().cookies()
+  const cookieStr = cookies.map(c => `${c.name}=${c.value}`).join('; ')
+  const res = await page.request.get(`${BASE}/api/navigator/action-feed`, {
+    headers: { 'Cookie': cookieStr },
+  })
+  if (res.status() === 404) { test.skip(); return }
+  expect([200, 204]).toContain(res.status())
+})

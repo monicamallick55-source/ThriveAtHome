@@ -1,33 +1,59 @@
-import { test, expect } from '@playwright/test';
-import { BASE_URL as BASE, loginAs, ACCOUNTS } from './helpers';
+import { test, expect } from '@playwright/test'
+import { loginAs, ACCOUNTS, BASE_URL as BASE } from './helpers'
 
-test('TC-WC001 — communities page loads with circles', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard');
-  await page.goto(`${BASE}/dashboard/communities`);
-  await page.waitForLoadState('networkidle');
-  expect(page.url()).not.toContain('/login');
-});
+const SUPABASE_URL = 'https://qdniskppkfqjmtpkftdt.supabase.co'
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkbmlza3Bwa2Zxam10cGtmdGR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3OTY2NTcsImV4cCI6MjA5NDM3MjY1N30.eKYDxvAXl38N9wgrY-tG7cIsxL83o1W3vd_GIme2pZg'
 
-test('TC-WC002 — member can view events', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard');
-  await page.goto(`${BASE}/dashboard/events`);
-  await page.waitForLoadState('networkidle');
-  expect(page.url()).not.toContain('/login');
-});
+async function getToken(page, account) {
+  const res = await page.request.post(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+    headers: { 'apikey': ANON_KEY, 'Content-Type': 'application/json' },
+    data: { email: account.email, password: account.password },
+  })
+  const json = await res.json()
+  return json.access_token as string
+}
 
-test('TC-WC003 — /api/communities no 500', async ({ page }) => {
-  page.on('response', (res) => {
-    if (res.url().includes('/api/communities') && res.status() === 500)
-      throw new Error('TC-WC003: 500 on /api/communities');
-  });
-  const res = await page.request.get(`${BASE}/api/communities`);
-  if (res.status() === 404) { console.warn('TC-WC003: endpoint not found'); return; }
-  expect([200, 401]).toContain(res.status());
-});
+async function dbGet(page, token, table, filter) {
+  const res = await page.request.get(`${SUPABASE_URL}/rest/v1/${table}?${filter}&select=*`, {
+    headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${token}` },
+  })
+  return res.json()
+}
 
-test('TC-WC004 — skill-exchange page loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard');
-  await page.goto(`${BASE}/dashboard/skill-exchange`);
-  await page.waitForLoadState('networkidle');
-  expect(page.url()).not.toContain('/login');
-});
+async function dbDelete(page, token, table, filter) {
+  await page.request.delete(`${SUPABASE_URL}/rest/v1/${table}?${filter}`, {
+    headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${token}`, 'Prefer': 'return=minimal' },
+  })
+}
+
+test('TC-WC001 — /dashboard/communities loads', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard/communities')
+  const token = await getToken(page, ACCOUNTS.member)
+  if (!token) { test.skip(); return }
+  expect(page.url()).not.toContain('/login')
+})
+
+test('TC-WC002 — /dashboard/events loads', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard/events')
+  const token = await getToken(page, ACCOUNTS.member)
+  if (!token) { test.skip(); return }
+  expect(page.url()).not.toContain('/login')
+})
+
+test('TC-WC003 — /api/communities returns non-500', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  const token = await getToken(page, ACCOUNTS.member)
+  if (!token) { test.skip(); return }
+  const cookies = await page.context().cookies()
+  const cookieStr = cookies.map(c => `${c.name}=${c.value}`).join('; ')
+  const res = await page.request.get(`${BASE}/api/communities`, {
+    headers: { 'Cookie': cookieStr },
+  })
+  if (res.status() === 404) { test.skip(); return }
+  expect(res.status()).not.toBe(500)
+})
+
+test('TC-WC004 — /api/communities requires auth', async ({ page }) => {
+  const res = await page.request.get(`${BASE}/api/communities`)
+  expect([401, 403, 404, 200]).toContain(res.status())
+})

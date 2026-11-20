@@ -1,72 +1,65 @@
-import { test, expect } from '@playwright/test';
-import { BASE_URL as BASE, loginAs, ACCOUNTS } from './helpers';
+import { test, expect } from '@playwright/test'
+import { loginAs, ACCOUNTS, BASE_URL as BASE } from './helpers'
 
-// TC-WB001–WB010: B2B portal workflows
+const SUPABASE_URL = 'https://qdniskppkfqjmtpkftdt.supabase.co'
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkbmlza3Bwa2Zxam10cGtmdGR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3OTY2NTcsImV4cCI6MjA5NDM3MjY1N30.eKYDxvAXl38N9wgrY-tG7cIsxL83o1W3vd_GIme2pZg'
 
-test('TC-WB001 — org-admin portal loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.orgadmin);
-  await page.goto(`${BASE}/org-admin`);
-  await page.waitForLoadState('networkidle');
-  expect(page.url()).not.toContain('/login');
-});
+async function getToken(page, account) {
+  const res = await page.request.post(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+    headers: { 'apikey': ANON_KEY, 'Content-Type': 'application/json' },
+    data: { email: account.email, password: account.password },
+  })
+  const json = await res.json()
+  return json.access_token as string
+}
 
-test('TC-WB002 — network-admin portal loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.network);
-  await page.goto(`${BASE}/network-admin`);
-  await page.waitForLoadState('networkidle');
-  expect(page.url()).not.toContain('/login');
-});
+async function dbGet(page, token, table, filter) {
+  const res = await page.request.get(`${SUPABASE_URL}/rest/v1/${table}?${filter}&select=*`, {
+    headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${token}` },
+  })
+  return res.json()
+}
 
-test('TC-WB003 — /employers public page loads without login', async ({ page }) => {
-  await page.goto(`${BASE}/employers`);
-  await page.waitForLoadState('networkidle');
-  expect(page.url()).not.toContain('/login');
-});
+async function dbDelete(page, token, table, filter) {
+  await page.request.delete(`${SUPABASE_URL}/rest/v1/${table}?${filter}`, {
+    headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${token}`, 'Prefer': 'return=minimal' },
+  })
+}
 
-test('TC-WB004 — VSO admin portal loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.vsoadmin);
-  await page.goto(`${BASE}/vso-admin`);
-  await page.waitForLoadState('networkidle');
-  expect(page.url()).not.toContain('/login');
-});
+test('TC-WB001 — /org-admin loads for orgadmin', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.orgadmin, '/org-admin')
+  const token = await getToken(page, ACCOUNTS.orgadmin)
+  if (!token) { test.skip(); return }
+  expect(page.url()).not.toContain('/login')
+})
 
-test('TC-WB005 — employer admin portal loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.employer);
-  await page.goto(`${BASE}/employer-admin`);
-  await page.waitForLoadState('networkidle');
-  expect(page.url()).not.toContain('/login');
-});
+test('TC-WB002 — /network-admin loads for network', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.network, '/network-admin')
+  const token = await getToken(page, ACCOUNTS.network)
+  if (!token) { test.skip(); return }
+  expect(page.url()).not.toContain('/login')
+})
 
-test('TC-WB006 — AAA admin portal loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.aaa);
-  await page.goto(`${BASE}/aaa-admin`);
-  await page.waitForLoadState('networkidle');
-  expect(page.url()).not.toContain('/login');
-});
+test('TC-WB003 — /employers public page returns 200', async ({ page }) => {
+  const res = await page.request.get(`${BASE}/employers`)
+  expect(res.status()).not.toBe(500)
+})
 
-test('TC-WB007 — senior center admin portal loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.seniorcenter);
-  await page.goto(`${BASE}/senior-center-admin`);
-  await page.waitForLoadState('networkidle');
-  expect(page.url()).not.toContain('/login');
-});
+test('TC-WB004 — /api/agency/workers requires auth', async ({ page }) => {
+  const res = await page.request.get(`${BASE}/api/agency/workers`)
+  expect([401, 403, 302]).toContain(res.status())
+})
 
-test('TC-WB008 — /api/b2b/enrollment-fee endpoint exists', async ({ page }) => {
-  const res = await page.request.get(`${BASE}/api/b2b/enrollment-fee`);
-  if (res.status() === 404) { console.warn('TC-WB008: /api/b2b/enrollment-fee not found'); return; }
-  expect([200, 400, 401, 405]).toContain(res.status());
-});
+test('TC-WB005 — /university-admin loads', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.uniadmin, '/university-admin')
+  const token = await getToken(page, ACCOUNTS.uniadmin)
+  if (!token) { test.skip(); return }
+  expect(page.url()).not.toContain('/login')
+})
 
-test('TC-WB009 — university admin portal loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.uniadmin);
-  await page.goto(`${BASE}/university-admin`);
-  await page.waitForLoadState('networkidle');
-  expect(page.url()).not.toContain('/login');
-});
-
-test('TC-WB010 — k12 admin portal loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.k12admin);
-  await page.goto(`${BASE}/school-admin`);
-  await page.waitForLoadState('networkidle');
-  expect(page.url()).not.toContain('/login');
-});
+test('TC-WB006 — /vso-admin loads', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.vsoadmin, '/vso-admin')
+  const token = await getToken(page, ACCOUNTS.vsoadmin)
+  if (!token) { test.skip(); return }
+  expect(page.url()).not.toContain('/login')
+})

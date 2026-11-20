@@ -1,42 +1,34 @@
-import { test, expect } from '@playwright/test';
-import { BASE_URL as BASE } from './helpers';
+import { test, expect } from "@playwright/test"
+import { loginAs, ACCOUNTS, BASE_URL as BASE } from "./helpers"
+const SUPABASE_URL = "https://qdniskppkfqjmtpkftdt.supabase.co"
+const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkbmlza3Bwa2Zxam10cGtmdGR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3OTY2NTcsImV4cCI6MjA5NDM3MjY1N30.eKYDxvAXl38N9wgrY-tG7cIsxL83o1W3vd_GIme2pZg"
+async function getToken(page, account) {
+  const res = await page.request.post(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, { headers: { "apikey": ANON_KEY, "Content-Type": "application/json" }, data: { email: account.email, password: account.password } })
+  const json = await res.json(); return json.access_token as string
+}
+async function dbGet(page, token, table, filter) {
+  const res = await page.request.get(`${SUPABASE_URL}/rest/v1/${table}?${filter}&select=*`, { headers: { "apikey": ANON_KEY, "Authorization": `Bearer ${token}` } })
+  return res.json()
+}
+async function dbDelete(page, token, table, filter) {
+  await page.request.delete(`${SUPABASE_URL}/rest/v1/${table}?${filter}`, { headers: { "apikey": ANON_KEY, "Authorization": `Bearer ${token}`, "Prefer": "return=minimal" } })
+}
 
-// TC-CH001–CH010: Metro Chapter Activation
+test('TC-CH001 — /api/metro-areas returns non-500', async ({ page }) => {
+  const res = await page.request.get(`${BASE}/api/metro-areas`)
+  if (res.status() === 404) { test.skip(); return }
+  expect([200, 401]).toContain(res.status())
+})
 
-test('TC-CH001 — /api/metro-areas returns list', async ({ page }) => {
-  const res = await page.request.get(`${BASE}/api/metro-areas`);
-  if (res.status() === 404) { console.warn('TC-CH001: /api/metro-areas not found'); return; }
-  expect([200, 401]).toContain(res.status());
-  if (res.status() === 200) {
-    const body = await res.json().catch(() => null);
-    if (Array.isArray(body)) expect(body.length).toBeGreaterThan(0);
-  }
-});
-
-test('TC-CH002 — /api/metro-areas?zip=94103 returns Bay Area', async ({ page }) => {
-  const res = await page.request.get(`${BASE}/api/metro-areas?zip=94103`);
-  if (res.status() === 404) { console.warn('TC-CH002: zip lookup not implemented'); return; }
-  expect([200, 401]).toContain(res.status());
-});
-
-test('TC-CH003 — chapter activation cron requires CRON_SECRET', async ({ page }) => {
-  const res = await page.request.post(`${BASE}/api/cron/chapter-activation`, {
-    data: {},
-    headers: { 'Content-Type': 'application/json' },
-  });
-  if (res.status() === 404) { console.warn('TC-CH003: cron endpoint not found'); return; }
-  expect([401, 403]).toContain(res.status());
-});
-
-test('TC-CH004 — /chapter/bay-area loads or returns graceful 404', async ({ page }) => {
-  await page.goto(`${BASE}/chapter/bay-area`);
-  await page.waitForLoadState('networkidle');
-  const status = await page.evaluate(() => document.readyState);
-  expect(['complete', 'interactive']).toContain(status);
-});
-
-test('TC-CH005 — member dashboard shows local chapter content', async ({ page }) => {
-  const res = await page.request.get(`${BASE}/api/metro-areas?zip=94103`);
-  if (res.status() === 404) { console.warn('TC-CH005: metro API not found'); return; }
-  expect([200, 401]).toContain(res.status());
-});
+test('TC-CH002 — /api/metro-areas requires auth or returns public list', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.admin, '/admin')
+  const token = await getToken(page, ACCOUNTS.admin)
+  if (!token) { test.skip(); return }
+  const cookies = await page.context().cookies()
+  const cookieStr = cookies.map(c => `${c.name}=${c.value}`).join('; ')
+  const res = await page.request.get(`${BASE}/api/metro-areas`, {
+    headers: { 'Cookie': cookieStr },
+  })
+  if (res.status() === 404) { test.skip(); return }
+  expect([200, 204]).toContain(res.status())
+})

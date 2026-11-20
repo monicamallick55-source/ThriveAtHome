@@ -1,69 +1,198 @@
 import { test, expect } from '@playwright/test'
+import { loginAs, ACCOUNTS, BASE_URL as BASE } from './helpers'
 
-const BASE = process.env.BASE_URL || 'https://thrive-at-home-pied.vercel.app'
-const MEMBER_EMAIL = 'member@test.com'
-const MEMBER_PASS  = 'TestPass123!'
+const SUPABASE_URL = 'https://qdniskppkfqjmtpkftdt.supabase.co'
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkbmlza3Bwa2Zxam10cGtmdGR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3OTY2NTcsImV4cCI6MjA5NDM3MjY1N30.eKYDxvAXl38N9wgrY-tG7cIsxL83o1W3vd_GIme2pZg'
 
-async function loginAsMember(page: any) {
-  await page.goto(BASE + '/login')
-  await page.fill('input[type="email"]', MEMBER_EMAIL)
-  await page.fill('input[type="password"]', MEMBER_PASS)
-  await page.click('button[type="submit"]')
-  await page.waitForURL(/dashboard/, { timeout: 15000 })
+async function getToken(page, account) {
+  const res = await page.request.post(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+    headers: { 'apikey': ANON_KEY, 'Content-Type': 'application/json' },
+    data: { email: account.email, password: account.password },
+  })
+  const json = await res.json()
+  return json.access_token as string
 }
 
-const DASHBOARD_PAGES = [
-  { tc: 'TC-M001', path: '/dashboard',                   keywords: ['dashboard', 'thrive', 'welcome'] },
-  { tc: 'TC-M002', path: '/dashboard/health',            keywords: ['health'] },
-  { tc: 'TC-M004', path: '/dashboard/buddy',             keywords: ['buddy', 'friend', 'connect'] },
-  { tc: 'TC-M005', path: '/dashboard/communities',       keywords: ['communit'] },
-  { tc: 'TC-M007', path: '/dashboard/skill-exchange',    keywords: ['skill'] },
-  { tc: 'TC-M011', path: '/dashboard/trusted-advisors',  keywords: ['advisor', 'trusted'] },
-  { tc: 'TC-M012', path: '/dashboard/fraud-protection',  keywords: ['fraud', 'scam', 'protect'] },
-  { tc: 'TC-M013', path: '/dashboard/benefits-finder',   keywords: ['benefit'] },
-  { tc: 'TC-M014', path: '/dashboard/plan',              keywords: ['plan', 'subscription', 'member', 'thrive'] },
-  { tc: 'TC-M015', path: '/dashboard/addons',            keywords: ['addon', 'add-on', 'extra', 'enhance'] },
-  { tc: 'TC-M016', path: '/dashboard/profile',           keywords: ['profile', 'account', 'setting', 'email'] },
-  { tc: 'TC-M017', path: '/dashboard/vault',             keywords: ['vault', 'document', 'file', 'store'] },
-  { tc: 'TC-M018', path: '/dashboard/navigator',         keywords: ['navigator', 'task', 'guide'] },
-  { tc: 'TC-M020', path: '/dashboard/home-safety',       keywords: ['home', 'safe'] },
-  { tc: 'TC-M022', path: '/dashboard/encore-careers',    keywords: ['career', 'encore', 'work', 'job'] },
-  { tc: 'TC-M023', path: '/dashboard/medicare-help',     keywords: ['medicare', 'insurance', 'health'] },
-  { tc: 'TC-M026', path: '/dashboard/festivals',         keywords: ['festival', 'event', 'celebrat'] },
-  { tc: 'TC-M027', path: '/dashboard/transition',        keywords: ['transition', 'life', 'change'] },
-  { tc: 'TC-M028', path: '/dashboard/gift-send',         keywords: ['gift', 'send', 'celebrat'] },
-  { tc: 'TC-M030', path: '/dashboard/celebrations',      keywords: ['celebrat'] },
-  { tc: 'TC-M031', path: '/dashboard/celebrations/plan', keywords: ['celebrat', 'plan'] },
-  { tc: 'TC-M034', path: '/dashboard/family',            keywords: ['family', 'member', 'connect'] },
-  { tc: 'TC-A002', path: '/org-admin',                   keywords: ['admin', 'org', 'manage'] },
-  { tc: 'TC-A006', path: '/employer-admin',              keywords: ['employer', 'admin', 'manage', 'employee'] },
-]
+async function dbGet(page, token, table, filter) {
+  const res = await page.request.get(`${SUPABASE_URL}/rest/v1/${table}?${filter}&select=*`, {
+    headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${token}` },
+  })
+  return res.json()
+}
 
-test.describe('Member dashboard pages', () => {
-  test.describe.configure({ retries: 2 })
+async function dbDelete(page, token, table, filter) {
+  await page.request.delete(`${SUPABASE_URL}/rest/v1/${table}?${filter}`, {
+    headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${token}`, 'Prefer': 'return=minimal' },
+  })
+}
 
-  for (const { tc, path, keywords } of DASHBOARD_PAGES) {
-    test(`${tc} — ${path} loads without 500`, async ({ page }) => {
-      try {
-        await loginAsMember(page)
-      } catch {
-        console.warn(`${tc}: login failed — skipping ${path}`)
-        return
-      }
-      await page.goto(BASE + path, { waitUntil: 'domcontentloaded', timeout: 25000 })
+// TC-M001 — /dashboard loads for authenticated member
+test('TC-M001 — /dashboard loads for authenticated member', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  const token = await getToken(page, ACCOUNTS.member)
+  if (!token) { test.skip(); return }
+  expect(page.url()).not.toContain('/login')
+})
 
-      // Must not be a 500
-      const status = page.url()
-      const bodyText = (await page.locator('body').innerText() ?? '').toLowerCase()
-      expect(bodyText).not.toContain('internal server error')
-      expect(bodyText).not.toContain('application error')
-
-      // At least one keyword must appear
-      const found = keywords.some(kw => bodyText.includes(kw.toLowerCase()))
-      if (!found) {
-        console.warn(`${tc}: none of [${keywords.join(', ')}] found on ${path}`)
-      }
-      // Soft check — don't fail on keyword, just on 500
-    })
+// TC-M002 — /api/members/profile returns member data
+test('TC-M002 — /api/members/profile returns member data', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  const token = await getToken(page, ACCOUNTS.member)
+  if (!token) { test.skip(); return }
+  const cookies = await page.context().cookies()
+  const cookieStr = cookies.map(c => `${c.name}=${c.value}`).join('; ')
+  const res = await page.request.get(`${BASE}/api/members/profile`, {
+    headers: { 'Cookie': cookieStr },
+  })
+  expect([200, 404]).toContain(res.status())
+  if (res.status() === 200) {
+    const body = await res.json()
+    expect(body).toBeDefined()
   }
+})
+
+// TC-M004 — /dashboard/buddy loads
+test('TC-M004 — /dashboard/buddy loads for member', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard/buddy')
+  const token = await getToken(page, ACCOUNTS.member)
+  if (!token) { test.skip(); return }
+  expect(page.url()).not.toContain('/login')
+})
+
+// TC-M005 — /api/connections returns list (no 500)
+test('TC-M005 — /api/connections returns data for authenticated member', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  const token = await getToken(page, ACCOUNTS.member)
+  if (!token) { test.skip(); return }
+  const cookies = await page.context().cookies()
+  const cookieStr = cookies.map(c => `${c.name}=${c.value}`).join('; ')
+  const res = await page.request.get(`${BASE}/api/connections`, {
+    headers: { 'Cookie': cookieStr },
+  })
+  expect([200, 404]).toContain(res.status())
+})
+
+// TC-M011 — POST /api/advisor-request creates row in advisor_requests
+test('TC-M011 — POST /api/advisor-request creates DB row', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  const token = await getToken(page, ACCOUNTS.member)
+  if (!token) { test.skip(); return }
+  const cookies = await page.context().cookies()
+  const cookieStr = cookies.map(c => `${c.name}=${c.value}`).join('; ')
+
+  const res = await page.request.post(`${BASE}/api/advisor-request`, {
+    headers: { 'Content-Type': 'application/json', 'Cookie': cookieStr },
+    data: { advisor_type: 'financial', notes: 'E2E test request' },
+  })
+  if (res.status() === 404) { test.skip(); return }
+  expect([200, 201]).toContain(res.status())
+  const body = await res.json()
+  const id = body.id || body.record?.id || body.data?.id
+  if (id) {
+    const rows = await dbGet(page, token, 'advisor_requests', `id=eq.${id}`)
+    expect(rows.length).toBe(1)
+    await dbDelete(page, token, 'advisor_requests', `id=eq.${id}`)
+  }
+})
+
+// TC-M012 — POST /api/fraud-flags creates row in fraud_flags
+test('TC-M012 — POST /api/fraud-flags creates DB row', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  const token = await getToken(page, ACCOUNTS.member)
+  if (!token) { test.skip(); return }
+  const cookies = await page.context().cookies()
+  const cookieStr = cookies.map(c => `${c.name}=${c.value}`).join('; ')
+
+  const res = await page.request.post(`${BASE}/api/fraud-flags`, {
+    headers: { 'Content-Type': 'application/json', 'Cookie': cookieStr },
+    data: { description: 'E2E test fraud flag', severity: 'low', source: 'e2e' },
+  })
+  if (res.status() === 404) { test.skip(); return }
+  expect([200, 201]).toContain(res.status())
+  const body = await res.json()
+  const id = body.id || body.record?.id
+  if (id) {
+    const rows = await dbGet(page, token, 'fraud_flags', `id=eq.${id}`)
+    expect(rows.length).toBe(1)
+    await dbDelete(page, token, 'fraud_flags', `id=eq.${id}`)
+  }
+})
+
+// TC-M014 — /dashboard/plan returns non-500
+test('TC-M014 — /dashboard/plan loads without error', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard/plan')
+  const token = await getToken(page, ACCOUNTS.member)
+  if (!token) { test.skip(); return }
+  expect(page.url()).not.toContain('/login')
+})
+
+// TC-M016 — /dashboard/profile loads
+test('TC-M016 — /dashboard/profile loads for member', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard/profile')
+  const token = await getToken(page, ACCOUNTS.member)
+  if (!token) { test.skip(); return }
+  expect(page.url()).not.toContain('/login')
+})
+
+// TC-M017 — /dashboard/vault loads
+test('TC-M017 — /dashboard/vault loads for member', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard/vault')
+  const token = await getToken(page, ACCOUNTS.member)
+  if (!token) { test.skip(); return }
+  expect(page.url()).not.toContain('/login')
+})
+
+// TC-M018 — /dashboard/navigator loads
+test('TC-M018 — /dashboard/navigator loads for member', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard/navigator')
+  const token = await getToken(page, ACCOUNTS.member)
+  if (!token) { test.skip(); return }
+  expect(page.url()).not.toContain('/login')
+})
+
+// TC-M022 — /dashboard/encore-careers loads
+test('TC-M022 — /dashboard/encore-careers loads for member', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard/encore-careers')
+  const token = await getToken(page, ACCOUNTS.member)
+  if (!token) { test.skip(); return }
+  expect(page.url()).not.toContain('/login')
+})
+
+// TC-M026 — /dashboard/festivals loads
+test('TC-M026 — /dashboard/festivals loads for member', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard/festivals')
+  const token = await getToken(page, ACCOUNTS.member)
+  if (!token) { test.skip(); return }
+  expect(page.url()).not.toContain('/login')
+})
+
+// TC-M030 — POST /api/celebrations creates DB row
+test('TC-M030 — POST /api/celebrations creates DB row', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  const token = await getToken(page, ACCOUNTS.member)
+  if (!token) { test.skip(); return }
+  const cookies = await page.context().cookies()
+  const cookieStr = cookies.map(c => `${c.name}=${c.value}`).join('; ')
+
+  const res = await page.request.post(`${BASE}/api/celebrations`, {
+    headers: { 'Content-Type': 'application/json', 'Cookie': cookieStr },
+    data: { event_type: 'birthday', event_date: '2027-01-01', notes: 'E2E test celebration' },
+  })
+  if (res.status() === 404) { test.skip(); return }
+  expect([200, 201]).toContain(res.status())
+  const body = await res.json()
+  const id = body.id || body.record?.id
+  if (id) {
+    const rows = await dbGet(page, token, 'celebrations', `id=eq.${id}`)
+    expect(rows.length).toBe(1)
+    await dbDelete(page, token, 'celebrations', `id=eq.${id}`)
+  }
+})
+
+// TC-M034 — /dashboard/family loads for member
+test('TC-M034 — /dashboard/family loads for member', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard/family')
+  const token = await getToken(page, ACCOUNTS.member)
+  if (!token) { test.skip(); return }
+  expect(page.url()).not.toContain('/login')
 })

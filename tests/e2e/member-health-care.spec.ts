@@ -1,71 +1,97 @@
-import { test, expect } from '@playwright/test';
-import { BASE_URL as BASE, loginAs, ACCOUNTS } from './helpers';
+import { test, expect } from '@playwright/test'
+import { loginAs, ACCOUNTS, BASE_URL as BASE } from './helpers'
 
-async function goToDashboard(page) {
-  await loginAs(page, ACCOUNTS.member, '/dashboard');
-  if (page.url().includes('/login')) return false;
-  await page.goto(`${BASE}/dashboard`);
-  await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) {
-    await loginAs(page, ACCOUNTS.member, '/dashboard');
-    await page.goto(`${BASE}/dashboard`);
-    await page.waitForLoadState('networkidle');
-  }
-  return !page.url().includes('/login');
+const SUPABASE_URL = 'https://qdniskppkfqjmtpkftdt.supabase.co'
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkbmlza3Bwa2Zxam10cGtmdGR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3OTY2NTcsImV4cCI6MjA5NDM3MjY1N30.eKYDxvAXl38N9wgrY-tG7cIsxL83o1W3vd_GIme2pZg'
+
+async function getToken(page, account) {
+  const res = await page.request.post(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+    headers: { 'apikey': ANON_KEY, 'Content-Type': 'application/json' },
+    data: { email: account.email, password: account.password },
+  })
+  const json = await res.json()
+  return json.access_token as string
 }
 
-test('TC-MHC001 — /dashboard/health loads', async ({ page }) => {
-  const ok = await goToDashboard(page);
-  if (!ok) { console.warn('TC-MHC001: auth failed'); return; }
-  await page.goto(`${BASE}/dashboard/health`);
-  await page.waitForLoadState('networkidle');
-  expect(page.url()).not.toContain('/login');
-});
+// TC-MHC001 — /dashboard/health loads
+test('TC-MHC001 — /dashboard/health loads for member', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard/health')
+  const token = await getToken(page, ACCOUNTS.member)
+  if (!token) { test.skip(); return }
+  expect(page.url()).not.toContain('/login')
+})
 
-test('TC-MHC002 — /dashboard/benefits-finder loads', async ({ page }) => {
-  const ok = await goToDashboard(page);
-  if (!ok) { console.warn('TC-MHC002: auth failed'); return; }
-  await page.goto(`${BASE}/dashboard/benefits-finder`);
-  await page.waitForLoadState('networkidle');
-  expect(page.url()).not.toContain('/login');
-});
+// TC-MHC002 — /dashboard/benefits-finder loads
+test('TC-MHC002 — /dashboard/benefits-finder loads for member', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard/benefits-finder')
+  const token = await getToken(page, ACCOUNTS.member)
+  if (!token) { test.skip(); return }
+  expect(page.url()).not.toContain('/login')
+})
 
-test('TC-MHC003 — /dashboard/medicare-help loads', async ({ page }) => {
-  const ok = await goToDashboard(page);
-  if (!ok) { console.warn('TC-MHC003: auth failed'); return; }
-  await page.goto(`${BASE}/dashboard/medicare-help`);
-  await page.waitForLoadState('networkidle');
-  expect(page.url()).not.toContain('/login');
-});
+// TC-MHC003 — /dashboard/medicare-help loads
+test('TC-MHC003 — /dashboard/medicare-help loads for member', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard/medicare-help')
+  const token = await getToken(page, ACCOUNTS.member)
+  if (!token) { test.skip(); return }
+  expect(page.url()).not.toContain('/login')
+})
 
-test('TC-MHC004 — /dashboard/grief-support loads with 9 pathways', async ({ page }) => {
-  const ok = await goToDashboard(page);
-  if (!ok) { console.warn('TC-MHC004: auth failed'); return; }
-  await page.goto(`${BASE}/dashboard/grief-support`);
-  await page.waitForLoadState('networkidle');
-  expect(page.url()).not.toContain('/login');
-});
+// TC-MHC004 — /dashboard/grief-support loads
+test('TC-MHC004 — /dashboard/grief-support loads for member', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard/grief-support')
+  const token = await getToken(page, ACCOUNTS.member)
+  if (!token) { test.skip(); return }
+  expect(page.url()).not.toContain('/login')
+})
 
-test('TC-MHC005 — /dashboard/trusted-advisors loads', async ({ page }) => {
-  const ok = await goToDashboard(page);
-  if (!ok) { console.warn('TC-MHC005: auth failed'); return; }
-  await page.goto(`${BASE}/dashboard/trusted-advisors`);
-  await page.waitForLoadState('networkidle');
-  expect(page.url()).not.toContain('/login');
-});
+// TC-MHC005 — /dashboard/home-safety loads
+test('TC-MHC005 — /dashboard/home-safety loads for member', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard/home-safety')
+  const token = await getToken(page, ACCOUNTS.member)
+  if (!token) { test.skip(); return }
+  expect(page.url()).not.toContain('/login')
+})
 
-test('TC-MHC006 — /dashboard/fraud-protection loads', async ({ page }) => {
-  const ok = await goToDashboard(page);
-  if (!ok) { console.warn('TC-MHC006: auth failed'); return; }
-  await page.goto(`${BASE}/dashboard/fraud-protection`);
-  await page.waitForLoadState('networkidle');
-  expect(page.url()).not.toContain('/login');
-});
+// TC-MHC006 — /dashboard/fhir-referrals loads
+test('TC-MHC006 — /dashboard/fhir-referrals loads for member', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard/fhir-referrals')
+  const token = await getToken(page, ACCOUNTS.member)
+  if (!token) { test.skip(); return }
+  expect(page.url()).not.toContain('/login')
+})
 
-test('TC-MHC007 — /dashboard/vault loads', async ({ page }) => {
-  const ok = await goToDashboard(page);
-  if (!ok) { console.warn('TC-MHC007: auth failed'); return; }
-  await page.goto(`${BASE}/dashboard/vault`);
-  await page.waitForLoadState('networkidle');
-  expect(page.url()).not.toContain('/login');
-});
+// TC-MHC007 — /api/members/profile requires auth
+test('TC-MHC007 — /api/members/profile requires auth', async ({ page }) => {
+  const res = await page.request.get(`${BASE}/api/members/profile`)
+  expect([401, 403, 302]).toContain(res.status())
+})
+
+// TC-MHC008 — /api/members/profile returns data for authenticated member
+test('TC-MHC008 — /api/members/profile returns data for authenticated member', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  const token = await getToken(page, ACCOUNTS.member)
+  if (!token) { test.skip(); return }
+  const cookies = await page.context().cookies()
+  const cookieStr = cookies.map(c => `${c.name}=${c.value}`).join('; ')
+  const res = await page.request.get(`${BASE}/api/members/profile`, {
+    headers: { 'Cookie': cookieStr },
+  })
+  expect([200, 404]).toContain(res.status())
+})
+
+// TC-MHC009 — /dashboard/life-transitions loads
+test('TC-MHC009 — /dashboard/life-transitions loads for member', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard/life-transitions')
+  const token = await getToken(page, ACCOUNTS.member)
+  if (!token) { test.skip(); return }
+  expect(page.url()).not.toContain('/login')
+})
+
+// TC-MHC010 — /dashboard/trusted-advisors loads
+test('TC-MHC010 — /dashboard/trusted-advisors loads for member', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard/trusted-advisors')
+  const token = await getToken(page, ACCOUNTS.member)
+  if (!token) { test.skip(); return }
+  expect(page.url()).not.toContain('/login')
+})

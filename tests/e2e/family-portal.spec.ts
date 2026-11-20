@@ -1,80 +1,115 @@
-/**
- * TC-F001–TC-F007 — Family Portal Tests
- *
- * Run: npx playwright test tests/e2e/family-portal.spec.ts
- */
-import { test, expect } from '@playwright/test';
-import { ACCOUNTS, loginAs } from './helpers';
+import { test, expect } from '@playwright/test'
+import { loginAs, ACCOUNTS, BASE_URL as BASE } from './helpers'
 
-test.describe('TC-F001–F007 — Family Portal', () => {
-  test.beforeEach(async ({ page }) => {
-    await loginAs(page, ACCOUNTS.family, '/dashboard/family').catch(() => {});
-  });
+const SUPABASE_URL = 'https://qdniskppkfqjmtpkftdt.supabase.co'
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkbmlza3Bwa2Zxam10cGtmdGR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3OTY2NTcsImV4cCI6MjA5NDM3MjY1N30.eKYDxvAXl38N9wgrY-tG7cIsxL83o1W3vd_GIme2pZg'
 
-  /** TC-F001 — Family main view */
-  test('TC-F001 — /dashboard/family loads with member wellness summary', async ({ page }) => {
-    if (!page.url().includes('/dashboard/family')) { console.warn(`TC-F001: unexpected URL ${page.url()}`); return; }
+async function getToken(page, account) {
+  const res = await page.request.post(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+    headers: { 'apikey': ANON_KEY, 'Content-Type': 'application/json' },
+    data: { email: account.email, password: account.password },
+  })
+  const json = await res.json()
+  return json.access_token as string
+}
 
-    const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
+async function dbGet(page, token, table, filter) {
+  const res = await page.request.get(`${SUPABASE_URL}/rest/v1/${table}?${filter}&select=*`, {
+    headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${token}` },
+  })
+  return res.json()
+}
 
-    // Wellness summary panel
-    const hasWellness = /mood|last call|check.?in|wellness/i.test(bodyText);
-    if (!hasWellness) console.warn('TC-F001: Wellness summary not found');
+async function dbDelete(page, token, table, filter) {
+  await page.request.delete(`${SUPABASE_URL}/rest/v1/${table}?${filter}`, {
+    headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${token}`, 'Prefer': 'return=minimal' },
+  })
+}
 
-    // Fraud protection card
-    const hasFraud = /fraud|scam|protection/i.test(bodyText);
-    if (!hasFraud) console.warn('TC-F001: Fraud protection card not found');
+// TC-F001 — /dashboard/family loads for family account
+test('TC-F001 — /dashboard/family loads for family account', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.family, '/dashboard/family')
+  const token = await getToken(page, ACCOUNTS.family)
+  if (!token) { test.skip(); return }
+  expect(page.url()).not.toContain('/login')
+})
 
-    // No server error
-    expect(/application error|internal server error/i.test(bodyText)).toBe(false);
-  });
+// TC-F002 — POST /api/family/events creates family_events row
+test('TC-F002 — POST /api/family/events creates DB row', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.family, '/dashboard/family')
+  const token = await getToken(page, ACCOUNTS.family)
+  if (!token) { test.skip(); return }
+  const cookies = await page.context().cookies()
+  const cookieStr = cookies.map(c => `${c.name}=${c.value}`).join('; ')
 
-  /** TC-F002 — Family events calendar — add event */
-  test('TC-F002 — family events calendar visible + add event form', async ({ page }) => {
-    // Look for events calendar tab or section
-    const calendarTab = page.getByRole('tab', { name: /events/i }).or(
-      page.getByRole('link', { name: /events/i })
-    ).or(page.getByText(/family events/i));
-
-    const hasCalendar = await calendarTab.isVisible({ timeout: 5000 }).catch(() => false);
-    if (!hasCalendar) console.warn('TC-F002: Family Events Calendar tab not visible');
-
-    // "Add event" button
-    const addEventBtn = page.getByRole('button', { name: /add event|new event/i });
-    const hasAddEvent = await addEventBtn.isVisible({ timeout: 5000 }).catch(() => false);
-    if (!hasAddEvent) console.warn('TC-F002: "Add event" button not found');
-  });
-
-  /** TC-F004 — Mood timeline */
-  test('TC-F004 — mood timeline visible', async ({ page }) => {
-    const hasMood = await page.getByText(/mood/i).isVisible({ timeout: 5000 }).catch(() => false);
-    if (!hasMood) console.warn('TC-F004: Mood timeline not found on /dashboard/family');
-  });
-
-  /** TC-F006 — Celebration planning accessible to family */
-  test('TC-F006 — family can access celebration planner', async ({ page }) => {
-    await page.goto('/dashboard/celebrations/plan');
-    await page.waitForLoadState('networkidle').catch(() => {});
-    const url = page.url();
-    // Should reach planner, not get blocked
-    if (url.includes('/login')) { console.warn('TC-F006: celebrations/plan redirected to login'); return; }
-    const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
-    expect(/application error|internal server error/i.test(bodyText)).toBe(false);
-  });
-});
-
-/** TC-A003 — Basic plan family seat limit (3 seats) */
-test('TC-A003 — basic plan blocks 4th family invite with upgrade prompt', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard');
-  // This test requires the member to already have 3 family seats
-  // Attempt to send a 4th invite
-  const inviteResp = await page.request.post('/api/family/invite', {
-    data: { email: 'fourth-family@test.com' },
-    failOnStatusCode: false,
-  });
-  if (inviteResp.status() === 403) {
-    console.log('TC-A003: 4th invite correctly rejected with 403');
-  } else {
-    console.warn(`TC-A003: 4th invite returned ${inviteResp.status()} — may need 3 existing family members seeded`);
+  const res = await page.request.post(`${BASE}/api/family/events`, {
+    headers: { 'Content-Type': 'application/json', 'Cookie': cookieStr },
+    data: { title: 'E2E Test Family Event', event_date: '2027-06-01', notes: 'created by e2e test' },
+  })
+  if (res.status() === 404) { test.skip(); return }
+  expect([200, 201]).toContain(res.status())
+  const body = await res.json()
+  const id = body.id || body.record?.id || body.data?.id
+  if (id) {
+    const rows = await dbGet(page, token, 'family_events', `id=eq.${id}`)
+    expect(rows.length).toBe(1)
+    expect(rows[0].title).toBe('E2E Test Family Event')
+    await dbDelete(page, token, 'family_events', `id=eq.${id}`)
   }
-});
+})
+
+// TC-F003 — GET /api/family/buddy-assignment returns data
+test('TC-F003 — GET /api/family/buddy-assignment returns data', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.family, '/dashboard/family')
+  const token = await getToken(page, ACCOUNTS.family)
+  if (!token) { test.skip(); return }
+  const cookies = await page.context().cookies()
+  const cookieStr = cookies.map(c => `${c.name}=${c.value}`).join('; ')
+  const res = await page.request.get(`${BASE}/api/family/buddy-assignment`, {
+    headers: { 'Cookie': cookieStr },
+  })
+  if (res.status() === 404) { test.skip(); return }
+  expect([200, 204]).toContain(res.status())
+})
+
+// TC-F004 — family cannot access /navigator
+test('TC-F004 — family account cannot access /navigator', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.family, '/dashboard/family')
+  const token = await getToken(page, ACCOUNTS.family)
+  if (!token) { test.skip(); return }
+  const cookies = await page.context().cookies()
+  const cookieStr = cookies.map(c => `${c.name}=${c.value}`).join('; ')
+  const res = await page.request.get(`${BASE}/api/navigator/tasks`, {
+    headers: { 'Cookie': cookieStr },
+  })
+  expect([401, 403, 404]).toContain(res.status())
+})
+
+// TC-F005 — /api/family/events GET requires auth
+test('TC-F005 — /api/family/events GET requires auth', async ({ page }) => {
+  const res = await page.request.get(`${BASE}/api/family/events`)
+  expect([401, 403, 302]).toContain(res.status())
+})
+
+// TC-F006 — family portal member data readable from DB
+test('TC-F006 — family token can read own profile from DB', async ({ page }) => {
+  const token = await getToken(page, ACCOUNTS.family)
+  if (!token) { test.skip(); return }
+  const rows = await dbGet(page, token, 'profiles', 'select=id,role')
+  expect(Array.isArray(rows)).toBe(true)
+  expect(rows.length).toBeGreaterThan(0)
+})
+
+// TC-F007 — family portal fraud protection card via API
+test('TC-F007 — /api/fraud-flags GET returns data for family', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.family, '/dashboard/family')
+  const token = await getToken(page, ACCOUNTS.family)
+  if (!token) { test.skip(); return }
+  const cookies = await page.context().cookies()
+  const cookieStr = cookies.map(c => `${c.name}=${c.value}`).join('; ')
+  const res = await page.request.get(`${BASE}/api/fraud-flags`, {
+    headers: { 'Cookie': cookieStr },
+  })
+  if (res.status() === 404) { test.skip(); return }
+  expect([200, 401]).toContain(res.status())
+})

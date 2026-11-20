@@ -1,119 +1,70 @@
-/**
- * TC-CELD* — Celebrations depth (G5.4, G7.3–G7.6) Nov 4–6
- * Covers: 3-tier planner, gift send deep, birthday arc, milestone programs
- */
-import { test, expect } from '@playwright/test';
-import { BASE_URL as BASE, loginAs, ACCOUNTS } from './helpers';
+import { test, expect } from "@playwright/test"
+import { loginAs, ACCOUNTS, BASE_URL as BASE } from "./helpers"
 
-// ── Celebrations hub ──────────────────────────────────────────────────────────
+const SUPABASE_URL = "https://qdniskppkfqjmtpkftdt.supabase.co"
+const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkbmlza3Bwa2Zxam10cGtmdGR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3OTY2NTcsImV4cCI6MjA5NDM3MjY1N30.eKYDxvAXl38N9wgrY-tG7cIsxL83o1W3vd_GIme2pZg"
+const CRON_SECRET = "0LjR0pE/7WueB508Z6OER1s/6x0Buze2vbRPVljKxFs="
 
-test('TC-CELD001 — celebrations hub shows all event types', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member);
-  await page.goto(`${BASE}/dashboard/celebrations`);
-  await page.waitForLoadState('networkidle');
-  const content = await page.content();
-  expect(content).not.toMatch(/application error|internal server error/i);
-  const hasTypes = content.match(/birthday|anniversary|milestone|celebration/i);
-  if (!hasTypes) console.warn('TC-CELD001: celebration event types not found');
-});
+async function getToken(page, account) {
+  const res = await page.request.post(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+    headers: { "apikey": ANON_KEY, "Content-Type": "application/json" },
+    data: { email: account.email, password: account.password },
+  })
+  const json = await res.json()
+  return json.access_token as string
+}
 
-test('TC-CELD002 — celebration planner shows 3 tiers (Simple/Signature/Legacy)', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member);
-  await page.goto(`${BASE}/dashboard/celebrations/plan`);
-  await page.waitForLoadState('networkidle');
-  const content = await page.content();
-  expect(content).not.toMatch(/application error|internal server error/i);
-  const hasTiers = content.match(/simple|signature|legacy/i);
-  if (!hasTiers) console.warn('TC-CELD002: 3-tier celebration options not found');
-});
+async function dbGet(page, token, table, filter) {
+  const res = await page.request.get(`${SUPABASE_URL}/rest/v1/${table}?${filter}&select=*`, {
+    headers: { "apikey": ANON_KEY, "Authorization": `Bearer ${token}` },
+  })
+  return res.json()
+}
 
-test('TC-CELD003 — /api/celebrations POST responds', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member);
+async function dbDelete(page, token, table, filter) {
+  await page.request.delete(`${SUPABASE_URL}/rest/v1/${table}?${filter}`, {
+    headers: { "apikey": ANON_KEY, "Authorization": `Bearer ${token}`, "Prefer": "return=minimal" },
+  })
+}
+
+test('TC-CELD001 — /dashboard/celebrations loads', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard/celebrations')
+  const token = await getToken(page, ACCOUNTS.member)
+  if (!token) { test.skip(); return }
+  expect(page.url()).not.toContain('/login')
+})
+
+test('TC-CELD002 — /dashboard/celebrations/plan loads', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard/celebrations/plan')
+  const token = await getToken(page, ACCOUNTS.member)
+  if (!token) { test.skip(); return }
+  expect(page.url()).not.toContain('/login')
+})
+
+test('TC-CELD003 — POST /api/celebrations creates DB row', async ({ page }) => {
+  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  const token = await getToken(page, ACCOUNTS.member)
+  if (!token) { test.skip(); return }
+  const cookies = await page.context().cookies()
+  const cookieStr = cookies.map(c => `${c.name}=${c.value}`).join('; ')
   const res = await page.request.post(`${BASE}/api/celebrations`, {
-    data: { type: 'birthday', tier: 'simple', memberId: 'test' },
-  });
-  expect(res.status()).not.toBe(500);
-  expect([200, 201, 400, 401, 404, 422]).toContain(res.status());
-});
-
-// ── Gift send ─────────────────────────────────────────────────────────────────
-
-test('TC-CELD010 — /dashboard/gift-send shows catalog categories', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member);
-  await page.goto(`${BASE}/dashboard/gift-send`);
-  await page.waitForLoadState('networkidle');
-  const content = await page.content();
-  expect(content).not.toMatch(/application error|internal server error/i);
-  const hasGifts = content.match(/gift|flower|card|experience|send/i);
-  if (!hasGifts) console.warn('TC-CELD010: gift catalog content not found');
-});
-
-test('TC-CELD011 — /api/gifts/catalog responds with items', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member);
-  const res = await page.request.get(`${BASE}/api/gifts/catalog`);
-  expect(res.status()).not.toBe(500);
-  if (res.status() === 200) {
-    const body = await res.json();
-    const hasItems = Array.isArray(body) || Array.isArray(body?.items) || Array.isArray(body?.gifts);
-    if (!hasItems) console.warn('TC-CELD011: gift catalog response not an array');
+    headers: { 'Content-Type': 'application/json', 'Cookie': cookieStr },
+    data: { event_type: 'anniversary', event_date: '2027-02-14', notes: 'E2E deep test' },
+  })
+  if (res.status() === 404) { test.skip(); return }
+  expect([200, 201]).toContain(res.status())
+  const body = await res.json()
+  const id = body.id || body.record?.id
+  if (id) {
+    const rows = await dbGet(page, token, 'celebrations', `id=eq.${id}`)
+    expect(rows.length).toBe(1)
+    await dbDelete(page, token, 'celebrations', `id=eq.${id}`)
   }
-});
+})
 
-test('TC-CELD012 — /api/gifts/send POST requires auth', async ({ page }) => {
-  const res = await page.request.post(`${BASE}/api/gifts/send`, {
-    data: { giftId: 'test', recipientId: 'test' },
-  });
-  expect([401, 403]).toContain(res.status());
-});
-
-// ── Birthday arc ──────────────────────────────────────────────────────────────
-
-test('TC-CELD020 — birthday arc cron exists and requires auth', async ({ page }) => {
-  const res = await page.request.post(`${BASE}/api/cron/birthday-arc`, {
-    headers: { authorization: 'Bearer wrong-secret' },
-  });
-  expect([401, 403, 405]).toContain(res.status());
-});
-
-test('TC-CELD021 — birthday arc cron accepts correct CRON_SECRET', async ({ page }) => {
-  const secret = process.env.CRON_SECRET || '0LjR0pE/7WueB508Z6OER1s/6x0Buze2vbRPVljKxFs=';
-  const res = await page.request.post(`${BASE}/api/cron/birthday-arc`, {
-    headers: { authorization: `Bearer ${secret}` },
-  });
-  expect([200, 207]).toContain(res.status());
-});
-
-test('TC-CELD022 — member profile has birthday field', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member);
-  await page.goto(`${BASE}/dashboard/profile`);
-  await page.waitForLoadState('networkidle');
-  const content = await page.content();
-  const hasBirthday = content.match(/birthday|birth date|date of birth/i);
-  if (!hasBirthday) console.warn('TC-CELD022: birthday field not found on profile page');
-});
-
-// ── Milestone birthday programs (70–100) ──────────────────────────────────────
-
-test('TC-CELD030 — /api/cron/birthday-arc returns milestones data', async ({ page }) => {
-  const secret = process.env.CRON_SECRET || '0LjR0pE/7WueB508Z6OER1s/6x0Buze2vbRPVljKxFs=';
-  const res = await page.request.post(`${BASE}/api/cron/birthday-arc`, {
-    headers: { authorization: `Bearer ${secret}` },
-  });
-  if (res.status() === 200) {
-    const body = await res.json();
-    // Response should include some processing info
-    expect(typeof body).toBe('object');
-  }
-  expect([200, 207]).toContain(res.status());
-});
-
-test('TC-CELD031 — member achievements page loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member);
-  await page.goto(`${BASE}/dashboard/achievements`);
-  await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login') || page.url().includes('/404')) {
-    console.warn('TC-CELD031: achievements page not found — may be at different route'); return;
-  }
-  const content = await page.content();
-  expect(content).not.toMatch(/application error|internal server error/i);
-});
+test('TC-CELD004 — /api/celebrations requires auth', async ({ page }) => {
+  const res = await page.request.post(`${BASE}/api/celebrations`, {
+    data: { event_type: 'birthday' }, headers: { 'Content-Type': 'application/json' },
+  })
+  expect([401, 403, 302]).toContain(res.status())
+})

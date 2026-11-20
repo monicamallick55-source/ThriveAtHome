@@ -1,46 +1,45 @@
-import { test, expect } from '@playwright/test';
-import { BASE_URL as BASE, loginAs, ACCOUNTS } from './helpers';
+import { test, expect } from "@playwright/test"
+import { loginAs, ACCOUNTS, BASE_URL as BASE } from "./helpers"
 
-// TC-CCF001–CCF003: Community Care Fund
+const SUPABASE_URL = "https://qdniskppkfqjmtpkftdt.supabase.co"
+const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkbmlza3Bwa2Zxam10cGtmdGR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3OTY2NTcsImV4cCI6MjA5NDM3MjY1N30.eKYDxvAXl38N9wgrY-tG7cIsxL83o1W3vd_GIme2pZg"
+const CRON_SECRET = "0LjR0pE/7WueB508Z6OER1s/6x0Buze2vbRPVljKxFs="
 
-test('TC-CCF001 — /community-care-fund public page loads', async ({ page }) => {
-  await page.goto(`${BASE}/community-care-fund`);
-  await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) {
-    // try /donate or /fund as alternate routes
-    await page.goto(`${BASE}/donate`);
-    await page.waitForLoadState('networkidle');
-  }
-  if (page.url().includes('/404') || page.url().includes('not-found')) {
-    console.warn('TC-CCF001: community care fund page not found — checking /donate');
-    return;
-  }
-  const status = await page.evaluate(() => document.readyState);
-  expect(['complete', 'interactive']).toContain(status);
-});
+async function getToken(page, account) {
+  const res = await page.request.post(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+    headers: { "apikey": ANON_KEY, "Content-Type": "application/json" },
+    data: { email: account.email, password: account.password },
+  })
+  const json = await res.json()
+  return json.access_token as string
+}
 
-test('TC-CCF002 — /api/community-care-fund endpoint exists', async ({ page }) => {
-  const res = await page.request.get(`${BASE}/api/community-care-fund`);
-  if (res.status() === 404) {
-    console.warn('TC-CCF002: /api/community-care-fund not implemented yet');
-    return;
-  }
-  expect([200, 401, 405]).toContain(res.status());
-});
+async function dbGet(page, token, table, filter) {
+  const res = await page.request.get(`${SUPABASE_URL}/rest/v1/${table}?${filter}&select=*`, {
+    headers: { "apikey": ANON_KEY, "Authorization": `Bearer ${token}` },
+  })
+  return res.json()
+}
 
-test('TC-CCF003 — member can view care fund status on dashboard', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard');
-  await page.goto(`${BASE}/dashboard`);
-  await page.waitForLoadState('networkidle');
-  if (page.url().includes('/login')) {
-    await loginAs(page, ACCOUNTS.member, '/dashboard');
-    await page.goto(`${BASE}/dashboard`);
-    await page.waitForLoadState('networkidle');
-  }
-  // care fund widget may not be on dashboard for all plans — soft check
-  const bodyText = await page.locator('body').textContent();
-  if (!bodyText?.toLowerCase().includes('care fund') && !bodyText?.toLowerCase().includes('community')) {
-    console.warn('TC-CCF003: care fund widget not visible on dashboard (may be plan-gated)');
-  }
-  expect(page.url()).not.toContain('/login');
-});
+async function dbDelete(page, token, table, filter) {
+  await page.request.delete(`${SUPABASE_URL}/rest/v1/${table}?${filter}`, {
+    headers: { "apikey": ANON_KEY, "Authorization": `Bearer ${token}`, "Prefer": "return=minimal" },
+  })
+}
+
+test('TC-CCF001 — /donate page returns non-500', async ({ page }) => {
+  const res = await page.request.get(`${BASE}/donate`)
+  expect(res.status()).not.toBe(500)
+})
+
+test('TC-CCF002 — /community-care-fund returns non-500', async ({ page }) => {
+  const res = await page.request.get(`${BASE}/community-care-fund`)
+  expect(res.status()).not.toBe(500)
+})
+
+test('TC-CCF003 — /api/donations requires auth', async ({ page }) => {
+  const res = await page.request.post(`${BASE}/api/donations`, {
+    data: { amount: 25, fund: 'community' }, headers: { 'Content-Type': 'application/json' },
+  })
+  expect([401, 403, 404]).toContain(res.status())
+})
