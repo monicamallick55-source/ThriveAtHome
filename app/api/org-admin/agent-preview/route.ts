@@ -4,8 +4,8 @@
  * POST — test chat with the configured agent
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
-import { createAdminClient } from '@/utils/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { buildAgentSystemPrompt, AgentType } from '@/lib/agent-prompt-builder'
 
 async function getOrgAndConfig(userId: string, agentType: string) {
