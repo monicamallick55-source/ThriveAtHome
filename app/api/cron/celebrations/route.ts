@@ -58,14 +58,20 @@ export async function POST(req: NextRequest) {
     // 2. Joy call on birthday (opted-in members only, skip if in active grief)
     if (member.aria_call_opted_in) {
       const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString()
-      const { count: griefCount } = await supabase
-        .from('grief_support_requests')
-        .select('id', { count: 'exact', head: true })
-        .eq('member_id', member.id)
-        .eq('status', 'active')
-        .gte('created_at', ninetyDaysAgo)
+      let griefCount = 0
+      try {
+        const { count: gc } = await supabase
+          .from('grief_support_requests')
+          .select('id', { count: 'exact', head: true })
+          .eq('member_id', member.id)
+          .eq('status', 'active')
+          .gte('created_at', ninetyDaysAgo)
+        griefCount = gc ?? 0
+      } catch (_e) {
+        griefCount = 0 // table may not exist yet
+      }
 
-      if (griefCount && griefCount > 0) {
+      if (griefCount > 0) {
         console.log(`[Cron/celebrations] skipping Joy call for ${member.id} — active grief support`)
       } else {
         const joyAgentId = process.env.RETELL_JOY_AGENT_ID

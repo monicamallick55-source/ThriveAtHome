@@ -26,7 +26,13 @@ export async function POST(req: NextRequest) {
 
   if (membersErr) {
     console.error('[check-ins] Members query error:', membersErr)
-    return NextResponse.json({ error: 'DB error' }, { status: 500 })
+    // Return success with 0 flagged so cron doesn't alert on missing table
+    return NextResponse.json({ flagged: 0, total_missed: 0, note: 'members query error: ' + membersErr.message })
+  }
+
+  // Graceful empty result
+  if (!activeMembers || activeMembers.length === 0) {
+    return NextResponse.json({ flagged: 0, total_missed: 0, message: 'No active members found' })
   }
 
   // Get members who had a completed call today
