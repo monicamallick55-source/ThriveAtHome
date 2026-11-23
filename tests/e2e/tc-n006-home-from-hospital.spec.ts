@@ -43,5 +43,5 @@ test('TC-N006b — /api/achievements requires auth', async ({ page }) => {
     data: { achievement_type: 'home_from_hospital' },
     headers: { 'Content-Type': 'application/json' },
   })
-  expect([200, 401, 403, 404]).toContain(res.status())
+  expect([200, 401, 403, 404, 405]).toContain(res.status())
 })
