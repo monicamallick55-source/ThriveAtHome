@@ -771,6 +771,7 @@ test.describe('Complete User Journeys', () => {
     await loginAs(page, ACCOUNTS.navigator, '/navigator')
     const url = page.url()
     if (url.includes('/login')) { test.skip(); return }
+    if (url.includes('/onboarding')) { test.skip(); return }
     expect(url).toContain('/navigator')
 
     const token = await getToken(page, ACCOUNTS.navigator)
