@@ -62,8 +62,3 @@ export async function GET(request: NextRequest) {
   if (!authOk(request)) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   return NextResponse.json({ ok: true, message: 'aria-calls cron ready' }, { status: 200 })
 }
-
-export async function GET(request: NextRequest) {
-  if (!authOk(request)) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
-  return NextResponse.json({ ok: true, message: 'aria-calls cron ready' }, { status: 200 })
-}
