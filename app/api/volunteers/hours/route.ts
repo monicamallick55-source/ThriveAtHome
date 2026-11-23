@@ -37,14 +37,21 @@ export async function POST(req: Request) {
   const body = await req.json().catch(() => ({})) as {
     hours?: number
     activity_date?: string
+    date?: string
     description?: string
+    notes?: string
+    activity_type?: string
     assignment_id?: string
     member_id?: string
   }
 
+  // Accept both field name conventions
+  const activityDate = body.activity_date ?? body.date ?? null
+  const description = body.description ?? body.notes ?? body.activity_type ?? null
+
   const hours = Number(body.hours)
-  if (!hours || hours <= 0 || hours > 24) return NextResponse.json({ error: 'hours must be 0–24' }, { status: 400 })
-  if (!body.activity_date) return NextResponse.json({ error: 'activity_date required (YYYY-MM-DD)' }, { status: 400 })
+  if (!hours || hours <= 0 || hours > 24) return NextResponse.json({ error: 'hours must be 0-24' }, { status: 400 })
+  if (!activityDate) return NextResponse.json({ error: 'activity_date required (YYYY-MM-DD)' }, { status: 400 })
 
   const { data: entry, error } = await db
     .from('volunteer_hours')
@@ -53,8 +60,8 @@ export async function POST(req: Request) {
       assignment_id: body.assignment_id ?? null,
       member_id: body.member_id ?? null,
       hours,
-      activity_date: body.activity_date,
-      description: body.description ?? null,
+      activity_date: activityDate,
+      description: description,
     })
     .select()
     .single()
