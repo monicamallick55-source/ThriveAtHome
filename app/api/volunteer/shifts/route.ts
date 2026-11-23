@@ -10,6 +10,7 @@ const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/
 
 export async function GET() {
   const user = await getCurrentUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   const { data: volunteer } = await getVolunteerByAuthId(user.id)
   if (!volunteer) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 

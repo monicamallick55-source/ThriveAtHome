@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function GET() {
   const user = await getCurrentUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
   const { data: volunteer, error: volError } = await getVolunteerByAuthId(user.id)
   if (volError || !volunteer || volunteer.status !== 'active') {
