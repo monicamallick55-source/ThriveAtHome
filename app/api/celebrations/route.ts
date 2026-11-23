@@ -80,14 +80,18 @@ export async function POST(req: NextRequest) {
   const price_cents = TIER_PRICES[tier] ?? 0
 
   // ── Grief guard: check if occasion_date is within 30 days of a loss anniversary
-  const { data: griefRequests } = await supabase
-    .from('grief_support_requests')
-    .select('loss_date')
-    .eq('member_id', member_id)
-    .not('loss_date', 'is', null)
+  let griefRequests: { loss_date: string | null }[] = []
+  try {
+    const { data: gr } = await supabase
+      .from('grief_support_requests')
+      .select('loss_date')
+      .eq('member_id', member_id)
+      .not('loss_date', 'is', null)
+    if (gr) griefRequests = gr
+  } catch (_e) { /* table may not exist */ }
 
   let griefFlagged = false
-  if (griefRequests && griefRequests.length > 0) {
+  if (griefRequests.length > 0) {
     const oDate = new Date(occasion_date)
     for (const gr of griefRequests) {
       if (!gr.loss_date) continue
