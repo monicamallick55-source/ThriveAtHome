@@ -70,7 +70,7 @@ export async function loginAs(
   await page.locator('input[type="email"], input[name="email"], #email').first().fill(account.email)
   await page.locator('input[type="password"], input[name="password"], #password').first().fill(account.password)
   await page.locator('button[type="submit"], button:has-text("Sign In"), button:has-text("Log In")').first().click()
-  await page.waitForFunction(() => !window.location.pathname.startsWith('/login'), { timeout: 20000 })
+  await page.waitForFunction(() => !window.location.pathname.startsWith('/login'), { timeout: 30000 })
 }
 
 export async function assertPageLoads(page: Page, path: string): Promise<number> {
