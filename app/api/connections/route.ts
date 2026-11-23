@@ -18,14 +18,18 @@ export async function GET(_req: NextRequest) {
 
     if (!fm?.member_id) return NextResponse.json([], { status: 200 })
 
-    const { data, error } = await (supabase as any)
-      .from('member_connections')
-      .select('*, connected_member:members!member_connections_connected_member_id_fkey(id, full_name, photo_url)')
-      .eq('member_id', fm.member_id)
-      .order('created_at', { ascending: false })
-
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-    return NextResponse.json(data ?? [])
+    let data: unknown[] = []
+    try {
+      const { data: rows, error } = await (supabase as any)
+        .from('member_connections')
+        .select('*, connected_member:members!member_connections_connected_member_id_fkey(id, full_name, photo_url)')
+        .eq('member_id', fm.member_id)
+        .order('created_at', { ascending: false })
+      if (!error) data = rows ?? []
+    } catch (_e) {
+      // table may not exist yet — return empty list
+    }
+    return NextResponse.json(data)
   } catch (err) {
     console.error('[connections GET]', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

@@ -51,10 +51,30 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
   const body = await req.json()
-  const { member_id, occasion, occasion_date, tier = 'digital', title, description } = body
+  // Accept aliases: event_type→occasion, event_date→occasion_date
+  const rawOccasion = body.occasion ?? body.event_type
+  const rawDate = body.occasion_date ?? body.event_date
+  const { tier = 'digital', title, description, notes } = body
+  const occasion = rawOccasion
+  const occasion_date = rawDate
 
-  if (!member_id || !occasion || !occasion_date) {
-    return NextResponse.json({ error: 'member_id, occasion and occasion_date are required' }, { status: 400 })
+  if (!occasion || !occasion_date) {
+    return NextResponse.json({ error: 'occasion/event_type and occasion_date/event_date are required' }, { status: 400 })
+  }
+
+  // member_id: use from body or look up from auth
+  let member_id = body.member_id
+  if (!member_id) {
+    const { data: mRow } = await supabase.from('members').select('id').eq('supabase_auth_id', user.id).maybeSingle().catch(() => ({ data: null }))
+    if (!mRow) {
+      const { data: fmRow } = await supabase.from('family_members').select('member_id').eq('supabase_auth_id', user.id).maybeSingle().catch(() => ({ data: null }))
+      if (fmRow?.member_id) member_id = fmRow.member_id
+    } else {
+      member_id = mRow.id
+    }
+  }
+  if (!member_id) {
+    return NextResponse.json({ error: 'member not found' }, { status: 404 })
   }
 
   const price_cents = TIER_PRICES[tier] ?? 0
