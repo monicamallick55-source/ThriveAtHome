@@ -2,7 +2,7 @@ import { requireAuth } from '@/lib/auth'
 import { getFamilyMemberByAuthId } from '@/lib/data/family'
 import { getUnreadCount } from '@/lib/data/member-messages'
 import { DashNavClient } from '@/components/dashboard/DashNavClient'
-import { QuinnWidget } from '@/components/shared/QuinnWidget'
+import QuinnWidget from '@/components/shared/QuinnWidget'
 
 export default async function DashboardLayout({
   children,
