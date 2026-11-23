@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
       post_type: 'birthday',
       content: `Wishing ${member.full_name} a wonderful birthday today! 🎂`,
       is_auto: true,
-    }).catch(console.error)
+    })
     posts++
 
     // 2. Joy call on birthday (opted-in members only, skip if in active grief)
