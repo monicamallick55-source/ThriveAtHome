@@ -59,3 +59,25 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({ task }, { status: 201 })
 }
+
+export async function GET(_request: NextRequest) {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) {
+    return NextResponse.json({ error: 'Unauthorised' }, { status: 401 })
+  }
+  const admin = createAdminClient()
+  const { data: fm } = await (admin as any)
+    .from('family_members')
+    .select('member_id')
+    .eq('supabase_auth_id', user.id)
+    .maybeSingle()
+  if (!fm?.member_id) return NextResponse.json({ tasks: [] })
+  const { data: tasks } = await (admin as any)
+    .from('member_tasks')
+    .select('id, title, task_type, status, due_date, created_at')
+    .eq('member_id', fm.member_id)
+    .order('created_at', { ascending: false })
+    .limit(50)
+  return NextResponse.json({ tasks: tasks ?? [] })
+}
