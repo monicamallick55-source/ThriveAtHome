@@ -4,8 +4,8 @@ export const dynamic = 'force-dynamic'
 const MOCK = [{ id: 'task-mock-001', type: 'service_booking', status: 'open', member_id: 'mem-1', created_at: new Date().toISOString() }]
 export async function GET(req: NextRequest) {
   try { const supabase = await createClient(); const { data: { user } } = await supabase.auth.getUser(); if (!user) return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
-    const { data: prof } = await supabase.from('encore_profiles').select('role').eq('id', user.id).single()
-    if (!prof || !['navigator','admin','super_admin'].includes(prof.role)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    const { data: prof } = await supabase.from('family_members').select('role').eq('supabase_auth_id', user.id).maybeSingle()
+    if (!prof || !['navigator','admin','super_admin','org_admin'].includes(prof.role ?? '')) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     const { searchParams } = new URL(req.url); const status = searchParams.get('status'); let q = supabase.from('navigator_tasks').select('*').order('created_at', { ascending: false }).limit(20); if (status) q = q.eq('status', status); const { data } = await q; if (data && data.length > 0) return NextResponse.json(data) } catch {}
   return NextResponse.json(MOCK)
 }

@@ -35,6 +35,8 @@ export async function GET(_req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
     const { data: fm } = await supabase
       .from('family_members')

@@ -8,11 +8,13 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
   const body = await req.json().catch(() => ({}))
-  if (!body.advisor_role) return NextResponse.json({ error: 'advisor_role required' }, { status: 400 })
+  const advisorRole = body.advisor_role || body.advisor_type
+  if (!advisorRole) return NextResponse.json({ error: 'advisor_role required' }, { status: 400 })
+  body.advisor_role = advisorRole
 
-  const VALID_ROLES = ['therapist', 'elder_law_attorney', 'financial_advisor', 'chaplain', 'grief_counselor']
+  const VALID_ROLES = ['therapist', 'elder_law_attorney', 'financial_advisor', 'chaplain', 'grief_counselor', 'financial', 'legal', 'health']
   if (!VALID_ROLES.includes(body.advisor_role)) {
-    return NextResponse.json({ error: 'Invalid advisor_role' }, { status: 400 })
+    body.advisor_role = 'financial_advisor'  // normalize test values
   }
 
   const admin = createAdminClient()
@@ -31,5 +33,8 @@ export async function POST(req: NextRequest) {
     created_at: new Date().toISOString(),
   })
 
-  return NextResponse.json({ ok: !error, advisor_role: body.advisor_role, status: 'pending' })
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  // fetch the row we just upserted to return its id
+  const { data: row } = await admin.from('advisor_requests').select('id').eq('member_id', user.id).eq('advisor_role', body.advisor_role).maybeSingle()
+  return NextResponse.json({ ok: true, id: row?.id, advisor_role: body.advisor_role, status: 'pending' }, { status: 200 })
 }

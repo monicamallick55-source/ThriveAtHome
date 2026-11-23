@@ -26,6 +26,8 @@ export async function GET(_req: NextRequest) {
 export async function POST(req: NextRequest) {
   // TC-FS005 — report a fraud flag
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = supabase as any
@@ -41,5 +43,5 @@ export async function POST(req: NextRequest) {
   }).select('id').single()
 
   if (error) return NextResponse.json({ error: 'Could not create flag' }, { status: 500 })
-  return NextResponse.json({ ok: true, flag_id: data?.id ?? null }, { status: 201 })
+  return NextResponse.json({ ok: true, id: data?.id ?? null, flag_id: data?.id ?? null }, { status: 201 })
 }
