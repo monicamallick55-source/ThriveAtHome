@@ -21,6 +21,8 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
   const body = await req.json()
   const { member_id, person_name, relationship, event_type, title, event_date, end_date, recurs_yearly, notes, aria_can_mention, mailing_address } = body

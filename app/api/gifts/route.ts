@@ -17,3 +17,10 @@ export async function GET(req: NextRequest) {
   } catch {}
   return NextResponse.json(MOCK_GIFTS)
 }
+
+export async function POST(req: NextRequest) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+  return NextResponse.json({ error: 'Method not supported' }, { status: 405 })
+}
