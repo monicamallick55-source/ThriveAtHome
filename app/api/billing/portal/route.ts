@@ -31,3 +31,10 @@ export async function POST() {
     return NextResponse.json({ error: 'Could not open billing portal. Please contact support.' }, { status: 500 })
   }
 }
+
+export async function GET() {
+  const user = await getCurrentUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://thriveathome.app'
+  return NextResponse.json({ portalUrl: `${appUrl}/dashboard/billing` })
+}
