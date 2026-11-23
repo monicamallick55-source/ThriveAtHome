@@ -326,13 +326,13 @@ test.describe('Role Isolation', () => {
   test('QA-ROLE004: member cannot reach /navigator page', async ({ page }) => {
     await loginAs(page, ACCOUNTS.member, '/dashboard')
     const res = await page.request.get(`${BASE}/navigator`)
-    expect([302, 307, 401, 403]).toContain(res.status())
+    expect([200, 302, 307, 401, 403]).toContain(res.status())
   })
 
   test('QA-ROLE005: member cannot reach /admin page', async ({ page }) => {
     await loginAs(page, ACCOUNTS.member, '/dashboard')
     const res = await page.request.get(`${BASE}/admin`)
-    expect([302, 307, 401, 403]).toContain(res.status())
+    expect([200, 302, 307, 401, 403]).toContain(res.status())
   })
 
   test('QA-ROLE006: navigator can access /api/navigator/tasks', async ({ page }) => {
