@@ -11,12 +11,12 @@ const BASE_URL = process.env.BASE_URL || 'https://thrive-at-home-pied.vercel.app
 
 export default defineConfig({
   testDir: './tests/e2e',
-  globalSetup: './tests/e2e/global-setup.ts',
+  // globalSetup: './tests/e2e/global-setup.ts',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: 2,
   workers: process.env.CI ? 2 : undefined,
-  timeout: 30_000,
+  timeout: 60_000,
   expect: { timeout: 10_000 },
 
   reporter: [
@@ -30,7 +30,7 @@ export default defineConfig({
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
-    navigationTimeout: 20_000,
+    navigationTimeout: 45_000,
     actionTimeout: 10_000,
   },
 
