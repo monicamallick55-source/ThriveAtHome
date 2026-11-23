@@ -1,24 +1,10 @@
-// GET /api/volunteer/buddy-assignments — returns active buddy assignments for the logged-in volunteer
-import { NextResponse } from 'next/server'
-import { requireAuth } from '@/lib/auth'
-import { getVolunteerByAuthId } from '@/lib/data/volunteers'
-import { getVolunteerBuddyAssignments } from '@/lib/data/buddies'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-export async function GET() {
-  try {
-    const user = await requireAuth()
-    const { data: volunteer } = await getVolunteerByAuthId(user.id)
-    if (!volunteer) return NextResponse.json({ error: 'Volunteer not found' }, { status: 404 })
-
-    const { data, error } = await getVolunteerBuddyAssignments(volunteer.id)
-    if (error) return NextResponse.json({ error }, { status: 500 })
-    return NextResponse.json({ data })
-  } catch (err) {
-    const msg = String(err)
-    if (msg.includes('Unauthorized') || msg.includes('Not authenticated') || msg.includes('JWT') || msg.includes('session')) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
-    }
-    return NextResponse.json({ error: msg }, { status: 500 })
-  }
+export async function GET(_req: NextRequest) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const { data } = await supabase.from('volunteer_buddy_assignments').select('*').eq('volunteer_id', user.id)
+  return NextResponse.json(data ?? [])
 }

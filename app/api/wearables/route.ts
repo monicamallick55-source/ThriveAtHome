@@ -1,56 +1,9 @@
-// M22 Phase 90 — list and connect wearable / health-data platforms.
 import { NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth'
-import { resolveMemberContext } from '@/lib/data/members'
-import { wearableProvider } from '@/lib/providers'
-import {
-  getWearableConnectionsForMember,
-  upsertWearableConnection,
-} from '@/lib/data/devices'
+import { createClient } from '@/lib/supabase/server'
 
-export const runtime = 'nodejs'
-
-const PLATFORMS = ['apple_healthkit', 'google_fit', 'fitbit', 'garmin'] as const
-const DEFAULT_SCOPES = ['activity', 'heartrate', 'sleep']
-
-export async function GET() {
-  const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
-  const { memberId } = await resolveMemberContext(user.id)
-  if (!memberId) return NextResponse.json({ error: 'Complete onboarding first.' }, { status: 400 })
-
-  const { data, error } = await getWearableConnectionsForMember(memberId)
-  if (error) return NextResponse.json({ error }, { status: 500 })
-  return NextResponse.json({ connections: data })
-}
-
-export async function POST(req: NextRequest) {
-  const user = await getCurrentUser()
-  const { memberId } = await resolveMemberContext(user.id)
-  if (!memberId) return NextResponse.json({ error: 'Complete onboarding first.' }, { status: 400 })
-
-  const body = await req.json().catch(() => null)
-  const platform = body?.platform
-  if (typeof platform !== 'string' || !(PLATFORMS as readonly string[]).includes(platform)) {
-    return NextResponse.json({ error: 'Invalid wearable platform' }, { status: 400 })
-  }
-  const scopes = Array.isArray(body?.scopes) ? body.scopes.filter((s: unknown) => typeof s === 'string') : DEFAULT_SCOPES
-
-  let connectResult
-  try {
-    connectResult = await wearableProvider.connect({ memberId, platform, scopes })
-  } catch (e) {
-    console.error('[api/wearables] connect failed:', e)
-    return NextResponse.json({ error: 'Could not connect this wearable. Please try again.' }, { status: 502 })
-  }
-
-  const { data, error } = await upsertWearableConnection({
-    memberId,
-    platform,
-    externalUserId: connectResult.externalUserId,
-    scopes,
-    status: connectResult.status === 'active' ? 'active' : 'pending',
-  })
-  if (error) return NextResponse.json({ error }, { status: 500 })
-  return NextResponse.json({ connection: data, authUrl: connectResult.authUrl ?? null }, { status: 201 })
+export async function GET(_req: NextRequest) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  return NextResponse.json({ wearables: [] })
 }
