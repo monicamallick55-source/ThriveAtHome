@@ -10,21 +10,15 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null)
   if (!body) return NextResponse.json({ error: 'Invalid body' }, { status: 400 })
 
-  const admin = createAdminClient()
-  const db = admin as any
+  const admin = createAdminClient() as any
+  const buddyType = body.buddy_type || body.kind || 'general'
+  const preferences = body.preferences || body.message || null
 
-  // Resolve member id
-  const { data: member } = await db.from('members').select('id').eq('supabase_auth_id', user.id).maybeSingle()
-  const memberId = member?.id ?? user.id
-
-  const taskType = body.kind === 'update_request' ? 'buddy_update_request' : 'buddy_special_request'
-  const description = body.message?.trim() || body.preferences?.trim() || `Buddy request: ${body.buddy_type || 'general'}`
-
-  const { data, error } = await db.from('navigator_tasks').insert({
-    member_id: memberId,
-    task_type: taskType,
-    description,
-    priority: 'medium',
+  const { data, error } = await admin.from('buddy_requests').insert({
+    member_id: user.id,
+    buddy_type: buddyType,
+    preferences,
+    status: 'pending',
   }).select('id').single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
