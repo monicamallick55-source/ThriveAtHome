@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
     if (!title) return NextResponse.json({ error: 'title is required' }, { status: 400 })
     const admin = createAdminClient()
     const { data: doc, error: dbError } = await (admin.from as any)('navigator_documents').insert({
-      navigator_id: null,
+      navigator_id: user.id,
       member_id: mId ?? null,
       title: title,
       document_type: document_type ?? 'care_plan',
