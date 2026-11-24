@@ -41,11 +41,11 @@ export async function POST(req: NextRequest) {
     member_id: memberId,
     scam_type: body.flag_type ?? body.scam_type ?? 'other',
     matched_text: body.description ?? body.matched_text ?? null,
-    source: body.source ?? 'member',
+    source: ['call_transcript','private_message','community_post','gift_order','navigator','family','buddy'].includes(body.source as string) ? body.source as string : 'private_message',
     severity: ['concern', 'urgent'].includes(body.severity as string) ? body.severity as string : 'concern',
     status: 'open',
   }).select('id').single()
 
-  if (error) return NextResponse.json({ error: error.message, code: error.code }, { status: 500 })
+  if (error) return NextResponse.json({ error: 'Could not create flag' }, { status: 500 })
   return NextResponse.json({ ok: true, id: data?.id ?? null }, { status: 201 })
 }
