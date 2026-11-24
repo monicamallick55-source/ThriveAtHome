@@ -46,6 +46,6 @@ export async function POST(req: NextRequest) {
     status: 'open',
   }).select('id').single()
 
-  if (error) return NextResponse.json({ error: 'Could not create flag' }, { status: 500 })
+  if (error) return NextResponse.json({ error: error.message, code: error.code }, { status: 500 })
   return NextResponse.json({ ok: true, id: data?.id ?? null }, { status: 201 })
 }
