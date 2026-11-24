@@ -15,7 +15,7 @@ async function getToken(page, account) {
 
 // TC-A001: Cookie injection login — member routes to /dashboard
 test('TC-A001-member — cookie injection routes member to /dashboard', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).toContain('/dashboard')
@@ -23,7 +23,7 @@ test('TC-A001-member — cookie injection routes member to /dashboard', async ({
 
 // TC-A001-family
 test('TC-A001-family — cookie injection routes family to /dashboard/family', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.family, '/dashboard/family')
+  await loginAs(page, ACCOUNTS.family, '/dashboard/family', test)
   const token = await getToken(page, ACCOUNTS.family)
   if (!token) { test.skip(); return }
   expect(page.url()).toContain('/dashboard')
@@ -31,7 +31,7 @@ test('TC-A001-family — cookie injection routes family to /dashboard/family', a
 
 // TC-A001-navigator
 test('TC-A001-navigator — cookie injection routes navigator to /navigator', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.navigator, '/navigator')
+  await loginAs(page, ACCOUNTS.navigator, '/navigator', test)
   const token = await getToken(page, ACCOUNTS.navigator)
   if (!token) { test.skip(); return }
   expect(page.url()).toContain('/navigator')
@@ -39,7 +39,7 @@ test('TC-A001-navigator — cookie injection routes navigator to /navigator', as
 
 // TC-A001-admin
 test('TC-A001-admin — cookie injection routes admin to /admin', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.admin, '/admin')
+  await loginAs(page, ACCOUNTS.admin, '/admin', test)
   const token = await getToken(page, ACCOUNTS.admin)
   if (!token) { test.skip(); return }
   expect(page.url()).toContain('/admin')
@@ -47,7 +47,7 @@ test('TC-A001-admin — cookie injection routes admin to /admin', async ({ page 
 
 // TC-A001-volunteer
 test('TC-A001-volunteer — cookie injection routes volunteer to /volunteer', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard')
+  await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard', test)
   const token = await getToken(page, ACCOUNTS.volunteer)
   if (!token) { test.skip(); return }
   expect(page.url()).toContain('/volunteer')
@@ -74,7 +74,7 @@ test('TC-A004 — /api/members/profile requires auth', async ({ page }) => {
 
 // TC-A005: member cannot access /navigator after cookie login
 test('TC-A005 — member cannot reach /navigator', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const res = await page.request.get(`${BASE}/api/navigator/tasks`, {

@@ -27,7 +27,7 @@ async function dbDelete(page, token, table, filter) {
 }
 
 test('TC-WG001 — /dashboard/gift-send loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/gift-send')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/gift-send', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -42,7 +42,7 @@ test('TC-WG002 — /api/gifts requires auth', async ({ page }) => {
 })
 
 test('TC-WG003 — /dashboard/festivals loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/festivals')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/festivals', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')

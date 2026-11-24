@@ -15,7 +15,7 @@ async function getToken(page, account) {
 
 // TC-OA001 — org-admin portal loads
 test('TC-OA001 — /org-admin loads for orgadmin', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.orgadmin, '/org-admin')
+  await loginAs(page, ACCOUNTS.orgadmin, '/org-admin', test)
   const token = await getToken(page, ACCOUNTS.orgadmin)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -23,7 +23,7 @@ test('TC-OA001 — /org-admin loads for orgadmin', async ({ page }) => {
 
 // TC-OA002 — /api/org-admin/stats returns data
 test('TC-OA002 — /api/org-admin/stats returns data', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.orgadmin, '/org-admin')
+  await loginAs(page, ACCOUNTS.orgadmin, '/org-admin', test)
   const token = await getToken(page, ACCOUNTS.orgadmin)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -41,7 +41,7 @@ test('TC-OA002 — /api/org-admin/stats returns data', async ({ page }) => {
 
 // TC-OA003 — /api/org-admin/members-list returns data
 test('TC-OA003 — /api/org-admin/members-list returns data', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.orgadmin, '/org-admin')
+  await loginAs(page, ACCOUNTS.orgadmin, '/org-admin', test)
   const token = await getToken(page, ACCOUNTS.orgadmin)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -63,7 +63,7 @@ test('TC-OA004 — /api/org-configs requires auth', async ({ page }) => {
 
 // TC-OA005 — /org-admin/village-referrals loads
 test('TC-OA005 — /org-admin/village-referrals loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.orgadmin, '/org-admin/village-referrals')
+  await loginAs(page, ACCOUNTS.orgadmin, '/org-admin/village-referrals', test)
   const token = await getToken(page, ACCOUNTS.orgadmin)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')

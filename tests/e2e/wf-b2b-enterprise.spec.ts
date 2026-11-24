@@ -28,14 +28,14 @@ async function dbDelete(page, token, table, filter) {
 }
 
 test('TC-B2B-WF001 — /org-admin loads via cookie injection', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.orgadmin, '/org-admin')
+  await loginAs(page, ACCOUNTS.orgadmin, '/org-admin', test)
   const token = await getToken(page, ACCOUNTS.orgadmin)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
 })
 
 test('TC-B2B-WF002 — /employer-admin loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.employer, '/employer-admin')
+  await loginAs(page, ACCOUNTS.employer, '/employer-admin', test)
   const token = await getToken(page, ACCOUNTS.employer)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')

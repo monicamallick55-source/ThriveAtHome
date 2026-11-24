@@ -52,7 +52,7 @@ test('TC-AR03 — /api/cron/aria-calls fires with correct secret', async ({ page
 })
 
 test('TC-AR04 — authenticated member can opt into Aria calls', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()

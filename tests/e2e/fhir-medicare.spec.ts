@@ -37,14 +37,14 @@ test('TC-FH001 — /api/fhir/referrals requires auth or returns 400', async ({ p
 })
 
 test('TC-FH002 — /dashboard/fhir-referrals loads for member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/fhir-referrals')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/fhir-referrals', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
 })
 
 test('TC-MED001 — /dashboard/medicare-help loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/medicare-help')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/medicare-help', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')

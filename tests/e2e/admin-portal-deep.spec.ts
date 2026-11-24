@@ -15,7 +15,7 @@ async function getToken(page, account) {
 
 // TC-AD002 — /admin portal loads for admin
 test('TC-AD002 — /admin portal loads for admin via cookie injection', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.admin, '/admin')
+  await loginAs(page, ACCOUNTS.admin, '/admin', test)
   const token = await getToken(page, ACCOUNTS.admin)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -23,7 +23,7 @@ test('TC-AD002 — /admin portal loads for admin via cookie injection', async ({
 
 // TC-AD003 — /api/admin/ambassadors returns data for admin
 test('TC-AD003 — /api/admin/ambassadors returns data for admin', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.admin, '/admin')
+  await loginAs(page, ACCOUNTS.admin, '/admin', test)
   const token = await getToken(page, ACCOUNTS.admin)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -43,7 +43,7 @@ test('TC-AD004 — /api/admin/ambassadors requires auth', async ({ page }) => {
 
 // TC-AD005 — /admin/ma-report loads
 test('TC-AD005 — /admin/ma-report loads for admin', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.admin, '/admin/ma-report')
+  await loginAs(page, ACCOUNTS.admin, '/admin/ma-report', test)
   const token = await getToken(page, ACCOUNTS.admin)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -51,7 +51,7 @@ test('TC-AD005 — /admin/ma-report loads for admin', async ({ page }) => {
 
 // TC-AD006 — /api/org-admin/stats returns data
 test('TC-AD006 — /api/org-admin/stats returns data for orgadmin', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.orgadmin, '/org-admin')
+  await loginAs(page, ACCOUNTS.orgadmin, '/org-admin', test)
   const token = await getToken(page, ACCOUNTS.orgadmin)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -65,7 +65,7 @@ test('TC-AD006 — /api/org-admin/stats returns data for orgadmin', async ({ pag
 
 // TC-AD007 — /api/org-admin/members-list returns data
 test('TC-AD007 — /api/org-admin/members-list returns data for orgadmin', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.orgadmin, '/org-admin')
+  await loginAs(page, ACCOUNTS.orgadmin, '/org-admin', test)
   const token = await getToken(page, ACCOUNTS.orgadmin)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -79,7 +79,7 @@ test('TC-AD007 — /api/org-admin/members-list returns data for orgadmin', async
 
 // TC-B2B002 — /employer-admin loads for employer
 test('TC-B2B002 — /employer-admin loads for employer', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.employer, '/employer-admin')
+  await loginAs(page, ACCOUNTS.employer, '/employer-admin', test)
   const token = await getToken(page, ACCOUNTS.employer)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -87,7 +87,7 @@ test('TC-B2B002 — /employer-admin loads for employer', async ({ page }) => {
 
 // TC-B2B003 — /network-admin loads for network
 test('TC-B2B003 — /network-admin loads for network', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.network, '/network-admin')
+  await loginAs(page, ACCOUNTS.network, '/network-admin', test)
   const token = await getToken(page, ACCOUNTS.network)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -95,7 +95,7 @@ test('TC-B2B003 — /network-admin loads for network', async ({ page }) => {
 
 // TC-B2B004 — /agency-admin loads for agency
 test('TC-B2B004 — /agency-admin loads for agency', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.agency, '/agency-admin')
+  await loginAs(page, ACCOUNTS.agency, '/agency-admin', test)
   const token = await getToken(page, ACCOUNTS.agency)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -103,7 +103,7 @@ test('TC-B2B004 — /agency-admin loads for agency', async ({ page }) => {
 
 // TC-B2B012 — /api/agency/workers returns data for agency
 test('TC-B2B012 — /api/agency/workers returns data for agency', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.agency, '/agency-admin')
+  await loginAs(page, ACCOUNTS.agency, '/agency-admin', test)
   const token = await getToken(page, ACCOUNTS.agency)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -117,7 +117,7 @@ test('TC-B2B012 — /api/agency/workers returns data for agency', async ({ page 
 
 // TC-AD010 — admin cannot be accessed by member
 test('TC-AD010 — member token cannot access admin API', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()

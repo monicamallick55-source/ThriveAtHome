@@ -47,7 +47,7 @@ test('TC-B004 — /api/stripe/webhook returns 400 without signature', async ({ p
 
 // TC-B005 — authenticated member can call create-checkout-session
 test('TC-B005 — authenticated member can call /api/create-checkout-session', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -61,7 +61,7 @@ test('TC-B005 — authenticated member can call /api/create-checkout-session', a
 
 // TC-B006 — /dashboard/plan loads for authenticated member
 test('TC-B006 — /dashboard/plan loads for authenticated member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/plan')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/plan', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -87,7 +87,7 @@ test('TC-B008 — /api/billing/cancel requires auth', async ({ page }) => {
 
 // TC-B009 — /api/entitlements returns plan data for authenticated member
 test('TC-B009 — /api/entitlements returns plan data for authenticated member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()

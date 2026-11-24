@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 import { loginAs, ACCOUNTS, BASE_URL as BASE } from './helpers'
 
 test('debug opt-in — retell opt-in API', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const result = await page.evaluate(async () => {
     const r = await fetch('/api/retell/opt-in', {
       method: 'POST',
@@ -17,7 +17,7 @@ test('debug opt-in — retell opt-in API', async ({ page }) => {
 })
 
 test.skip('debug webhook + check-ins + buddy', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
 
   const r1 = await page.evaluate(async () => {
     const r = await fetch('/api/retell/webhook', {

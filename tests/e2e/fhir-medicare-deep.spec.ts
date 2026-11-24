@@ -28,7 +28,7 @@ async function dbDelete(page, token, table, filter) {
 }
 
 test('TC-FMD001 — /dashboard/fhir-referrals loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/fhir-referrals')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/fhir-referrals', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -44,7 +44,7 @@ test('TC-FMD002 — /api/fhir/referrals POST requires auth', async ({ page }) =>
 })
 
 test('TC-FMD003 — /dashboard/medicare-help loads for medicare_member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.medicare_member, '/dashboard/medicare-help')
+  await loginAs(page, ACCOUNTS.medicare_member, '/dashboard/medicare-help', test)
   const token = await getToken(page, ACCOUNTS.medicare_member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')

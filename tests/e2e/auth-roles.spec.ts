@@ -82,7 +82,7 @@ test('TC-A006-auth-guard — /api/admin/ambassadors returns 401 without token', 
 
 // TC-ROLE001 — orgadmin token can read org stats
 test('TC-ROLE001 — orgadmin can call /api/org-admin/stats', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.orgadmin, '/org-admin')
+  await loginAs(page, ACCOUNTS.orgadmin, '/org-admin', test)
   const token = await getToken(page, ACCOUNTS.orgadmin)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -95,7 +95,7 @@ test('TC-ROLE001 — orgadmin can call /api/org-admin/stats', async ({ page }) =
 
 // TC-ROLE002 — agency token can read agency workers
 test('TC-ROLE002 — agency admin can call /api/agency/workers', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.agency, '/agency-admin')
+  await loginAs(page, ACCOUNTS.agency, '/agency-admin', test)
   const token = await getToken(page, ACCOUNTS.agency)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()

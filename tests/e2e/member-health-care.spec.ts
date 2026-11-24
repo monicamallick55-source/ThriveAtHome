@@ -15,7 +15,7 @@ async function getToken(page, account) {
 
 // TC-MHC001 — /dashboard/health loads
 test('TC-MHC001 — /dashboard/health loads for member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/health')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/health', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -23,7 +23,7 @@ test('TC-MHC001 — /dashboard/health loads for member', async ({ page }) => {
 
 // TC-MHC002 — /dashboard/benefits-finder loads
 test('TC-MHC002 — /dashboard/benefits-finder loads for member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/benefits-finder')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/benefits-finder', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -31,7 +31,7 @@ test('TC-MHC002 — /dashboard/benefits-finder loads for member', async ({ page 
 
 // TC-MHC003 — /dashboard/medicare-help loads
 test('TC-MHC003 — /dashboard/medicare-help loads for member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/medicare-help')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/medicare-help', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -39,7 +39,7 @@ test('TC-MHC003 — /dashboard/medicare-help loads for member', async ({ page })
 
 // TC-MHC004 — /dashboard/grief-support loads
 test('TC-MHC004 — /dashboard/grief-support loads for member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/grief-support')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/grief-support', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -47,7 +47,7 @@ test('TC-MHC004 — /dashboard/grief-support loads for member', async ({ page })
 
 // TC-MHC005 — /dashboard/home-safety loads
 test('TC-MHC005 — /dashboard/home-safety loads for member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/home-safety')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/home-safety', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -55,7 +55,7 @@ test('TC-MHC005 — /dashboard/home-safety loads for member', async ({ page }) =
 
 // TC-MHC006 — /dashboard/fhir-referrals loads
 test('TC-MHC006 — /dashboard/fhir-referrals loads for member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/fhir-referrals')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/fhir-referrals', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -69,7 +69,7 @@ test('TC-MHC007 — /api/members/profile requires auth', async ({ page }) => {
 
 // TC-MHC008 — /api/members/profile returns data for authenticated member
 test('TC-MHC008 — /api/members/profile returns data for authenticated member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -82,7 +82,7 @@ test('TC-MHC008 — /api/members/profile returns data for authenticated member',
 
 // TC-MHC009 — /dashboard/life-transitions loads
 test('TC-MHC009 — /dashboard/life-transitions loads for member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/life-transitions')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/life-transitions', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -90,7 +90,7 @@ test('TC-MHC009 — /dashboard/life-transitions loads for member', async ({ page
 
 // TC-MHC010 — /dashboard/trusted-advisors loads
 test('TC-MHC010 — /dashboard/trusted-advisors loads for member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/trusted-advisors')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/trusted-advisors', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')

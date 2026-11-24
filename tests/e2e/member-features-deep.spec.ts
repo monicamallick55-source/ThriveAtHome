@@ -50,7 +50,7 @@ test('TC-M041 — Birthday arc cron requires valid CRON_SECRET', async ({ page }
 
 // TC-M042 — POST /api/member/buddy-request creates buddy_requests row
 test('TC-M042 — POST /api/member/buddy-request creates DB row', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -73,7 +73,7 @@ test('TC-M042 — POST /api/member/buddy-request creates DB row', async ({ page 
 
 // TC-M050 — /api/connections returns list for member
 test('TC-M050 — /api/connections returns list for authenticated member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -90,7 +90,7 @@ test('TC-M050 — /api/connections returns list for authenticated member', async
 
 // TC-M055 — /dashboard/communities loads
 test('TC-M055 — /dashboard/communities loads for member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/communities')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/communities', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -98,7 +98,7 @@ test('TC-M055 — /dashboard/communities loads for member', async ({ page }) => 
 
 // TC-M060 — POST /api/connections creates connection row
 test('TC-M060 — POST /api/connections creates DB row', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -121,7 +121,7 @@ test('TC-M060 — POST /api/connections creates DB row', async ({ page }) => {
 
 // TC-M064 — /api/feature-flags does not 500
 test('TC-M064 — /api/feature-flags does not 500 for member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -134,7 +134,7 @@ test('TC-M064 — /api/feature-flags does not 500 for member', async ({ page }) 
 
 // TC-M080 — Complete member dashboard loads
 test('TC-M080 — Complete member dashboard loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.complete, '/dashboard')
+  await loginAs(page, ACCOUNTS.complete, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.complete)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -142,7 +142,7 @@ test('TC-M080 — Complete member dashboard loads', async ({ page }) => {
 
 // TC-M084 — Premier member dashboard loads
 test('TC-M084 — Premier member dashboard loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.premier, '/dashboard')
+  await loginAs(page, ACCOUNTS.premier, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.premier)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')

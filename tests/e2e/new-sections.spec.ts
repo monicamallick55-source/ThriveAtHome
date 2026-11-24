@@ -15,7 +15,7 @@ async function dbDelete(page, token, table, filter) {
 }
 
 test('TC-SVC001 — /dashboard/marketplace loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/marketplace')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/marketplace', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -32,7 +32,7 @@ test('TC-NOTIF001 — /api/notifications requires auth', async ({ page }) => {
 })
 
 test('TC-NOTIF002 — member can read own notifications', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -65,28 +65,28 @@ test('TC-RT002 — /login returns 200', async ({ page }) => {
 })
 
 test('TC-OB001 — member onboarding: /dashboard loads after cookie injection', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
 })
 
 test('TC-GC001 — /dashboard/grief-circles loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/grief-circles')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/grief-circles', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
 })
 
 test('TC-COM001 — /dashboard/communities loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/communities')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/communities', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
 })
 
 test('TC-VLT001 — /dashboard/vault loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/vault')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/vault', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')

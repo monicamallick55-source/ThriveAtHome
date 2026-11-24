@@ -24,7 +24,7 @@ test.describe('B2B Portals — real auth + DB verification', () => {
   test.describe.configure({ retries: 1 })
 
   test('TC-B2B001 — /org-admin loads; org_configs row readable as orgadmin', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.orgadmin, '/org-admin')
+    await loginAs(page, ACCOUNTS.orgadmin, '/org-admin', test)
     const token = await getToken(page, ACCOUNTS.orgadmin)
     if (!token) { test.skip(); return }
     expect(page.url()).not.toContain('/login')
@@ -41,7 +41,7 @@ test.describe('B2B Portals — real auth + DB verification', () => {
   })
 
   test('TC-B2B010 — /employer-admin loads; employer session valid', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.employer, '/employer-admin')
+    await loginAs(page, ACCOUNTS.employer, '/employer-admin', test)
     const token = await getToken(page, ACCOUNTS.employer)
     if (!token) { test.skip(); return }
     expect(page.url()).not.toContain('/login')
@@ -69,7 +69,7 @@ test.describe('B2B Portals — real auth + DB verification', () => {
   })
 
   test('TC-B2B020 — /senior-center-admin loads; session valid', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.seniorcenter, '/senior-center-admin')
+    await loginAs(page, ACCOUNTS.seniorcenter, '/senior-center-admin', test)
     const token = await getToken(page, ACCOUNTS.seniorcenter)
     if (!token) { test.skip(); return }
     expect(page.url()).not.toContain('/login')
@@ -78,7 +78,7 @@ test.describe('B2B Portals — real auth + DB verification', () => {
   })
 
   test('TC-B2B025 — /aaa-admin loads; session valid', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.aaa, '/aaa-admin')
+    await loginAs(page, ACCOUNTS.aaa, '/aaa-admin', test)
     const token = await getToken(page, ACCOUNTS.aaa)
     if (!token) { test.skip(); return }
     expect(page.url()).not.toContain('/login')
@@ -87,7 +87,7 @@ test.describe('B2B Portals — real auth + DB verification', () => {
   })
 
   test('TC-B2B030 — /network-admin loads; session valid', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.network, '/network-admin')
+    await loginAs(page, ACCOUNTS.network, '/network-admin', test)
     const token = await getToken(page, ACCOUNTS.network)
     if (!token) { test.skip(); return }
     expect(page.url()).not.toContain('/login')
@@ -96,7 +96,7 @@ test.describe('B2B Portals — real auth + DB verification', () => {
   })
 
   test('TC-B2B035 — /agency-admin loads; session valid', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.agency, '/agency-admin')
+    await loginAs(page, ACCOUNTS.agency, '/agency-admin', test)
     const token = await getToken(page, ACCOUNTS.agency)
     if (!token) { test.skip(); return }
     expect(page.url()).not.toContain('/login')
@@ -109,7 +109,7 @@ test.describe('B2B Volunteer Portals — real auth', () => {
   test.describe.configure({ retries: 1 })
 
   test('TC-VOL001 — /university-admin loads; session valid', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.uniadmin, '/university-admin')
+    await loginAs(page, ACCOUNTS.uniadmin, '/university-admin', test)
     const token = await getToken(page, ACCOUNTS.uniadmin)
     if (!token) { test.skip(); return }
     expect(page.url()).not.toContain('/login')
@@ -118,7 +118,7 @@ test.describe('B2B Volunteer Portals — real auth', () => {
   })
 
   test('TC-VOL010 — /vso-admin loads; session valid', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.vsoadmin, '/vso-admin')
+    await loginAs(page, ACCOUNTS.vsoadmin, '/vso-admin', test)
     const token = await getToken(page, ACCOUNTS.vsoadmin)
     if (!token) { test.skip(); return }
     expect(page.url()).not.toContain('/login')
@@ -127,7 +127,7 @@ test.describe('B2B Volunteer Portals — real auth', () => {
   })
 
   test('TC-VOL020 — /school-admin loads; session valid', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.k12admin, '/school-admin')
+    await loginAs(page, ACCOUNTS.k12admin, '/school-admin', test)
     const token = await getToken(page, ACCOUNTS.k12admin)
     if (!token) { test.skip(); return }
     expect(page.url()).not.toContain('/login')
@@ -136,7 +136,7 @@ test.describe('B2B Volunteer Portals — real auth', () => {
   })
 
   test('TC-VOL030 — /volunteer/dashboard loads; real volunteer session', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard')
+    await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard', test)
     const token = await getToken(page, ACCOUNTS.volunteer)
     if (!token) { test.skip(); return }
     expect(page.url()).not.toContain('/login')

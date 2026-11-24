@@ -15,7 +15,7 @@ async function dbDelete(page, token, table, filter) {
 }
 
 test('TC-RAC001 — member cannot access /api/navigator/tasks', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -27,7 +27,7 @@ test('TC-RAC001 — member cannot access /api/navigator/tasks', async ({ page })
 })
 
 test('TC-RAC002 — volunteer cannot access /api/admin/ambassadors', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard')
+  await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard', test)
   const token = await getToken(page, ACCOUNTS.volunteer)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -39,7 +39,7 @@ test('TC-RAC002 — volunteer cannot access /api/admin/ambassadors', async ({ pa
 })
 
 test('TC-RAC003 — family cannot access /api/navigator/tasks', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.family, '/dashboard/family')
+  await loginAs(page, ACCOUNTS.family, '/dashboard/family', test)
   const token = await getToken(page, ACCOUNTS.family)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()

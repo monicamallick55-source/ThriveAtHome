@@ -27,7 +27,7 @@ async function dbDelete(page, token, table, filter) {
 }
 
 test('TC-WS001 — /dashboard/home-safety loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/home-safety')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/home-safety', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -39,7 +39,7 @@ test('TC-WS002 — /api/home-safety requires auth', async ({ page }) => {
 })
 
 test('TC-WS003 — /dashboard/fraud-protection returns non-500', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/fraud-protection')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/fraud-protection', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')

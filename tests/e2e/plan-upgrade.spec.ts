@@ -15,7 +15,7 @@ async function dbDelete(page, token, table, filter) {
 }
 
 test('TC-PU001 — /dashboard/plan loads for member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/plan')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/plan', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -30,7 +30,7 @@ test('TC-PU002 — /api/create-checkout-session requires auth', async ({ page })
 })
 
 test('TC-PU003 — /api/entitlements returns current plan', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()

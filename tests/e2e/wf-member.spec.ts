@@ -27,14 +27,14 @@ async function dbDelete(page, token, table, filter) {
 }
 
 test('TC-M-WF01 — /dashboard loads for member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
 })
 
 test('TC-M-WF02 — POST /api/advisor-request creates DB row', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -57,7 +57,7 @@ test('TC-M-WF02 — POST /api/advisor-request creates DB row', async ({ page }) 
 })
 
 test('TC-M-WF03 — POST /api/member/buddy-request creates DB row', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -80,21 +80,21 @@ test('TC-M-WF03 — POST /api/member/buddy-request creates DB row', async ({ pag
 })
 
 test('TC-M-WF04 — /dashboard/communities loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/communities')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/communities', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
 })
 
 test('TC-M-WF07 — /dashboard/gift-send loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/gift-send')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/gift-send', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
 })
 
 test('TC-M-WF08 — POST /api/celebrations creates DB row', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -116,7 +116,7 @@ test('TC-M-WF08 — POST /api/celebrations creates DB row', async ({ page }) => 
 })
 
 test('TC-M-WF18 — POST /api/fraud-flags creates DB row', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()

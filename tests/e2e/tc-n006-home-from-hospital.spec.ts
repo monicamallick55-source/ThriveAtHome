@@ -15,7 +15,7 @@ async function dbDelete(page, token, table, filter) {
 }
 
 test('TC-N006a — POST /api/achievements with home_from_hospital returns 201 and DB row', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.navigator, '/navigator')
+  await loginAs(page, ACCOUNTS.navigator, '/navigator', test)
   const token = await getToken(page, ACCOUNTS.navigator)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()

@@ -15,7 +15,7 @@ async function dbDelete(page, token, table, filter) {
 }
 
 test('TC-PED001 — /api/entitlements returns plan_tier for member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -31,7 +31,7 @@ test('TC-PED001 — /api/entitlements returns plan_tier for member', async ({ pa
 })
 
 test('TC-PED002 — complete member has richer entitlements than basic', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.complete, '/dashboard')
+  await loginAs(page, ACCOUNTS.complete, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.complete)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()

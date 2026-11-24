@@ -15,7 +15,7 @@ async function dbDelete(page, token, table, filter) {
 }
 
 test('TC-CF001 — member can login and reach dashboard', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -23,7 +23,7 @@ test('TC-CF001 — member can login and reach dashboard', async ({ page }) => {
 })
 
 test('TC-CF002 — POST /api/advisor-request creates row + DB verifies', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -44,7 +44,7 @@ test('TC-CF002 — POST /api/advisor-request creates row + DB verifies', async (
 })
 
 test('TC-CF003 — navigator can log time and DB row is created', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.navigator, '/navigator')
+  await loginAs(page, ACCOUNTS.navigator, '/navigator', test)
   const token = await getToken(page, ACCOUNTS.navigator)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -65,7 +65,7 @@ test('TC-CF003 — navigator can log time and DB row is created', async ({ page 
 })
 
 test('TC-CF004 — volunteer can log hours and DB row is created', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard')
+  await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard', test)
   const token = await getToken(page, ACCOUNTS.volunteer)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()

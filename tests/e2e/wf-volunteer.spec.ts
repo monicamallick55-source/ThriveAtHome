@@ -37,7 +37,7 @@ test('TC-V-WF02 — /api/volunteer/buddy-assignments requires auth', async ({ pa
 })
 
 test('TC-V-WF03 — POST /api/volunteers/hours creates DB row', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard')
+  await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard', test)
   const token = await getToken(page, ACCOUNTS.volunteer)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -58,14 +58,14 @@ test('TC-V-WF03 — POST /api/volunteers/hours creates DB row', async ({ page })
 })
 
 test('TC-V-WF06 — /volunteer/dashboard loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard')
+  await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard', test)
   const token = await getToken(page, ACCOUNTS.volunteer)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
 })
 
 test('TC-V-WF07 — /dashboard/training loads for volunteer', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.volunteer, '/dashboard/training')
+  await loginAs(page, ACCOUNTS.volunteer, '/dashboard/training', test)
   const token = await getToken(page, ACCOUNTS.volunteer)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')

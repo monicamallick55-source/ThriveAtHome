@@ -115,7 +115,7 @@ test.describe('B2B Agent Customization — API Routes', () => {
   })
 
   test('TC-BAC011: GET /api/org-admin/agent-configs returns list for orgadmin', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.orgadmin, '/org-admin')
+    await loginAs(page, ACCOUNTS.orgadmin, '/org-admin', test)
     const url = page.url()
     if (url.includes('/login')) { test.skip(); return }
     const cookies = await page.context().cookies()
@@ -137,7 +137,7 @@ test.describe('B2B Agent Customization — API Routes', () => {
   })
 
   test('TC-BAC013: member cannot POST to /api/org-admin/agent-configs', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.member, '/dashboard')
+    await loginAs(page, ACCOUNTS.member, '/dashboard', test)
     const cookies = await page.context().cookies()
     const res = await page.request.post(`${BASE_URL}/api/org-admin/agent-configs`, {
       headers: { 'Content-Type': 'application/json', 'Cookie': cookieStr(cookies) },
@@ -152,7 +152,7 @@ test.describe('B2B Agent Customization — API Routes', () => {
   })
 
   test('TC-BAC015: orgadmin can POST new agent config', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.orgadmin, '/org-admin')
+    await loginAs(page, ACCOUNTS.orgadmin, '/org-admin', test)
     const url = page.url()
     if (url.includes('/login')) { test.skip(); return }
     const cookies = await page.context().cookies()
@@ -194,7 +194,7 @@ test.describe('B2B Agent Customization — Prompt Builder', () => {
   })
 
   test('TC-BAC021: agent preview assembles prompt for navigator type', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.orgadmin, '/org-admin')
+    await loginAs(page, ACCOUNTS.orgadmin, '/org-admin', test)
     const url = page.url()
     if (url.includes('/login')) { test.skip(); return }
     const cookies = await page.context().cookies()
@@ -217,7 +217,7 @@ test.describe('B2B Agent Customization — Prompt Builder', () => {
       'community', 'health', 'encore'
     ]
     // Check each type is accepted by the preview endpoint (or skipped if 404)
-    await loginAs(page, ACCOUNTS.orgadmin, '/org-admin')
+    await loginAs(page, ACCOUNTS.orgadmin, '/org-admin', test)
     const url = page.url()
     if (url.includes('/login')) { test.skip(); return }
     const cookies = await page.context().cookies()
@@ -235,7 +235,7 @@ test.describe('B2B Agent Customization — Org-Admin UI', () => {
   test.setTimeout(30000)
 
   test('TC-BAC030: /org-admin/ai-assistant page loads for orgadmin', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.orgadmin, '/org-admin/ai-assistant')
+    await loginAs(page, ACCOUNTS.orgadmin, '/org-admin/ai-assistant', test)
     const url = page.url()
     if (url.includes('/login')) { test.skip(); return }
     const body = await page.locator('body').innerText().catch(() => '')
@@ -249,13 +249,13 @@ test.describe('B2B Agent Customization — Org-Admin UI', () => {
   })
 
   test('TC-BAC032: member cannot access /org-admin/ai-assistant', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.member, '/dashboard')
+    await loginAs(page, ACCOUNTS.member, '/dashboard', test)
     const res = await page.request.get(`${BASE_URL}/org-admin/ai-assistant`)
     expect([200, 302, 307, 401, 403]).toContain(res.status())
   })
 
   test('TC-BAC033: /org-admin page loads without 500', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.orgadmin, '/org-admin')
+    await loginAs(page, ACCOUNTS.orgadmin, '/org-admin', test)
     const url = page.url()
     if (url.includes('/login')) { test.skip(); return }
     const body = await page.locator('body').innerText().catch(() => '')
@@ -267,7 +267,7 @@ test.describe('B2B Agent Customization — Role Isolation', () => {
   test.setTimeout(30000)
 
   test('TC-BAC040: navigator cannot manage agent configs', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.navigator, '/navigator')
+    await loginAs(page, ACCOUNTS.navigator, '/navigator', test)
     const cookies = await page.context().cookies()
     const res = await page.request.post(`${BASE_URL}/api/org-admin/agent-configs`, {
       headers: { 'Content-Type': 'application/json', 'Cookie': cookieStr(cookies) },
@@ -277,7 +277,7 @@ test.describe('B2B Agent Customization — Role Isolation', () => {
   })
 
   test('TC-BAC041: volunteer cannot manage agent configs', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard')
+    await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard', test)
     const cookies = await page.context().cookies()
     const res = await page.request.post(`${BASE_URL}/api/org-admin/agent-configs`, {
       headers: { 'Content-Type': 'application/json', 'Cookie': cookieStr(cookies) },

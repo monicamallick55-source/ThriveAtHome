@@ -34,7 +34,7 @@ test('TC-DV001 — /api/device GET requires auth', async ({ page }) => {
 
 // TC-DV002 — /api/device POST registers device → DB row created
 test('TC-DV002 — /api/device POST registers device and creates DB row', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -67,7 +67,7 @@ test('TC-DV003 — /kiosk route returns non-500', async ({ page }) => {
 
 // TC-DV004 — admin can list devices via API
 test('TC-DV004 — admin can list devices via API', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.admin, '/admin')
+  await loginAs(page, ACCOUNTS.admin, '/admin', test)
   const token = await getToken(page, ACCOUNTS.admin)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()

@@ -27,14 +27,14 @@ async function dbDelete(page, token, table, filter) {
 }
 
 test('TC-WV001 — /volunteer/dashboard loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard')
+  await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard', test)
   const token = await getToken(page, ACCOUNTS.volunteer)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
 })
 
 test('TC-WV002 — POST /api/volunteers/hours creates DB row', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard')
+  await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard', test)
   const token = await getToken(page, ACCOUNTS.volunteer)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()

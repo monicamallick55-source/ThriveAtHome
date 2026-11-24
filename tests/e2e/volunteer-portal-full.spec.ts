@@ -28,7 +28,7 @@ async function dbDelete(page, token, table, filter) {
 
 // TC-VPF001 — /volunteer portal loads without 500
 test('TC-VPF001 — /volunteer loads without 500', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard')
+  await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard', test)
   const token = await getToken(page, ACCOUNTS.volunteer)
   if (!token) { test.skip(); return }
   const res = await page.request.get(`${BASE}/volunteer`)
@@ -44,7 +44,7 @@ test('TC-VPF002 — /volunteer/apply loads without auth', async ({ page }) => {
 
 // TC-VPF003 — POST /api/volunteers/hours creates volunteer_hours row
 test('TC-VPF003 — POST /api/volunteers/hours creates DB row', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard')
+  await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard', test)
   const token = await getToken(page, ACCOUNTS.volunteer)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -74,7 +74,7 @@ test('TC-VPF004 — /api/volunteer/buddy-assignments requires auth', async ({ pa
 
 // TC-VPF005 — /dashboard/training loads for volunteer
 test('TC-VPF005 — /dashboard/training loads for volunteer', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.volunteer, '/dashboard/training')
+  await loginAs(page, ACCOUNTS.volunteer, '/dashboard/training', test)
   const token = await getToken(page, ACCOUNTS.volunteer)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -90,7 +90,7 @@ test('TC-VPF006 — volunteer token can read own volunteer_hours from DB', async
 
 // TC-VPF007 — student volunteer portal loads
 test('TC-VPF007 — /student portal loads for student volunteer', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.student, '/student')
+  await loginAs(page, ACCOUNTS.student, '/student', test)
   const token = await getToken(page, ACCOUNTS.student)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')

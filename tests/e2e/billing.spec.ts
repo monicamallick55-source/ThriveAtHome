@@ -39,7 +39,7 @@ test('TC-B002 — Premier $199 plan hidden from /pricing', async ({ page }) => {
 
 // TC-B003 — /dashboard/plan accessible to authenticated member
 test('TC-B003 — /dashboard/plan accessible to authenticated member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/plan')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/plan', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -65,7 +65,7 @@ test('TC-B005 — /api/stripe/webhook returns 400 without Stripe-Signature', asy
 
 // TC-B006 — authenticated member reaches checkout session endpoint
 test('TC-B006 — authenticated member can call create-checkout-session', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -101,7 +101,7 @@ test('TC-B008 — complete member plan_tier is correct in DB', async ({ page }) 
 
 // TC-B009 — /api/entitlements returns plan_tier
 test('TC-B009 — /api/entitlements returns plan_tier for authenticated member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -118,7 +118,7 @@ test('TC-B009 — /api/entitlements returns plan_tier for authenticated member',
 
 // TC-B010 — /dashboard/addons loads for member
 test('TC-B010 — /dashboard/addons loads for member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/addons')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/addons', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')

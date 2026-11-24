@@ -28,7 +28,7 @@ async function dbDelete(page, token, table, filter) {
 
 // TC-N001 — /navigator loads for navigator
 test('TC-N001 — /navigator loads for navigator via cookie injection', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.navigator, '/navigator')
+  await loginAs(page, ACCOUNTS.navigator, '/navigator', test)
   const token = await getToken(page, ACCOUNTS.navigator)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -36,7 +36,7 @@ test('TC-N001 — /navigator loads for navigator via cookie injection', async ({
 
 // TC-N002 — /api/navigator/tasks returns data
 test('TC-N002 — /api/navigator/tasks returns data for navigator', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.navigator, '/navigator')
+  await loginAs(page, ACCOUNTS.navigator, '/navigator', test)
   const token = await getToken(page, ACCOUNTS.navigator)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -50,7 +50,7 @@ test('TC-N002 — /api/navigator/tasks returns data for navigator', async ({ pag
 
 // TC-N003 — POST /api/navigator/time-log creates navigator_time_logs row
 test('TC-N003 — POST /api/navigator/time-log creates DB row', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.navigator, '/navigator')
+  await loginAs(page, ACCOUNTS.navigator, '/navigator', test)
   const token = await getToken(page, ACCOUNTS.navigator)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -76,7 +76,7 @@ test('TC-N003 — POST /api/navigator/time-log creates DB row', async ({ page })
 
 // TC-N004 — POST /api/navigator/documents creates navigator_documents row
 test('TC-N004 — POST /api/navigator/documents creates DB row', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.navigator, '/navigator')
+  await loginAs(page, ACCOUNTS.navigator, '/navigator', test)
   const token = await getToken(page, ACCOUNTS.navigator)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -115,7 +115,7 @@ test('TC-N007 — navigator token can read own navigator_time_logs from DB', asy
 
 // TC-N008 — /navigator action feed visible
 test('TC-N008 — navigator action feed accessible', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.navigator, '/navigator')
+  await loginAs(page, ACCOUNTS.navigator, '/navigator', test)
   const token = await getToken(page, ACCOUNTS.navigator)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()

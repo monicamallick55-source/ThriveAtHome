@@ -27,14 +27,14 @@ async function dbDelete(page, token, table, filter) {
 }
 
 test('TC-WB001 — /org-admin loads for orgadmin', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.orgadmin, '/org-admin')
+  await loginAs(page, ACCOUNTS.orgadmin, '/org-admin', test)
   const token = await getToken(page, ACCOUNTS.orgadmin)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
 })
 
 test('TC-WB002 — /network-admin loads for network', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.network, '/network-admin')
+  await loginAs(page, ACCOUNTS.network, '/network-admin', test)
   const token = await getToken(page, ACCOUNTS.network)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -51,14 +51,14 @@ test('TC-WB004 — /api/agency/workers requires auth', async ({ page }) => {
 })
 
 test('TC-WB005 — /university-admin loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.uniadmin, '/university-admin')
+  await loginAs(page, ACCOUNTS.uniadmin, '/university-admin', test)
   const token = await getToken(page, ACCOUNTS.uniadmin)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
 })
 
 test('TC-WB006 — /vso-admin loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.vsoadmin, '/vso-admin')
+  await loginAs(page, ACCOUNTS.vsoadmin, '/vso-admin', test)
   const token = await getToken(page, ACCOUNTS.vsoadmin)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')

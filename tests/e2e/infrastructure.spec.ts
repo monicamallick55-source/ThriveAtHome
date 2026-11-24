@@ -24,7 +24,7 @@ test('TC-INFRA002 — login page loads', async ({ page }) => {
 })
 
 test('TC-INFRA003 — member can reach dashboard after cookie login', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const url = page.url()
   if (url.includes('/login')) { test.skip(); return } // cold-start flaky
   expect(url).toContain('/dashboard')
@@ -42,7 +42,7 @@ test('TC-INFRA005 — brand colors are teal not purple', async ({ page }) => {
 })
 
 test('TC-INFRA006 — member profile API returns 200 with auth', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()

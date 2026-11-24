@@ -30,14 +30,14 @@ test('TC-LTA010 — unknown pathway returns 404 or 400', async ({ page }) => {
 })
 
 test('TC-BF001 — /dashboard/grief-circles loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/grief-circles')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/grief-circles', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
 })
 
 test('TC-BF002 — /dashboard/grief-support loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/grief-support')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/grief-support', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')

@@ -44,7 +44,7 @@ test('TC-P009 — /blog returns non-500', async ({ page }) => {
 })
 
 test('TC-P050 — authenticated member can reach /dashboard', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')

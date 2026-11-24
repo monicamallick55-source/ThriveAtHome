@@ -15,28 +15,28 @@ async function dbDelete(page, token, table, filter) {
 }
 
 test('TC-B2BD001 — /university-admin loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.uniadmin, '/university-admin')
+  await loginAs(page, ACCOUNTS.uniadmin, '/university-admin', test)
   const token = await getToken(page, ACCOUNTS.uniadmin)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
 })
 
 test('TC-B2BD002 — /vso-admin loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.vsoadmin, '/vso-admin')
+  await loginAs(page, ACCOUNTS.vsoadmin, '/vso-admin', test)
   const token = await getToken(page, ACCOUNTS.vsoadmin)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
 })
 
 test('TC-B2BD003 — /school-admin loads for k12admin', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.k12admin, '/school-admin')
+  await loginAs(page, ACCOUNTS.k12admin, '/school-admin', test)
   const token = await getToken(page, ACCOUNTS.k12admin)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
 })
 
 test('TC-B2BD004 — /employer-admin loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.employer, '/employer-admin')
+  await loginAs(page, ACCOUNTS.employer, '/employer-admin', test)
   const token = await getToken(page, ACCOUNTS.employer)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')

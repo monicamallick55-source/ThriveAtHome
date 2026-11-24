@@ -45,7 +45,7 @@ test('TC-C03 — /api/campaigns requires auth or returns list', async ({ page })
 })
 
 test('TC-C05 — admin can view donations', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.admin, '/admin')
+  await loginAs(page, ACCOUNTS.admin, '/admin', test)
   const token = await getToken(page, ACCOUNTS.admin)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()

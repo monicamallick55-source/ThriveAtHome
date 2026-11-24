@@ -27,7 +27,7 @@ async function dbDelete(page, token, table, filter) {
 }
 
 test('TC-WF001 — /dashboard/fraud-protection loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/fraud-protection')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/fraud-protection', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -39,7 +39,7 @@ test('TC-WF002 — /api/fraud-flags requires auth', async ({ page }) => {
 })
 
 test('TC-WF003 — POST /api/fraud-flags creates DB row', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()

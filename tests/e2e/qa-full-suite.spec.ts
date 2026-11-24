@@ -161,56 +161,56 @@ test.describe('Volunteer Pages', () => {
 // ═══════════════════════════════════════════════════════════════
 test.describe('B2B Portal Pages', () => {
   test('QA-B2B001: /org-admin loads for orgadmin', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.orgadmin, '/org-admin')
+    await loginAs(page, ACCOUNTS.orgadmin, '/org-admin', test)
     const url = page.url()
     if (url.includes('/login')) { test.skip(); return }
     expect(url).not.toContain('/login')
   })
 
   test('QA-B2B002: /agency-admin loads for agency', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.agency, '/agency-admin')
+    await loginAs(page, ACCOUNTS.agency, '/agency-admin', test)
     const url = page.url()
     if (url.includes('/login')) { test.skip(); return }
     expect(url).not.toContain('/login')
   })
 
   test('QA-B2B003: /employer-admin loads for employer', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.employer, '/employer-admin')
+    await loginAs(page, ACCOUNTS.employer, '/employer-admin', test)
     const url = page.url()
     if (url.includes('/login')) { test.skip(); return }
     expect(url).not.toContain('/login')
   })
 
   test('QA-B2B004: /network-admin loads for network', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.network, '/network-admin')
+    await loginAs(page, ACCOUNTS.network, '/network-admin', test)
     const url = page.url()
     if (url.includes('/login')) { test.skip(); return }
     expect(url).not.toContain('/login')
   })
 
   test('QA-B2B005: /university-admin loads for uniadmin', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.uniadmin, '/university-admin')
+    await loginAs(page, ACCOUNTS.uniadmin, '/university-admin', test)
     const url = page.url()
     if (url.includes('/login')) { test.skip(); return }
     expect(url).not.toContain('/login')
   })
 
   test('QA-B2B006: /vso-admin loads for vsoadmin', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.vsoadmin, '/vso-admin')
+    await loginAs(page, ACCOUNTS.vsoadmin, '/vso-admin', test)
     const url = page.url()
     if (url.includes('/login')) { test.skip(); return }
     expect(url).not.toContain('/login')
   })
 
   test('QA-B2B007: /school-admin loads for k12admin', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.k12admin, '/school-admin')
+    await loginAs(page, ACCOUNTS.k12admin, '/school-admin', test)
     const url = page.url()
     if (url.includes('/login')) { test.skip(); return }
     expect(url).not.toContain('/login')
   })
 
   test('QA-B2B008: /senior-center-admin loads for seniorcenter', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.seniorcenter, '/senior-center-admin')
+    await loginAs(page, ACCOUNTS.seniorcenter, '/senior-center-admin', test)
     const url = page.url()
     if (url.includes('/login')) { test.skip(); return }
     expect(url).not.toContain('/login')
@@ -297,7 +297,7 @@ test.describe('API Auth Guards', () => {
 // ═══════════════════════════════════════════════════════════════
 test.describe('Role Isolation', () => {
   test('QA-ROLE001: member cannot access /api/admin/ambassadors', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.member, '/dashboard')
+    await loginAs(page, ACCOUNTS.member, '/dashboard', test)
     const cookies = await page.context().cookies()
     const res = await page.request.get(`${BASE}/api/admin/ambassadors`, {
       headers: { 'Cookie': cookieStr(cookies) },
@@ -306,7 +306,7 @@ test.describe('Role Isolation', () => {
   })
 
   test('QA-ROLE002: member cannot access /api/navigator/tasks', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.member, '/dashboard')
+    await loginAs(page, ACCOUNTS.member, '/dashboard', test)
     const cookies = await page.context().cookies()
     const res = await page.request.get(`${BASE}/api/navigator/tasks`, {
       headers: { 'Cookie': cookieStr(cookies) },
@@ -315,7 +315,7 @@ test.describe('Role Isolation', () => {
   })
 
   test('QA-ROLE003: volunteer cannot access /api/admin/ambassadors', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard')
+    await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard', test)
     const cookies = await page.context().cookies()
     const res = await page.request.get(`${BASE}/api/admin/ambassadors`, {
       headers: { 'Cookie': cookieStr(cookies) },
@@ -324,19 +324,19 @@ test.describe('Role Isolation', () => {
   })
 
   test('QA-ROLE004: member cannot reach /navigator page', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.member, '/dashboard')
+    await loginAs(page, ACCOUNTS.member, '/dashboard', test)
     const res = await page.request.get(`${BASE}/navigator`)
     expect([200, 302, 307, 401, 403]).toContain(res.status())
   })
 
   test('QA-ROLE005: member cannot reach /admin page', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.member, '/dashboard')
+    await loginAs(page, ACCOUNTS.member, '/dashboard', test)
     const res = await page.request.get(`${BASE}/admin`)
     expect([200, 302, 307, 401, 403]).toContain(res.status())
   })
 
   test('QA-ROLE006: navigator can access /api/navigator/tasks', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.navigator, '/navigator')
+    await loginAs(page, ACCOUNTS.navigator, '/navigator', test)
     const token = await getToken(page, ACCOUNTS.navigator)
     if (!token) { test.skip(); return }
     const cookies = await page.context().cookies()
@@ -347,7 +347,7 @@ test.describe('Role Isolation', () => {
   })
 
   test('QA-ROLE007: admin can access /api/admin/ambassadors', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.admin, '/admin')
+    await loginAs(page, ACCOUNTS.admin, '/admin', test)
     const token = await getToken(page, ACCOUNTS.admin)
     if (!token) { test.skip(); return }
     const cookies = await page.context().cookies()
@@ -363,7 +363,7 @@ test.describe('Role Isolation', () => {
 // ═══════════════════════════════════════════════════════════════
 test.describe('DB Write Workflows', () => {
   test('QA-WF001: member can submit service request', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.member, '/dashboard')
+    await loginAs(page, ACCOUNTS.member, '/dashboard', test)
     const token = await getToken(page, ACCOUNTS.member)
     if (!token) { test.skip(); return }
     const cookies = await page.context().cookies()
@@ -379,7 +379,7 @@ test.describe('DB Write Workflows', () => {
   })
 
   test('QA-WF002: member can submit support ticket', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.member, '/dashboard')
+    await loginAs(page, ACCOUNTS.member, '/dashboard', test)
     const token = await getToken(page, ACCOUNTS.member)
     if (!token) { test.skip(); return }
     const cookies = await page.context().cookies()
@@ -395,7 +395,7 @@ test.describe('DB Write Workflows', () => {
   })
 
   test('QA-WF003: member can request advisor (therapist)', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.member, '/dashboard')
+    await loginAs(page, ACCOUNTS.member, '/dashboard', test)
     const token = await getToken(page, ACCOUNTS.member)
     if (!token) { test.skip(); return }
     const cookies = await page.context().cookies()
@@ -408,7 +408,7 @@ test.describe('DB Write Workflows', () => {
   })
 
   test('QA-WF004: member can request advisor (financial)', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.member, '/dashboard')
+    await loginAs(page, ACCOUNTS.member, '/dashboard', test)
     const token = await getToken(page, ACCOUNTS.member)
     if (!token) { test.skip(); return }
     const cookies = await page.context().cookies()
@@ -421,7 +421,7 @@ test.describe('DB Write Workflows', () => {
   })
 
   test('QA-WF005: navigator can log time', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.navigator, '/navigator')
+    await loginAs(page, ACCOUNTS.navigator, '/navigator', test)
     const token = await getToken(page, ACCOUNTS.navigator)
     if (!token) { test.skip(); return }
     const cookies = await page.context().cookies()
@@ -437,7 +437,7 @@ test.describe('DB Write Workflows', () => {
   })
 
   test('QA-WF006: volunteer can log hours', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard')
+    await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard', test)
     const token = await getToken(page, ACCOUNTS.volunteer)
     if (!token) { test.skip(); return }
     const cookies = await page.context().cookies()
@@ -453,7 +453,7 @@ test.describe('DB Write Workflows', () => {
   })
 
   test('QA-WF007: member can create village referral', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.member, '/dashboard')
+    await loginAs(page, ACCOUNTS.member, '/dashboard', test)
     const token = await getToken(page, ACCOUNTS.member)
     if (!token) { test.skip(); return }
     const cookies = await page.context().cookies()
@@ -469,7 +469,7 @@ test.describe('DB Write Workflows', () => {
   })
 
   test('QA-WF008: member can create transition plan', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.member, '/dashboard')
+    await loginAs(page, ACCOUNTS.member, '/dashboard', test)
     const token = await getToken(page, ACCOUNTS.member)
     if (!token) { test.skip(); return }
     const cookies = await page.context().cookies()
@@ -485,7 +485,7 @@ test.describe('DB Write Workflows', () => {
   })
 
   test('QA-WF009: member can register for skill exchange', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.member, '/dashboard')
+    await loginAs(page, ACCOUNTS.member, '/dashboard', test)
     const token = await getToken(page, ACCOUNTS.member)
     if (!token) { test.skip(); return }
     const cookies = await page.context().cookies()
@@ -498,7 +498,7 @@ test.describe('DB Write Workflows', () => {
   })
 
   test('QA-WF010: volunteer can claim open need', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard')
+    await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard', test)
     const token = await getToken(page, ACCOUNTS.volunteer)
     if (!token) { test.skip(); return }
     const cookies = await page.context().cookies()
@@ -586,7 +586,7 @@ test.describe('DB Read Workflows', () => {
 // ═══════════════════════════════════════════════════════════════
 test.describe('API Functional Checks', () => {
   test('QA-API001: /api/members/profile returns member data', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.member, '/dashboard')
+    await loginAs(page, ACCOUNTS.member, '/dashboard', test)
     const token = await getToken(page, ACCOUNTS.member)
     if (!token) { test.skip(); return }
     const cookies = await page.context().cookies()
@@ -601,7 +601,7 @@ test.describe('API Functional Checks', () => {
   })
 
   test('QA-API002: /api/feature-flags returns non-500', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.member, '/dashboard')
+    await loginAs(page, ACCOUNTS.member, '/dashboard', test)
     const cookies = await page.context().cookies()
     const res = await page.request.get(`${BASE}/api/feature-flags`, {
       headers: { 'Cookie': cookieStr(cookies) },
@@ -610,7 +610,7 @@ test.describe('API Functional Checks', () => {
   })
 
   test('QA-API003: /api/billing returns plan info', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.member, '/dashboard')
+    await loginAs(page, ACCOUNTS.member, '/dashboard', test)
     const cookies = await page.context().cookies()
     const res = await page.request.get(`${BASE}/api/billing`, {
       headers: { 'Cookie': cookieStr(cookies) },
@@ -623,7 +623,7 @@ test.describe('API Functional Checks', () => {
   })
 
   test('QA-API004: /api/volunteers/me returns volunteer data', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard')
+    await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard', test)
     const cookies = await page.context().cookies()
     const res = await page.request.get(`${BASE}/api/volunteers/me`, {
       headers: { 'Cookie': cookieStr(cookies) },
@@ -632,7 +632,7 @@ test.describe('API Functional Checks', () => {
   })
 
   test('QA-API005: /api/volunteer/open-needs returns list', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard')
+    await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard', test)
     const cookies = await page.context().cookies()
     const res = await page.request.get(`${BASE}/api/volunteer/open-needs`, {
       headers: { 'Cookie': cookieStr(cookies) },
@@ -656,7 +656,7 @@ test.describe('API Functional Checks', () => {
   })
 
   test('QA-API008: /api/admin/ambassadors returns data for admin', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.admin, '/admin')
+    await loginAs(page, ACCOUNTS.admin, '/admin', test)
     const token = await getToken(page, ACCOUNTS.admin)
     if (!token) { test.skip(); return }
     const cookies = await page.context().cookies()
@@ -667,7 +667,7 @@ test.describe('API Functional Checks', () => {
   })
 
   test('QA-API009: /api/org-admin/stats returns data for orgadmin', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.orgadmin, '/org-admin')
+    await loginAs(page, ACCOUNTS.orgadmin, '/org-admin', test)
     const token = await getToken(page, ACCOUNTS.orgadmin)
     if (!token) { test.skip(); return }
     const cookies = await page.context().cookies()
@@ -678,7 +678,7 @@ test.describe('API Functional Checks', () => {
   })
 
   test('QA-API010: /api/trusted-advisors returns list for member', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.member, '/dashboard')
+    await loginAs(page, ACCOUNTS.member, '/dashboard', test)
     const cookies = await page.context().cookies()
     const res = await page.request.get(`${BASE}/api/trusted-advisors`, {
       headers: { 'Cookie': cookieStr(cookies) },
@@ -691,7 +691,7 @@ test.describe('API Functional Checks', () => {
   })
 
   test('QA-API011: /api/wearables returns data or 404', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.member, '/dashboard')
+    await loginAs(page, ACCOUNTS.member, '/dashboard', test)
     const cookies = await page.context().cookies()
     const res = await page.request.get(`${BASE}/api/wearables`, {
       headers: { 'Cookie': cookieStr(cookies) },
@@ -700,7 +700,7 @@ test.describe('API Functional Checks', () => {
   })
 
   test('QA-API012: /api/time-bank/balance returns data', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.member, '/dashboard')
+    await loginAs(page, ACCOUNTS.member, '/dashboard', test)
     const cookies = await page.context().cookies()
     const res = await page.request.get(`${BASE}/api/time-bank/balance`, {
       headers: { 'Cookie': cookieStr(cookies) },
@@ -709,7 +709,7 @@ test.describe('API Functional Checks', () => {
   })
 
   test('QA-API013: /api/volunteer/buddy-assignments returns data for volunteer', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard')
+    await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard', test)
     const cookies = await page.context().cookies()
     const res = await page.request.get(`${BASE}/api/volunteer/buddy-assignments`, {
       headers: { 'Cookie': cookieStr(cookies) },
@@ -718,7 +718,7 @@ test.describe('API Functional Checks', () => {
   })
 
   test('QA-API014: /api/tasks returns task list', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.member, '/dashboard')
+    await loginAs(page, ACCOUNTS.member, '/dashboard', test)
     const cookies = await page.context().cookies()
     const res = await page.request.get(`${BASE}/api/tasks`, {
       headers: { 'Cookie': cookieStr(cookies) },
@@ -727,7 +727,7 @@ test.describe('API Functional Checks', () => {
   })
 
   test('QA-API015: /api/connections returns empty array or list', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.member, '/dashboard')
+    await loginAs(page, ACCOUNTS.member, '/dashboard', test)
     const cookies = await page.context().cookies()
     const res = await page.request.get(`${BASE}/api/connections`, {
       headers: { 'Cookie': cookieStr(cookies) },
@@ -746,7 +746,7 @@ test.describe('API Functional Checks', () => {
 test.describe('Complete User Journeys', () => {
   test('QA-JNY001: member login → dashboard → profile API → logout flow', async ({ page }) => {
     // Step 1: login
-    await loginAs(page, ACCOUNTS.member, '/dashboard')
+    await loginAs(page, ACCOUNTS.member, '/dashboard', test)
     const url = page.url()
     if (url.includes('/login')) { test.skip(); return }
     if (url.includes('/onboarding')) { test.skip(); return }
@@ -769,7 +769,7 @@ test.describe('Complete User Journeys', () => {
   })
 
   test('QA-JNY002: navigator login → tasks → time-log workflow', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.navigator, '/navigator')
+    await loginAs(page, ACCOUNTS.navigator, '/navigator', test)
     const url = page.url()
     if (url.includes('/login')) { test.skip(); return }
     if (url.includes('/onboarding')) { test.skip(); return }
@@ -798,7 +798,7 @@ test.describe('Complete User Journeys', () => {
   })
 
   test('QA-JNY003: volunteer login → open needs → training status workflow', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard')
+    await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard', test)
     const url = page.url()
     if (url.includes('/login')) { test.skip(); return }
 
@@ -824,7 +824,7 @@ test.describe('Complete User Journeys', () => {
   })
 
   test('QA-JNY004: family member login → dashboard → family events workflow', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.family, '/dashboard/family')
+    await loginAs(page, ACCOUNTS.family, '/dashboard/family', test)
     const url = page.url()
     if (url.includes('/login')) { test.skip(); return }
 
@@ -845,7 +845,7 @@ test.describe('Complete User Journeys', () => {
   })
 
   test('QA-JNY005: admin login → ambassadors → support workflow', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.admin, '/admin')
+    await loginAs(page, ACCOUNTS.admin, '/admin', test)
     const url = page.url()
     if (url.includes('/login')) { test.skip(); return }
     if (url.includes('/onboarding')) { test.skip(); return }
@@ -871,7 +871,7 @@ test.describe('Complete User Journeys', () => {
   })
 
   test('QA-JNY006: member → advisor request → verify row in DB', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.member, '/dashboard')
+    await loginAs(page, ACCOUNTS.member, '/dashboard', test)
     const token = await getToken(page, ACCOUNTS.member)
     if (!token) { test.skip(); return }
     const cookies = await page.context().cookies()
@@ -892,7 +892,7 @@ test.describe('Complete User Journeys', () => {
   })
 
   test('QA-JNY007: member completes onboarding flow pages', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.member, '/onboarding')
+    await loginAs(page, ACCOUNTS.member, '/onboarding', test)
     const url = page.url()
     if (url.includes('/login')) { test.skip(); return }
 
@@ -949,7 +949,7 @@ test.describe('Content & UI Checks', () => {
   })
 
   test('QA-UI006: member dashboard shows no 500 errors', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.member, '/dashboard')
+    await loginAs(page, ACCOUNTS.member, '/dashboard', test)
     const url = page.url()
     if (url.includes('/login')) { test.skip(); return }
     const body = await page.locator('body').innerText().catch(() => '')
@@ -958,7 +958,7 @@ test.describe('Content & UI Checks', () => {
   })
 
   test('QA-UI007: navigator dashboard shows no 500 errors', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.navigator, '/navigator')
+    await loginAs(page, ACCOUNTS.navigator, '/navigator', test)
     const url = page.url()
     if (url.includes('/login')) { test.skip(); return }
     const body = await page.locator('body').innerText().catch(() => '')
@@ -966,7 +966,7 @@ test.describe('Content & UI Checks', () => {
   })
 
   test('QA-UI008: admin dashboard shows no 500 errors', async ({ page }) => {
-    await loginAs(page, ACCOUNTS.admin, '/admin')
+    await loginAs(page, ACCOUNTS.admin, '/admin', test)
     const url = page.url()
     if (url.includes('/login')) { test.skip(); return }
     const body = await page.locator('body').innerText().catch(() => '')

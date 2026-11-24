@@ -20,7 +20,7 @@ test('TC-PE001 — /api/entitlements requires auth', async ({ page }) => {
 })
 
 test('TC-PE002 — /api/entitlements returns plan_tier for member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()

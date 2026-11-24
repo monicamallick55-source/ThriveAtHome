@@ -28,7 +28,7 @@ test('TC-SRV002 — POST /api/service-requests requires auth', async ({ page }) 
 })
 
 test('TC-SRV003 — POST /api/service-requests creates DB row for member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()

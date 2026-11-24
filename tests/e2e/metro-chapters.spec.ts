@@ -21,7 +21,7 @@ test('TC-CH001 — /api/metro-areas returns non-500', async ({ page }) => {
 })
 
 test('TC-CH002 — /api/metro-areas requires auth or returns public list', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.admin, '/admin')
+  await loginAs(page, ACCOUNTS.admin, '/admin', test)
   const token = await getToken(page, ACCOUNTS.admin)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()

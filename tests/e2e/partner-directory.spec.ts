@@ -26,7 +26,7 @@ test('TC-PD002 — /api/partners returns non-500', async ({ page }) => {
 })
 
 test('TC-PD003 — /api/partners authenticated returns list', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()

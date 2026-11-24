@@ -27,7 +27,7 @@ async function dbDelete(page, token, table, filter) {
 }
 
 test('TC-WN001 — /navigator loads for navigator', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.navigator, '/navigator')
+  await loginAs(page, ACCOUNTS.navigator, '/navigator', test)
   const token = await getToken(page, ACCOUNTS.navigator)
   if (!token) { test.skip(); return }
   expect(page.url()).toContain('/navigator')
@@ -39,7 +39,7 @@ test('TC-WN002 — /api/navigator/tasks requires auth', async ({ page }) => {
 })
 
 test('TC-WN003 — POST /api/navigator/time-log creates DB row', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.navigator, '/navigator')
+  await loginAs(page, ACCOUNTS.navigator, '/navigator', test)
   const token = await getToken(page, ACCOUNTS.navigator)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()

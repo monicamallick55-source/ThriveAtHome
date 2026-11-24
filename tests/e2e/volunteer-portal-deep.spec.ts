@@ -33,7 +33,7 @@ async function dbGet(page, token, table, filter) {
 // ── TC-VOL011 — VSO admin portal ────────────────────────────────────────────
 
 test('TC-VOL011 — VSO admin: /vso-admin loads; real session + DB row', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.vsoadmin, '/vso-admin')
+  await loginAs(page, ACCOUNTS.vsoadmin, '/vso-admin', test)
   const token = await getToken(page, ACCOUNTS.vsoadmin)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -49,7 +49,7 @@ test('TC-VOL011 — VSO admin: /vso-admin loads; real session + DB row', async (
 // ── TC-VOL021 — K-12 admin portal ───────────────────────────────────────────
 
 test('TC-VOL021 — K-12 admin: /school-admin loads; real session', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.k12admin, '/school-admin')
+  await loginAs(page, ACCOUNTS.k12admin, '/school-admin', test)
   const token = await getToken(page, ACCOUNTS.k12admin)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/500')
@@ -61,7 +61,7 @@ test('TC-VOL021 — K-12 admin: /school-admin loads; real session', async ({ pag
 // ── TC-VOL040 — Corporate volunteer dashboard ────────────────────────────────
 
 test('TC-VOL040 — Volunteer dashboard: hours/tier data accessible with real token', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard')
+  await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard', test)
   const token = await getToken(page, ACCOUNTS.volunteer)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/500')
@@ -77,7 +77,7 @@ test('TC-VOL040 — Volunteer dashboard: hours/tier data accessible with real to
 // ── TC-VOL050 — Neighbor volunteer zip enforcement ───────────────────────────
 
 test('TC-VOL050 — Neighbor volunteer: /volunteer/dashboard loads with real session', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard')
+  await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard', test)
   const token = await getToken(page, ACCOUNTS.volunteer)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/500')
@@ -104,7 +104,7 @@ test('TC-VOL061 — Training gate: volunteer_profiles schema check via real toke
 // ── TC-VOL070 — Reciprocity credits readable ─────────────────────────────────
 
 test('TC-VOL070 — Volunteer dashboard loads; reciprocity_credits table accessible', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard')
+  await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard', test)
   const token = await getToken(page, ACCOUNTS.volunteer)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/500')
@@ -118,7 +118,7 @@ test('TC-VOL070 — Volunteer dashboard loads; reciprocity_credits table accessi
 // ── TC-SCH001 — Admin dashboard schema clean ─────────────────────────────────
 
 test('TC-SCH001 — Admin dashboard loads; no schema errors', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.admin, '/admin')
+  await loginAs(page, ACCOUNTS.admin, '/admin', test)
   const token = await getToken(page, ACCOUNTS.admin)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/500')
@@ -146,7 +146,7 @@ test('TC-SCH002 — /api/cron/aria-calls: 401 without secret, not-500 with secre
 // ── TC-MED005 — MA report loads ──────────────────────────────────────────────
 
 test('TC-MED005 — /admin/ma-report loads; real admin session', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.admin, '/admin/ma-report')
+  await loginAs(page, ACCOUNTS.admin, '/admin/ma-report', test)
   const token = await getToken(page, ACCOUNTS.admin)
   if (!token) { test.skip(); return }
   if (page.url().includes('/login')) { test.skip(); return }
@@ -159,7 +159,7 @@ test('TC-MED005 — /admin/ma-report loads; real admin session', async ({ page }
 // ── TC-MED006 — MA report 3 rapid requests ───────────────────────────────────
 
 test('TC-MED007 — /admin/ma-report: 3 rapid loads do not 500', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.admin, '/admin/ma-report')
+  await loginAs(page, ACCOUNTS.admin, '/admin/ma-report', test)
   if (page.url().includes('/login')) { test.skip(); return }
   for (let i = 0; i < 3; i++) {
     await page.goto(`${BASE}/admin/ma-report`, { waitUntil: 'domcontentloaded', timeout: 20000 })
@@ -184,7 +184,7 @@ test('TC-REG001 — RLS: member token reads own family_members; not other member
 // ── TC-F003 — Family aria toggle present ─────────────────────────────────────
 
 test('TC-F003 — Family dashboard: aria toggle + real session', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.family, '/dashboard/family')
+  await loginAs(page, ACCOUNTS.family, '/dashboard/family', test)
   const token = await getToken(page, ACCOUNTS.family)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/500')
@@ -200,7 +200,7 @@ test('TC-F003 — Family dashboard: aria toggle + real session', async ({ page }
 // ── TC-F005 — Family gift approval ───────────────────────────────────────────
 
 test('TC-F005 — Family dashboard: gift_orders readable via real token', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.family, '/dashboard/family')
+  await loginAs(page, ACCOUNTS.family, '/dashboard/family', test)
   const token = await getToken(page, ACCOUNTS.family)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/500')
@@ -216,7 +216,7 @@ test('TC-F005 — Family dashboard: gift_orders readable via real token', async 
 // ── TC-F007 — Family transition plan visible ──────────────────────────────────
 
 test('TC-F007 — Family dashboard loads; transition_plans readable', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.family, '/dashboard/family')
+  await loginAs(page, ACCOUNTS.family, '/dashboard/family', test)
   const token = await getToken(page, ACCOUNTS.family)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/500')

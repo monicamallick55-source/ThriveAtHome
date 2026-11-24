@@ -18,7 +18,7 @@ async function getAuthToken(page: any, account: { email: string; password: strin
 }
 
 test('WF-SRV001 — member can submit service request + row appears in DB', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.complete, '/dashboard')
+  await loginAs(page, ACCOUNTS.complete, '/dashboard', test)
 
   const token = await getAuthToken(page, ACCOUNTS.complete)
   if (!token) { test.skip(); return }
@@ -55,7 +55,7 @@ test('WF-SRV001 — member can submit service request + row appears in DB', asyn
 })
 
 test('WF-SRV002 — member can list their own service requests', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.complete, '/dashboard')
+  await loginAs(page, ACCOUNTS.complete, '/dashboard', test)
 
   const res = await page.request.get(`${BASE_URL}/api/service-requests`, {
     headers: { 'Cookie': await page.context().cookies().then(c => c.map(x => `${x.name}=${x.value}`).join('; ')) },
@@ -70,7 +70,7 @@ test('WF-SRV003 — member cannot see other members requests', async ({ page }) 
   if (!token) { test.skip(); return }
 
   // Insert a request as complete@test.com
-  await loginAs(page, ACCOUNTS.complete, '/dashboard')
+  await loginAs(page, ACCOUNTS.complete, '/dashboard', test)
   const createRes = await page.request.post(`${BASE_URL}/api/service-requests`, {
     headers: { 'Content-Type': 'application/json', 'Cookie': await page.context().cookies().then(c => c.map(x => `${x.name}=${x.value}`).join('; ')) },
     data: { service_type: 'meals', notes: 'isolation test' },
@@ -79,7 +79,7 @@ test('WF-SRV003 — member cannot see other members requests', async ({ page }) 
   const requestId = request?.id
 
   // Now try to fetch it as member@test.com
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const fetchRes = await page.request.get(`${BASE_URL}/api/service-requests/${requestId}`, {
     headers: { 'Cookie': await page.context().cookies().then(c => c.map(x => `${x.name}=${x.value}`).join('; ')) },
   })
@@ -94,7 +94,7 @@ test('WF-SRV003 — member cannot see other members requests', async ({ page }) 
 })
 
 test('WF-SRV004 — support ticket form submits and returns ok', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/support')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/support', test)
   if (page.url().includes('/login')) { test.skip(); return }
 
   // Submit via API directly (form is client-side)
@@ -116,7 +116,7 @@ test('WF-SRV004 — support ticket form submits and returns ok', async ({ page }
 })
 
 test('WF-SRV005 — /dashboard/support page UI flow works end to end', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/support')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/support', test)
   if (page.url().includes('/login')) { test.skip(); return }
 
   // Click the label (radio inputs may be visually hidden)

@@ -28,7 +28,7 @@ async function dbDelete(page, token, table, filter) {
 }
 
 test('TC-FS001 — /dashboard/fraud-protection loads without 500', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/fraud-protection')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/fraud-protection', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -40,7 +40,7 @@ test('TC-FS002 — /api/fraud-flags requires auth', async ({ page }) => {
 })
 
 test('TC-FS003 — POST /api/fraud-flags creates DB row', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -61,7 +61,7 @@ test('TC-FS003 — POST /api/fraud-flags creates DB row', async ({ page }) => {
 })
 
 test('TC-FS004 — /dashboard/home-safety loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/home-safety')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/home-safety', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')

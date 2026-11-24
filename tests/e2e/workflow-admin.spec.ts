@@ -14,7 +14,7 @@ async function getToken(page, account) {
 }
 
 test('TC-WA001 — /admin loads for admin', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.admin, '/admin')
+  await loginAs(page, ACCOUNTS.admin, '/admin', test)
   const token = await getToken(page, ACCOUNTS.admin)
   if (!token) { test.skip(); return }
   if (page.url().includes('/onboarding')) { test.skip(); return }
@@ -22,7 +22,7 @@ test('TC-WA001 — /admin loads for admin', async ({ page }) => {
 })
 
 test('TC-WA002 — /admin/ma-report loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.admin, '/admin/ma-report')
+  await loginAs(page, ACCOUNTS.admin, '/admin/ma-report', test)
   const token = await getToken(page, ACCOUNTS.admin)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -34,7 +34,7 @@ test('TC-WA003 — /api/admin/ambassadors requires auth', async ({ page }) => {
 })
 
 test('TC-WA004 — admin can access /api/admin/ambassadors', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.admin, '/admin')
+  await loginAs(page, ACCOUNTS.admin, '/admin', test)
   const token = await getToken(page, ACCOUNTS.admin)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -47,14 +47,14 @@ test('TC-WA004 — admin can access /api/admin/ambassadors', async ({ page }) =>
 })
 
 test('TC-WA005 — /care-worker portal loads for careworker', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.careworker, '/care-worker')
+  await loginAs(page, ACCOUNTS.careworker, '/care-worker', test)
   const token = await getToken(page, ACCOUNTS.careworker)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
 })
 
 test('TC-WA006 — member cannot access /admin', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const res = await page.request.get(`${BASE}/admin`)

@@ -28,21 +28,21 @@ async function dbDelete(page, token, table, filter) {
 }
 
 test('TC-ECF001 — /dashboard/encore-careers loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/encore-careers')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/encore-careers', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
 })
 
 test('TC-ECF002 — /dashboard/festivals loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/festivals')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/festivals', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
 })
 
 test('TC-ECF003 — /api/festivals returns list', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -55,7 +55,7 @@ test('TC-ECF003 — /api/festivals returns list', async ({ page }) => {
 })
 
 test('TC-ECF004 — /dashboard/home-safety loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/home-safety')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/home-safety', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')

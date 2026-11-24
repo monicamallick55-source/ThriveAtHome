@@ -28,7 +28,7 @@ async function dbDelete(page, token, table, filter) {
 
 // TC-F001 — /dashboard/family loads for family account
 test('TC-F001 — /dashboard/family loads for family account', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.family, '/dashboard/family')
+  await loginAs(page, ACCOUNTS.family, '/dashboard/family', test)
   const token = await getToken(page, ACCOUNTS.family)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -36,7 +36,7 @@ test('TC-F001 — /dashboard/family loads for family account', async ({ page }) 
 
 // TC-F002 — POST /api/family/events creates family_events row
 test('TC-F002 — POST /api/family/events creates DB row', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.family, '/dashboard/family')
+  await loginAs(page, ACCOUNTS.family, '/dashboard/family', test)
   const token = await getToken(page, ACCOUNTS.family)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -62,7 +62,7 @@ test('TC-F002 — POST /api/family/events creates DB row', async ({ page }) => {
 
 // TC-F003 — GET /api/family/buddy-assignment returns data
 test('TC-F003 — GET /api/family/buddy-assignment returns data', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.family, '/dashboard/family')
+  await loginAs(page, ACCOUNTS.family, '/dashboard/family', test)
   const token = await getToken(page, ACCOUNTS.family)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -76,7 +76,7 @@ test('TC-F003 — GET /api/family/buddy-assignment returns data', async ({ page 
 
 // TC-F004 — family cannot access /navigator
 test('TC-F004 — family account cannot access /navigator', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.family, '/dashboard/family')
+  await loginAs(page, ACCOUNTS.family, '/dashboard/family', test)
   const token = await getToken(page, ACCOUNTS.family)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -104,7 +104,7 @@ test('TC-F006 — family token can read own profile from DB', async ({ page }) =
 
 // TC-F007 — family portal fraud protection card via API
 test('TC-F007 — /api/fraud-flags GET returns data for family', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.family, '/dashboard/family')
+  await loginAs(page, ACCOUNTS.family, '/dashboard/family', test)
   const token = await getToken(page, ACCOUNTS.family)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()

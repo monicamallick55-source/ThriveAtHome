@@ -27,21 +27,21 @@ async function dbDelete(page, token, table, filter) {
 }
 
 test('TC-WC001 — /dashboard/communities loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/communities')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/communities', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
 })
 
 test('TC-WC002 — /dashboard/events loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/events')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/events', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
 })
 
 test('TC-WC003 — /api/communities returns non-500', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()

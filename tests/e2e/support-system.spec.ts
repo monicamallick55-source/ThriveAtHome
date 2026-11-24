@@ -28,7 +28,7 @@ test('TC-SUP002 — /api/support/tickets requires auth', async ({ page }) => {
 })
 
 test('TC-SUP003 — authenticated member can submit support ticket', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()

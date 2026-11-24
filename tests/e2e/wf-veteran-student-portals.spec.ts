@@ -14,49 +14,49 @@ async function getToken(page, account) {
 }
 
 test('TC-VT01 — veteran volunteer portal loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.veteran, '/volunteer/dashboard')
+  await loginAs(page, ACCOUNTS.veteran, '/volunteer/dashboard', test)
   const token = await getToken(page, ACCOUNTS.veteran)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
 })
 
 test('TC-VT02 — /vso-admin loads for vsoadmin', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.vsoadmin, '/vso-admin')
+  await loginAs(page, ACCOUNTS.vsoadmin, '/vso-admin', test)
   const token = await getToken(page, ACCOUNTS.vsoadmin)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
 })
 
 test('TC-ST01 — student volunteer portal loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.student, '/student')
+  await loginAs(page, ACCOUNTS.student, '/student', test)
   const token = await getToken(page, ACCOUNTS.student)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
 })
 
 test('TC-ST02 — k12student portal loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.k12student, '/student')
+  await loginAs(page, ACCOUNTS.k12student, '/student', test)
   const token = await getToken(page, ACCOUNTS.k12student)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
 })
 
 test('TC-PORT01 — /dashboard/medicare-help loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/medicare-help')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/medicare-help', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
 })
 
 test('TC-PORT02 — /university-admin loads for uniadmin', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.uniadmin, '/university-admin')
+  await loginAs(page, ACCOUNTS.uniadmin, '/university-admin', test)
   const token = await getToken(page, ACCOUNTS.uniadmin)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
 })
 
 test('TC-PORT03 — /school-admin loads for k12admin', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.k12admin, '/school-admin')
+  await loginAs(page, ACCOUNTS.k12admin, '/school-admin', test)
   const token = await getToken(page, ACCOUNTS.k12admin)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')

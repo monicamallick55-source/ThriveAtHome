@@ -28,7 +28,7 @@ async function dbDelete(page, token, table, filter) {
 }
 
 test('TC-CEG001 — /dashboard/gift-send loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/gift-send')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/gift-send', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -42,7 +42,7 @@ test('TC-CEG002 — /api/gifts requires auth', async ({ page }) => {
 })
 
 test('TC-CEG003 — POST /api/festivals/{id}/rsvp creates DB row', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()

@@ -27,14 +27,14 @@ async function dbDelete(page, token, table, filter) {
 }
 
 test('TC-WF-F01 — /dashboard/family loads for family', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.family, '/dashboard/family')
+  await loginAs(page, ACCOUNTS.family, '/dashboard/family', test)
   const token = await getToken(page, ACCOUNTS.family)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
 })
 
 test('TC-WF-F02 — POST /api/family/events creates DB row', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.family, '/dashboard/family')
+  await loginAs(page, ACCOUNTS.family, '/dashboard/family', test)
   const token = await getToken(page, ACCOUNTS.family)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -55,7 +55,7 @@ test('TC-WF-F02 — POST /api/family/events creates DB row', async ({ page }) =>
 })
 
 test('TC-WF-F03 — GET /api/family/buddy-assignment returns data', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.family, '/dashboard/family')
+  await loginAs(page, ACCOUNTS.family, '/dashboard/family', test)
   const token = await getToken(page, ACCOUNTS.family)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()

@@ -15,7 +15,7 @@ async function dbDelete(page, token, table, filter) {
 }
 
 test('TC-MKT001 — /dashboard/marketplace returns non-500', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/marketplace')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/marketplace', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -27,7 +27,7 @@ test('TC-MKT002 — /api/marketplace/providers requires auth', async ({ page }) 
 })
 
 test('TC-MKT003 — marketplace_live flag: marketplace API does not 500', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()

@@ -28,14 +28,14 @@ async function dbDelete(page, token, table, filter) {
 }
 
 test('TC-COM001 — /dashboard/communities loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/communities')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/communities', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
 })
 
 test('TC-COM002 — /api/communities returns list for member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -48,7 +48,7 @@ test('TC-COM002 — /api/communities returns list for member', async ({ page }) 
 })
 
 test('TC-COM003 — /dashboard/skill-exchange loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/skill-exchange')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/skill-exchange', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')

@@ -27,14 +27,14 @@ async function dbDelete(page, token, table, filter) {
 }
 
 test('TC-N-WF01 — /navigator action feed loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.navigator, '/navigator')
+  await loginAs(page, ACCOUNTS.navigator, '/navigator', test)
   const token = await getToken(page, ACCOUNTS.navigator)
   if (!token) { test.skip(); return }
   expect(page.url()).toContain('/navigator')
 })
 
 test('TC-N-WF02 — POST /api/navigator/time-log creates DB row', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.navigator, '/navigator')
+  await loginAs(page, ACCOUNTS.navigator, '/navigator', test)
   const token = await getToken(page, ACCOUNTS.navigator)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -58,7 +58,7 @@ test('TC-N-WF02 — POST /api/navigator/time-log creates DB row', async ({ page 
 })
 
 test('TC-N-WF03 — POST /api/navigator/documents creates DB row', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.navigator, '/navigator')
+  await loginAs(page, ACCOUNTS.navigator, '/navigator', test)
   const token = await getToken(page, ACCOUNTS.navigator)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()

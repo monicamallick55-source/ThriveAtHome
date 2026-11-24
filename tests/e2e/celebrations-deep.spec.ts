@@ -28,21 +28,21 @@ async function dbDelete(page, token, table, filter) {
 }
 
 test('TC-CELD001 — /dashboard/celebrations loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/celebrations')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/celebrations', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
 })
 
 test('TC-CELD002 — /dashboard/celebrations/plan loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/celebrations/plan')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/celebrations/plan', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
 })
 
 test('TC-CELD003 — POST /api/celebrations creates DB row', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()

@@ -28,7 +28,7 @@ async function dbDelete(page, token, table, filter) {
 
 // TC-M001 — /dashboard loads for authenticated member
 test('TC-M001 — /dashboard loads for authenticated member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -36,7 +36,7 @@ test('TC-M001 — /dashboard loads for authenticated member', async ({ page }) =
 
 // TC-M002 — /api/members/profile returns member data
 test('TC-M002 — /api/members/profile returns member data', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -53,7 +53,7 @@ test('TC-M002 — /api/members/profile returns member data', async ({ page }) =>
 
 // TC-M004 — /dashboard/buddy loads
 test('TC-M004 — /dashboard/buddy loads for member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/buddy')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/buddy', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -61,7 +61,7 @@ test('TC-M004 — /dashboard/buddy loads for member', async ({ page }) => {
 
 // TC-M005 — /api/connections returns list (no 500)
 test('TC-M005 — /api/connections returns data for authenticated member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -74,7 +74,7 @@ test('TC-M005 — /api/connections returns data for authenticated member', async
 
 // TC-M011 — POST /api/advisor-request creates row in advisor_requests
 test('TC-M011 — POST /api/advisor-request creates DB row', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -99,7 +99,7 @@ test('TC-M011 — POST /api/advisor-request creates DB row', async ({ page }) =>
 
 // TC-M012 — POST /api/fraud-flags creates row in fraud_flags
 test('TC-M012 — POST /api/fraud-flags creates DB row', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -124,7 +124,7 @@ test('TC-M012 — POST /api/fraud-flags creates DB row', async ({ page }) => {
 
 // TC-M014 — /dashboard/plan returns non-500
 test('TC-M014 — /dashboard/plan loads without error', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/plan')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/plan', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -132,7 +132,7 @@ test('TC-M014 — /dashboard/plan loads without error', async ({ page }) => {
 
 // TC-M016 — /dashboard/profile loads
 test('TC-M016 — /dashboard/profile loads for member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/profile')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/profile', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -140,7 +140,7 @@ test('TC-M016 — /dashboard/profile loads for member', async ({ page }) => {
 
 // TC-M017 — /dashboard/vault loads
 test('TC-M017 — /dashboard/vault loads for member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/vault')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/vault', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -148,7 +148,7 @@ test('TC-M017 — /dashboard/vault loads for member', async ({ page }) => {
 
 // TC-M018 — /dashboard/navigator loads
 test('TC-M018 — /dashboard/navigator loads for member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/navigator')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/navigator', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -156,7 +156,7 @@ test('TC-M018 — /dashboard/navigator loads for member', async ({ page }) => {
 
 // TC-M022 — /dashboard/encore-careers loads
 test('TC-M022 — /dashboard/encore-careers loads for member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/encore-careers')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/encore-careers', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -164,7 +164,7 @@ test('TC-M022 — /dashboard/encore-careers loads for member', async ({ page }) 
 
 // TC-M026 — /dashboard/festivals loads
 test('TC-M026 — /dashboard/festivals loads for member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/festivals')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/festivals', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -172,7 +172,7 @@ test('TC-M026 — /dashboard/festivals loads for member', async ({ page }) => {
 
 // TC-M030 — POST /api/celebrations creates DB row
 test('TC-M030 — POST /api/celebrations creates DB row', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -197,7 +197,7 @@ test('TC-M030 — POST /api/celebrations creates DB row', async ({ page }) => {
 
 // TC-M034 — /dashboard/family loads for member
 test('TC-M034 — /dashboard/family loads for member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/family')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/family', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')

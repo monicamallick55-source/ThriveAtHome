@@ -23,7 +23,7 @@ async function dbGet(page, token, table, filter) {
 
 // TC-MBA001 — /dashboard/profile loads (birthday field presence)
 test('TC-MBA001 — /dashboard/profile loads for member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/profile')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/profile', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -74,7 +74,7 @@ test('TC-MBA006 — authenticated member can read achievements from DB', async (
 
 // TC-MBA007 — /dashboard/achievements loads or falls back gracefully
 test('TC-MBA007 — /dashboard/achievements loads or falls back gracefully', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const res = await page.request.get(`${BASE}/dashboard/achievements`)
@@ -84,7 +84,7 @@ test('TC-MBA007 — /dashboard/achievements loads or falls back gracefully', asy
 
 // TC-MBA008 — interest circles page loads
 test('TC-MBA008 — /dashboard/communities interest circles loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/communities')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/communities', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')

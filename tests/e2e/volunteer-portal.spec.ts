@@ -15,7 +15,7 @@ async function getToken(page, account) {
 
 // TC-VOL001 — volunteer dashboard loads
 test('TC-VOL001 — volunteer dashboard loads via cookie injection', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard')
+  await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard', test)
   const token = await getToken(page, ACCOUNTS.volunteer)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -23,7 +23,7 @@ test('TC-VOL001 — volunteer dashboard loads via cookie injection', async ({ pa
 
 // TC-VOL002 — /api/volunteer/buddy-assignments returns data
 test('TC-VOL002 — /api/volunteer/buddy-assignments returns data for volunteer', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard')
+  await loginAs(page, ACCOUNTS.volunteer, '/volunteer/dashboard', test)
   const token = await getToken(page, ACCOUNTS.volunteer)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -43,7 +43,7 @@ test('TC-VOL003 — /api/volunteer/buddy-assignments requires auth', async ({ pa
 
 // TC-VOL010 — /university-admin loads for uniadmin
 test('TC-VOL010 — /university-admin loads for uniadmin', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.uniadmin, '/university-admin')
+  await loginAs(page, ACCOUNTS.uniadmin, '/university-admin', test)
   const token = await getToken(page, ACCOUNTS.uniadmin)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -51,7 +51,7 @@ test('TC-VOL010 — /university-admin loads for uniadmin', async ({ page }) => {
 
 // TC-VOL011 — /vso-admin loads for vsoadmin
 test('TC-VOL011 — /vso-admin loads for vsoadmin', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.vsoadmin, '/vso-admin')
+  await loginAs(page, ACCOUNTS.vsoadmin, '/vso-admin', test)
   const token = await getToken(page, ACCOUNTS.vsoadmin)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -59,7 +59,7 @@ test('TC-VOL011 — /vso-admin loads for vsoadmin', async ({ page }) => {
 
 // TC-VOL012 — /school-admin loads for k12admin
 test('TC-VOL012 — /school-admin loads for k12admin', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.k12admin, '/school-admin')
+  await loginAs(page, ACCOUNTS.k12admin, '/school-admin', test)
   const token = await getToken(page, ACCOUNTS.k12admin)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')

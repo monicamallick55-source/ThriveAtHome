@@ -15,14 +15,14 @@ async function dbDelete(page, token, table, filter) {
 }
 
 test('TC-LTD001 — /dashboard/life-transitions loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/life-transitions')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/life-transitions', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
 })
 
 test('TC-LTD002 — /dashboard/grief-circles loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard/grief-circles')
+  await loginAs(page, ACCOUNTS.member, '/dashboard/grief-circles', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')

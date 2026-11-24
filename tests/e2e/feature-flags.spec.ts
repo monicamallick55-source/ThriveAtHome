@@ -32,7 +32,7 @@ test('TC-REG002 — Premier label not paired with price on /pricing', async ({ p
 
 // TC-REG005 — /api/feature-flags endpoint exists and returns flags
 test('TC-REG005 — /api/feature-flags returns feature flag data', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.admin, '/admin')
+  await loginAs(page, ACCOUNTS.admin, '/admin', test)
   const token = await getToken(page, ACCOUNTS.admin)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
@@ -49,7 +49,7 @@ test('TC-REG005 — /api/feature-flags returns feature flag data', async ({ page
 
 // TC-REG006 — marketplace_live:false → /dashboard/marketplace is locked/accessible
 test('TC-REG006 — /dashboard/marketplace loads in locked state (no 500)', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const res = await page.request.get(`${BASE}/dashboard/marketplace`)
@@ -58,7 +58,7 @@ test('TC-REG006 — /dashboard/marketplace loads in locked state (no 500)', asyn
 
 // TC-M080 — Complete member can access dashboard
 test('TC-M080 — Complete member dashboard loads', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.complete, '/dashboard')
+  await loginAs(page, ACCOUNTS.complete, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.complete)
   if (!token) { test.skip(); return }
   expect(page.url()).not.toContain('/login')
@@ -66,7 +66,7 @@ test('TC-M080 — Complete member dashboard loads', async ({ page }) => {
 
 // TC-M064 — member_campaigns_live flag: /api/feature-flags returns non-500
 test('TC-M064 — /api/feature-flags does not 500 for authenticated member', async ({ page }) => {
-  await loginAs(page, ACCOUNTS.member, '/dashboard')
+  await loginAs(page, ACCOUNTS.member, '/dashboard', test)
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const cookies = await page.context().cookies()
