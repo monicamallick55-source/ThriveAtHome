@@ -23,6 +23,7 @@ const PRICE_MAP: Record<string, string | undefined> = {
 export async function POST(req: NextRequest) {
   // Require authenticated user
   const user = await requireAuth().catch(() => null)
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await req.json().catch(() => null)
   if (!body) return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
@@ -45,7 +46,7 @@ export async function POST(req: NextRequest) {
   const { data: member, error: memberError } = await supabaseAdmin
     .from('members')
     .select('id, plan, stripe_subscription_id, stripe_customer_id, subscription_status')
-    .eq('auth_id', user.id)
+    .eq('supabase_auth_id', user.id)
     .maybeSingle()
 
   if (memberError || !member) {
