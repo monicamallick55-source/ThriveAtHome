@@ -73,7 +73,9 @@ export async function loginAs(
     const refresh_token = tokens?.refresh_token
     if (access_token) {
       const expiresAt = Math.floor(Date.now() / 1000) + 3600
-      const sessionVal = JSON.stringify({ access_token, refresh_token, token_type: 'bearer', expires_in: 3600, expires_at: expiresAt })
+      const sessionObj = JSON.stringify({ access_token, refresh_token, token_type: 'bearer', expires_in: 3600, expires_at: expiresAt })
+      // Supabase server-side cookie parser expects URL-encoded JSON
+      const sessionVal = encodeURIComponent(sessionObj)
       const domain = new URL(BASE_URL).hostname
       await page.context().addCookies([
         { name: 'sb-qdniskppkfqjmtpkftdt-auth-token', value: sessionVal, domain, path: '/', expires: expiresAt, httpOnly: false, secure: true, sameSite: 'Lax' },
