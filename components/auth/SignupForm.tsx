@@ -71,6 +71,7 @@ export function SignupForm({ referralCode }: { referralCode?: string }) {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [tcpaConsent, setTcpaConsent] = useState(false)
   const router = useRouter()
   const [plan, setPlan] = useState<string | null>(null)
   useEffect(() => {
@@ -100,6 +101,11 @@ export function SignupForm({ referralCode }: { referralCode?: string }) {
     }
     if (accountType === 'proxy' && !relationship) {
       setError('Please choose your relationship to the person you are enrolling.')
+      return
+    }
+
+    if (!tcpaConsent) {
+      setError('Please agree to receive SMS messages to continue.')
       return
     }
 
@@ -448,6 +454,43 @@ export function SignupForm({ referralCode }: { referralCode?: string }) {
               )}
             </div>
 
+
+            {/* TCPA SMS consent */}
+            <label
+              style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '12px',
+                cursor: loading ? 'not-allowed' : 'pointer',
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={tcpaConsent}
+                onChange={(e) => setTcpaConsent(e.target.checked)}
+                disabled={loading}
+                style={{
+                  width: '20px',
+                  height: '20px',
+                  marginTop: '2px',
+                  accentColor: 'var(--color-navy)',
+                  flexShrink: 0,
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                }}
+              />
+              <span
+                style={{
+                  fontFamily: 'var(--font-body)',
+                  fontSize: '15px',
+                  color: 'var(--color-text-secondary)',
+                  lineHeight: 1.5,
+                }}
+              >
+                I agree to receive SMS messages from ThriveAtHome for care check-ins and important updates. Message &amp; data rates may apply. Reply STOP to cancel at any time. See our{' '}
+                <Link href="/privacy" style={{ color: 'var(--color-navy-light)', textDecoration: 'underline' }}>Privacy Policy</Link>.
+              </span>
+            </label>
+
             {error && (
               <p
                 role="alert"
@@ -471,7 +514,7 @@ export function SignupForm({ referralCode }: { referralCode?: string }) {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !tcpaConsent}
               style={{
                 width: '100%',
                 height: '56px',
