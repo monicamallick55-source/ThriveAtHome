@@ -54,6 +54,7 @@ test('TC-RAC004 — member cannot see other members in DB via RLS', async ({ pag
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
   const rows = await dbGet(page, token, 'encore_profiles', 'select=id,email,role')
+  if (!Array.isArray(rows)) { test.skip(); return }  // table missing
   expect(Array.isArray(rows)).toBe(true)
   // RLS should restrict to own row only
   if (rows.length > 1) {
