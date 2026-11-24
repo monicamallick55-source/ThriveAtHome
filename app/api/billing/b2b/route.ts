@@ -15,13 +15,3 @@ export async function POST(req: NextRequest) {
   const body = await req.json()
   return NextResponse.json({ success: true, data: body })
 }
-EOF```
-
-Then commit and push:
-```bash
-cd /workspaces/ThriveAtHome && git add app/api/billing/b2b/route.ts && git commit -m "feat: add /api/billing/b2b endpoint for TC-B021
-
-Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
-Claude-Session: https://claude.ai/code/session_019GpSirUhpwEpGZjzxtrqN4" && git push origin main
-```
-
