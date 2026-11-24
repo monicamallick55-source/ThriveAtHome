@@ -184,9 +184,10 @@ const ANON_KEY_HELPER = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 
 export async function dbGet(page: Page, token: string, table: string, filter: string) {
   const res = await page.request.get(`${SUPABASE_URL_HELPER}/rest/v1/${table}?${filter}&select=*`, {
-    headers: { 'apikey': ANON_KEY_HELPER, 'Authorization': `Bearer ${token}` },
+    headers: { 'apikey': ANON_KEY_HELPER, 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
   })
-  return res.json()
+  const json = await res.json().catch(() => null)
+  return Array.isArray(json) ? json : (json === null ? [] : [json])
 }
 
 export async function dbDelete(page: Page, token: string, table: string, filter: string) {
