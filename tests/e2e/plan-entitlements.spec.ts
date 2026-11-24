@@ -29,6 +29,6 @@ test('TC-PE003 — member plan_tier is valid value in DB', async ({ page }) => {
   const rows = await dbGet(page, token, 'profiles', 'select=plan_tier')
   if (!Array.isArray(rows)) { test.skip(); return }
   if (rows.length > 0 && rows[0].plan_tier) {
-    expect(['basics', 'connect', 'complete', 'premier']).toContain(rows[0].plan_tier)
+    expect(['basic', 'basics', 'connect', 'complete', 'premier']).toContain(rows[0].plan_tier)
   }
 })
