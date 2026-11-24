@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     scam_type: body.flag_type ?? body.scam_type ?? 'other',
     matched_text: body.description ?? body.matched_text ?? null,
     source: body.source ?? 'member',
-    severity: body.severity ?? 'low',
+    severity: ['concern', 'urgent'].includes(body.severity as string) ? body.severity as string : 'concern',
     status: 'open',
   }).select('id').single()
 
