@@ -66,7 +66,7 @@ test('TC-B006 — authenticated member can call create-checkout-session', async 
 test('TC-B007 — member profile has plan_tier in DB', async ({ page }) => {
   const token = await getToken(page, ACCOUNTS.member)
   if (!token) { test.skip(); return }
-  const rows = await dbGet(page, token, 'encore_profiles', 'select=plan_tier,email')
+  const rows = await dbGet(page, token, 'profiles', 'select=plan_tier,email')
   expect(Array.isArray(rows)).toBe(true)
   if (rows.length > 0 && rows[0].plan_tier !== undefined) {
     expect(typeof rows[0].plan_tier).toBe('string')
@@ -77,7 +77,7 @@ test('TC-B007 — member profile has plan_tier in DB', async ({ page }) => {
 test('TC-B008 — complete member plan_tier is correct in DB', async ({ page }) => {
   const token = await getToken(page, ACCOUNTS.complete)
   if (!token) { test.skip(); return }
-  const rows = await dbGet(page, token, 'encore_profiles', 'select=plan_tier')
+  const rows = await dbGet(page, token, 'profiles', 'select=plan_tier')
   expect(Array.isArray(rows)).toBe(true)
   if (rows.length > 0 && rows[0].plan_tier) {
     expect(['complete', 'premier', 'basics', 'connect']).toContain(rows[0].plan_tier)
