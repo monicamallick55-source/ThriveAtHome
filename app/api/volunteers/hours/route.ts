@@ -1,6 +1,3 @@
-// app/api/volunteers/hours/route.ts
-// POST — log volunteer hours; GET — own hours summary
-
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -10,7 +7,6 @@ export async function GET(_req: Request) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = createAdminClient() as any
   const { data: volunteer } = await db.from('volunteers').select('id, total_hours').eq('email', user.email).maybeSingle()
   if (!volunteer) return NextResponse.json({ error: 'Volunteer profile not found' }, { status: 404 })
@@ -27,45 +23,33 @@ export async function GET(_req: Request) {
 
 export async function POST(req: Request) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = createAdminClient() as any
   const { data: volunteer } = await db.from('volunteers').select('id, status').eq('email', user.email).maybeSingle()
   if (!volunteer) return NextResponse.json({ error: 'Volunteer profile not found' }, { status: 404 })
   if (volunteer.status !== 'active') return NextResponse.json({ error: 'Volunteer account not active' }, { status: 403 })
 
   const body = await req.json().catch(() => ({})) as {
-    hours?: number
-    activity_date?: string
-    date?: string
-    description?: string
-    notes?: string
-    activity_type?: string
-    assignment_id?: string
-    member_id?: string
+    hours?: number; activity_date?: string; date?: string;
+    activity_type?: string; description?: string; notes?: string; assignment_id?: string
   }
 
-  // Accept both field name conventions
-  const activityDate = body.activity_date ?? body.date ?? null
-  const description = body.description ?? body.notes ?? body.activity_type ?? null
+  const hours = body.hours
+  if (!hours || hours <= 0) return NextResponse.json({ error: 'hours required' }, { status: 400 })
+  const activityDate = body.activity_date || body.date || new Date().toISOString().slice(0, 10)
 
-  const hours = Number(body.hours)
-  if (!hours || hours <= 0 || hours > 24) return NextResponse.json({ error: 'hours must be 0-24' }, { status: 400 })
-  if (!activityDate) return NextResponse.json({ error: 'activity_date required (YYYY-MM-DD)' }, { status: 400 })
-
-  const { data: entry, error } = await db
-    .from('volunteer_hours')
-    .insert({
-      volunteer_id: volunteer.id,
-      assignment_id: body.assignment_id ?? null,
-      member_id: body.member_id ?? null,
-      hours,
-      activity_date: activityDate,
-      description: description,
-    })
-    .select()
-    .single()
+  const { data, error } = await db.from('volunteer_hours').insert({
+    volunteer_id: volunteer.id,
+    hours,
+    activity_date: activityDate,
+    activity_type: body.activity_type ?? 'general',
+    description: body.description || body.notes || null,
+    assignment_id: body.assignment_id ?? null,
+    verified: false,
+  }).select('id').single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ entry }, { status: 201 })
+  return NextResponse.json({ ok: true, id: data?.id }, { status: 201 })
 }

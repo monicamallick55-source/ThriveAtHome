@@ -128,3 +128,67 @@ export async function assertNoHorizontalScroll(page: Page): Promise<void> {
 }
 
 export const STRIPE_TEST_CARD = '4242 4242 4242 4242';
+
+// Exported token getter — tries cookie first (no rate-limit hit), falls back to cache
+export async function getToken(page: Page, account: { email: string; password: string }): Promise<string | null> {
+  // Try to extract from already-injected cookie (loginAs sets this)
+  const cookies = await page.context().cookies()
+  const authCookie = cookies.find(c => c.name === 'sb-qdniskppkfqjmtpkftdt-auth-token')
+  if (authCookie) {
+    try {
+      const session = JSON.parse(decodeURIComponent(authCookie.value))
+      if (session.access_token) return session.access_token
+    } catch {}
+  }
+  const chunk0 = cookies.find(c => c.name === 'sb-qdniskppkfqjmtpkftdt-auth-token.0')
+  if (chunk0) {
+    try {
+      const chunk1 = cookies.find(c => c.name === 'sb-qdniskppkfqjmtpkftdt-auth-token.1')
+      const combined = (chunk0.value || '') + (chunk1?.value || '')
+      const session = JSON.parse(decodeURIComponent(combined))
+      if (session.access_token) return session.access_token
+    } catch {}
+  }
+  // Fallback: use cache (may trigger auth request if cold)
+  const tokens = await getCachedToken(account.email, account.password, page)
+  return tokens?.access_token ?? null
+}
+
+// Extract access token from the injected Supabase cookie — no extra auth request needed
+export async function getTokenFromCookie(page: Page): Promise<string | null> {
+  const cookies = await page.context().cookies()
+  const authCookie = cookies.find(c => c.name === 'sb-qdniskppkfqjmtpkftdt-auth-token')
+  if (authCookie) {
+    try {
+      const session = JSON.parse(decodeURIComponent(authCookie.value))
+      if (session.access_token) return session.access_token
+    } catch {}
+  }
+  // Fallback: try chunked cookie
+  const chunk0 = cookies.find(c => c.name === 'sb-qdniskppkfqjmtpkftdt-auth-token.0')
+  const chunk1 = cookies.find(c => c.name === 'sb-qdniskppkfqjmtpkftdt-auth-token.1')
+  if (chunk0) {
+    try {
+      const combined = (chunk0.value || '') + (chunk1?.value || '')
+      const session = JSON.parse(decodeURIComponent(combined))
+      if (session.access_token) return session.access_token
+    } catch {}
+  }
+  return null
+}
+
+const SUPABASE_URL_HELPER = 'https://qdniskppkfqjmtpkftdt.supabase.co'
+const ANON_KEY_HELPER = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkbmlza3Bwa2Zxam10cGtmdGR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3OTY2NTcsImV4cCI6MjA5NDM3MjY1N30.eKYDxvAXl38N9wgrY-tG7cIsxL83o1W3vd_GIme2pZg'
+
+export async function dbGet(page: Page, token: string, table: string, filter: string) {
+  const res = await page.request.get(`${SUPABASE_URL_HELPER}/rest/v1/${table}?${filter}&select=*`, {
+    headers: { 'apikey': ANON_KEY_HELPER, 'Authorization': `Bearer ${token}` },
+  })
+  return res.json()
+}
+
+export async function dbDelete(page: Page, token: string, table: string, filter: string) {
+  await page.request.delete(`${SUPABASE_URL_HELPER}/rest/v1/${table}?${filter}`, {
+    headers: { 'apikey': ANON_KEY_HELPER, 'Authorization': `Bearer ${token}`, 'Prefer': 'return=minimal' },
+  })
+}
