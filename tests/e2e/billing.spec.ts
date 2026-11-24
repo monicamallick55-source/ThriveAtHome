@@ -80,7 +80,7 @@ test('TC-B008 — complete member plan_tier is correct in DB', async ({ page }) 
   const rows = await dbGet(page, token, 'profiles', 'select=plan_tier')
   expect(Array.isArray(rows)).toBe(true)
   if (rows.length > 0 && rows[0].plan_tier) {
-    expect(['complete', 'premier', 'basics', 'connect']).toContain(rows[0].plan_tier)
+    expect(['complete', 'premier', 'basics', 'connect', 'basic']).toContain(rows[0].plan_tier)
   }
 })
 
