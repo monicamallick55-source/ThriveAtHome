@@ -1,4 +1,4 @@
-// build-bust: 2026-11-24b
+// build-bust: 2026-11-24c
 import type { Metadata } from 'next'
 import { DM_Sans, DM_Mono } from 'next/font/google'
 import './globals.css'
