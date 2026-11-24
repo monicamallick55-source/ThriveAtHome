@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
   let body: Record<string, unknown> = {}
   try { body = await req.json() } catch { /* empty body is fine */ }
 
-  const { data, error } = await supabase.from('fraud_flags').insert({
+  const { data, error } = await admin.from('fraud_flags').insert({
     member_id: memberId,
     scam_type: body.flag_type ?? body.scam_type ?? 'manual_report',
     matched_text: body.description ?? body.matched_text ?? null,
