@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 
 export async function GET() {
   return NextResponse.json({
-    marketplace_live: false,
+    marketplace_live: true,
     premier_plan_live: false,
     member_campaigns_live: false,
     home_from_hospital_live: true,
