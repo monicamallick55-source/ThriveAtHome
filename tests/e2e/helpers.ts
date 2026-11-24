@@ -5,6 +5,29 @@ export const BASE_URL = process.env.BASE_URL || 'https://thrive-at-home-pied.ver
 const SUPABASE_URL = 'https://qdniskppkfqjmtpkftdt.supabase.co'
 const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkbmlza3Bwa2Zxam10cGtmdGR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3OTY2NTcsImV4cCI6MjA5NDM3MjY1N30.eKYDxvAXl38N9wgrY-tG7cIsxL83o1W3vd_GIme2pZg'
 
+// Token cache — reuse tokens within a worker process to avoid rate limits
+const _tokenCache = new Map<string, { access_token: string; refresh_token: string; expires_at: number }>()
+
+async function getCachedToken(email: string, password: string, page: Page): Promise<{ access_token: string; refresh_token: string } | null> {
+  const now = Math.floor(Date.now() / 1000)
+  const cached = _tokenCache.get(email)
+  if (cached && cached.expires_at > now + 60) {
+    return { access_token: cached.access_token, refresh_token: cached.refresh_token }
+  }
+  const res = await page.request.post(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+    headers: { 'apikey': ANON_KEY, 'Content-Type': 'application/json' },
+    data: { email, password },
+  })
+  const json = await res.json()
+  if (json.access_token) {
+    const expires_at = Math.floor(Date.now() / 1000) + 3600
+    _tokenCache.set(email, { access_token: json.access_token, refresh_token: json.refresh_token, expires_at })
+    return { access_token: json.access_token, refresh_token: json.refresh_token }
+  }
+  return null
+}
+
+
 export const CRON_SECRET = process.env.CRON_SECRET ?? '0LjR0pE/7WueB508Z6OER1s/6x0Buze2vbRPVljKxFs='
 export const ACCOUNTS = {
   member:        { email: 'member@test.com',        password: 'TestPass123!' },
@@ -45,12 +68,9 @@ export async function loginAs(
 ): Promise<void> {
   // If we have an expectedPath, inject cookie and go directly — fast path
   if (expectedPath) {
-    const res = await page.request.post(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
-      headers: { 'apikey': ANON_KEY, 'Content-Type': 'application/json' },
-      data: { email: account.email, password: account.password },
-    })
-    const json = await res.json()
-    const { access_token, refresh_token } = json
+    const tokens = await getCachedToken(account.email, account.password, page)
+    const access_token = tokens?.access_token
+    const refresh_token = tokens?.refresh_token
     if (access_token) {
       const expiresAt = Math.floor(Date.now() / 1000) + 3600
       const sessionVal = JSON.stringify({ access_token, refresh_token, token_type: 'bearer', expires_in: 3600, expires_at: expiresAt })
