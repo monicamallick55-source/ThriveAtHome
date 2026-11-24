@@ -39,13 +39,13 @@ export async function POST(req: NextRequest) {
 
   const { data, error } = await admin.from('fraud_flags').insert({
     member_id: memberId,
-    scam_type: body.flag_type ?? body.scam_type ?? 'manual_report',
+    scam_type: body.flag_type ?? body.scam_type ?? 'other',
     matched_text: body.description ?? body.matched_text ?? null,
     source: body.source ?? 'member',
     severity: body.severity ?? 'low',
     status: 'open',
   }).select('id').single()
 
-  if (error) return NextResponse.json({ error: error.message, code: error.code, details: error.details }, { status: 500 })
+  if (error) return NextResponse.json({ error: 'Could not create flag' }, { status: 500 })
   return NextResponse.json({ ok: true, id: data?.id ?? null }, { status: 201 })
 }
