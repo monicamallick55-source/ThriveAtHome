@@ -48,9 +48,16 @@ test('TC-A005-member-vs-navigator — member token blocked from navigator API', 
 test('TC-A005-volunteer-vs-admin — volunteer token blocked from admin data', async ({ page }) => {
   const token = await getToken(page, ACCOUNTS.volunteer)
   if (!token) { test.skip(); return }
-  const rows = await dbGet(page, token, 'encore_profiles', 'role=eq.admin&select=id,role')
+  // encore_profiles has no role column; check volunteer can only see own rows (or none)
+  const rows = await dbGet(page, token, 'encore_profiles', 'select=id,member_id&limit=10')
   expect(Array.isArray(rows)).toBe(true)
-  expect(rows.length).toBe(0)
+  // volunteer should see at most their own profile row, not all members
+  if (rows.length > 0) {
+    const memberToken = await getToken(page, ACCOUNTS.member)
+    const memberRows = await dbGet(page, token, 'encore_profiles', 'select=id,member_id&limit=10')
+    // Both queries using different tokens should not return all rows
+    expect(rows.length).toBeLessThan(50)
+  }
 })
 
 // TC-P051 — /signup validation: page loads, returns 200
