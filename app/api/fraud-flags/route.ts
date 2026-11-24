@@ -28,11 +28,16 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
+  // Look up member UUID from members table (member_id is not auth UID)
+  const admin = createAdminClient()
+  const { data: memberRow } = await admin.from('members').select('id').eq('supabase_auth_id', user.id).maybeSingle()
+  const memberId = memberRow?.id ?? user.id
+
   let body: Record<string, unknown> = {}
   try { body = await req.json() } catch { /* empty body is fine */ }
 
   const { data, error } = await supabase.from('fraud_flags').insert({
-    member_id: user.id,
+    member_id: memberId,
     scam_type: body.flag_type ?? body.scam_type ?? 'manual_report',
     matched_text: body.description ?? body.matched_text ?? null,
     source: body.source ?? 'member',
