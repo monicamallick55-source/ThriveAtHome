@@ -1,0 +1,6 @@
+
+Running 735 tests using 2 workers
+
+  -    1 [chromium] › tests/e2e/admin-portal-deep.spec.ts:17:1 › TC-AD002 — /admin portal loads for admin via cookie injection
+  ✓    2 [chromium] › tests/e2e/admin-portal-deep.spec.ts:25:1 › TC-AD003 — /api/admin/ambassadors returns data for admin (3.2s)
+  ✓    3 [chromium] › tests/e2e/admin-portal-deep.spec.ts:39:1 › TC-AD004 — /api/admin/ambassadors requires auth (524ms)

@@ -1,0 +1,706 @@
+nohup: ignoring input
+
+Running 13 tests using 2 workers
+
+  ✓   2 [chromium] › tests/e2e/critical-flows.spec.ts:17:1 › TC-CF001 — member can login and reach dashboard (2.3s)
+  ✓   1 [chromium] › tests/e2e/infrastructure.spec.ts:26:1 › TC-INFRA003 — member can reach dashboard after cookie login (2.5s)
+  ✘   3 [chromium] › tests/e2e/member-dashboard-full.spec.ts:170:1 › TC-M030 — POST /api/celebrations creates DB row (2.4s)
+  ✘   4 [chromium] › tests/e2e/member-features-deep.spec.ts:75:1 › TC-M050 — /api/connections returns list for authenticated member (3.4s)
+  ✘   5 [chromium] › tests/e2e/member-dashboard-full.spec.ts:170:1 › TC-M030 — POST /api/celebrations creates DB row (retry #1) (2.6s)
+  ✘   6 [chromium] › tests/e2e/member-features-deep.spec.ts:75:1 › TC-M050 — /api/connections returns list for authenticated member (retry #1) (3.4s)
+  ✘   7 [chromium] › tests/e2e/member-dashboard-full.spec.ts:170:1 › TC-M030 — POST /api/celebrations creates DB row (retry #2) (2.5s)
+  ✘   8 [chromium] › tests/e2e/member-features-deep.spec.ts:75:1 › TC-M050 — /api/connections returns list for authenticated member (retry #2) (2.9s)
+  ✓   9 [chromium] › tests/e2e/member-pages.spec.ts:66:5 › Member Dashboard Pages — real cookie injection › TC-M030 — /dashboard/celebrations loads without login redirect (1.8s)
+  ✘  10 [chromium] › tests/e2e/qa-full-suite.spec.ts:612:3 › API Functional Checks › QA-API003: /api/billing returns plan info (2.1s)
+  ✘  11 [chromium] › tests/e2e/qa-full-suite.spec.ts:702:3 › API Functional Checks › QA-API012: /api/time-bank/balance returns data (2.4s)
+  ✘  12 [chromium] › tests/e2e/qa-full-suite.spec.ts:612:3 › API Functional Checks › QA-API003: /api/billing returns plan info (retry #1) (2.7s)
+  ✘  13 [chromium] › tests/e2e/qa-full-suite.spec.ts:702:3 › API Functional Checks › QA-API012: /api/time-bank/balance returns data (retry #1) (2.9s)
+  ✘  14 [chromium] › tests/e2e/qa-full-suite.spec.ts:612:3 › API Functional Checks › QA-API003: /api/billing returns plan info (retry #2) (2.7s)
+  ✘  15 [chromium] › tests/e2e/qa-full-suite.spec.ts:702:3 › API Functional Checks › QA-API012: /api/time-bank/balance returns data (retry #2) (2.5s)
+  ✘  16 [chromium] › tests/e2e/qa-full-suite.spec.ts:729:3 › API Functional Checks › QA-API015: /api/connections returns empty array or list (3.0s)
+  ✓  17 [chromium] › tests/e2e/voice-infra.spec.ts:25:1 › TC-V010 — /api/cron/aria-calls fires with correct secret (3.1s)
+  ✘  18 [chromium] › tests/e2e/voice-pipeline.spec.ts:25:1 › TC-V002 — /api/cron/aria-calls fires with correct secret (309ms)
+  ✘  20 [chromium] › tests/e2e/voice-pipeline.spec.ts:25:1 › TC-V002 — /api/cron/aria-calls fires with correct secret (retry #1) (315ms)
+  ✘  21 [chromium] › tests/e2e/voice-pipeline.spec.ts:25:1 › TC-V002 — /api/cron/aria-calls fires with correct secret (retry #2) (345ms)
+  ✘  19 [chromium] › tests/e2e/qa-full-suite.spec.ts:729:3 › API Functional Checks › QA-API015: /api/connections returns empty array or list (retry #1) (3.3s)
+  ✘  22 [chromium] › tests/e2e/voice-pipeline.spec.ts:43:1 › TC-V004 — /api/cron/birthday-arc fires without 500 (472ms)
+  ✘  24 [chromium] › tests/e2e/voice-pipeline.spec.ts:43:1 › TC-V004 — /api/cron/birthday-arc fires without 500 (retry #1) (296ms)
+  ✘  25 [chromium] › tests/e2e/voice-pipeline.spec.ts:43:1 › TC-V004 — /api/cron/birthday-arc fires without 500 (retry #2) (282ms)
+  ✘  26 [chromium] › tests/e2e/voice-pipeline.spec.ts:52:1 › TC-V081 — /api/cron/check-ins fires without 500 (427ms)
+  ✘  23 [chromium] › tests/e2e/qa-full-suite.spec.ts:729:3 › API Functional Checks › QA-API015: /api/connections returns empty array or list (retry #2) (3.7s)
+  ✘  27 [chromium] › tests/e2e/voice-pipeline.spec.ts:52:1 › TC-V081 — /api/cron/check-ins fires without 500 (retry #1) (534ms)
+  ✘  29 [chromium] › tests/e2e/voice-pipeline.spec.ts:52:1 › TC-V081 — /api/cron/check-ins fires without 500 (retry #2) (377ms)
+  ✓  28 [mobile-chrome] › tests/e2e/member-pages.spec.ts:66:5 › Member Dashboard Pages — real cookie injection › TC-M030 — /dashboard/celebrations loads without login redirect (2.4s)
+
+
+  1) [chromium] › tests/e2e/member-dashboard-full.spec.ts:170:1 › TC-M030 — POST /api/celebrations creates DB row 
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected value: 400
+    Received array: [200, 201]
+
+      180 |   })
+      181 |   if (res.status() === 404) { test.skip(); return }
+    > 182 |   expect([200, 201]).toContain(res.status())
+          |                      ^
+      183 |   const body = await res.json()
+      184 |   const id = body.id || body.record?.id
+      185 |   if (id) {
+        at /workspaces/ThriveAtHome/tests/e2e/member-dashboard-full.spec.ts:182:22
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/member-dashboard-full-TC-M-f4fb6-celebrations-creates-DB-row-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/member-dashboard-full-TC-M-f4fb6-celebrations-creates-DB-row-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/member-dashboard-full-TC-M-f4fb6-celebrations-creates-DB-row-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected value: 400
+    Received array: [200, 201]
+
+      180 |   })
+      181 |   if (res.status() === 404) { test.skip(); return }
+    > 182 |   expect([200, 201]).toContain(res.status())
+          |                      ^
+      183 |   const body = await res.json()
+      184 |   const id = body.id || body.record?.id
+      185 |   if (id) {
+        at /workspaces/ThriveAtHome/tests/e2e/member-dashboard-full.spec.ts:182:22
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/member-dashboard-full-TC-M-f4fb6-celebrations-creates-DB-row-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/member-dashboard-full-TC-M-f4fb6-celebrations-creates-DB-row-chromium-retry1/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/member-dashboard-full-TC-M-f4fb6-celebrations-creates-DB-row-chromium-retry1/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/member-dashboard-full-TC-M-f4fb6-celebrations-creates-DB-row-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/member-dashboard-full-TC-M-f4fb6-celebrations-creates-DB-row-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #2 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected value: 400
+    Received array: [200, 201]
+
+      180 |   })
+      181 |   if (res.status() === 404) { test.skip(); return }
+    > 182 |   expect([200, 201]).toContain(res.status())
+          |                      ^
+      183 |   const body = await res.json()
+      184 |   const id = body.id || body.record?.id
+      185 |   if (id) {
+        at /workspaces/ThriveAtHome/tests/e2e/member-dashboard-full.spec.ts:182:22
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/member-dashboard-full-TC-M-f4fb6-celebrations-creates-DB-row-chromium-retry2/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/member-dashboard-full-TC-M-f4fb6-celebrations-creates-DB-row-chromium-retry2/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/member-dashboard-full-TC-M-f4fb6-celebrations-creates-DB-row-chromium-retry2/error-context.md
+
+  2) [chromium] › tests/e2e/member-features-deep.spec.ts:75:1 › TC-M050 — /api/connections returns list for authenticated member 
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected value: 500
+    Received array: [200, 404]
+
+      82 |     headers: { 'Cookie': cookieStr },
+      83 |   })
+    > 84 |   expect([200, 404]).toContain(res.status())
+         |                      ^
+      85 |   if (res.status() === 200) {
+      86 |     const body = await res.json()
+      87 |     expect(Array.isArray(body) || typeof body === 'object').toBe(true)
+        at /workspaces/ThriveAtHome/tests/e2e/member-features-deep.spec.ts:84:22
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/member-features-deep-TC-M0-c5b73-st-for-authenticated-member-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/member-features-deep-TC-M0-c5b73-st-for-authenticated-member-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/member-features-deep-TC-M0-c5b73-st-for-authenticated-member-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected value: 500
+    Received array: [200, 404]
+
+      82 |     headers: { 'Cookie': cookieStr },
+      83 |   })
+    > 84 |   expect([200, 404]).toContain(res.status())
+         |                      ^
+      85 |   if (res.status() === 200) {
+      86 |     const body = await res.json()
+      87 |     expect(Array.isArray(body) || typeof body === 'object').toBe(true)
+        at /workspaces/ThriveAtHome/tests/e2e/member-features-deep.spec.ts:84:22
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/member-features-deep-TC-M0-c5b73-st-for-authenticated-member-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/member-features-deep-TC-M0-c5b73-st-for-authenticated-member-chromium-retry1/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/member-features-deep-TC-M0-c5b73-st-for-authenticated-member-chromium-retry1/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/member-features-deep-TC-M0-c5b73-st-for-authenticated-member-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/member-features-deep-TC-M0-c5b73-st-for-authenticated-member-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #2 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected value: 500
+    Received array: [200, 404]
+
+      82 |     headers: { 'Cookie': cookieStr },
+      83 |   })
+    > 84 |   expect([200, 404]).toContain(res.status())
+         |                      ^
+      85 |   if (res.status() === 200) {
+      86 |     const body = await res.json()
+      87 |     expect(Array.isArray(body) || typeof body === 'object').toBe(true)
+        at /workspaces/ThriveAtHome/tests/e2e/member-features-deep.spec.ts:84:22
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/member-features-deep-TC-M0-c5b73-st-for-authenticated-member-chromium-retry2/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/member-features-deep-TC-M0-c5b73-st-for-authenticated-member-chromium-retry2/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/member-features-deep-TC-M0-c5b73-st-for-authenticated-member-chromium-retry2/error-context.md
+
+  3) [chromium] › tests/e2e/qa-full-suite.spec.ts:612:3 › API Functional Checks › QA-API003: /api/billing returns plan info 
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected value: 500
+    Received array: [200, 404]
+
+      616 |       headers: { 'Cookie': cookieStr(cookies) },
+      617 |     })
+    > 618 |     expect([200, 404]).toContain(res.status())
+          |                        ^
+      619 |     if (res.status() === 200) {
+      620 |       const body = await res.json()
+      621 |       expect(body).toHaveProperty('plan')
+        at /workspaces/ThriveAtHome/tests/e2e/qa-full-suite.spec.ts:618:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/qa-full-suite-API-Function-3ceee-i-billing-returns-plan-info-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/qa-full-suite-API-Function-3ceee-i-billing-returns-plan-info-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/qa-full-suite-API-Function-3ceee-i-billing-returns-plan-info-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected value: 500
+    Received array: [200, 404]
+
+      616 |       headers: { 'Cookie': cookieStr(cookies) },
+      617 |     })
+    > 618 |     expect([200, 404]).toContain(res.status())
+          |                        ^
+      619 |     if (res.status() === 200) {
+      620 |       const body = await res.json()
+      621 |       expect(body).toHaveProperty('plan')
+        at /workspaces/ThriveAtHome/tests/e2e/qa-full-suite.spec.ts:618:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/qa-full-suite-API-Function-3ceee-i-billing-returns-plan-info-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/qa-full-suite-API-Function-3ceee-i-billing-returns-plan-info-chromium-retry1/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/qa-full-suite-API-Function-3ceee-i-billing-returns-plan-info-chromium-retry1/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/qa-full-suite-API-Function-3ceee-i-billing-returns-plan-info-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/qa-full-suite-API-Function-3ceee-i-billing-returns-plan-info-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #2 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected value: 500
+    Received array: [200, 404]
+
+      616 |       headers: { 'Cookie': cookieStr(cookies) },
+      617 |     })
+    > 618 |     expect([200, 404]).toContain(res.status())
+          |                        ^
+      619 |     if (res.status() === 200) {
+      620 |       const body = await res.json()
+      621 |       expect(body).toHaveProperty('plan')
+        at /workspaces/ThriveAtHome/tests/e2e/qa-full-suite.spec.ts:618:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/qa-full-suite-API-Function-3ceee-i-billing-returns-plan-info-chromium-retry2/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/qa-full-suite-API-Function-3ceee-i-billing-returns-plan-info-chromium-retry2/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/qa-full-suite-API-Function-3ceee-i-billing-returns-plan-info-chromium-retry2/error-context.md
+
+  4) [chromium] › tests/e2e/qa-full-suite.spec.ts:702:3 › API Functional Checks › QA-API012: /api/time-bank/balance returns data 
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected value: 500
+    Received array: [200, 404]
+
+      706 |       headers: { 'Cookie': cookieStr(cookies) },
+      707 |     })
+    > 708 |     expect([200, 404]).toContain(res.status())
+          |                        ^
+      709 |   })
+      710 |
+      711 |   test('QA-API013: /api/volunteer/buddy-assignments returns data for volunteer', async ({ page }) => {
+        at /workspaces/ThriveAtHome/tests/e2e/qa-full-suite.spec.ts:708:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/qa-full-suite-API-Function-aad19-e-bank-balance-returns-data-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/qa-full-suite-API-Function-aad19-e-bank-balance-returns-data-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/qa-full-suite-API-Function-aad19-e-bank-balance-returns-data-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected value: 500
+    Received array: [200, 404]
+
+      706 |       headers: { 'Cookie': cookieStr(cookies) },
+      707 |     })
+    > 708 |     expect([200, 404]).toContain(res.status())
+          |                        ^
+      709 |   })
+      710 |
+      711 |   test('QA-API013: /api/volunteer/buddy-assignments returns data for volunteer', async ({ page }) => {
+        at /workspaces/ThriveAtHome/tests/e2e/qa-full-suite.spec.ts:708:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/qa-full-suite-API-Function-aad19-e-bank-balance-returns-data-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/qa-full-suite-API-Function-aad19-e-bank-balance-returns-data-chromium-retry1/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/qa-full-suite-API-Function-aad19-e-bank-balance-returns-data-chromium-retry1/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/qa-full-suite-API-Function-aad19-e-bank-balance-returns-data-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/qa-full-suite-API-Function-aad19-e-bank-balance-returns-data-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #2 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected value: 500
+    Received array: [200, 404]
+
+      706 |       headers: { 'Cookie': cookieStr(cookies) },
+      707 |     })
+    > 708 |     expect([200, 404]).toContain(res.status())
+          |                        ^
+      709 |   })
+      710 |
+      711 |   test('QA-API013: /api/volunteer/buddy-assignments returns data for volunteer', async ({ page }) => {
+        at /workspaces/ThriveAtHome/tests/e2e/qa-full-suite.spec.ts:708:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/qa-full-suite-API-Function-aad19-e-bank-balance-returns-data-chromium-retry2/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/qa-full-suite-API-Function-aad19-e-bank-balance-returns-data-chromium-retry2/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/qa-full-suite-API-Function-aad19-e-bank-balance-returns-data-chromium-retry2/error-context.md
+
+  5) [chromium] › tests/e2e/qa-full-suite.spec.ts:729:3 › API Functional Checks › QA-API015: /api/connections returns empty array or list 
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected value: 500
+    Received array: [200, 404]
+
+      733 |       headers: { 'Cookie': cookieStr(cookies) },
+      734 |     })
+    > 735 |     expect([200, 404]).toContain(res.status())
+          |                        ^
+      736 |     if (res.status() === 200) {
+      737 |       const body = await res.json()
+      738 |       expect(Array.isArray(body)).toBe(true)
+        at /workspaces/ThriveAtHome/tests/e2e/qa-full-suite.spec.ts:735:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/qa-full-suite-API-Function-41456-returns-empty-array-or-list-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/qa-full-suite-API-Function-41456-returns-empty-array-or-list-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/qa-full-suite-API-Function-41456-returns-empty-array-or-list-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected value: 500
+    Received array: [200, 404]
+
+      733 |       headers: { 'Cookie': cookieStr(cookies) },
+      734 |     })
+    > 735 |     expect([200, 404]).toContain(res.status())
+          |                        ^
+      736 |     if (res.status() === 200) {
+      737 |       const body = await res.json()
+      738 |       expect(Array.isArray(body)).toBe(true)
+        at /workspaces/ThriveAtHome/tests/e2e/qa-full-suite.spec.ts:735:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/qa-full-suite-API-Function-41456-returns-empty-array-or-list-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/qa-full-suite-API-Function-41456-returns-empty-array-or-list-chromium-retry1/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/qa-full-suite-API-Function-41456-returns-empty-array-or-list-chromium-retry1/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/qa-full-suite-API-Function-41456-returns-empty-array-or-list-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/qa-full-suite-API-Function-41456-returns-empty-array-or-list-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #2 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected value: 500
+    Received array: [200, 404]
+
+      733 |       headers: { 'Cookie': cookieStr(cookies) },
+      734 |     })
+    > 735 |     expect([200, 404]).toContain(res.status())
+          |                        ^
+      736 |     if (res.status() === 200) {
+      737 |       const body = await res.json()
+      738 |       expect(Array.isArray(body)).toBe(true)
+        at /workspaces/ThriveAtHome/tests/e2e/qa-full-suite.spec.ts:735:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/qa-full-suite-API-Function-41456-returns-empty-array-or-list-chromium-retry2/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/qa-full-suite-API-Function-41456-returns-empty-array-or-list-chromium-retry2/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/qa-full-suite-API-Function-41456-returns-empty-array-or-list-chromium-retry2/error-context.md
+
+  6) [chromium] › tests/e2e/voice-pipeline.spec.ts:25:1 › TC-V002 — /api/cron/aria-calls fires with correct secret 
+
+    ReferenceError: CRON_SECRET is not defined
+
+      25 | test('TC-V002 — /api/cron/aria-calls fires with correct secret', async ({ page }) => {
+      26 |   const res = await page.request.get(`${BASE}/api/cron/aria-calls`, {
+    > 27 |     headers: { 'x-cron-secret': CRON_SECRET },
+         |                                 ^
+      28 |   })
+      29 |   if (res.status() === 404) { test.skip(); return }
+      30 |   expect(res.status()).not.toBe(500)
+        at /workspaces/ThriveAtHome/tests/e2e/voice-pipeline.spec.ts:27:33
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/voice-pipeline-TC-V002-—-a-e3669-s-fires-with-correct-secret-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/voice-pipeline-TC-V002-—-a-e3669-s-fires-with-correct-secret-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/voice-pipeline-TC-V002-—-a-e3669-s-fires-with-correct-secret-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    ReferenceError: CRON_SECRET is not defined
+
+      25 | test('TC-V002 — /api/cron/aria-calls fires with correct secret', async ({ page }) => {
+      26 |   const res = await page.request.get(`${BASE}/api/cron/aria-calls`, {
+    > 27 |     headers: { 'x-cron-secret': CRON_SECRET },
+         |                                 ^
+      28 |   })
+      29 |   if (res.status() === 404) { test.skip(); return }
+      30 |   expect(res.status()).not.toBe(500)
+        at /workspaces/ThriveAtHome/tests/e2e/voice-pipeline.spec.ts:27:33
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/voice-pipeline-TC-V002-—-a-e3669-s-fires-with-correct-secret-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/voice-pipeline-TC-V002-—-a-e3669-s-fires-with-correct-secret-chromium-retry1/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/voice-pipeline-TC-V002-—-a-e3669-s-fires-with-correct-secret-chromium-retry1/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/voice-pipeline-TC-V002-—-a-e3669-s-fires-with-correct-secret-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/voice-pipeline-TC-V002-—-a-e3669-s-fires-with-correct-secret-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #2 ───────────────────────────────────────────────────────────────────────────────────────
+
+    ReferenceError: CRON_SECRET is not defined
+
+      25 | test('TC-V002 — /api/cron/aria-calls fires with correct secret', async ({ page }) => {
+      26 |   const res = await page.request.get(`${BASE}/api/cron/aria-calls`, {
+    > 27 |     headers: { 'x-cron-secret': CRON_SECRET },
+         |                                 ^
+      28 |   })
+      29 |   if (res.status() === 404) { test.skip(); return }
+      30 |   expect(res.status()).not.toBe(500)
+        at /workspaces/ThriveAtHome/tests/e2e/voice-pipeline.spec.ts:27:33
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/voice-pipeline-TC-V002-—-a-e3669-s-fires-with-correct-secret-chromium-retry2/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/voice-pipeline-TC-V002-—-a-e3669-s-fires-with-correct-secret-chromium-retry2/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/voice-pipeline-TC-V002-—-a-e3669-s-fires-with-correct-secret-chromium-retry2/error-context.md
+
+  7) [chromium] › tests/e2e/voice-pipeline.spec.ts:43:1 › TC-V004 — /api/cron/birthday-arc fires without 500 
+
+    ReferenceError: CRON_SECRET is not defined
+
+      44 |   const res = await page.request.post(`${BASE}/api/cron/birthday-arc`, {
+      45 |     data: {},
+    > 46 |     headers: { 'Content-Type': 'application/json', 'x-cron-secret': CRON_SECRET },
+         |                                                                     ^
+      47 |   })
+      48 |   if (res.status() === 404) { test.skip(); return }
+      49 |   expect(res.status()).not.toBe(500)
+        at /workspaces/ThriveAtHome/tests/e2e/voice-pipeline.spec.ts:46:69
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/voice-pipeline-TC-V004-—-a-a23b1-thday-arc-fires-without-500-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/voice-pipeline-TC-V004-—-a-a23b1-thday-arc-fires-without-500-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/voice-pipeline-TC-V004-—-a-a23b1-thday-arc-fires-without-500-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    ReferenceError: CRON_SECRET is not defined
+
+      44 |   const res = await page.request.post(`${BASE}/api/cron/birthday-arc`, {
+      45 |     data: {},
+    > 46 |     headers: { 'Content-Type': 'application/json', 'x-cron-secret': CRON_SECRET },
+         |                                                                     ^
+      47 |   })
+      48 |   if (res.status() === 404) { test.skip(); return }
+      49 |   expect(res.status()).not.toBe(500)
+        at /workspaces/ThriveAtHome/tests/e2e/voice-pipeline.spec.ts:46:69
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/voice-pipeline-TC-V004-—-a-a23b1-thday-arc-fires-without-500-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/voice-pipeline-TC-V004-—-a-a23b1-thday-arc-fires-without-500-chromium-retry1/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/voice-pipeline-TC-V004-—-a-a23b1-thday-arc-fires-without-500-chromium-retry1/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/voice-pipeline-TC-V004-—-a-a23b1-thday-arc-fires-without-500-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/voice-pipeline-TC-V004-—-a-a23b1-thday-arc-fires-without-500-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #2 ───────────────────────────────────────────────────────────────────────────────────────
+
+    ReferenceError: CRON_SECRET is not defined
+
+      44 |   const res = await page.request.post(`${BASE}/api/cron/birthday-arc`, {
+      45 |     data: {},
+    > 46 |     headers: { 'Content-Type': 'application/json', 'x-cron-secret': CRON_SECRET },
+         |                                                                     ^
+      47 |   })
+      48 |   if (res.status() === 404) { test.skip(); return }
+      49 |   expect(res.status()).not.toBe(500)
+        at /workspaces/ThriveAtHome/tests/e2e/voice-pipeline.spec.ts:46:69
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/voice-pipeline-TC-V004-—-a-a23b1-thday-arc-fires-without-500-chromium-retry2/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/voice-pipeline-TC-V004-—-a-a23b1-thday-arc-fires-without-500-chromium-retry2/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/voice-pipeline-TC-V004-—-a-a23b1-thday-arc-fires-without-500-chromium-retry2/error-context.md
+
+  8) [chromium] › tests/e2e/voice-pipeline.spec.ts:52:1 › TC-V081 — /api/cron/check-ins fires without 500 
+
+    ReferenceError: CRON_SECRET is not defined
+
+      53 |   const res = await page.request.post(`${BASE}/api/cron/check-ins`, {
+      54 |     data: {},
+    > 55 |     headers: { 'Content-Type': 'application/json', 'x-cron-secret': CRON_SECRET },
+         |                                                                     ^
+      56 |   })
+      57 |   if (res.status() === 404) { test.skip(); return }
+      58 |   expect(res.status()).not.toBe(500)
+        at /workspaces/ThriveAtHome/tests/e2e/voice-pipeline.spec.ts:55:69
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/voice-pipeline-TC-V081-—-a-a1d08-check-ins-fires-without-500-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/voice-pipeline-TC-V081-—-a-a1d08-check-ins-fires-without-500-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/voice-pipeline-TC-V081-—-a-a1d08-check-ins-fires-without-500-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    ReferenceError: CRON_SECRET is not defined
+
+      53 |   const res = await page.request.post(`${BASE}/api/cron/check-ins`, {
+      54 |     data: {},
+    > 55 |     headers: { 'Content-Type': 'application/json', 'x-cron-secret': CRON_SECRET },
+         |                                                                     ^
+      56 |   })
+      57 |   if (res.status() === 404) { test.skip(); return }
+      58 |   expect(res.status()).not.toBe(500)
+        at /workspaces/ThriveAtHome/tests/e2e/voice-pipeline.spec.ts:55:69
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/voice-pipeline-TC-V081-—-a-a1d08-check-ins-fires-without-500-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/voice-pipeline-TC-V081-—-a-a1d08-check-ins-fires-without-500-chromium-retry1/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/voice-pipeline-TC-V081-—-a-a1d08-check-ins-fires-without-500-chromium-retry1/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/voice-pipeline-TC-V081-—-a-a1d08-check-ins-fires-without-500-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/voice-pipeline-TC-V081-—-a-a1d08-check-ins-fires-without-500-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #2 ───────────────────────────────────────────────────────────────────────────────────────
+
+    ReferenceError: CRON_SECRET is not defined
+
+      53 |   const res = await page.request.post(`${BASE}/api/cron/check-ins`, {
+      54 |     data: {},
+    > 55 |     headers: { 'Content-Type': 'application/json', 'x-cron-secret': CRON_SECRET },
+         |                                                                     ^
+      56 |   })
+      57 |   if (res.status() === 404) { test.skip(); return }
+      58 |   expect(res.status()).not.toBe(500)
+        at /workspaces/ThriveAtHome/tests/e2e/voice-pipeline.spec.ts:55:69
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/voice-pipeline-TC-V081-—-a-a1d08-check-ins-fires-without-500-chromium-retry2/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/voice-pipeline-TC-V081-—-a-a1d08-check-ins-fires-without-500-chromium-retry2/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/voice-pipeline-TC-V081-—-a-a1d08-check-ins-fires-without-500-chromium-retry2/error-context.md
+
+  8 failed
+    [chromium] › tests/e2e/member-dashboard-full.spec.ts:170:1 › TC-M030 — POST /api/celebrations creates DB row 
+    [chromium] › tests/e2e/member-features-deep.spec.ts:75:1 › TC-M050 — /api/connections returns list for authenticated member 
+    [chromium] › tests/e2e/qa-full-suite.spec.ts:612:3 › API Functional Checks › QA-API003: /api/billing returns plan info 
+    [chromium] › tests/e2e/qa-full-suite.spec.ts:702:3 › API Functional Checks › QA-API012: /api/time-bank/balance returns data 
+    [chromium] › tests/e2e/qa-full-suite.spec.ts:729:3 › API Functional Checks › QA-API015: /api/connections returns empty array or list 
+    [chromium] › tests/e2e/voice-pipeline.spec.ts:25:1 › TC-V002 — /api/cron/aria-calls fires with correct secret 
+    [chromium] › tests/e2e/voice-pipeline.spec.ts:43:1 › TC-V004 — /api/cron/birthday-arc fires without 500 
+    [chromium] › tests/e2e/voice-pipeline.spec.ts:52:1 › TC-V081 — /api/cron/check-ins fires without 500 
+  5 passed (46.8s)
