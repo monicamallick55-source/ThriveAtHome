@@ -100,9 +100,9 @@ export function DashNav({ seniorName, unreadCount = 0, onMarkAllRead, unreadMess
               </button>
             )}
           <button onClick={handleSignOut} style={{
-              background: 'none', border: '1px solid #E8E4DC', cursor: 'pointer',
-              fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 500,
-              color: 'var(--color-text-secondary)', padding: '5px 12px', borderRadius: '8px',
+              background: 'none', border: 'none', cursor: 'pointer',
+              fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 400,
+              color: 'var(--color-text-secondary)', padding: '6px 0',
             }}>Sign out</button>
           </div>
         </div>
