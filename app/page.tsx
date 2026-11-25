@@ -101,6 +101,9 @@ export default function HomePage() {
             }}>
               Loneliness is the real risk.<br />Connection is the answer.
             </h1>
+            <p style={{ ...bodyText, fontSize: '22px', maxWidth: '560px', margin: '0 auto 16px', lineHeight: 1.5, fontStyle: 'italic' }}>
+              Your loved one deserves a morning call, not a medical alert.
+            </p>
             <p style={{ ...bodyText, fontSize: '20px', maxWidth: '620px', margin: '0 auto 40px', lineHeight: 1.7 }}>
               ThriveAtHome surrounds seniors with real connection — a daily companion call, a matched human buddy,
               25+ communities, and a family that stays close no matter the distance.

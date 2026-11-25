@@ -192,8 +192,8 @@ export function SignupForm({ referralCode }: { referralCode?: string }) {
               marginBottom: '48px',
             }}
           >
-            &ldquo;Join thousands of families<br />
-            finding peace of mind.&rdquo;
+            &ldquo;Stay connected. Live well.<br />
+            Thrive at home.&rdquo;
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {['HIPAA compliant', 'No contracts', 'Cancel anytime'].map((item: any) => (

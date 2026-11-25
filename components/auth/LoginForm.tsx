@@ -159,8 +159,8 @@ export function LoginForm() {
             }}
           >
             &ldquo;Welcome back.<br />
-            Margaret is waiting<br />
-            to hear from you.&rdquo;
+            Connection every day,<br />
+            care when it counts.&rdquo;
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {['HIPAA compliant', 'No contracts', 'Cancel anytime'].map((item: any) => (
