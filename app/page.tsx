@@ -101,7 +101,7 @@ export default function HomePage() {
             }}>
               Loneliness is the real risk.<br />Connection is the answer.
             </h1>
-            <p style={{ ...bodyText, fontSize: '22px', maxWidth: '560px', margin: '0 auto 16px', lineHeight: 1.5, fontStyle: 'italic' }}>
+            <p style={{ ...bodyText, fontSize: '20px', maxWidth: '540px', margin: '0 auto 32px', lineHeight: 1.6, fontStyle: 'italic', color: 'var(--color-text-secondary, #6B7280)', fontWeight: 400, letterSpacing: '0.01em' }}>
               Your loved one deserves a morning call, not a medical alert.
             </p>
             <p style={{ ...bodyText, fontSize: '20px', maxWidth: '620px', margin: '0 auto 40px', lineHeight: 1.7 }}>
