@@ -1,8 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
 
 interface DashNavProps {
   seniorName: string
@@ -17,6 +18,7 @@ const NAV_LINKS = [
   { href: '/dashboard/communities', label: 'Community', icon: '👥' },
   { href: '/dashboard/messages', label: 'Messages', icon: '✉️' },
   { href: '/dashboard/documents', label: 'Docs', icon: '📄' },
+  { href: '/dashboard/settings', label: 'More', icon: '⚙️' },
 ]
 
 const DESKTOP_LINKS = [
@@ -32,7 +34,14 @@ const DESKTOP_LINKS = [
 
 export function DashNav({ seniorName, unreadCount = 0, onMarkAllRead, unreadMessages = 0 }: DashNavProps) {
   const pathname = usePathname()
+  const router = useRouter()
   const [showNotifs, setShowNotifs] = useState(false)
+
+  async function handleSignOut() {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push("/login")
+  }
 
   return (
     <>
@@ -90,6 +99,11 @@ export function DashNav({ seniorName, unreadCount = 0, onMarkAllRead, unreadMess
                 }}>{unreadCount > 9 ? '9+' : unreadCount}</span>
               </button>
             )}
+          <button onClick={handleSignOut} style={{
+              background: 'none', border: '1px solid #E8E4DC', cursor: 'pointer',
+              fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 500,
+              color: 'var(--color-text-secondary)', padding: '5px 12px', borderRadius: '8px',
+            }}>Sign out</button>
           </div>
         </div>
       </nav>
